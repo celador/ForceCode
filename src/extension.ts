@@ -4,13 +4,7 @@ import * as vscode from 'vscode';
 import * as jsforce from 'jsforce';
 import * as SOAP from 'jsforce/lib/soap';
 
-var config: {
-    userId: string;
-    queryString: string;
-    conn: {};
-    apexBody: string;
-    output: vscode.OutputChannel
-};
+var config = {};
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -28,15 +22,15 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Display a message box to the user
         // vscode.window.showInformationMessage('Hello World!');
-        config.apexBody = vscode.window.activeTextEditor.document.getText();
+        var apexBody: string = vscode.window.activeTextEditor.document.getText();
         // vscode.window.showInformationMessage(text);
+        var output: vscode.OutputChannel = vscode.window.createOutputChannel('ForceCode');
 
-        config.output = vscode.window.createOutputChannel('ForceCode');
 
-        config.conn = new jsforce.Connection();
-        config.conn.login('john.aaron.nelson@gmail.com', 'Science3', function(err, res) {
+        var conn = new jsforce.Connection();
+        conn.login('john.aaron.nelson@gmail.com', 'Science3', function(err, res) {
             if (err) { return console.error(err); }
-            // config.conn.query('SELECT Id, Name FROM Account', function(err, res) {
+            // conn.query('SELECT Id, Name FROM Account', function(err, res) {
             //     if (err) { return console.error(err); }
             //     // console.log(res);
             //     output.show(3);
@@ -44,71 +38,65 @@ export function activate(context: vscode.ExtensionContext) {
             //     //     output.appendLine(element.Name);
             //     // });
             // });
-            config.conn.identity(function(err, res) {
+            conn.identity(function(err, res) {
                 if (err) { return console.error(err); }
                 config.userId = res.user_id;
-                var debugConfig = {
-                    'TracedEntityId': res.user_id,
-                    'ExpirationDate': '2016-02-06',
-                    'ScopeId': undefined,
+                console.log("user ID: " + res.user_id);
+
+                conn.tooling.sobject('traceFlag').create({
                     'ApexCode': 'Debug',
                     'ApexProfiling': 'Error',
                     'Callout': 'Error',
                     'Database': 'Error',
+                    'ExpirationDate': '2016-02-06',
+                    'TracedEntityId': res.user_id,
                     'Validation': 'Error',
                     'Visualforce': 'Error',
                     'Workflow': 'Error',
+                    'ScopeId': null,
                     'System': 'Error',
-                };
+                }, execute);
+                function execute(err, res) {
+                    if (err) {
+                        return console.error(err);
+                    }
+                    console.log(res);
 
-                config.conn.tooling.sobject('traceFlag').create(debugConfig, executeAnonymous);
+                    conn.tooling.executeAnonymous(apexBody, function(err, res) {
+                        var message: string = '';
+                        if (!res.compiled) {
+                            message = 'Compile Problem: ' + res.compileProblem;
+                            vscode.window.showErrorMessage(message);
+                            return console.error(message);
+                        }
+                        if (!res.success) {
+                            message = 'Exception: ' + res.exceptionMessage;
+                            vscode.window.showErrorMessage(message);
+                            return console.error();
+                        }
+                        vscode.window.showInformationMessage('Success!');
+                        config.queryString = `SELECT Id FROM ApexLog WHERE Request = 'API' AND Location = 'Monitoring' AND Operation like '%executeAnonymous%' AND LogUserId='${ config.userId }' ORDER BY StartTime DESC, Id DESC LIMIT 1`;
+
+
+                        conn.query(config.queryString, queryCallback);
+                        // console.log("compiled?: " + res.compiled); // compiled successfully
+                        // console.log("executed?: " + res.success); // executed successfully
+                        // var soapEndpoint = new SOAP(conn, {
+                        //     xmlns: "urn:partner.soap.sforce.com",
+                        //     endpointUrl: conn.instanceUrl + "/services/Soap/u/" + conn.version
+                        // });
+                        // return soapEndpoint.invoke('executeanonymous', apexBody).then(function(res) {
+                        //     return res.result;
+                        // }).thenCall(console.log);
+                    });
+
+                }
             });
 
         });
     });
 
     context.subscriptions.push(disposable);
-}
-
-
-function executeAnonymous(err, res) {
-    'use strict';
-    if (err) {
-        return console.error(err);
-    }
-    console.log(res);
-
-    config.conn.tooling.executeAnonymous(apexBody, executeCallback);
-    // console.log("compiled?: " + res.compiled); // compiled successfully
-    // console.log("executed?: " + res.success); // executed successfully
-    // var soapEndpoint = new SOAP(conn, {
-    //     xmlns: "urn:partner.soap.sforce.com",
-    //     endpointUrl: config.conn.instanceUrl + "/services/Soap/u/" + config.conn.version
-    // });
-    // return soapEndpoint.invoke('executeanonymous', apexBody).then(function(res) {
-    //     return res.result;
-    // }).thenCall(console.log);
-
-}
-
-function executeCallback(err, res) {
-    'use strict';
-    var message: string = '';
-    if (!res.compiled) {
-        message = 'Compile Problem: ' + res.compileProblem;
-        vscode.window.showErrorMessage(message);
-        return console.error(message);
-    }
-    if (!res.success) {
-        message = 'Exception: ' + res.exceptionMessage;
-        vscode.window.showErrorMessage(message);
-        return console.error();
-    }
-    vscode.window.showInformationMessage('Success!');
-    config.queryString = `SELECT Id FROM ApexLog WHERE Request = 'API' AND Operation like '%executeAnonymous%'` +
-        `AND LogUserId='${config.userId}' ORDER BY StartTime DESC, Id DESC LIMIT 1`;
-
-    config.conn.query(config.queryString, queryCallback);
 }
 
 function queryCallback(err, res) {
