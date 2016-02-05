@@ -41,44 +41,10 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
         config.conn.login('john.aaron.nelson@gmail.com', 'Science3')
-            .then(enableLogging);
-            // .then(executeAnonymous);
-            // .then(getLog)
-            // .then(disableLogging);
-
+            .then(console.log);
     });
 
     context.subscriptions.push(disposable);
 }
 
-// function executeAnonymous(result) {
-//     console.log(result);
-// }
-
-function enableLogging(userInfo) {
-    console.log(userInfo);
-    config.userId = userInfo.id;
-    var date = moment().add(1, 'days').format('YYYY-MM-DD');
-    
-    return config.conn.tooling.sobject('traceFlag').create({
-        'ExpirationDate': date,
-        'TracedEntityId': userInfo.id,
-        'ApexCode': 'Debug',
-        'ApexProfiling': 'Error',
-        'Callout': 'Error',
-        'Database': 'Error',
-        'Validation': 'Error',
-        'Visualforce': 'Error',
-        'Workflow': 'Error',
-        'System': 'Error',
-        'ScopeId': null,
-    });
-}
-
-// function queryCallback(err, res) {
-//     'use strict';
-//     if (err) { return console.error(err); }
-//     console.log('total : ' + res.totalSize);
-//     console.log('fetched : ' + res.records.length);
-// }
 
