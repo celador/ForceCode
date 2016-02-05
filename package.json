@@ -19,12 +19,14 @@
         "command": "extension.sayHello",
         "title": "Execute Anonymous"
       }
-    ], 
-    "keybindings": [{
+    ],
+    "keybindings": [
+      {
         "command": "extension.sayHello",
         "key": "cmd+s",
         "when": ""
-    }]
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
@@ -35,6 +37,7 @@
     "vscode": "0.10.x"
   },
   "dependencies": {
-    "jsforce": "^1.5.1"
+    "jsforce": "^1.5.1",
+    "moment": "^2.11.2"
   }
 }
