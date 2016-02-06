@@ -1,13 +1,19 @@
 # README
-## This is the README for your extension "ForceCode" 
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+## This is a Visual Studio Code extension for Salesforce (SFDC) development. 
 
-* Split the editor (`Cmd+\` on OSX or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on OSX or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (OSX) to see a list of Markdown snippets
+###Initial goals
 
-### For more information
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+#### Code
+* Debug Apex - Execute Anonymous from an unsaved editor window and return debug result
+* View Logs - Make it easy to view the complete logs in a new unsaved editor window 
+* Compile/Deploy Apex code on save
+* Compile/Deploy VisualForce code on save
 
-** Enjoy!**
+#### Language
+* Include Apex language features, like syntax highlighting and code snippets (wave templates?)
+* Include VisualForce language features, etc..
+
+### Stretch goals
+* Use code validation to highlight errors in Apex code 
+* Use code validation to highlight errors in VisualForce pages 
+* Debug Apex code with breakpoints in the editor
