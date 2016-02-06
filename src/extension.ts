@@ -1,7 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-// import * as jsforce from 'jsforce';
 import executeAnonymous from './commands/executeAnonymous';
 import getLogs from './commands/getLogs';
 
@@ -22,6 +21,7 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.commands.registerCommand('forcecode.executeAnonymous', () => {
         executeAnonymous(conn);
     }));
+
     context.subscriptions.push(vscode.commands.registerCommand('forcecode.getLogs', () => {
         getLogs();
     }));
