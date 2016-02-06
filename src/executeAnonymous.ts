@@ -5,7 +5,12 @@ import * as chalk from 'chalk';
 export interface IExecuteAnonymousService {
     userId?: string;
     queryString?: string;
-    connection?: {};
+    connection?: {
+        login(name:string, password:string);
+        tooling: any;
+        request: any;
+        query: any;
+    };
     apexBody?: string;
     outputChannel?: vscode.OutputChannel;
     traceFlagId?: string;
