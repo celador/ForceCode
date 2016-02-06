@@ -2,7 +2,7 @@
   "name": "ForceCode",
   "description": "Salesforce extension",
   "version": "0.0.1",
-  "publisher": "John Nelson",
+  "publisher": "Celador",
   "engines": {
     "vscode": "^0.10.1"
   },
@@ -10,20 +10,30 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.sayHello"
+    "onCommand:forcecode.executeAnonymous",
+    "onCommand:forcecode.getLogs"
   ],
   "main": "./out/src/extension",
   "contributes": {
     "commands": [
       {
-        "command": "extension.sayHello",
-        "title": "Execute Anonymous"
+        "command": "forcecode.executeAnonymous",
+        "title": "Force: Execute Anonymous"
+      },
+      {
+        "command": "forcecode.getLogs",
+        "title": "Force: Get Logs"
       }
     ],
     "keybindings": [
       {
-        "command": "extension.sayHello",
-        "key": "cmd+s",
+        "command": "forcecode.executeAnonymous",
+        "key": "cmd+e",
+        "when": ""
+      },
+      {
+        "command": "forcecode.getLogs",
+        "key": "cmd+l",
         "when": ""
       }
     ]
@@ -37,6 +47,7 @@
     "vscode": "0.10.x"
   },
   "dependencies": {
+    "chalk": "^1.1.1",
     "jsforce": "^1.5.1",
     "moment": "^2.11.2"
   }
