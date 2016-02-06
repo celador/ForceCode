@@ -6,7 +6,7 @@ export interface IExecuteAnonymousService {
     userId?: string;
     queryString?: string;
     connection?: {
-        login(name:string, password:string);
+        login(name: string, password: string): any;
         tooling: any;
         request: any;
         query: any;
@@ -19,7 +19,7 @@ export interface IExecuteAnonymousService {
 
 const service: IExecuteAnonymousService = {};
 
-export default function executeAnonymous(connection) {
+export default function executeAnonymous(connection: any): any {
     'use strict';
     service.connection = connection;
     service.apexBody = vscode.window.activeTextEditor.document.getText();
@@ -39,7 +39,7 @@ export default function executeAnonymous(connection) {
 }
 
 
-function enableLogging(userInfo) {
+function enableLogging(userInfo: any): any {
     'use strict';
     console.log('userInfo', userInfo);
     service.userId = userInfo.id;
@@ -60,13 +60,13 @@ function enableLogging(userInfo) {
     });
 }
 
-function execute(traceFlagResult) {
+function execute(traceFlagResult: any): any {
     'use strict';
     service.traceFlagId = traceFlagResult.id;
     return service.connection.tooling.executeAnonymous(service.apexBody);
 }
 
-function getLogId(result) {
+function getLogId(result: any): any {
     'use strict';
     var message: string = '';
     if (!result.compiled) {
@@ -83,11 +83,11 @@ function getLogId(result) {
             + ` AND Operation like '%executeAnonymous%'`
             + ` AND LogUserId='${service.userId}' ORDER BY StartTime DESC, Id DESC LIMIT 1`;
         return service.connection.query(service.queryString)
-            .then(queryResult => queryResult.records[0].Id);
+            .then((queryResult: any) => queryResult.records[0].Id);
     }
 }
 
-function getLog(logId) {
+function getLog(logId: string): any {
     'use strict';
     service.logId = logId;
     var url: string = `https://johnaaronnelson-dev-ed.my.salesforce.com/services/data/v34.0/sobjects/ApexLog/${service.logId}/Body`;
@@ -100,8 +100,8 @@ function getLog(logId) {
 
 function truncateLog(logBody: string) {
     'use strict';
-    var regex = /\|USER_DEBUG\|/g;
-    var debug = logBody
+    var regex: any = /\|USER_DEBUG\|/g;
+    var debug: string = logBody
                 .split('\n')
                 .filter(line => !!line.match(regex))
                 .map(line => line.split('\|DEBUG\|')[1])
