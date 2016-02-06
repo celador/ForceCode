@@ -1,8 +1,8 @@
 {
   "name": "ForceCode",
-  "description": "Salesforce extension",
+  "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "version": "0.0.1",
-  "publisher": "celador",
+  "publisher": "JohnAaronNelson",
   "engines": {
     "vscode": "^0.10.1"
   },
