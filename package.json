@@ -2,7 +2,7 @@
   "name": "ForceCode",
   "description": "Salesforce extension",
   "version": "0.0.1",
-  "publisher": "Celador",
+  "publisher": "celador",
   "engines": {
     "vscode": "^0.10.1"
   },
