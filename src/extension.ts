@@ -14,10 +14,6 @@ export function activate(context: vscode.ExtensionContext): any {
     // This line of code will only be executed once when your extension is activated
     console.log('ForceCode is now active!');
 
-    // force.conn.login('john.aaron.nelson@gmail.com', 'Science3').then(userInfo => {
-    //     force.userId = userInfo.id;
-    // });
-
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
