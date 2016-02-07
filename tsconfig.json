@@ -6,7 +6,8 @@
 		"target": "ES5",
 		"outDir": "out",
 		"noLib": false,
-		"sourceMap": true
+		"sourceMap": true,
+        "allowJs": true
 	},
 	"exclude": [
 		"node_modules"

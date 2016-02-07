@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import executeAnonymous from './commands/executeAnonymous';
 import getLogs from './commands/getLogs';
+import * as jsforce from 'jsforce';
 
 
 // this method is called when your extension is activated
@@ -12,7 +13,7 @@ export function activate(context: vscode.ExtensionContext): any {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('ForceCode is now active!');
-    var jsforce: any = require('jsforce');
+    // var jsforce: any = require('jsforce');
     var conn: any = new jsforce.Connection();
 
     // The command has been defined in the package.json file
