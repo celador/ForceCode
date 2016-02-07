@@ -1,34 +1,28 @@
 import * as vscode from 'vscode';
 import * as moment from 'moment';
 import * as chalk from 'chalk';
+import * as force from './../forceSvc';
 
-export interface IExecuteAnonymousService {
+interface IExecuteAnonymousService {
     userId?: string;
     queryString?: string;
-    connection?: {
-        login(name: string, password: string): any;
-        tooling: any;
-        request: any;
-        query: any;
-    };
+    connection?: force.IForceConnection;
     apexBody?: string;
     outputChannel?: vscode.OutputChannel;
     traceFlagId?: string;
     logId?: string;
 };
+const self: IExecuteAnonymousService = {};
 
-const service: IExecuteAnonymousService = {};
-
-export default function executeAnonymous(connection: any): any {
+export default function executeAnonymous(force: force.IForceService): any {
     'use strict';
-    service.connection = connection;
-    service.apexBody = vscode.window.activeTextEditor.document.getText();
+    self.apexBody = vscode.window.activeTextEditor.document.getText();
 
     // Create the output channel that we will pipe our results to.
-    service.outputChannel = vscode.window.createOutputChannel('Execute Anonymous');
+    self.outputChannel = vscode.window.createOutputChannel('Execute Anonymous');
 
     // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
-    return service.connection.login('john.aaron.nelson@gmail.com', 'Science3')
+    return force.connect()
         .then(enableLogging)
         .then(execute, disableLogging)
         .then(getLogId, disableLogging)
@@ -38,14 +32,17 @@ export default function executeAnonymous(connection: any): any {
         .then(disableLogging);
 }
 
+function setConnection(userInfo: any) {
+    self.connection = force.default.conn;
+    return userInfo;
+}
 
-function enableLogging(userInfo: any): any {
+
+function enableLogging(userInfo: { id: string }): any {
     'use strict';
-    console.log('userInfo', userInfo);
-    service.userId = userInfo.id;
     var expirationDate: string = moment().add(1, 'days').format('YYYY-MM-DD');
 
-    return service.connection.tooling.sobject('traceFlag').create({
+    return self.connection.tooling.sobject('traceFlag').create({
         'ApexCode': 'DEBUG',
         'ApexProfiling': 'ERROR',
         'Callout': 'ERROR',
@@ -62,8 +59,8 @@ function enableLogging(userInfo: any): any {
 
 function execute(traceFlagResult: any): any {
     'use strict';
-    service.traceFlagId = traceFlagResult.id;
-    return service.connection.tooling.executeAnonymous(service.apexBody);
+    self.traceFlagId = traceFlagResult.id;
+    return self.connection.tooling.executeAnonymous(self.apexBody);
 }
 
 function getLogId(result: any): any {
@@ -79,20 +76,20 @@ function getLogId(result: any): any {
         return console.error();
     } else {
         vscode.window.showInformationMessage('Execute Anonymous Success');
-        service.queryString = `SELECT Id FROM ApexLog WHERE Request = 'API' AND Location = 'SystemLog'`
+        self.queryString = `SELECT Id FROM ApexLog WHERE Request = 'API' AND Location = 'SystemLog'`
             + ` AND Operation like '%executeAnonymous%'`
-            + ` AND LogUserId='${service.userId}' ORDER BY StartTime DESC, Id DESC LIMIT 1`;
-        return service.connection.query(service.queryString)
+            + ` AND LogUserId='${self.userId}' ORDER BY StartTime DESC, Id DESC LIMIT 1`;
+        return self.connection.query(self.queryString)
             .then((queryResult: any) => queryResult.records[0].Id);
     }
 }
 
 function getLog(logId: string): any {
     'use strict';
-    service.logId = logId;
-    var url: string = `https://johnaaronnelson-dev-ed.my.salesforce.com/services/data/v34.0/sobjects/ApexLog/${service.logId}/Body`;
+    self.logId = logId;
+    var url: string = `https://johnaaronnelson-dev-ed.my.salesforce.com/services/data/v34.0/sobjects/ApexLog/${self.logId}/Body`;
     return new Promise((resolve, reject) => {
-        service.connection.request(url, function(err, res) {
+        self.connection.request(url, function(err, res) {
             resolve(res);
         });
     });
@@ -102,21 +99,21 @@ function truncateLog(logBody: string) {
     'use strict';
     var regex: any = /\|USER_DEBUG\|/g;
     var debug: string = logBody
-                .split('\n')
-                .filter(line => !!line.match(regex))
-                .map(line => line.split('\|DEBUG\|')[1])
-                .join('\n');
+        .split('\n')
+        .filter(line => !!line.match(regex))
+        .map(line => line.split('\|DEBUG\|')[1])
+        .join('\n');
     return chalk.red(debug);
 }
 
 function showLog(logBody) {
     'use strict';
-    service.outputChannel.clear();
-    service.outputChannel.show(3);
-    service.outputChannel.append(logBody);
+    self.outputChannel.clear();
+    self.outputChannel.show(3);
+    self.outputChannel.append(logBody);
 }
 
 function disableLogging() {
     'use strict';
-    return service.connection.tooling.sobject('traceFlag').del(service.traceFlagId);
+    return self.connection.tooling.sobject('traceFlag').del(self.traceFlagId);
 }
