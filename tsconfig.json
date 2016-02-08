@@ -4,10 +4,9 @@
         "moduleResolution": "node",
         "noResolve": false,
 		"target": "ES5",
-		"outDir": "out",
+		"outDir": "./out",
 		"noLib": false,
-		"sourceMap": true,
-        "allowJs": true
+		"sourceMap": true
 	},
 	"exclude": [
 		"node_modules"

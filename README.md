@@ -17,3 +17,15 @@
 * Use code validation to highlight errors in Apex code 
 * Use code validation to highlight errors in VisualForce pages 
 * Debug Apex code with breakpoints in the editor
+
+### Configuration
+To assign your username and password, include the following json in your `settings.json` file, inside the `.config` folder
+```
+{
+    "sfdc": {
+        "username": "${ Username }",
+        "password": "${ Password }",
+        "token": "${ Token }"
+    }
+}
+```

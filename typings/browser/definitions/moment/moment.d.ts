@@ -1,4 +1,4 @@
-// Compiled using typings@0.6.2
+// Compiled using typings@0.6.6
 // Source: https://raw.githubusercontent.com/typings/typed-moment/a4075cd50e63efbedd850f654594f293ab81a385/moment.d.ts
 declare module 'moment/moment' {
     // Type definitions for Moment.js 2.10.5
@@ -487,7 +487,7 @@ declare module 'moment/moment' {
 
     export = moment;
 }
-// declare module 'moment' {
-//     import main = require('moment/moment');
-//     export = main;
-// }
+declare module 'moment' {
+    import main = require('moment/moment');
+    export = main;
+}

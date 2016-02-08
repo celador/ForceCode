@@ -1,7 +1,7 @@
 {
   "name": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
-  "version": "0.0.1",
+  "version": "0.0.7",
   "publisher": "JohnAaronNelson",
   "engines": {
     "vscode": "^0.10.1"
@@ -11,29 +11,46 @@
   ],
   "activationEvents": [
     "onCommand:forcecode.executeAnonymous",
-    "onCommand:forcecode.getLogs"
+    "onCommand:forcecode.getLog",
+    "onCommand:forcecode.compile",
+    "onLanguage:apex",
+    "onLanguage:visualforce"
   ],
   "main": "./out/src/extension",
   "contributes": {
     "commands": [
       {
+        "command": "forcecode.compile",
+        "title": "Force: Save/Deploy/Compile"
+      },
+      {
         "command": "forcecode.executeAnonymous",
         "title": "Force: Execute Anonymous"
       },
       {
-        "command": "forcecode.getLogs",
+        "command": "forcecode.getLog",
         "title": "Force: Get Logs"
       }
     ],
     "keybindings": [
       {
         "command": "forcecode.executeAnonymous",
-        "key": "cmd+e",
+        "key": "alt+cmd+e",
         "when": ""
       },
       {
-        "command": "forcecode.getLogs",
-        "key": "cmd+l",
+        "command": "forcecode.getLog",
+        "key": "alt+cmd+i",
+        "when": ""
+      },
+      {
+        "command": "forcecode.compile",
+        "key": "alt+cmd+s",
+        "when": ""
+      },
+      {
+        "command": "forcecode.open",
+        "key": "alt+cmd+o",
         "when": ""
       }
     ]
@@ -43,7 +60,8 @@
     "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
   },
   "devDependencies": {
-    "typescript": "^1.6.2",
+    "node-fs-extra": "^0.8.1",
+    "typescript": "^1.7.5",
     "vscode": "0.10.x"
   },
   "dependencies": {

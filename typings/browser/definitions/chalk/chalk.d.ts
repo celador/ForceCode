@@ -61,7 +61,7 @@ declare module 'chalk/index' {
 
     export = chalk;
 }
-// declare module 'chalk' {
-//     import main = require('chalk/index');
-//     export = main;
-// }
+declare module 'chalk' {
+    import main = require('chalk/index');
+    export = main;
+}

@@ -1,3 +1,4 @@
 /**/*.private
 out
 node_modules
+settings.json
