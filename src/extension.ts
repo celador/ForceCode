@@ -36,6 +36,10 @@ export function activate(context: vscode.ExtensionContext): any {
         forcecode.open(forceService);
     }));
 
+    context.subscriptions.push(vscode.commands.registerCommand('forcecode.exportAll', () => {
+        forcecode.retrieve(forceService);
+    }));
+
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         const toolingType: string = parsers.getToolingType(textDocument);
         const config: any = vscode.workspace.getConfiguration('sfdc');

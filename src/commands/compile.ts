@@ -83,7 +83,7 @@ export default function compile(force: IForceService, document: vscode.TextDocum
     // =======================================================================================================================================
     // =======================================================================================================================================
     function getCompileStatus() {
-        var checkCount = 0;
+        var checkCount: number = 0;
         return new Promise(
             function(resolve, reject) {
                 // Recursively get the status of the container, using promises

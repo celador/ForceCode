@@ -10,6 +10,8 @@ declare module 'jsforce/index' {
         interface jsforce extends NodeJS.EventEmitter {
             Connection(options: ConnectionOptions): Connection;
         }
+        
+        
 
         interface ExecuteAnonymousResult {
             compiled: boolean; // Flag if the query is compiled successfully
@@ -39,8 +41,20 @@ declare module 'jsforce/index' {
             executeAnonymous(apexBody: string): Promise<ExecuteAnonymousResult>;
             query(locator: string):  Thenable<QueryResult>;
         }
+        interface RetrieveResult {
+            id: string;
+        }
+        interface RetrieveResultLocator {
+            stream(): NodeJS.ReadableStream;
+            then(): Thenable<any>;
+        }
+        interface Metadata{
+            retrieve({}): Thenable<RetrieveResult>;
+            checkRetrieveStatus(): Thenable<any>;
+        }
         // Connection
         interface Connection {
+            metadata: Metadata;
             tooling: Tooling;
             request: any;
             query: any;
