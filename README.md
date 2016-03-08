@@ -1,31 +1,55 @@
-# README
-## This is a Visual Studio Code extension for Salesforce (SFDC) development. 
+# ForceCode for Visual Studio Code
+This extension is a companion for SFDC development with Visual Studio Code. 
 
-###Initial goals
+##Features
+* Execute Anonymous
+* View Debug Logs 
+* Open / Retrieve a file
+* Save / Compile / Deploy a file
+* Line errors in the editor
+* Retrieve Package
 
-#### Code
-* Debug Apex - Execute Anonymous from an unsaved editor window and return debug result
-* View Logs - Make it easy to view the complete logs in a new unsaved editor window 
-* Compile/Deploy Apex code on save
-* Compile/Deploy VisualForce code on save
+<!--
+* Deploy Package
+* Build / Deploy Static Resources
+-->
 
-#### Language
-* Include Apex language features, like syntax highlighting and code snippets (wave templates?)
-* Include VisualForce language features, etc..
-
-### Stretch goals
-* Use code validation to highlight errors in Apex code 
-* Use code validation to highlight errors in VisualForce pages 
-* Debug Apex code with breakpoints in the editor
-
-### Configuration
+## Configuration
 To assign your username and password, include the following json in your `settings.json` file, inside the `.config` folder
 ```
 {
     "sfdc": {
         "username": "${ Username }",
         "password": "${ Password }",
-        "token": "${ Token }"
+        "token": "${ Token }",
+        "autoCompile": true
     }
 }
 ```
+
+##Commands
+###Execute Anonymous
+\>Force: Execute Anonymous  
+Keyboard: alt + cmd + e
+
+###Compile
+\>Force: Save/Deploy/Compile  
+Keyboard: alt + cmd + s
+
+###Get Log
+\>Force: Get Logs  
+Keyboard: alt + cmd + i
+
+###Open  
+\>Force: Get Class, Page, or Trigger  
+Keyboard: alt + cmd + o
+
+###Retrieve Package
+\>Force: Get Package from Org  
+
+
+## Future goals
+* Test runner
+* Intellisense code completion
+* Debug Apex code with breakpoints in the editor
+* Lightning component builder

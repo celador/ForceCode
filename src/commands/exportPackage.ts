@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import {IForceService} from './../services';
 import fs = require('fs-extra');
 
-export default function exportAll(force: IForceService) {
+export default function exportPackage(force: IForceService) {
     'use strict';
     const jmt = require('jsforce-metadata-tools');
     return force.connect()

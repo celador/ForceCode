@@ -6,6 +6,7 @@
   "engines": {
     "vscode": "^0.10.1"
   },
+  "icon": "images/salesforce_logo.png",
   "categories": [
     "Other"
   ],
@@ -36,8 +37,8 @@
         "title": "Force: Get Class, Page, or Trigger"
       },
       {
-        "command": "forcecode.exportAll",
-        "title": "Force: Get All Metadata from Org"
+        "command": "forcecode.exportPackage",
+        "title": "Force: Get Package from Org"
       }
     ],
     "keybindings": [
@@ -59,11 +60,6 @@
       {
         "command": "forcecode.open",
         "key": "alt+cmd+o",
-        "when": ""
-      },
-      {
-        "command": "forcecode.exportAll",
-        "key": "alt+cmd+y",
         "when": ""
       }
     ]

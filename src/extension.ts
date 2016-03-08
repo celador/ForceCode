@@ -36,7 +36,7 @@ export function activate(context: vscode.ExtensionContext): any {
         forcecode.open(forceService);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('forcecode.exportAll', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('forcecode.exportPackage', () => {
         forcecode.retrieve(forceService);
     }));
 
