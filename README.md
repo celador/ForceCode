@@ -28,6 +28,7 @@ To assign your username and password, include the following json in your `settin
 ```
 
 ##Commands
+Forcecode provides a number of commands to work with your Salesforce org and metadata.
 ###Execute Anonymous
 \>Force: Execute Anonymous  
 Keyboard: alt + cmd + e
