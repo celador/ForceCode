@@ -5,8 +5,8 @@ This extension is a companion for SFDC development with Visual Studio Code.
 * Execute Anonymous
 * View Debug Logs 
 * Open / Retrieve a file
-* Save / Compile / Deploy a file
-* Line errors in the editor
+* Save / Compile / Deploy a file 
+  * w/ line errors in the editor
 * Retrieve Package
 
 <!--
