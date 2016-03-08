@@ -7,12 +7,9 @@ This extension is a companion for SFDC development with Visual Studio Code.
 * Open / Retrieve a file
 * Save / Compile / Deploy a file 
   * w/ line errors in the editor
-* Retrieve Package
-
-<!--
-* Deploy Package
-* Build / Deploy Static Resources
--->
+* [Not fully implemented] Retrieve Package
+* [Not fully implemented] Deploy Package
+* [Not fully implemented] Build/Deploy Static Resource(s)
 
 ## Configuration
 To assign your username and password, include the following json in your `settings.json` file, inside the `.config` folder
@@ -26,6 +23,8 @@ To assign your username and password, include the following json in your `settin
     }
 }
 ```
+####Get errors as you type
+The Auto-compile feature adds a hook to the save command that will automatically deploy and compile your code to your SFDC org whenever you save.  This works great with VSCode's autosave feature, providing errors as you type.  
 
 ##Commands
 Forcecode provides a number of commands to work with your Salesforce org and metadata.
