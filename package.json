@@ -1,7 +1,7 @@
 {
-  "name": "forcecode",
+  "name": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "publisher": "JohnAaronNelson",
   "engines": {
     "vscode": "^0.10.1"
