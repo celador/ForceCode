@@ -1,7 +1,7 @@
 {
-  "name": "ForceCode",
+  "name": "forcecode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "publisher": "JohnAaronNelson",
   "engines": {
     "vscode": "^0.10.1"
@@ -44,28 +44,24 @@
     "keybindings": [
       {
         "command": "forcecode.executeAnonymous",
-        "key": "alt+cmd+e",
-        "when": ""
+        "key": "alt+cmd+e"
       },
       {
         "command": "forcecode.getLog",
-        "key": "alt+cmd+i",
-        "when": ""
+        "key": "alt+cmd+i"
       },
       {
         "command": "forcecode.compile",
-        "key": "alt+cmd+s",
-        "when": ""
+        "key": "alt+cmd+s"
       },
       {
         "command": "forcecode.open",
-        "key": "alt+cmd+o",
-        "when": ""
+        "key": "alt+cmd+o"
       }
     ]
   },
   "scripts": {
-    "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+    "pre": "node ./node_modules/vscode/bin/compile",
     "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
   },
   "devDependencies": {

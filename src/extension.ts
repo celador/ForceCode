@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as forcecode from './commands';
+import * as fc from './commands';
 import * as parsers from './parsers';
 import {IForceService, ForceService} from './services';
 
@@ -20,31 +20,31 @@ export function activate(context: vscode.ExtensionContext): any {
     // The commandId parameter must match the command field in package.json
     context.subscriptions.push(vscode.commands.registerCommand('forcecode.executeAnonymous', () => {
         const text: string = vscode.window.activeTextEditor.document.getText();
-        forcecode.executeAnonymous(forceService, text);
+        fc.executeAnonymous(forceService, text);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('forcecode.getLog', () => {
-        forcecode.getLog(forceService);
+        fc.getLog(forceService);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('forcecode.compile', () => {
         const textDocument: vscode.TextDocument = vscode.window.activeTextEditor.document;
-        forcecode.compile(forceService, textDocument);
+        fc.compile(forceService, textDocument);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('forcecode.open', () => {
-        forcecode.open(forceService);
+        fc.open(forceService);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('forcecode.exportPackage', () => {
-        forcecode.retrieve(forceService);
+        fc.retrieve(forceService);
     }));
 
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         const toolingType: string = parsers.getToolingType(textDocument);
         const config: any = vscode.workspace.getConfiguration('sfdc');
         if (forceService.conn && toolingType !== undefined && config.autoCompile === true) {
-            forcecode.compile(forceService, textDocument);
+            fc.compile(forceService, textDocument);
         }
     }));
 }
