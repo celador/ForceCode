@@ -80,21 +80,17 @@
     "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
   },
   "devDependencies": {
-    "archiver": "^0.21.0",
-    "fs-extra": "^0.26.5",
-    "fstream": "^1.0.8",
-    "jsforce-metadata-tools": "^1.2.2",
-    "jszip": "^2.5.0",
-    "node-fs-extra": "^0.8.1",
-    "readable-stream": "^2.0.5",
     "typescript": "^1.7.5",
-    "unzip": "^0.1.11",
-    "vscode": "0.10.x",
-    "xml2js": "^0.4.16"
+    "vscode": "0.10.x"
   },
   "dependencies": {
+    "archiver": "^0.21.0",
+    "fs-extra": "^0.26.5",
+    "jszip": "^2.5.0",
+    "unzip": "^0.1.11",
     "chalk": "^1.1.1",
     "jsforce": "^1.5.1",
-    "moment": "^2.11.2"
+    "moment": "^2.11.2",
+    "xml2js": "^0.4.16"    
   }
 }
