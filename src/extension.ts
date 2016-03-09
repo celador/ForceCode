@@ -18,25 +18,25 @@ export function activate(context: vscode.ExtensionContext): any {
     // The commands have been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
-    context.subscriptions.push(vscode.commands.registerCommand('forcecode.executeAnonymous', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.executeAnonymous', () => {
         const text: string = vscode.window.activeTextEditor.document.getText();
         fc.executeAnonymous(forceService, text);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('forcecode.getLog', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.getLog', () => {
         fc.getLog(forceService);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('forcecode.compile', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.compile', () => {
         const textDocument: vscode.TextDocument = vscode.window.activeTextEditor.document;
         fc.compile(forceService, textDocument);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('forcecode.open', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.open', () => {
         fc.open(forceService);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('forcecode.exportPackage', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.exportPackage', () => {
         fc.retrieve(forceService);
     }));
 
