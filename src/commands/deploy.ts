@@ -3,7 +3,7 @@
 var path = require('path');
 var jsforce = require('jsforce');
 var archiver = require('archiver');
-var Promise = jsforce.Promise;
+// var Promise = jsforce.Promise;
 var connect = require('./connect');
 
 var DEPLOY_OPTIONS =

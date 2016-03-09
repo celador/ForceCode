@@ -68,7 +68,7 @@ export default function retrieve(force: IForceService) {
         });
 };
 
-function checkRetrieveStatus(service, id) {
+function checkRetrieveStatus(service, id): any {
     var checkCount: number = 0;
     return new Promise(function(resolve, reject) {
         // Recursively get the status of the container, using promises
