@@ -19,8 +19,7 @@ export function activate(context: vscode.ExtensionContext): any {
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.executeAnonymous', () => {
-        const text: string = vscode.window.activeTextEditor.document.getText();
-        fc.executeAnonymous(forceService, text);
+        fc.executeAnonymous(forceService, vscode.window.activeTextEditor.document);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.getLog', () => {
@@ -28,8 +27,7 @@ export function activate(context: vscode.ExtensionContext): any {
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.compile', () => {
-        const textDocument: vscode.TextDocument = vscode.window.activeTextEditor.document;
-        fc.compile(forceService, textDocument);
+        fc.compile(forceService, vscode.window.activeTextEditor.document);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.open', () => {

@@ -10,17 +10,20 @@ declare module 'jsforce/index' {
         interface jsforce extends NodeJS.EventEmitter {
             Connection(options: ConnectionOptions): Connection;
         }
-        
-        
-
+        interface ExecuteAnonymousResponse{
+            body: {
+                result: ExecuteAnonymousResult;
+            };
+            header: {};
+        }
         interface ExecuteAnonymousResult {
-            compiled: boolean; // Flag if the query is compiled successfully
+            column: string; // Column number for the error
+            compiled: string; // Flag if the query is compiled successfully
             compileProblem: string; // Error reason in compilation
-            success: boolean; // Flag if the code is executed successfully
-            line: number; // Line number for the error
-            column: number; // Column number for the error
-            exceptionMessage: string; // Exception message
-            exceptionStackTrace: string; // Exception stack trace
+            exceptionMessage: {}; // Exception message
+            exceptionStackTrace: {}; // Exception stack trace
+            line: string; // Line number for the error
+            success: string; // Flag if the code is executed successfully
         }
         interface SObject {
             find(config: {});
@@ -28,6 +31,7 @@ declare module 'jsforce/index' {
             create(records: Array<any>, options?: {}, callback?: () => {}): Array<RecordResult>;
             create(record: any): Thenable<RecordResult>;
             create(record: any, options?: {}, callback?: () => {}): RecordResult;
+            upsert(record: any, options?: {}, callback?: () => {}): RecordResult;
             retrieve(ids: Array<string>, options?: {}, callback?: () => {}): Array<RecordResult>;
             update(records: Array<any>, options?: {}): Thenable<Array<RecordResult>>;
             update(records: Array<any>, options?: {}, callback?: () => {}): Array<RecordResult>;
@@ -39,7 +43,7 @@ declare module 'jsforce/index' {
         interface Tooling {
             sobject(name: string): SObject;
             executeAnonymous(apexBody: string): Promise<ExecuteAnonymousResult>;
-            query(locator: string):  Thenable<QueryResult>;
+            query(locator: string): Thenable<QueryResult>;
         }
         interface RetrieveResult {
             id: string;
@@ -48,12 +52,15 @@ declare module 'jsforce/index' {
             stream(): NodeJS.ReadableStream;
             then(): Thenable<any>;
         }
-        interface Metadata{
+        interface Metadata {
             retrieve({}): Thenable<RetrieveResult>;
             checkRetrieveStatus(): Thenable<any>;
         }
         // Connection
         interface Connection {
+            soap: any;
+            debuggingHeader: any;
+            version: string;
             metadata: Metadata;
             tooling: Tooling;
             request: any;
@@ -62,7 +69,7 @@ declare module 'jsforce/index' {
             instanceUrl: string;
             identity(): any;
             login(name: string, password: string): any;
-            login(name: string, password: string, callback:(err: any, res: any) => void): any;
+            login(name: string, password: string, callback: (err: any, res: any) => void): any;
             _baseUrl(): string;
         }
         interface ConnectionOptions {
@@ -88,12 +95,41 @@ declare module 'jsforce/index' {
             clientSecret: string; // OAuth2 client secret.
             redirectUri: string;  // URI to be callbacked from Salesforce OAuth2 authorization service.
         }
-    
+
         // Login
         interface UserInfo {
             id: string; // User ID
             organizationId: string; // Organization ID
             url: string; // Identity URL of the user
+        }
+
+        interface DebugLevel {
+            ApexCode?: string;
+            ApexProfiling?: string;
+            Callout?: string;
+            Database?: string;
+            DeveloperName: string;
+            Language?: string;
+            MasterLabel: string;
+            System?: string;
+            Validation?: string;
+            Visualforce?: string;
+            Workflow?: string;
+        }
+        interface TraceFlagOptions {
+            ApexCode?: string;
+            ApexProfiling?: string;
+            Callout?: string;
+            Database?: string;
+            DebugLevelId?: string;
+            ExpirationDate: string; // Datetime
+            LogType?: string; // USER_DEBUG
+            StartDate?: string; // Datetime
+            System?: string;
+            TracedEntityId?: string; // UserId
+            Validation?: string;
+            Visualforce?: string;
+            Workflow?: string;
         }
 
         interface RecordResult {

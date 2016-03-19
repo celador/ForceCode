@@ -87,7 +87,7 @@
     "archiver": "^0.21.0",
     "chalk": "^1.1.1",
     "fs-extra": "^0.26.5",
-    "jsforce": "^1.5.1",
+    "jsforce": "github:celador/jsforce",
     "jszip": "^2.5.0",
     "moment": "^2.11.2",
     "readable-stream": "^2.0.5",

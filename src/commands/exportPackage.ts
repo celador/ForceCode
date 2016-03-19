@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import {IForceService} from './../services';
-// import fs = require('fs-extra');
+import fs = require('fs-extra');
 
 export default function exportPackage(force: IForceService) {
     'use strict';
@@ -13,7 +13,7 @@ export default function exportPackage(force: IForceService) {
     // =======================================================================================================================================
     function getAllFiles(svc: IForceService) {
         return svc.conn
-            .metadata.retrieve({ packageNames: [ 'Test' ] })
+            .metadata.retrieve({ packageNames: [ 'Test' ] });
             //  .stream()
             //  .pipe(fs.createWriteStream(vscode.workspace.rootPath + '/MyPackage.zip'));
 
