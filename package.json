@@ -25,6 +25,7 @@
   "activationEvents": [
     "onCommand:ForceCode.executeAnonymous",
     "onCommand:ForceCode.getLog",
+    "onCommand:ForceCode.staticResource",
     "onCommand:ForceCode.compile"
   ],
   "main": "./out/src/extension",
@@ -54,6 +55,11 @@
         "command": "ForceCode.exportPackage",
         "title": "Force: Get Package from Org",
         "description": "Export (retrieve) a package from Salesforce"
+      },
+      {
+        "command": "ForceCode.staticResource",
+        "title": "Force: Bundle / Deploy Static Resource",
+        "description": "Bundles a Resource Bundle into a Static Resource and optionally deploys"
       }
     ],
     "keybindings": [
@@ -72,6 +78,10 @@
       {
         "command": "ForceCode.open",
         "key": "alt+cmd+o"
+      },
+      {
+        "command": "ForceCode.staticResource",
+        "key": "alt+cmd+b"
       }
     ]
   },
@@ -79,6 +89,10 @@
     "pre": "node ./node_modules/vscode/bin/compile",
     "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
   },
+  "extensionDependencies": [ 
+      "JohnAaronNelson.apex", 
+      "JohnAaronNelson.visualforce"
+    ],
   "devDependencies": {
     "typescript": "^1.7.5",
     "vscode": "0.10.x"
@@ -87,6 +101,8 @@
     "archiver": "^0.21.0",
     "chalk": "^1.1.1",
     "fs-extra": "^0.26.5",
+    "globule": "^0.2.0",
+    "jquery": "^2.2.2",
     "jsforce": "github:celador/jsforce",
     "jszip": "^2.5.0",
     "moment": "^2.11.2",
