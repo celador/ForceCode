@@ -89,10 +89,10 @@
     "pre": "node ./node_modules/vscode/bin/compile",
     "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
   },
-  "extensionDependencies": [ 
-      "JohnAaronNelson.apex", 
-      "JohnAaronNelson.visualforce"
-    ],
+  "extensionDependencies": [
+    "JohnAaronNelson.apex",
+    "JohnAaronNelson.visualforce"
+  ],
   "devDependencies": {
     "typescript": "^1.7.5",
     "vscode": "0.10.x"
