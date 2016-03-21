@@ -43,6 +43,16 @@ export default function retrieve(force: IForceService) {
     var service: any = undefined;
     // Get Package(s) from a prompt
     var packages: string[] = ['Test'];
+    
+    // Get packages to retrieve
+// WE NEED TO USE THE REQUEST LIBRARY HERE INSTEAD OF JQUERY
+    // $.post(force.conn.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI', {
+    //     action: 'EXTENT',
+    //     extent: 'PACKAGES'
+    // }, function (res){
+    //     console.log(res);
+    // });
+    
     return force.connect()
         .then(svc => {
             service = svc;

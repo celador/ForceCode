@@ -26,7 +26,7 @@
       true,
       280
     ],
-    "member-access": true,
+    "member-access": false,
     "member-ordering": [
       true,
       "public-before-private",

@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import * as fc from './commands';
 import * as parsers from './parsers';
-import {IForceService, ForceService} from './services';
+import {IForceService, ForceService, constants} from './services';
 
 
 // this method is called when your extension is activated
@@ -37,6 +37,18 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.exportPackage', () => {
         fc.retrieve(forceService);
     }));
+
+    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.staticResource', () => {
+        const config: any = vscode.workspace.getConfiguration('sfdc');
+        fc.staticResource(forceService, vscode.window.activeTextEditor.document, config.deployStaticResource);
+    }));
+
+    context.subscriptions.push(
+        vscode.languages.registerDefinitionProvider(
+            constants.PEEK_FILTER,
+            new fc.PeekFileDefinitionProvider()
+        )
+    );
 
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         const toolingType: string = parsers.getToolingType(textDocument);
