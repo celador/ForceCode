@@ -1,16 +1,18 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
+    "compilerOptions": {
+        "module": "commonjs",
         "moduleResolution": "node",
         "noResolve": false,
-		"target": "ES5",
-		"outDir": "./out",
-		"noLib": false,
-		"sourceMap": true
-	},
-	"exclude": [
-		"node_modules"
-	]
+        "target": "ES5",
+        "outDir": "./out",
+        "noLib": false,
+        "sourceMap": true
+    },
+    "exclude": [
+        "typings/browser",
+        "typings/browser.d.ts",        
+        "node_modules"
+    ]
 }
 
 
