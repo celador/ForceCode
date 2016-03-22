@@ -148,7 +148,7 @@ export default function compile(force: IForceService, document: vscode.TextDocum
     }
     // =======================================================================================================================================
     function onError(err): boolean {
-        vscode.window.setStatusBarMessage('ForceCode: Compile Error');
+        vscode.window.setStatusBarMessage('ForceCode: ' + err.message);
         outputChannel.appendLine('================================     ERROR     ================================\n');
         outputChannel.appendLine(err.message);
         console.log(err);
