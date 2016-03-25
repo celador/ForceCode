@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import {IForceService} from './../services';
+import {IForceService} from './../forceCode';
 import fs = require('fs-extra');
 
 export default function exportPackage(force: IForceService) {

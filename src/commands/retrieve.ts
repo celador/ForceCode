@@ -1,6 +1,6 @@
 'use strict';
 import * as vscode from 'vscode';
-import {IForceService} from './../services';
+import {IForceService} from './../forceCode';
 const fs: any = require('fs-extra');
 const jszip: any = require('jszip');
 const unzip = require('unzip');

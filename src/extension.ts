@@ -1,10 +1,10 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as fc from './commands';
+import {IForceService} from './forceCode';
+import * as commands from './commands';
 import * as parsers from './parsers';
-import {IForceService, ForceService, constants} from './services';
-
+import {ForceService, constants} from './services';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -15,46 +15,41 @@ export function activate(context: vscode.ExtensionContext): any {
     console.log('ForceCode is now active!');
     const forceService: IForceService = new ForceService();
 
-    // The commands have been defined in the package.json file
-    // Now provide the implementation of the command with  registerCommand
-    // The commandId parameter must match the command field in package.json
+    // Peek Provider Setup
+    const peekProvider: any = new commands.PeekFileDefinitionProvider();
+    const definitionProvider: any = vscode.languages.registerDefinitionProvider(constants.PEEK_FILTER, peekProvider);
+    context.subscriptions.push(definitionProvider);
+
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.executeAnonymous', () => {
-        fc.executeAnonymous(forceService, vscode.window.activeTextEditor.document);
+        commands.executeAnonymous(forceService, vscode.window.activeTextEditor.document);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.getLog', () => {
-        fc.getLog(forceService);
+        commands.getLog(forceService);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.compile', () => {
-        fc.compile(forceService, vscode.window.activeTextEditor.document);
+        commands.compile(forceService, vscode.window.activeTextEditor.document);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.open', () => {
-        fc.open(forceService);
+        commands.open(forceService);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.exportPackage', () => {
-        fc.retrieve(forceService);
+        commands.retrieve(forceService);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.staticResource', () => {
         const config: any = vscode.workspace.getConfiguration('sfdc');
-        fc.staticResource(forceService, vscode.window.activeTextEditor.document, config.deployStaticResource);
+        commands.staticResource(forceService, vscode.window.activeTextEditor.document, config.deployStaticResource);
     }));
-
-    context.subscriptions.push(
-        vscode.languages.registerDefinitionProvider(
-            constants.PEEK_FILTER,
-            new fc.PeekFileDefinitionProvider()
-        )
-    );
 
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         const toolingType: string = parsers.getToolingType(textDocument);
         const config: any = vscode.workspace.getConfiguration('sfdc');
         if (forceService.conn && toolingType !== undefined && config.autoCompile === true) {
-            fc.compile(forceService, textDocument);
+            commands.compile(forceService, textDocument);
         }
     }));
 }

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import {IForceService} from './../services';
+import {IForceService} from './../forceCode';
 import fs = require('fs-extra');
 import {getIcon, getExtension, getFolder} from './../parsers';
 const TYPEATTRIBUTE: string = 'type';

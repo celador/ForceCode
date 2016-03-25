@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import {IForceService} from './../services';
+import {IForceService} from './../forceCode';
 const UPDATE: boolean = true;
 const CREATE: boolean = false;
 const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('ForceCode');
@@ -60,7 +60,11 @@ export default function compile(force: IForceService, document: vscode.TextDocum
             if (toolingType === 'ApexClass') {
                 return { Body: text };
             } else if (toolingType === 'ApexPage') {
-                return { Markup: text };
+                return {
+                    Markup: text,
+                    Masterlabel: name + 'Label',
+                    Name: name,
+                 };
             }
             return { Body: text };
         }

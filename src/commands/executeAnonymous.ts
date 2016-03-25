@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import * as chalk from 'chalk';
 import jsforce = require('jsforce');
 var SoapApi = require('jsforce/lib/api');
-import {IForceService} from './../services';
+import {IForceService} from './../forceCode';
 const DEBUG_LEVEL_NAME: string = 'Execute_Anonymous_Debug';
 const LOG_TYPE: string = 'DEVELOPER_LOG';
 const executeAnonymousService: IExecuteAnonymousService = {};
@@ -114,8 +114,17 @@ function showResult(res) {
     // var outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Execute Anonymous');
     // outputChannel.clear();
     // outputChannel.show(3);
+    // var foo = res.header.debugLog.split('\n').map(line => {
+    //     var regex = /\|DEBUG\|/g;
+    //     if(line.match(regex)){
+    //         line = '<span style="color: red;">' + line + '</span';
+    //     }
+    //     return line;
+    // }).join('\n');
+    outputChannel.clear();
     outputChannel.append(res.header.debugLog);
-    return true;
+    // vscode.window.
+     return true;
 }
 
 // function invokeExecuteCode(instanceUrl, sessionId, loggingLevels, code, callback) {

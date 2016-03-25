@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import jsforce = require('jsforce');
-import {IForceService} from './../services/';
+import {IForceService} from './../forceCode';
 
 interface LogRecord {
     Id: string;

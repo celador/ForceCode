@@ -1,55 +1,41 @@
 import * as vscode from 'vscode';
+import * as forceCode from './../forceCode';
 import jsforce = require('jsforce');
+const service: forceCode.IForceService = vscode.window.forceCode;
 
-interface config {
-    username?: string;
-    password?: string;
-    token?: string;
-}
+export default class ForceService implements forceCode.IForceService {
 
-export interface IForceService {
-    config?: config;
-    containerId?: string;
-    containerAsyncRequestId?: string;
-    conn?: jsforce.Connection;
-    userInfo?: jsforce.UserInfo;
-    connect(): Promise<ForceService>;
-    newContainer(): PromiseLike<ForceService>;
-}
-export class ForceService implements IForceService {
-    public conn: jsforce.Connection = undefined;
-    public containerId: string = undefined;
-    public containerAsyncRequestId: string = undefined;
-    public userInfo: jsforce.UserInfo = undefined;
-    public config: config = undefined;
+    public clearLog() {
+        service.outputChannel.clear();
+    };
 
-    public newContainer(): PromiseLike<ForceService> {
+    public newContainer(): PromiseLike<forceCode.IForceService> {
         'use strict';
-        return this.conn.tooling.sobject('MetadataContainer')
+        return service.conn.tooling.sobject('MetadataContainer')
             .create({ name: 'ForceCode-' + Date.now() })
             .then(res => {
-                this.containerId = res.id;
-                return this;
+                service.containerId = res.id;
+                return service;
             });
     }
 
-    public connect(): Promise<IForceService> {
+    public connect(): Promise<forceCode.IForceService> {
         'use strict';
         // Lazy-load the connection
-        if (this.conn === undefined) {
-            var jsforce: any = require('jsforce');
-            this.conn = new jsforce.Connection();
+        if (service === undefined || service.conn === undefined || service.config === undefined) {
+            // this.conn = new jsforce.Connection();
+            service.conn = new jsforce.Connection();
             /// TODO: Pull credentials from .config jsforce.config.js file from the user directory
-            this.config = vscode.workspace.getConfiguration('sfdc');
-            var username: string = this.config.username || '';
-            var password: string = (this.config.password || '') + (this.config.token || '');
-            return this.conn.login(username, password).then((userInfo) => {
-                this.userInfo = userInfo;
-                return this;
+            service.config = vscode.workspace.getConfiguration('sfdc');
+            const username: string = service.config.username || '';
+            const password: string = (service.config.password || '') + (service.config.token || '');
+            return service.conn.login(username, password).then((userInfo) => {
+                service.userInfo = userInfo;
+                return service;
             });
         } else {
             return new Promise((resolve, reject) => {
-                resolve(this);
+                resolve(service);
             });
         }
     }

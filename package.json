@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -23,10 +23,14 @@
     "url": "https://github.com/celador/ForceCode.git"
   },
   "activationEvents": [
+    "onCommand:ForceCode.compile",
     "onCommand:ForceCode.executeAnonymous",
+    "onCommand:ForceCode.exportPackage",
     "onCommand:ForceCode.getLog",
+    "onCommand:ForceCode.open",
     "onCommand:ForceCode.staticResource",
-    "onCommand:ForceCode.compile"
+    "onLanguage:apex",
+    "onLanguage:visualforce"
   ],
   "main": "./out/src/extension",
   "contributes": {

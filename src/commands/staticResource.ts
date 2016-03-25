@@ -4,7 +4,7 @@ import path = require('path');
 import jszip = require('jszip');
 // import jsforce = require('jsforce');
 import globule = require('globule');
-import {IForceService} from './../services';
+import {IForceService} from './../forceCode';
 var outputChannel = vscode.window.createOutputChannel('ForceCode');
 var packageName = undefined;
 var relativeRoot = undefined;
