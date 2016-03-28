@@ -1,9 +1,32 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import jsforce = require('jsforce');
-const service: forceCode.IForceService = vscode.window.forceCode;
+var service: forceCode.IForceService;
+const jsforce = require('jsforce');
 
 export default class ForceService implements forceCode.IForceService {
+    public connect(): Promise<forceCode.IForceService> {
+        'use strict';
+        if (service === undefined) {
+            service = vscode.window.forceCode || new ForceService();
+        }
+        // Lazy-load the connection
+        if (service.userInfo === undefined)  {
+            vscode.window.forceCode.conn = new jsforce.Connection();
+            const username: string = service.config.username || '';
+            const password: string = (service.config.password || '') + (service.config.token || '');
+            vscode.window.setStatusBarMessage(`ForceCode: Connecting $(plug)`);
+            return service.conn.login(username, password).then((userInfo) => {
+                vscode.window.setStatusBarMessage(`ForceCode: Connected $(zap)`);
+                service.userInfo = userInfo;
+                return service;
+            });
+        } else {
+            vscode.window.setStatusBarMessage(`ForceCode: Connected $(history)`);
+            return new Promise((resolve, reject) => {
+                resolve(service);
+            });
+        }
+    }
 
     public clearLog() {
         service.outputChannel.clear();
@@ -19,24 +42,4 @@ export default class ForceService implements forceCode.IForceService {
             });
     }
 
-    public connect(): Promise<forceCode.IForceService> {
-        'use strict';
-        // Lazy-load the connection
-        if (service === undefined || service.conn === undefined || service.config === undefined) {
-            // this.conn = new jsforce.Connection();
-            service.conn = new jsforce.Connection();
-            /// TODO: Pull credentials from .config jsforce.config.js file from the user directory
-            service.config = vscode.workspace.getConfiguration('sfdc');
-            const username: string = service.config.username || '';
-            const password: string = (service.config.password || '') + (service.config.token || '');
-            return service.conn.login(username, password).then((userInfo) => {
-                service.userInfo = userInfo;
-                return service;
-            });
-        } else {
-            return new Promise((resolve, reject) => {
-                resolve(service);
-            });
-        }
-    }
 }

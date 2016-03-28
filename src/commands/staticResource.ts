@@ -9,10 +9,10 @@ var outputChannel = vscode.window.createOutputChannel('ForceCode');
 var packageName = undefined;
 var relativeRoot = undefined;
 var autoDeploy = false;
-var forceService: IForceService = undefined;
+var service: IForceService;
 // var root = './resource-bundles/dbaseLib.resource';
 
-export default function staticResourceBundleDeploy(force: IForceService, document: vscode.TextDocument, auto: boolean): any {
+export default function staticResourceBundleDeploy(document: vscode.TextDocument, auto: boolean): any {
     'use strict';
     autoDeploy = true;
     // executeAnonymousService.apexBody = document.getText();
@@ -24,11 +24,10 @@ export default function staticResourceBundleDeploy(force: IForceService, documen
     //     deployToSalesforce = false;
     //     console.log('deploying to local filesystem');
     // }
-    vscode.window.setStatusBarMessage(`ForceCode: Start Bundling...`);
+    service = vscode.window.forceCode;
 
     // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
-    return force.connect()
-        .then(setConnection)
+    return service.connect()
         .then(getPackageName)
         .then(getPackagePath)
         .then(makeZip)
@@ -36,15 +35,11 @@ export default function staticResourceBundleDeploy(force: IForceService, documen
         .then(deploy)
         .then(onComplete, onError);
 }
-function setConnection(svc: IForceService): IForceService {
-    'use strict';
-    forceService = svc;
-    return svc;
-}
 // =======================================================================================================================================
 // =======================================================================================================================================
 // =======================================================================================================================================
 function getPackageName(service: IForceService) {
+    vscode.window.setStatusBarMessage(`ForceCode: Get Packages $(list-unordered)`);
     let bundleDirectories = [];
     let bundlePath = vscode.workspace.rootPath + '/resource-bundles';
     if (fs.existsSync(bundlePath)) {
@@ -82,7 +77,7 @@ function getPackageName(service: IForceService) {
 }
 
 function getPackagePath(option) {
-    vscode.window.setStatusBarMessage(`ForceCode: Pick the resource to create`);
+    vscode.window.setStatusBarMessage(`ForceCode: Making Zip $(fold)`);
     packageName = option.label;
     let bundlePath = vscode.workspace.rootPath;
     // Get package data
@@ -100,7 +95,8 @@ function makeZip(root) {
     // Create a Zip Object from which we can generate data, with which we do things...
     //  Get a file list that we generate from a path defined in the package.json.
     relativeRoot = root;
-    var zip = zipFiles(getFileList(relativeRoot));
+    var fileList = getFileList(relativeRoot);
+    var zip = zipFiles(fileList);
     return zip;
 }
 
@@ -114,7 +110,6 @@ function makeZip(root) {
 function zipFiles(fileList: string[]) {
     var zip = new jszip();
 
-    vscode.window.setStatusBarMessage(`ForceCode: Making Zip...`);
     // Add files to zip object
     fileList.forEach(function(file) {
         // var relativePath = file.split(relativeRoot)[1] || file;
@@ -143,7 +138,17 @@ function getFileList(relativeRoot) {
     return (function innerGetFileList(localPath) {
         var fileslist = []; // List of files
         var files = fs.readdirSync(localPath); // Files in current directory
-        var ignoreFiles: {} = vscode.workspace.getConfiguration('sfdc')['filesExclude'];
+        var ignoreFiles: {} = vscode.workspace.getConfiguration('sfdc')['filesExclude'] || {
+            '.gitignore': true,
+            '.DS_Store': true,
+            '.org_metadata': true,
+            '**/*.map': true,
+            'node_modules/**': true,
+            'bower_modules/**': true,
+            '**.tmp': true,
+            '**/*-meta.xml': true,
+            '.log': true
+        };
         var _ignoreFiles = Object.keys(ignoreFiles).map(key => {
             return { key: key, value: ignoreFiles[key] };
         })
@@ -178,7 +183,7 @@ function isMatch(path, file) {
  * @return undefined
  */
 function bundle(zip) {
-    vscode.window.setStatusBarMessage(`ForceCode: Bundling Static Resource!`);
+    vscode.window.setStatusBarMessage(`ForceCode: Bundling Resource $(beaker)`);
     var buffer = zip.generate({ type: 'nodebuffer', compression: 'DEFLATE' });
     // Copy the zip to the StaticResource folder
     var finalPath = vscode.workspace.rootPath + '/src/staticresources/' + packageName + '.resource';
@@ -194,7 +199,7 @@ function bundle(zip) {
  */
 function deploy(zip) {
     if (autoDeploy === true) {
-        vscode.window.setStatusBarMessage(`ForceCode: Deploying Static Resource to your Org!`);
+        vscode.window.setStatusBarMessage(`ForceCode: Deploying $(rocket)`);
         // Create the base64 data to send to Salesforce 
         var zipFile = zip.generate({ base64: true, compression: 'DEFLATE' });
 
@@ -209,7 +214,7 @@ function deploy(zip) {
         //     serverUrl: session.server_url
         // });
 
-        return forceService.conn.metadata.upsert('StaticResource', metadata);
+        return service.conn.metadata.upsert('StaticResource', metadata);
     }
 };
 
@@ -232,7 +237,7 @@ function makeResourceMetadata(bundleName, zipFile) {
 
 function onComplete(results) {
     'use strict';
-    vscode.window.setStatusBarMessage(`ForceCode: Deploy Static Resource Success!!!`);
+    vscode.window.setStatusBarMessage(`ForceCode: Deploy Success $(check)`);
     //   exec('osascript -e \'tell app 'Google Chrome' to tell the active tab of its first window to reload\'');
     console.log('results are: ', results);
     console.log('success: ' + results.success);
@@ -249,7 +254,8 @@ function onComplete(results) {
  */
 function onError(err) {
     'use strict';
-    vscode.window.setStatusBarMessage(`ForceCode: Whomp! Error!`);
+    vscode.window.setStatusBarMessage(`ForceCode: Error $(stop)`);
+    vscode.window.forceCode.outputChannel.append(err);
     console.log(err);
     return false;
 };

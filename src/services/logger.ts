@@ -2,7 +2,6 @@
 import * as vscode from 'vscode';
 import * as chalk from 'chalk';
 import * as moment from 'moment';
-// import * as chalk from 'chalk';
 import jsforce = require('jsforce');
 var SoapApi = require('jsforce/lib/api');
 import {IForceService} from './../forceCode';
@@ -120,3 +119,34 @@ function onError(err) {
     'use strict';
     console.log(err);
 }
+
+
+// function getLogId(result: any): any {
+//     'use strict';
+//     var message: string = '';
+//     if (!result.compiled) {
+//         message = 'Compile Problem: ' + result.compileProblem;
+//         vscode.window.showErrorMessage(message);
+//         return Promise.reject(message);
+//     } else if (!result.success) {
+//         message = 'Exception: ' + result.exceptionMessage;
+//         vscode.window.showErrorMessage(message);
+//         return Promise.reject(message);
+//     } else {
+//         var statusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
+//         statusBarItem.text = 'Hello';
+//         statusBarItem.tooltip = 'Hello';
+//         statusBarItem.color = 'Red';
+//         // vscode.window.showInformationMessage('Execute Anonymous Success', 'Foo', 'Bar').then(response => setTimeout( () => {console.log(response)}, 5000));
+//         // setTimeout(function() {
+//         // }, 5000);
+//         executeAnonymousService.queryString = `SELECT Id FROM ApexLog WHERE Request = 'API' AND Location = 'SystemLog'`
+//             + ` AND Operation like '%executeAnonymous%'`
+//             + ` AND LogUserId='${executeAnonymousService.userId}' ORDER BY StartTime DESC, Id DESC LIMIT 1`;
+//         return executeAnonymousService.connection.query(executeAnonymousService.queryString)
+//             .then(function(queryResult: any) {
+//                 var id: string = queryResult.records[0].Id;
+//                 return id;
+//             });
+//     }
+// }

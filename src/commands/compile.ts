@@ -3,11 +3,12 @@ import * as parsers from './../parsers';
 import {IForceService} from './../forceCode';
 const UPDATE: boolean = true;
 const CREATE: boolean = false;
-const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('ForceCode');
+var service: IForceService;
 
-export default function compile(force: IForceService, document: vscode.TextDocument): Thenable<any> {
+export default function compile(document: vscode.TextDocument): Thenable<any> {
     'use strict';
     vscode.window.setStatusBarMessage('ForceCode: Compiling...');
+    service = vscode.window.forceCode;
     const body: string = document.getText();
     const toolingType: string = parsers.getToolingType(document);
     if (toolingType === undefined) {
@@ -16,7 +17,7 @@ export default function compile(force: IForceService, document: vscode.TextDocum
             .catch(onError);
     }
     const name: string = parsers.getName(document, toolingType);
-    return force.connect()
+    return service.connect()
         .then(svc => svc.newContainer())
         .then(addToContainer)
         .then(requestCompile)
@@ -26,7 +27,7 @@ export default function compile(force: IForceService, document: vscode.TextDocum
     // =======================================================================================================================================
     // =======================================================================================================================================
     function addToContainer() {
-        return force.conn.tooling.sobject(toolingType)
+        return service.conn.tooling.sobject(toolingType)
             .find({ Name: name }).execute()
             .then(records => addMember(records));
         function addMember(records) {
@@ -37,22 +38,22 @@ export default function compile(force: IForceService, document: vscode.TextDocum
                 var member: {} = {
                     Body: body,
                     ContentEntityId: record.Id,
-                    Id: force.containerId,
+                    Id: service.containerId,
                     Metadata: record.Metadata,
-                    MetadataContainerId: force.containerId,
+                    MetadataContainerId: service.containerId,
                 };
                 // outputChannel.appendLine('ForceCode: Updating ' + name);
                 vscode.window.setStatusBarMessage('ForceCode: Updating ' + name);
-                return force.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).create(member).then(res => {
-                    return force;
+                return service.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).create(member).then(res => {
+                    return service;
                 });
             } else {
                 // Tooling Object does not exist
                 // CREATE it
                 // outputChannel.appendLine('ForceCode: Creating ' + name);
                 vscode.window.setStatusBarMessage('ForceCode: Creating ' + name);
-                return force.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
-                    return force;
+                return service.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
+                    return service;
                 });
             }
         }
@@ -64,23 +65,23 @@ export default function compile(force: IForceService, document: vscode.TextDocum
                     Markup: text,
                     Masterlabel: name + 'Label',
                     Name: name,
-                 };
+                };
             }
             return { Body: text };
         }
-     }
+    }
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
     function requestCompile() {
         vscode.window.setStatusBarMessage('ForceCode: Compile Requested');
-        return force.conn.tooling.sobject('ContainerAsyncRequest').create({
+        return service.conn.tooling.sobject('ContainerAsyncRequest').create({
             IsCheckOnly: false,
             IsRunTests: false,
-            MetadataContainerId: force.containerId,
+            MetadataContainerId: service.containerId,
         }).then(res => {
-            force.containerAsyncRequestId = res.id;
-            return force;
+            service.containerAsyncRequestId = res.id;
+            return service;
         });
     }
     // =======================================================================================================================================
@@ -89,7 +90,7 @@ export default function compile(force: IForceService, document: vscode.TextDocum
     function getCompileStatus() {
         var checkCount: number = 0;
         return new Promise(
-            function(resolve, reject) {
+            function (resolve, reject) {
                 // Recursively get the status of the container, using promises
                 nextStatus();
                 function nextStatus() {
@@ -97,17 +98,17 @@ export default function compile(force: IForceService, document: vscode.TextDocum
                     vscode.window.setStatusBarMessage('ForceCode: Get Status...' + checkCount);
                     return getStatus().then(res => {
                         // Throttle the ReCheck of the compile status, to use fewer http requests (reduce effects on SFDC limits)
-                        isFinished(res) ? resolve(res) : setTimeout(() => nextStatus(), 500);
+                        isFinished(res) ? resolve(res) : setTimeout(() => nextStatus(), 300);
                     });
                 }
                 // Set a timeout to auto fail the compile after 30 seconds
-                setTimeout(function() {
+                setTimeout(function () {
                     reject();
                 }, 30000);
             });
         function getStatus() {
-            return force.conn.tooling.query(`SELECT Id, MetadataContainerId, MetadataContainerMemberId, State, IsCheckOnly, ` +
-                `DeployDetails, ErrorMsg FROM ContainerAsyncRequest WHERE Id='${force.containerAsyncRequestId}'`);
+            return service.conn.tooling.query(`SELECT Id, MetadataContainerId, MetadataContainerMemberId, State, IsCheckOnly, ` +
+                `DeployDetails, ErrorMsg FROM ContainerAsyncRequest WHERE Id='${service.containerAsyncRequestId}'`);
         }
         function isFinished(res) {
             if (res.records && res.records[0]) {
@@ -153,8 +154,8 @@ export default function compile(force: IForceService, document: vscode.TextDocum
     // =======================================================================================================================================
     function onError(err): boolean {
         vscode.window.setStatusBarMessage('ForceCode: ' + err.message);
-        outputChannel.appendLine('================================     ERROR     ================================\n');
-        outputChannel.appendLine(err.message);
+        service.outputChannel.appendLine('================================     ERROR     ================================\n');
+        service.outputChannel.appendLine(err.message);
         console.log(err);
         return false;
     }

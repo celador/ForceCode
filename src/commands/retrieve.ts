@@ -5,6 +5,7 @@ const fs: any = require('fs-extra');
 const jszip: any = require('jszip');
 const unzip = require('unzip');
 const stream = require('stream');
+var service: IForceService;
 
 // console.log(‘data of source.txt is gzipped, the unzipped and then written to target.txt’);
 
@@ -39,7 +40,7 @@ function noop() { }
 /**
  *
  */
-export default function retrieve(force: IForceService) {
+export default function retrieve() {
     var service: any = undefined;
     // Get Package(s) from a prompt
     var packages: string[] = ['Test'];
@@ -53,7 +54,7 @@ export default function retrieve(force: IForceService) {
     //     console.log(res);
     // });
     
-    return force.connect()
+    return service.connect()
         .then(svc => {
             service = svc;
             return service.conn.metadata.retrieve({
@@ -85,7 +86,7 @@ function checkRetrieveStatus(service, id): any {
         nextStatus();
         function nextStatus() {
             checkCount += 1;
-            vscode.window.setStatusBarMessage('ForceCode: Retrieval attempt ' + checkCount);
+            vscode.window.setStatusBarMessage('ForceCode: Retrieval attempt $(cloud-download) ' + checkCount);
             return service.conn.metadata.checkRetrieveStatus(id).then(res => {
                 // Throttle the ReCheck of the compile status, to use fewer http requests (reduce effects on SFDC limits)
                 isFinished(res) ? resolve(res) : setTimeout(() => nextStatus(), 500);

@@ -3,20 +3,21 @@ import {IForceService} from './../forceCode';
 import fs = require('fs-extra');
 import {getIcon, getExtension, getFolder} from './../parsers';
 const TYPEATTRIBUTE: string = 'type';
+var service: IForceService;
 
-export default function open(force: IForceService) {
+export default function open() {
     'use strict';
     vscode.window.setStatusBarMessage('open Started');
-    // var name: string = undefined;
+    service = vscode.window.forceCode;
 
-    return force.connect()
-        .then(svc => showFileOptions(svc))
+    return service.connect()
+        .then(svc => showFileOptions())
         .then(opt => getFile(opt))
         .then(finished, onError);
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
-    function showFileOptions(service: IForceService) {
+    function showFileOptions() {
         var promises: Thenable<any>[] = [
             service.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexClass'),
             service.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexTrigger'),
@@ -51,7 +52,7 @@ export default function open(force: IForceService) {
 
     // =======================================================================================================================================
     function getFile(res: any) {
-        return force.conn.tooling.sobject(res.detail)
+        return service.conn.tooling.sobject(res.detail)
             .find({ Id: res.description }).execute();
     }
     // =======================================================================================================================================
