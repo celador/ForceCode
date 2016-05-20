@@ -22,6 +22,10 @@ export function activate(context: vscode.ExtensionContext): any {
     // // const definitionProvider: any = vscode.languages.registerDefinitionProvider(constants.PEEK_FILTER, peekProvider);
     // // context.subscriptions.push(definitionProvider);
 
+    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.showMenu', () => {
+        commands.showMenu();
+    }));
+
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.executeAnonymous', () => {
         commands.executeAnonymous(vscode.window.activeTextEditor.document);
     }));

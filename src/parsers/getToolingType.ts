@@ -11,16 +11,16 @@ export default function getToolingTypeFromBody(document: vscode.TextDocument, me
     var isComponent: RegExpMatchArray = document.getText().trim().match(/^<\s*apex:component/g);
     var isField: boolean = false;
 
-    if (isClass) {
+    if (isClass || document.fileName.endsWith('.cls')) {
         return member ? 'ApexClassMember' : 'ApexClass';
     }
-    if (isTrigger) {
+    if (isTrigger || document.fileName.endsWith('.trigger')) {
         return member ? 'ApexTriggerMember' : 'ApexTrigger';
     }
-    if (isComponent) {
+    if (isComponent || document.fileName.endsWith('.component')) {
         return member ? 'ApexComponentMember' : 'ApexComponent';
     }
-    if (isPage) {
+    if (isPage || document.fileName.endsWith('.page')) {
         return member ? 'ApexPageMember' : 'ApexPage';
     }
     if (isField) {

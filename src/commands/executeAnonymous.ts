@@ -21,13 +21,12 @@ export interface IExecuteAnonymousService {
 
 export default function executeAnonymous(document: vscode.TextDocument): any {
     'use strict';
-    let apexBody = document.getText();
+    let apexBody: string = document.getText();
     service = vscode.window.forceCode;
-        return service.connect()
-        // USING SOAP API
-        .then(svc => invokeExecuteAnonymous(apexBody))
-        .then(res => runDiagnostics(res, document))
-        .then(showResult, onError);
+    return service.connect()
+    .then(svc => invokeExecuteAnonymous(apexBody))
+    .then(res => runDiagnostics(res, document))
+    .then(showResult, onError);
 }
 // =========================================================================================================
 // =====================       USING SOAP API      =========================================================
@@ -41,25 +40,25 @@ function invokeExecuteAnonymous(text: string): jsforce.ExecuteAnonymousResponse 
             'level': 'DEBUG'
         } , {
             'category': 'Apex_profiling',
-            'level': 'INFO'
+            'level': 'NONE'
         } , {
             'category': 'Callout',
-            'level': 'INFO'
+            'level': 'NONE'
         } , {
             'category': 'Db',
-            'level': 'INFO'
+            'level': 'NONE'
         } , {
             'category': 'System',
-            'level': 'INFO'
+            'level': 'DEBUG'
         } , {
             'category': 'Validation',
-            'level': 'INFO'
+            'level': 'NONE'
         } , {
             'category': 'Visualforce',
-            'level': 'INFO'
+            'level': 'NONE'
         } , {
             'category': 'Workflow',
-            'level': 'INFO'
+            'level': 'NONE'
         }
     ];
     return service.conn.soap.executeAnonymous(text).then(function(res){
@@ -73,7 +72,7 @@ function runDiagnostics(res: jsforce.ExecuteAnonymousResponse, document: vscode.
     var result: any = res.body.result;
     var header: any = res.header;
     if (result.compiled === 'false') {
-        const lineNumber: number = Number(result.line) - 2;
+        const lineNumber: number = Number(result.line) - 1;
         const columnNumber: number = Number(result.column);
         var failureRange: vscode.Range = document.lineAt(lineNumber).range;
         if (columnNumber > 0) {
