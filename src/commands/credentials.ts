@@ -4,11 +4,14 @@ import {constants} from './../services';
 import {IForceService} from './../forceCode';
 import {getIcon} from './../parsers';
 var service: IForceService;
+var outputChannel: vscode.OutputChannel;
 
 export default function enterCredentials(context: vscode.ExtensionContext) {
     'use strict';
     vscode.window.setStatusBarMessage('ForceCode Menu');
     service = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
+    outputChannel = <vscode.OutputChannel>context.workspaceState.get(constants.OUTPUT_CHANNEL);
+
     return getUsername()
         .then(cfg => getPassword(cfg))
         .then(cfg => getUrl(cfg))
@@ -46,17 +49,17 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
             title: 'Production / Developer',
             url: 'https://login.salesforce.com',
         }, {
-            icon: 'beaker',
-            title: 'Sandbox / Test',
-            url: 'https://test.salesforce.com',
-        }].map(res => {
-            let icon: string = getIcon(res.icon);
-            return {
-                description: `${res.url}`,
-                // detail: `${'Detail'}`,
-                label: `$(${icon}) ${res.title}`,
-            };
-        });
+                icon: 'beaker',
+                title: 'Sandbox / Test',
+                url: 'https://test.salesforce.com',
+            }].map(res => {
+                let icon: string = getIcon(res.icon);
+                return {
+                    description: `${res.url}`,
+                    // detail: `${'Detail'}`,
+                    label: `$(${icon}) ${res.title}`,
+                };
+            });
         return vscode.window.showQuickPick(options).then((res: vscode.QuickPickItem) => {
             ret['url'] = res.description || 'https://login.salesforce.com';
             return ret;
@@ -90,15 +93,29 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
         return vscode.workspace.findFiles('.vscode/settings.json', '').then(function (files) {
             var filePath: string = files[0].path;
             var buffer: NodeBuffer = fs.readFileSync(filePath);
-            var data: any = JSON.parse(buffer.toString());
+            var data: any = undefined;
+            try {
+                data = JSON.parse(buffer.toString());
+            } catch (error) {
+                outputChannel.appendLine(error);
+                data = {};
+            }
             if (data.force) {
-                data.force.username = config.username;
+                setForceConfig(data, config);
             } else {
                 data.force = {};
-                data.force.username = config.username;
+                setForceConfig(data, config);
             }
-            fs.writeFile(path, data);
+            fs.writeFile(filePath, JSON.stringify(data, undefined, 4));
+            return config;
         });
+    }
+    function setForceConfig(data, config) {
+        data.force.username = config.username;
+        data.force.password = config.password;
+        data.force.autoCompile = config.autoCompile;
+        data.force.token = '';
+        data.force.url = config.url;
     }
     // =======================================================================================================================================
     function onError(err): boolean {

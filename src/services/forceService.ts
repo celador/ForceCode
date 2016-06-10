@@ -29,8 +29,12 @@ export default class ForceService implements forceCode.IForceService {
             service.config = sfdcConfig;
         }
         if (!service.config.username || !service.config.password) {
-            return commands.credentials(context).then(res => {
-                service.config = vscode.workspace.getConfiguration('force');
+            return commands.credentials(context).then(credentials => {
+                service.config.username = credentials.username;
+                service.config.password = credentials.password;
+                service.config.autoCompile = credentials.autoCompile;
+                service.config.token = '';
+                service.config.url = credentials.url;
                 return service.config;
             });
         }
