@@ -8,5 +8,17 @@ import retrieve from './retrieve';
 import staticResource from './staticResource';
 import PeekFileDefinitionProvider from './lens';
 import showMenu from './menu';
+import credentials from './credentials';
 
-export {executeAnonymous, getLog, compile, open, exportPackage, retrieve, staticResource, PeekFileDefinitionProvider, showMenu};
+export {
+    executeAnonymous,
+    getLog,
+    compile,
+    open,
+    exportPackage,
+    retrieve,
+    staticResource,
+    PeekFileDefinitionProvider,
+    showMenu,
+    credentials
+};

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs-extra';
 import {IForceService} from './forceCode';
-import {ForceService} from './services';
+import {ForceService, constants} from './services';
 import * as commands from './commands';
 import * as parsers from './parsers';
 
@@ -11,11 +12,10 @@ export function activate(context: vscode.ExtensionContext): any {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('ForceCode is now active!');
-    vscode.window.forceCode = new ForceService();
-    vscode.window.forceCode.outputChannel = vscode.window.createOutputChannel('ForceCode');
+    context.workspaceState.update(constants.FORCE_SERVICE, new ForceService());
+    context.workspaceState.update(constants.OUTPUT_CHANNEL, vscode.window.createOutputChannel('ForceCode'));
     // this.conn = new jsforce.Connection();
     /// TODO: Pull credentials from .config jsforce.config.js file from the user directory
-    vscode.window.forceCode.config = vscode.workspace.getConfiguration('sfdc');
 
     // // // Peek Provider Setup
     // // const peekProvider: any = new commands.PeekFileDefinitionProvider();
@@ -23,23 +23,23 @@ export function activate(context: vscode.ExtensionContext): any {
     // // context.subscriptions.push(definitionProvider);
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.showMenu', () => {
-        commands.showMenu();
+        commands.showMenu(context);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.executeAnonymous', () => {
-        commands.executeAnonymous(vscode.window.activeTextEditor.document);
+        commands.executeAnonymous(vscode.window.activeTextEditor.document, context);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.getLog', () => {
-        commands.getLog();
+        commands.getLog(context);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.compile', () => {
-        commands.compile(vscode.window.activeTextEditor.document);
+        commands.compile(vscode.window.activeTextEditor.document, context);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.open', () => {
-        commands.open();
+        commands.open(context);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.exportPackage', () => {
@@ -47,15 +47,15 @@ export function activate(context: vscode.ExtensionContext): any {
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.staticResource', () => {
-        const config: any = vscode.workspace.getConfiguration('sfdc');
-        commands.staticResource(vscode.window.activeTextEditor.document, config.deployStaticResource);
+        commands.staticResource(context);
     }));
 
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         const toolingType: string = parsers.getToolingType(textDocument);
-        const config: any = vscode.window.forceCode.config;
-        if (toolingType !== undefined && config.autoCompile === true) {
-            commands.compile(textDocument);
+        var service: IForceService = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
+        const config: any = service && service.config;
+        if (toolingType && config && config.autoCompile === true) {
+            commands.compile(textDocument, context);
         }
     }));
 }

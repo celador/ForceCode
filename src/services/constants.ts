@@ -1,7 +1,11 @@
 import * as vscode from 'vscode';
-interface Constants{
-    PEEK_FILTER: vscode.DocumentFilter[];
+interface Constants {
     APEX_FILTER: vscode.DocumentFilter[];
+    FORCE_SERVICE: string;
+    PEEK_FILTER: vscode.DocumentFilter[];
+    OUTPUT_CHANNEL: string;
+    DEBUG_LEVEL_NAME: string;
+    LOG_TYPE: string;
 }
 const peekFilter: vscode.DocumentFilter[] = [
     {
@@ -23,6 +27,10 @@ const apexFilter: vscode.DocumentFilter[] = [
 ];
 const constants: Constants = {
     APEX_FILTER: apexFilter,
+    FORCE_SERVICE: 'forceService',
     PEEK_FILTER: peekFilter,
+    OUTPUT_CHANNEL: 'outputChannel',
+    DEBUG_LEVEL_NAME: 'Execute_Anonymous_Debug',
+    LOG_TYPE: 'DEVELOPER_LOG',
 };
 export default constants;

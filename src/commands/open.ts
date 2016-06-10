@@ -1,16 +1,18 @@
 import * as vscode from 'vscode';
 import {IForceService} from './../forceCode';
 import fs = require('fs-extra');
+import {constants} from './../services';
 import {getIcon, getExtension, getFolder} from './../parsers';
 const TYPEATTRIBUTE: string = 'type';
+import jsforce = require('jsforce');
 var service: IForceService;
 
-export default function open() {
+export default function open(context: vscode.ExtensionContext) {
     'use strict';
     vscode.window.setStatusBarMessage('open Started');
-    service = vscode.window.forceCode;
+    service = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
 
-    return service.connect()
+    return service.connect(context)
         .then(svc => showFileOptions())
         .then(opt => getFile(opt))
         .then(finished, onError);
@@ -18,7 +20,7 @@ export default function open() {
     // =======================================================================================================================================
     // =======================================================================================================================================
     function showFileOptions() {
-        var promises: Thenable<any>[] = [
+        var promises: any[] = [
             service.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexClass'),
             service.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexTrigger'),
             service.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexPage'),
@@ -63,7 +65,6 @@ export default function open() {
             let toolingType: string = res[0].attributes[TYPEATTRIBUTE];
             let filename: string = `${vscode.workspace.rootPath}/src/${getFolder(toolingType)}/${res[0].FullName || res[0].Name}.${getExtension(toolingType)}`;
             let body: string = res[0].Body || res[0].Markup;
-
             fs.outputFile(filename, body, function(err) {
                 console.log(err);
                 vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, 3));
@@ -74,7 +75,7 @@ export default function open() {
     }
     // =======================================================================================================================================
     function onError(err): boolean {
-        vscode.window.setStatusBarMessage('open Error');
+        vscode.window.setStatusBarMessage('ForceCode: Error Opening File');
         var outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('ForceCode');
         outputChannel.append('================================================================');
         outputChannel.append(err);

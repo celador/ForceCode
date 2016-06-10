@@ -11,16 +11,18 @@ export interface Config {
     username?: string;
     password?: string;
     token?: string;
+    url?: string;
+    autoCompile?: boolean;
 }
 
 export interface IForceService {
-    outputChannel?: vscode.OutputChannel;
     config?: Config;
     containerId?: string;
     containerAsyncRequestId?: string;
     conn?: jsforce.Connection;
     userInfo?: jsforce.UserInfo;
-    connect(): PromiseLike<IForceService>;
+    username?: string;
+    connect(context: vscode.ExtensionContext): PromiseLike<IForceService>;
     newContainer(): PromiseLike<IForceService>;
     clearLog(): void;
 }

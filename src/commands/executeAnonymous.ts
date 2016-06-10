@@ -1,14 +1,12 @@
 import * as vscode from 'vscode';
-import * as moment from 'moment';
-import * as chalk from 'chalk';
+// import * as moment from 'moment';
+// import * as chalk from 'chalk';
 import jsforce = require('jsforce');
-var SoapApi = require('jsforce/lib/api');
+import {constants} from './../services';
+// var SoapApi = require('jsforce/lib/api');
 import {IForceService} from './../forceCode';
-const DEBUG_LEVEL_NAME: string = 'Execute_Anonymous_Debug';
-const LOG_TYPE: string = 'DEVELOPER_LOG';
-const executeAnonymousService: IExecuteAnonymousService = {};
 var service: IForceService;
-var outputChannel = vscode.window.createOutputChannel('ForceCode');
+var outputChannel: vscode.OutputChannel;
 
 export interface IExecuteAnonymousService {
     userId?: string;
@@ -19,14 +17,15 @@ export interface IExecuteAnonymousService {
     logId?: string;
 };
 
-export default function executeAnonymous(document: vscode.TextDocument): any {
+export default function executeAnonymous(document: vscode.TextDocument, context: vscode.ExtensionContext): any {
     'use strict';
     let apexBody: string = document.getText();
-    service = vscode.window.forceCode;
-    return service.connect()
-    .then(svc => invokeExecuteAnonymous(apexBody))
-    .then(res => runDiagnostics(res, document))
-    .then(showResult, onError);
+    service = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
+    outputChannel = <vscode.OutputChannel>context.workspaceState.get(constants.OUTPUT_CHANNEL);
+    return service.connect(context)
+        .then(svc => invokeExecuteAnonymous(apexBody))
+        .then(res => runDiagnostics(res, document))
+        .then(showResult, onError);
 }
 // =========================================================================================================
 // =====================       USING SOAP API      =========================================================
@@ -38,30 +37,30 @@ function invokeExecuteAnonymous(text: string): jsforce.ExecuteAnonymousResponse 
         {
             'category': 'Apex_code',
             'level': 'DEBUG'
-        } , {
+        }, {
             'category': 'Apex_profiling',
             'level': 'NONE'
-        } , {
+        }, {
             'category': 'Callout',
             'level': 'NONE'
-        } , {
+        }, {
             'category': 'Db',
             'level': 'NONE'
-        } , {
+        }, {
             'category': 'System',
             'level': 'DEBUG'
-        } , {
+        }, {
             'category': 'Validation',
             'level': 'NONE'
-        } , {
+        }, {
             'category': 'Visualforce',
             'level': 'NONE'
-        } , {
+        }, {
             'category': 'Workflow',
             'level': 'NONE'
         }
     ];
-    return service.conn.soap.executeAnonymous(text).then(function(res){
+    return service.conn.soap.executeAnonymous(text).then(function (res) {
         return res;
     });
 }
@@ -91,9 +90,9 @@ function runDiagnostics(res: jsforce.ExecuteAnonymousResponse, document: vscode.
 }
 function showResult(res) {
     'use strict';
-    service.outputChannel.clear();
-    service.outputChannel.append(res.header.debugLog);
-    service.outputChannel.show();
+    outputChannel.clear();
+    outputChannel.append(res.header.debugLog);
+    outputChannel.show();
     return true;
 }
 

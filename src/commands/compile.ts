@@ -1,14 +1,18 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
+import {constants} from './../services';
 import {IForceService} from './../forceCode';
 const UPDATE: boolean = true;
 const CREATE: boolean = false;
 var service: IForceService;
+var outputChannel: vscode.OutputChannel;
 
-export default function compile(document: vscode.TextDocument): Thenable<any> {
+export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Thenable<any> {
     'use strict';
     vscode.window.setStatusBarMessage('ForceCode: Compiling...');
-    service = vscode.window.forceCode;
+    service = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
+    outputChannel = <vscode.OutputChannel>context.workspaceState.get(constants.OUTPUT_CHANNEL);
+
     const body: string = document.getText();
     const toolingType: string = parsers.getToolingType(document);
     if (toolingType === undefined) {
@@ -17,7 +21,7 @@ export default function compile(document: vscode.TextDocument): Thenable<any> {
             .catch(onError);
     }
     const name: string = parsers.getName(document, toolingType);
-    return service.connect()
+    return service.connect(context)
         .then(svc => svc.newContainer())
         .then(addToContainer)
         .then(requestCompile)
@@ -154,8 +158,8 @@ export default function compile(document: vscode.TextDocument): Thenable<any> {
     // =======================================================================================================================================
     function onError(err): boolean {
         vscode.window.setStatusBarMessage('ForceCode: ' + err.message);
-        service.outputChannel.appendLine('================================     ERROR     ================================\n');
-        service.outputChannel.appendLine(err.message);
+        outputChannel.appendLine('================================     ERROR     ================================\n');
+        outputChannel.appendLine(err.message);
         console.log(err);
         return false;
     }

@@ -1,0 +1,11 @@
+{
+  "generator-force": {
+    "project": {
+      "name": "ForceCode",
+      "issandbox": false,
+      "username": "john@demandbase.dev",
+      "password": "***************",
+      "repo": "Codescience/ForceCode"
+    }
+  }
+}

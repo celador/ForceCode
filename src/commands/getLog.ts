@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import {constants} from './../services';
 import jsforce = require('jsforce');
 import {IForceService} from './../forceCode';
 var service: IForceService;
@@ -19,14 +20,13 @@ export interface IGetLogService {
 };
 const getLogService: IGetLogService = {};
 
-function getLog() {
+function getLog(context: vscode.ExtensionContext) {
     'use strict';
-    service = vscode.window.forceCode;
-
+    service = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
     // Login, then get Identity info, 
     //  then get info about the logs and ask the user which one to open, 
     //  then get the log and show it
-    return service.connect()
+    return service.connect(context)
         .then(setConnection)
         .then(getLast10Logs)
         .then(displayOptions)

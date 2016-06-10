@@ -1,47 +1,74 @@
 import * as vscode from 'vscode';
 import {IForceService} from './../forceCode';
+import * as commands from './../commands';
+import {constants} from './../services';
+import model from './../models/commands';
 import {getIcon} from './../parsers';
 var service: IForceService;
 
-export default function showMenu() {
+
+export default function showMenu(context: vscode.ExtensionContext) {
     'use strict';
     vscode.window.setStatusBarMessage('ForceCode Menu');
-    service = vscode.window.forceCode;
-    return service.connect()
+    service = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
+    return service.connect(context)
         .then(svc => displayMenu())
+        .then(res => processResult(res))
         .then(finished, onError);
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
+
     function displayMenu() {
-        // We need to figure out what options we have.
-        // Options.. 
-        // Execute Anonymous 
-        // Execute Selected Code
-        // Compile/Deploy
-        // Export Package (Deploy via Metadata API, using Package.xml)
-        // Retrieve Package
-        // Get Log(s)
-        // Open File
-        // Build/Deploy Resource Bundle(s)
-        let options: vscode.QuickPickItem[] = ['Test']
-        .map(str => {
-            let icon: string = getIcon(str);
+        var quickpick: any[] = [model.enterCredentials];
+        if (service.userInfo !== undefined) {
+            quickpick.push(model.openFile);
+            quickpick.push(model.compileDeploy);
+            quickpick.push(model.executeAnonymous);
+            quickpick.push(model.getLogs);
+            quickpick.push(model.resourceBundle);
+            quickpick.push(model.retrievePackage);
+            quickpick.push(model.deployPackage);
+        }
+        let options: vscode.QuickPickItem[] = quickpick.map(record => {
+            let icon: string = getIcon(record.icon);
             return {
-                // description: `${record.Id}`,
-                // detail: `${record.attributes[TYPEATTRIBUTE]}`,
-                // label: `$(${icon}) ${record.Name}`,
-                description: `Description`,
-                detail: `Detail`,
-                label: `Label`,
+                description: `${record.description}`,
+                detail: `${record.detail}`,
+                label: `$(${icon}) ${record.label}`,
             };
         });
         let config: {} = {
             matchOnDescription: true,
             matchOnDetail: true,
-            placeHolder: 'Retrieve a Salesforce File',
+            placeHolder: 'Run a command',
         };
         return vscode.window.showQuickPick(options, config);
+    }
+    function processResult(result) {
+        if (result !== undefined && result.description !== undefined) {
+            switch (result.description) {
+                case model.enterCredentials.description:
+                    return commands.credentials(context);
+                case model.compileDeploy.description:
+                    return commands.compile(vscode.window.activeTextEditor.document, context);
+                case model.executeAnonymous.description:
+                    return commands.executeAnonymous(vscode.window.activeTextEditor.document, context);
+                case model.getLogs.description:
+                    return commands.getLog(context);
+                case model.openFile.description:
+                    return commands.open(context);
+                case model.resourceBundle.description:
+                    return commands.staticResource(context);
+                case model.retrievePackage.description:
+                    return commands.retrieve();
+                case model.deployPackage.description:
+                    // return commands.deployPackage();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -52,7 +79,8 @@ export default function showMenu() {
     }
     // =======================================================================================================================================
     function onError(err): boolean {
-        vscode.window.setStatusBarMessage('open Error');
+        vscode.window.setStatusBarMessage('Error opening menu');
+        vscode.window.showErrorMessage(err.message);
         var outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('ForceCode');
         outputChannel.append('================================================================');
         outputChannel.append(err);

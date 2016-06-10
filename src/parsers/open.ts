@@ -12,7 +12,7 @@ export function getIcon(toolingType: string) {
         case 'ApexLog':
             return 'bug';
         default:
-            return 'file-text';
+            return toolingType;
     }
 }
 export function getExtension(toolingType: string) {
