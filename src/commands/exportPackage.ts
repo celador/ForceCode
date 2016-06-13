@@ -1,13 +1,10 @@
 import * as vscode from 'vscode';
 import {IForceService} from './../forceCode';
-import {constants} from './../services';
-// import fs = require('fs-extra');
 
 export default function exportPackage(context) {
     'use strict';
     // const jmt = require('jsforce-metadata-tools');
-    var service: IForceService = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
-    return service.connect(context)
+    return vscode.window.forceCode.connect(context)
         .then(svc => getAllFiles(svc))
         .then(finished, onError);
     // =======================================================================================================================================
@@ -30,10 +27,10 @@ export default function exportPackage(context) {
     // =======================================================================================================================================
     function onError(err): boolean {
         vscode.window.setStatusBarMessage('ForceCode: Export Error');
-        var outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('ForceCode');
+        var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
         outputChannel.append('================================================================');
         outputChannel.append(err);
-        console.log(err);
+        console.error(err);
         return false;
     }
     // =======================================================================================================================================

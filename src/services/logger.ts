@@ -3,22 +3,13 @@ import * as vscode from 'vscode';
 import * as chalk from 'chalk';
 import * as moment from 'moment';
 import jsforce = require('jsforce');
-import {constants} from './../services';
-// var SoapApi = require('jsforce/lib/api');
-import {IForceService} from './../forceCode';
 const DEBUG_LEVEL_NAME: string = 'FORCE_CODE';
 const LOG_TYPE: string = 'DEVELOPER_LOG';
-var service: IForceService = undefined;
-var outputChannel: vscode.OutputChannel;
 
-// const logger: any = {
-//     createDebugLevel: createDebugLevel,
-//     enableLogging: enableLogging,
-// };
 export default class Logger {
+    public context: vscode.ExtensionContext;
     constructor(context) {
-        service = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
-        outputChannel = <vscode.OutputChannel>context.workspaceState.get(constants.OUTPUT_CHANNEL);
+        this.context = context;
     }
     // =========================================================================================================
     // =====================       USING REST API      =========================================================
@@ -37,11 +28,11 @@ export default class Logger {
             Workflow: 'DEBUG',
         };
         const query: string = `Select Id, DeveloperName from debugLevel where DeveloperName = '${DEBUG_LEVEL_NAME}'`;
-        return service.conn.tooling.query(query).then(res => {
+        return vscode.window.forceCode.conn.tooling.query(query).then(res => {
             if (res.records.length > 0) {
                 return res.records[0].Id;
             } else {
-                return service.conn.tooling.sobject('debugLevel').create(options).then(record => {
+                return vscode.window.forceCode.conn.tooling.sobject('debugLevel').create(options).then(record => {
                     return record.id;
                 });
             }
@@ -55,17 +46,17 @@ export default class Logger {
             DebugLevelId: debugLevelId,
             ExpirationDate: expirationDate,
             LogType: LOG_TYPE,
-            TracedEntityId: service.userInfo.id,
+            TracedEntityId: vscode.window.forceCode.userInfo.id,
         };
 
-        const query: string = `Select Id from traceFlag where TracedEntityId = '${service.userInfo.id}'`;
-        return service.conn.tooling.query(query).then(res => {
+        const query: string = `Select Id from traceFlag where TracedEntityId = '${vscode.window.forceCode.userInfo.id}'`;
+        return vscode.window.forceCode.conn.tooling.query(query).then(res => {
             if (res.records.length > 0) {
                 // Trace Flag already exists
                 this.cleanupLogging(res.records[0].Id);
                 return 'true';
             } else {
-                return service.conn.tooling.sobject('debugLevel').create(options).then(record => {
+                return vscode.window.forceCode.conn.tooling.sobject('debugLevel').create(options).then(record => {
                     return record.id;
                 });
             }
@@ -77,9 +68,9 @@ export default class Logger {
         'use strict';
         var queryString: string = `SELECT Id FROM ApexLog WHERE Request = 'API' AND Location = 'SystemLog'`
             + ` AND Operation like '%executeAnonymous%'`
-            + ` AND LogUserId='${service.userInfo.id}' ORDER BY StartTime DESC, Id DESC LIMIT 1`;
+            + ` AND LogUserId='${vscode.window.forceCode.userInfo.id}' ORDER BY StartTime DESC, Id DESC LIMIT 1`;
 
-        return service.conn.query(queryString)
+        return vscode.window.forceCode.conn.query(queryString)
             .then(function (queryResult: any) {
                 var id: string = queryResult.records[0].Id;
                 return id;
@@ -89,7 +80,7 @@ export default class Logger {
 
     getLog(logId: string): any {
         'use strict';
-        var url: string = `${service.conn._baseUrl()}/sobjects/ApexLog/${logId}/Body`;
+        var url: string = `${vscode.window.forceCode.conn._baseUrl()}/sobjects/ApexLog/${logId}/Body`;
         return new Promise((resolve, reject) => {
             vscode.window.forceCode.conn.request(url, function (err, res) {
                 resolve(res);
@@ -110,20 +101,20 @@ export default class Logger {
 
     showLog(logBody) {
         'use strict';
-        service.clearLog();
-        outputChannel.show(3);
-        outputChannel.append(logBody);
+        vscode.window.forceCode.clearLog();
+        vscode.window.forceCode.outputChannel.show(3);
+        vscode.window.forceCode.outputChannel.append(logBody);
         return true;
     }
 
     cleanupLogging(id) {
         'use strict';
-        return service.conn.tooling.sobject('traceFlag').del(id);
+        return vscode.window.forceCode.conn.tooling.sobject('traceFlag').del(id);
     }
 
     onError(err) {
         'use strict';
-        console.log(err);
+        console.error(err);
     }
 }
 

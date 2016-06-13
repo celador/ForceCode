@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as fs   from 'fs';
 import * as path from 'path';
 // import {constants, IForceService} from './../services';
-// const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('ForceCode');
 
 /**
  * Provide the lookup so we can peek into the files.

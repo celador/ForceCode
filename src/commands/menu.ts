@@ -1,17 +1,13 @@
 import * as vscode from 'vscode';
-import {IForceService} from './../forceCode';
 import * as commands from './../commands';
-import {constants} from './../services';
 import model from './../models/commands';
 import {getIcon} from './../parsers';
-var service: IForceService;
-
 
 export default function showMenu(context: vscode.ExtensionContext) {
     'use strict';
     vscode.window.setStatusBarMessage('ForceCode Menu');
-    service = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
-    return service.connect(context)
+    
+    return vscode.window.forceCode.connect(context)
         .then(svc => displayMenu())
         .then(res => processResult(res))
         .then(finished, onError);
@@ -21,7 +17,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
 
     function displayMenu() {
         var quickpick: any[] = [model.enterCredentials];
-        if (service.userInfo !== undefined) {
+        if (vscode.window.forceCode.userInfo !== undefined) {
             quickpick.push(model.openFile);
             quickpick.push(model.compileDeploy);
             quickpick.push(model.executeAnonymous);
@@ -81,10 +77,10 @@ export default function showMenu(context: vscode.ExtensionContext) {
     function onError(err): boolean {
         vscode.window.setStatusBarMessage('Error opening menu');
         vscode.window.showErrorMessage(err.message);
-        var outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('ForceCode');
+        var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
         outputChannel.append('================================================================');
         outputChannel.append(err);
-        console.log(err);
+        console.error(err);
         return false;
     }
     // =======================================================================================================================================

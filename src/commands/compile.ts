@@ -1,17 +1,12 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import {constants} from './../services';
-import {IForceService} from './../forceCode';
+// import {constants} from './../services';
 const UPDATE: boolean = true;
 const CREATE: boolean = false;
-var service: IForceService;
-var outputChannel: vscode.OutputChannel;
 
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Thenable<any> {
     'use strict';
     vscode.window.setStatusBarMessage('ForceCode: Compiling...');
-    service = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
-    outputChannel = <vscode.OutputChannel>context.workspaceState.get(constants.OUTPUT_CHANNEL);
 
     const body: string = document.getText();
     const toolingType: string = parsers.getToolingType(document);
@@ -21,7 +16,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             .catch(onError);
     }
     const name: string = parsers.getName(document, toolingType);
-    return service.connect(context)
+    return vscode.window.forceCode.connect(context)
         .then(svc => svc.newContainer())
         .then(addToContainer)
         .then(requestCompile)
@@ -31,7 +26,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // =======================================================================================================================================
     // =======================================================================================================================================
     function addToContainer() {
-        return service.conn.tooling.sobject(toolingType)
+        return vscode.window.forceCode.conn.tooling.sobject(toolingType)
             .find({ Name: name }).execute()
             .then(records => addMember(records));
         function addMember(records) {
@@ -42,22 +37,22 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 var member: {} = {
                     Body: body,
                     ContentEntityId: record.Id,
-                    Id: service.containerId,
+                    Id: vscode.window.forceCode.containerId,
                     Metadata: record.Metadata,
-                    MetadataContainerId: service.containerId,
+                    MetadataContainerId: vscode.window.forceCode.containerId,
                 };
                 // outputChannel.appendLine('ForceCode: Updating ' + name);
                 vscode.window.setStatusBarMessage('ForceCode: Updating ' + name);
-                return service.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).create(member).then(res => {
-                    return service;
+                return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).create(member).then(res => {
+                    return vscode.window.forceCode;
                 });
             } else {
                 // Tooling Object does not exist
                 // CREATE it
                 // outputChannel.appendLine('ForceCode: Creating ' + name);
                 vscode.window.setStatusBarMessage('ForceCode: Creating ' + name);
-                return service.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
-                    return service;
+                return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
+                    return vscode.window.forceCode;
                 });
             }
         }
@@ -79,13 +74,13 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // =======================================================================================================================================
     function requestCompile() {
         vscode.window.setStatusBarMessage('ForceCode: Compile Requested');
-        return service.conn.tooling.sobject('ContainerAsyncRequest').create({
+        return vscode.window.forceCode.conn.tooling.sobject('ContainerAsyncRequest').create({
             IsCheckOnly: false,
             IsRunTests: false,
-            MetadataContainerId: service.containerId,
+            MetadataContainerId: vscode.window.forceCode.containerId,
         }).then(res => {
-            service.containerAsyncRequestId = res.id;
-            return service;
+            vscode.window.forceCode.containerAsyncRequestId = res.id;
+            return vscode.window.forceCode;
         });
     }
     // =======================================================================================================================================
@@ -111,8 +106,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 }, 30000);
             });
         function getStatus() {
-            return service.conn.tooling.query(`SELECT Id, MetadataContainerId, MetadataContainerMemberId, State, IsCheckOnly, ` +
-                `DeployDetails, ErrorMsg FROM ContainerAsyncRequest WHERE Id='${service.containerAsyncRequestId}'`);
+            return vscode.window.forceCode.conn.tooling.query(`SELECT Id, MetadataContainerId, MetadataContainerMemberId, State, IsCheckOnly, ` +
+                `DeployDetails, ErrorMsg FROM ContainerAsyncRequest WHERE Id='${vscode.window.forceCode.containerAsyncRequestId}'`);
         }
         function isFinished(res) {
             if (res.records && res.records[0]) {
@@ -158,9 +153,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // =======================================================================================================================================
     function onError(err): boolean {
         vscode.window.setStatusBarMessage('ForceCode: ' + err.message);
-        outputChannel.appendLine('================================     ERROR     ================================\n');
-        outputChannel.appendLine(err.message);
-        console.log(err);
+        vscode.window.forceCode.outputChannel.appendLine('================================     ERROR     ================================\n');
+        vscode.window.forceCode.outputChannel.appendLine(err.message);
+        console.error(err);
         return false;
     }
     // =======================================================================================================================================

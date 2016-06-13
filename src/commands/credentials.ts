@@ -1,16 +1,11 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import {constants} from './../services';
-import {IForceService} from './../forceCode';
 import {getIcon} from './../parsers';
-var service: IForceService;
-var outputChannel: vscode.OutputChannel;
 
 export default function enterCredentials(context: vscode.ExtensionContext) {
     'use strict';
     vscode.window.setStatusBarMessage('ForceCode Menu');
-    service = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
-    outputChannel = <vscode.OutputChannel>context.workspaceState.get(constants.OUTPUT_CHANNEL);
 
     return getUsername()
         .then(cfg => getPassword(cfg))
@@ -22,13 +17,28 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     // =======================================================================================================================================
     function getUsername() {
-        let options: vscode.InputBoxOptions = {
-            placeHolder: 'mark@salesforce.com',
-            prompt: 'Please enter your SFDC username'
-        };
-        return vscode.window.showInputBox(options).then(function (result: string) {
-            if (!result) { throw 'No Username'; };
-            return { username: result };
+        return vscode.workspace.findFiles('force.json', '').then(function (files) {
+            var buffer: NodeBuffer = undefined;
+            var data: any = {};
+            if (files.length && files[0].path) {
+                buffer = fs.readFileSync(files[0].path);
+                try {
+                    data = JSON.parse(buffer.toString());
+                } catch (error) {
+                    vscode.window.forceCode.outputChannel.appendLine(error);
+                }
+            }
+            let options: vscode.InputBoxOptions = {
+                placeHolder: 'mark@salesforce.com',
+                prompt: 'Please enter your SFDC username'
+            };
+            if (data.username) {
+                options.value = data.username;
+            }
+            return vscode.window.showInputBox(options).then(function (result: string) {
+                if (!result) { throw 'No Username'; };
+                return { username: result };
+            });
         });
     }
     function getPassword(config) {
@@ -39,7 +49,18 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
         };
         return vscode.window.showInputBox(options).then(function (result: string) {
             if (!result) { throw 'No Password'; };
-            config['password'] = result;
+            try {
+                var keychain: any = require('xkeychain');
+                keychain.setPassword({
+                    account: config.username,
+                    service: constants.FORCECODE_KEYCHAIN,
+                    password: result
+                });
+                config['password'] = result.split('').map(chr => '*').join('');
+            } catch (error) {
+                vscode.window.forceCode.outputChannel.appendLine(error);
+                config['password'] = result;
+            }
             return config;
         });
     }
@@ -89,41 +110,46 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     // =======================================================================================================================================
     function finished(config) {
-        console.log(config);
+        // console.log(config);
         return vscode.workspace.findFiles('.vscode/settings.json', '').then(function (files) {
-            var filePath: string = files[0].path;
-            var buffer: NodeBuffer = fs.readFileSync(filePath);
-            var data: any = undefined;
-            try {
-                data = JSON.parse(buffer.toString());
-            } catch (error) {
-                outputChannel.appendLine(error);
-                data = {};
+            var filePath: string = '';
+            var buffer: NodeBuffer = undefined;
+            var data: any = {};
+            if (files.length && files[0].path) {
+                filePath = files[0].path;
+                buffer = fs.readFileSync(filePath);
+                try {
+                    data = JSON.parse(buffer.toString());
+                } catch (error) {
+                    console.error(error);
+                }
             }
-            if (data.force) {
-                setForceConfig(data, config);
-            } else {
-                data.force = {};
-                setForceConfig(data, config);
+            if (filePath.length === 0) {
+                filePath = vscode.workspace.rootPath + '/.vscode/settings.json';
             }
+            data = setForceConfig(data, config);
             fs.writeFile(filePath, JSON.stringify(data, undefined, 4));
             return config;
         });
     }
     function setForceConfig(data, config) {
+        if (typeof (data.force) !== 'object') {
+            data.force = {};
+        }
         data.force.username = config.username;
         data.force.password = config.password;
         data.force.autoCompile = config.autoCompile;
         data.force.token = '';
         data.force.url = config.url;
+        return data;
     }
     // =======================================================================================================================================
     function onError(err): boolean {
         vscode.window.setStatusBarMessage('ForceCode: Error getting credentials');
-        var outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('ForceCode');
+        var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
         outputChannel.append('================================================================');
         outputChannel.append(err);
-        console.log(err);
+        console.error(err);
         return false;
     }
     // =======================================================================================================================================

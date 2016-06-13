@@ -1,18 +1,13 @@
 import * as vscode from 'vscode';
-import {IForceService} from './../forceCode';
 import fs = require('fs-extra');
-import {constants} from './../services';
 import {getIcon, getExtension, getFolder} from './../parsers';
 const TYPEATTRIBUTE: string = 'type';
-import jsforce = require('jsforce');
-var service: IForceService;
 
 export default function open(context: vscode.ExtensionContext) {
     'use strict';
     vscode.window.setStatusBarMessage('open Started');
-    service = <IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
 
-    return service.connect(context)
+    return vscode.window.forceCode.connect(context)
         .then(svc => showFileOptions())
         .then(opt => getFile(opt))
         .then(finished, onError);
@@ -21,10 +16,10 @@ export default function open(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     function showFileOptions() {
         var promises: any[] = [
-            service.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexClass'),
-            service.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexTrigger'),
-            service.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexPage'),
-            service.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexComponent'),
+            vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexClass'),
+            vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexTrigger'),
+            vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexPage'),
+            vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexComponent'),
         ];
         // TODO: Objects
         // TODO: Static Resources
@@ -54,7 +49,7 @@ export default function open(context: vscode.ExtensionContext) {
 
     // =======================================================================================================================================
     function getFile(res: any) {
-        return service.conn.tooling.sobject(res.detail)
+        return vscode.window.forceCode.conn.tooling.sobject(res.detail)
             .find({ Id: res.description }).execute();
     }
     // =======================================================================================================================================
@@ -66,7 +61,7 @@ export default function open(context: vscode.ExtensionContext) {
             let filename: string = `${vscode.workspace.rootPath}/src/${getFolder(toolingType)}/${res[0].FullName || res[0].Name}.${getExtension(toolingType)}`;
             let body: string = res[0].Body || res[0].Markup;
             fs.outputFile(filename, body, function(err) {
-                console.log(err);
+                console.error(err);
                 vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, 3));
                 // vscode.window.showInformationMessage('Finished');
             });
@@ -76,10 +71,10 @@ export default function open(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     function onError(err): boolean {
         vscode.window.setStatusBarMessage('ForceCode: Error Opening File');
-        var outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel('ForceCode');
+        var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
         outputChannel.append('================================================================');
         outputChannel.append(err);
-        console.log(err);
+        console.error(err);
         return false;
     }
     // =======================================================================================================================================

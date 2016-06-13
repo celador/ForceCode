@@ -2,85 +2,108 @@ import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
 import {constants} from './../services';
 import * as commands from './../commands';
-var service: forceCode.IForceService;
-var outputChannel: vscode.OutputChannel;
+const keychain: any = require('xkeychain');
 const jsforce = require('jsforce');
 
 export default class ForceService implements forceCode.IForceService {
-    public connect(context: vscode.ExtensionContext): PromiseLike<forceCode.IForceService> {
-        'use strict';
-        outputChannel = <vscode.OutputChannel>context.workspaceState.get(constants.OUTPUT_CHANNEL);
-        if (service === undefined) {
-            service = <forceCode.IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
-            if (service === {}) {
-                context.workspaceState.update(constants.FORCE_SERVICE, new ForceService()).then(a => {
-                    service = <forceCode.IForceService>context.workspaceState.get(constants.FORCE_SERVICE);
-                });
-            }
-        }
-        return this.setupConfig(context).then(this.login);
-    }
+    public config: forceCode.Config;
+    public conn: any;
+    public containerId: string;
+    public containerAsyncRequestId: string;
+    public userInfo: any;
+    public username: string;
+    public outputChannel: vscode.OutputChannel;
 
-    public setupConfig(context): PromiseLike<forceCode.IForceService> {
+    constructor(context) {
+        // Set the ForceCode configuration
         const forceConfig: any = vscode.workspace.getConfiguration('force');
         const sfdcConfig: any = vscode.workspace.getConfiguration('sfdc');
-        service.config = forceConfig;
+        this.config = forceConfig;
         if (!forceConfig.username && sfdcConfig.username) {
-            service.config = sfdcConfig;
+            this.config = sfdcConfig;
         }
-        if (!service.config.username || !service.config.password) {
-            return commands.credentials(context).then(credentials => {
-                service.config.username = credentials.username;
-                service.config.password = credentials.password;
-                service.config.autoCompile = credentials.autoCompile;
-                service.config.token = '';
-                service.config.url = credentials.url;
-                return service.config;
-            });
-        }
-        return Promise.resolve(service.config);
+        // Setup username and outputChannel
+        this.username = this.config.username || '';
+        this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
+        this.conn = new jsforce.Connection({
+            loginUrl: this.config.url || 'https://test.salesforce.com'
+        });
     }
-    public login(config): PromiseLike<forceCode.IForceService> {
-        // Lazy-load the connection
-        if (service.userInfo === undefined || service.config.username !== service.username) {
-            service.conn = new jsforce.Connection({
-                loginUrl: service.config.url || 'https://test.salesforce.com'
-            });
-            const username: string = service.config.username || '';
-            const password: string = (service.config.password || '') + (service.config.token || '');
-            if (!username || !password) { throw { message: 'No Credentials' }; }
-            vscode.window.setStatusBarMessage(`ForceCode: $(plug) Connecting as ${username}`);
-            return service.conn.login(username, password).then((userInfo) => {
-                vscode.window.setStatusBarMessage(`ForceCode: $(zap) Connected $(zap)`);
-                service.userInfo = userInfo;
-                service['username'] = username;
-                return service;
-            }).catch(err => {
-                vscode.window.setStatusBarMessage(`ForceCode: $(alert) Connection Error $(alert)`);
-                outputChannel.appendLine(err.message);
-                throw err;
-            });
-        } else {
-            vscode.window.setStatusBarMessage(`ForceCode: $(history) Connected as ${service.config.username}`);
-            return new Promise((resolve, reject) => {
-                resolve(service);
-            });
-        }
+    public connect(context: vscode.ExtensionContext): PromiseLike<forceCode.IForceService> {
+        return this.setupConfig(context).then(config => this.login(config));
     }
-
 
     public clearLog() {
-        outputChannel.clear();
+        this.outputChannel.clear();
     };
 
     public newContainer(): PromiseLike<forceCode.IForceService> {
         'use strict';
-        return service.conn.tooling.sobject('MetadataContainer')
+        var self: forceCode.IForceService = vscode.window.forceCode;
+        return self.conn.tooling.sobject('MetadataContainer')
             .create({ name: 'ForceCode-' + Date.now() })
             .then(res => {
-                service.containerId = res.id;
-                return service;
+                self.containerId = res.id;
+                return self;
             });
     }
 
+    private setupConfig(context): PromiseLike<forceCode.IForceService> {
+        var self: forceCode.IForceService = vscode.window.forceCode;
+        if (!self.config.username || !self.config.password) {
+            return commands.credentials(context).then(credentials => {
+                self.config.username = credentials.username;
+                self.config.password = credentials.password;
+                self.config.autoCompile = credentials.autoCompile;
+                self.config.token = '';
+                self.config.url = credentials.url;
+                return self.config;
+            });
+        }
+        return Promise.resolve(self.config);
+    }
+    private login(config): PromiseLike<forceCode.IForceService> {
+        var self: forceCode.IForceService = vscode.window.forceCode;
+        // Lazy-load the connection
+        if (self.userInfo === undefined || self.config.username !== self.username || self.conn.accessToken === undefined) {
+            self.conn = new jsforce.Connection({
+                loginUrl: self.config.url || 'https://test.salesforce.com'
+            });
+            var username: string = self.config.username || '';
+            var password: string = '';
+            return new Promise((resolve, reject) => {
+                try {
+                    keychain.getPassword({
+                        account: config.username,
+                        service: constants.FORCECODE_KEYCHAIN,
+                    }, function (err, pass) {
+                        password = pass;
+                        actuallyLogin().then(resolve);
+                    });
+                } catch (error) {
+                    console.error(error);
+                    password = (self.config.password || '') + (self.config.token || '');
+                    actuallyLogin().then(resolve);
+                }
+            });
+
+            function actuallyLogin() {
+                if (!username || !password) { throw { message: 'No Credentials' }; }
+                vscode.window.setStatusBarMessage(`ForceCode: $(plug) Connecting as ${username}`);
+                return self.conn.login(username, password).then((userInfo) => {
+                    vscode.window.setStatusBarMessage(`ForceCode: $(zap) Connected $(zap)`);
+                    self.userInfo = userInfo;
+                    self.username = username;
+                    return self;
+                }).catch(err => {
+                    vscode.window.setStatusBarMessage(`ForceCode: $(alert) Connection Error $(alert)`);
+                    self.outputChannel.appendLine(err.message);
+                    throw err;
+                });
+            };
+        } else {
+            vscode.window.setStatusBarMessage(`ForceCode: $(history) Connected as ${self.config.username}`);
+            return Promise.resolve(self);
+        }
+    }
 }
