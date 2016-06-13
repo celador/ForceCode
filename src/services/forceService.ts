@@ -50,6 +50,15 @@ export default class ForceService implements forceCode.IForceService {
 
     private setupConfig(context): PromiseLike<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
+        // Set the ForceCode configuration
+        const forceConfig: any = vscode.workspace.getConfiguration('force');
+        const sfdcConfig: any = vscode.workspace.getConfiguration('sfdc');
+        self.config = forceConfig;
+        if (!forceConfig.username && sfdcConfig.username) {
+            self.config = sfdcConfig;
+        }
+        // Setup username and outputChannel
+        self.username = self.config.username || '';
         if (!self.config.username || !self.config.password) {
             return commands.credentials(context).then(credentials => {
                 self.config.username = credentials.username;

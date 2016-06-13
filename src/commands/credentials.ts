@@ -6,8 +6,11 @@ import {getIcon} from './../parsers';
 export default function enterCredentials(context: vscode.ExtensionContext) {
     'use strict';
     vscode.window.setStatusBarMessage('ForceCode Menu');
+    var yoForceConfig = undefined;
+    var keychain: any = require('xkeychain');
 
-    return getUsername()
+    return getYoForceConfig()
+        .then(yoForce => getUsername(yoForce))
         .then(cfg => getPassword(cfg))
         .then(cfg => getUrl(cfg))
         .then(cfg => getAutoCompile(cfg))
@@ -16,7 +19,8 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
-    function getUsername() {
+
+    function getYoForceConfig() {
         return vscode.workspace.findFiles('force.json', '').then(function (files) {
             var buffer: NodeBuffer = undefined;
             var data: any = {};
@@ -27,30 +31,53 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
                 } catch (error) {
                     vscode.window.forceCode.outputChannel.appendLine(error);
                 }
+                return new Promise((resolve, reject) => {
+                    try {
+                        keychain.getPassword({
+                            account: data.username,
+                            service: constants.FORCECODE_KEYCHAIN,
+                        }, function (err, pass) {
+                            data.password = pass;
+                            resolve(data);
+                        });
+                    } catch (error) {
+                        console.error(error);
+                        data.password = (vscode.window.forceCode.config.password || '') + (vscode.window.forceCode.config.token || '');
+                        resolve(data);
+                    }
+                });
             }
-            let options: vscode.InputBoxOptions = {
-                placeHolder: 'mark@salesforce.com',
-                prompt: 'Please enter your SFDC username'
-            };
-            if (data.username) {
-                options.value = data.username;
-            }
-            return vscode.window.showInputBox(options).then(function (result: string) {
-                if (!result) { throw 'No Username'; };
-                return { username: result };
-            });
+            return data;
         });
     }
+
+    function getUsername(config) {
+        yoForceConfig = config;
+        let options: vscode.InputBoxOptions = {
+            placeHolder: 'mark@salesforce.com',
+            prompt: 'Please enter your SFDC username'
+        };
+        if (config.username) {
+            options.value = config.username;
+        }
+        return vscode.window.showInputBox(options).then(function (result: string) {
+            if (!result) { throw 'No Username'; };
+            return { username: result };
+        });
+    }
+
     function getPassword(config) {
         let options: vscode.InputBoxOptions = {
             password: true,
             placeHolder: 'enter your password (and token)',
             prompt: 'Please enter your SFDC username'
         };
+        if (yoForceConfig.password) {
+            options.value = yoForceConfig.password;
+        }
         return vscode.window.showInputBox(options).then(function (result: string) {
             if (!result) { throw 'No Password'; };
             try {
-                var keychain: any = require('xkeychain');
                 keychain.setPassword({
                     account: config.username,
                     service: constants.FORCECODE_KEYCHAIN,

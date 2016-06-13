@@ -78,6 +78,7 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
         // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
         if (diagnostics.length > 0) {
             vscode.window.setStatusBarMessage(`ForceCode: Execute Anonymous Errors $(alert)`);
+            diagnostics.forEach(d => vscode.window.forceCode.outputChannel.appendLine(`Line ${Number(result.line)}: ${d.message}`));
         } else {
             vscode.window.setStatusBarMessage(`ForceCode: Execute Anonymous Success $(check)`);
         }
