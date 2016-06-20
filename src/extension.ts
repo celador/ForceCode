@@ -7,6 +7,7 @@ import * as parsers from './parsers';
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext): any {
+  vscode.window.showInformationMessage('ForceCode Initializing');
   'use strict';
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
@@ -15,6 +16,7 @@ export function activate(context: vscode.ExtensionContext): any {
     vscode.window.showInformationMessage('ForceCode is now active for user ' + vscode.window.forceCode.username);
   } catch (error) {
     console.error(error);
+    vscode.window.showErrorMessage('OH NO FORCECODE FAILED');
     vscode.window.showErrorMessage(error);
   }
 
