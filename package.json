@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -129,7 +129,17 @@
         },
         "force.excludeFiles": {
           "type": "object",
-          "default": "",
+          "default": {
+            ".gitignore": true,
+            ".DS_Store": true,
+            ".org_metadata": true,
+            "**/*.map": true,
+            "node_modules/**": true,
+            "bower_modules/**": true,
+            "**.tmp": true,
+            "**/*-meta.xml": true,
+            ".log": true
+          },
           "description": "An object describing the files to exclude from the Static Resource build. The key is a Nodejs \"Glob\" pattern, the value is true or false"
         }
       }
