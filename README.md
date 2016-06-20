@@ -1,6 +1,9 @@
 # ForceCode for Visual Studio Code
 This extension is a companion for SFDC development with Visual Studio Code. 
 
+# There is currently an issue with the NPM version used
+You must go into the ForceCode extension directory and run `npm install`
+
 ##Features
 * Execute Anonymous
 * View Debug Logs 
