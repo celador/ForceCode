@@ -12,9 +12,10 @@ export function activate(context: vscode.ExtensionContext): any {
   // This line of code will only be executed once when your extension is activated
   try {
     vscode.window.forceCode = new ForceService(context);
-    console.log('ForceCode is now active!');
+    vscode.window.showInformationMessage('ForceCode is now active for user ' + vscode.window.forceCode.username);
   } catch (error) {
     console.error(error);
+    vscode.window.showErrorMessage(error);
   }
 
   if (vscode.window.forceCode !== undefined) {
