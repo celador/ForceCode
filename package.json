@@ -17,7 +17,7 @@
     "color": "OrangeRed",
     "theme": "dark"
   },
-  "private": true,
+  "private": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/celador/ForceCode.git"
