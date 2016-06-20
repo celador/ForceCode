@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.0.37",
+  "version": "0.0.38",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -147,7 +147,8 @@
   },
   "scripts": {
     "pre": "node ./node_modules/vscode/bin/compile",
-    "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
+    "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
+    "postinstall": "npm install"
   },
   "extensionDependencies": [
     "JohnAaronNelson.apex",
