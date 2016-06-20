@@ -147,16 +147,15 @@
   },
   "scripts": {
     "pre": "node ./node_modules/vscode/bin/compile",
-    "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
-    "postInstall": "npm install"
+    "compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
   },
   "extensionDependencies": [
     "JohnAaronNelson.apex",
     "JohnAaronNelson.visualforce"
   ],
   "devDependencies": {
-    "typescript": "^1.8.10",
-    "vscode": "^1.2.x"
+    "typescript": "^1.7.5",
+    "vscode": "0.10.x"
   },
   "dependencies": {
     "archiver": "^0.21.0",
