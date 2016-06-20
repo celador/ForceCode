@@ -23,8 +23,8 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.executeAnonymous);
             quickpick.push(model.getLogs);
             quickpick.push(model.resourceBundle);
-            quickpick.push(model.retrievePackage);
-            quickpick.push(model.deployPackage);
+            // quickpick.push(model.retrievePackage);
+            // quickpick.push(model.deployPackage);
         }
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
             let icon: string = getIcon(record.icon);
