@@ -1,9 +1,11 @@
-.vscode/**
 typings/**
-out/test/**
 test/**
-src/**
 **/*.map
+.vscode/**/*
 .gitignore
 tsconfig.json
 vsc-extension-quickstart.md
+src/**/*
+out/test/**
+**/*.js.map
+*.vsix
