@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.0.53",
+  "version": "0.0.54",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -159,6 +159,7 @@
   "dependencies": {
     "archiver": "^0.21.0",
     "asap": "^2.0.4",
+    "aws-sign2": "^0.6.0",
     "bower-logger": "^0.2.2",
     "buffers": "^0.1.1",
     "chainsaw": "^0.1.0",
