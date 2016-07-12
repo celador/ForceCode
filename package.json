@@ -163,6 +163,7 @@
     "jszip": "^2.5.0",
     "lodash": "^4.13.1",
     "moment": "^2.11.2",
+    "typescript": "^1.8.10",
     "unzip": "^0.1.11",
     "vscode": "^0.11.13",
     "xkeychain": "0.0.6",
