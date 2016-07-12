@@ -27,15 +27,15 @@ declare module 'jsforce/index' {
         }
         interface SObject {
             find(config: {});
-            create(records: Array<any>, options?: {}): Thenable<Array<RecordResult>>;
+            create(records: Array<any>, options?: {}): Promise<Array<RecordResult>>;
             create(records: Array<any>, options?: {}, callback?: () => {}): Array<RecordResult>;
-            create(record: any): Thenable<RecordResult>;
+            create(record: any): Promise<RecordResult>;
             create(record: any, options?: {}, callback?: () => {}): RecordResult;
             upsert(record: any, options?: {}, callback?: () => {}): RecordResult;
             retrieve(ids: Array<string>, options?: {}, callback?: () => {}): Array<RecordResult>;
-            update(records: Array<any>, options?: {}): Thenable<Array<RecordResult>>;
+            update(records: Array<any>, options?: {}): Promise<Array<RecordResult>>;
             update(records: Array<any>, options?: {}, callback?: () => {}): Array<RecordResult>;
-            update(record: any): Thenable<RecordResult>;
+            update(record: any): Promise<RecordResult>;
             update(record: any, options?: {}, callback?: () => {}): RecordResult;
             del(ids: Array<string>, callback?: () => {}): Array<RecordResult>;
             del(id: string, callback?: () => {}): Array<RecordResult>;
@@ -43,19 +43,19 @@ declare module 'jsforce/index' {
         interface Tooling {
             sobject(name: string): SObject;
             executeAnonymous(apexBody: string): Promise<ExecuteAnonymousResult>;
-            query(locator: string): Thenable<QueryResult>;
+            query(locator: string): Promise<QueryResult>;
         }
         interface RetrieveResult {
             id: string;
         }
         interface RetrieveResultLocator {
             stream(): NodeJS.ReadableStream;
-            then(): Thenable<any>;
+            then(): Promise<any>;
         }
         interface Metadata {
-            checkRetrieveStatus(): Thenable<any>;
-            retrieve({}): Thenable<RetrieveResult>;
-            upsert(foo: string, bar: any): Thenable<any>;
+            checkRetrieveStatus(): Promise<any>;
+            retrieve({}): Promise<RetrieveResult>;
+            upsert(foo: string, bar: any): Promise<any>;
         }
         // Connection
         interface Connection {

@@ -9,7 +9,7 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
     var yoForceConfig = undefined;
     var keychain: any = require('xkeychain');
 
-    return getYoForceConfig()
+    return findFiles()
         .then(yoForce => getUsername(yoForce))
         .then(cfg => getPassword(cfg))
         .then(cfg => getUrl(cfg))
@@ -19,7 +19,9 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
-
+    function findFiles (){
+      return Promise.resolve(getYoForceConfig);
+    }
     function getYoForceConfig() {
         return vscode.workspace.findFiles('force.json', '').then(function (files) {
             var buffer: NodeBuffer = undefined;

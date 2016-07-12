@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -148,10 +148,8 @@
   },
   "scripts": {
     "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
-    "preinstall": "rm -rf node_modules/",
     "compile": "node ./node_modules/vscode/bin/compile -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "installDependencies": "sh scripts/install.sh",
     "clean": "rm -rf node_modules/",
     "tslint": "tslint -c tslint.json src/**/*.ts"
   },

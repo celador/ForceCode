@@ -29,7 +29,7 @@ export default class ForceService implements forceCode.IForceService {
             loginUrl: this.config.url || 'https://test.salesforce.com'
         });
     }
-    public connect(context: vscode.ExtensionContext): PromiseLike<forceCode.IForceService> {
+    public connect(context: vscode.ExtensionContext): Promise<forceCode.IForceService> {
         return this.setupConfig(context).then(config => this.login(config));
     }
 
@@ -37,7 +37,7 @@ export default class ForceService implements forceCode.IForceService {
         this.outputChannel.clear();
     };
 
-    public newContainer(): PromiseLike<forceCode.IForceService> {
+    public newContainer(): Promise<forceCode.IForceService> {
         'use strict';
         var self: forceCode.IForceService = vscode.window.forceCode;
         return self.conn.tooling.sobject('MetadataContainer')
@@ -48,7 +48,7 @@ export default class ForceService implements forceCode.IForceService {
             });
     }
 
-    private setupConfig(context): PromiseLike<forceCode.IForceService> {
+    private setupConfig(context): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Set the ForceCode configuration
         const forceConfig: any = vscode.workspace.getConfiguration('force');
@@ -71,7 +71,7 @@ export default class ForceService implements forceCode.IForceService {
         }
         return Promise.resolve(self.config);
     }
-    private login(config): PromiseLike<forceCode.IForceService> {
+    private login(config): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Lazy-load the connection
         if (self.userInfo === undefined || self.config.username !== self.username || self.conn.accessToken === undefined) {

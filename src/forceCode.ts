@@ -23,7 +23,7 @@ export interface IForceService {
     userInfo?: jsforce.UserInfo;
     username?: string;
     outputChannel: vscode.OutputChannel;
-    connect(context: vscode.ExtensionContext): PromiseLike<IForceService>;
-    newContainer(): PromiseLike<IForceService>;
+    connect(context: vscode.ExtensionContext): Promise<IForceService>;
+    newContainer(): Promise<IForceService>;
     clearLog(): void;
 }

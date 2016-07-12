@@ -13,13 +13,6 @@ export function activate(context: vscode.ExtensionContext): any {
   try {
     vscode.window.forceCode = new ForceService(context);
     vscode.window.setStatusBarMessage(`ForceCode is now active`);
-  } catch (error) {
-    console.error(error);
-    vscode.window.showErrorMessage('OH NO FORCECODE FAILED');
-    vscode.window.showErrorMessage(error);
-  }
-
-  if (vscode.window.forceCode !== undefined) {
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.showMenu', () => {
       commands.showMenu(context);
     }));
@@ -54,7 +47,12 @@ export function activate(context: vscode.ExtensionContext): any {
         commands.compile(textDocument, context);
       }
     }));
+  } catch (error) {
+    console.error(error);
+    vscode.window.showErrorMessage('OH NO FORCECODE FAILED');
+    vscode.window.showErrorMessage(error);
   }
+
 
 
   // // // Peek Provider Setup

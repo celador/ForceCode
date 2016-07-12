@@ -26,6 +26,7 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
     // =====================       USING SOAP API      =========================================================
     // =========================================================================================================
     function invokeExecuteAnonymous(text: string): jsforce.ExecuteAnonymousResponse {
+        vscode.window.setStatusBarMessage("ForceCode: $(pulse) Executing $(pulse)");
         vscode.window.forceCode.conn.debuggingHeader = vscode.window.forceCode.conn.debuggingHeader ? vscode.window.forceCode.conn.debuggingHeader : {};
         vscode.window.forceCode.conn.debuggingHeader['@xmlns'] = 'http://soap.sforce.com/2006/08/apex';
         vscode.window.forceCode.conn.debuggingHeader['categories'] = [

@@ -14,7 +14,7 @@ export default class Logger {
     // =========================================================================================================
     // =====================       USING REST API      =========================================================
     // =========================================================================================================
-    createDebugLevel(debugLevel: jsforce.DebugLevel): Thenable<string> {
+    createDebugLevel(debugLevel: jsforce.DebugLevel): Promise<string> {
         const options: jsforce.DebugLevel = debugLevel || {
             ApexCode: 'DEBUG',
             ApexProfiling: 'DEBUG',
