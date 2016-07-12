@@ -1,5 +1,9 @@
 {
   "dependencies": {
     "moment": "github:typings/typed-moment#a4075cd50e63efbedd850f654594f293ab81a385"
+  },
+  "globalDependencies": {
+    "lodash": "registry:dt/lodash#3.10.0+20160619033623",
+    "xml2js": "registry:dt/xml2js#0.0.0+20160317120654"
   }
 }
