@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -153,10 +153,6 @@
     "clean": "rm -rf node_modules/",
     "tslint": "tslint -c tslint.json src/**/*.ts"
   },
-  "extensionDependencies": [
-    "JohnAaronNelson.apex",
-    "JohnAaronNelson.visualforce"
-  ],
   "dependencies": {
     "fs-extra": "^0.26.5",
     "jsforce": "github:celador/jsforce",
