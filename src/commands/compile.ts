@@ -131,7 +131,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     res.records.forEach(containerAsyncRequest => {
       containerAsyncRequest.DeployDetails.componentFailures.forEach(failure => {
         if (failure.problemType === 'Error') {
-          var failureLineNumber: number = failure.LineNumber || 1;
+          var failureLineNumber: number = failure.lineNumber || failure.LineNumber || 1;
           var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
           if (failure.columnNumber > 0) {
             failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failure.columnNumber));
