@@ -45,6 +45,14 @@ declare module 'jsforce/index' {
             executeAnonymous(apexBody: string): Promise<ExecuteAnonymousResult>;
             query(locator: string): Promise<QueryResult>;
         }
+        interface DeployResult {
+            done: boolean;
+            true: boolean;
+            state: string;  
+            numberComponentErrors: number;
+            numberComponentsDeployed: number;
+            numberTestsCompleted: number
+        }
         interface RetrieveResult {
             id: string;
         }
@@ -53,8 +61,13 @@ declare module 'jsforce/index' {
             then(): Promise<any>;
         }
         interface Metadata {
-            checkRetrieveStatus(): Promise<any>;
+            pollTimeout: number;
+            pollInterval: number;
+            checkDeployStatus(processId: string, {}): Promise<any>;
+            checkRetrieveStatus(id: string): Promise<any>;
+            retrieve({}): { stream(): NodeJS.ReadableStream };
             retrieve({}): Promise<RetrieveResult>;
+            deploy({}, {}): Promise<DeployResult>;
             upsert(foo: string, bar: any): Promise<any>;
         }
         // Connection

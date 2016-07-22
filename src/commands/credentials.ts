@@ -31,6 +31,7 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
                 try {
                     data = JSON.parse(buffer.toString());
                 } catch (error) {
+                    vscode.window.forceCode.outputChannel.appendLine('================================================================');
                     vscode.window.forceCode.outputChannel.appendLine(error);
                 }
                 return new Promise((resolve, reject) => {
@@ -87,6 +88,7 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
                 });
                 config['password'] = result.split('').map(chr => '*').join('');
             } catch (error) {
+                vscode.window.forceCode.outputChannel.appendLine('================================================================');
                 vscode.window.forceCode.outputChannel.appendLine(error);
                 config['password'] = result;
             }
@@ -176,8 +178,8 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
     function onError(err): boolean {
         vscode.window.setStatusBarMessage('ForceCode: Error getting credentials');
         var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-        outputChannel.append('================================================================');
-        outputChannel.append(err);
+        outputChannel.appendLine('================================================================');
+        outputChannel.appendLine(err);
         console.error(err);
         return false;
     }

@@ -115,6 +115,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
      */
     function getFileList(relativeRoot) {
         // Throw if not a directory
+
         if (!fs.lstatSync(relativeRoot).isDirectory()) {
             throw new Error('');
         }
@@ -225,7 +226,8 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
     function onError(err) {
         'use strict';
         vscode.window.setStatusBarMessage(`ForceCode: Error $(stop)`);
-        outputChannel.append(err);
+        outputChannel.appendLine('================================================================');
+        outputChannel.appendLine(err);
         return err;
     };
 }

@@ -102,8 +102,7 @@ export default class Logger {
     showLog(logBody) {
         'use strict';
         vscode.window.forceCode.clearLog();
-        vscode.window.forceCode.outputChannel.show(3);
-        vscode.window.forceCode.outputChannel.append(logBody);
+        vscode.window.forceCode.outputChannel.appendLine(logBody);
         return true;
     }
 

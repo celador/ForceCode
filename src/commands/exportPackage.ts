@@ -28,8 +28,8 @@ export default function exportPackage(context) {
     function onError(err): boolean {
         vscode.window.setStatusBarMessage('ForceCode: Export Error');
         var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-        outputChannel.append('================================================================');
-        outputChannel.append(err);
+        outputChannel.appendLine('================================================================');
+        outputChannel.appendLine(err);
         console.error(err);
         return false;
     }

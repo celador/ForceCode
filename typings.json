@@ -3,7 +3,11 @@
     "moment": "github:typings/typed-moment#a4075cd50e63efbedd850f654594f293ab81a385"
   },
   "globalDependencies": {
+    "archiver": "registry:dt/archiver#0.15.0+20160709062918",
+    "fs-extra": "registry:dt/fs-extra#0.0.0+20160517121359",
     "lodash": "registry:dt/lodash#3.10.0+20160619033623",
+    "mocha": "registry:dt/mocha#2.2.5+20160720003353",
+    "node-fetch": "registry:dt/node-fetch#0.0.0+20160711094047",
     "xml2js": "registry:dt/xml2js#0.0.0+20160317120654"
   }
 }

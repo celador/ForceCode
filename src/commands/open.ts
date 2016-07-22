@@ -20,6 +20,7 @@ export default function open(context: vscode.ExtensionContext) {
             vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexTrigger'),
             vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexPage'),
             vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexComponent'),
+            vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix FROM CustomObject'),
         ];
         // TODO: Objects
         // TODO: Static Resources
@@ -35,7 +36,7 @@ export default function open(context: vscode.ExtensionContext) {
                     return {
                         description: `${record.Id}`,
                         detail: `${record.attributes[TYPEATTRIBUTE]}`,
-                        label: `$(${icon}) ${record.Name}`,
+                        label: `$(${icon}) ${record.Name || record.DeveloperName}`,
                     };
                 });
             let config: {} = {
@@ -72,8 +73,8 @@ export default function open(context: vscode.ExtensionContext) {
     function onError(err): boolean {
         vscode.window.setStatusBarMessage('ForceCode: Error Opening File');
         var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-        outputChannel.append('================================================================');
-        outputChannel.append(err);
+        outputChannel.appendLine('================================================================');
+        outputChannel.appendLine(err);
         console.error(err);
         return false;
     }

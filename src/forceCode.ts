@@ -8,6 +8,7 @@ declare module 'vscode' {
 }
 
 export interface Config {
+    pollTimeout?: number;
     username?: string;
     password?: string;
     token?: string;

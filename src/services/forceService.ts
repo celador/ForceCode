@@ -89,7 +89,7 @@ export default class ForceService implements forceCode.IForceService {
                         if (err) {
                             console.error(err.message);
                             password = (self.config.password || '') + (self.config.token || '');
-                            actuallyLogin().then(resolve);    
+                            actuallyLogin().then(resolve);
                         } else {
                             password = pass;
                             actuallyLogin().then(resolve);
@@ -103,18 +103,20 @@ export default class ForceService implements forceCode.IForceService {
             });
 
             function actuallyLogin() {
-                if (!username || !password) { 
+                if (!username || !password) {
                     vscode.window.setStatusBarMessage(`ForceCode: $(alert) Missing Credentials $(alert)`);
-                    throw { message: 'No Credentials' }; 
+                    throw { message: 'No Credentials' };
                 }
                 vscode.window.setStatusBarMessage(`ForceCode: $(plug) Connecting as ${username}`);
                 return self.conn.login(username, password).then((userInfo) => {
                     vscode.window.setStatusBarMessage(`ForceCode: $(zap) Connected $(zap)`);
+                    self.outputChannel.appendLine(`Connected as username. ${JSON.stringify(userInfo)}`);
                     self.userInfo = userInfo;
                     self.username = username;
                     return self;
                 }).catch(err => {
                     vscode.window.setStatusBarMessage(`ForceCode: $(alert) Connection Error $(alert)`);
+                    self.outputChannel.appendLine('================================================================');
                     self.outputChannel.appendLine(err.message);
                     throw err;
                 });

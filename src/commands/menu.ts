@@ -6,7 +6,7 @@ import {getIcon} from './../parsers';
 export default function showMenu(context: vscode.ExtensionContext) {
     'use strict';
     vscode.window.setStatusBarMessage('ForceCode Menu');
-    
+
     return vscode.window.forceCode.connect(context)
         .then(svc => displayMenu())
         .then(res => processResult(res))
@@ -23,7 +23,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.executeAnonymous);
             quickpick.push(model.getLogs);
             quickpick.push(model.resourceBundle);
-            // quickpick.push(model.retrievePackage);
+            quickpick.push(model.retrievePackage);
             // quickpick.push(model.deployPackage);
         }
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
@@ -57,7 +57,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.resourceBundle.description:
                     return commands.staticResource(context);
                 case model.retrievePackage.description:
-                    return commands.retrieve();
+                    return commands.retrieve(context);
                 case model.deployPackage.description:
                     // return commands.deployPackage();
                     break;
@@ -78,8 +78,8 @@ export default function showMenu(context: vscode.ExtensionContext) {
         vscode.window.setStatusBarMessage('Error opening menu');
         vscode.window.showErrorMessage(err.message);
         var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-        outputChannel.append('================================================================');
-        outputChannel.append(err);
+        outputChannel.appendLine('================================================================');
+        outputChannel.appendLine(err);
         console.error(err);
         return false;
     }

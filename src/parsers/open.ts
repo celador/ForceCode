@@ -11,8 +11,10 @@ export function getIcon(toolingType: string) {
             return 'gist';
         case 'ApexLog':
             return 'bug';
+        case 'CustomObject':
+            return 'gist';
         default:
-            return toolingType;
+            return 'code';
     }
 }
 export function getExtension(toolingType: string) {

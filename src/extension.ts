@@ -30,8 +30,8 @@ export function activate(context: vscode.ExtensionContext): any {
     commands.open(context);
   }));
 
-  context.subscriptions.push(vscode.commands.registerCommand('ForceCode.exportPackage', () => {
-    commands.retrieve();
+  context.subscriptions.push(vscode.commands.registerCommand('ForceCode.retrievePackage', () => {
+    commands.retrieve(context);
   }));
 
   context.subscriptions.push(vscode.commands.registerCommand('ForceCode.staticResource', () => {

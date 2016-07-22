@@ -32,7 +32,7 @@ export default {
     retrievePackage: {
         description: 'Retrieve the entire contents of a package to your src directory.',
         detail: 'You will be asked for the package name.',
-        icon: 'desktop-download',
+        icon: 'cloud-download',
         label: 'Retrieve Package',
     },
     // Get Log(s)

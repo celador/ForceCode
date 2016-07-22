@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.1.6",
+  "version": "0.1.10",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -154,16 +154,24 @@
     "tslint": "tslint -c tslint.json src/**/*.ts"
   },
   "dependencies": {
+    "archiver": "^1.0.0",
     "fs-extra": "^0.26.5",
     "jsforce": "github:celador/jsforce",
     "jszip": "^2.5.0",
     "lodash": "^4.13.1",
     "moment": "^2.11.2",
+    "node-fetch": "^1.5.3",
+    "node-zip": "^1.1.1",
     "sequin": "^0.1.0",
     "typescript": "^1.8.10",
     "unzip": "^0.1.11",
     "vscode": "^0.11.13",
     "xkeychain": "0.0.6",
-    "xml2js": "^0.4.16"
+    "xml2js": "^0.4.16",
+    "zip": "^1.2.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3"
   }
 }

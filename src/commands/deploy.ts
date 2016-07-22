@@ -1,13 +1,69 @@
 'use strict';
+// 'use strict';
+import * as vscode from 'vscode';
+import fs = require('fs-extra');
+import * as archiver from 'archiver';
+import * as path from 'path';
+const nz = require('node-zip');
+const conn = vscode.window.forceCode.conn;
 
-var path = require('path');
-var jsforce = require('jsforce');
-var archiver = require('archiver');
-// var Promise = jsforce.Promise;
-var connect = require('./connect');
+export default function deploy(context: vscode.ExtensionContext) {
+  'use strict';
+  vscode.window.setStatusBarMessage('Deploy Started');
 
-var DEPLOY_OPTIONS =
-  "allowMissingFiles,autoUpdatePackage,checkOnly,ignoreWarnings,performRetrieve,purgeOnDelete,rollbackOnError,runAllTests,runTests,singlePackage,testLevel".split(',');
+  return vscode.window.forceCode.connect(context)
+    .then(svc => deployPackage(svc.conn))
+    .then(finished, onError);
+  // =======================================================================================================================================
+  // =======================================================================================================================================
+  // =======================================================================================================================================
+
+
+
+
+  // =======================================================================================================================================
+  function deployPackage(conn) {
+    vscode.window.setStatusBarMessage('ForceCode: Deploying from src');
+    vscode.window.forceCode.conn.metadata.pollTimeout = 60000;
+    var zip = new nz();
+    zip.file('test.file', 'hello there');
+    var data = zip.generate({ base64: false, compression: 'DEFLATE' });
+
+    return vscode.window.forceCode.conn.metadata.deploy(data, {})
+      .then(function (result) {
+        console.log('done ? :' + result.done);
+        console.log('success ? : ' + result.true);
+        console.log('state : ' + result.state);
+        console.log('component errors: ' + result.numberComponentErrors);
+        console.log('components deployed: ' + result.numberComponentsDeployed);
+        console.log('tests completed: ' + result.numberTestsCompleted);
+      }).catch(function (err) {
+        if (err) { console.error(err); }
+      });
+  }
+  // =======================================================================================================================================
+  // =======================================================================================================================================
+  // =======================================================================================================================================
+  function finished(res): boolean {
+    vscode.window.setStatusBarMessage('ForceCode: Retrieve Finished');
+    return true;
+  }
+  // =======================================================================================================================================
+  function onError(err): boolean {
+    vscode.window.setStatusBarMessage('ForceCode: Error Retrieving Package');
+    var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
+    outputChannel.appendLine('================================================================');
+    outputChannel.appendLine(err);
+    console.error(err);
+    return false;
+  }
+  // =======================================================================================================================================
+}
+
+
+'use strict';
+
+var DEPLOY_OPTIONS: string[] = "allowMissingFiles,autoUpdatePackage,checkOnly,ignoreWarnings,performRetrieve,purgeOnDelete,rollbackOnError,runAllTests,runTests,singlePackage,testLevel".split(',');
 
 /* @private */
 function noop() {}
@@ -17,16 +73,14 @@ function noop() {}
  */
 function deployFromZipStream(zipStream, options) {
   var logger = options.logger || { log: noop };
-  return connect(options).then(function(conn) {
-    logger.log('Deploying to server...');
-    conn.metadata.pollTimeout = options.pollTimeout || 60*1000; // timeout in 60 sec by default
-    conn.metadata.pollInterval = options.pollInterval || 5*1000; // polling interval to 5 sec by default
-    var deployOpts = {};
-    DEPLOY_OPTIONS.forEach(function(prop) {
-      if (typeof options[prop] !== 'undefined') { deployOpts[prop] = options[prop]; }
-    });
-    return conn.metadata.deploy(zipStream, deployOpts).complete({ details: true });
+  vscode.window.setStatusBarMessage(`ForceCode: Deploying to server... $(beaker)`);
+  conn.metadata.pollTimeout = options.pollTimeout || 60*1000; // timeout in 60 sec by default
+  conn.metadata.pollInterval = options.pollInterval || 5*1000; // polling interval to 5 sec by default
+  var deployOpts = {};
+  DEPLOY_OPTIONS.forEach(function(prop) {
+    if (typeof options[prop] !== 'undefined') { deployOpts[prop] = options[prop]; }
   });
+  return conn.metadata.deploy(zipStream, deployOpts);
 };
 
 /**
@@ -34,7 +88,7 @@ function deployFromZipStream(zipStream, options) {
  */
 function deployFromFileMapping(mapping, options) {
   var archive = archiver('zip');
-  archive.bulk(mapping);
+  archiver.bulk(mapping);
   archive.finalize();
   return deployFromZipStream(archive, options);
 }
@@ -54,9 +108,7 @@ function deployFromDirectory(packageDirectoryPath, options) {
  *
  */
 function checkDeployStatus(processId, options) {
-  return connect(options).then(function(conn) {
-    return conn.metadata.checkDeployStatus(processId, { details: true });
-  });
+  return conn.metadata.checkDeployStatus(processId, { details: true });
 }
 
 /**

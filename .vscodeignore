@@ -9,3 +9,4 @@ src/**/*
 out/test/**
 **/*.js.map
 *.vsix
+out/

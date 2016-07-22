@@ -1,0 +1,8 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/90dc1f65a2ffa5125ced3d64ef5ba06262ac7ee7/archiver/archiver.d.ts",
+    "raw": "registry:dt/archiver#0.15.0+20160709062918",
+    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/90dc1f65a2ffa5125ced3d64ef5ba06262ac7ee7/archiver/archiver.d.ts"
+  }
+}
