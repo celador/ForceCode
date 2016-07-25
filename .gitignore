@@ -4,3 +4,4 @@ node_modules
 settings.json
 test/foo.spec.json
 .*
+force.json
