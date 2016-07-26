@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -53,19 +53,9 @@
         "description": "Execute Anonymous Apex and get the debug result"
       },
       {
-        "command": "ForceCode.getLog",
-        "title": "Force: Get Logs",
-        "description": "Get a log"
-      },
-      {
         "command": "ForceCode.open",
         "title": "Force: Get Class, Page, or Trigger",
         "description": "Open a Salesforce file"
-      },
-      {
-        "command": "ForceCode.exportPackage",
-        "title": "Force: Get Package from Org",
-        "description": "Export (retrieve) a package from Salesforce"
       },
       {
         "command": "ForceCode.staticResource",
@@ -75,20 +65,16 @@
     ],
     "keybindings": [
       {
-        "command": "ForceCode.executeAnonymous",
-        "key": "alt+cmd+e"
-      },
-      {
-        "command": "ForceCode.getLog",
-        "key": "alt+cmd+i"
+        "command": "ForceCode.showMenu",
+        "key": "alt+cmd+c"
       },
       {
         "command": "ForceCode.compile",
         "key": "alt+cmd+s"
       },
       {
-        "command": "ForceCode.showMenu",
-        "key": "alt+cmd+c"
+        "command": "ForceCode.executeAnonymous",
+        "key": "alt+cmd+e"
       },
       {
         "command": "ForceCode.open",
@@ -108,15 +94,10 @@
           "default": "",
           "description": "The Salesforce username to use"
         },
-        "force.password": {
-          "type": "string",
-          "default": "",
-          "description": "The Saleforce password for the specified user"
-        },
-        "force.token": {
-          "type": "string",
-          "default": "",
-          "description": "The Salesforce security token"
+        "force.pollTimeout": {
+          "type": "number",
+          "default": 60,
+          "description": "The Polling timeout (in seconds) for Retreive and Deploy commands"
         },
         "force.url": {
           "type": "string",

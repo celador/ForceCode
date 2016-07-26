@@ -8,12 +8,10 @@ declare module 'vscode' {
 }
 
 export interface Config {
-    pollTimeout?: number;
     username?: string;
-    password?: string;
-    token?: string;
     url?: string;
     autoCompile?: boolean;
+    pollTimeout?: number;
 }
 
 export interface IForceService {

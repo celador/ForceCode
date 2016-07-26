@@ -59,12 +59,10 @@ export default class ForceService implements forceCode.IForceService {
         }
         // Setup username and outputChannel
         self.username = self.config.username || '';
-        if (!self.config.username || !self.config.password) {
+        if (!self.config.username) {
             return commands.credentials(context).then(credentials => {
                 self.config.username = credentials.username;
-                self.config.password = credentials.password;
                 self.config.autoCompile = credentials.autoCompile;
-                self.config.token = '';
                 self.config.url = credentials.url;
                 return self.config;
             });
@@ -88,8 +86,7 @@ export default class ForceService implements forceCode.IForceService {
                     }, function (err, pass) {
                         if (err) {
                             console.error(err.message);
-                            password = (self.config.password || '') + (self.config.token || '');
-                            actuallyLogin().then(resolve);
+                            throw err;
                         } else {
                             password = pass;
                             actuallyLogin().then(resolve);
@@ -97,8 +94,7 @@ export default class ForceService implements forceCode.IForceService {
                     });
                 } catch (error) {
                     console.error(error);
-                    password = (self.config.password || '') + (self.config.token || '');
-                    actuallyLogin().then(resolve);
+                    throw error;
                 }
             });
 

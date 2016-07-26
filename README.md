@@ -7,45 +7,41 @@ This extension is a companion for SFDC development with Visual Studio Code.
 * Open / Retrieve a file
 * Save / Compile / Deploy a file 
   * w/ line errors in the editor
-* [Not fully implemented] Retrieve Package
+* Retrieve Package
+* Bundle & Deploy Static Resource
 * [Not fully implemented] Deploy Package
-* [Not fully implemented] Build/Deploy Static Resource(s)
 
 ## Configuration
-To assign your username and password, include the following json in your `settings.json` file, inside the `.config` folder
-```
-{
-    "sfdc": {
-        "username": "${ Username }",
-        "password": "${ Password }",
-        "token": "${ Token }",
-        "autoCompile": true
-    }
-}
-```
-####Get errors as you type
+To begin, press `Opt+Cmd+C` or open the Command Pallete and type `>ForceCode: Menu` to bring up the ForceCode Menu
+You can then enter your credentials to login to your Salesforce org.  Your username will be saved in your projects settings file. 
+
+## Get errors as you type
 The Auto-compile feature adds a hook to the save command that will automatically deploy and compile your code to your SFDC org whenever you save.  This works great with VSCode's autosave feature, providing errors as you type.  
 
-##Commands
+## Commands
 Forcecode provides a number of commands to work with your Salesforce org and metadata.
-###Execute Anonymous
-\>Force: Execute Anonymous  
+
+### Execute Anonymous
+\>Force: Execute Anonymous
 Keyboard: alt + cmd + e
 
-###Compile
-\>Force: Save/Deploy/Compile  
+### Compile
+\>Force: Save/Deploy/Compile
 Keyboard: alt + cmd + s
 
-###Get Log
-\>Force: Get Logs  
-Keyboard: alt + cmd + i
-
-###Open  
-\>Force: Get Class, Page, or Trigger  
+### Open  
+\>Force: Get Class, Page, or Trigger
 Keyboard: alt + cmd + o
 
-###Retrieve Package
-\>Force: Get Package from Org  
+### Bundle and Deploy Static Resource
+\>Force: Save/Deploy/Compile
+Keyboard: alt + cmd + b
+
+### Retrieve Package
+\>Force: Retrieve Package
+
+### Get Log
+\>Force: Get Logs
 
 
 ## Future goals
