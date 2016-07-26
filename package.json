@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -144,7 +144,45 @@
           "description": "An object describing the files to exclude from the Static Resource build. The key is a Nodejs \"Glob\" pattern, the value is true or false"
         }
       }
-    }
+    },
+    "languages": [
+      {
+        "id": "html",
+        "aliases": [
+          "Lightning"
+        ],
+        "extensions": [
+          ".cmp"
+        ]
+      },
+      {
+        "id": "html",
+        "aliases": [
+          "Visualforce"
+        ],
+        "extensions": [
+          ".page"
+        ]
+      },
+      {
+        "id": "apex",
+        "aliases": [
+          "Apex"
+        ],
+        "extensions": [
+          ".apex"
+        ]
+      },
+      {
+        "id": "xml",
+        "aliases": [
+          "Lightning Design"
+        ],
+        "extensions": [
+          ".design"
+        ]
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "node ./node_modules/vscode/bin/compile",

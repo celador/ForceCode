@@ -16,11 +16,16 @@ export default function open(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     function showFileOptions() {
         var promises: any[] = [
+            // Apex Stuff
             vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexClass'),
             vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexTrigger'),
+            // VisualForce stuff
             vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexPage'),
             vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexComponent'),
-            vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix FROM CustomObject'),
+            vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix, ContentType FROM StaticResource'),
+            // Lightning stuff
+            vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, ApiVersion, Description FROM AuraDefinitionBundle'),
+            // vscode.window.forceCode.conn.tooling.query('SELECT Id, AuraDefinitionBundleId, AuraDefinitionBundle.DeveloperName, DefType, Format FROM AuraDefinition'),
         ];
         // TODO: Objects
         // TODO: Static Resources
