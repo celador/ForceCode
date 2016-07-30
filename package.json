@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -98,6 +98,11 @@
           "type": "number",
           "default": 60,
           "description": "The Polling timeout (in seconds) for Retreive and Deploy commands"
+        },
+        "force.debugOnly": {
+          "type": "boolean",
+          "default": false,
+          "description": "When showing logs in the output panel, should we only show User Debug statements?"
         },
         "force.url": {
           "type": "string",

@@ -88,7 +88,10 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
     function showResult(res) {
         'use strict';
         vscode.window.forceCode.outputChannel.clear();
-        vscode.window.forceCode.outputChannel.appendLine(res.header.debugLog);
+        let debugOnly: string = res.header.debugLog.split('\n').filter(l => l.match(/USER_DEBUG/)).join('\n');
+        let config: any = vscode.workspace.getConfiguration('force');
+        let log: string = config.debugOnly ? debugOnly : res.header.debugLog;
+        vscode.window.forceCode.outputChannel.appendLine(log);
         vscode.window.forceCode.outputChannel.show();
         return true;
     }

@@ -30,8 +30,23 @@ export function getExtension(toolingType: string) {
             return 'component';
         case 'ApexLog':
             return 'log';
+        case 'Controller':
+        case 'Helper':
+        case 'Renderer':
+            return 'js';
+        case 'Documentation':
+            return 'auradoc';
+        case 'Design':
+            return 'design';
+        case 'Svg':
+            return 'svg';
+        case 'Style':
+            return 'css';
+        case 'Component':
+            return 'cmp';
         default:
-            return 'cls';
+            debugger;
+            return toolingType + ' not found';
     }
 }
 export function getFolder(toolingType: string) {

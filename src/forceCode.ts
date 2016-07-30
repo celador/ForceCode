@@ -12,6 +12,7 @@ export interface Config {
     url?: string;
     autoCompile?: boolean;
     pollTimeout?: number;
+    debugOnly?: boolean;
 }
 
 export interface IForceService {
