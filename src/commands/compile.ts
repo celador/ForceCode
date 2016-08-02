@@ -10,22 +10,122 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   vscode.window.setStatusBarMessage('ForceCode: Compiling...');
 
   const body: string = document.getText();
+  const ext: string = parsers.getFileExtension(document);
   const toolingType: string = parsers.getToolingType(document);
+  const fileName: string = parsers.getFileName(document);
+  const DefType: string = getAuraDefTypeFromDocument(document);
+  const Format: string = getAuraFormatFromDocument(document);
+  const Source: string = document.getText();
+  const name: string = parsers.getName(document, toolingType);
+  var currentObjectDefinition: any = undefined;
+  var AuraDefinitionBundleId: string = undefined;
+  var Id: string = undefined;
   if (toolingType === undefined) {
     return Promise
       .reject({ message: 'Unknown Tooling Type.  Ensure the body is well formed' })
       .catch(onError);
+  } else if (toolingType === 'AuraDefinition') {
+    return vscode.window.forceCode.connect(context)
+      .then(svc => getAuraDefinition(svc))
+      .then(results => upsertAuraDefinition(results))
+      .then(finished, onError);
+  } else {
+    return vscode.window.forceCode.connect(context)
+      .then(svc => svc.newContainer())
+      .then(addToContainer)
+      .then(requestCompile)
+      .then(getCompileStatus)
+      .then(finished, onError);
   }
-  const name: string = parsers.getName(document, toolingType);
-  return vscode.window.forceCode.connect(context)
-    .then(svc => svc.newContainer())
-    .then(addToContainer)
-    .then(requestCompile)
-    .then(getCompileStatus)
-    .then(finished, onError);
+  // =======================================================================================================================================
+  // ================================                Lightning Components               ===========================================
+  // =======================================================================================================================================
+  function getAuraDefinition(svc) {
+    return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({
+      'AuraDefinitionBundle.DeveloperName': name
+    });
+  }
+  function upsertAuraDefinition(results) {
+    if (results.length > 0) {
+      var def: any[] = results.filter(result => result.DefType === DefType);
+      currentObjectDefinition = def.length > 0 ? def[0] : undefined;
+      if (currentObjectDefinition !== undefined) {
+        AuraDefinitionBundleId = currentObjectDefinition.AuraDefinitionBundleId;
+        Id = currentObjectDefinition.Id;
+        return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').update({ Id: currentObjectDefinition.Id, Source });
+      } else {
+        return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').find({
+          'DeveloperName': name
+        }).then(bundles => {
+          if (bundles.length > 0) {
+            return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: currentObjectDefinition.AuraDefinitionBundleId, DefType, Format, Source });
+          }
+          throw { message: 'Bundle not yet created' };
+        });
+      }
+    }
+  }
+  function getAuraDefTypeFromDocument(doc: vscode.TextDocument) {
+    var extension: string = ext.toLowerCase();
+    switch (extension) {
+      case 'app':
+        // APPLICATION — Lightning Components app
+        return 'APPLICATION';
+      case 'cmp':
+        // COMPONENT — component markup
+        return 'COMPONENT';
+      case 'auradoc':
+        // DOCUMENTATION — documentation markup
+        return 'DOCUMENTATION';
+      case 'css':
+        // STYLE — style (CSS) resource
+        return 'STYLE';
+      case 'evt':
+        // EVENT — event definition
+        return 'EVENT';
+      case 'design':
+        // DESIGN — design definition
+        return 'DESIGN';
+      case 'svg':
+        // SVG — SVG graphic resource
+        return 'SVG';
+      case 'js':
+        var fileNameEndsWith: string = fileName.replace(name, '').toLowerCase();
+        if (fileNameEndsWith === 'controller') {
+          // CONTROLLER — client-side controller
+          return 'CONTROLLER';
+        } else if (fileNameEndsWith === 'helper') {
+          // HELPER — client-side helper
+          return 'HELPER';
+        } else if (fileNameEndsWith === 'renderer') {
+          // RENDERER — client-side renderer
+          return 'RENDERER';
+        };
+      default:
+        throw `Unknown extension: ${extension} .`;
+    }
+    // Yet to be implemented
+    // INTERFACE — interface definition
+    // TOKENS — tokens collection
+    // PROVIDER — reserved for future use
+    // TESTSUITE — reserved for future use
+    // MODEL — deprecated, do not use
+  }
+  function getAuraFormatFromDocument(doc: vscode.TextDocument) {
+    // is 'js', 'css', or 'xml'
+    switch (ext) {
+      case 'js':
+        return 'js';
+      case 'css':
+        return 'css';
+      default:
+        return 'xml';
+    }
+  }
   // =======================================================================================================================================
   // =======================================================================================================================================
   // =======================================================================================================================================
+
   function addToContainer() {
     return vscode.window.forceCode.conn.tooling.sobject(toolingType)
       .find({ Name: name }).execute()
@@ -128,24 +228,26 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // Create a diagnostic Collection for the current file.  Overwriting the last...
     var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
     var diagnostics: vscode.Diagnostic[] = [];
-    res.records.forEach(containerAsyncRequest => {
-      containerAsyncRequest.DeployDetails.componentFailures.forEach(failure => {
-        if (failure.problemType === 'Error') {
-          var failureLineNumber: number = failure.lineNumber || failure.LineNumber || 1;
-          var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
-          if (failure.columnNumber > 0) {
-            failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failure.columnNumber));
+    if (res.records && res.records.length > 0) {
+      res.records.forEach(containerAsyncRequest => {
+        containerAsyncRequest.DeployDetails.componentFailures.forEach(failure => {
+          if (failure.problemType === 'Error') {
+            var failureLineNumber: number = failure.lineNumber || failure.LineNumber || 1;
+            var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
+            if (failure.columnNumber > 0) {
+              failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failure.columnNumber));
+            }
+            diagnostics.push(new vscode.Diagnostic(failureRange, failure.problem, failure.problemType));
           }
-          diagnostics.push(new vscode.Diagnostic(failureRange, failure.problem, failure.problemType));
-        }
+        });
+        diagnosticCollection.set(document.uri, diagnostics);
       });
-      diagnosticCollection.set(document.uri, diagnostics);
-    });
+    }
     // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
     if (diagnostics.length > 0) {
       vscode.window.setStatusBarMessage(`ForceCode: Compile Errors!`);
     } else {
-      vscode.window.setStatusBarMessage(`ForceCode: Compile/Deploy of ${name} was successful`);
+      vscode.window.setStatusBarMessage(`ForceCode: Compile/Deploy of ${name} ${DefType ? DefType : ''} was successful`);
       // vscode.commands.executeCommand('workbench.action.output.toggleOutput');
       // outputChannel.hide();
     }

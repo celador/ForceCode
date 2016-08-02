@@ -1,3 +1,5 @@
+import * as vscode from 'vscode';
+
 export function getIcon(toolingType: string) {
     'use strict';
     switch (toolingType) {
@@ -16,6 +18,17 @@ export function getIcon(toolingType: string) {
         default:
             return 'code';
     }
+}
+export function getFileName(document: vscode.TextDocument) {
+    'use strict';
+    var fileName: string = document.fileName.substring(0, document.fileName.lastIndexOf('.'));
+    fileName = fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
+    return fileName;
+}
+export function getFileExtension(document: vscode.TextDocument) {
+    'use strict';
+    var ext: string = document.fileName.substring(document.fileName.lastIndexOf('.') + 1, document.fileName.length);
+    return ext;
 }
 export function getExtension(toolingType: string) {
     'use strict';
@@ -44,9 +57,10 @@ export function getExtension(toolingType: string) {
             return 'css';
         case 'Component':
             return 'cmp';
+        case 'Application':
+            return 'app';
         default:
-            debugger;
-            return toolingType + ' not found';
+            throw toolingType + ' extension not defined';
     }
 }
 export function getFolder(toolingType: string) {
