@@ -1,14 +1,10 @@
 module.exports = function () {
   return {
     files: [
-      'src/'
+      'src/**/*.ts'
     ],
     tests: [
-      'test/*.spec.js'
-    ],
-    'testFramework': 'mocha',
-    env: {
-      type: 'node'
-    }
+      'test/*.spec.ts'
+    ]
   }
 }

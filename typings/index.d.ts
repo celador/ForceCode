@@ -1,4 +1,5 @@
 /// <reference path="globals/archiver/index.d.ts" />
+/// <reference path="globals/chai/index.d.ts" />
 /// <reference path="globals/chalk/chalk.d.ts" />
 /// <reference path="globals/fs-extra/index.d.ts" />
 /// <reference path="globals/globule/globule.d.ts" />

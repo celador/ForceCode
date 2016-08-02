@@ -19,12 +19,6 @@ export function getIcon(toolingType: string) {
             return 'code';
     }
 }
-export function getFileName(document: vscode.TextDocument) {
-    'use strict';
-    var fileName: string = document.fileName.substring(0, document.fileName.lastIndexOf('.'));
-    fileName = fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
-    return fileName;
-}
 export function getFileExtension(document: vscode.TextDocument) {
     'use strict';
     var ext: string = document.fileName.substring(document.fileName.lastIndexOf('.') + 1, document.fileName.length);

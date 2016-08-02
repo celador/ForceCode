@@ -13,13 +13,15 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   const ext: string = parsers.getFileExtension(document);
   const toolingType: string = parsers.getToolingType(document);
   const fileName: string = parsers.getFileName(document);
+  const name: string = parsers.getName(document, toolingType);
   const DefType: string = getAuraDefTypeFromDocument(document);
   const Format: string = getAuraFormatFromDocument(document);
   const Source: string = document.getText();
-  const name: string = parsers.getName(document, toolingType);
+  // To be defined further down`
   var currentObjectDefinition: any = undefined;
   var AuraDefinitionBundleId: string = undefined;
   var Id: string = undefined;
+  // Start doing stuff
   if (toolingType === undefined) {
     return Promise
       .reject({ message: 'Unknown Tooling Type.  Ensure the body is well formed' })
@@ -242,6 +244,12 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         });
         diagnosticCollection.set(document.uri, diagnostics);
       });
+    } else if (res.errors && res.errors.length > 0) {
+      res.errors.forEach(err => {
+        console.error(err);
+        debugger;
+      });
+      vscode.window.setStatusBarMessage(`ForceCode: Compile Errors!`);
     }
     // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
     if (diagnostics.length > 0) {
