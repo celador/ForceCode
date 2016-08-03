@@ -14,10 +14,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   const toolingType: string = parsers.getToolingType(document);
   const fileName: string = parsers.getFileName(document);
   const name: string = parsers.getName(document, toolingType);
-  const DefType: string = getAuraDefTypeFromDocument(document);
-  const Format: string = getAuraFormatFromDocument(document);
-  const Source: string = document.getText();
   // To be defined further down`
+  var DefType: string = undefined;
+  var Format: string = undefined;
+  var Source: string = undefined;
   var currentObjectDefinition: any = undefined;
   var AuraDefinitionBundleId: string = undefined;
   var Id: string = undefined;
@@ -27,6 +27,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       .reject({ message: 'Unknown Tooling Type.  Ensure the body is well formed' })
       .catch(onError);
   } else if (toolingType === 'AuraDefinition') {
+    DefType = getAuraDefTypeFromDocument(document);
+    Format = getAuraFormatFromDocument(document);
+    Source = document.getText();
     return vscode.window.forceCode.connect(context)
       .then(svc => getAuraDefinition(svc))
       .then(results => upsertAuraDefinition(results))
