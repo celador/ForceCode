@@ -8,7 +8,7 @@
   },
   "license": "MIT",
   "engines": {
-    "vscode": "^0.10.1"
+    "vscode": "^1.3.1"
   },
   "icon": "images/salesforce_logo.png",
   "categories": [
@@ -190,7 +190,7 @@
     "sequin": "^0.1.0",
     "typescript": "^1.8.10",
     "unzip": "^0.1.11",
-    "vscode": "^0.11.13",
+    "vscode": "^0.11.14",
     "xkeychain": "0.0.6",
     "xml2js": "^0.4.16",
     "zip": "^1.2.0"
