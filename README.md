@@ -1,6 +1,15 @@
 # ForceCode for Visual Studio Code
 This extension is a companion for SFDC development with Visual Studio Code. 
 
+#This extension currently only works with OS X due to issues with the xkeychain library
+I am aware of the problem and am working to resolve the issues by switching to a different library.
+I am in the process of trying to figure out why KeyTar isn't working.  Any pull requests would be helpful.
+
+##Issues
+Please submit any issues to https://github.com/celador/ForceCode/issues
+I use this extension every day, so if there is something not working, I would appreciate it if you explained your error so I can fix it.
+I will try to be as responsive as possible to reported issues.
+
 ##Features
 * Execute Anonymous
 * View Debug Logs 
