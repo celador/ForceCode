@@ -63,7 +63,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
           'DeveloperName': name
         }).then(bundles => {
           if (bundles.length > 0) {
-            return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: currentObjectDefinition.AuraDefinitionBundleId, DefType, Format, Source });
+            return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: results[0].AuraDefinitionBundleId, DefType, Format, Source });
           }
           throw { message: 'Bundle not yet created' };
         });
