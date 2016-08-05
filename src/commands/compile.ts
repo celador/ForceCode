@@ -266,11 +266,34 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   }
   // =======================================================================================================================================
   function onError(err): boolean {
-    vscode.window.setStatusBarMessage('ForceCode: ' + err.message);
-    vscode.window.forceCode.outputChannel.appendLine('================================     ERROR     ================================\n');
-    vscode.window.forceCode.outputChannel.appendLine(err.message);
-    console.error(err);
-    return false;
+    if (toolingType === 'AuraDefinition') {
+      var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
+      var diagnostics: vscode.Diagnostic[] = [];
+      var splitString = err.message.split(fileName + ':');
+      var partTwo = splitString.length > 1 ? splitString[1] : '1,1:Unknown error';
+      var idx = partTwo.indexOf(':');
+      var rangeArray = partTwo.substring(0, idx).split(',');
+      var errorMessage = partTwo.substring(idx);
+      var failureLineNumber: number = rangeArray[0];
+      var failureColumnNumber: number = rangeArray[1];
+      var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
+      if (failureColumnNumber > 0) {
+        failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));
+      }
+      diagnostics.push(new vscode.Diagnostic(failureRange, errorMessage, 0));
+      diagnosticCollection.set(document.uri, diagnostics);
+      vscode.window.setStatusBarMessage('ForceCode: Lightning Error');
+      vscode.window.forceCode.outputChannel.appendLine('================================     ERROR     ================================\n');
+      vscode.window.forceCode.outputChannel.appendLine(err.message);
+      console.error(err);
+      return false;
+    } else {
+      vscode.window.setStatusBarMessage('ForceCode: ' + err.message);
+      vscode.window.forceCode.outputChannel.appendLine('================================     ERROR     ================================\n');
+      vscode.window.forceCode.outputChannel.appendLine(err.message);
+      console.error(err);
+      return false;
+    }
   }
   // =======================================================================================================================================
 }
