@@ -8,6 +8,7 @@ declare module 'vscode' {
 }
 
 export interface Config {
+    password?: string;
     username?: string;
     url?: string;
     autoCompile?: boolean;

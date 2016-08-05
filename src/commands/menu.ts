@@ -45,7 +45,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
         if (result !== undefined && result.description !== undefined) {
             switch (result.description) {
                 case model.enterCredentials.description:
-                    return commands.credentials(context);
+                    return commands.credentials();
                 case model.compileDeploy.description:
                     return commands.compile(vscode.window.activeTextEditor.document, context);
                 case model.executeAnonymous.description:

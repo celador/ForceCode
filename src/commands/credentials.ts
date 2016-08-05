@@ -1,16 +1,12 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
-import {constants} from './../services';
 import {getIcon} from './../parsers';
 
-export default function enterCredentials(context: vscode.ExtensionContext) {
+export default function enterCredentials() {
   'use strict';
   vscode.window.setStatusBarMessage('ForceCode Menu');
-  var yoForceConfig = undefined;
-  var keychain: any = require('xkeychain');
 
-  return findFiles()
-    .then(yoForce => getUsername(yoForce))
+  return getUsername()
     .then(cfg => getPassword(cfg))
     .then(cfg => getUrl(cfg))
     .then(cfg => getAutoCompile(cfg))
@@ -19,89 +15,62 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
   // =======================================================================================================================================
   // =======================================================================================================================================
   // =======================================================================================================================================
-  function findFiles() {
-    return Promise.resolve(getYoForceConfig);
-  }
+
   function getYoForceConfig() {
-    return vscode.workspace.findFiles('force.json', '').then(function (files) {
-      var buffer: NodeBuffer = undefined;
-      var forceConfig: any = {};
-      if (files.length && files[0].path) {
-        buffer = fs.readFileSync(files[0].path);
-        try {
-          forceConfig = JSON.parse(buffer.toString());
-        } catch (error) {
-          vscode.window.forceCode.outputChannel.appendLine('================================================================');
-          vscode.window.forceCode.outputChannel.appendLine(error);
-        }
-        return new Promise((resolve, reject) => {
-          try {
-            keychain.getPassword({
-              account: forceConfig.username,
-              service: constants.FORCECODE_KEYCHAIN,
-            }, function (err, pass) {
-              if (err) {
-                vscode.window.forceCode.outputChannel.appendLine('================================================================');
-                vscode.window.forceCode.outputChannel.appendLine(err);
-                reject(err);
-              }
-              forceConfig.password = pass;
-              resolve(forceConfig);
-            });
-          } catch (error) {
-            console.error(error);
-            reject(error);
-            vscode.window.forceCode.outputChannel.appendLine('================================================================');
-            vscode.window.forceCode.outputChannel.appendLine(error);
-          }
-        });
-      }
-      return forceConfig;
-    });
+    // return vscode.workspace.findFiles('force.json', '').then(function (files) {
+    //   var buffer: NodeBuffer = undefined;
+    var forceConfig: any = {};
+    //   if (files.length && files[0].path) {
+    //     buffer = fs.readFileSync(files[0].path);
+    //     try {
+    //       forceConfig = JSON.parse(buffer.toString());
+    //     } catch (error) {
+    //       vscode.window.forceCode.outputChannel.appendLine('================================================================');
+    //       vscode.window.forceCode.outputChannel.appendLine(error);
+    //     }
+    //     return Promise.resolve(forceConfig);
+    //   }
+    try {
+      forceConfig = fs.readJsonSync(vscode.workspace.rootPath + '/force.json');
+    } catch (err) {
+      // forceConfig = {};
+    }
+    return Promise.resolve(forceConfig);
+    // });
   }
 
-  function getUsername(config) {
-    yoForceConfig = config;
-    let options: vscode.InputBoxOptions = {
-      placeHolder: 'mark@salesforce.com',
-      prompt: 'Please enter your SFDC username'
-    };
-    if (config.username) {
-      options.value = config.username;
-    }
-    return vscode.window.showInputBox(options).then(function (result: string) {
-      if (!result) { throw 'No Username'; };
-      return { username: result };
+  function getUsername() {
+    return new Promise(function (resolve, reject) {
+      getYoForceConfig().then(config => {
+        let options: vscode.InputBoxOptions = {
+          placeHolder: 'mark@salesforce.com',
+          value: config.username || '',
+          prompt: 'Please enter your SFDC username'
+        };
+        vscode.window.showInputBox(options).then(result => {
+          config.username = result || config.username || '';
+          if (!config.username) { reject('No Username'); };
+          resolve(config);
+        });
+      });
     });
+
   }
 
   function getPassword(config) {
     let options: vscode.InputBoxOptions = {
       password: true,
+      value: config.password || '',
       placeHolder: 'enter your password and token',
       prompt: 'Please enter your SFDC username'
     };
-    if (yoForceConfig.password) {
-      options.value = yoForceConfig.password;
-    }
     return vscode.window.showInputBox(options).then(function (result: string) {
-      if (!result) { throw 'No Password'; };
-      try {
-        keychain.setPassword({
-          account: config.username,
-          service: constants.FORCECODE_KEYCHAIN,
-          password: result
-        });
-        config['password'] = result.split('').map(chr => '*').join('');
-      } catch (error) {
-        vscode.window.forceCode.outputChannel.appendLine('================================================================');
-        vscode.window.forceCode.outputChannel.appendLine(error);
-        config['password'] = result;
-      }
+      config.password = result || config.password || '';
+      if (!config.password) { throw 'No Password'; };
       return config;
     });
   }
-  function getUrl(ret) {
+  function getUrl(config) {
     let options: vscode.QuickPickItem[] = [{
       icon: 'code',
       title: 'Production / Developer',
@@ -119,21 +88,22 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
         };
       });
     return vscode.window.showQuickPick(options).then((res: vscode.QuickPickItem) => {
-      ret['url'] = res.description || 'https://login.salesforce.com';
-      return ret;
+      config.url = res.description || 'https://login.salesforce.com';
+      return config;
     });
   }
-  function getAutoCompile(ret) {
+  function getAutoCompile(config) {
     let options: vscode.QuickPickItem[] = [{
       description: 'Automatically deploy/compile files on save',
       label: 'Yes',
     }, {
         description: 'Deploy/compile code through the ForceCode menu',
         label: 'No',
-      }];
+      },
+    ];
     return vscode.window.showQuickPick(options).then((res: vscode.QuickPickItem) => {
-      ret['autoCompile'] = res.label === 'Yes';
-      return ret;
+      config.autoCompile = res.label === 'Yes';
+      return config;
     });
   }
 
@@ -142,36 +112,10 @@ export default function enterCredentials(context: vscode.ExtensionContext) {
   // =======================================================================================================================================
   function finished(config) {
     // console.log(config);
-    return vscode.workspace.findFiles('.vscode/settings.json', '').then(function (files) {
-      var filePath: string = '';
-      var buffer: NodeBuffer = undefined;
-      var data: any = {};
-      if (files.length && files[0].path) {
-        filePath = files[0].path;
-        buffer = fs.readFileSync(filePath);
-        try {
-          data = JSON.parse(buffer.toString());
-        } catch (error) {
-          console.error(error);
-        }
-      }
-      if (filePath.length === 0) {
-        filePath = vscode.workspace.rootPath + '/.vscode/settings.json';
-      }
-      data = setForceConfig(data, config);
-      fs.writeFile(filePath, JSON.stringify(data, undefined, 4));
-      return config;
-    });
+    fs.outputFile(vscode.workspace.rootPath + '/force.json', JSON.stringify(config, undefined, 4));
+    return config;
   }
-  function setForceConfig(data, config) {
-    if (typeof (data.force) !== 'object') {
-      data.force = {};
-    }
-    data.force.username = config.username;
-    data.force.autoCompile = config.autoCompile;
-    data.force.url = config.url;
-    return data;
-  }
+
   // =======================================================================================================================================
   function onError(err): boolean {
     vscode.window.setStatusBarMessage('ForceCode: Error getting credentials');
