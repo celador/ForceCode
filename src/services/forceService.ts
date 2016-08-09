@@ -36,6 +36,15 @@ export default class ForceService implements forceCode.IForceService {
     this.outputChannel.clear();
   };
 
+  public getConfig() {
+    try {
+      this.config = fs.readJsonSync(vscode.workspace.rootPath + '/force.json');
+    } catch (err) {
+      this.config = {};
+    }
+    return this.config;
+  }
+
   public newContainer(): Promise<forceCode.IForceService> {
     'use strict';
     var self: forceCode.IForceService = vscode.window.forceCode;

@@ -8,6 +8,7 @@ declare module 'vscode' {
 }
 
 export interface Config {
+    apiVersion?: string;
     password?: string;
     username?: string;
     url?: string;
@@ -27,4 +28,5 @@ export interface IForceService {
     connect(context: vscode.ExtensionContext): Promise<IForceService>;
     newContainer(): Promise<IForceService>;
     clearLog(): void;
+    getConfig(): Config;
 }

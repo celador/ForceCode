@@ -53,11 +53,12 @@ export default function retrieve(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     function getPackage(option: vscode.QuickPickItem) {
       vscode.window.setStatusBarMessage('ForceCode: Retrieving ' + option.description);
+      vscode.window.forceCode.getConfig();
       return new Promise(function(resolve, reject) {
         vscode.window.forceCode.conn.metadata.pollTimeout = (vscode.window.forceCode.config.pollTimeout || 60) * 1000;
         var stream: NodeJS.ReadableStream = vscode.window.forceCode.conn.metadata.retrieve({
           packageNames: [option.description],
-          apiVersion: vscode.window.forceCode.conn.version
+          apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version
         }).stream();
         var bufs: any = [];
         stream.on('data', function(d) {
