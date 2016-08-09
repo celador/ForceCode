@@ -245,12 +245,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             diagnostics.push(new vscode.Diagnostic(failureRange, failure.problem, failure.problemType));
           }
         });
-        diagnosticCollection.set(document.uri, diagnostics);
       });
     } else if (res.errors && res.errors.length > 0) {
       res.errors.forEach(err => {
         console.error(err);
-        debugger;
       });
       vscode.window.setStatusBarMessage(`ForceCode: Compile Errors!`);
     }
@@ -262,6 +260,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       // vscode.commands.executeCommand('workbench.action.output.toggleOutput');
       // outputChannel.hide();
     }
+    diagnosticCollection.set(document.uri, diagnostics);
     return true;
   }
   // =======================================================================================================================================
