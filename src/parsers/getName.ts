@@ -16,13 +16,14 @@ export function getFileName(document: vscode.TextDocument) {
 }
 function getNameFromClassBody(document: vscode.TextDocument): string {
     'use strict';
-    var fileName: string = getFileName(document);
+    var fileNameArray: string[] = getFileName(document).split('\');
+    var fileName: string = fileNameArray[fileNameArray.length-1];
     var bodyParts: string[] = document.getText().split(/(extends|implements|\{)/);
     var firstLine: string = bodyParts.length && bodyParts[0];
     var words: string[] = firstLine.trim().split(' ');
     var className: string = words.length && words[words.length - 1];
     if (fileName !== className) {
-        vscode.window.showWarningMessage(`Class Name (${className}) is not the same as the File Name(${fileName}).  Please fix this.`);
+        vscode.window.showWarningMessage(`Class Name (${className}) is not the same as the File Name (${fileName}).  Please fix this.`);
     }
     return className;
 }
