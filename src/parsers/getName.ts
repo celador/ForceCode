@@ -16,7 +16,7 @@ export function getFileName(document: vscode.TextDocument) {
 }
 function getNameFromClassBody(document: vscode.TextDocument): string {
     'use strict';
-    var fileNameArray: string[] = getFileName(document).split('\');
+    var fileNameArray: string[] = getFileName(document).split('\\');
     var fileName: string = fileNameArray[fileNameArray.length-1];
     var bodyParts: string[] = document.getText().split(/(extends|implements|\{)/);
     var firstLine: string = bodyParts.length && bodyParts[0];
