@@ -9,6 +9,7 @@ import staticResource from './staticResource';
 import PeekFileDefinitionProvider from './lens';
 import showMenu from './menu';
 import credentials from './credentials';
+import createClass from './createClass';
 
 export {
     executeAnonymous,
@@ -20,5 +21,6 @@ export {
     staticResource,
     PeekFileDefinitionProvider,
     showMenu,
-    credentials
+    credentials,
+    createClass
 };

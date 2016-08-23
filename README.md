@@ -29,7 +29,8 @@ The config file should look something like...
     "url": "https://test.salesforce.com",
     "pollTimeout": 120,
     "debugOnly": false,
-    "apiVersion": "37.0"
+    "apiVersion": "37.0",
+    "enableSeperationOfConcerns": true
 }
 ```
 
@@ -65,8 +66,13 @@ The pollTimeout setting is used to determine how long you should wait for the re
 ### Get Log
 \>Force: Get Logs
 
+### Create Class
+\>ForceCode Menu -> Create Class
+This will automatically create classes based on `apiVersion` else it defaults to 37.0 . Enabling `enableSeperationOfConcerns` will prompt for class type and automatically append class type to class name else it defaults to true.
 
 ## Future goals
 * Test runner
 * Intellisense code completion
 * Debug Apex code with breakpoints in the editor
+* Add interfaces to Create Class
+* Allow class type overrides in Create Class
