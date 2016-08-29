@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import jsforce = require('jsforce');
 import {IForceService} from './../forceCode';
+import * as error from './../util/error';
 
 interface LogRecord {
     Id: string;
@@ -28,7 +29,8 @@ function getLog(context: vscode.ExtensionContext) {
         .then(getLast10Logs)
         .then(displayOptions)
         .then(getLogById)
-        .then(showLog, onError);
+        .then(showLog)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
 }
 export default getLog;
 
@@ -81,8 +83,8 @@ function showLog(logBody) {
     return true;
 }
 
-function onError(err) {
-    'use strict';
-    console.error(err);
-}
+// function onError(err) {
+//     'use strict';
+//     console.error(err);
+// }
 

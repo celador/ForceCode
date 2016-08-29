@@ -5,6 +5,7 @@ import jszip = require('jszip');
 // import jsforce = require('jsforce');
 import globule = require('globule');
 import {IForceService} from './../forceCode';
+import * as error from './../util/error';
 var packageName: string = undefined;
 var relativeRoot: string = undefined;
 var outputChannel: vscode.OutputChannel;
@@ -20,7 +21,8 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
         .then(makeZip)
         .then(bundle)
         .then(deploy)
-        .then(onComplete, onError);
+        .then(onComplete)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -223,11 +225,11 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
      * @param {Object} err - The Error object
      * @return {Boolean} - The return value
      */
-    function onError(err) {
-        'use strict';
-        vscode.window.setStatusBarMessage(`ForceCode: Error $(stop)`);
-        outputChannel.appendLine('================================================================');
-        outputChannel.appendLine(err);
-        return err;
-    };
+    // function onError(err) {
+    //     'use strict';
+    //     vscode.window.setStatusBarMessage(`ForceCode: Error $(stop)`);
+    //     outputChannel.appendLine('================================================================');
+    //     outputChannel.appendLine(err);
+    //     return err;
+    // };
 }

@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import jsforce = require('jsforce');
+import * as error from './../util/error';
+
 import {getIcon, getExtension, getFolder} from './../parsers';
 const TYPEATTRIBUTE: string = 'type';
 
@@ -13,7 +15,8 @@ export default function open(context: vscode.ExtensionContext) {
     .then(svc => showFileOptions())
     .then(opt => getFile(opt))
     .then(res => writeFiles(res))
-    .then(finished, onError);
+    .then(finished)
+    .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
   // =======================================================================================================================================
   // =======================================================================================================================================
   // =======================================================================================================================================
@@ -134,13 +137,13 @@ export default function open(context: vscode.ExtensionContext) {
     vscode.window.setStatusBarMessage('ForceCode: Retrieve Lightning Finished');
     return true;
   }
-  function onError(err): boolean {
-    vscode.window.setStatusBarMessage('ForceCode: Error Opening File');
-    var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-    outputChannel.appendLine('================================================================');
-    outputChannel.appendLine(err);
-    console.error(err);
-    return false;
-  }
+//   function onError(err): boolean {
+//     vscode.window.setStatusBarMessage('ForceCode: Error Opening File');
+//     var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
+//     outputChannel.appendLine('================================================================');
+//     outputChannel.appendLine(err);
+//     console.error(err);
+//     return false;
+//   }
   // =======================================================================================================================================
 }

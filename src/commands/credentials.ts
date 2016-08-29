@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import {getIcon} from './../parsers';
+import * as error from './../util/error';
 
 export default function enterCredentials() {
   'use strict';
@@ -11,7 +12,8 @@ export default function enterCredentials() {
     .then(cfg => getUrl(cfg))
     .then(cfg => getAutoCompile(cfg))
     // .then(cfg => setSettings(cfg)):
-    .then(finished, onError);
+    .then(cfg => finished(cfg))
+    .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
   // =======================================================================================================================================
   // =======================================================================================================================================
   // =======================================================================================================================================
@@ -117,13 +119,13 @@ export default function enterCredentials() {
   }
 
   // =======================================================================================================================================
-  function onError(err): boolean {
-    vscode.window.setStatusBarMessage('ForceCode: Error getting credentials');
-    var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-    outputChannel.appendLine('================================================================');
-    outputChannel.appendLine(err);
-    console.error(err);
-    return false;
-  }
+//   function onError(err): boolean {
+//     vscode.window.setStatusBarMessage('ForceCode: Error getting credentials');
+//     var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
+//     outputChannel.appendLine('================================================================');
+//     outputChannel.appendLine(err);
+//     console.error(err);
+//     return false;
+//   }
   // =======================================================================================================================================
 }

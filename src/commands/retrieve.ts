@@ -1,6 +1,7 @@
 // 'use strict';
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
+import * as error from './../util/error';
 const fetch = require('node-fetch');
 const ZIP = require('zip');
 
@@ -11,7 +12,8 @@ export default function retrieve(context: vscode.ExtensionContext) {
     return vscode.window.forceCode.connect(context)
         .then(svc => showPackageOptions(svc.conn))
         .then(opt => getPackage(opt))
-        .then(finished, onError);
+        .then(finished)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -91,13 +93,13 @@ export default function retrieve(context: vscode.ExtensionContext) {
         return true;
     }
     // =======================================================================================================================================
-    function onError(err): boolean {
-        vscode.window.setStatusBarMessage('ForceCode Error: ' + err.message);
-        var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-        outputChannel.appendLine('================================================================');
-        outputChannel.appendLine(err.stack);
-        console.error(err);
-        return false;
-    }
+    // function onError(err): boolean {
+    //     vscode.window.setStatusBarMessage('ForceCode Error: ' + err.message);
+    //     var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
+    //     outputChannel.appendLine('================================================================');
+    //     outputChannel.appendLine(err.stack);
+    //     console.error(err);
+    //     return false;
+    // }
     // =======================================================================================================================================
 }

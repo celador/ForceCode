@@ -30,3 +30,7 @@ export interface IForceService {
     clearLog(): void;
     getConfig(): Config;
 }
+
+export interface ForceCodeError {
+    message: string;
+}

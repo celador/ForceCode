@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as commands from './../commands';
 import model from './../models/commands';
 import {getIcon} from './../parsers';
+import * as error from './../util/error';
 
 export default function showMenu(context: vscode.ExtensionContext) {
     'use strict';
@@ -10,7 +11,8 @@ export default function showMenu(context: vscode.ExtensionContext) {
     return vscode.window.forceCode.connect(context)
         .then(svc => displayMenu())
         .then(res => processResult(res))
-        .then(finished, onError);
+        .then(finished)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -74,14 +76,14 @@ export default function showMenu(context: vscode.ExtensionContext) {
         return true;
     }
     // =======================================================================================================================================
-    function onError(err): boolean {
-        vscode.window.setStatusBarMessage('Error opening menu');
-        vscode.window.showErrorMessage(err.message);
-        var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-        outputChannel.appendLine('================================================================');
-        outputChannel.appendLine(err);
-        console.error(err);
-        return false;
-    }
+    // function onError(err): boolean {
+    //     vscode.window.setStatusBarMessage('Error opening menu');
+    //     vscode.window.showErrorMessage(err.message);
+    //     var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
+    //     outputChannel.appendLine('================================================================');
+    //     outputChannel.appendLine(err);
+    //     console.error(err);
+    //     return false;
+    // }
     // =======================================================================================================================================
 }
