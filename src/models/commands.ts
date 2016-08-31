@@ -55,12 +55,5 @@ export default {
         detail: 'Uses the MavensMate convention of a resource-bundle foleder',
         icon: 'flame',
         label: 'Build Resource Bundle',
-    },
-    // Create Classes
-    createClass: {
-        description: 'Create a Service, Domain, Selector class.',
-        detail: 'Finds your classes folder and inserts the metadata and class specified by user input',
-        icon: 'code',
-        label: 'Create Class'
     }
 }

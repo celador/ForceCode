@@ -25,8 +25,6 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.resourceBundle);
             quickpick.push(model.retrievePackage);
             // quickpick.push(model.deployPackage);
-            quickpick.push(model.createClass);
-
         }
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
             let icon: string = getIcon(record.icon);
@@ -63,8 +61,6 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.deployPackage.description:
                     // return commands.deployPackage();
                     break;
-                case model.createClass.description:
-                    return commands.createClass(context);
                 default:
                     break;
             }
