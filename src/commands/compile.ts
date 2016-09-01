@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import sleep from './../util/sleep';
+const parseString = require('xml2js').parseString;
+
 // import {constants} from './../services';
 const UPDATE: boolean = true;
 const CREATE: boolean = false;
@@ -34,6 +36,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       .then(svc => getAuraDefinition(svc))
       .then(results => upsertAuraDefinition(results))
       .then(finished, onError);
+  } else if (toolingType === 'PermissionSet') {
+      Source = document.getText();
+      return vscode.window.forceCode.connect(context)
+        .then(createPermissionSetMetaData);
   } else {
     return vscode.window.forceCode.connect(context)
       .then(svc => svc.newContainer())
@@ -42,6 +48,33 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       .then(getCompileStatus)
       .then(finished, onError);
   }
+
+  // =======================================================================================================================================
+  // ================================                  Permission Sets                  ===========================================
+  // =======================================================================================================================================
+
+  function createPermissionSetMetaData(svc) {
+      vscode.window.setStatusBarMessage('ForceCode: Compiling...');
+      parseString(Source, {explicitArray: false, async: true}, function (err, result) {
+            delete result.PermissionSet['$']; 
+            result.PermissionSet.fullName = fileName;
+            return compileMetadata(result.PermissionSet);
+      });
+  }
+
+  function compileMetadata(metadata) {
+      vscode.window.setStatusBarMessage('ForceCode: Deploying...');
+      vscode.window.forceCode.conn.metadata.upsert(toolingType, [metadata]).then(
+        function(result) {
+          if (result.success) {
+            vscode.window.setStatusBarMessage('ForceCode: Successly deployed ' + result.fullName);
+          } else {
+            var error = result.errors[0];
+            vscode.window.setStatusBarMessage('ForceCode: Error('+ error.fields +') ' + error.message);
+          }
+        });
+  }
+
   // =======================================================================================================================================
   // ================================                Lightning Components               ===========================================
   // =======================================================================================================================================

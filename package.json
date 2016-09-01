@@ -218,7 +218,7 @@
     "typescript": "^1.8.10",
     "unzip": "^0.1.11",
     "vscode": "^0.11.14",
-    "xml2js": "^0.4.16",
+    "xml2js": "^0.4.17",
     "zip": "^1.2.0"
   },
   "devDependencies": {
