@@ -11,7 +11,8 @@ export default function getName(document: vscode.TextDocument, toolingType: stri
 export function getFileName(document: vscode.TextDocument) {
     'use strict';
     var fileName: string = document.fileName.substring(0, document.fileName.lastIndexOf('.'));
-    fileName = fileName.substring(fileName.lastIndexOf('/') + 1, fileName.length);
+    var fileNameArray: string[] = fileName.split(/[\\\/]/);
+    fileName = fileNameArray[fileNameArray.length - 1];
     return fileName;
 }
 function getNameFromClassBody(document: vscode.TextDocument): string {
