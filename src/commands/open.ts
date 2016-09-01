@@ -96,6 +96,7 @@ export default function open(context: vscode.ExtensionContext) {
     return Promise.all(results.map(function (res) {
       var filename: string = '';
       let toolingType: string = res.attributes[TYPEATTRIBUTE];
+      console.log(toolingType);
       if (toolingType === 'AuraDefinition') {
         if (res.DefType && res.DefType.length > 0) {
           var defType: string = res.DefType.toLowerCase().split('').map((c, i) => i === 0 ? c.toUpperCase() : c).join('');
