@@ -41,7 +41,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     } else if (toolingType === 'PermissionSet') {
       Source = document.getText();
       return vscode.window.forceCode.connect(context)
-        .then(createPermissionSetMetaData);
+             .then(createPermissionSetMetaData);
     } else {
         return vscode.window.forceCode.connect(context)
             .then(svc => svc.newContainer())
@@ -68,13 +68,14 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         vscode.window.setStatusBarMessage('ForceCode: Deploying...');
         vscode.window.forceCode.conn.metadata.upsert(toolingType, [metadata]).then(
             function(result) {
-            if (result.success) {
-                vscode.window.setStatusBarMessage('ForceCode: Successly deployed ' + result.fullName);
-            } else {
-                var error = result.errors[0];
-                vscode.window.setStatusBarMessage('ForceCode: Error('+ error.fields +') ' + error.message);
+                if (result.success) {
+                    vscode.window.setStatusBarMessage('ForceCode: Successly deployed ' + result.fullName);
+                } else {
+                    var error = result.errors[0];
+                    vscode.window.setStatusBarMessage('ForceCode: Error('+ error.fields +') ' + error.message);
+                }
             }
-            });
+        );
     }
 
 
