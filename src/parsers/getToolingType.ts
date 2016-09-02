@@ -26,7 +26,7 @@ export default function getToolingTypeFromBody(document: vscode.TextDocument, me
         return member ? 'ApexPageMember' : 'ApexPage';
     }
     if (isPermissionSet || document.fileName.endsWith('.permissionset')) {
-        return member ? 'PermissionSet' : 'PermissionSet';
+        return 'PermissionSet';
     }
     if (isAuraDefinition) {
         return 'AuraDefinition';
