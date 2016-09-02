@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as error from './../util/error';
+
 // import * as moment from 'moment';
 // import * as chalk from 'chalk';
 import * as jsforce from 'jsforce';
@@ -20,7 +22,8 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
     return vscode.window.forceCode.connect(context)
         .then(svc => invokeExecuteAnonymous(apexBody))
         .then(res => runDiagnostics(res, document))
-        .then(showResult, onError);
+        .then(showResult)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
 
     // =========================================================================================================
     // =====================       USING SOAP API      =========================================================
@@ -96,10 +99,10 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
         return true;
     }
 
-    function onError(err) {
-        'use strict';
-        console.error(err);
-    }
+    // function onError(err) {
+    //     'use strict';
+    //     console.error(err);
+    // }
 
     // =========================================================================================================
     // =====================       USING REST API      =========================================================

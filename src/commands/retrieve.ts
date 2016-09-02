@@ -1,17 +1,20 @@
 // 'use strict';
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
-const fetch = require('node-fetch');
-const ZIP = require('zip');
+import * as error from './../util/error';
+const fetch: any = require('node-fetch');
+const ZIP: any = require('zip');
 
 export default function retrieve(context: vscode.ExtensionContext) {
     'use strict';
     vscode.window.setStatusBarMessage('Retrieve Started');
+    const slash: string = vscode.window.forceCode.pathSeparator;
 
     return vscode.window.forceCode.connect(context)
         .then(svc => showPackageOptions(svc.conn))
         .then(opt => getPackage(opt))
-        .then(finished, onError);
+        .then(finished)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -20,7 +23,7 @@ export default function retrieve(context: vscode.ExtensionContext) {
       var requestUrl: string = conn.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
       var headers: any = {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Cookie': 'sid=' + conn.accessToken
+        'Cookie': 'sid=' + conn.accessToken,
       };
       // console.log(conn.accessToken)
       var body: string = 'action=EXTENT&extent=PACKAGES';
@@ -58,7 +61,7 @@ export default function retrieve(context: vscode.ExtensionContext) {
         vscode.window.forceCode.conn.metadata.pollTimeout = (vscode.window.forceCode.config.pollTimeout || 60) * 1000;
         var stream: NodeJS.ReadableStream = vscode.window.forceCode.conn.metadata.retrieve({
           packageNames: [option.description],
-          apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version
+          apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
         }).stream();
         var bufs: any = [];
         stream.on('data', function(d) {
@@ -69,14 +72,14 @@ export default function retrieve(context: vscode.ExtensionContext) {
         });
         stream.on('end', function() {
           vscode.window.setStatusBarMessage('ForceCode: Unzipping... ');
-          var reader = ZIP.Reader(Buffer.concat(bufs));
+          var reader: any[] = ZIP.Reader(Buffer.concat(bufs));
           reader.forEach(function (entry) {
             if (entry.isFile()) {
               var name: string = entry.getName();
               var data: NodeBuffer = entry.getData();
-              var newName: string = name.replace(option.description + '/', '');
+              var newName: string = name.replace(option.description + slash, '');
               vscode.window.setStatusBarMessage('ForceCode: Unzipping ' + newName);
-              fs.outputFileSync(vscode.workspace.rootPath + '/src/' + newName, data);
+              fs.outputFileSync(vscode.workspace.rootPath + slash + 'src' + slash + newName, data);
             }
           });
           resolve();
@@ -91,13 +94,13 @@ export default function retrieve(context: vscode.ExtensionContext) {
         return true;
     }
     // =======================================================================================================================================
-    function onError(err): boolean {
-        vscode.window.setStatusBarMessage('ForceCode Error: ' + err.message);
-        var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-        outputChannel.appendLine('================================================================');
-        outputChannel.appendLine(err.stack);
-        console.error(err);
-        return false;
-    }
+    // function onError(err): boolean {
+    //     vscode.window.setStatusBarMessage('ForceCode Error: ' + err.message);
+    //     var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
+    //     outputChannel.appendLine('================================================================');
+    //     outputChannel.appendLine(err.stack);
+    //     console.error(err);
+    //     return false;
+    // }
     // =======================================================================================================================================
 }

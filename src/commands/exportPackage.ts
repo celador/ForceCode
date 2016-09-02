@@ -1,12 +1,16 @@
 import * as vscode from 'vscode';
 import {IForceService} from './../forceCode';
+import * as error from './../util/error';
+
 
 export default function exportPackage(context) {
     'use strict';
     // const jmt = require('jsforce-metadata-tools');
     return vscode.window.forceCode.connect(context)
         .then(svc => getAllFiles(svc))
-        .then(finished, onError);
+        .then(finished)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -25,13 +29,13 @@ export default function exportPackage(context) {
         return true;
     }
     // =======================================================================================================================================
-    function onError(err): boolean {
-        vscode.window.setStatusBarMessage('ForceCode: Export Error');
-        var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-        outputChannel.appendLine('================================================================');
-        outputChannel.appendLine(err);
-        console.error(err);
-        return false;
-    }
+    // function onError(err): boolean {
+    //     vscode.window.setStatusBarMessage('ForceCode: Export Error');
+    //     var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
+    //     outputChannel.appendLine('================================================================');
+    //     outputChannel.appendLine(err);
+    //     console.error(err);
+    //     return false;
+    // }
     // =======================================================================================================================================
 }

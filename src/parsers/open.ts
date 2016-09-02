@@ -4,7 +4,7 @@ export function getIcon(toolingType: string) {
     'use strict';
     switch (toolingType) {
         case 'ApexClass':
-            return 'file-text';
+            return 'file';
         case 'ApexPage':
             return 'code';
         case 'ApexTrigger':

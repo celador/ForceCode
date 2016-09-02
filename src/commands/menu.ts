@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as commands from './../commands';
 import model from './../models/commands';
-import {getIcon} from './../parsers';
+import * as error from './../util/error';
 
 export default function showMenu(context: vscode.ExtensionContext) {
     'use strict';
@@ -10,7 +10,8 @@ export default function showMenu(context: vscode.ExtensionContext) {
     return vscode.window.forceCode.connect(context)
         .then(svc => displayMenu())
         .then(res => processResult(res))
-        .then(finished, onError);
+        .then(finished)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -25,13 +26,14 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.resourceBundle);
             quickpick.push(model.retrievePackage);
             // quickpick.push(model.deployPackage);
+            quickpick.push(model.createClass);
+
         }
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
-            let icon: string = getIcon(record.icon);
             return {
                 description: `${record.description}`,
                 detail: `${record.detail}`,
-                label: `$(${icon}) ${record.label}`,
+                label: `$(${record.icon}) ${record.label}`,
             };
         });
         let config: {} = {
@@ -61,6 +63,8 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.deployPackage.description:
                     // return commands.deployPackage();
                     break;
+                case model.createClass.description:
+                    return commands.createClass(context);
                 default:
                     break;
             }
@@ -74,14 +78,14 @@ export default function showMenu(context: vscode.ExtensionContext) {
         return true;
     }
     // =======================================================================================================================================
-    function onError(err): boolean {
-        vscode.window.setStatusBarMessage('Error opening menu');
-        vscode.window.showErrorMessage(err.message);
-        var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-        outputChannel.appendLine('================================================================');
-        outputChannel.appendLine(err);
-        console.error(err);
-        return false;
-    }
+    // function onError(err): boolean {
+    //     vscode.window.setStatusBarMessage('Error opening menu');
+    //     vscode.window.showErrorMessage(err.message);
+    //     var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
+    //     outputChannel.appendLine('================================================================');
+    //     outputChannel.appendLine(err);
+    //     console.error(err);
+    //     return false;
+    // }
     // =======================================================================================================================================
 }

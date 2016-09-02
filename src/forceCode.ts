@@ -18,6 +18,8 @@ export interface Config {
 }
 
 export interface IForceService {
+    operatingSystem?: string;
+    pathSeparator?: string;
     config?: Config;
     containerId?: string;
     containerAsyncRequestId?: string;
@@ -29,4 +31,8 @@ export interface IForceService {
     newContainer(): Promise<IForceService>;
     clearLog(): void;
     getConfig(): Config;
+}
+
+export interface ForceCodeError {
+    message: string;
 }
