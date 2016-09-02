@@ -42,7 +42,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       Source = document.getText();
       return vscode.window.forceCode.connect(context)
         .then(createPermissionSetMetaData);
-  } else {
+    } else {
         return vscode.window.forceCode.connect(context)
             .then(svc => svc.newContainer())
             .then(addToContainer)
