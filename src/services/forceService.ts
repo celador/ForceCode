@@ -18,18 +18,18 @@ export default class ForceService implements forceCode.IForceService {
 
     constructor() {
         // Set the ForceCode configuration
+        this.pathSeparator = operatingSystem.isWindows() ? '\\' : '/';
         try {
-            this.config = fs.readJsonSync(vscode.workspace.rootPath + '/force.json');
+            this.config = fs.readJsonSync(vscode.workspace.rootPath + this.pathSeparator + 'force.json');
         } catch (err) {
             this.config = {};
         }
         // Setup username and outputChannel
         this.operatingSystem = operatingSystem.getOS();
-        this.pathSeparator = operatingSystem.isWindows() ? '\\' : '/';
         this.username = this.config.username || '';
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
         this.conn = new jsforce.Connection({
-            loginUrl: this.config.url || 'https://test.salesforce.com'
+            loginUrl: this.config.url || 'https://login.salesforce.com'
         });
     }
     public connect(): Promise<forceCode.IForceService> {
@@ -42,7 +42,7 @@ export default class ForceService implements forceCode.IForceService {
 
     public getConfig() {
         try {
-            this.config = fs.readJsonSync(vscode.workspace.rootPath + '/force.json');
+            this.config = fs.readJsonSync(vscode.workspace.rootPath + this.pathSeparator + 'force.json');
         } catch (err) {
             this.config = {};
         }
@@ -82,9 +82,8 @@ export default class ForceService implements forceCode.IForceService {
         // Lazy-load the connection
         if (self.userInfo === undefined || self.config.username !== self.username || !self.config.password) {
             self.conn = new jsforce.Connection({
-                loginUrl: self.config.url || 'https://test.salesforce.com'
+                loginUrl: self.config.url || 'https://login.salesforce.com'
             });
-
 
             if (!config.username || !config.password) {
                 vscode.window.setStatusBarMessage(`ForceCode: $(alert) Missing Credentials $(alert)`);

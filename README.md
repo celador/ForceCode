@@ -36,7 +36,7 @@ The configuration file should look something like...
     "username": "MonsterMike@Salesforce.com",
     "password": "YourPasswordHere",
     "autoCompile": true,
-    "url": "https://test.salesforce.com",
+    "url": "https://login.salesforce.com",
     "pollTimeout": 120,
     "debugOnly": false,
     "apiVersion": "37.0",

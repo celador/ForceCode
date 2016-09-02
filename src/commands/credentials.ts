@@ -6,7 +6,7 @@ import * as error from './../util/error';
 export default function enterCredentials() {
     'use strict';
     vscode.window.setStatusBarMessage('ForceCode Menu');
-
+    const slash: string = vscode.window.forceCode.pathSeparator;
     return getUsername()
         .then(cfg => getPassword(cfg))
         .then(cfg => getUrl(cfg))
@@ -20,25 +20,13 @@ export default function enterCredentials() {
 
     function getYoForceConfig() {
         // return vscode.workspace.findFiles('force.json', '').then(function (files) {
-        //   var buffer: NodeBuffer = undefined;
         var forceConfig: any = {};
-        //   if (files.length && files[0].path) {
-        //     buffer = fs.readFileSync(files[0].path);
-        //     try {
-        //       forceConfig = JSON.parse(buffer.toString());
-        //     } catch (error) {
-        //       vscode.window.forceCode.outputChannel.appendLine('================================================================');
-        //       vscode.window.forceCode.outputChannel.appendLine(error);
-        //     }
-        //     return Promise.resolve(forceConfig);
-        //   }
         try {
-            forceConfig = fs.readJsonSync(vscode.workspace.rootPath + '/force.json');
+            forceConfig = fs.readJsonSync(vscode.workspace.rootPath + slash + 'force.json');
         } catch (err) {
             // forceConfig = {};
         }
         return Promise.resolve(forceConfig);
-        // });
     }
 
     function getUsername() {
@@ -117,7 +105,7 @@ export default function enterCredentials() {
     // =======================================================================================================================================
     function finished(config) {
         // console.log(config);
-        fs.outputFile(vscode.workspace.rootPath + '/force.json', JSON.stringify(config, undefined, 4));
+        fs.outputFile(vscode.workspace.rootPath + slash + 'force.json', JSON.stringify(config, undefined, 4));
         return config;
     }
 }
