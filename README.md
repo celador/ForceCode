@@ -1,6 +1,10 @@
 # ForceCode for Visual Studio Code
 
 This extension is a companion for SFDC development with Visual Studio Code.
+It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.
+There's no complicated setup process or project configurations, no external apps to keep open, and no jarring errors knocking you out of your flow.
+
+To get syntax highlighting, make sure you install the Visualforce and Apex extensions.
 
 ## Issues
 
@@ -14,18 +18,12 @@ I will try to be as responsive as possible to reported issues.
 * View Debug Logs
 * Open / Retrieve a file
 * Save / Compile / Deploy a file
-  * w/ line errors in the editor
-  * Works with Lightning Components
+  * Works with Classes, Triggers, Components, Pages, and Lightning Components
+  * Provides line errors in the editor
 * Retrieve Package
 * Bundle & Deploy Static Resource
-* [Not fully implemented] Deploy Package
-
-## Special Notes
-
-VSCode recently started the bad habit of closing the text inputs when the app loses focus.
-This has causes some people to have trouble logging in because they have can't copy/paste the credentials.
-In that case, create a file called `force.json` in the root of your currently opened project folder and copy the configuration from below.
-In the future, to ameliorate the current situation, I will persist this configuration file after every input, so copy/paste will be possible.
+* Create Classes from templates
+* ~~Deploy Package~~
 
 ## Configuration
 
@@ -42,13 +40,19 @@ The configuration file should look something like...
     "pollTimeout": 120,
     "debugOnly": false,
     "apiVersion": "37.0",
-    "enableSeperationOfConcerns": true
 }
 ```
 
+**Special Note**
+VSCode recently started the bad habit of closing the text inputs when the app loses focus.
+This has caused some people to have trouble logging in because they have can't copy/paste their credentials.
+In that case, create the `force.json` file in the root of your currently opened project folder and copy the configuration from above.
+In the future, to ameliorate the current situation, I will persist this configuration file after every input, so copy/paste will be a bit easier.
+
 ## Get errors as you type
 
-The Auto-compile feature adds a hook to the save command that will automatically deploy and compile your code to your SFDC org whenever you save.  This works great with VSCode's autosave feature, providing errors as you type.
+The Auto-compile feature adds a hook to the save command that will automatically deploy and compile your code to your SFDC org whenever you save.  
+This works great with VSCode's autosave feature, providing errors as you type.
 
 ## Commands
 
@@ -64,7 +68,8 @@ To only show the User Debug lines, you can set the `debugOnly` setting to `true`
 
 \>Force: Save/Deploy/Compile
 Keyboard: alt + cmd + s
-To automatically compile/save your changes to Salesforce when the file is saved locally, you can set the `autoCompile` setting to `true`.  Otherwise, you will need to use alt + cmd + s to save/compile your file.
+To automatically compile/save your changes to Salesforce when the file is saved locally, you can set the `autoCompile` setting to `true`.  
+Otherwise, you will need to use alt + cmd + s to save/compile your file.
 
 ### Open
 
@@ -90,13 +95,14 @@ The `pollTimeout` setting is used to determine how long you should wait for the 
 
 \>ForceCode Menu -> Create Class
 This will automatically create classes based on `apiVersion` else it defaults to '37.0'.
-Enabling `enableSeperationOfConcerns` will prompt for class type and automatically append class type to class name else
-it defaults to true.
+
+**SPECIAL NOTE**  You can create Classes, Triggers, Components, and Pages by simply creating the file anywhere in your project structure. 
+When you save it, it'll create the file if it doesn't exist, and update it if it does. 
+The manual process doesn't automatically create the meta.xml file, so doesn't work seamlessly with CI, but if all you want to do is open a file, modify it and save it, there's no easier way than with this extension.
 
 ## Future goals
 
 * Test runner
 * Intellisense code completion
 * Debug Apex code with breakpoints in the editor
-* Add interfaces to Create Class
-* Allow class type overrides in Create Class
+* Integrate with Yo Force to provide scaffolding of files. 
