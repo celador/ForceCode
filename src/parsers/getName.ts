@@ -10,6 +10,7 @@ export default function getName(document: vscode.TextDocument, toolingType: stri
 }
 export function getFileName(document: vscode.TextDocument) {
     'use strict';
+    const slash: string = vscode.window.forceCode.pathSeparator;
     var fileName: string = document.fileName.substring(0, document.fileName.lastIndexOf('.'));
     var fileNameArray: string[] = fileName.split(/[\\\/]/);
     fileName = fileNameArray[fileNameArray.length - 1];
@@ -17,8 +18,9 @@ export function getFileName(document: vscode.TextDocument) {
 }
 function getNameFromClassBody(document: vscode.TextDocument): string {
     'use strict';
-    var fileNameArray: string[] = getFileName(document).split('\\');
-    var fileName: string = fileNameArray[fileNameArray.length-1];
+    const slash: string = vscode.window.forceCode.pathSeparator;
+    var fileNameArray: string[] = getFileName(document).split(slash);
+    var fileName: string = fileNameArray[fileNameArray.length - 1];
     var bodyParts: string[] = document.getText().split(/(extends|implements|\{)/);
     var firstLine: string = bodyParts.length && bodyParts[0];
     var words: string[] = firstLine.trim().split(' ');
@@ -30,8 +32,9 @@ function getNameFromClassBody(document: vscode.TextDocument): string {
 }
 export function getAuraNameFromFileName(fileName: string): string {
     'use strict';
-    var parts: string[] = fileName.split('src/aura/');
-    var auraNameParts: string[] = (parts && parts.length) > 1 ? parts[1].split('/') : undefined;
+    const slash: string = vscode.window.forceCode.pathSeparator;
+    var parts: string[] = fileName.split(`src${slash}aura${slash}`);
+    var auraNameParts: string[] = (parts && parts.length) > 1 ? parts[1].split(new RegExp(slash)) : undefined;
     var auraName: string = (auraNameParts && auraNameParts.length) > 0 ? auraNameParts[0] : undefined;
     return auraName;
 }

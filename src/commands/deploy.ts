@@ -4,6 +4,8 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as archiver from 'archiver';
 import * as path from 'path';
+import * as error from './../util/error';
+
 const nz = require('node-zip');
 const conn = vscode.window.forceCode.conn;
 
@@ -13,7 +15,8 @@ export default function deploy(context: vscode.ExtensionContext) {
 
   return vscode.window.forceCode.connect(context)
     .then(svc => deployPackage(svc.conn))
-    .then(finished, onError);
+    .then(finished)
+    .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
   // =======================================================================================================================================
   // =======================================================================================================================================
   // =======================================================================================================================================
@@ -49,14 +52,14 @@ export default function deploy(context: vscode.ExtensionContext) {
     return true;
   }
   // =======================================================================================================================================
-  function onError(err): boolean {
-    vscode.window.setStatusBarMessage('ForceCode: Error Retrieving Package');
-    var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-    outputChannel.appendLine('================================================================');
-    outputChannel.appendLine(err);
-    console.error(err);
-    return false;
-  }
+//   function onError(err): boolean {
+//     vscode.window.setStatusBarMessage('ForceCode: Error Retrieving Package');
+//     var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
+//     outputChannel.appendLine('================================================================');
+//     outputChannel.appendLine(err);
+//     console.error(err);
+//     return false;
+//   }
   // =======================================================================================================================================
 }
 
