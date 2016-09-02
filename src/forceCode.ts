@@ -18,6 +18,8 @@ export interface Config {
 }
 
 export interface IForceService {
+    operatingSystem?: string;
+    pathSeparator?: string;
     config?: Config;
     containerId?: string;
     containerAsyncRequestId?: string;

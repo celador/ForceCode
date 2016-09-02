@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -214,6 +214,7 @@
     "moment": "^2.11.2",
     "node-fetch": "^1.5.3",
     "node-zip": "^1.1.1",
+    "os": "^0.1.1",
     "sequin": "^0.1.0",
     "typescript": "^1.8.10",
     "unzip": "^0.1.11",

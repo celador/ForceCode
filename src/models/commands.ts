@@ -11,7 +11,7 @@ export default {
     executeAnonymous: {
         description: 'Execute code and get the debug log',
         detail: 'If you have a block of text selected, it will run that, otherwise it will use the text of the active file.',
-        icon: 'bug',
+        icon: 'terminal',
         label: 'Execute Anonymous',
     },
     // Compile/Deploy
@@ -38,29 +38,29 @@ export default {
     // Get Log(s)
     getLogs: {
         description: 'Display a list of the last ten logs.',
-        detail: 'to be improved',
+        detail: 'Get recent logs',
         icon: 'unfold',
         label: 'Get Logs',
     },
     // Open File
     openFile: {
         description: 'Open Classes, Pages, Triggers, and Components',
-        detail: 'to be expanded',
-        icon: 'file-text',
+        detail: 'Open some files from your org to work with.',
+        icon: 'desktop-download',
         label: 'Open Salesforce File',
     },
     // Build/Deploy Resource Bundle(s)
     resourceBundle: {
         description: 'Build and Deploy a resource bundle.',
-        detail: 'Uses the MavensMate convention of a resource-bundle foleder',
-        icon: 'flame',
+        detail: 'Create the Static Resource from the resource-bundle folder and deploy it to your org.',
+        icon: 'file-zip',
         label: 'Build Resource Bundle',
     },
     // Create Classes
     createClass: {
-        description: 'Create a Service, Domain, Selector class.',
-        detail: 'Finds your classes folder and inserts the metadata and class specified by user input',
-        icon: 'code',
+        description: 'Create a Repository, Model, Service, or Controller class.',
+        detail: 'Creates classes based on common separation of concerns patterns',
+        icon: 'plus',
         label: 'Create Class'
     }
 }

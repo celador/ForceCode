@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import sleep from './../util/sleep';
 import * as error from './../util/error';
-// import {constants} from './../services';
+
 const UPDATE: boolean = true;
 const CREATE: boolean = false;
 
@@ -16,12 +16,14 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     const fileName: string = parsers.getFileName(document);
     const name: string = parsers.getName(document, toolingType);
     // To be defined further down`
+/* tslint:disable */ 
     var DefType: string = undefined;
     var Format: string = undefined;
     var Source: string = undefined;
     var currentObjectDefinition: any = undefined;
     var AuraDefinitionBundleId: string = undefined;
     var Id: string = undefined;
+/* tslint:enable */
     // Start doing stuff
     if (toolingType === undefined) {
         return Promise
@@ -107,6 +109,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                     // RENDERER — client-side renderer
                     return 'RENDERER';
                 };
+                break;
             default:
                 throw `Unknown extension: ${extension} .`;
         }
@@ -205,7 +208,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 if (isFinished(res)) {
                     return res;
                 } else if (checkCount > 30) {
-                    throw 'Timeout';
+                    throw {message: 'Timeout'};
                 } else {
                     return sleep(1000).then(nextStatus);
                 }
@@ -269,11 +272,11 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         if (toolingType === '   ') {
             var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
             var diagnostics: vscode.Diagnostic[] = [];
-            var splitString = err.message.split(fileName + ':');
-            var partTwo = splitString.length > 1 ? splitString[1] : '1,1:Unknown error';
-            var idx = partTwo.indexOf(':');
-            var rangeArray = partTwo.substring(0, idx).split(',');
-            var errorMessage = partTwo.substring(idx);
+            var splitString: string[] = err.message.split(fileName + ':');
+            var partTwo: string = splitString.length > 1 ? splitString[1] : '1,1:Unknown error';
+            var idx: number = partTwo.indexOf(':');
+            var rangeArray: any[] = partTwo.substring(0, idx).split(',');
+            var errorMessage: string = partTwo.substring(idx);
             var failureLineNumber: number = rangeArray[0];
             var failureColumnNumber: number = rangeArray[1];
             var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;

@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as commands from './../commands';
 import model from './../models/commands';
-import {getIcon} from './../parsers';
 import * as error from './../util/error';
 
 export default function showMenu(context: vscode.ExtensionContext) {
@@ -31,11 +30,10 @@ export default function showMenu(context: vscode.ExtensionContext) {
 
         }
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
-            let icon: string = getIcon(record.icon);
             return {
                 description: `${record.description}`,
                 detail: `${record.detail}`,
-                label: `$(${icon}) ${record.label}`,
+                label: `$(${record.icon}) ${record.label}`,
             };
         });
         let config: {} = {

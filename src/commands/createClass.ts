@@ -1,143 +1,113 @@
-'use strict';
-
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
-import * as path from 'path';
-import {getIcon} from './../parsers';
+import {configuration} from './../services';
 
 export default function createClass(context: vscode.ExtensionContext) {
-
-    const classesPath = `${vscode.workspace.rootPath}/src/classes`;
-    getYoForceConfig().then(config => {
-        if (config.enableSeperationOfConcerns || true) {
-            userClassSelection().then(function(selectedOption) {
-                generateFile(selectedOption, config);
-            });
-        } else {
-            var selectedOption = {
-                label: ''
+    const slash: string = vscode.window.forceCode.pathSeparator;
+    const classesPath: string = `${vscode.workspace.rootPath}${slash}src${slash}classes`;
+    return configuration().then(config => {
+        return userClassSelection().then(selectedOption => {
+            if (selectedOption) {
+                return userFileNameSelection(selectedOption.label).then(filename => {
+                    if (filename) {
+                        generateFile(filename, config);
+                    }
+                });
             }
-            generateFile(selectedOption, config);
-        }
+        });
     });
 
-    function generateFile(selectedOption, config) {
-        userFileNameSelection(selectedOption.label).then(function(getFileName) {
-            fs.stat(classesPath + '/' + getFileName + '.cls', function(err) {
-                if (err == null) {
-                    vscode.window.setStatusBarMessage('A file with this name already exists!');
-                    vscode.window.showErrorMessage('A file with this name already exists!');
-                } else if (err.code == 'ENOENT') {
-                    var classFile = 'public class ' + getFileName + ' { \n';
-                    classFile += '\n}';
-                    fs.writeFile(classesPath + '/' + getFileName + '.cls', classFile, function(err) {
-                        if (err) {
-                            vscode.window.setStatusBarMessage(err.message);
-                            vscode.window.showErrorMessage(err.message);
-                        } else {
-                            vscode.window.setStatusBarMessage(getFileName + ' was sucessfully created');
-                        }
-                    });
-                } else {
-                    vscode.window.setStatusBarMessage(err.code);
-                    vscode.window.showErrorMessage(err.code);
-                }
-            });
-
-            fs.stat(classesPath + '/' + getFileName + '.cls-meta.xml', function(err) {
-                if (err == null) {
-                    vscode.window.setStatusBarMessage('A file with this name already exists!');
-                    vscode.window.showErrorMessage('A file with this name already exists!');
-                } else if (err.code == 'ENOENT') {
-                    var metaFile = '<?xml version="1.0" encoding="UTF-8"?>\n';
-                    metaFile += '    <apiVersion>' + (config.apiVersion || '37.0') + '</apiVersion>\n';
-                    metaFile += '    <status>Active</status>\n';
-                    metaFile += '</ApexClass>';
-
-                    fs.writeFile(classesPath + '/' + getFileName + '.cls-meta.xml', metaFile, function(err) {
-                        if (err) {
-                            vscode.window.setStatusBarMessage(err.message);
-                            vscode.window.showErrorMessage(err.message);
-                        }
-                    });
-                } else {
-                    vscode.window.setStatusBarMessage(err.code);
-                }    
-            });
-        });
-    }
-    
-    function getYoForceConfig() {
-        var forceConfig: any = {};
-        try {
-            forceConfig = fs.readJsonSync(vscode.workspace.rootPath + '/force.json');
-        } catch (err) {
-        }
-        return Promise.resolve(forceConfig);
-    }
     function userClassSelection() {
-        let options: vscode.QuickPickItem[] = [{
-            icon: 'code',
-            title: 'Selector',
-            description: 'Selector layer contains code responsible for querying records from the database.'
-        }, {
-            icon: 'code',
-            title: 'Domain',
-            description: 'Called into by the Service contains the execution logic of business tasks, calculations, and processes.'
-        }, {
-            icon: 'code',
-            title: 'Service',
-            description: 'A Service Layer contains code implementation of business tasks, calculations, and processes.'
-        }].map(res => {
-            let icon: string = getIcon(res.icon);
+        var classOptions: any = [
+            {
+                title: 'Repository',
+                description: 'The Repository layer contains code responsible for querying records from the database.',
+            }, {
+                title: 'Controller',
+                description: 'The Controller layer marshals data from the service to provide to the view.',
+            }, {
+                title: 'Model',
+                description: 'Plain Old Class Objects used to normalize data from repositories.',
+            }, {
+                title: 'Service',
+                description: 'The Service Layer contains business logic, calculations, and processes.',
+            },
+        ];
+        let options: vscode.QuickPickItem[] = classOptions.map(res => {
             return {
-            description: `${res.description}`,
-            label: `${res.title}`,
+                description: res.description,
+                label: res.title,
             };
         });
-        return vscode.window.showQuickPick(options).then((res: vscode.QuickPickItem) => {
-            return res;
-        });
+        return vscode.window.showQuickPick(options);
     }
 
     function userFileNameSelection(classType) {
         let options: vscode.InputBoxOptions = {
-            placeHolder: 'Foo' + classType + '.cls',
-            prompt: 'Enter ' + classType + ' class name.'
+            placeHolder: 'Base name',
+            prompt: `Enter ${classType} class name. ${classType}.cls will appended to this name`,
         };
-        return vscode.window.showInputBox(options).then(function (result: string) {
-            var definedErrors = {
-                error: false,
-                message: ''
-            }
-            if (result.length < 1) {
-                definedErrors.message += 'Enter a filename';
-            }
-            if (result.indexOf(' ') > -1) {
-                if (definedErrors.error) {
-                    definedErrors.message += '\n'
+        return vscode.window.showInputBox(options).then(classname => {
+            if (classname) {
+                if (classname.indexOf(' ') > -1) {
+                    classname = classname.replace(' ', '');
                 }
-                definedErrors.message += 'No spaces in a file name';
-            }
-            if (result.indexOf('.cls') > -1) {
-                if (definedErrors.error) {
-                    definedErrors.message += '\n'
+                if (classname.endsWith('.cls')) {
+                    classname = classname.substring(0, classname.lastIndexOf('.cls'));
                 }
-                definedErrors.message += 'No need to append .cls we will do that for you';
+                return classname + classType;
             }
-
-            if (result.indexOf(classType) > -1) {
-                if (definedErrors.error) {
-                    definedErrors.message += '\n'
-                }
-                definedErrors.message += 'No need to append class type we will do that for you';
-            }
-
-            if (definedErrors.error) {
-                vscode.window.setStatusBarMessage(definedErrors.message);
-                vscode.window.showErrorMessage(definedErrors.message);
-            }
-            return result;
+            return undefined;
         });
     }
+
+    function generateFile(classname, config) {
+        // Write Class file
+        var finalClassName: string = classesPath + slash + classname + '.cls';
+        fs.stat(finalClassName, function (err, stats) {
+            if (!err) {
+                vscode.window.setStatusBarMessage('ForceCode: Error creating file');
+                vscode.window.showErrorMessage('Cannot create ' + finalClassName + '. A file with that name already exists!');
+            } else if (err.code === 'ENOENT') {
+                var classFile: string = `public class ${classname} {
+
+}`;
+                fs.writeFile(finalClassName, classFile, function (writeErr) {
+                    if (writeErr) {
+                        vscode.window.setStatusBarMessage(writeErr.message);
+                        vscode.window.showErrorMessage(writeErr.message);
+                    } else {
+                        vscode.window.setStatusBarMessage('ForceCode: $(check)' + classname + ' was sucessfully created');
+                    }
+                });
+            } else {
+                vscode.window.setStatusBarMessage(err.code);
+                vscode.window.showErrorMessage(err.code);
+            }
+        });
+        // Write Metadata file
+        var finalMetadataName: string = classesPath + slash + classname + '.cls-meta.xml';
+        fs.stat(finalMetadataName, function (err, stats) {
+            if (!err) {
+                vscode.window.setStatusBarMessage('ForceCode: Error creating file');
+                vscode.window.showErrorMessage('Cannot create ' + finalMetadataName + '. A file with that name already exists!');
+            } else if (err.code === 'ENOENT') {
+
+                var metaFile: string = `<?xml version="1.0" encoding="UTF-8"?>
+    <apiVersion> ${config.apiVersion || 37.0} + </apiVersion>
+    <status>Active</status>
+</ApexClass>`;
+
+                fs.writeFile(finalMetadataName, metaFile, function (writeError) {
+                    if (writeError) {
+                        vscode.window.setStatusBarMessage(writeError.message);
+                        vscode.window.showErrorMessage(writeError.message);
+                    }
+                });
+            } else {
+                vscode.window.setStatusBarMessage(err.code);
+            }
+        });
+    }
+
 }

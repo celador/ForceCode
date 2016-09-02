@@ -10,7 +10,6 @@ export default function getToolingTypeFromBody(document: vscode.TextDocument, me
     var isPage: RegExpMatchArray = document.getText().trim().match(/^<\s*apex:page/g);
     var isComponent: RegExpMatchArray = document.getText().trim().match(/^<\s*apex:component/g);
     var isAuraDefinition: RegExpMatchArray = document.fileName.match(/aura/g);
-    // var isField: boolean = false;
 
     if (isClass || document.fileName.endsWith('.cls')) {
         return member ? 'ApexClassMember' : 'ApexClass';
@@ -24,9 +23,6 @@ export default function getToolingTypeFromBody(document: vscode.TextDocument, me
     if (isPage || document.fileName.endsWith('.page')) {
         return member ? 'ApexPageMember' : 'ApexPage';
     }
-    // if (isField) {
-    //     return member ? 'ApexFieldMember' : 'ApexField';
-    // }
     if (isAuraDefinition.length) {
         return 'AuraDefinition';
     }
