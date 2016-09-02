@@ -51,7 +51,7 @@ In the future, to ameliorate the current situation, I will persist this configur
 
 ## Get errors as you type
 
-The Auto-compile feature adds a hook to the save command that will automatically deploy and compile your code to your SFDC org whenever you save.  
+The Auto-compile feature adds a hook to the save command that will automatically deploy and compile your code to your SFDC org whenever you save.
 This works great with VSCode's autosave feature, providing errors as you type.
 
 ## Commands
@@ -68,7 +68,7 @@ To only show the User Debug lines, you can set the `debugOnly` setting to `true`
 
 \>Force: Save/Deploy/Compile
 Keyboard: alt + cmd + s
-To automatically compile/save your changes to Salesforce when the file is saved locally, you can set the `autoCompile` setting to `true`.  
+To automatically compile/save your changes to Salesforce when the file is saved locally, you can set the `autoCompile` setting to `true`.
 Otherwise, you will need to use alt + cmd + s to save/compile your file.
 
 ### Open
@@ -96,8 +96,8 @@ The `pollTimeout` setting is used to determine how long you should wait for the 
 \>ForceCode Menu -> Create Class
 This will automatically create classes based on `apiVersion` else it defaults to '37.0'.
 
-**SPECIAL NOTE**  You can create Classes, Triggers, Components, and Pages by simply creating the file anywhere in your project structure. 
-When you save it, it'll create the file if it doesn't exist, and update it if it does. 
+**SPECIAL NOTE**  You can create Classes, Triggers, Components, and Pages by simply creating the file anywhere in your project structure.
+When you save it, it'll create the file if it doesn't exist, and update it if it does.
 The manual process doesn't automatically create the meta.xml file, so doesn't work seamlessly with CI, but if all you want to do is open a file, modify it and save it, there's no easier way than with this extension.
 
 ## Future goals
@@ -105,4 +105,4 @@ The manual process doesn't automatically create the meta.xml file, so doesn't wo
 * Test runner
 * Intellisense code completion
 * Debug Apex code with breakpoints in the editor
-* Integrate with Yo Force to provide scaffolding of files. 
+* Integrate with Yo Force to provide scaffolding of files.
