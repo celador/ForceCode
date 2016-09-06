@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import sleep from './../util/sleep';
 import * as error from './../util/error';
-const parseString = require('xml2js').parseString;
+const parseString: any = require('xml2js').parseString;
 
 const UPDATE: boolean = true;
 const CREATE: boolean = false;
@@ -16,7 +16,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     const toolingType: string = parsers.getToolingType(document);
     const fileName: string = parsers.getFileName(document);
     const name: string = parsers.getName(document, toolingType);
-    // To be defined further down`
 /* tslint:disable */ 
     var DefType: string = undefined;
     var Format: string = undefined;
@@ -34,6 +33,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         DefType = getAuraDefTypeFromDocument(document);
         Format = getAuraFormatFromDocument(document);
         Source = document.getText();
+        
         return vscode.window.forceCode.connect(context)
             .then(svc => getAuraDefinition(svc))
             .then(results => upsertAuraDefinition(results))
@@ -58,7 +58,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     function createPermissionSetMetaData(svc) {
         vscode.window.setStatusBarMessage('ForceCode: Compiling...');
         parseString(Source, {explicitArray: false, async: true}, function (err, result) {
-                delete result.PermissionSet['$']; 
+                delete result.PermissionSet['$'];
                 result.PermissionSet.fullName = fileName;
                 return compileMetadata(result.PermissionSet);
         });
@@ -71,8 +71,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 if (result.success) {
                     vscode.window.setStatusBarMessage('ForceCode: Successly deployed ' + result.fullName);
                 } else {
-                    var error = result.errors[0];
-                    vscode.window.setStatusBarMessage('ForceCode: Error('+ error.fields +') ' + error.message);
+                    var error: any = result.errors[0];
+                    vscode.window.setStatusBarMessage('ForceCode: Error(' + error.fields + ') ' + error.message);
                 }
             }
         );
@@ -106,6 +106,16 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                     throw { message: 'Bundle not yet created' };
                 });
             }
+        } else {
+            // Create Aura Definition Bundle
+            return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').create({
+                'DeveloperName': name,
+                'MasterLabel': name,
+                'ApiVersion': vscode.window.forceCode.config.apiVersion || '37.0',
+                'Description': name.replace('_', ' '),
+            }).then(bundle => {
+                return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle.id, DefType, Format, Source });
+            });
         }
     }
     function getAuraDefTypeFromDocument(doc: vscode.TextDocument) {
