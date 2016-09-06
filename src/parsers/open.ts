@@ -37,6 +37,8 @@ export function getExtension(toolingType: string) {
             return 'component';
         case 'ApexLog':
             return 'log';
+        case 'PermissionSet':
+            return 'permissionset';
         case 'Controller':
         case 'Helper':
         case 'Renderer':
@@ -70,6 +72,8 @@ export function getFolder(toolingType: string) {
             return 'components';
         case 'ApexLog':
             return 'logs';
+        case 'PermissionSet':
+            return 'permissionsets';
         default:
             return 'classes';
     }

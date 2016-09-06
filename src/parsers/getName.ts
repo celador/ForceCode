@@ -12,7 +12,8 @@ export function getFileName(document: vscode.TextDocument) {
     'use strict';
     const slash: string = vscode.window.forceCode.pathSeparator;
     var fileName: string = document.fileName.substring(0, document.fileName.lastIndexOf('.'));
-    fileName = fileName.substring(fileName.lastIndexOf(slash) + 1, fileName.length);
+    var fileNameArray: string[] = fileName.split(/[\\\/]/);
+    fileName = fileNameArray[fileNameArray.length - 1];
     return fileName;
 }
 function getNameFromClassBody(document: vscode.TextDocument): string {
