@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
 import * as error from './../util/error';
-
-// import * as moment from 'moment';
-// import * as chalk from 'chalk';
+import { configuration } from './../services';
 import * as jsforce from 'jsforce';
 
 export interface IExecuteAnonymousService {
@@ -90,27 +88,19 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
     }
     function showResult(res) {
         'use strict';
-        vscode.window.forceCode.outputChannel.clear();
-        let debugOnly: string = res.header.debugLog.split('\n').filter(l => l.match(/USER_DEBUG/)).join('\n');
-        let config: any = vscode.workspace.getConfiguration('force');
-        let log: string = config.debugOnly ? debugOnly : res.header.debugLog;
-        vscode.window.forceCode.outputChannel.appendLine(log);
-        vscode.window.forceCode.outputChannel.show();
-        return true;
+        return configuration().then(config => {
+            vscode.window.forceCode.outputChannel.clear();
+            vscode.window.forceCode.outputChannel.appendLine(debugOnly(config.debugOnly));
+            vscode.window.forceCode.outputChannel.show();
+            return res;
+        })
+        function debugOnly(shouldShowOnlyDebugLines) {
+            if (shouldShowOnlyDebugLines) {
+                return res.header.debugLog.split('\n').filter(l => l.match(/USER_DEBUG/)).join('\n');
+            } else {
+                return res.header.debugLog;
+            }
+        }
     }
 
-    // function onError(err) {
-    //     'use strict';
-    //     console.error(err);
-    // }
-
-    // =========================================================================================================
-    // =====================       USING REST API      =========================================================
-    // =========================================================================================================
-
-    // function execute(traceFlagResult: any): any {
-    //     'use strict';
-    //     executeAnonymousService.traceFlagId = traceFlagResult.id;
-    //     return executeAnonymousService.connection.tooling.executeAnonymous(executeAnonymousService.apexBody);
-    // }
 }
