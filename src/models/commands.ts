@@ -2,7 +2,7 @@ export default {
     // Enter Salesforce Credentials
     enterCredentials : {
         description: 'Enter the credentials you wish to use.',
-        detail: 'If you are already logged in, you will be logged out of your prebious session.',
+        detail: 'If you are already logged in, you will be logged out of your previous session.',
         icon: 'key',
         label: 'Enter Credentials',
     },
