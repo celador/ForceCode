@@ -68,7 +68,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 metadata.fullName = fileName;
                 resolve(compileMetadata(metadata));
             });
-        })
+        });
     }
 
     function compileMetadata(metadata) {
@@ -80,7 +80,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                     return result;
                 } else {
                     var error: any = result.errors[0];
-                    throw {message: error};
+                    throw { message: error };
                 }
             }
         );
@@ -321,27 +321,51 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // =======================================================================================================================================
     function onError(err): boolean {
         if (toolingType === '   ') {
-            var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
-            var diagnostics: vscode.Diagnostic[] = [];
-            var splitString: string[] = err.message.split(fileName + ':');
-            var partTwo: string = splitString.length > 1 ? splitString[1] : '1,1:Unknown error';
-            var idx: number = partTwo.indexOf(':');
-            var rangeArray: any[] = partTwo.substring(0, idx).split(',');
-            var errorMessage: string = partTwo.substring(idx);
-            var failureLineNumber: number = rangeArray[0];
-            var failureColumnNumber: number = rangeArray[1];
-            var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
-            if (failureColumnNumber > 0) {
-                failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));
-            }
-            diagnostics.push(new vscode.Diagnostic(failureRange, errorMessage, 0));
-            diagnosticCollection.set(document.uri, diagnostics);
-
-            error.outputError(err, vscode.window.forceCode.outputChannel);
-            return false;
+            return toolingError(err);
+        } else if (toolingType === 'CustomObject') {
+            return metadataError(err);
         } else {
             error.outputError(err, vscode.window.forceCode.outputChannel);
         }
     }
+
+    function toolingError(err) {
+        var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
+        var diagnostics: vscode.Diagnostic[] = [];
+        var splitString: string[] = err.message.split(fileName + ':');
+        var partTwo: string = splitString.length > 1 ? splitString[1] : '1,1:Unknown error';
+        var idx: number = partTwo.indexOf(':');
+        var rangeArray: any[] = partTwo.substring(0, idx).split(',');
+        var errorMessage: string = partTwo.substring(idx);
+        var failureLineNumber: number = rangeArray[0];
+        var failureColumnNumber: number = rangeArray[1];
+        var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
+        if (failureColumnNumber > 0) {
+            failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));
+        }
+        diagnostics.push(new vscode.Diagnostic(failureRange, errorMessage, 0));
+        diagnosticCollection.set(document.uri, diagnostics);
+
+        error.outputError(err, vscode.window.forceCode.outputChannel);
+        return false;
+    }
+    function metadataError(err) {
+        var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
+        var diagnostics: vscode.Diagnostic[] = [];
+        var errorInfo: string[] = err.message.split('\n');
+        var line: number = Number(errorInfo[1].split('Line: ')[1]);
+        var col: number = Number(errorInfo[2].split('Column: ')[1]);
+        var failureRange: vscode.Range = document.lineAt(line).range;
+        if (col > 0) {
+            failureRange = failureRange.with(new vscode.Position((line), col));
+        }
+        diagnostics.push(new vscode.Diagnostic(failureRange, errorInfo[0] + errorInfo[3], 0));
+        diagnosticCollection.set(document.uri, diagnostics);
+
+        error.outputError(err, vscode.window.forceCode.outputChannel);
+        return false;
+
+    }
+
     // =======================================================================================================================================
 }
