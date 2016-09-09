@@ -16,14 +16,14 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     const toolingType: string = parsers.getToolingType(document);
     const fileName: string = parsers.getFileName(document);
     const name: string = parsers.getName(document, toolingType);
-/* tslint:disable */ 
+    /* tslint:disable */
     var DefType: string = undefined;
     var Format: string = undefined;
     var Source: string = undefined;
     var currentObjectDefinition: any = undefined;
     var AuraDefinitionBundleId: string = undefined;
     var Id: string = undefined;
-/* tslint:enable */
+    /* tslint:enable */
     // Start doing stuff
     if (toolingType === undefined) {
         return Promise
@@ -33,15 +33,16 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         DefType = getAuraDefTypeFromDocument(document);
         Format = getAuraFormatFromDocument(document);
         Source = document.getText();
-        
+
         return vscode.window.forceCode.connect(context)
             .then(svc => getAuraDefinition(svc))
             .then(results => upsertAuraDefinition(results))
             .then(finished, onError);
-    } else if (toolingType === 'PermissionSet') {
-      Source = document.getText();
-      return vscode.window.forceCode.connect(context)
-             .then(createPermissionSetMetaData);
+    } else if (toolingType === 'PermissionSet' || toolingType === 'CustomObject') {
+        Source = document.getText();
+        return vscode.window.forceCode.connect(context)
+            .then(createMetaData)
+            .then(finished, onError);
     } else {
         return vscode.window.forceCode.connect(context)
             .then(svc => svc.newContainer())
@@ -51,34 +52,39 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             .then(finished, onError);
     }
 
-  // =======================================================================================================================================
-  // ================================                  Permission Sets                  ===========================================
-  // =======================================================================================================================================
+    // =======================================================================================================================================
+    // ================================                  All Metadata                  ===========================================
+    // =======================================================================================================================================
 
-    function createPermissionSetMetaData(svc) {
-        vscode.window.setStatusBarMessage('ForceCode: Compiling...');
-        parseString(Source, {explicitArray: false, async: true}, function (err, result) {
-                delete result.PermissionSet['$'];
-                result.PermissionSet.fullName = fileName;
-                return compileMetadata(result.PermissionSet);
-        });
+    function createMetaData(svc) {
+        vscode.window.setStatusBarMessage('ForceCode: Create Metadata');
+        return new Promise(function (resolve, reject) {
+            parseString(Source, { explicitArray: false, async: true }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                var metadata: any = result[toolingType];
+                delete metadata['$'];
+                metadata.fullName = fileName;
+                resolve(compileMetadata(metadata));
+            });
+        })
     }
 
     function compileMetadata(metadata) {
         vscode.window.setStatusBarMessage('ForceCode: Deploying...');
-        vscode.window.forceCode.conn.metadata.upsert(toolingType, [metadata]).then(
-            function(result) {
+        return vscode.window.forceCode.conn.metadata.upsert(toolingType, [metadata]).then(
+            function (result) {
                 if (result.success) {
                     vscode.window.setStatusBarMessage('ForceCode: Successly deployed ' + result.fullName);
+                    return result;
                 } else {
                     var error: any = result.errors[0];
-                    vscode.window.setStatusBarMessage('ForceCode: Error(' + error.fields + ') ' + error.message);
+                    throw {message: error};
                 }
             }
         );
     }
-
-
 
     // =======================================================================================================================================
     // ================================                Lightning Components               ===========================================
@@ -253,7 +259,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 if (isFinished(res)) {
                     return res;
                 } else if (checkCount > 30) {
-                    throw {message: 'Timeout'};
+                    throw { message: 'Timeout' };
                 } else {
                     return sleep(1000).then(nextStatus);
                 }
