@@ -118,7 +118,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
     function getFileList(root) {
         // Throw if not a directory
 
-        if (!fs.lstatSync(root).isDirectory()) {
+        if (!fs.statSync(root).isDirectory()) {
             throw new Error('');
         }
 
