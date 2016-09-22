@@ -299,7 +299,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
     var diagnostics: vscode.Diagnostic[] = [];
     if (res.records && res.records.length > 0) {
-      res.records.forEach(containerAsyncRequest => {
+      res.records.filter(r => r.State !== 'Error').forEach(containerAsyncRequest => {
         containerAsyncRequest.DeployDetails.componentFailures.forEach(failure => {
           if (failure.problemType === 'Error') {
             var failureLineNumber: number = failure.lineNumber || failure.LineNumber || 1;
@@ -316,6 +316,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         console.error(err);
       });
       vscode.window.setStatusBarMessage(`ForceCode: Compile Errors!`);
+    } else if (res.State === 'Error') {
+      vscode.window.setStatusBarMessage(`ForceCode: Compile Errors!`);
     }
     // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
     if (diagnostics.length > 0) {
@@ -330,7 +332,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   }
   // =======================================================================================================================================
   function onError(err): boolean {
-    if (toolingType === '   ') {
+    if (toolingType === 'AuraDefinition') {
       return toolingError(err);
     } else if (toolingType === 'CustomObject') {
       return metadataError(err);
@@ -347,6 +349,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     var idx: number = partTwo.indexOf(':');
     var rangeArray: any[] = partTwo.substring(0, idx).split(',');
     var errorMessage: string = partTwo.substring(idx);
+    var statusIdx: string = 'Message: ';
+    var statusMessage: string = partTwo.substring(partTwo.indexOf(statusIdx) + statusIdx.length);
     var failureLineNumber: number = rangeArray[0];
     var failureColumnNumber: number = rangeArray[1];
     var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
@@ -356,7 +360,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     diagnostics.push(new vscode.Diagnostic(failureRange, errorMessage, 0));
     diagnosticCollection.set(document.uri, diagnostics);
 
-    error.outputError(err, vscode.window.forceCode.outputChannel);
+    error.outputError({message: statusMessage}, vscode.window.forceCode.outputChannel);
     return false;
   }
   function metadataError(err) {
