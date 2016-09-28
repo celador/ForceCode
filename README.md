@@ -44,6 +44,8 @@ The configuration file should look something like...
 }
 ```
 
+Note: the password is in the format "passwordtoken".  Do not try to use any delimiters.
+
 ### Options
 
 * username: The username for the org you want to connect to.
