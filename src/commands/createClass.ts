@@ -5,6 +5,7 @@ import {configuration} from './../services';
 export default function createClass(context: vscode.ExtensionContext) {
     const slash: string = vscode.window.forceCode.pathSeparator;
     const classesPath: string = `${vscode.workspace.rootPath}${slash}src${slash}classes`;
+    const CUSTOM_CLASS: string = 'Custom';
     return configuration().then(config => {
         return userClassSelection().then(selectedOption => {
             if (selectedOption) {
@@ -31,7 +32,10 @@ export default function createClass(context: vscode.ExtensionContext) {
             }, {
                 title: 'Service',
                 description: 'The Service Layer contains business logic, calculations, and processes.',
-            },
+            }, {
+                title: CUSTOM_CLASS,
+                description: 'Any custom class that does not fit standard conventions.',
+            }
         ];
         let options: vscode.QuickPickItem[] = classOptions.map(res => {
             return {
@@ -43,6 +47,10 @@ export default function createClass(context: vscode.ExtensionContext) {
     }
 
     function userFileNameSelection(classType) {
+        // don't force name convention for custom class type.
+        if (classType === CUSTOM_CLASS) {
+            classType = '';
+        }
         let options: vscode.InputBoxOptions = {
             placeHolder: 'Base name',
             prompt: `Enter ${classType} class name. ${classType}.cls will appended to this name`,
