@@ -58,7 +58,7 @@ export default {
     },
     // Create Classes
     createClass: {
-        description: 'Create a Repository, Model, Service, or Controller class.',
+        description: 'Create a Repository, Model, Service, Controller, or Custom class.',
         detail: 'Creates classes based on common separation of concerns patterns',
         icon: 'plus',
         label: 'Create Class'
