@@ -10,6 +10,7 @@ import PeekFileDefinitionProvider from './lens';
 import showMenu from './menu';
 import credentials from './credentials';
 import createClass from './createClass';
+import apexTest from './apexTest';
 
 export {
     executeAnonymous,
@@ -22,5 +23,6 @@ export {
     PeekFileDefinitionProvider,
     showMenu,
     credentials,
-    createClass
+    createClass,
+    apexTest
 };

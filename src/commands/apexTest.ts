@@ -1,0 +1,78 @@
+import * as vscode from 'vscode';
+import * as parsers from './../parsers';
+import * as error from './../util/error';
+import { configuration } from './../services';
+
+export default function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
+    'use strict';
+    vscode.window.setStatusBarMessage('ForceCode: Compiling...');
+
+    const body: string = document.getText();
+    const ext: string = parsers.getFileExtension(document);
+    const toolingType: string = parsers.getToolingType(document);
+    const fileName: string = parsers.getFileName(document);
+    const name: string = parsers.getName(document, toolingType);
+    /* tslint:disable */
+    var DefType: string = undefined;
+    var Format: string = undefined;
+    var Source: string = undefined;
+    var currentObjectDefinition: any = undefined;
+    var AuraDefinitionBundleId: string = undefined;
+    var Id: string = undefined;
+    /* tslint:enable */
+    // Start doing stuff
+    return vscode.window.forceCode.connect(context)
+        .then(svc => getClassInfo(svc))
+        .then(id => runCurrentTests(id))
+        .then(showResult)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+
+    function getClassInfo(svc) {
+        return vscode.window.forceCode.conn.tooling.sobject(toolingType)
+            .find({ Name: name }).execute();
+    }
+
+    function getTestMethods(info): string[] {
+        return info.SymbolTable.methods.filter(function (method) {
+            return method.annotations.some(function (annotation) {
+                return annotation.name === 'IsTest';
+            });
+        }).map(function (method) {
+            return method.name;
+        });
+    }
+
+    function runCurrentTests(results) {
+        var info = results[0];
+        var methodNames: string[] = getTestMethods(info);
+        // {tests: [{classId: '01p61000007m4oW', testMethods: ['canCreateHotList']}]}
+        return vscode.window.forceCode.conn.tooling.runUnitTests(info.Id, methodNames);
+    }
+    // =======================================================================================================================================
+
+    function showResult(res) {
+        'use strict';
+        return configuration().then(config => {
+            vscode.window.forceCode.outputChannel.clear();
+            if (res.failures.length > 0) { vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   =========================================================='); }
+            res.failures.forEach(function (failure) {
+                var errorMessage: string = 'FAILED: ' + failure.stackTrace + '\n' + failure.message;
+                vscode.window.forceCode.outputChannel.appendLine(errorMessage);
+            });
+            if (res.failures.length > 0) { vscode.window.forceCode.outputChannel.appendLine('======================================================================================================================================='); }
+            res.successes.forEach(function (success) {
+                var successMessage: string = 'SUCCESS: ' + success.name + ':' + success.methodName + ' - in ' + success.time + 'ms';
+                vscode.window.forceCode.outputChannel.appendLine(successMessage);
+            });
+            vscode.window.forceCode.outputChannel.show();
+            return res;
+        });
+    }
+
+    function onError(err): any {
+        error.outputError(err, vscode.window.forceCode.outputChannel);
+        return err;
+    }
+
+    // =======================================================================================================================================
+}

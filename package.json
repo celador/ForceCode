@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.2.21",
+  "version": "0.2.22",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -44,6 +44,11 @@
         "description": "Run ForceCode Commands"
       },
       {
+        "command": "ForceCode.apexTest",
+        "title": "ForceCode Test",
+        "description": "Run Apex unit tests"
+      },
+      {
         "command": "ForceCode.compile",
         "title": "Force: Save/Deploy/Compile",
         "description": "Compile a Salesforce file"
@@ -66,24 +71,35 @@
     ],
     "keybindings": [
       {
+        "key": "alt+cmd+t",
+        "command": "ForceCode.apexTest",
+        "when": "resourceLangId == apex",
+        "win": "ctrl+shift+t"
+      },
+      {
         "command": "ForceCode.showMenu",
-        "key": "alt+cmd+c"
+        "key": "alt+cmd+c",
+        "win": "ctrl+shift+c"
       },
       {
         "command": "ForceCode.compile",
-        "key": "alt+cmd+s"
+        "key": "alt+cmd+s",
+        "win": "ctrl+shift+s"
       },
       {
         "command": "ForceCode.executeAnonymous",
-        "key": "alt+cmd+e"
+        "key": "alt+cmd+e",
+        "win": "ctrl+shift+e"
       },
       {
         "command": "ForceCode.open",
-        "key": "alt+cmd+o"
+        "key": "alt+cmd+o",
+        "win": "ctrl:shift+o"
       },
       {
         "command": "ForceCode.staticResource",
-        "key": "alt+cmd+b"
+        "key": "alt+cmd+b",
+        "win": "ctrl+shift+b"
       }
     ],
     "configuration": {
