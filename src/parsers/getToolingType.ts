@@ -23,7 +23,7 @@ export default function getToolingTypeFromBody(document: vscode.TextDocument, me
     if (document.fileName.endsWith('.object')) {
         return 'CustomObject';
     }
-    if (document.fileName.match(new RegExp('src' + slash + 'aura'))) {
+    if (document.fileName.indexOf('src' + slash + 'aura') >= 0) {
         return 'AuraDefinition';
     }
     return undefined;
