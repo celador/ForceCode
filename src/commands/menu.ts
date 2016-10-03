@@ -27,6 +27,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.retrievePackage);
             // quickpick.push(model.deployPackage);
             quickpick.push(model.createClass);
+            quickpick.push(model.runUnitTests);
 
         }
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
@@ -65,6 +66,8 @@ export default function showMenu(context: vscode.ExtensionContext) {
                     break;
                 case model.createClass.description:
                     return commands.createClass(context);
+                case model.runUnitTests.description:
+                    return commands.apexTest(vscode.window.activeTextEditor.document, context);
                 default:
                     break;
             }

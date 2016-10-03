@@ -62,5 +62,12 @@ export default {
         detail: 'Creates classes based on common separation of concerns patterns',
         icon: 'plus',
         label: 'Create Class'
+    },
+    // Create Classes
+    runUnitTests: {
+        description: 'Run the Unit Tests for this Test Class',
+        detail: 'If the Apex class you currently have open contains test methods, it will run the test methods and return the results in the output panel',
+        icon: 'beaker',
+        label: 'Run Unit Tests'
     }
 }

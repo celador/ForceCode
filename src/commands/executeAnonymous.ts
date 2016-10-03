@@ -36,25 +36,25 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
                 'level': 'DEBUG',
             }, {
                 'category': 'Apex_profiling',
-                'level': 'INFO',
+                'level': 'DEBUG',
             }, {
                 'category': 'Callout',
-                'level': 'INFO',
+                'level': 'DEBUG',
             }, {
                 'category': 'Db',
-                'level': 'INFO',
+                'level': 'DEBUG',
             }, {
                 'category': 'System',
                 'level': 'DEBUG',
             }, {
                 'category': 'Validation',
-                'level': 'INFO',
+                'level': 'DEBUG',
             }, {
                 'category': 'Visualforce',
-                'level': 'INFO',
+                'level': 'DEBUG',
             }, {
                 'category': 'Workflow',
-                'level': 'INFO',
+                'level': 'DEBUG',
             },
         ];
         return vscode.window.forceCode.conn.soap.executeAnonymous(text).then(function (res) {

@@ -45,7 +45,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     function runCurrentTests(results) {
         var info = results[0];
         var methodNames: string[] = getTestMethods(info);
-        // {tests: [{classId: '01p61000007m4oW', testMethods: ['canCreateHotList']}]}
+        vscode.window.setStatusBarMessage('ForceCode: $(pulse) Running Unit Tests $(pulse)');
         return vscode.window.forceCode.conn.tooling.runUnitTests(info.Id, methodNames);
     }
     // =======================================================================================================================================
@@ -54,7 +54,12 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
         'use strict';
         return configuration().then(config => {
             vscode.window.forceCode.outputChannel.clear();
-            if (res.failures.length > 0) { vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   =========================================================='); }
+            if (res.failures.length > 0) { 
+                vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   =========================================================='); 
+                vscode.window.setStatusBarMessage('ForceCode: Some Tests Failed $(thumbsdown)');
+            } else {
+                vscode.window.setStatusBarMessage('ForceCode: All Tests Passed $(thumbsup)');
+            }
             res.failures.forEach(function (failure) {
                 var errorMessage: string = 'FAILED: ' + failure.stackTrace + '\n' + failure.message;
                 vscode.window.forceCode.outputChannel.appendLine(errorMessage);
