@@ -102,7 +102,8 @@ export default function createClass(context: vscode.ExtensionContext) {
             } else if (err.code === 'ENOENT') {
 
                 var metaFile: string = `<?xml version="1.0" encoding="UTF-8"?>
-    <apiVersion> ${config.apiVersion || 37.0} + </apiVersion>
+<ApexClass>
+    <apiVersion>${config.apiVersion || '37.0'}</apiVersion>
     <status>Active</status>
 </ApexClass>`;
 
