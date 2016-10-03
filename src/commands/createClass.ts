@@ -85,7 +85,7 @@ export default function createClass(context: vscode.ExtensionContext) {
                         vscode.window.setStatusBarMessage(writeErr.message);
                         vscode.window.showErrorMessage(writeErr.message);
                     } else {
-                        vscode.window.setStatusBarMessage('ForceCode: $(check)' + classname + ' was sucessfully created');
+                        vscode.window.setStatusBarMessage('ForceCode: ' + classname + ' was sucessfully created $(check)');
                     }
                 });
             } else {
