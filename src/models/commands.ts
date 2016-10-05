@@ -23,8 +23,8 @@ export default {
     },
     // Export Package (Deploy via Metadata API, using Package.xml)
     deployPackage: {
-        description: 'Deploy the entire package.',
-        detail: 'If you have a ./src/package.xml file, it will deploy the entire package.',
+        description: 'Deploy your package.',
+        detail: 'If you have a directory with a package.xml, you will get the option to deploy it.',
         icon: 'package',
         label: 'Deploy Package',
     },
@@ -63,11 +63,25 @@ export default {
         icon: 'plus',
         label: 'Create Class'
     },
-    // Create Classes
+    // Run current Unit tests
     runUnitTests: {
         description: 'Run the Unit Tests for this Test Class',
         detail: 'If the Apex class you currently have open contains test methods, it will run the test methods and return the results in the output panel',
         icon: 'beaker',
         label: 'Run Unit Tests'
+    },
+    // Run SOQL
+    soql: {
+        description: 'Run a SOQL query',
+        detail: 'The SOQL query results will be dumped to a json file in the soql directory',
+        icon: 'telescope',
+        label: 'SOQL Query'
+    },
+    // Run SOQL
+    package: {
+        description: 'Generate Package.xml file from the contents of a directory',
+        detail: 'Generate a Package.xml file for a directory',
+        icon: 'gift',
+        label: 'Package-xml'
     }
 }

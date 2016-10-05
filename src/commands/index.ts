@@ -11,6 +11,7 @@ import showMenu from './menu';
 import credentials from './credentials';
 import createClass from './createClass';
 import apexTest from './apexTest';
+import soql from './soql';
 
 export {
     executeAnonymous,
@@ -24,5 +25,6 @@ export {
     showMenu,
     credentials,
     createClass,
-    apexTest
+    apexTest,
+    soql
 };

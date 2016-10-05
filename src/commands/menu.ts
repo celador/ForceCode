@@ -25,10 +25,12 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.getLogs);
             quickpick.push(model.resourceBundle);
             quickpick.push(model.retrievePackage);
-            // quickpick.push(model.deployPackage);
             quickpick.push(model.createClass);
             quickpick.push(model.runUnitTests);
-
+            // Experimental
+            quickpick.push(model.deployPackage);
+            quickpick.push(model.package);
+            quickpick.push(model.soql);
         }
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
             return {

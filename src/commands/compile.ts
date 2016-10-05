@@ -4,18 +4,21 @@ import sleep from './../util/sleep';
 import * as error from './../util/error';
 const parseString: any = require('xml2js').parseString;
 
+var elegantSpinner = require('elegant-spinner');
 const UPDATE: boolean = true;
 const CREATE: boolean = false;
 
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
   'use strict';
-  vscode.window.setStatusBarMessage('ForceCode: Compiling...');
 
   const body: string = document.getText();
   const ext: string = parsers.getFileExtension(document);
   const toolingType: string = parsers.getToolingType(document);
   const fileName: string = parsers.getFileName(document);
   const name: string = parsers.getName(document, toolingType);
+  const spinner = elegantSpinner();
+  var interval = undefined;
+
   /* tslint:disable */
   var DefType: string = undefined;
   var Format: string = undefined;
@@ -25,6 +28,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   var Id: string = undefined;
   /* tslint:enable */
   // Start doing stuff
+  vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''}` + spinner());
   if (toolingType === undefined) {
     return Promise
       .reject({ message: 'Unknown Tooling Type.  Ensure the body is well formed' })
@@ -44,6 +48,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       .then(createMetaData)
       .then(finished, onError);
   } else {
+    vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''}` + spinner());
     return vscode.window.forceCode.connect(context)
       .then(svc => svc.newContainer())
       .then(addToContainer)
@@ -212,15 +217,12 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
           Metadata: record.Metadata,
           MetadataContainerId: vscode.window.forceCode.containerId,
         };
-        // outputChannel.appendLine('ForceCode: Updating ' + name);
-        vscode.window.setStatusBarMessage('ForceCode: Updating ' + name);
         return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).create(member).then(res => {
           return vscode.window.forceCode;
         });
       } else {
         // Tooling Object does not exist
         // CREATE it
-        // outputChannel.appendLine('ForceCode: Creating ' + name);
         vscode.window.setStatusBarMessage('ForceCode: Creating ' + name);
         return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
           return vscode.window.forceCode;
@@ -244,7 +246,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   // =======================================================================================================================================
   // =======================================================================================================================================
   function requestCompile() {
-    vscode.window.setStatusBarMessage('ForceCode: Compile Requested');
+    // vscode.window.setStatusBarMessage('ForceCode: Compile Requested');
     return vscode.window.forceCode.conn.tooling.sobject('ContainerAsyncRequest').create({
       IsCheckOnly: false,
       IsRunTests: false,
@@ -259,14 +261,20 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   // =======================================================================================================================================
   function getCompileStatus() {
     var checkCount: number = 0;
+    vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''}` + spinner());
     return nextStatus();
     function nextStatus() {
       checkCount += 1;
+      clearInterval(interval);
+      interval = setInterval(function () {
+        vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''}` + spinner());
+      }, 50);
+      // vscode.window.setStatusBarMessage('ForceCode: Get Status...' + checkCount);
       // Set a timeout to auto fail the compile after 30 seconds
-      vscode.window.setStatusBarMessage('ForceCode: Get Status...' + checkCount);
       return getStatus().then(res => {
         // Throttle the ReCheck of the compile status, to use fewer http requests (reduce effects on SFDC limits)
         if (isFinished(res)) {
+          clearInterval(interval);
           return res;
         } else if (checkCount > 30) {
           throw { message: 'Timeout' };
@@ -315,15 +323,15 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       res.errors.forEach(err => {
         console.error(err);
       });
-      vscode.window.setStatusBarMessage(`ForceCode: Compile Errors!`);
+      vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`);
     } else if (res.State === 'Error') {
-      vscode.window.setStatusBarMessage(`ForceCode: Compile Errors!`);
+      vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`);
     }
     // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
     if (diagnostics.length > 0) {
-      vscode.window.setStatusBarMessage(`ForceCode: Compile Errors!`);
+      vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`);
     } else {
-      vscode.window.setStatusBarMessage(`ForceCode: Compile/Deploy of ${name} ${DefType ? DefType : ''} was successful`);
+      vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''} $(check)`);
       // vscode.commands.executeCommand('workbench.action.output.toggleOutput');
       // outputChannel.hide();
     }
@@ -360,7 +368,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     diagnostics.push(new vscode.Diagnostic(failureRange, errorMessage, 0));
     diagnosticCollection.set(document.uri, diagnostics);
 
-    error.outputError({message: statusMessage}, vscode.window.forceCode.outputChannel);
+    error.outputError({ message: statusMessage }, vscode.window.forceCode.outputChannel);
     return false;
   }
   function metadataError(err) {
