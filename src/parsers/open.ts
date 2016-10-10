@@ -4,7 +4,7 @@ export function getIcon(toolingType: string) {
     'use strict';
     switch (toolingType) {
         case 'ApexClass':
-            return 'file';
+            return 'file-code';
         case 'ApexPage':
             return 'code';
         case 'ApexTrigger':
@@ -55,6 +55,10 @@ export function getExtension(toolingType: string) {
             return 'cmp';
         case 'Application':
             return 'app';
+        case 'StaticResource':
+            return 'resource';
+        case 'AuraDefinitionBundle':
+            return 'aura';
         default:
             throw toolingType + ' extension not defined';
     }

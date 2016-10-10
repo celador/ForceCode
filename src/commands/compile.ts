@@ -202,8 +202,22 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   // =======================================================================================================================================
 
   function addToContainer() {
+    // Namespace fixes... do we need this??
+    let prefix = '';
+    let shortName = '';
+    if (name.indexOf('__') > -1) {
+      let nameParts = name.split('__');
+      if (nameParts.length > 1) {
+        prefix = nameParts[0];
+        shortName = nameParts[1];
+      } else {
+        shortName = name;
+      }
+    } else {
+      shortName = name;
+    }
     return vscode.window.forceCode.conn.tooling.sobject(toolingType)
-      .find({ Name: name }).execute()
+      .find({ Name: shortName, NamespacePrefix: '' }).execute()
       .then(records => addMember(records));
     function addMember(records) {
       if (records.length > 0) {

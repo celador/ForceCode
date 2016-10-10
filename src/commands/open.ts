@@ -32,7 +32,6 @@ export default function open(context: vscode.ExtensionContext) {
             vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix, ContentType FROM StaticResource'),
             // Lightning stuff
             vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, ApiVersion, Description FROM AuraDefinitionBundle'),
-            // vscode.window.forceCode.conn.tooling.query('SELECT Id, AuraDefinitionBundleId, AuraDefinitionBundle.DeveloperName, DefType, Format FROM AuraDefinition'),
         ];
         // TODO: Objects
         // TODO: Static Resources
@@ -44,11 +43,15 @@ export default function open(context: vscode.ExtensionContext) {
                     return prev.concat(curr);
                 })
                 .map(record => {
-                    let icon: string = getIcon(record.attributes[TYPEATTRIBUTE]);
+                    let toolingType: string = record.attributes[TYPEATTRIBUTE];
+                    let icon: string = getIcon(toolingType);
+                    let ext: string = getExtension(toolingType);
+                    let name: string = record.Name || record.DeveloperName;
+                    let prefix: string = record.NamespacePrefix ? record.NamespacePrefix + '.' : '';
                     return {
                         description: `${record.Id}`,
                         detail: `${record.attributes[TYPEATTRIBUTE]}`,
-                        label: `$(${icon}) ${record.Name || record.DeveloperName}`,
+                        label: `$(${icon}) - ${prefix}${name}.${ext}`,
                     };
                 });
             let config: {} = {
