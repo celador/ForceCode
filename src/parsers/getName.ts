@@ -34,7 +34,7 @@ export function getAuraNameFromFileName(fileName: string): string {
     'use strict';
     const slash: string = vscode.window.forceCode.pathSeparator;
     var parts: string[] = fileName.split(`src${slash}aura${slash}`);
-    var auraNameParts: string[] = (parts && parts.length) > 1 ? parts[1].split(new RegExp(slash)) : undefined;
+    var auraNameParts: string[] = (parts && parts.length) > 1 ? parts[1].split(slash) : undefined;
     var auraName: string = (auraNameParts && auraNameParts.length) > 0 ? auraNameParts[0] : undefined;
     return auraName;
 }
