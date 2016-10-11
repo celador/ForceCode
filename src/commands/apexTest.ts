@@ -5,7 +5,7 @@ import { configuration } from './../services';
 
 export default function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
     'use strict';
-    vscode.window.setStatusBarMessage('ForceCode: Compiling...');
+    vscode.window.setStatusBarMessage('ForceCode: Testing...');
 
     const body: string = document.getText();
     const ext: string = parsers.getFileExtension(document);
