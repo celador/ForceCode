@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.2.27",
+  "version": "0.2.28",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -73,23 +73,26 @@
       {
         "key": "alt+cmd+t",
         "command": "ForceCode.apexTest",
-        "when": "resourceLangId == apex",
+        "when": "resourceLangId == apex && editorFocus",
         "win": "ctrl+shift+t"
       },
       {
         "command": "ForceCode.showMenu",
         "key": "alt+cmd+c",
-        "win": "ctrl+shift+c"
+        "win": "ctrl+shift+c",
+        "when":"editorFocus"
       },
       {
         "command": "ForceCode.compile",
         "key": "alt+cmd+s",
-        "win": "ctrl+shift+s"
+        "win": "ctrl+shift+s",
+        "when":"editorFocus"
       },
       {
         "command": "ForceCode.executeAnonymous",
         "key": "alt+cmd+e",
-        "win": "ctrl+shift+e"
+        "win": "ctrl+shift+e",
+        "when":"editorFocus"
       },
       {
         "command": "ForceCode.open",

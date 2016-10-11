@@ -205,8 +205,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // Namespace fixes... do we need this??
     let prefix = '';
     let shortName = '';
-    if (name.indexOf('__') > -1) {
-      let nameParts = name.split('__');
+    if (fileName.indexOf('__') > -1) {
+      let nameParts = fileName.split('__');
       if (nameParts.length > 1) {
         prefix = nameParts[0];
         shortName = nameParts[1];
@@ -217,7 +217,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       shortName = name;
     }
     return vscode.window.forceCode.conn.tooling.sobject(toolingType)
-      .find({ Name: shortName, NamespacePrefix: '' }).execute()
+      .find({ Name: shortName, NamespacePrefix: prefix }).execute()
       .then(records => addMember(records));
     function addMember(records) {
       if (records.length > 0) {
