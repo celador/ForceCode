@@ -216,6 +216,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     } else {
       shortName = name;
     }
+    if (vscode.window.forceCode.config.prefix) {
+      prefix = vscode.window.forceCode.config.prefix;
+    }
+
     return vscode.window.forceCode.conn.tooling.sobject(toolingType)
       .find({ Name: shortName, NamespacePrefix: prefix }).execute()
       .then(records => addMember(records));

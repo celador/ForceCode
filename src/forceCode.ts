@@ -15,6 +15,7 @@ export interface Config {
     autoCompile?: boolean;
     pollTimeout?: number;
     debugOnly?: boolean;
+    prefix?: string;
 }
 
 export interface IForceService {

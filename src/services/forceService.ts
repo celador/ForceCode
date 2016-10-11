@@ -75,6 +75,7 @@ export default class ForceService implements forceCode.IForceService {
                 return self.config;
             });
         }
+        self.getConfig();
         return Promise.resolve(self.config);
     }
     private login(config): Promise<forceCode.IForceService> {
