@@ -5,7 +5,7 @@ import { configuration } from './../services';
 
 export default function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
     'use strict';
-    vscode.window.setStatusBarMessage('ForceCode: Testing...');
+    vscode.window.setStatusBarMessage('ForceCode: $(pulse) Running Unit Tests $(pulse)');
 
     const body: string = document.getText();
     const ext: string = parsers.getFileExtension(document);
@@ -54,8 +54,8 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
         'use strict';
         return configuration().then(config => {
             vscode.window.forceCode.outputChannel.clear();
-            if (res.failures.length > 0) { 
-                vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   =========================================================='); 
+            if (res.failures.length > 0) {
+                vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   ==========================================================');
                 vscode.window.setStatusBarMessage('ForceCode: Some Tests Failed $(thumbsdown)');
             } else {
                 vscode.window.setStatusBarMessage('ForceCode: All Tests Passed $(thumbsup)');
