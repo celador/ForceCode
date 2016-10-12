@@ -24,16 +24,7 @@
     "url": "https://github.com/celador/ForceCode.git"
   },
   "activationEvents": [
-    "*",
-    "onCommand:ForceCode.showMenu",
-    "onCommand:ForceCode.compile",
-    "onCommand:ForceCode.executeAnonymous",
-    "onCommand:ForceCode.exportPackage",
-    "onCommand:ForceCode.getLog",
-    "onCommand:ForceCode.open",
-    "onCommand:ForceCode.staticResource",
-    "onLanguage:apex",
-    "onLanguage:visualforce"
+    "*"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -80,19 +71,19 @@
         "command": "ForceCode.showMenu",
         "key": "alt+cmd+c",
         "win": "ctrl+shift+c",
-        "when":"editorFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ForceCode.compile",
         "key": "alt+cmd+s",
         "win": "ctrl+shift+s",
-        "when":"editorFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ForceCode.executeAnonymous",
         "key": "alt+cmd+e",
         "win": "ctrl+shift+e",
-        "when":"editorFocus"
+        "when": "editorFocus"
       },
       {
         "command": "ForceCode.open",
@@ -153,12 +144,79 @@
     },
     "languages": [
       {
-        "id": "html",
-        "aliases": [
-          "Lightning"
-        ],
+        "id": "apex",
         "extensions": [
-          ".cmp"
+          ".apex",
+          ".cls",
+          ".trigger",
+          ".tgr"
+        ],
+        "aliases": [
+          "Apex"
+        ],
+        "configuration": "./languages/apex-language-configuration.json"
+      },
+      {
+        "id": "visualforce",
+        "extensions": [
+          ".component",
+          ".page"
+        ],
+        "aliases": [
+          "Visualforce"
+        ]
+      },
+      {
+        "id": "staticResource",
+        "extensions": [
+          ".resource"
+        ]
+      },
+      {
+        "id": "xml",
+        "extensions": [
+          ".xml",
+          ".object",
+          ".layout",
+          ".resource",
+          ".remoteSite",
+          ".labels",
+          ".app",
+          ".dashboard",
+          ".permissionset",
+          ".workflow",
+          ".email",
+          ".profile",
+          ".scf",
+          ".queue",
+          ".reportType",
+          ".report",
+          ".weblink",
+          ".tab",
+          ".letter",
+          ".role",
+          ".homePageComponent",
+          ".homePageLayout",
+          ".objectTranslation",
+          ".flow",
+          ".datacategorygroup",
+          ".snapshot",
+          ".site",
+          ".sharingRules",
+          ".settings",
+          ".callCenter",
+          ".community",
+          ".authProvider",
+          ".customApplicationComponent",
+          ".quickAction",
+          ".approvalProcess",
+          ".app",
+          ".auradoc",
+          ".cmp",
+          ".evt",
+          ".tokens",
+          ".design",
+          ".object"
         ]
       },
       {
@@ -180,42 +238,6 @@
         ]
       },
       {
-        "id": "xml",
-        "aliases": [
-          "Lightning Design"
-        ],
-        "extensions": [
-          ".design"
-        ]
-      },
-      {
-        "id": "xml",
-        "aliases": [
-          "Documentation"
-        ],
-        "extensions": [
-          ".auradoc"
-        ]
-      },
-      {
-        "id": "xml",
-        "aliases": [
-          "Lightning App"
-        ],
-        "extensions": [
-          ".app"
-        ]
-      },
-      {
-        "id": "xml",
-        "aliases": [
-          "Lightning Event"
-        ],
-        "extensions": [
-          ".evt"
-        ]
-      },
-      {
         "id": "html",
         "aliases": [
           "HTML"
@@ -223,46 +245,92 @@
         "extensions": [
           ".html"
         ]
-      },
-      {
-        "id": "xml",
-        "aliases": [
-          "XML"
-        ],
-        "extensions": [
-          ".xml"
-        ]
       }
-    ]
-  },
-  "scripts": {
-    "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
-    "compile": "node ./node_modules/vscode/bin/compile -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "clean": "rm -rf node_modules/",
-    "tslint": "tslint -c tslint.json src/**/*.ts"
-  },
-  "dependencies": {
-    "archiver": "^1.0.0",
-    "elegant-spinner": "^1.0.1",
-    "fs-extra": "^0.26.5",
-    "globule": "^1.0.0",
-    "jsforce": "github:celador/jsforce",
-    "jszip": "^2.5.0",
-    "lodash": "^4.13.1",
-    "moment": "^2.11.2",
-    "node-fetch": "^1.5.3",
-    "node-zip": "^1.1.1",
-    "os": "^0.1.1",
-    "sequin": "^0.1.0",
-    "typescript": "^1.8.10",
-    "unzip": "^0.1.11",
-    "vscode": "^0.11.14",
-    "xml2js": "^0.4.17",
-    "zip": "^1.2.0"
-  },
-  "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^2.5.3"
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "ForceCode.getCoverage",
+          "group": "ForceCode"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "resourceLangId == 'apex'",
+          "command": "ForceCode.compile",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == 'visualforce'",
+          "command": "ForceCode.compile",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == 'xml'",
+          "command": "ForceCode.compile",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == 'apex'",
+          "command": "ForceCode.refresh",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == 'visualforce'",
+          "command": "ForceCode.refresh",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == 'xml'",
+          "command": "ForceCode.refresh",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == 'apex'",
+          "command": "ForceCode.delete",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == 'visualforce'",
+          "command": "ForceCode.delete",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == 'xml'",
+          "command": "ForceCode.delete",
+          "group": "ForceCode"
+        }
+      ]
+    },
+    "scripts": {
+      "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+      "compile": "node ./node_modules/vscode/bin/compile -p ./",
+      "postinstall": "node ./node_modules/vscode/bin/install",
+      "clean": "rm -rf node_modules/",
+      "tslint": "tslint -c tslint.json src/**/*.ts"
+    },
+    "dependencies": {
+      "archiver": "^1.0.0",
+      "elegant-spinner": "^1.0.1",
+      "fs-extra": "^0.26.5",
+      "globule": "^1.0.0",
+      "jsforce": "github:celador/jsforce",
+      "jszip": "^2.5.0",
+      "lodash": "^4.13.1",
+      "moment": "^2.11.2",
+      "node-fetch": "^1.5.3",
+      "node-zip": "^1.1.1",
+      "os": "^0.1.1",
+      "sequin": "^0.1.0",
+      "typescript": "^1.8.10",
+      "unzip": "^0.1.11",
+      "vscode": "^0.11.14",
+      "xml2js": "^0.4.17",
+      "zip": "^1.2.0"
+    },
+    "devDependencies": {
+      "chai": "^3.5.0",
+      "mocha": "^2.5.3"
+    }
   }
 }

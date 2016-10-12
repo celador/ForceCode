@@ -248,9 +248,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       }
     }
     function createObject(text: string): {} {
-      if (toolingType === 'ApexClass') {
+      if (toolingType === 'ApexClass' || toolingType === 'ApexTrigger') {
         return { Body: text };
-      } else if (toolingType === 'ApexPage') {
+      } else if (toolingType === 'ApexPage' || toolingType === 'ApexComponent') {
         return {
           Markup: text,
           Masterlabel: name + 'Label',
