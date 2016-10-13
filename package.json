@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.2.31",
+  "version": "0.2.32",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -248,8 +248,7 @@
       }
     ],
     "menus": {
-      "editor/title": [
-      ],
+      "editor/title": [],
       "explorer/context": [
         {
           "when": "resourceLangId == 'apex'",
@@ -267,36 +266,36 @@
           "group": "ForceCode"
         }
       ]
-    },
-    "scripts": {
-      "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
-      "compile": "node ./node_modules/vscode/bin/compile -p ./",
-      "postinstall": "node ./node_modules/vscode/bin/install",
-      "clean": "rm -rf node_modules/",
-      "tslint": "tslint -c tslint.json src/**/*.ts"
-    },
-    "dependencies": {
-      "archiver": "^1.0.0",
-      "elegant-spinner": "^1.0.1",
-      "fs-extra": "^0.26.5",
-      "globule": "^1.0.0",
-      "jsforce": "github:celador/jsforce",
-      "jszip": "^2.5.0",
-      "lodash": "^4.13.1",
-      "moment": "^2.11.2",
-      "node-fetch": "^1.5.3",
-      "node-zip": "^1.1.1",
-      "os": "^0.1.1",
-      "sequin": "^0.1.0",
-      "typescript": "^1.8.10",
-      "unzip": "^0.1.11",
-      "vscode": "^0.11.14",
-      "xml2js": "^0.4.17",
-      "zip": "^1.2.0"
-    },
-    "devDependencies": {
-      "chai": "^3.5.0",
-      "mocha": "^2.5.3"
     }
+  },
+  "scripts": {
+    "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+    "compile": "node ./node_modules/vscode/bin/compile -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "clean": "rm -rf node_modules/",
+    "tslint": "tslint -c tslint.json src/**/*.ts"
+  },
+  "dependencies": {
+    "archiver": "^1.0.0",
+    "elegant-spinner": "^1.0.1",
+    "fs-extra": "^0.26.5",
+    "globule": "^1.0.0",
+    "jsforce": "github:celador/jsforce",
+    "jszip": "^2.5.0",
+    "lodash": "^4.13.1",
+    "moment": "^2.11.2",
+    "node-fetch": "^1.5.3",
+    "node-zip": "^1.1.1",
+    "os": "^0.1.1",
+    "sequin": "^0.1.0",
+    "typescript": "^1.8.10",
+    "unzip": "^0.1.11",
+    "vscode": "^0.11.14",
+    "xml2js": "^0.4.17",
+    "zip": "^1.2.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3"
   }
 }
