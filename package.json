@@ -249,10 +249,6 @@
     ],
     "menus": {
       "editor/title": [
-        {
-          "command": "ForceCode.getCoverage",
-          "group": "ForceCode"
-        }
       ],
       "explorer/context": [
         {
@@ -268,36 +264,6 @@
         {
           "when": "resourceLangId == 'xml'",
           "command": "ForceCode.compile",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == 'apex'",
-          "command": "ForceCode.refresh",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == 'visualforce'",
-          "command": "ForceCode.refresh",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == 'xml'",
-          "command": "ForceCode.refresh",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == 'apex'",
-          "command": "ForceCode.delete",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == 'visualforce'",
-          "command": "ForceCode.delete",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == 'xml'",
-          "command": "ForceCode.delete",
           "group": "ForceCode"
         }
       ]
