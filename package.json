@@ -36,7 +36,7 @@
       },
       {
         "command": "ForceCode.apexTest",
-        "title": "ForceCode Test",
+        "title": "Force: Test",
         "description": "Run Apex unit tests"
       },
       {
