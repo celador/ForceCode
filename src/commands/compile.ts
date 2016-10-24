@@ -96,12 +96,12 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   // =======================================================================================================================================
   function getAuraBundle(svc) {
     return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').find({
-      'DeveloperName': name
+      'DeveloperName': name, NamespacePrefix: vscode.window.forceCode.config.prefix
     });
   }
   function getAuraDefinition(svc) {
     return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({
-      'AuraDefinitionBundle.DeveloperName': name
+      'AuraDefinitionBundle.DeveloperName': name, NamespacePrefix: vscode.window.forceCode.config.prefix
     });
   }
   function getAuraMembers(svc) {
@@ -119,7 +119,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       }).then(bundle => {
         results[0] = [bundle];
         return results;
-        // return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle.id, DefType, Format, Source });
       });
     } else {
       return results;

@@ -77,7 +77,7 @@ export default function createClass(context: vscode.ExtensionContext) {
                 vscode.window.setStatusBarMessage('ForceCode: Error creating file');
                 vscode.window.showErrorMessage('Cannot create ' + finalClassName + '. A file with that name already exists!');
             } else if (err.code === 'ENOENT') {
-                var classFile: string = `public class ${classname} {
+                var classFile: string = `public with sharing class ${classname} {
 
 }`;
                 fs.writeFile(finalClassName, classFile, function (writeErr) {
