@@ -35,7 +35,7 @@ export default function createClass(context: vscode.ExtensionContext) {
             }, {
                 title: CUSTOM_CLASS,
                 description: 'Any custom class that does not fit standard conventions.',
-            }
+            },
         ];
         let options: vscode.QuickPickItem[] = classOptions.map(res => {
             return {

@@ -60,6 +60,8 @@ export default class ForceService implements forceCode.IForceService {
             });
     }
 
+// TODO: Add keychain access so we don't have to use a username or password'
+// var keychain = require('keytar')
     private setupConfig(): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Set the ForceCode configuration

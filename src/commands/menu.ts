@@ -28,9 +28,9 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.createClass);
             quickpick.push(model.runUnitTests);
             // Experimental
-            quickpick.push(model.deployPackage);
             quickpick.push(model.package);
-            quickpick.push(model.soql);
+            quickpick.push(model.deployPackage);
+            // quickpick.push(model.soql);
         }
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
             return {
@@ -64,8 +64,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.retrievePackage.description:
                     return commands.retrieve(context);
                 case model.deployPackage.description:
-                    // return commands.deployPackage();
-                    break;
+                    return commands.deploy(context);
                 case model.createClass.description:
                     return commands.createClass(context);
                 case model.runUnitTests.description:

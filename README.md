@@ -22,7 +22,7 @@ I use this extension every day, so if there is something not working, I would ap
 * Retrieve Package
 * Bundle & Deploy Static Resource
 * Create Classes from templates
-* ~~Deploy Package~~
+* Deploy Package
 
 ## Configuration
 
@@ -34,12 +34,19 @@ The configuration file should look something like...
 {
     "username": "MonsterMike@Salesforce.com",
     "password": "YourPasswordHere",
-    "autoCompile": true,
     "url": "https://login.salesforce.com",
+    "autoCompile": true,
+    "poll": 1500,
     "pollTimeout": 120,
     "debugOnly": false,
     "apiVersion": "37.0",
-    "prefix": "namespace"
+    "prefix": "namespace",
+    "deployOptions": {
+        "checkOnly": false,
+        "testLevel": "RunLocalTests",
+        "verbose": false,
+        "ignoreWarnings": false
+    }
 }
 ```
 
@@ -52,6 +59,7 @@ Note: the password is in the format "passwordtoken".  Do not try to use any deli
 * password: The password, with security token, for your user.
 * autoCompile: When a supported file is saved (works with VSCode's autosave feature) the file is saved/compiled on the server.  Otherwise, use `cmd + opt + s` to save the file to the server.
 * url: This is the login url for Salesforce.  It's either login.salesforce.com for Developer and Professional editions or test.salesforce.com for sandboxes.
+* poll: When compiling, this is the interval at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
 * pollTimeout: When retrieving packages, or other long running tasks, this is the maximum amount of time (in seconds) it will wait before the process times out.  If you're having trouble retrieving your package, try increasing this number.  Max is 600 (10 minutes).
 * debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
 * apiVersion: This is the default api version that all your files will be saved with.  If this is not set, this will default to the version of the org in use.  ForceCode will not change the version of an existing file.  This is also the version used for package retrieval.
@@ -110,9 +118,34 @@ Menu: \>Force: Save/Deploy/Compile
 Mac: alt + cmd + b  
 Win: ctrl + shift + b  
 
+### Build package.xml
+
+Menu: \>ForceCode Menu ... Package-xml  
+
+Generate a package.xml file in your src directory based on its contents. You can give the package a name, which makes your package easy to retrieve later on, or you can generate a package without a name. You can then use this package.xml to deploy your package.  
+
+### Deploy Package
+
+Menu: \>ForceCode Menu ... Deploy Package  
+
+Deploy your package based on your configured deploy options and the package.xml in your src folder.
+
+**Options**:
+  * checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.  This will generate a `.validationId` file.
+  * ignoreWarnings:  Indicates whether a warning should allow a deployment to complete successfully (true) or not (false).
+  * rollbackOnError: Indicates whether any failure causes a complete rollback (true) or not (false)
+  * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
+  * runTests:        A list of Apex tests to run during deployment (commma separated list)
+  * verbose:         Output execution detail log to a `DeployStatistics.log` file
+  
+If you want destructive changes as part of the deploy, put a `destructiveChanges.xml` file in your src folder
+
+Derived from https://jsforce.github.io/blog/posts/20151106-jsforce-metadata-tools.html
+
+
 ### Retrieve Package
 
-Menu: \>Force: Retrieve Package  
+Menu: \>ForceCode Menu ... Retrieve Package  
 The `apiVersion` setting is used to retrieve your package (this setting is important in CI setups) comes directly from your org.  When you want to override your Salesforce org version, set the `apiVersion` setting manually.  This is a string, with the decimal.
 The `pollTimeout` setting is used to determine how long you should wait for the retrieve command to complete.  This should usually take less than a minute, but can take longer with large packages.
 

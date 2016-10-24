@@ -7,10 +7,10 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     'use strict';
     vscode.window.setStatusBarMessage('ForceCode: $(pulse) Running Unit Tests $(pulse)');
 
-    const body: string = document.getText();
-    const ext: string = parsers.getFileExtension(document);
+    // const body: string = document.getText();
+    // const ext: string = parsers.getFileExtension(document);
     const toolingType: string = parsers.getToolingType(document);
-    const fileName: string = parsers.getFileName(document);
+    // const fileName: string = parsers.getFileName(document);
     const name: string = parsers.getName(document, toolingType);
     /* tslint:disable */
     var DefType: string = undefined;
@@ -43,7 +43,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     }
 
     function runCurrentTests(results) {
-        var info = results[0];
+        var info: any = results[0];
         var methodNames: string[] = getTestMethods(info);
         vscode.window.setStatusBarMessage('ForceCode: $(pulse) Running Unit Tests $(pulse)');
         return vscode.window.forceCode.conn.tooling.runUnitTests(info.Id, methodNames);
@@ -74,10 +74,10 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
         });
     }
 
-    function onError(err): any {
-        error.outputError(err, vscode.window.forceCode.outputChannel);
-        return err;
-    }
+    // function onError(err): any {
+    //     error.outputError(err, vscode.window.forceCode.outputChannel);
+    //     return err;
+    // }
 
     // =======================================================================================================================================
 }

@@ -277,6 +277,7 @@
   },
   "dependencies": {
     "archiver": "^1.0.0",
+    "cs-jsforce-metadata-tools": "^1.2.6",
     "elegant-spinner": "^1.0.1",
     "fs-extra": "^0.26.5",
     "globule": "^1.0.0",

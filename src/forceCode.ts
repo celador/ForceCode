@@ -13,9 +13,14 @@ export interface Config {
     username?: string;
     url?: string;
     autoCompile?: boolean;
+    poll?: number;
     pollTimeout?: number;
     debugOnly?: boolean;
     prefix?: string;
+    deployOptions?: {
+        verbose?: boolean,
+        checkOnly?: boolean
+    };
 }
 
 export interface IForceService {

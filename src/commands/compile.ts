@@ -297,7 +297,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         } else if (checkCount > 30) {
           throw { message: 'Timeout' };
         } else {
-          return sleep(1000).then(nextStatus);
+          return sleep(vscode.window.forceCode.config.poll || 1000).then(nextStatus);
         }
       });
     }

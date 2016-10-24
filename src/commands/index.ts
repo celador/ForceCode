@@ -12,6 +12,7 @@ import credentials from './credentials';
 import createClass from './createClass';
 import apexTest from './apexTest';
 import soql from './soql';
+import deploy from './deploy';
 
 export {
     executeAnonymous,
@@ -25,6 +26,7 @@ export {
     showMenu,
     credentials,
     createClass,
+    deploy,
     apexTest,
     soql
 };
