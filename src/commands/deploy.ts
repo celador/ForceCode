@@ -8,25 +8,31 @@ import * as error from './../util/error';
 
 var tools: any = require('cs-jsforce-metadata-tools');
 
-var logger = (function (fs) {
-    var buffer = '';
-    return {
-        log: log,
-        flush: flush
-    }
-    function log(val) {
-        buffer += (val + '\n')
-    }
-    function flush() {
-        var logFile: any = path.resolve('./DeployStatistics.log')
-        fs.appendFileSync(logFile, buffer, 'utf8');
-        buffer = '';
-    }
-} (fs));
-
 export default function deploy(context: vscode.ExtensionContext) {
     'use strict';
     vscode.window.setStatusBarMessage('ForceCode: Deploy Started');
+
+
+    const slash: string = vscode.window.forceCode.pathSeparator;
+    const validationIdPath: string = `${vscode.workspace.rootPath}${slash}.validationId`;
+    const deployPath: string = `${vscode.workspace.rootPath}${slash}src`;
+    const statsPath: string = `${vscode.workspace.rootPath}${slash}DeployStatistics.log`;
+
+    var logger = (function (fs) {
+        var buffer = '';
+        return {
+            log: log,
+            flush: flush
+        }
+        function log(val) {
+            buffer += (val + '\n')
+        }
+        function flush() {
+            var logFile: any = path.resolve(statsPath);
+            fs.appendFileSync(logFile, buffer, 'utf8');
+            buffer = '';
+        }
+    } (fs));
     var deployOptions: any = {
         username: vscode.window.forceCode.config.username,
         password: vscode.window.forceCode.config.password,
@@ -48,13 +54,12 @@ export default function deploy(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     function deployPackage(conn) {
         Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
-
-        if (fs.existsSync('.validationId') && !deployOptions.checkOnly) {
-            var validationId: string = fs.readFileSync('.validationId', 'utf-8');
-            fs.unlinkSync('.validationId');
+        if (fs.existsSync(validationIdPath) && !deployOptions.checkOnly) {
+            var validationId: string = fs.readFileSync(validationIdPath, 'utf-8');
+            fs.unlinkSync(validationIdPath);
             return tools.deployRecentValidation(validationId, deployOptions);
         } else {
-            return tools.deployFromDirectory('./src', deployOptions);
+            return tools.deployFromDirectory(deployPath, deployOptions);
         }
     }
     // =======================================================================================================================================
@@ -62,7 +67,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         if (res.success) {
             vscode.window.setStatusBarMessage('ForceCode: Deployed $(thumbsup)');
             if (deployOptions.checkOnly) {
-                fs.writeFileSync('.validationId', res.id);
+                fs.writeFileSync(validationIdPath, res.id);
             }
         } else {
             vscode.window.setStatusBarMessage('ForceCode: Deploy Errors $(thumbsdown)');
