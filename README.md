@@ -1,5 +1,9 @@
 # ForceCode for Visual Studio Code
 
+[![Version](http://vsmarketplacebadge.apphb.com/version/JohnAaronNelson.ForceCode.svg)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
+[![Installs](http://vsmarketplacebadge.apphb.com/installs/JohnAaronNelson.ForceCode.svg)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
+[![Ratings](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.svg)](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.svg)
+
 This extension is a companion for SFDC development with Visual Studio Code.
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.
 There's no complicated setup process or project configurations, no external apps to keep open, and no jarring errors knocking you out of your flow.
