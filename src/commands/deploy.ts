@@ -15,14 +15,14 @@ export default function deploy(context: vscode.ExtensionContext) {
     const deployPath: string = `${vscode.workspace.rootPath}${slash}src`;
     const statsPath: string = `${vscode.workspace.rootPath}${slash}DeployStatistics.log`;
 
-    var logger = (function (fs) {
-        var buffer = '';
+    var logger: any = (function (fs) {
+        var buffer: string = '';
         return {
             log: log,
-            flush: flush
-        }
+            flush: flush,
+        };
         function log(val) {
-            buffer += (val + '\n')
+            buffer += (val + '\n');
         }
         function flush() {
             var logFile: any = path.resolve(statsPath);
