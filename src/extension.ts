@@ -6,7 +6,6 @@ import * as parsers from './parsers';
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext): any {
-  'use strict';
   vscode.window.forceCode = new ForceService();
   vscode.window.setStatusBarMessage(`ForceCode is now active`);
 

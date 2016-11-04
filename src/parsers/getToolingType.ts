@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 export default function getToolingTypeFromBody(document: vscode.TextDocument, member = false): string {
-    'use strict';
-    var body: string = document.getText();
-    var bodyParts: string[] = body.split('{');
+    // var body: string = document.getText();
+    // var bodyParts: string[] = body.split('{');
     const slash: string = vscode.window.forceCode.pathSeparator;
 
     if (document.fileName.endsWith('.cls')) {

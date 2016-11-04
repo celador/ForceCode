@@ -5,7 +5,8 @@
   "globalDependencies": {
     "archiver": "registry:dt/archiver#0.15.0+20160709062918",
     "chai": "registry:dt/chai#3.4.0+20160601211834",
-    "fs-extra": "registry:dt/fs-extra#0.0.0+20160517121359",
+    "fs-extra": "registry:dt/fs-extra#0.0.0+20161004190449",
+    "jszip": "registry:dt/jszip#0.0.0+20160709055933",
     "lodash": "registry:dt/lodash#3.10.0+20160619033623",
     "mocha": "registry:dt/mocha#2.2.5+20160720003353",
     "node-fetch": "registry:dt/node-fetch#0.0.0+20160711094047",

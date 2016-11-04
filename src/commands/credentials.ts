@@ -3,8 +3,10 @@ import * as fs from 'fs-extra';
 import {getIcon} from './../parsers';
 import * as error from './../util/error';
 
+const quickPickOptions: vscode.QuickPickOptions = {
+    ignoreFocusOut: true
+};
 export default function enterCredentials() {
-    'use strict';
     vscode.window.setStatusBarMessage('ForceCode Menu');
     const slash: string = vscode.window.forceCode.pathSeparator;
     return getUsername()
@@ -33,6 +35,7 @@ export default function enterCredentials() {
         return new Promise(function (resolve, reject) {
             getYoForceConfig().then(config => {
                 let options: vscode.InputBoxOptions = {
+                    ignoreFocusOut: true,
                     placeHolder: 'mark@salesforce.com',
                     value: config.username || '',
                     prompt: 'Please enter your SFDC username',
@@ -49,6 +52,7 @@ export default function enterCredentials() {
 
     function getPassword(config) {
         let options: vscode.InputBoxOptions = {
+            ignoreFocusOut: true,
             password: true,
             value: config.password || '',
             placeHolder: 'enter your password and token',
@@ -80,7 +84,7 @@ export default function enterCredentials() {
                 label: `$(${icon}) ${res.title}`,
             };
         });
-        return vscode.window.showQuickPick(options).then((res: vscode.QuickPickItem) => {
+        return vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
             config.url = res.description || 'https://login.salesforce.com';
             return config;
         });
@@ -94,7 +98,7 @@ export default function enterCredentials() {
                 label: 'No',
             },
         ];
-        return vscode.window.showQuickPick(options).then((res: vscode.QuickPickItem) => {
+        return vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
             config.autoCompile = res.label === 'Yes';
             return config;
         });

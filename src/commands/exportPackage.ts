@@ -4,8 +4,6 @@ import * as error from './../util/error';
 
 
 export default function exportPackage(context) {
-    'use strict';
-    // const jmt = require('jsforce-metadata-tools');
     return vscode.window.forceCode.connect(context)
         .then(svc => getAllFiles(svc))
         .then(finished)

@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 
 export function getIcon(toolingType: string) {
-    'use strict';
     switch (toolingType) {
         case 'ApexClass':
             return 'file-code';
@@ -20,12 +19,10 @@ export function getIcon(toolingType: string) {
     }
 }
 export function getFileExtension(document: vscode.TextDocument) {
-    'use strict';
     var ext: string = document.fileName.substring(document.fileName.lastIndexOf('.') + 1, document.fileName.length);
     return ext;
 }
 export function getExtension(toolingType: string) {
-    'use strict';
     switch (toolingType) {
         case 'ApexClass':
             return 'cls';
@@ -64,7 +61,6 @@ export function getExtension(toolingType: string) {
     }
 }
 export function getFolder(toolingType: string) {
-    'use strict';
     switch (toolingType) {
         case 'ApexClass':
             return 'classes';

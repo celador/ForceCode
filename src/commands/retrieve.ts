@@ -1,4 +1,3 @@
-// 'use strict';
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as error from './../util/error';
@@ -6,7 +5,6 @@ const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 
 export default function retrieve(context: vscode.ExtensionContext) {
-    'use strict';
     vscode.window.setStatusBarMessage('Retrieve Started');
     const slash: string = vscode.window.forceCode.pathSeparator;
 

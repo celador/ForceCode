@@ -11,7 +11,6 @@ var relativeRoot: string = undefined;
 var outputChannel: vscode.OutputChannel;
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
-    'use strict';
     outputChannel = vscode.window.forceCode.outputChannel;
     const slash: string = vscode.window.forceCode.pathSeparator;
 
@@ -210,7 +209,6 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
     }
 
     function onComplete(results) {
-        'use strict';
         vscode.window.setStatusBarMessage(`ForceCode: Deploy Success $(check)`);
         //   exec('osascript -e \'tell app 'Google Chrome' to tell the active tab of its first window to reload\'');
         console.log('results are: ', results);

@@ -4,20 +4,19 @@ import sleep from './../util/sleep';
 import * as error from './../util/error';
 const parseString: any = require('xml2js').parseString;
 
-var elegantSpinner = require('elegant-spinner');
+var elegantSpinner: any = require('elegant-spinner');
 const UPDATE: boolean = true;
 const CREATE: boolean = false;
 
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
-  'use strict';
 
   const body: string = document.getText();
   const ext: string = parsers.getFileExtension(document);
   const toolingType: string = parsers.getToolingType(document);
   const fileName: string = parsers.getFileName(document);
   const name: string = parsers.getName(document, toolingType);
-  const spinner = elegantSpinner();
-  var interval = undefined;
+  const spinner: any = elegantSpinner();
+  var interval: any = undefined;
 
   /* tslint:disable */
   var DefType: string = undefined;
@@ -202,10 +201,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
 
   function addToContainer() {
     // Namespace fixes... do we need this??
-    let prefix = '';
-    let shortName = '';
+    let prefix: string = '';
+    let shortName: string = '';
     if (fileName.indexOf('__') > -1) {
-      let nameParts = fileName.split('__');
+      let nameParts: string[] = fileName.split('__');
       if (nameParts.length > 1) {
         prefix = nameParts[0];
         shortName = nameParts[1];

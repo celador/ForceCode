@@ -50,7 +50,6 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     public newContainer(): Promise<forceCode.IForceService> {
-        'use strict';
         var self: forceCode.IForceService = vscode.window.forceCode;
         return self.conn.tooling.sobject('MetadataContainer')
             .create({ name: 'ForceCode-' + Date.now() })

@@ -4,7 +4,6 @@ import * as error from './../util/error';
 import { configuration } from './../services';
 
 export default function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
-    'use strict';
     vscode.window.setStatusBarMessage('ForceCode: $(pulse) Running Unit Tests $(pulse)');
 
     // const body: string = document.getText();
@@ -51,7 +50,6 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     // =======================================================================================================================================
 
     function showResult(res) {
-        'use strict';
         return configuration().then(config => {
             vscode.window.forceCode.outputChannel.clear();
             if (res.failures.length > 0) {

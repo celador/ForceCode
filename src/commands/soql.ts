@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as error from './../util/error';
 
 export default function soql(context: vscode.ExtensionContext): Promise<any> {
-    'use strict';
     vscode.window.setStatusBarMessage('ForceCode: Run SOQL Query');
 
     return vscode.window.forceCode.connect(context)

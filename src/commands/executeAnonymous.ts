@@ -13,7 +13,6 @@ export interface IExecuteAnonymousService {
 };
 
 export default function executeAnonymous(document: vscode.TextDocument, context: vscode.ExtensionContext): any {
-    'use strict';
     let apexBody: string = document.getText();
     // vscode.window.forceCode = vscode.window.forceCode;
     // vscode.window.forceCode.outputChannel = ;
@@ -87,7 +86,6 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
         return res;
     }
     function showResult(res) {
-        'use strict';
         return configuration().then(config => {
             vscode.window.forceCode.outputChannel.clear();
             vscode.window.forceCode.outputChannel.appendLine(debugOnly(config.debugOnly));

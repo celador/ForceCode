@@ -7,7 +7,6 @@ import {getIcon, getExtension, getFolder} from './../parsers';
 const TYPEATTRIBUTE: string = 'type';
 
 export default function open(context: vscode.ExtensionContext) {
-    'use strict';
     const slash: string = vscode.window.forceCode.pathSeparator;
     let bundleName: string = '';
     vscode.window.setStatusBarMessage('open Started');

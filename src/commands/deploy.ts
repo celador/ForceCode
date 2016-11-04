@@ -1,5 +1,3 @@
-'use strict';
-// 'use strict';
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 // import * as archiver from 'archiver';
@@ -9,7 +7,6 @@ import * as error from './../util/error';
 var tools: any = require('cs-jsforce-metadata-tools');
 
 export default function deploy(context: vscode.ExtensionContext) {
-    'use strict';
     vscode.window.setStatusBarMessage('ForceCode: Deploy Started');
 
 
@@ -105,7 +102,6 @@ export default function deploy(context: vscode.ExtensionContext) {
 
 
 
-// 'use strict';
 
 // var DEPLOY_OPTIONS: string[] = "allowMissingFiles,autoUpdatePackage,checkOnly,ignoreWarnings,performRetrieve,purgeOnDelete,rollbackOnError,runAllTests,runTests,singlePackage,testLevel".split(',');
 
