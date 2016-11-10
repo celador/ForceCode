@@ -4,7 +4,7 @@ import path = require('path');
 import jszip = require('jszip');
 // import jsforce = require('jsforce');
 import globule = require('globule');
-import {IForceService} from './../forceCode';
+import { IForceService } from './../forceCode';
 import * as error from './../util/error';
 var packageName: string = undefined;
 var relativeRoot: string = undefined;
@@ -167,11 +167,11 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
      * @return undefined
      */
     function bundle(zip) {
-        vscode.window.setStatusBarMessage(`ForceCode: Bundling Resource $(beaker)`);
-        var buffer: Buffer = zip.generate({ type: 'nodebuffer', compression: 'DEFLATE' });
-        // Copy the zip to the StaticResource folder
         var finalPath: string = vscode.workspace.rootPath + slash + 'src' + slash + 'staticresources' + slash + packageName + '.resource';
-        fs.writeFile(finalPath, buffer, 'binary');
+        vscode.window.setStatusBarMessage(`ForceCode: Bundling Resource $(beaker)`);
+        zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(function (buffer) {
+            fs.outputFile(finalPath, buffer);
+        });
         return zip;
     }
 
@@ -184,9 +184,10 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
     function deploy(zip) {
         vscode.window.setStatusBarMessage(`ForceCode: Deploying $(rocket)`);
         // Create the base64 data to send to Salesforce 
-        var zipFile: any = zip.generate({ base64: true, compression: 'DEFLATE' });
-        var metadata: any = makeResourceMetadata(packageName, zipFile);
-        return vscode.window.forceCode.conn.metadata.upsert('StaticResource', metadata);
+        return zip.generateAsync({ type: 'base64', compression: 'DEFLATE' }).then(function (content) {
+            var metadata: any = makeResourceMetadata(packageName, content);
+            return vscode.window.forceCode.conn.metadata.upsert('StaticResource', metadata);
+        });
     }
 
     /**
@@ -196,12 +197,12 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
      * @param {ZipBlob} - generated zip blob
      * @return {Metadata[]} - Array with one metadata object
      */
-    function makeResourceMetadata(bundleName, zipFile) {
+    function makeResourceMetadata(bundleName, content) {
         return [
             {
                 fullName: bundleName,
                 description: 'spa data files',
-                content: zipFile,
+                content: content,
                 contentType: 'application/zip',
                 cacheControl: 'Private',
             },
