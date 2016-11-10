@@ -18,7 +18,7 @@
       true,
       "spaces"
     ],
-    "interface-name": false,
+    "interface-name": [false],
     "jsdoc-format": true,
     "label-position": true,
     "label-undefined": true,

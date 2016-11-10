@@ -21,10 +21,6 @@ export function activate(context: vscode.ExtensionContext): any {
     commands.getLog(context);
   }));
 
-  context.subscriptions.push(vscode.commands.registerCommand('ForceCode.compile', () => {
-    commands.compile(vscode.window.activeTextEditor.document, context);
-  }));
-
   context.subscriptions.push(vscode.commands.registerCommand('ForceCode.open', () => {
     commands.open(context);
   }));
@@ -39,6 +35,10 @@ export function activate(context: vscode.ExtensionContext): any {
 
   context.subscriptions.push(vscode.commands.registerCommand('ForceCode.apexTest', () => {
     commands.apexTest(vscode.window.activeTextEditor.document, context);
+  }));
+
+  context.subscriptions.push(vscode.commands.registerCommand('ForceCode.compile', () => {
+    commands.compile(vscode.window.activeTextEditor.document, context);
   }));
 
   context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {

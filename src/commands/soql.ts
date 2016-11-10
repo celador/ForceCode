@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as error from './../util/error';
+// import * as error from './../util/error';
 
 export default function soql(context: vscode.ExtensionContext): Promise<any> {
     vscode.window.setStatusBarMessage('ForceCode: Run SOQL Query');
@@ -17,11 +17,14 @@ export default function soql(context: vscode.ExtensionContext): Promise<any> {
             return vscode.window.forceCode.conn.query(query);
         });
     }
-    function finished(){
-        
+    function finished() {
+        // Take the results
+        // And write them to a file
     }
-    function onError(){
-        
+    function onError(err) {
+        // Take the results
+        // And write them to a file
+        // error.outputError({});
     }
     // =======================================================================================================================================
 }
