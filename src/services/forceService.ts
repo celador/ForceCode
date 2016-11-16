@@ -104,7 +104,7 @@ export default class ForceService implements forceCode.IForceService {
             });
         } else {
             // self.outputChannel.appendLine(`Connected as ` + self.config.username);
-            vscode.window.forceCode.statusBarItem.text = `ForceCode: $(history) ${self.config.username}`;
+            // vscode.window.forceCode.statusBarItem.text = `ForceCode: $(history) ${self.config.username}`;
             return Promise.resolve(self);
         }
     }
