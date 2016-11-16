@@ -9,7 +9,7 @@ const TYPEATTRIBUTE: string = 'type';
 export default function open(context: vscode.ExtensionContext) {
     const slash: string = vscode.window.forceCode.pathSeparator;
     let bundleName: string = '';
-    vscode.window.setStatusBarMessage('open Started');
+    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Open Cloud File';
 
     return vscode.window.forceCode.connect(context)
         .then(svc => showFileOptions())
@@ -138,7 +138,7 @@ export default function open(context: vscode.ExtensionContext) {
     }
     // =======================================================================================================================================
     function finished(rsp): boolean {
-        vscode.window.setStatusBarMessage('ForceCode: Retrieve Lightning Finished');
+        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieve Lightning Finished';
         return true;
     }
     // =======================================================================================================================================

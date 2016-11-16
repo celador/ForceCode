@@ -26,7 +26,7 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
     // =====================       USING SOAP API      =========================================================
     // =========================================================================================================
     function invokeExecuteAnonymous(text: string): jsforce.ExecuteAnonymousResponse {
-        vscode.window.setStatusBarMessage('ForceCode: $(pulse) Executing $(pulse)');
+        vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Executing $(pulse)';
         vscode.window.forceCode.conn.debuggingHeader = vscode.window.forceCode.conn.debuggingHeader ? vscode.window.forceCode.conn.debuggingHeader : {};
         vscode.window.forceCode.conn.debuggingHeader['@xmlns'] = 'http://soap.sforce.com/2006/08/apex';
         vscode.window.forceCode.conn.debuggingHeader['categories'] = [
@@ -78,10 +78,10 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
         diagnosticCollection.set(_document.uri, diagnostics);
         // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
         if (diagnostics.length > 0) {
-            vscode.window.setStatusBarMessage(`ForceCode: Execute Anonymous Errors $(alert)`);
+            vscode.window.forceCode.statusBarItem.text = `ForceCode: Execute Anonymous Errors $(alert)`;
             diagnostics.forEach(d => vscode.window.forceCode.outputChannel.appendLine(`Line ${Number(result.line)}: ${d.message}`));
         } else {
-            vscode.window.setStatusBarMessage(`ForceCode: Execute Anonymous Success $(check)`);
+            vscode.window.forceCode.statusBarItem.text = `ForceCode: Execute Anonymous Success $(check)`;
         }
         return res;
     }

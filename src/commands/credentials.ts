@@ -7,7 +7,7 @@ const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
 };
 export default function enterCredentials() {
-    vscode.window.setStatusBarMessage('ForceCode Menu');
+    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Show Menu';
     const slash: string = vscode.window.forceCode.pathSeparator;
     return getUsername()
         .then(cfg => getPassword(cfg))

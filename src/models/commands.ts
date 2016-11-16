@@ -45,7 +45,7 @@ export default {
     // Open File
     openFile: {
         description: 'Open Classes, Pages, Triggers, and Components',
-        detail: 'Open some files from your org to work with.',
+        detail: 'Open a file from the cloud (aka "refresh from org").',
         icon: 'desktop-download',
         label: 'Open Salesforce File',
     },
@@ -61,34 +61,34 @@ export default {
         description: 'Create a Repository, Model, Service, Controller, or Custom class.',
         detail: 'Creates classes based on common separation of concerns patterns',
         icon: 'plus',
-        label: 'Create Class'
+        label: 'Create Class',
     },
     // Run current Unit tests
     runUnitTests: {
         description: 'Run the Unit Tests for this Test Class',
         detail: 'If the Apex class you currently have open contains test methods, it will run the test methods and return the results in the output panel',
         icon: 'beaker',
-        label: 'Run Unit Tests'
+        label: 'Run Unit Tests',
     },
     // Run SOQL
     soql: {
         description: 'Run a SOQL query',
         detail: 'The SOQL query results will be dumped to a json file in the soql directory',
         icon: 'telescope',
-        label: 'SOQL Query'
+        label: 'SOQL Query',
     },
     // Run Tooling Query
     toql: {
         description: 'Run a Tooling API query',
         detail: 'The Tooling API query (Select SymbolTable From ApexClass) results will be dumped to a json file in the toql directory',
         icon: 'telescope',
-        label: 'Tooling Query'
+        label: 'Tooling Query',
     },
     // Run SOQL
     package: {
         description: 'Generate Package.xml file from the contents of a directory',
         detail: 'Generate a Package.xml file for a directory',
         icon: 'gift',
-        label: 'Package-xml'
-    }
+        label: 'Package-xml',
+    },
 }

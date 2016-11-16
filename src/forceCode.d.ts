@@ -35,6 +35,7 @@ export interface IForceService {
     userInfo?: jsforce.UserInfo;
     username?: string;
     outputChannel: vscode.OutputChannel;
+    statusBarItem: vscode.StatusBarItem;
     connect(context: vscode.ExtensionContext): Promise<IForceService>;
     newContainer(): Promise<IForceService>;
     clearLog(): void;

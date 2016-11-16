@@ -6,7 +6,7 @@ import * as error from './../util/error';
 var tools: any = require('cs-jsforce-metadata-tools');
 
 export default function deploy(context: vscode.ExtensionContext) {
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Started';
+    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Package-xml';
     vscode.window.forceCode.outputChannel.clear();
     var _consoleInfoReference: any = console.info;
     var _consoleErrorReference: any = console.error;

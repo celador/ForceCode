@@ -27,7 +27,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
     // =======================================================================================================================================
     // =======================================================================================================================================
     function getPackageName(service: IForceService) {
-        vscode.window.setStatusBarMessage(`ForceCode: Get Packages $(list-unordered)`);
+        vscode.window.forceCode.statusBarItem.text = `ForceCode: Get Packages $(list-unordered)`;
         let bundleDirectories: any[] = [];
         let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles';
         if (fs.existsSync(bundlePath)) {
@@ -64,7 +64,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
     }
 
     function getPackagePath(option) {
-        vscode.window.setStatusBarMessage(`ForceCode: Making Zip $(fold)`);
+        vscode.window.forceCode.statusBarItem.text = `ForceCode: Making Zip $(fold)`;
         packageName = option.label;
         let bundlePath: string = vscode.workspace.rootPath;
         // Get package data
@@ -169,7 +169,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
     function bundle(zip) {
 	// Here is replaceSrc possiblity
         var finalPath: string = vscode.workspace.rootPath + slash + vscode.window.forceCode.config.src + slash + 'staticresources' + slash + packageName + '.resource';
-        vscode.window.setStatusBarMessage(`ForceCode: Bundling Resource $(beaker)`);
+        vscode.window.forceCode.statusBarItem.text = `ForceCode: Bundling Resource $(beaker)`;
         zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(function (buffer) {
             fs.outputFile(finalPath, buffer);
         });
@@ -183,7 +183,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
      * @return undefined
      */
     function deploy(zip) {
-        vscode.window.setStatusBarMessage(`ForceCode: Deploying $(rocket)`);
+        vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying $(rocket)`;
         // Create the base64 data to send to Salesforce 
         return zip.generateAsync({ type: 'base64', compression: 'DEFLATE' }).then(function (content) {
             var metadata: any = makeResourceMetadata(packageName, content);
@@ -211,7 +211,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
     }
 
     function onComplete(results) {
-        vscode.window.setStatusBarMessage(`ForceCode: Deploy Success $(check)`);
+        vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploy Success $(check)`;
         //   exec('osascript -e \'tell app 'Google Chrome' to tell the active tab of its first window to reload\'');
         console.log('results are: ', results);
         console.log('success: ' + results.success);

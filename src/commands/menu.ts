@@ -4,7 +4,7 @@ import model from './../models/commands';
 import * as error from './../util/error';
 
 export default function showMenu(context: vscode.ExtensionContext) {
-    vscode.window.setStatusBarMessage('ForceCode Menu');
+    vscode.window.forceCode.statusBarItem.text = 'ForceCode Menu';
 
     return vscode.window.forceCode.connect(context)
         .then(svc => displayMenu())
@@ -21,7 +21,6 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.openFile);
             quickpick.push(model.compileDeploy);
             quickpick.push(model.executeAnonymous);
-            quickpick.push(model.getLogs);
             quickpick.push(model.resourceBundle);
             quickpick.push(model.retrievePackage);
             quickpick.push(model.createClass);
@@ -31,6 +30,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.deployPackage);
             quickpick.push(model.soql);
             quickpick.push(model.toql);
+            quickpick.push(model.getLogs);
         }
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
             return {
@@ -85,15 +85,5 @@ export default function showMenu(context: vscode.ExtensionContext) {
         console.log(res);
         return true;
     }
-    // =======================================================================================================================================
-    // function onError(err): boolean {
-    //     vscode.window.setStatusBarMessage('Error opening menu');
-    //     vscode.window.showErrorMessage(err.message);
-    //     var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-    //     outputChannel.appendLine('================================================================');
-    //     outputChannel.appendLine(err);
-    //     console.error(err);
-    //     return false;
-    // }
     // =======================================================================================================================================
 }

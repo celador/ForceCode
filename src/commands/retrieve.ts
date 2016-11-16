@@ -6,7 +6,7 @@ const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 
 export default function retrieve(context: vscode.ExtensionContext) {
-    vscode.window.setStatusBarMessage('Retrieve Started');
+    vscode.window.forceCode.statusBarItem.text = 'Retrieve Started';
     const slash: string = vscode.window.forceCode.pathSeparator;
 
     return vscode.window.forceCode.connect(context)
@@ -54,7 +54,7 @@ export default function retrieve(context: vscode.ExtensionContext) {
 
     // =======================================================================================================================================
     function getPackage(option: vscode.QuickPickItem) {
-      vscode.window.setStatusBarMessage('ForceCode: Retrieving ' + option.description);
+      vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieving ' + option.description;
       // vscode.window.forceCode.getConfig();
       return configuration().then(config => {
         return new Promise(function(resolve, reject) {
@@ -71,14 +71,12 @@ export default function retrieve(context: vscode.ExtensionContext) {
             reject(err);
           });
           stream.on('end', function() {
-            vscode.window.setStatusBarMessage('ForceCode: Unzipping... ');
             var reader: any[] = ZIP.Reader(Buffer.concat(bufs));
             reader.forEach(function (entry) {
               if (entry.isFile()) {
                 var name: string = entry.getName();
                 var data: NodeBuffer = entry.getData();
                 var newName: string = name.replace(option.description + slash, '');
-                vscode.window.setStatusBarMessage('ForceCode: Unzipping ' + newName);
                 // Here is  possiblity
                 fs.outputFileSync(vscode.workspace.rootPath + slash + vscode.window.forceCode.config.src + slash + newName, data);
               }
@@ -92,7 +90,7 @@ export default function retrieve(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     // =======================================================================================================================================
     function finished(res): boolean {
-        vscode.window.setStatusBarMessage('ForceCode: Retrieve Finished');
+        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieve Finished';
         return true;
     }
   }

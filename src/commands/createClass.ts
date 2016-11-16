@@ -91,7 +91,7 @@ export default function createClass(context: vscode.ExtensionContext) {
                 var finalClassName: string = classesPath + slash + classname + '.cls';
                 fs.stat(finalClassName, function (err, stats) {
                     if (!err) {
-                        vscode.window.setStatusBarMessage('ForceCode: Error creating file');
+                        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Error creating file';
                         vscode.window.showErrorMessage('Cannot create ' + finalClassName + '. A file with that name already exists!');
                     } else if (err.code === 'ENOENT') {
                         var classFile: string = `public with sharing class ${classname} {
@@ -99,16 +99,16 @@ export default function createClass(context: vscode.ExtensionContext) {
 }`;
                         fs.outputFile(finalClassName, classFile, function (writeErr) {
                             if (writeErr) {
-                                vscode.window.setStatusBarMessage(writeErr.message);
+                                vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + writeErr.message;
                                 vscode.window.showErrorMessage(writeErr.message);
                                 reject(writeErr);
                             } else {
-                                vscode.window.setStatusBarMessage('ForceCode: ' + classname + ' was sucessfully created $(check)');
+                                vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + classname + ' was sucessfully created $(check)';
                                 resolve(finalClassName);
                             }
                         });
                     } else {
-                        vscode.window.setStatusBarMessage(err.code);
+                        vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + err.code;
                         vscode.window.showErrorMessage(err.code);
                         reject(err);
                     }
@@ -122,7 +122,7 @@ export default function createClass(context: vscode.ExtensionContext) {
             return new Promise(function (resolve, reject) {
                 fs.stat(finalMetadataName, function (err, stats) {
                     if (!err) {
-                        vscode.window.setStatusBarMessage('ForceCode: Error creating file');
+                        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Error creating file';
                         vscode.window.showErrorMessage('Cannot create ' + finalMetadataName + '. A file with that name already exists!');
                     } else if (err.code === 'ENOENT') {
 
@@ -134,14 +134,14 @@ export default function createClass(context: vscode.ExtensionContext) {
 
                         fs.outputFile(finalMetadataName, metaFile, function (writeError) {
                             if (writeError) {
-                                vscode.window.setStatusBarMessage(writeError.message);
+                                vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + writeError.message;
                                 vscode.window.showErrorMessage(writeError.message);
                                 reject(err);
                             }
                             resolve(finalMetadataName);
                         });
                     } else {
-                        vscode.window.setStatusBarMessage(err.code);
+                        vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + err.code;
                         reject(err);
                     }
                 });

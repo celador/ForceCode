@@ -13,6 +13,7 @@ export default class ForceService implements forceCode.IForceService {
     public containerAsyncRequestId: string;
     public userInfo: any;
     public username: string;
+    public statusBarItem: vscode.StatusBarItem;
     public outputChannel: vscode.OutputChannel;
     public operatingSystem: string;
     public pathSeparator: string;
@@ -28,6 +29,12 @@ export default class ForceService implements forceCode.IForceService {
         // Setup username and outputChannel
         this.operatingSystem = operatingSystem.getOS();
         this.username = this.config.username || '';
+        this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
+        this.statusBarItem.command = 'ForceCode.showMenu';
+        this.statusBarItem.tooltip = 'Open the ForceCode Menu';
+        this.statusBarItem.text = 'ForceCode is now active';
+        this.statusBarItem.show();
+
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
         this.conn = new jsforce.Connection({
             loginUrl: this.config.url || 'https://login.salesforce.com'
@@ -79,24 +86,25 @@ export default class ForceService implements forceCode.IForceService {
             });
 
             if (!config.username || !config.password) {
-                vscode.window.setStatusBarMessage(`ForceCode: $(alert) Missing Credentials $(alert)`);
+                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(alert) Missing Credentials $(alert)`;
                 throw { message: 'No Credentials' };
             }
-            vscode.window.setStatusBarMessage(`ForceCode: $(plug) Connecting as ${config.username}`);
+            vscode.window.forceCode.statusBarItem.text = `ForceCode: $(plug) Connecting as ${config.username}`;
             return self.conn.login(config.username, config.password).then((userInfo) => {
-                vscode.window.setStatusBarMessage(`ForceCode: $(zap) Connected $(zap)`);
+                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(zap) Connected $(zap)`;
                 self.outputChannel.appendLine(`Connected as username. ${JSON.stringify(userInfo)}`);
                 self.userInfo = userInfo;
                 self.username = config.username;
                 return self;
             }).catch(err => {
-                vscode.window.setStatusBarMessage(`ForceCode: $(alert) Connection Error $(alert)`);
+                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(alert) Connection Error $(alert)`;
                 self.outputChannel.appendLine('================================================================');
                 self.outputChannel.appendLine(err.message);
                 throw err;
             });
         } else {
-            // vscode.window.setStatusBarMessage(`ForceCode: $(history) Connected as ${self.config.username}`);
+            // self.outputChannel.appendLine(`Connected as ` + self.config.username);
+            vscode.window.forceCode.statusBarItem.text = `ForceCode: $(history) ${self.config.username}`;
             return Promise.resolve(self);
         }
     }

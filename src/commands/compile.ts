@@ -9,7 +9,6 @@ const UPDATE: boolean = true;
 const CREATE: boolean = false;
 
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
-
   const body: string = document.getText();
   const ext: string = parsers.getFileExtension(document);
   const toolingType: string = parsers.getToolingType(document);
@@ -27,7 +26,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   var Id: string = undefined;
   /* tslint:enable */
   // Start doing stuff
-  vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''}` + spinner());
+  vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''}` + spinner();
   if (toolingType === undefined) {
     return Promise
       .reject({ message: 'Unknown Tooling Type.  Ensure the body is well formed' })
@@ -36,6 +35,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     DefType = getAuraDefTypeFromDocument(document);
     Format = getAuraFormatFromDocument(document);
     Source = document.getText();
+    // Aura Bundles are a special case, since they can be upserted with the Tooling API
+    // Instead of needing to be compiled, like Classes and Pages..
     return vscode.window.forceCode.connect(context)
       .then(svc => getAuraMembers(svc))
       .then(svc => ensureAuraBundle(svc))
@@ -43,11 +44,15 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       .then(finished, onError);
   } else if (toolingType === 'PermissionSet' || toolingType === 'CustomObject') {
     Source = document.getText();
+    // This process uses the Metadata API to deploy specific files
+    // This is where we extend it to create any kind of metadata
+    // Currently only Objects and Permission sets ...
     return vscode.window.forceCode.connect(context)
       .then(createMetaData)
       .then(finished, onError);
   } else {
-    vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''}` + spinner());
+    // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
+    vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''}` + spinner();
     return vscode.window.forceCode.connect(context)
       .then(svc => svc.newContainer())
       .then(addToContainer)
@@ -61,7 +66,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   // =======================================================================================================================================
 
   function createMetaData(svc) {
-    vscode.window.setStatusBarMessage('ForceCode: Create Metadata');
+    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Create Metadata';
     return new Promise(function (resolve, reject) {
       parseString(Source, { explicitArray: false, async: true }, function (err, result) {
         if (err) {
@@ -76,11 +81,11 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   }
 
   function compileMetadata(metadata) {
-    vscode.window.setStatusBarMessage('ForceCode: Deploying...');
+    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploying...';
     return vscode.window.forceCode.conn.metadata.upsert(toolingType, [metadata]).then(
       function (result) {
         if (result.success) {
-          vscode.window.setStatusBarMessage('ForceCode: Successly deployed ' + result.fullName);
+          vscode.window.forceCode.statusBarItem.text = 'ForceCode: Successly deployed ' + result.fullName;
           return result;
         } else {
           var error: any = result.errors[0];
@@ -239,7 +244,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       } else {
         // Tooling Object does not exist
         // CREATE it
-        vscode.window.setStatusBarMessage('ForceCode: Creating ' + name);
+        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Creating ' + name;
         return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
           return vscode.window.forceCode;
         });
@@ -262,7 +267,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   // =======================================================================================================================================
   // =======================================================================================================================================
   function requestCompile() {
-    // vscode.window.setStatusBarMessage('ForceCode: Compile Requested');
     return vscode.window.forceCode.conn.tooling.sobject('ContainerAsyncRequest').create({
       IsCheckOnly: false,
       IsRunTests: false,
@@ -277,15 +281,24 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   // =======================================================================================================================================
   function getCompileStatus() {
     var checkCount: number = 0;
-    vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''}` + spinner());
+    vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''}` + spinner();
     return nextStatus();
     function nextStatus() {
       checkCount += 1;
       clearInterval(interval);
       interval = setInterval(function () {
-        vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''}` + spinner());
+        if (checkCount <= 10) {
+          vscode.window.forceCode.statusBarItem.color = 'white';
+        }
+        if (checkCount > 10) {
+          vscode.window.forceCode.statusBarItem.color = 'orange';
+        }
+        if (checkCount > 20) {
+          vscode.window.forceCode.statusBarItem.color = 'red';
+        }
+        vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''}` + spinner();
       }, 50);
-      // vscode.window.setStatusBarMessage('ForceCode: Get Status...' + checkCount);
+      // vscode.window.forceCode.statusBarItem.text = 'ForceCode: Get Status...' + checkCount;
       // Set a timeout to auto fail the compile after 30 seconds
       return getStatus().then(res => {
         // Throttle the ReCheck of the compile status, to use fewer http requests (reduce effects on SFDC limits)
@@ -340,17 +353,15 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       res.errors.forEach(err => {
         console.error(err);
       });
-      vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`);
+      vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`;
     } else if (res.State === 'Error') {
-      vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`);
+      vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`;
     }
     // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
     if (diagnostics.length > 0) {
-      vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`);
+      vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`;
     } else {
-      vscode.window.setStatusBarMessage(`ForceCode: ${name} ${DefType ? DefType : ''} $(check)`);
-      // vscode.commands.executeCommand('workbench.action.output.toggleOutput');
-      // outputChannel.hide();
+      vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''} $(check)`;
     }
     diagnosticCollection.set(document.uri, diagnostics);
     return true;

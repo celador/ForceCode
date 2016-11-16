@@ -3,7 +3,7 @@ import fs = require('fs-extra');
 // import * as error from './../util/error';
 
 export default function toql(context: vscode.ExtensionContext): Promise<any> {
-    vscode.window.setStatusBarMessage('ForceCode: Run SOQL Query');
+    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Run SOQL Query';
     const slash: string = vscode.window.forceCode.pathSeparator;
 
     return vscode.window.forceCode.connect(context)
