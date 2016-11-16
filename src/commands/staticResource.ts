@@ -167,7 +167,8 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
      * @return undefined
      */
     function bundle(zip) {
-        var finalPath: string = vscode.workspace.rootPath + slash + 'src' + slash + 'staticresources' + slash + packageName + '.resource';
+	// Here is replaceSrc possiblity
+        var finalPath: string = vscode.workspace.rootPath + slash + vscode.window.forceCode.config.src + slash + 'staticresources' + slash + packageName + '.resource';
         vscode.window.setStatusBarMessage(`ForceCode: Bundling Resource $(beaker)`);
         zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(function (buffer) {
             fs.outputFile(finalPath, buffer);

@@ -77,6 +77,13 @@ export default {
         icon: 'telescope',
         label: 'SOQL Query'
     },
+    // Run Tooling Query
+    toql: {
+        description: 'Run a Tooling API query',
+        detail: 'The Tooling API query (Select SymbolTable From ApexClass) results will be dumped to a json file in the toql directory',
+        icon: 'telescope',
+        label: 'Tooling Query'
+    },
     // Run SOQL
     package: {
         description: 'Generate Package.xml file from the contents of a directory',

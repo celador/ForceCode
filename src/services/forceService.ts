@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
 import * as fs from 'fs-extra';
 import {constants, operatingSystem} from './../services';
+import { configuration } from './../services';
 import * as commands from './../commands';
 const jsforce: any = require('jsforce');
 
@@ -40,15 +41,6 @@ export default class ForceService implements forceCode.IForceService {
         this.outputChannel.clear();
     };
 
-    public getConfig() {
-        try {
-            this.config = fs.readJsonSync(vscode.workspace.rootPath + this.pathSeparator + 'force.json');
-        } catch (err) {
-            this.config = {};
-        }
-        return this.config;
-    }
-
     public newContainer(): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         return self.conn.tooling.sobject('MetadataContainer')
@@ -76,8 +68,7 @@ export default class ForceService implements forceCode.IForceService {
                 return self.config;
             });
         }
-        self.getConfig();
-        return Promise.resolve(self.config);
+        return configuration();
     }
     private login(config): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;

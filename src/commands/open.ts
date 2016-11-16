@@ -3,7 +3,7 @@ import fs = require('fs-extra');
 // import jsforce = require('jsforce');
 import * as error from './../util/error';
 
-import {getIcon, getExtension, getFolder} from './../parsers';
+import { getIcon, getExtension, getFolder } from './../parsers';
 const TYPEATTRIBUTE: string = 'type';
 
 export default function open(context: vscode.ExtensionContext) {
@@ -107,9 +107,9 @@ export default function open(context: vscode.ExtensionContext) {
                     var defType: string = res.DefType.toLowerCase().split('').map((c, i) => i === 0 ? c.toUpperCase() : c).join('');
                 }
                 let extension: string = getExtension(defType);
-                // let filename: string = `${vscode.workspace.rootPath}/src/aura/${bundleName}/${bundleName}${defType}.${extension}`;
                 let actualFileName: string = extension === 'js' ? bundleName + defType : bundleName;
-                filename = vscode.workspace.rootPath + slash + 'src' + slash + 'aura' + slash + bundleName + slash + actualFileName + '.' + extension;
+                // Here is replaceSrc possiblity
+                filename = vscode.workspace.rootPath + slash + vscode.window.forceCode.config.src + slash + 'aura' + slash + bundleName + slash + actualFileName + '.' + extension;
                 let body: string = res.Source;
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {
@@ -121,7 +121,8 @@ export default function open(context: vscode.ExtensionContext) {
                     });
                 });
             } else {
-                filename = `${vscode.workspace.rootPath}/src/${getFolder(toolingType)}/${res.FullName || res.Name}.${getExtension(toolingType)}`;
+                // Here is replaceSrc possiblity
+                filename = `${vscode.workspace.rootPath}${slash}${vscode.window.forceCode.config.src}${slash}${getFolder(toolingType)}${slash}${res.FullName || res.Name}.${getExtension(toolingType)}`;
                 let body: string = res.Body || res.Markup;
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {

@@ -1,22 +1,36 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
-import {configuration} from './../services';
+import * as error from './../util/error';
+import { configuration } from './../services';
 
 export default function createClass(context: vscode.ExtensionContext) {
     const slash: string = vscode.window.forceCode.pathSeparator;
-    const classesPath: string = `${vscode.workspace.rootPath}${slash}src${slash}classes`;
     const CUSTOM_CLASS: string = 'Custom';
+    var classesPath: string;
+    // Here is replaceSrc possiblity
     return configuration().then(config => {
-        return userClassSelection().then(selectedOption => {
-            if (selectedOption) {
-                return userFileNameSelection(selectedOption.label).then(filename => {
-                    if (filename) {
-                        generateFile(filename, config);
-                    }
-                });
-            }
-        });
-    });
+        classesPath = `${vscode.workspace.rootPath}${slash}${vscode.window.forceCode.config.src}${slash}classes`;
+        if (fs.statSync(classesPath).isDirectory()) {
+            return userClassSelection().then(selectedOption => {
+                if (selectedOption) {
+                    return userFileNameSelection(selectedOption.label).then(filename => {
+                        if (filename) {
+                            return generateFile(filename, config).then(res => {
+                                let fp: string = res[0].toString();
+                                return vscode.workspace.openTextDocument(fp).then(document => {
+                                    return vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+                                });
+                            });
+
+                        }
+                    });
+                }
+            });
+        } else {
+            throw { message: classesPath + ' is not a real folder. Check the src option in your config file.' };
+        }
+    }).catch(err => error.outputError);
+
 
     function userClassSelection() {
         var classOptions: any = [
@@ -70,53 +84,73 @@ export default function createClass(context: vscode.ExtensionContext) {
     }
 
     function generateFile(classname, config) {
-        // Write Class file
-        var finalClassName: string = classesPath + slash + classname + '.cls';
-        fs.stat(finalClassName, function (err, stats) {
-            if (!err) {
-                vscode.window.setStatusBarMessage('ForceCode: Error creating file');
-                vscode.window.showErrorMessage('Cannot create ' + finalClassName + '. A file with that name already exists!');
-            } else if (err.code === 'ENOENT') {
-                var classFile: string = `public with sharing class ${classname} {
+        return Promise.all([writeFile(), writeMetaFile()]);
+        function writeFile() {
+            return new Promise(function (resolve, reject) {
+                // Write Class file
+                var finalClassName: string = classesPath + slash + classname + '.cls';
+                fs.stat(finalClassName, function (err, stats) {
+                    if (!err) {
+                        vscode.window.setStatusBarMessage('ForceCode: Error creating file');
+                        vscode.window.showErrorMessage('Cannot create ' + finalClassName + '. A file with that name already exists!');
+                    } else if (err.code === 'ENOENT') {
+                        var classFile: string = `public with sharing class ${classname} {
 
 }`;
-                fs.writeFile(finalClassName, classFile, function (writeErr) {
-                    if (writeErr) {
-                        vscode.window.setStatusBarMessage(writeErr.message);
-                        vscode.window.showErrorMessage(writeErr.message);
+                        fs.outputFile(finalClassName, classFile, function (writeErr) {
+                            if (writeErr) {
+                                vscode.window.setStatusBarMessage(writeErr.message);
+                                vscode.window.showErrorMessage(writeErr.message);
+                                reject(writeErr);
+                            } else {
+                                vscode.window.setStatusBarMessage('ForceCode: ' + classname + ' was sucessfully created $(check)');
+                                resolve(finalClassName);
+                            }
+                        });
                     } else {
-                        vscode.window.setStatusBarMessage('ForceCode: ' + classname + ' was sucessfully created $(check)');
+                        vscode.window.setStatusBarMessage(err.code);
+                        vscode.window.showErrorMessage(err.code);
+                        reject(err);
                     }
                 });
-            } else {
-                vscode.window.setStatusBarMessage(err.code);
-                vscode.window.showErrorMessage(err.code);
-            }
-        });
+            });
+        }
         // Write Metadata file
-        var finalMetadataName: string = classesPath + slash + classname + '.cls-meta.xml';
-        fs.stat(finalMetadataName, function (err, stats) {
-            if (!err) {
-                vscode.window.setStatusBarMessage('ForceCode: Error creating file');
-                vscode.window.showErrorMessage('Cannot create ' + finalMetadataName + '. A file with that name already exists!');
-            } else if (err.code === 'ENOENT') {
 
-                var metaFile: string = `<?xml version="1.0" encoding="UTF-8"?>
+        function writeMetaFile() {
+            var finalMetadataName: string = classesPath + slash + classname + '.cls-meta.xml';
+            return new Promise(function (resolve, reject) {
+                fs.stat(finalMetadataName, function (err, stats) {
+                    if (!err) {
+                        vscode.window.setStatusBarMessage('ForceCode: Error creating file');
+                        vscode.window.showErrorMessage('Cannot create ' + finalMetadataName + '. A file with that name already exists!');
+                    } else if (err.code === 'ENOENT') {
+
+                        var metaFile: string = `<?xml version="1.0" encoding="UTF-8"?>
 <ApexClass xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>${config.apiVersion || '37.0'}</apiVersion>
     <status>Active</status>
 </ApexClass>`;
 
-                fs.writeFile(finalMetadataName, metaFile, function (writeError) {
-                    if (writeError) {
-                        vscode.window.setStatusBarMessage(writeError.message);
-                        vscode.window.showErrorMessage(writeError.message);
+                        fs.outputFile(finalMetadataName, metaFile, function (writeError) {
+                            if (writeError) {
+                                vscode.window.setStatusBarMessage(writeError.message);
+                                vscode.window.showErrorMessage(writeError.message);
+                                reject(err);
+                            }
+                            resolve(finalMetadataName);
+                        });
+                    } else {
+                        vscode.window.setStatusBarMessage(err.code);
+                        reject(err);
                     }
                 });
-            } else {
-                vscode.window.setStatusBarMessage(err.code);
-            }
-        });
+
+            });
+        }
+
+
+
     }
 
 }

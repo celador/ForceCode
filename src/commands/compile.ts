@@ -293,6 +293,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
           clearInterval(interval);
           return res;
         } else if (checkCount > 30) {
+          clearInterval(interval);
           throw { message: 'Timeout' };
         } else {
           return sleep(vscode.window.forceCode.config.poll || 1000).then(nextStatus);

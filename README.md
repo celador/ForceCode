@@ -45,6 +45,7 @@ The configuration file should look something like...
     "debugOnly": false,
     "apiVersion": "37.0",
     "prefix": "namespace",
+    "src": "src",
     "deployOptions": {
         "checkOnly": false,
         "testLevel": "RunLocalTests",
@@ -68,11 +69,13 @@ Note: the password is in the format "passwordtoken".  Do not try to use any deli
 * debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
 * apiVersion: This is the default api version that all your files will be saved with.  If this is not set, this will default to the version of the org in use.  ForceCode will not change the version of an existing file.  This is also the version used for package retrieval.
 * prefix: This is the namespce prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise it will attempt to infer a prefix from the filename.  If you have a namespaced org and do not set this setting, you will have problems.
+* src: This is the src folder that contains your project files
 
-**Special Note**:  
+**Special Note**:
+
 By default, VSCode will close the "quick open" dialog, making it difficult to copy/paste your user credentials.  
 Use the following setting to force the dialog to remain open when the window loses focus.  
-`"workbench.quickOpen.closeOnFocusLost": false`  
+`"workbench.quickOpen.closeOnFocusLost": false`
 
 ## Get errors as you type
 

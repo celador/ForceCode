@@ -12,6 +12,7 @@ import credentials from './credentials';
 import createClass from './createClass';
 import apexTest from './apexTest';
 import soql from './soql';
+import toql from './toql';
 import deploy from './deploy';
 
 export {
@@ -28,5 +29,6 @@ export {
     createClass,
     deploy,
     apexTest,
-    soql
+    soql,
+    toql
 };
