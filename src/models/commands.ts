@@ -91,4 +91,11 @@ export default {
         icon: 'gift',
         label: 'Package-xml',
     },
+    // Diff Files
+    diff: {
+        description: 'Diff the current file with what is on the server',
+        detail: 'Diff the file',
+        icon: 'diff',
+        label: 'Diff',
+    },
 }

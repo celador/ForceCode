@@ -91,7 +91,7 @@ export default class ForceService implements forceCode.IForceService {
             }
             vscode.window.forceCode.statusBarItem.text = `ForceCode: $(plug) Connecting as ${config.username}`;
             return self.conn.login(config.username, config.password).then((userInfo) => {
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(zap) Connected $(zap)`;
+                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(zap) Connected as ${self.config.username} $(zap)`;
                 self.outputChannel.appendLine(`Connected as username. ${JSON.stringify(userInfo)}`);
                 self.userInfo = userInfo;
                 self.username = config.username;

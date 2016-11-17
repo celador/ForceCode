@@ -13,6 +13,7 @@ import apexTest from './apexTest';
 import soql from './soql';
 import toql from './toql';
 import deploy from './deploy';
+import diff from './diff';
 
 export {
     executeAnonymous,
@@ -28,5 +29,6 @@ export {
     deploy,
     apexTest,
     soql,
-    toql
+    toql,
+    diff
 };
