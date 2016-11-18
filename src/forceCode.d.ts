@@ -11,6 +11,7 @@ export interface Config {
     apiVersion?: string;
     autoCompile?: boolean;
     autoRefresh?: boolean;
+    browser?: string;
     debugOnly?: boolean;
     password?: string;
     poll?: number;

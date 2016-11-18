@@ -236,8 +236,8 @@ function makeResourceMetadata(bundleName, content) {
 
 function onComplete(results) {
     vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploy Success $(check)`;
-    if (vscode.window.forceCode.config.autoRefresh) {
-        require('child_process').exec(`osascript -e 'tell application "Google Chrome Canary" to reload active tab of window 1'`);
+    if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
+        require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
     }
     console.log('results are: ', results);
     console.log('success: ' + results.success);
