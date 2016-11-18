@@ -38,10 +38,13 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // Aura Bundles are a special case, since they can be upserted with the Tooling API
     // Instead of needing to be compiled, like Classes and Pages..
     return vscode.window.forceCode.connect(context)
-      .then(svc => getAuraMembers(svc))
-      .then(svc => ensureAuraBundle(svc))
-      .then(results => upsertAuraDefinition(results))
-      .then(finished, onError);
+      .then(svc => getAuraBundle(svc)
+                    .then(ensureAuraBundle)
+                      .then(bundle => getAuraDefinition(svc, bundle)
+                        .then(definitions => upsertAuraDefinition(definitions, bundle)
+                      )
+                    )
+      ).then(finished, onError);
   } else if (toolingType === 'PermissionSet' || toolingType === 'CustomObject') {
     Source = document.getText();
     // This process uses the Metadata API to deploy specific files
@@ -103,14 +106,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       'DeveloperName': name, NamespacePrefix: vscode.window.forceCode.config.prefix
     });
   }
-  function getAuraDefinition(svc) {
-    return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({
-      'AuraDefinitionBundle.DeveloperName': name, NamespacePrefix: vscode.window.forceCode.config.prefix
-    });
-  }
-  function getAuraMembers(svc) {
-    return Promise.all([getAuraBundle(svc), getAuraDefinition(svc)]);
-  }
   function ensureAuraBundle(results) {
     // If the Bundle doesn't exist, create it, else Do nothing
     if (!results[0] || results[0].length === 0) {
@@ -128,9 +123,12 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       return results;
     }
   }
-
-  function upsertAuraDefinition(results) {
-    var definitions: any[] = results[1];
+  function getAuraDefinition(svc, bundle) {
+    return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({
+      'AuraDefinitionBundleId': bundle[0].Id
+    });
+  }
+  function upsertAuraDefinition(definitions, bundle) {
     // If the Definition doesn't exist, create it
     var def: any[] = definitions.filter(result => result.DefType === DefType);
     currentObjectDefinition = def.length > 0 ? def[0] : undefined;
@@ -138,8 +136,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       AuraDefinitionBundleId = currentObjectDefinition.AuraDefinitionBundleId;
       Id = currentObjectDefinition.Id;
       return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').update({ Id: currentObjectDefinition.Id, Source });
-    } else {
-      return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: results[0][0].Id, DefType, Format, Source });
+    } else if (bundle[0]) {
+      return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle[0].Id, DefType, Format, Source });
     }
   }
   function getAuraDefTypeFromDocument(doc: vscode.TextDocument) {
