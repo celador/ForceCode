@@ -21,14 +21,14 @@ export default class ForceService implements forceCode.IForceService {
     constructor() {
         // Set the ForceCode configuration
         this.pathSeparator = operatingSystem.isWindows() ? '\\' : '/';
-        try {
-            this.config = fs.readJsonSync(vscode.workspace.rootPath + this.pathSeparator + 'force.json');
-        } catch (err) {
-            this.config = {};
-        }
         // Setup username and outputChannel
         this.operatingSystem = operatingSystem.getOS();
-        this.username = this.config.username || '';
+        configuration(this).then(config => {
+            this.username = config.username || '';
+            this.conn = new jsforce.Connection({
+                loginUrl: config.url || 'https://login.salesforce.com'
+            });
+        });
         this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
         this.statusBarItem.command = 'ForceCode.showMenu';
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
@@ -36,9 +36,6 @@ export default class ForceService implements forceCode.IForceService {
         this.statusBarItem.show();
 
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
-        this.conn = new jsforce.Connection({
-            loginUrl: this.config.url || 'https://login.salesforce.com'
-        });
     }
     public connect(): Promise<forceCode.IForceService> {
         return this.setupConfig().then(config => this.login(config));
