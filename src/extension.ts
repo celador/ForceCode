@@ -49,6 +49,10 @@ export function activate(context: vscode.ExtensionContext): any {
     if (toolingType && vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
       commands.compile(textDocument, context);
     }
+    var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
+    if (isResource.index) {
+      commands.staticResourceDeployFromFile(textDocument, context);
+    }
   }));
 
   // // Peek Provider Setup

@@ -10,6 +10,7 @@ declare module 'vscode' {
 export interface Config {
     apiVersion?: string;
     autoCompile?: boolean;
+    autoRefresh?: boolean;
     debugOnly?: boolean;
     password?: string;
     poll?: number;

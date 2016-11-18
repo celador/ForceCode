@@ -5,6 +5,7 @@ import compile from './compile';
 import open from './open';
 import retrieve from './retrieve';
 import staticResource from './staticResource';
+import {staticResourceDeployFromFile} from './staticResource';
 import PeekFileDefinitionProvider from './lens';
 import showMenu from './menu';
 import credentials from './credentials';
@@ -22,6 +23,7 @@ export {
     open,
     retrieve,
     staticResource,
+    staticResourceDeployFromFile,
     PeekFileDefinitionProvider,
     showMenu,
     credentials,
