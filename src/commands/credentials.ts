@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
-import {getIcon} from './../parsers';
+import { getIcon } from './../parsers';
 import * as error from './../util/error';
+import { configuration } from './../services';
 
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
@@ -20,20 +21,9 @@ export default function enterCredentials() {
     // =======================================================================================================================================
     // =======================================================================================================================================
 
-    function getYoForceConfig() {
-        // return vscode.workspace.findFiles('force.json', '').then(function (files) {
-        var forceConfig: any = {};
-        try {
-            forceConfig = fs.readJsonSync(vscode.workspace.rootPath + slash + 'force.json');
-        } catch (err) {
-            // forceConfig = {};
-        }
-        return Promise.resolve(forceConfig);
-    }
-
     function getUsername() {
         return new Promise(function (resolve, reject) {
-            getYoForceConfig().then(config => {
+            configuration().then(config => {
                 let options: vscode.InputBoxOptions = {
                     ignoreFocusOut: true,
                     placeHolder: 'mark@salesforce.com',
@@ -94,9 +84,9 @@ export default function enterCredentials() {
             description: 'Automatically deploy/compile files on save',
             label: 'Yes',
         }, {
-                description: 'Deploy/compile code through the ForceCode menu',
-                label: 'No',
-            },
+            description: 'Deploy/compile code through the ForceCode menu',
+            label: 'No',
+        },
         ];
         return vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
             config.autoCompile = res.label === 'Yes';

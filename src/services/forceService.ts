@@ -21,21 +21,23 @@ export default class ForceService implements forceCode.IForceService {
     constructor() {
         // Set the ForceCode configuration
         this.pathSeparator = operatingSystem.isWindows() ? '\\' : '/';
-        // Setup username and outputChannel
         this.operatingSystem = operatingSystem.getOS();
+        // Setup username and outputChannel
+        this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
+        this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
+        this.statusBarItem.command = 'ForceCode.showMenu';
+        this.statusBarItem.tooltip = 'Open the ForceCode Menu';
+        this.statusBarItem.text = 'ForceCode: Active';
         configuration(this).then(config => {
             this.username = config.username || '';
             this.conn = new jsforce.Connection({
                 loginUrl: config.url || 'https://login.salesforce.com'
             });
+            this.statusBarItem.text = 'ForceCode: Connected as ${config.username}';
+        }).catch(err => {
+            this.statusBarItem.text = 'ForceCode: Not Connected';
         });
-        this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
-        this.statusBarItem.command = 'ForceCode.showMenu';
-        this.statusBarItem.tooltip = 'Open the ForceCode Menu';
-        this.statusBarItem.text = 'ForceCode is now active';
         this.statusBarItem.show();
-
-        this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
     }
     public connect(): Promise<forceCode.IForceService> {
         return this.setupConfig().then(config => this.login(config));
@@ -59,11 +61,9 @@ export default class ForceService implements forceCode.IForceService {
 // var keychain = require('keytar')
     private setupConfig(): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
-        // Set the ForceCode configuration
-
         // Setup username and outputChannel
-        self.username = self.config.username || '';
-        if (!self.config.username) {
+        self.username = (self.config && self.config.username) || '';
+        if (!self.config || !self.config.username) {
             return commands.credentials().then(credentials => {
                 self.config.username = credentials.username;
                 self.config.password = credentials.password;

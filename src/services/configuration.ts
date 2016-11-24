@@ -15,8 +15,8 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
             self.config.workspaceRoot = `${vscode.workspace.rootPath}${slash}${self.config.src}${slash}`;
             resolve(self.config);
         } catch (err) {
-            vscode.window.forceCode.config = {};
-            reject(err);
+            self.config = {};
+            resolve(self.config);
         }
     });
 }
