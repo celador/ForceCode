@@ -46,7 +46,6 @@ The configuration file should look something like...
     "pollTimeout": 120,
     "debugOnly": false,
     "apiVersion": "37.0",
-    "prefix": "namespace",
     "src": "src",
     "deployOptions": {
         "checkOnly": false,
