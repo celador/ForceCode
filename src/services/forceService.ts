@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import * as fs from 'fs-extra';
-import {constants, operatingSystem} from './../services';
+// import * as fs from 'fs-extra';
+import { constants, operatingSystem } from './../services';
 import { configuration } from './../services';
 import * as commands from './../commands';
 const jsforce: any = require('jsforce');
@@ -33,14 +33,14 @@ export default class ForceService implements forceCode.IForceService {
             this.conn = new jsforce.Connection({
                 loginUrl: config.url || 'https://login.salesforce.com'
             });
-            this.statusBarItem.text = 'ForceCode: Connected as ${config.username}';
+            this.statusBarItem.text = `ForceCode is Active`;
         }).catch(err => {
-            this.statusBarItem.text = 'ForceCode: Not Connected';
+            this.statusBarItem.text = 'ForceCode: Missing Configuration';
         });
         this.statusBarItem.show();
     }
     public connect(): Promise<forceCode.IForceService> {
-        return this.setupConfig().then(config => this.login(config));
+        return this.setupConfig().then(this.login);
     }
 
     public clearLog() {
@@ -57,8 +57,8 @@ export default class ForceService implements forceCode.IForceService {
             });
     }
 
-// TODO: Add keychain access so we don't have to use a username or password'
-// var keychain = require('keytar')
+    // TODO: Add keychain access so we don't have to use a username or password'
+    // var keychain = require('keytar')
     private setupConfig(): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Setup username and outputChannel
@@ -87,18 +87,32 @@ export default class ForceService implements forceCode.IForceService {
                 throw { message: 'No Credentials' };
             }
             vscode.window.forceCode.statusBarItem.text = `ForceCode: $(plug) Connecting as ${config.username}`;
-            return self.conn.login(config.username, config.password).then((userInfo) => {
+            return self.conn
+                .login(config.username, config.password)
+                .then(connectionSuccess)
+                .then(getNamespacePrefix)
+                .catch(connectionError);
+            function connectionSuccess(userInfo) {
                 vscode.window.forceCode.statusBarItem.text = `ForceCode: $(zap) Connected as ${self.config.username} $(zap)`;
-                self.outputChannel.appendLine(`Connected as username. ${JSON.stringify(userInfo)}`);
+                self.outputChannel.appendLine(`Connected as ${JSON.stringify(userInfo)}`);
                 self.userInfo = userInfo;
                 self.username = config.username;
                 return self;
-            }).catch(err => {
+            }
+            function connectionError(err) {
                 vscode.window.forceCode.statusBarItem.text = `ForceCode: $(alert) Connection Error $(alert)`;
                 self.outputChannel.appendLine('================================================================');
                 self.outputChannel.appendLine(err.message);
                 throw err;
-            });
+            }
+            function getNamespacePrefix(svc: forceCode.IForceService) {
+                return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {
+                    if (res && res.records.length && res.records[0].NamespacePrefix) {
+                        svc.config.prefix = res.records[0].NamespacePrefix;
+                    }
+                    return svc;
+                });
+            }
         } else {
             // self.outputChannel.appendLine(`Connected as ` + self.config.username);
             // vscode.window.forceCode.statusBarItem.text = `ForceCode: $(history) ${self.config.username}`;

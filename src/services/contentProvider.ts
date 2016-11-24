@@ -23,7 +23,7 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
             field = 'Markup';
         }
         return new Promise<string>((resolve, reject) => {
-            var query: string = `SELECT ${field} FROM ${toolingType} WHERE NamespacePrefix='${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : 'null'}' and Name='${toolingName}'`;
+            var query: string = `SELECT ${field} FROM ${toolingType} WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : 'null'}' and Name='${toolingName}'`;
             vscode.window.forceCode.conn.query(query).then((results: jsforce.QueryResult) => {
                 if (results && results.totalSize === 1) {
                     resolve(results.records[0][field]);

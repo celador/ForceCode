@@ -21,17 +21,13 @@ export default function open(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     // =======================================================================================================================================
     function showFileOptions() {
-        var promises: any[] = [
-            // Apex Stuff
-            vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexClass'),
-            vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexTrigger'),
-            // VisualForce stuff
-            vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexPage'),
-            vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix FROM ApexComponent'),
-            vscode.window.forceCode.conn.tooling.query('SELECT Id, Name, NamespacePrefix, ContentType FROM StaticResource'),
-            // Lightning stuff
-            vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, ApiVersion, Description FROM AuraDefinitionBundle'),
-        ];
+        var metadataTypes: string[] = ['ApexClass', 'ApexTrigger', 'ApexPage', 'ApexComponent', 'StaticResource'];
+        var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : 'null'}'`;
+        var promises: any[] = metadataTypes.map(t => {
+            var q: string = `SELECT Id, Name, NamespacePrefix FROM ${t} ${predicate}`;
+            return vscode.window.forceCode.conn.tooling.query(q);
+        });
+        promises.push(vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate));
         // TODO: Objects
         // TODO: Static Resources
         // TODO: Packages
@@ -46,11 +42,10 @@ export default function open(context: vscode.ExtensionContext) {
                     let icon: string = getIcon(toolingType);
                     let ext: string = getExtension(toolingType);
                     let name: string = record.Name || record.DeveloperName;
-                    let prefix: string = record.NamespacePrefix ? record.NamespacePrefix + '.' : '';
                     return {
                         description: `${record.Id}`,
                         detail: `${record.attributes[TYPEATTRIBUTE]}`,
-                        label: `$(${icon}) - ${prefix}${name}.${ext}`,
+                        label: `$(${icon}) - ${name}.${ext}`,
                     };
                 });
             let config: {} = {
@@ -122,7 +117,7 @@ export default function open(context: vscode.ExtensionContext) {
                 });
             } else {
                 // Here is replaceSrc possiblity
-                filename = `${vscode.workspace.rootPath}${slash}${vscode.window.forceCode.config.src}${slash}${getFolder(toolingType)}${slash}${res.FullName || res.Name}.${getExtension(toolingType)}`;
+                filename = `${vscode.workspace.rootPath}${slash}${vscode.window.forceCode.config.src}${slash}${getFolder(toolingType)}${slash}${res.Name || res.FullName}.${getExtension(toolingType)}`;
                 let body: string = res.Body || res.Markup;
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {

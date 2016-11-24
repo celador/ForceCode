@@ -203,26 +203,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   // =======================================================================================================================================
 
   function addToContainer() {
-    // Namespace fixes... do we need this??
-    let prefix: string = '';
-    let shortName: string = '';
-    if (fileName.indexOf('__') > -1) {
-      let nameParts: string[] = fileName.split('__');
-      if (nameParts.length > 1) {
-        prefix = nameParts[0];
-        shortName = nameParts[1];
-      } else {
-        shortName = name;
-      }
-    } else {
-      shortName = name;
-    }
-    if (vscode.window.forceCode.config.prefix) {
-      prefix = vscode.window.forceCode.config.prefix;
-    }
-
     return vscode.window.forceCode.conn.tooling.sobject(toolingType)
-      .find({ Name: shortName, NamespacePrefix: prefix }).execute()
+      .find({ Name: fileName, NamespacePrefix: vscode.window.forceCode.config.prefix || '' }).execute()
       .then(records => addMember(records));
     function addMember(records) {
       if (records.length > 0) {
