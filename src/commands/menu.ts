@@ -62,6 +62,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.toql.description: return commands.toql(context);
                 case model.deployPackage.description: return commands.deploy(context);
                 case model.diff.description: return commands.diff(vscode.window.activeTextEditor.document, context);
+                case model.package.description: return commands.generator(context);
                 case model.createClass.description: return commands.createClass(context);
                 case model.runUnitTests.description: return commands.apexTest(vscode.window.activeTextEditor.document, context);
                 default: break;

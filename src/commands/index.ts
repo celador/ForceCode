@@ -15,6 +15,7 @@ import soql from './soql';
 import toql from './toql';
 import deploy from './deploy';
 import diff from './diff';
+import generator from './package';
 
 export {
     executeAnonymous,
@@ -32,5 +33,6 @@ export {
     apexTest,
     soql,
     toql,
-    diff
+    diff,
+    generator
 };

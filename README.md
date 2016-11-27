@@ -39,6 +39,7 @@ The configuration file should look something like...
     "username": "MonsterMike@Salesforce.com",
     "password": "YourPasswordHere",
     "url": "https://login.salesforce.com",
+    "prefix": "",
     "autoCompile": true,
     "autoRefresh": true,
     "browser": "Google Chrome Canary",
@@ -64,10 +65,10 @@ Note: the password is in the format "passwordtoken".  Do not try to use any deli
 * username: The username for the org you want to connect to.
 * password: The password, with security token, for your user.
 * autoCompile: When a supported file is saved (works with VSCode's autosave feature) the file is saved/compiled on the server.  Otherwise, use `cmd + opt + s` to save the file to the server.
-* autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on, the currently active tab in Google Chrome Canary will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
-* browser: Define which browser you want to reload when the static resource refreshes
+* autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on (and you're working on a Mac), the currently active tab in Google Chrome Canary (or your configured browser) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
+* browser: Define which browser you want to reload when the static resource refreshes (this only works with Macs at the moment)
 * url: This is the login url for Salesforce.  It's either login.salesforce.com for Developer and Professional editions or test.salesforce.com for sandboxes.
-* poll: When compiling, this is the interval at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
+* poll: When compiling, this is the interval (in milliseconds) at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
 * pollTimeout: When retrieving packages, or other long running tasks, this is the maximum amount of time (in seconds) it will wait before the process times out.  If you're having trouble retrieving your package, try increasing this number.  Max is 600 (10 minutes).
 * debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
 * apiVersion: This is the default api version that all your files will be saved with.  If this is not set, this will default to the version of the org in use.  ForceCode will not change the version of an existing file.  This is also the version used for package retrieval.
