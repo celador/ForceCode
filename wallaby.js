@@ -4,7 +4,7 @@ module.exports = function () {
       'src/**/*.ts'
     ],
     tests: [
-      'test/*.test.js'
+      'test/*.spec.ts'
     ],
     'testFramework': 'mocha',
     env: {

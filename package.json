@@ -274,6 +274,7 @@
     "compile": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "clean": "rm -rf node_modules/",
+	"test": "node ./node_modules/vscode/bin/test",
     "tslint": "tslint -c tslint.json src/**/*.ts"
   },
   "dependencies": {
