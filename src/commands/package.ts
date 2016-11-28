@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 // import * as path from 'path';
 import * as error from './../util/error';
 
-var generator: any = require('package-xml/js/packageXmlGenerator');
+// var generator: any = require('package-xml/js/packageXmlGenerator');
 
 export default function generate(context: vscode.ExtensionContext) {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Package-xml';
@@ -13,7 +13,7 @@ export default function generate(context: vscode.ExtensionContext) {
 
 
     return vscode.window.forceCode.connect(context)
-        .then(svc => generator({}))
+        // .then(svc => generator({}))
         .then(finished)
         .catch(onError);
     // =======================================================================================================================================
