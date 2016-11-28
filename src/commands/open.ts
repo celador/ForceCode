@@ -29,8 +29,7 @@ export default function open(context: vscode.ExtensionContext) {
         });
         promises.push(vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate));
         // TODO: Objects
-        // TODO: Static Resources
-        // TODO: Packages
+        // TODO: Generic Metadata retrieve
         return Promise.all(promises).then(results => {
             let options: vscode.QuickPickItem[] = results
                 .map(res => res.records)
