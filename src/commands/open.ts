@@ -22,7 +22,7 @@ export default function open(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     function showFileOptions() {
         var metadataTypes: string[] = ['ApexClass', 'ApexTrigger', 'ApexPage', 'ApexComponent', 'StaticResource'];
-        var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : 'null'}'`;
+        var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''}'`;
         var promises: any[] = metadataTypes.map(t => {
             var q: string = `SELECT Id, Name, NamespacePrefix FROM ${t} ${predicate}`;
             return vscode.window.forceCode.conn.tooling.query(q);

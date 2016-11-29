@@ -28,7 +28,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
 
     function getClassInfo(svc) {
         return vscode.window.forceCode.conn.tooling.sobject(toolingType)
-            .find({ Name: name, NamespacePrefix: vscode.window.forceCode.config.prefix }).execute();
+            .find({ Name: name, NamespacePrefix: vscode.window.forceCode.config.prefix || '' }).execute();
     }
 
     function getTestMethods(info): string[] {

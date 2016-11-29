@@ -103,7 +103,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   // =======================================================================================================================================
   function getAuraBundle(svc) {
     return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').find({
-      'DeveloperName': name, NamespacePrefix: vscode.window.forceCode.config.prefix
+      'DeveloperName': name, NamespacePrefix: vscode.window.forceCode.config.prefix || ''
     });
   }
   function ensureAuraBundle(results) {
