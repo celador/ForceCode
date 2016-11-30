@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.3.10",
+  "version": "0.3.11-beta.1",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -269,7 +269,6 @@
     }
   },
   "scripts": {
-    "bump": "npm version patch && git push && git push --tags && vsce publish",
     "rebuild": "./node_modules/.bin/electron-rebuild -n 49 -v 1.3.8",
     "vscode:prepublish": "tsc -p ./",
     "compile": "tsc -watch -p ./",

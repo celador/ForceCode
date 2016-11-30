@@ -66,6 +66,7 @@ declare module 'jsforce/index' {
         interface Metadata {
             pollTimeout: number;
             pollInterval: number;
+            describe(): Promise<any>;
             checkDeployStatus(processId: string, {}): Promise<any>;
             checkRetrieveStatus(id: string): Promise<any>;
             retrieve({}): { stream(): NodeJS.ReadableStream };
