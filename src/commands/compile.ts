@@ -274,7 +274,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         // var record: any = records[0];
         var member: {} = {
           Body: body,
-          Id: records.id
+          Id: records.id,
         };
         return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).update(member).then(res => {
           return vscode.window.forceCode;
