@@ -11,109 +11,123 @@ var relativeRoot: string = undefined;
 var outputChannel: vscode.OutputChannel;
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
-    outputChannel = vscode.window.forceCode.outputChannel;
-    const slash: string = vscode.window.forceCode.pathSeparator;
+  outputChannel = vscode.window.forceCode.outputChannel;
+  const slash: string = vscode.window.forceCode.pathSeparator;
 
-    // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
-    return vscode.window.forceCode.connect(context)
-        .then(getPackageName)
-        .then(bundleAndDeploy);
-    // =======================================================================================================================================
-    function getPackageName(service: IForceService) {
-        vscode.window.forceCode.statusBarItem.text = `ForceCode: Get Packages $(list-unordered)`;
-        let bundleDirectories: any[] = [];
-        let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles';
-        if (fs.existsSync(bundlePath)) {
-            bundleDirectories = fs.readdirSync(bundlePath).filter(function (file) {
-                return fs.statSync(path.join(bundlePath, file)).isDirectory();
-            }).map(d => d.split('.resource')[0]).map(d => {
-                return { name: d, type: 'resource-bundle' };
-            });
-        }
-        let spaDirectories: Array<any> = [];
-        let spaPath: string = vscode.workspace.rootPath + slash + 'spa';
-        if (fs.existsSync(spaPath)) {
-            spaDirectories = fs.readdirSync(spaPath).filter(function (file) {
-                return fs.statSync(path.join(spaPath, file)).isDirectory();
-            }).map(s => {
-                return { name: s, type: 'SPA' };
-            });
-        }
-
-        let config: {} = {
-            matchOnDescription: true,
-            matchOnDetail: true,
-            placeHolder: 'Choose a Resource Bundle to bundle',
-        };
-        let options: any[] = bundleDirectories.concat(spaDirectories).map(option => {
-            return {
-                description: option.name,
-                detail: option.type,
-                label: option.name,
-            };
-        });
-        return vscode.window.showQuickPick(options, config);
-
+  // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
+  return vscode.window.forceCode.connect(context)
+    .then(getPackageName)
+    .then(option => {
+      if (option.label === 'All Static Resources') {
+        return bundleAndDeployAll();
+      } else {
+        return bundleAndDeploy(option);
+      }
+    });
+  // =======================================================================================================================================
+  function getPackageName(service: IForceService): any {
+    vscode.window.forceCode.statusBarItem.text = `ForceCode: Get Packages $(list-unordered)`;
+    let bundleDirectories: any[] = [];
+    let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles';
+    if (fs.existsSync(bundlePath)) {
+      bundleDirectories = fs.readdirSync(bundlePath).filter(function (file) {
+        return fs.statSync(path.join(bundlePath, file)).isDirectory();
+      }).map(d => d.split('.resource')[0]).map(d => {
+        return { name: d, type: 'resource-bundle' };
+      });
     }
+    let spaDirectories: Array<any> = [];
+    let spaPath: string = vscode.workspace.rootPath + slash + 'spa';
+    if (fs.existsSync(spaPath)) {
+      spaDirectories = fs.readdirSync(spaPath).filter(function (file) {
+        return fs.statSync(path.join(spaPath, file)).isDirectory();
+      }).map(s => {
+        return { name: s, type: 'SPA' };
+      });
+    }
+
+    let config: {} = {
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: 'Choose a Resource Bundle to bundle',
+    };
+    let options: any[] = bundleDirectories.concat(spaDirectories).concat([{ name: 'All Static Resources', type: 'resource-bundle' }])
+      .map(option => {
+        return {
+          description: option.name,
+          detail: option.type,
+          label: option.name,
+        };
+      });
+    return vscode.window.showQuickPick(options, config);
+
+  }
 }
 
 export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, context: vscode.ExtensionContext): any {
-    return vscode.window.forceCode.connect(context)
-        .then(getPackageName)
-        .then(bundleAndDeploy);
-    // =======================================================================================================================================
-    function getPackageName(service: IForceService) {
-        const slash: string = vscode.window.forceCode.pathSeparator;
-        let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles' + slash;
-        var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource')[0];
-        return {
-            detail: 'resource-bundle',
-            label: resourceName
-        };
-    }
+  // This command is run when working in a file, and it's saved... It will auto bundle/deploy that static resource 
+  return vscode.window.forceCode.connect(context)
+    .then(getPackageName)
+    .then(bundleAndDeploy);
+  // =======================================================================================================================================
+  function getPackageName(service: IForceService) {
+    const slash: string = vscode.window.forceCode.pathSeparator;
+    let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles' + slash;
+    var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource')[0];
+    return {
+      detail: 'resource-bundle',
+      label: resourceName
+    };
+  }
 }
 
 function bundleAndDeploy(option) {
   return Promise.resolve(getPackagePath(option))
-        .then(makeZip)
-        .then(bundle)
-        .then(deploy)
-        .then(onComplete)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel))
+    .then(makeZip)
+    .then(bundle)
+    .then(deploy)
+    .then(onComplete)
+    .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
 }
 
-function bundleAndDeployAll(option) {
-  return Promise.resolve(getPackagePath(option))
-        .then(makeZip)
-        .then(bundle)
-        .then(deploy)
-        .then(onComplete)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel))
+function bundleAndDeployAll() {
+  const slash: string = vscode.window.forceCode.pathSeparator;
+  let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles';
+  if (fs.existsSync(bundlePath)) {
+    fs.readdirSync(bundlePath).filter(function (file) {
+      return fs.statSync(path.join(bundlePath, file)).isDirectory();
+    }).map(d => {
+      return bundleAndDeploy({
+        detail: 'resource-bundle',
+        label: d.substring(0, d.lastIndexOf('.')),
+      });
+    });
+  }
 }
 
 function getPackagePath(option) {
-    const slash: string = vscode.window.forceCode.pathSeparator;
-    var bundlePath: string = vscode.workspace.rootPath;
-    vscode.window.forceCode.statusBarItem.text = `ForceCode: Making Zip $(fold)`;
-    packageName = option.label;
-    // Get package data
-    if (option.detail === 'resource-bundle') {
-        bundlePath = vscode.workspace.rootPath + slash + 'resource-bundles' + slash + option.label + '.resource';
-    }
-    if (option.detail === 'SPA') {
-        bundlePath = vscode.workspace.rootPath + slash + 'spa' + slash + option.label;
-    }
-    return bundlePath;
+  const slash: string = vscode.window.forceCode.pathSeparator;
+  var bundlePath: string = vscode.workspace.rootPath;
+  vscode.window.forceCode.statusBarItem.text = `ForceCode: Making Zip $(fold)`;
+  packageName = option.label;
+  // Get package data
+  if (option.detail === 'resource-bundle') {
+    bundlePath = vscode.workspace.rootPath + slash + 'resource-bundles' + slash + option.label + '.resource';
+  }
+  if (option.detail === 'SPA') {
+    bundlePath = vscode.workspace.rootPath + slash + 'spa' + slash + option.label;
+  }
+  return bundlePath;
 }
 
 // Make Zip uses the two subsequent functions
 function makeZip(root) {
-    // Create a Zip Object from which we can generate data, with which we do things...
-    //  Get a file list that we generate from a path defined in the package.json.
-    relativeRoot = root;
-    var fileList: any[] = getFileList(relativeRoot);
-    var zip: any = zipFiles(fileList);
-    return zip;
+  // Create a Zip Object from which we can generate data, with which we do things...
+  //  Get a file list that we generate from a path defined in the package.json.
+  relativeRoot = root;
+  var fileList: any[] = getFileList(relativeRoot);
+  var zip: any = zipFiles(fileList);
+  return zip;
 }
 
 /**
@@ -124,17 +138,17 @@ function makeZip(root) {
  * @return {Zip} - zip blob for use
  */
 function zipFiles(fileList: string[]) {
-    var zip: any = new jszip();
-    const slash: string = vscode.window.forceCode.pathSeparator;
+  var zip: any = new jszip();
+  const slash: string = vscode.window.forceCode.pathSeparator;
 
-    // Add files to zip object
-    fileList.forEach(function (file) {
-        // var relativePath = file.split(relativeRoot)[1] || file;
-        var content: any = fs.readFileSync(relativeRoot + slash + file);
-        zip.file(file, content);
-    });
+  // Add files to zip object
+  fileList.forEach(function (file) {
+    // var relativePath = file.split(relativeRoot)[1] || file;
+    var content: any = fs.readFileSync(relativeRoot + slash + file);
+    zip.file(file, content);
+  });
 
-    return zip;
+  return zip;
 }
 
 /**
@@ -145,45 +159,45 @@ function zipFiles(fileList: string[]) {
  * @return {String[]} - Array of paths relative to given root
  */
 function getFileList(root) {
-    const slash: string = vscode.window.forceCode.pathSeparator;
-    // Throw if not a directory
-    if (!fs.statSync(root).isDirectory()) {
-        throw new Error('');
-    }
+  const slash: string = vscode.window.forceCode.pathSeparator;
+  // Throw if not a directory
+  if (!fs.statSync(root).isDirectory()) {
+    throw new Error('');
+  }
 
-    // We trap the relative root in a closure then
-    // Perform the recursive file search
-    return (function innerGetFileList(localPath) {
-        var fileslist: any[] = []; // List of files
-        var files: any = fs.readdirSync(localPath); // Files in current'sfdc' directory
-        var ignoreFiles: {} = vscode.workspace.getConfiguration('force')['filesExclude'] || {
-            '.gitignore': true,
-            '.DS_Store': true,
-            '.org_metadata': true,
-            '.log': true,
-            'node_modules/**': true,
-            'bower_modules/**': true,
-        };
-        var _ignoreFiles: any[] = Object.keys(ignoreFiles).map(key => {
-            return { key: key, value: ignoreFiles[key] };
-        }).filter(setting => setting.value === true)
-            .map(setting => root + slash + setting.key);
+  // We trap the relative root in a closure then
+  // Perform the recursive file search
+  return (function innerGetFileList(localPath) {
+    var fileslist: any[] = []; // List of files
+    var files: any = fs.readdirSync(localPath); // Files in current'sfdc' directory
+    var ignoreFiles: {} = vscode.workspace.getConfiguration('force')['filesExclude'] || {
+      '.gitignore': true,
+      '.DS_Store': true,
+      '.org_metadata': true,
+      '.log': true,
+      'node_modules/**': true,
+      'bower_modules/**': true,
+    };
+    var _ignoreFiles: any[] = Object.keys(ignoreFiles).map(key => {
+      return { key: key, value: ignoreFiles[key] };
+    }).filter(setting => setting.value === true)
+      .map(setting => root + slash + setting.key);
 
-        files.forEach(function (file) {
-            var pathname: string = localPath + slash + file;
-            var stat: any = fs.lstatSync(pathname);
+    files.forEach(function (file) {
+      var pathname: string = localPath + slash + file;
+      var stat: any = fs.lstatSync(pathname);
 
-            // If file is a directory, recursively add it's children
-            if (stat.isDirectory()) {
-                fileslist = fileslist.concat(innerGetFileList(pathname));
-                // Otherwise, add the file to the file list
-                // } else if (!_ignoreFiles.some(p => isMatch(p, file))) {
-            } else if (!globule.isMatch(_ignoreFiles, pathname, { matchBase: true, dot: true })) {
-                fileslist.push(pathname.replace(root + slash, ''));
-            }
-        });
-        return fileslist;
-    } (root));
+      // If file is a directory, recursively add it's children
+      if (stat.isDirectory()) {
+        fileslist = fileslist.concat(innerGetFileList(pathname));
+        // Otherwise, add the file to the file list
+        // } else if (!_ignoreFiles.some(p => isMatch(p, file))) {
+      } else if (!globule.isMatch(_ignoreFiles, pathname, { matchBase: true, dot: true })) {
+        fileslist.push(pathname.replace(root + slash, ''));
+      }
+    });
+    return fileslist;
+  } (root));
 }
 
 // function isMatch(path, file) {
@@ -197,14 +211,14 @@ function getFileList(root) {
  * @return undefined
  */
 function bundle(zip) {
-    const slash: string = vscode.window.forceCode.pathSeparator;
-    // Here is replaceSrc possiblity
-    var finalPath: string = vscode.workspace.rootPath + slash + vscode.window.forceCode.config.src + slash + 'staticresources' + slash + packageName + '.resource';
-    vscode.window.forceCode.statusBarItem.text = `ForceCode: Bundling Resource $(beaker)`;
-    zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(function (buffer) {
-        fs.outputFile(finalPath, buffer);
-    });
-    return zip;
+  const slash: string = vscode.window.forceCode.pathSeparator;
+  // Here is replaceSrc possiblity
+  var finalPath: string = vscode.workspace.rootPath + slash + vscode.window.forceCode.config.src + slash + 'staticresources' + slash + packageName + '.resource';
+  vscode.window.forceCode.statusBarItem.text = `ForceCode: Bundling Resource $(beaker)`;
+  zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(function (buffer) {
+    fs.outputFile(finalPath, buffer);
+  });
+  return zip;
 }
 
 /**
@@ -214,12 +228,12 @@ function bundle(zip) {
  * @return undefined
  */
 function deploy(zip) {
-    vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying $(rocket)`;
-    // Create the base64 data to send to Salesforce 
-    return zip.generateAsync({ type: 'base64', compression: 'DEFLATE' }).then(function (content) {
-        var metadata: any = makeResourceMetadata(packageName, content);
-        return vscode.window.forceCode.conn.metadata.upsert('StaticResource', metadata);
-    });
+  vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying $(rocket)`;
+  // Create the base64 data to send to Salesforce 
+  return zip.generateAsync({ type: 'base64', compression: 'DEFLATE' }).then(function (content) {
+    var metadata: any = makeResourceMetadata(packageName, content);
+    return vscode.window.forceCode.conn.metadata.upsert('StaticResource', metadata);
+  });
 }
 
 /**
@@ -230,25 +244,25 @@ function deploy(zip) {
  * @return {Metadata[]} - Array with one metadata object
  */
 function makeResourceMetadata(bundleName, content) {
-    return [
-        {
-            fullName: bundleName,
-            description: 'spa data files',
-            content: content,
-            contentType: 'application/zip',
-            cacheControl: 'Private',
-        },
-    ];
+  return [
+    {
+      fullName: bundleName,
+      description: 'spa data files',
+      content: content,
+      contentType: 'application/zip',
+      cacheControl: 'Private',
+    },
+  ];
 }
 
 function onComplete(results) {
-    vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploy Success $(check)`;
-    if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
-        require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
-    }
-    console.log('results are: ', results);
-    console.log('success: ' + results.success);
-    console.log('created: ' + results.created);
-    console.log('fullName: ' + results.fullName);
-    return results;
+  vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploy Success $(check)`;
+  if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
+    require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
+  }
+  console.log('results are: ', results);
+  console.log('success: ' + results.success);
+  console.log('created: ' + results.created);
+  console.log('fullName: ' + results.fullName);
+  return results;
 }
