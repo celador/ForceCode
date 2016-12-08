@@ -81,6 +81,11 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       if (checkCount > 20) {
         vscode.window.forceCode.statusBarItem.color = 'red';
       }
+      if (checkCount > 30) {
+        clearInterval(interval);
+        checkCount = 0;
+        vscode.window.forceCode.statusBarItem.color = 'red';
+      }
       vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''}` + spinner();
     }, 50);
 
