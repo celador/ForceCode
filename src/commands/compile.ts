@@ -68,7 +68,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
     // vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''}` + spinner();
     if (vscode.window.forceCode.isCompiling) {
-      throw ({ message: 'Already compiling' });
+      return Promise.reject({ message: 'Already compiling' });
     }
     clearInterval(interval);
     interval = setInterval(function () {
@@ -248,13 +248,14 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   function addToContainer(svc: IForceService) {
     // We will push the filename on to the members array to make sure that the next time we compile, 
     var hasActiveContainer: Boolean = svc.containerId !== undefined;
-    var fileIsOnlyMember: Boolean = (vscode.window.forceCode.containerMembers.length === 1) && vscode.window.forceCode.containerMembers.every(m => m === m.name === name);
+    var fileIsOnlyMember: Boolean = (vscode.window.forceCode.containerMembers.length === 1) && vscode.window.forceCode.containerMembers.every(m => m.name === name);
     if (hasActiveContainer && fileIsOnlyMember) {
-      return svc.newContainer(false).then(() => {
-        return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, UPDATE))
-          .find({ MetadataContainerId: vscode.window.forceCode.containerId }).execute()
-          .then(records => updateMember(records));
-      });
+      return updateMember(vscode.window.forceCode.containerMembers[0]);
+      // return svc.newContainer(false).then(() => {
+      //   return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, UPDATE))
+      //     .find({ MetadataContainerId: vscode.window.forceCode.containerId }).execute()
+      //     .then(records => updateMember(records));
+      // });
     } else {
       return svc.newContainer(true).then(() => {
         return vscode.window.forceCode.conn.tooling.sobject(toolingType)
@@ -266,19 +267,19 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
 
 
     function updateMember(records) {
-      if (records.length === 1) {
+      // if (records.length === 1) {
         // Tooling Object already exists
         //  UPDATE it
         // records[0].Body = body;
-        var record: any = records[0];
+        // var record: any = records[0];
         var member: {} = {
           Body: body,
-          Id: record.Id
+          Id: records.id
         };
         return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).update(member).then(res => {
           return vscode.window.forceCode;
         });
-      }
+      // }
     }
 
     function addMember(records) {
@@ -286,7 +287,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         // Tooling Object already exists
         //  UPDATE it
         var record: { Id: string, Metadata: {} } = records[0];
-        vscode.window.forceCode.containerMembers.push({ name, id: record.Id });
         var member: {} = {
           Body: body,
           ContentEntityId: record.Id,
@@ -295,6 +295,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
           MetadataContainerId: vscode.window.forceCode.containerId,
         };
         return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).create(member).then(res => {
+          vscode.window.forceCode.containerMembers.push({ name, id: res.id });
           return vscode.window.forceCode;
         });
       } else {
