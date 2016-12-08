@@ -28,7 +28,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         }
         function flush() {
             var logFile: any = path.resolve(statsPath);
-            fs.appendFileSync(logFile, buffer, 'utf8');
+            fs.writeFileSync(logFile, buffer, 'utf8');
             buffer = '';
         }
     } (fs));

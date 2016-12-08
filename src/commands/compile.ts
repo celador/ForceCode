@@ -409,8 +409,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
     diagnosticCollection.set(document.uri, diagnostics);
     if (diagnostics.length > 0) {
-      // FAILURE !!! We have to assume we are only compiling one thing at a time.
-      //  if that's not the file we're compiling, we will make a new container
+      // FAILURE !!! 
       vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`;
       return false;
     } else {

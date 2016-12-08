@@ -17,14 +17,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
     // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
     return vscode.window.forceCode.connect(context)
         .then(getPackageName)
-        .then(getPackagePath)
-        .then(makeZip)
-        .then(bundle)
-        .then(deploy)
-        .then(onComplete)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
-    // =======================================================================================================================================
-    // =======================================================================================================================================
+        .then(bundleAndDeploy);
     // =======================================================================================================================================
     function getPackageName(service: IForceService) {
         vscode.window.forceCode.statusBarItem.text = `ForceCode: Get Packages $(list-unordered)`;
@@ -67,12 +60,8 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
 export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, context: vscode.ExtensionContext): any {
     return vscode.window.forceCode.connect(context)
         .then(getPackageName)
-        .then(getPackagePath)
-        .then(makeZip)
-        .then(bundle)
-        .then(deploy)
-        .then(onComplete)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+        .then(bundleAndDeploy);
+    // =======================================================================================================================================
     function getPackageName(service: IForceService) {
         const slash: string = vscode.window.forceCode.pathSeparator;
         let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles' + slash;
@@ -82,6 +71,24 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, 
             label: resourceName
         };
     }
+}
+
+function bundleAndDeploy(option) {
+  return Promise.resolve(getPackagePath(option))
+        .then(makeZip)
+        .then(bundle)
+        .then(deploy)
+        .then(onComplete)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel))
+}
+
+function bundleAndDeployAll(option) {
+  return Promise.resolve(getPackagePath(option))
+        .then(makeZip)
+        .then(bundle)
+        .then(deploy)
+        .then(onComplete)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel))
 }
 
 function getPackagePath(option) {
