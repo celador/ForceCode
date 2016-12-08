@@ -22,6 +22,9 @@ export default function getToolingTypeFromBody(document: vscode.TextDocument, me
     if (document.fileName.endsWith('.object')) {
         return 'CustomObject';
     }
+    if (document.fileName.endsWith('.labels')) {
+        return 'CustomLabels';
+    }
 	// Here is replaceSrc possiblity
     if (document.fileName.indexOf(vscode.window.forceCode.config.src + slash + 'aura') >= 0) {
         return 'AuraDefinition';

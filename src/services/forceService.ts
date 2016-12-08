@@ -10,6 +10,7 @@ export default class ForceService implements forceCode.IForceService {
     public config: forceCode.Config;
     public conn: any;
     public containerId: string;
+    public containerMembers: any[];
     public containerAsyncRequestId: string;
     public userInfo: any;
     public username: string;
@@ -28,6 +29,7 @@ export default class ForceService implements forceCode.IForceService {
         this.statusBarItem.command = 'ForceCode.showMenu';
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         this.statusBarItem.text = 'ForceCode: Active';
+        this.containerMembers = [];
         configuration(this).then(config => {
             this.username = config.username || '';
             this.conn = new jsforce.Connection({
@@ -47,14 +49,19 @@ export default class ForceService implements forceCode.IForceService {
         this.outputChannel.clear();
     };
 
-    public newContainer(): Promise<forceCode.IForceService> {
+    public newContainer(force: Boolean): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
-        return self.conn.tooling.sobject('MetadataContainer')
-            .create({ name: 'ForceCode-' + Date.now() })
-            .then(res => {
-                self.containerId = res.id;
-                return self;
-            });
+        if (self.containerId && !force) {
+          return Promise.resolve(self);
+        } else {
+          return self.conn.tooling.sobject('MetadataContainer')
+              .create({ name: 'ForceCode-' + Date.now() })
+              .then(res => {
+                  self.containerId = res.id;
+                  self.containerMembers = [];
+                  return self;
+              });
+        }
     }
 
     // TODO: Add keychain access so we don't have to use a username or password'

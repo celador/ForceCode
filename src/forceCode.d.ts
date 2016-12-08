@@ -32,6 +32,8 @@ export interface IForceService {
     pathSeparator?: string;
     config?: Config;
     containerId?: string;
+    isCompiling?: boolean;
+    containerMembers: {name: string, id: string }[];
     containerAsyncRequestId?: string;
     conn?: jsforce.Connection;
     userInfo?: jsforce.UserInfo;
@@ -39,7 +41,7 @@ export interface IForceService {
     outputChannel: vscode.OutputChannel;
     statusBarItem: vscode.StatusBarItem;
     connect(context: vscode.ExtensionContext): Promise<IForceService>;
-    newContainer(): Promise<IForceService>;
+    newContainer(force: Boolean): Promise<IForceService>;
     clearLog(): void;
 }
 
