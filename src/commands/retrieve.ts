@@ -3,6 +3,7 @@ import fs = require('fs-extra');
 import * as error from './../util/error';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
+const parseString: any = require('xml2js').parseString;
 
 export default function retrieve(context: vscode.ExtensionContext) {
   vscode.window.forceCode.statusBarItem.text = 'Retrieve Started';
@@ -43,6 +44,11 @@ export default function retrieve(context: vscode.ExtensionContext) {
           };
         });
       options.push({
+        label: '$(package) Retrieve by package.xml',
+        detail: `Packaged (Retrieve metadata defined in Package.xml)`,
+        description: 'packaged',
+      });
+      options.push({
         label: '$(cloud-download) Get All Files from org',
         detail: `All Unpackaged`,
         description: 'unpackaged',
@@ -70,6 +76,17 @@ export default function retrieve(context: vscode.ExtensionContext) {
             apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
           }).stream());
         });
+      } else if (option.description === 'packaged') {
+        var xmlFilePath: string = `${vscode.workspace.rootPath}${slash}${vscode.window.forceCode.config.src}${slash}package.xml`;
+        var data: any = fs.readFileSync(xmlFilePath);
+        parseString(data, { explicitArray: false }, function (err, dom) {
+          if (err) { reject(err); } else {
+            delete dom.Package.$;
+            resolve(vscode.window.forceCode.conn.metadata.retrieve({
+              unpackaged: dom.Package
+            }).stream());
+          }
+        });
       } else {
         resolve(vscode.window.forceCode.conn.metadata.retrieve({
           packageNames: [option.description],
@@ -92,6 +109,9 @@ export default function retrieve(context: vscode.ExtensionContext) {
             if (entry.isFile()) {
               var name: string = entry.getName();
               var data: NodeBuffer = entry.getData();
+              if (option.description === 'packaged') {
+                option.description = 'unpackaged';
+              }
               var newName: string = name.replace(option.description + slash, '');
               // Here is  possiblity
               fs.outputFileSync(vscode.workspace.rootPath + slash + vscode.window.forceCode.config.src + slash + newName, data);
