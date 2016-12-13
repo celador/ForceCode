@@ -68,6 +68,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
     // vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''}` + spinner();
     if (vscode.window.forceCode.isCompiling) {
+      vscode.window.forceCode.queueCompile = true;
       return Promise.reject({ message: 'Already compiling' });
     }
     clearInterval(interval);
@@ -256,11 +257,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     var fileIsOnlyMember: Boolean = (vscode.window.forceCode.containerMembers.length === 1) && vscode.window.forceCode.containerMembers.every(m => m.name === name);
     if (hasActiveContainer && fileIsOnlyMember) {
       return updateMember(vscode.window.forceCode.containerMembers[0]);
-      // return svc.newContainer(false).then(() => {
-      //   return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, UPDATE))
-      //     .find({ MetadataContainerId: vscode.window.forceCode.containerId }).execute()
-      //     .then(records => updateMember(records));
-      // });
     } else {
       return svc.newContainer(true).then(() => {
         return vscode.window.forceCode.conn.tooling.sobject(toolingType)
@@ -269,14 +265,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       });
     }
 
-
-
     function updateMember(records) {
-      // if (records.length === 1) {
-        // Tooling Object already exists
-        //  UPDATE it
-        // records[0].Body = body;
-        // var record: any = records[0];
         var member: {} = {
           Body: body,
           Id: records.id,
@@ -284,7 +273,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).update(member).then(res => {
           return vscode.window.forceCode;
         });
-      // }
     }
 
     function addMember(records) {
@@ -427,7 +415,12 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
   function containerFinished(createNewContainer: boolean): any {
     // We got some records in our response
     vscode.window.forceCode.isCompiling = false;
-    return vscode.window.forceCode.newContainer(createNewContainer);
+    return vscode.window.forceCode.newContainer(createNewContainer).then(res => {
+      if (vscode.window.forceCode.queueCompile) {
+        vscode.window.forceCode.queueCompile = false;
+        return compile(document, context);
+      }
+    });
   }
   // =======================================================================================================================================
   function onError(err): any {

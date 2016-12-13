@@ -32,6 +32,7 @@ export interface IForceService {
     pathSeparator?: string;
     config?: Config;
     containerId?: string;
+    queueCompile?: boolean;
     isCompiling?: boolean;
     containerMembers: {name: string, id: string }[];
     containerAsyncRequestId?: string;
