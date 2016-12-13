@@ -436,6 +436,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     } else if (toolingType === 'CustomObject') {
       return metadataError(err);
     } else {
+      clearInterval(interval);
       error.outputError(err, vscode.window.forceCode.outputChannel);
     }
   }
