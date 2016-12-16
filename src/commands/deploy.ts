@@ -90,9 +90,13 @@ export default function deploy(context: vscode.ExtensionContext) {
             if (msg.match(/Deploy is Pending/)) {
                 vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Pending';
             } else if (msg.match(/Components\:/)) {
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploying...';
+                let cnt: string = msg.match(/\d*\/\d*/) ? msg.match(/\d*\/\d*/)[0] : '...';
+                let icon: string = msg.match(/errors\: [1-9]/) ? 'thumbsdown' : 'thumbsup';
+                vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying ${cnt} $(${icon})`;
             } else if (msg.match(/Tests\:/)) {
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: Testing...';
+                let cnt: string = msg.match(/\d*\/\d*/) ? msg.match(/\d*\/\d*/)[0] : '...';
+                let icon: string = msg.match(/errors\: [1-9]/) ? 'thumbsdown' : 'thumbsup';
+                vscode.window.forceCode.statusBarItem.text = `ForceCode: Testing ${cnt} $(${icon})`;
             }
             vscode.window.forceCode.outputChannel.appendLine(msg);
             return _consoleInfoReference.apply(this, arguments);
