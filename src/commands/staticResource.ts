@@ -115,8 +115,8 @@ function zipFiles(fileList: string[], root: string) {
   // Add files to zip object
   fileList.forEach(function (file) {
     var content: any = fs.readFileSync(root + path.sep + file);
-
-    var pathFragments: string[] = file.split('/');
+    // zip.file(file, content, { createFolders: true })
+    var pathFragments: string[] = file.split(path.sep);
     pathFragments.slice(0, -1).reduce(function(parent, name) {
       return parent.folder(name);
     }, zip).file(pathFragments[pathFragments.length - 1], content);
@@ -163,8 +163,6 @@ function getFileList(root) {
       // If file is a directory, recursively add it's children
       if (stat.isDirectory()) {
         fileslist = fileslist.concat(innerGetFileList(pathname));
-        // Otherwise, add the file to the file list
-        // } else if (!_ignoreFiles.some(p => isMatch(p, file))) {
       } else if (!globule.isMatch(_ignoreFiles, pathname, { matchBase: true, dot: true })) {
         fileslist.push(pathname.replace(root + path.sep, ''));
       }
