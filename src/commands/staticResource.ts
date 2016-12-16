@@ -6,12 +6,8 @@ import jszip = require('jszip');
 import globule = require('globule');
 import { IForceService } from './../forceCode';
 import * as error from './../util/error';
-var packageName: string = undefined;
-var relativeRoot: string = undefined;
-var outputChannel: vscode.OutputChannel;
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
-  outputChannel = vscode.window.forceCode.outputChannel;
   const slash: string = vscode.window.forceCode.pathSeparator;
 
   // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
@@ -19,9 +15,13 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
     .then(getPackageName)
     .then(option => {
       if (option.label === 'All Static Resources') {
-        return bundleAndDeployAll();
+        return bundleAndDeployAll()
+        .then(deployAllComplete)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
       } else {
-        return bundleAndDeploy(option);
+        return bundleAndDeploy(option)
+        .then(deployComplete)
+        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
       }
     });
   // =======================================================================================================================================
@@ -36,22 +36,13 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
         return { name: d, type: 'resource-bundle' };
       });
     }
-    let spaDirectories: Array<any> = [];
-    let spaPath: string = vscode.workspace.rootPath + slash + 'spa';
-    if (fs.existsSync(spaPath)) {
-      spaDirectories = fs.readdirSync(spaPath).filter(function (file) {
-        return fs.statSync(path.join(spaPath, file)).isDirectory();
-      }).map(s => {
-        return { name: s, type: 'SPA' };
-      });
-    }
 
     let config: {} = {
       matchOnDescription: true,
       matchOnDetail: true,
       placeHolder: 'Choose a Resource Bundle to bundle',
     };
-    let options: any[] = bundleDirectories.concat(spaDirectories).concat([{ name: 'All Static Resources', type: 'resource-bundle' }])
+    let options: any[] = bundleDirectories.concat([{ name: 'All Static Resources', type: 'resource-bundle' }])
       .map(option => {
         return {
           description: option.name,
@@ -83,25 +74,23 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, 
 
 function bundleAndDeploy(option) {
   return Promise.resolve(getPackagePath(option))
-    .then(makeZip)
-    .then(bundle)
-    .then(deploy)
-    .then(onComplete)
-    .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+    .then(root => zipFiles(getFileList(root), root))
+    .then(zip => bundle(zip, option.label))
+    .then(zip => deploy(zip, option.label));
 }
 
 function bundleAndDeployAll() {
   const slash: string = vscode.window.forceCode.pathSeparator;
   let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles';
   if (fs.existsSync(bundlePath)) {
-    fs.readdirSync(bundlePath).filter(function (file) {
+    return Promise.all(fs.readdirSync(bundlePath).filter(function (file) {
       return fs.statSync(path.join(bundlePath, file)).isDirectory();
     }).map(d => {
       return bundleAndDeploy({
         detail: 'resource-bundle',
         label: d.substring(0, d.lastIndexOf('.')),
       });
-    });
+    }));
   }
 }
 
@@ -109,7 +98,6 @@ function getPackagePath(option) {
   const slash: string = vscode.window.forceCode.pathSeparator;
   var bundlePath: string = vscode.workspace.rootPath;
   vscode.window.forceCode.statusBarItem.text = `ForceCode: Making Zip $(fold)`;
-  packageName = option.label;
   // Get package data
   if (option.detail === 'resource-bundle') {
     bundlePath = vscode.workspace.rootPath + slash + 'resource-bundles' + slash + option.label + '.resource';
@@ -120,16 +108,6 @@ function getPackagePath(option) {
   return bundlePath;
 }
 
-// Make Zip uses the two subsequent functions
-function makeZip(root) {
-  // Create a Zip Object from which we can generate data, with which we do things...
-  //  Get a file list that we generate from a path defined in the package.json.
-  relativeRoot = root;
-  var fileList: any[] = getFileList(relativeRoot);
-  var zip: any = zipFiles(fileList);
-  return zip;
-}
-
 /**
  * @private zipFiles
  * Given an array of file paths, make a zip file and add all
@@ -137,15 +115,14 @@ function makeZip(root) {
  * @param {String[]} fileList - Array of file paths
  * @return {Zip} - zip blob for use
  */
-function zipFiles(fileList: string[]) {
+function zipFiles(fileList: string[], root: string) {
   var zip: any = new jszip();
   const slash: string = vscode.window.forceCode.pathSeparator;
 
   // Add files to zip object
   fileList.forEach(function (file) {
-    // var relativePath = file.split(relativeRoot)[1] || file;
-    var content: any = fs.readFileSync(relativeRoot + slash + file);
-    zip.file(file, content);
+    var content: any = fs.readFileSync(root + slash + file);
+    zip.file(file, content, { createFolders: true });
   });
 
   return zip;
@@ -200,17 +177,13 @@ function getFileList(root) {
   } (root));
 }
 
-// function isMatch(path, file) {
-//     var regex: RegExp = new RegExp(file + '$');
-//     return path.match(regex);
-// }
 /**
  * @func bundle
  * The zip file is written to the static resource directory
  * @param none
  * @return undefined
  */
-function bundle(zip) {
+function bundle(zip, packageName) {
   const slash: string = vscode.window.forceCode.pathSeparator;
   // Here is replaceSrc possiblity
   var finalPath: string = vscode.workspace.rootPath + slash + vscode.window.forceCode.config.src + slash + 'staticresources' + slash + packageName + '.resource';
@@ -227,7 +200,7 @@ function bundle(zip) {
  * @param none
  * @return undefined
  */
-function deploy(zip) {
+function deploy(zip, packageName) {
   vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying $(rocket)`;
   // Create the base64 data to send to Salesforce 
   return zip.generateAsync({ type: 'base64', compression: 'DEFLATE' }).then(function (content) {
@@ -255,8 +228,8 @@ function makeResourceMetadata(bundleName, content) {
   ];
 }
 
-function onComplete(results) {
-  vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploy Success $(check)`;
+function deployComplete(results) {
+  vscode.window.forceCode.statusBarItem.text = `ForceCode: Deployed ${results.fullName} $(check)`;
   if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
     require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
   }
@@ -265,4 +238,16 @@ function onComplete(results) {
   console.log('created: ' + results.created);
   console.log('fullName: ' + results.fullName);
   return results;
+}
+
+function deployAllComplete(results) {
+  vscode.window.forceCode.statusBarItem.text = `ForceCode: Deployed ${results.length} Resources $(check)`;
+  if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
+    require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
+  }
+  var talliedResults = results.reduce(function(prev, curr, idx, arr){
+    return Object.assign(prev, curr);
+  }, {});
+  console.log('Deployed: ', results.length, ' bundles');
+  return talliedResults;
 }
