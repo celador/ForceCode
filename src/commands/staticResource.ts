@@ -8,8 +8,6 @@ import { IForceService } from './../forceCode';
 import * as error from './../util/error';
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
-  const slash: string = vscode.window.forceCode.pathSeparator;
-
   // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
   return vscode.window.forceCode.connect(context)
     .then(getPackageName)
@@ -28,7 +26,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
   function getPackageName(service: IForceService): any {
     vscode.window.forceCode.statusBarItem.text = `ForceCode: Get Packages $(list-unordered)`;
     let bundleDirectories: any[] = [];
-    let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles';
+    let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles';
     if (fs.existsSync(bundlePath)) {
       bundleDirectories = fs.readdirSync(bundlePath).filter(function (file) {
         return fs.statSync(path.join(bundlePath, file)).isDirectory();
@@ -62,8 +60,7 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, 
     .then(bundleAndDeploy);
   // =======================================================================================================================================
   function getPackageName(service: IForceService) {
-    const slash: string = vscode.window.forceCode.pathSeparator;
-    let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles' + slash;
+    let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep;
     var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource')[0];
     return {
       detail: 'resource-bundle',
@@ -80,8 +77,7 @@ function bundleAndDeploy(option) {
 }
 
 function bundleAndDeployAll() {
-  const slash: string = vscode.window.forceCode.pathSeparator;
-  let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles';
+  let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles';
   if (fs.existsSync(bundlePath)) {
     return Promise.all(fs.readdirSync(bundlePath).filter(function (file) {
       return fs.statSync(path.join(bundlePath, file)).isDirectory();
@@ -95,15 +91,14 @@ function bundleAndDeployAll() {
 }
 
 function getPackagePath(option) {
-  const slash: string = vscode.window.forceCode.pathSeparator;
   var bundlePath: string = vscode.workspace.rootPath;
   vscode.window.forceCode.statusBarItem.text = `ForceCode: Making Zip $(fold)`;
   // Get package data
   if (option.detail === 'resource-bundle') {
-    bundlePath = vscode.workspace.rootPath + slash + 'resource-bundles' + slash + option.label + '.resource';
+    bundlePath = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep + option.label + '.resource';
   }
   if (option.detail === 'SPA') {
-    bundlePath = vscode.workspace.rootPath + slash + 'spa' + slash + option.label;
+    bundlePath = vscode.workspace.rootPath + path.sep + 'spa' + path.sep + option.label;
   }
   return bundlePath;
 }
@@ -117,12 +112,14 @@ function getPackagePath(option) {
  */
 function zipFiles(fileList: string[], root: string) {
   var zip: any = new jszip();
-  const slash: string = vscode.window.forceCode.pathSeparator;
-
   // Add files to zip object
   fileList.forEach(function (file) {
-    var content: any = fs.readFileSync(root + slash + file);
-    zip.file(file, content, { createFolders: true });
+    var content: any = fs.readFileSync(root + path.sep + file);
+
+    var pathFragments: string[] = file.split('/');
+    pathFragments.slice(0, -1).reduce(function(parent, name) {
+      return parent.folder(name);
+    }, zip).file(pathFragments[pathFragments.length - 1], content);
   });
 
   return zip;
@@ -136,7 +133,6 @@ function zipFiles(fileList: string[], root: string) {
  * @return {String[]} - Array of paths relative to given root
  */
 function getFileList(root) {
-  const slash: string = vscode.window.forceCode.pathSeparator;
   // Throw if not a directory
   if (!fs.statSync(root).isDirectory()) {
     throw new Error('');
@@ -158,10 +154,10 @@ function getFileList(root) {
     var _ignoreFiles: any[] = Object.keys(ignoreFiles).map(key => {
       return { key: key, value: ignoreFiles[key] };
     }).filter(setting => setting.value === true)
-      .map(setting => root + slash + setting.key);
+      .map(setting => root + path.sep + setting.key);
 
     files.forEach(function (file) {
-      var pathname: string = localPath + slash + file;
+      var pathname: string = localPath + path.sep + file;
       var stat: any = fs.lstatSync(pathname);
 
       // If file is a directory, recursively add it's children
@@ -170,7 +166,7 @@ function getFileList(root) {
         // Otherwise, add the file to the file list
         // } else if (!_ignoreFiles.some(p => isMatch(p, file))) {
       } else if (!globule.isMatch(_ignoreFiles, pathname, { matchBase: true, dot: true })) {
-        fileslist.push(pathname.replace(root + slash, ''));
+        fileslist.push(pathname.replace(root + path.sep, ''));
       }
     });
     return fileslist;
@@ -184,9 +180,8 @@ function getFileList(root) {
  * @return undefined
  */
 function bundle(zip, packageName) {
-  const slash: string = vscode.window.forceCode.pathSeparator;
   // Here is replaceSrc possiblity
-  var finalPath: string = vscode.workspace.rootPath + slash + vscode.window.forceCode.config.src + slash + 'staticresources' + slash + packageName + '.resource';
+  var finalPath: string = vscode.workspace.rootPath + path.sep + vscode.window.forceCode.config.src + path.sep + 'staticresources' + path.sep + packageName + '.resource';
   vscode.window.forceCode.statusBarItem.text = `ForceCode: Bundling Resource $(beaker)`;
   zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(function (buffer) {
     fs.outputFile(finalPath, buffer);

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
+import * as path from 'path';
 import * as error from './../util/error';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
@@ -7,8 +8,6 @@ const parseString: any = require('xml2js').parseString;
 
 export default function retrieve(context: vscode.ExtensionContext) {
   vscode.window.forceCode.statusBarItem.text = 'Retrieve Started';
-  const slash: string = vscode.window.forceCode.pathSeparator;
-
   return vscode.window.forceCode.connect(context)
     .then(svc => showPackageOptions(svc.conn))
     .then(opt => getPackage(opt))
@@ -77,7 +76,7 @@ export default function retrieve(context: vscode.ExtensionContext) {
           }).stream());
         });
       } else if (option.description === 'packaged') {
-        var xmlFilePath: string = `${vscode.workspace.rootPath}${slash}${vscode.window.forceCode.config.src}${slash}package.xml`;
+        var xmlFilePath: string = `${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}${path.sep}package.xml`;
         var data: any = fs.readFileSync(xmlFilePath);
         parseString(data, { explicitArray: false }, function (err, dom) {
           if (err) { reject(err); } else {
@@ -112,9 +111,9 @@ export default function retrieve(context: vscode.ExtensionContext) {
               if (option.description === 'packaged') {
                 option.description = 'unpackaged';
               }
-              var newName: string = name.replace(option.description + slash, '');
+              var newName: string = name.replace(option.description + path.sep, '');
               // Here is  possiblity
-              fs.outputFileSync(vscode.workspace.rootPath + slash + vscode.window.forceCode.config.src + slash + newName, data);
+              fs.outputFileSync(vscode.workspace.rootPath + path.sep + vscode.window.forceCode.config.src + path.sep + newName, data);
             }
           });
           resolve();

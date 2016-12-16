@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
+import * as path from 'path';
 // import * as fs from 'fs-extra';
 import { constants, operatingSystem } from './../services';
 import { configuration } from './../services';
@@ -17,11 +18,9 @@ export default class ForceService implements forceCode.IForceService {
     public statusBarItem: vscode.StatusBarItem;
     public outputChannel: vscode.OutputChannel;
     public operatingSystem: string;
-    public pathSeparator: string;
 
     constructor() {
         // Set the ForceCode configuration
-        this.pathSeparator = operatingSystem.isWindows() ? '\\' : '/';
         this.operatingSystem = operatingSystem.getOS();
         // Setup username and outputChannel
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
