@@ -23,7 +23,6 @@ export default function retrieve(context: vscode.ExtensionContext) {
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       'Cookie': 'sid=' + conn.accessToken,
     };
-    // console.log(conn.accessToken)
     var body: string = 'action=EXTENT&extent=PACKAGES';
     return fetch(requestUrl, { method: 'POST', headers, body }).then(function (response) {
       return response.text();

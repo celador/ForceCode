@@ -14,12 +14,12 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
     .then(option => {
       if (option.label === 'All Static Resources') {
         return bundleAndDeployAll()
-        .then(deployAllComplete)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+          .then(deployAllComplete)
+          .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
       } else {
         return bundleAndDeploy(option)
-        .then(deployComplete)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+          .then(deployComplete)
+          .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
       }
     });
   // =======================================================================================================================================
@@ -57,23 +57,25 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, 
   // This command is run when working in a file, and it's saved... It will auto bundle/deploy that static resource 
   return vscode.window.forceCode.connect(context)
     .then(getPackageName)
-    .then(bundleAndDeploy);
+    .then(bundleAndDeploy)
+    .then(deployComplete)
+    .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
   // =======================================================================================================================================
   function getPackageName(service: IForceService) {
     let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep;
     var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource')[0];
     return {
       detail: 'resource-bundle',
-      label: resourceName
+      label: resourceName,
     };
   }
 }
 
 function bundleAndDeploy(option) {
-  return Promise.resolve(getPackagePath(option))
-    .then(root => zipFiles(getFileList(root), root))
-    .then(zip => bundle(zip, option.label))
-    .then(zip => deploy(zip, option.label));
+  let root: string = getPackagePath(option);
+  let zip: any = zipFiles(getFileList(root), root);
+  bundle(zip, option.label);
+  return deploy(zip, option.label).then(deployComplete);
 }
 
 function bundleAndDeployAll() {
@@ -92,7 +94,6 @@ function bundleAndDeployAll() {
 
 function getPackagePath(option) {
   var bundlePath: string = vscode.workspace.rootPath;
-  vscode.window.forceCode.statusBarItem.text = `ForceCode: Making Zip $(fold)`;
   // Get package data
   if (option.detail === 'resource-bundle') {
     bundlePath = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep + option.label + '.resource';
@@ -112,14 +113,18 @@ function getPackagePath(option) {
  */
 function zipFiles(fileList: string[], root: string) {
   var zip: any = new jszip();
-  // Add files to zip object
+  // Add folders and files to zip object for each file in the list
   fileList.forEach(function (file) {
-    var content: any = fs.readFileSync(root + path.sep + file);
+    // the below code should work, according to the documentation
     // zip.file(file, content, { createFolders: true })
-    var pathFragments: string[] = file.split(path.sep);
-    pathFragments.slice(0, -1).reduce(function(parent, name) {
-      return parent.folder(name);
-    }, zip).file(pathFragments[pathFragments.length - 1], content);
+    // the above code should work, but for some reason it isn't so we have to add the files manually, as per the code below
+    let pathFragments: string[] = file.split(path.sep);
+    // reduce all the directory names, adding Folders to the zip for each folder created
+    // The return of the reduce is the continuation of the parent, so adding folders just works... 
+    // Do that until you have mapped all the folders, then return the zip/folder and add the file from the contents
+    pathFragments.slice(0, -1)
+      .reduce((parent, name) => parent.folder(name), zip)
+      .file(pathFragments[pathFragments.length - 1], fs.readFileSync(root + path.sep + file));
   });
 
   return zip;
@@ -180,11 +185,10 @@ function getFileList(root) {
 function bundle(zip, packageName) {
   // Here is replaceSrc possiblity
   var finalPath: string = vscode.workspace.rootPath + path.sep + vscode.window.forceCode.config.src + path.sep + 'staticresources' + path.sep + packageName + '.resource';
-  vscode.window.forceCode.statusBarItem.text = `ForceCode: Bundling Resource $(beaker)`;
-  zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(function (buffer) {
-    fs.outputFile(finalPath, buffer);
+  // vscode.window.forceCode.statusBarItem.text = `ForceCode: Bundling Resource $(beaker)`;
+  return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(function (buffer) {
+    return fs.outputFile(finalPath, buffer);
   });
-  return zip;
 }
 
 /**
@@ -196,10 +200,8 @@ function bundle(zip, packageName) {
 function deploy(zip, packageName) {
   vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying $(rocket)`;
   // Create the base64 data to send to Salesforce 
-  return zip.generateAsync({ type: 'base64', compression: 'DEFLATE' }).then(function (content) {
-    var metadata: any = makeResourceMetadata(packageName, content);
-    return vscode.window.forceCode.conn.metadata.upsert('StaticResource', metadata);
-  });
+  return zip.generateAsync({ type: 'base64', compression: 'DEFLATE' })
+    .then(content => vscode.window.forceCode.conn.metadata.upsert('StaticResource', makeResourceMetadata(packageName, content)));
 }
 
 /**
@@ -226,10 +228,6 @@ function deployComplete(results) {
   if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
     require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
   }
-  console.log('results are: ', results);
-  console.log('success: ' + results.success);
-  console.log('created: ' + results.created);
-  console.log('fullName: ' + results.fullName);
   return results;
 }
 
@@ -238,9 +236,8 @@ function deployAllComplete(results) {
   if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
     require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
   }
-  var talliedResults = results.reduce(function(prev, curr, idx, arr){
+  var talliedResults: {} = results.reduce(function (prev, curr, idx, arr) {
     return Object.assign(prev, curr);
   }, {});
-  console.log('Deployed: ', results.length, ' bundles');
   return talliedResults;
 }

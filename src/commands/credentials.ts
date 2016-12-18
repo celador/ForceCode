@@ -98,7 +98,6 @@ export default function enterCredentials() {
     // =======================================================================================================================================
     // =======================================================================================================================================
     function finished(config) {
-        // console.log(config);
         fs.outputFile(vscode.workspace.rootPath + path.sep + 'force.json', JSON.stringify(config, undefined, 4));
         return config;
     }
