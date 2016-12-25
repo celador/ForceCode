@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import jsforce = require('jsforce');
 import * as path from 'path';
+import * as fs from 'fs-extra';
 import {IForceService} from './../forceCode';
 import * as error from './../util/error';
 
@@ -65,17 +66,28 @@ function getLogById(result: string): Promise<string> {
 }
 
 function showLog(logBody) {
-    var filePath: string = `untitled:${vscode.workspace.rootPath}${path.sep}.logs${path.sep}${getLogService.logId}.log`;
-    var uri = vscode.Uri.parse(filePath);
-    return vscode.workspace.openTextDocument(uri).then(document => {
-        return vscode.window.showTextDocument(document, vscode.window.visibleTextEditors.length - 1).then(editor => {
+    var tempPath: string = `${vscode.workspace.rootPath}${path.sep}.logs${path.sep}${getLogService.logId}.log`;
+    fs.stat(tempPath, function(err, stats){
+        if (err) {
+            return open(vscode.Uri.parse(`untitled:${tempPath}`)).then(show).then(replaceAll);
+        } else {
+            return open(vscode.Uri.parse(`file:${tempPath}`)).then(show);
+        }
+
+        function open(uri) {
+            return vscode.workspace.openTextDocument(uri);
+        } 
+        function show(document) {
+            return vscode.window.showTextDocument(document, vscode.window.visibleTextEditors.length - 1);
+        }
+        function replaceAll(editor) {
             var start: vscode.Position = new vscode.Position(0, 0);
             var lineCount: number = editor.document.lineCount - 1;
             var lastCharNumber: number = editor.document.lineAt(lineCount).text.length;
             var end: vscode.Position = new vscode.Position(lineCount, lastCharNumber);
             var range: vscode.Range = new vscode.Range(start, end);
             editor.edit( builder => builder.replace(range, logBody));
-        });
-    });
+        }
+    })
 }
 
