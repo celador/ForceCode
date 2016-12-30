@@ -4,8 +4,7 @@ import model from './../models/commands';
 import * as error from './../util/error';
 
 export default function showMenu(context: vscode.ExtensionContext) {
-    'use strict';
-    vscode.window.setStatusBarMessage('ForceCode Menu');
+    vscode.window.forceCode.statusBarItem.text = 'ForceCode Menu';
 
     return vscode.window.forceCode.connect(context)
         .then(svc => displayMenu())
@@ -22,12 +21,18 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.openFile);
             quickpick.push(model.compileDeploy);
             quickpick.push(model.executeAnonymous);
-            quickpick.push(model.getLogs);
             quickpick.push(model.resourceBundle);
             quickpick.push(model.retrievePackage);
-            // quickpick.push(model.deployPackage);
             quickpick.push(model.createClass);
-
+            quickpick.push(model.runUnitTests);
+            quickpick.push(model.deployPackage);
+            quickpick.push(model.diff);
+            // Experimental
+            quickpick.push(model.package);
+            quickpick.push(model.soql);
+            quickpick.push(model.toql);
+            // Deprecated
+            quickpick.push(model.getLogs);
         }
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
             return {
@@ -46,27 +51,21 @@ export default function showMenu(context: vscode.ExtensionContext) {
     function processResult(result) {
         if (result !== undefined && result.description !== undefined) {
             switch (result.description) {
-                case model.enterCredentials.description:
-                    return commands.credentials();
-                case model.compileDeploy.description:
-                    return commands.compile(vscode.window.activeTextEditor.document, context);
-                case model.executeAnonymous.description:
-                    return commands.executeAnonymous(vscode.window.activeTextEditor.document, context);
-                case model.getLogs.description:
-                    return commands.getLog(context);
-                case model.openFile.description:
-                    return commands.open(context);
-                case model.resourceBundle.description:
-                    return commands.staticResource(context);
-                case model.retrievePackage.description:
-                    return commands.retrieve(context);
-                case model.deployPackage.description:
-                    // return commands.deployPackage();
-                    break;
-                case model.createClass.description:
-                    return commands.createClass(context);
-                default:
-                    break;
+                case model.enterCredentials.description: return commands.credentials();
+                case model.compileDeploy.description: return commands.compile(vscode.window.activeTextEditor.document, context);
+                case model.executeAnonymous.description: return commands.executeAnonymous(vscode.window.activeTextEditor.document, context);
+                case model.getLogs.description: return commands.getLog(context);
+                case model.openFile.description: return commands.open(context);
+                case model.resourceBundle.description: return commands.staticResource(context);
+                case model.retrievePackage.description: return commands.retrieve(context);
+                case model.soql.description: return commands.soql(context);
+                case model.toql.description: return commands.toql(context);
+                case model.deployPackage.description: return commands.deploy(context);
+                case model.diff.description: return commands.diff(vscode.window.activeTextEditor.document, context);
+                case model.package.description: return commands.generator(context);
+                case model.createClass.description: return commands.createClass(context);
+                case model.runUnitTests.description: return commands.apexTest(vscode.window.activeTextEditor.document, context);
+                default: break;
             }
         }
     }
@@ -77,15 +76,5 @@ export default function showMenu(context: vscode.ExtensionContext) {
         console.log(res);
         return true;
     }
-    // =======================================================================================================================================
-    // function onError(err): boolean {
-    //     vscode.window.setStatusBarMessage('Error opening menu');
-    //     vscode.window.showErrorMessage(err.message);
-    //     var outputChannel: vscode.OutputChannel = vscode.window.forceCode.outputChannel;
-    //     outputChannel.appendLine('================================================================');
-    //     outputChannel.appendLine(err);
-    //     console.error(err);
-    //     return false;
-    // }
     // =======================================================================================================================================
 }

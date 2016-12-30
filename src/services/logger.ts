@@ -39,7 +39,6 @@ export default class Logger {
         });
     }
     enableLogging(debugLevelId: string): any {
-        'use strict';
         const expirationDate: string = moment().add(6, 'hours').format();
         const options: jsforce.TraceFlagOptions = {
             DebugLevelId: debugLevelId,
@@ -63,7 +62,6 @@ export default class Logger {
     }
 
     getLastLog(result: any): any {
-        'use strict';
         var queryString: string = `SELECT Id FROM ApexLog WHERE Request = 'API' AND Location = 'SystemLog'`
             + ` AND Operation like '%executeAnonymous%'`
             + ` AND LogUserId='${vscode.window.forceCode.userInfo.id}' ORDER BY StartTime DESC, Id DESC LIMIT 1`;
@@ -77,7 +75,6 @@ export default class Logger {
 
 
     getLog(logId: string): any {
-        'use strict';
         var url: string = `${vscode.window.forceCode.conn._baseUrl()}/sobjects/ApexLog/${logId}/Body`;
         return new Promise((resolve, reject) => {
             vscode.window.forceCode.conn.request(url, function (err, res) {
@@ -87,7 +84,6 @@ export default class Logger {
     }
 
     truncateLog(logBody: string) {
-        'use strict';
         var regex: any = /\|USER_DEBUG\|/g;
         var debug: string = logBody
             .split('\n')
@@ -98,19 +94,16 @@ export default class Logger {
     }
 
     showLog(logBody) {
-        'use strict';
         vscode.window.forceCode.clearLog();
         vscode.window.forceCode.outputChannel.appendLine(logBody);
         return true;
     }
 
     cleanupLogging(id) {
-        'use strict';
         return vscode.window.forceCode.conn.tooling.sobject('traceFlag').del(id);
     }
 
     onError(err) {
-        'use strict';
         console.error(err);
     }
 }

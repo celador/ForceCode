@@ -23,8 +23,8 @@ export default {
     },
     // Export Package (Deploy via Metadata API, using Package.xml)
     deployPackage: {
-        description: 'Deploy the entire package.',
-        detail: 'If you have a ./src/package.xml file, it will deploy the entire package.',
+        description: 'Deploy your package.',
+        detail: 'If you have a directory with a package.xml, you will get the option to deploy it.',
         icon: 'package',
         label: 'Deploy Package',
     },
@@ -45,7 +45,7 @@ export default {
     // Open File
     openFile: {
         description: 'Open Classes, Pages, Triggers, and Components',
-        detail: 'Open some files from your org to work with.',
+        detail: 'Open a file from the cloud (aka "refresh from org").',
         icon: 'desktop-download',
         label: 'Open Salesforce File',
     },
@@ -58,9 +58,44 @@ export default {
     },
     // Create Classes
     createClass: {
-        description: 'Create a Repository, Model, Service, or Controller class.',
+        description: 'Create a Repository, Model, Service, Controller, or Custom class.',
         detail: 'Creates classes based on common separation of concerns patterns',
         icon: 'plus',
-        label: 'Create Class'
-    }
+        label: 'Create Class',
+    },
+    // Run current Unit tests
+    runUnitTests: {
+        description: 'Run the Unit Tests for this Test Class',
+        detail: 'If the Apex class you currently have open contains test methods, it will run the test methods and return the results in the output panel',
+        icon: 'beaker',
+        label: 'Run Unit Tests',
+    },
+    // Run SOQL
+    soql: {
+        description: 'Run a SOQL query',
+        detail: 'The SOQL query results will be dumped to a json file in the soql directory',
+        icon: 'telescope',
+        label: 'SOQL Query',
+    },
+    // Run Tooling Query
+    toql: {
+        description: 'Run a Tooling API query',
+        detail: 'The Tooling API query (Select SymbolTable From ApexClass) results will be dumped to a json file in the toql directory',
+        icon: 'telescope',
+        label: 'Tooling Query',
+    },
+    // Run SOQL
+    package: {
+        description: 'Generate Package.xml file from the contents of a directory',
+        detail: 'Generate a Package.xml file for a directory',
+        icon: 'gift',
+        label: 'Package-xml',
+    },
+    // Diff Files
+    diff: {
+        description: 'Diff the current file with what is on the server',
+        detail: 'Diff the file',
+        icon: 'diff',
+        label: 'Diff',
+    },
 }

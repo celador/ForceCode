@@ -5,6 +5,10 @@ module.exports = function () {
     ],
     tests: [
       'test/*.spec.ts'
-    ]
+    ],
+    'testFramework': 'mocha',
+    env: {
+      type: 'node'
+    }
   }
 }

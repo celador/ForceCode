@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
 
 export function getIcon(toolingType: string) {
-    'use strict';
     switch (toolingType) {
         case 'ApexClass':
-            return 'file';
+            return 'file-code';
         case 'ApexPage':
             return 'code';
         case 'ApexTrigger':
@@ -20,12 +19,10 @@ export function getIcon(toolingType: string) {
     }
 }
 export function getFileExtension(document: vscode.TextDocument) {
-    'use strict';
     var ext: string = document.fileName.substring(document.fileName.lastIndexOf('.') + 1, document.fileName.length);
     return ext;
 }
 export function getExtension(toolingType: string) {
-    'use strict';
     switch (toolingType) {
         case 'ApexClass':
             return 'cls';
@@ -55,12 +52,15 @@ export function getExtension(toolingType: string) {
             return 'cmp';
         case 'Application':
             return 'app';
+        case 'StaticResource':
+            return 'resource';
+        case 'AuraDefinitionBundle':
+            return 'aura';
         default:
             throw toolingType + ' extension not defined';
     }
 }
 export function getFolder(toolingType: string) {
-    'use strict';
     switch (toolingType) {
         case 'ApexClass':
             return 'classes';

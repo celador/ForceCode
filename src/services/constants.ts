@@ -15,17 +15,17 @@ const peekFilter: vscode.DocumentFilter[] = [
         scheme: 'file',
     }, {
         language: 'javascript',
-        scheme: 'file'
-    }
+        scheme: 'file',
+    },
 ];
 const apexFilter: vscode.DocumentFilter[] = [
     {
         language: 'apex',
-        scheme: 'file'
+        scheme: 'file',
     }, {
         language: 'javascript',
-        scheme: 'file'
-    }
+        scheme: 'file',
+    },
 ];
 const constants: Constants = {
     FORCECODE_KEYCHAIN: 'yo-force',

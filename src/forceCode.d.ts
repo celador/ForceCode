@@ -9,12 +9,22 @@ declare module 'vscode' {
 
 export interface Config {
     apiVersion?: string;
-    password?: string;
-    username?: string;
-    url?: string;
     autoCompile?: boolean;
-    pollTimeout?: number;
+    autoRefresh?: boolean;
+    browser?: string;
     debugOnly?: boolean;
+    password?: string;
+    poll?: number;
+    pollTimeout?: number;
+    prefix?: string;
+    src?: string;
+    url?: string;
+    username?: string;
+    workspaceRoot?: string;
+    deployOptions?: {
+        verbose?: boolean,
+        checkOnly?: boolean
+    };
 }
 
 export interface IForceService {
@@ -27,10 +37,10 @@ export interface IForceService {
     userInfo?: jsforce.UserInfo;
     username?: string;
     outputChannel: vscode.OutputChannel;
+    statusBarItem: vscode.StatusBarItem;
     connect(context: vscode.ExtensionContext): Promise<IForceService>;
     newContainer(): Promise<IForceService>;
     clearLog(): void;
-    getConfig(): Config;
 }
 
 export interface ForceCodeError {

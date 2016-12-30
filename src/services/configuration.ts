@@ -1,14 +1,23 @@
 import * as vscode from 'vscode';
+import { Config } from './../forceCode';
+import * as forceCode from './../forceCode';
 import * as fs from 'fs-extra';
+var _: any = require('lodash');
 
-export default function getSetConfig() {
-    return new Promise(function(resolve, reject){
+export default function getSetConfig(service?: forceCode.IForceService): Promise<Config> {
+    return new Promise(function (resolve, reject) {
+        var self: forceCode.IForceService = service || vscode.window.forceCode;
+        const slash: string = self.pathSeparator;
         try {
-            vscode.window.forceCode.config = fs.readJsonSync(vscode.workspace.rootPath + vscode.window.forceCode.pathSeparator + 'force.json');
-            resolve(vscode.window.forceCode.config);
+            self.config = _.extend(self.config, fs.readJsonSync(vscode.workspace.rootPath + slash + 'force.json'));
+            if (typeof self.config === 'object' && !self.config.src) {
+                self.config.src = 'src';
+            }
+            self.config.workspaceRoot = `${vscode.workspace.rootPath}${slash}${self.config.src}${slash}`;
+            resolve(self.config);
         } catch (err) {
-            vscode.window.forceCode.config = {};
-            reject(err);
+            self.config = {};
+            resolve(self.config);
         }
     });
 }

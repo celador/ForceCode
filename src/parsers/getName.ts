@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 export default function getName(document: vscode.TextDocument, toolingType: string): string {
-    'use strict';
     if (toolingType === 'ApexClass') {
         return getNameFromClassBody(document);
     } else if (toolingType === 'AuraDefinition') {
@@ -9,15 +8,24 @@ export default function getName(document: vscode.TextDocument, toolingType: stri
     return getFileName(document);
 }
 export function getFileName(document: vscode.TextDocument) {
-    'use strict';
-    const slash: string = vscode.window.forceCode.pathSeparator;
+    // const slash: string = vscode.window.forceCode.pathSeparator;
     var fileName: string = document.fileName.substring(0, document.fileName.lastIndexOf('.'));
+    // split on pathSeparator
     var fileNameArray: string[] = fileName.split(/[\\\/]/);
+    // give me the last one, giving me just the fileName
     fileName = fileNameArray[fileNameArray.length - 1];
     return fileName;
 }
+export function getWholeFileName(document: vscode.TextDocument) {
+    // const slash: string = vscode.window.forceCode.pathSeparator;
+    // var fileName: string = document.fileName.substring(0, document.fileName.lastIndexOf('.'));
+    // split on pathSeparator
+    var fileNameArray: string[] = document.fileName.split(/[\\\/]/);
+    // give me the last one, giving me just the fileName
+    var fileName = fileNameArray[fileNameArray.length - 1];
+    return fileName;
+}
 function getNameFromClassBody(document: vscode.TextDocument): string {
-    'use strict';
     const slash: string = vscode.window.forceCode.pathSeparator;
     var fileNameArray: string[] = getFileName(document).split(slash);
     var fileName: string = fileNameArray[fileNameArray.length - 1];
@@ -26,15 +34,16 @@ function getNameFromClassBody(document: vscode.TextDocument): string {
     var words: string[] = firstLine.trim().split(' ');
     var className: string = words.length && words[words.length - 1];
     if (fileName !== className) {
-        vscode.window.showWarningMessage(`Class Name (${className}) is not the same as the File Name (${fileName}).  Please fix this.`);
+        vscode.window.forceCode.outputChannel.appendLine(`It appears to me that the Class Name (${className}) is not the same as the File Name (${fileName}).  You may want to fix this.  Be warned, I am saving it as ${className}`);
     }
     return className;
 }
 export function getAuraNameFromFileName(fileName: string): string {
-    'use strict';
     const slash: string = vscode.window.forceCode.pathSeparator;
-    var parts: string[] = fileName.split(`src${slash}aura${slash}`);
-    var auraNameParts: string[] = (parts && parts.length) > 1 ? parts[1].split(new RegExp(slash)) : undefined;
-    var auraName: string = (auraNameParts && auraNameParts.length) > 0 ? auraNameParts[0] : undefined;
-    return auraName;
+	// Here is replaceSrc possiblity
+    // Get the folder and filename part of the path, then split that again on the slashes
+    // We should now have something like ['foo/bar/baz/buzz', 'component/componentController.js']
+    // We should now have something like ['component', 'componentController.js']
+    // So give me the first one
+    return fileName.split(`${vscode.window.forceCode.config.src}${slash}aura${slash}`).pop().split(slash).shift();
 }

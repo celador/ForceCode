@@ -1,18 +1,19 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "noResolve": false,
-        "target": "ES5",
-        "outDir": "./out",
-        "noLib": false,
-        "sourceMap": true
-    },
-    "exclude": [
-        "typings/browser",
-        "typings/browser.d.ts",        
-        "node_modules"
-    ]
+	"compilerOptions": {
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"noResolve": false,
+		"target": "es6",
+		"outDir": "out",
+		"lib": [
+			"es6"
+		],
+		"sourceMap": true,
+		"rootDir": "."
+	},
+	"exclude": [
+		"typings/browser",
+		"typings/browser.d.ts",
+		"node_modules"
+	]
 }
-
-
