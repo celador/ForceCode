@@ -98,6 +98,17 @@ export default function enterCredentials() {
     // =======================================================================================================================================
     // =======================================================================================================================================
     function finished(config) {
+        config.autoRefresh = false;
+        config.browser = 'Google Chrome Canary';
+        config.pollTimeout = 1200;
+        config.debugOnly = true;
+        config.apiVersion = '38.0';
+        config.deployOptions = {
+            'checkOnly': false,
+            'testLevel': 'runLocalTests',
+            'verbose': false,
+            'ignoreWarnings': true
+        };
         fs.outputFile(vscode.workspace.rootPath + path.sep + 'force.json', JSON.stringify(config, undefined, 4));
         return config;
     }

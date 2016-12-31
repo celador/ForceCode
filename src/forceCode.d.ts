@@ -13,6 +13,10 @@ export interface Config {
     autoRefresh?: boolean;
     browser?: string;
     debugOnly?: boolean;
+    deployOptions?: {
+        verbose?: boolean,
+        checkOnly?: boolean
+    };
     password?: string;
     poll?: number;
     pollTimeout?: number;
@@ -20,11 +24,7 @@ export interface Config {
     src?: string;
     url?: string;
     username?: string;
-    workspaceRoot?: string;
-    deployOptions?: {
-        verbose?: boolean,
-        checkOnly?: boolean
-    };
+    // workspaceRoot?: string;
 }
 
 export interface IForceService {

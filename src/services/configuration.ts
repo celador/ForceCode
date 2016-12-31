@@ -13,7 +13,7 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
             if (typeof self.config === 'object' && !self.config.src) {
                 self.config.src = 'src';
             }
-            self.config.workspaceRoot = `${vscode.workspace.rootPath}${path.sep}${self.config.src}${path.sep}`;
+            // self.config.workspaceRoot = `${vscode.workspace.rootPath}${path.sep}${self.config.src}${path.sep}`;
             resolve(self.config);
         } catch (err) {
             self.config = {};

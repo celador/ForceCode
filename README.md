@@ -35,24 +35,22 @@ You can then enter your credentials to login to your Salesforce org.  Your confi
 The configuration file should look something like...
 
 ``` json
+
 {
     "username": "MonsterMike@Salesforce.com",
     "password": "YourPasswordHere",
     "url": "https://login.salesforce.com",
-    "prefix": "",
     "autoCompile": true,
     "autoRefresh": true,
     "browser": "Google Chrome Canary",
-    "poll": 1500,
-    "pollTimeout": 120,
-    "debugOnly": false,
-    "apiVersion": "37.0",
-    "src": "src",
+    "pollTimeout": 1200,
+    "debugOnly": true,
+    "apiVersion": "38.0",
     "deployOptions": {
-        "checkOnly": false,
-        "testLevel": "RunLocalTests",
-        "verbose": false,
-        "ignoreWarnings": false
+      "checkOnly": false,
+      "testLevel": "runLocalTests",
+      "verbose": false,
+      "ignoreWarnings": true
     }
 }
 ```
