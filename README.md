@@ -75,14 +75,31 @@ Note: the password is in the format "passwordtoken".  Do not try to use any deli
 * prefix: This is the namespce prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise it will attempt to infer a prefix from the filename.  If you have a namespaced org and do not set this setting, you will have problems.
 * src: This is the src folder that contains your project files
 
-## Get errors as you type
+## Commands
+
+ForceCode provides a number of commands to work with your Salesforce org and metadata.  
+
+### Compile
+
+Menu: \>Force: Save/Deploy/Compile  
+Mac: alt + cmd + s  
+Win: ctrl + shift + s  
+To automatically compile/save your changes to Salesforce when the file is saved locally, you can set the `autoCompile` setting to `true`.
+Otherwise, you will need to use alt + cmd + s to save/compile your file.
+
+#### Get errors as you type
 
 The Auto-compile feature adds a hook to the save command that will automatically deploy and compile your code to your SFDC org whenever you save.
 This works great with VSCode's autosave feature, providing errors as you type.
 
-## Commands
+### Run Apex Unit Tests
 
-ForceCode provides a number of commands to work with your Salesforce org and metadata.  
+Menu: \>ForceCode Menu... Run Unit Tests  
+Mac: alt + cmd + t  
+Win: ctrl + shift + t  
+Run the tests in the currently open file.  
+For easy and fun TDD, keep the class you're working on open in one pane, and your tests in the other. 
+AutoCompile means you The tests will execute and output the results below.
 
 ### Execute Anonymous
 
@@ -93,29 +110,11 @@ Open any file, untitled or otherwise, and use the key combo to run the code and 
 I've also applied the .apex extension to the Apex languge syntax.  Doing this allows you to more easily differentiate between your anonymous scratch files and actual apex classes.  
 To only show the User Debug lines, you can set the `debugOnly` setting to `true`
 
-### Compile
-
-Menu: \>Force: Save/Deploy/Compile  
-Mac: alt + cmd + s  
-Win: ctrl + shift + s  
-To automatically compile/save your changes to Salesforce when the file is saved locally, you can set the `autoCompile` setting to `true`.
-Otherwise, you will need to use alt + cmd + s to save/compile your file.
-
 ### Open
 
 Menu: \>Force: Get Class, Page, or Trigger  
 Mac: alt + cmd + o  
 Win: ctrl + shift + o  
-
-### Run Apex Unit Tests
-
-Menu: \>ForceCode Menu... Run Unit Tests  
-Mac: alt + cmd + t  
-Win: ctrl + shift + t  
-Run the tests in the currently open file.  
-For easy and fun TDD, keep the class you're working on open in one pane, and your tests in the other. 
-AutoCompile means you The tests will execute and output the results below.
- 
 
 ### Bundle and Deploy Static Resource
 
@@ -136,12 +135,13 @@ Menu: \>ForceCode Menu ... Deploy Package
 Deploy your package based on your configured deploy options and the package.xml in your src folder.
 
 **Options**:
-  * checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.  This will generate a `.validationId` file.
-  * ignoreWarnings:  Indicates whether a warning should allow a deployment to complete successfully (true) or not (false).
-  * rollbackOnError: Indicates whether any failure causes a complete rollback (true) or not (false)
-  * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
-  * runTests:        A list of Apex tests to run during deployment (commma separated list)
-  * verbose:         Output execution detail log to a `DeployStatistics.log` file
+
+* checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.  This will generate a `.validationId` file.
+* ignoreWarnings:  Indicates whether a warning should allow a deployment to complete successfully (true) or not (false).
+* rollbackOnError: Indicates whether any failure causes a complete rollback (true) or not (false)
+* testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
+* runTests:        A list of Apex tests to run during deployment (commma separated list)
+* verbose:         Output execution detail log to a `DeployStatistics.log` file
   
 If you want destructive changes as part of the deploy, put a `destructiveChanges.xml` file in your src folder
 
