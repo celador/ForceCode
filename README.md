@@ -73,6 +73,26 @@ Note: the password is in the format "passwordtoken".  Do not try to use any deli
 * prefix: This is the namespce prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise it will attempt to infer a prefix from the filename.  If you have a namespaced org and do not set this setting, you will have problems.
 * src: This is the src folder that contains your project files
 
+There's also one special configuration option that's not included in the force.json, but rather in your vscode settings.json file (This is for portability between projects).
+If you open up your settings.json file, or go to Code > Preferences > Workspace Settings and create a new preference, starting with `force` you should see the filesExclude preference.
+This property allows you to have certain files ignored (exluded) from Static Resources when bundled/deployed.  This allows you to create a modern SPA project in a "spa" folder instead of keeping it in your "resource-bundles" directory.
+However, when we build these SPAs we generally have a ton of preference and source files that we don't want to deploy to Salesforce, both for security and size reasons.
+So, you can create Node glob patterns to ignore. The default configuration is shown below.  
+Glob patterns can be tricky... so a little research and trial and error may be required to get your bundle just right.
+```
+{
+    ".gitignore": true,
+    ".DS_Store": true,
+    ".org_metadata": true,
+    "**/*.map": true,
+    "node_modules/**": true,
+    "bower_modules/**": true,
+    "**.tmp": true,
+    "**/*-meta.xml": true,
+    ".log": true
+}
+```
+
 **Special Note**:
 
 By default, VSCode will close the "quick open" dialog, making it difficult to copy/paste your user credentials.  
