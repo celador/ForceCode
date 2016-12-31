@@ -46,7 +46,7 @@ export default function enterCredentials() {
             password: true,
             value: config.password || '',
             placeHolder: 'enter your password and token',
-            prompt: 'Please enter your SFDC username',
+            prompt: 'Please enter your SFDC password and token',
         };
         return vscode.window.showInputBox(options).then(function (result: string) {
             config.password = result || config.password || '';
