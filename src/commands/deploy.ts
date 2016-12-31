@@ -12,10 +12,9 @@ export default function deploy(context: vscode.ExtensionContext) {
     var _consoleErrorReference: any = console.error;
     var _consoleLogReference: any = console.log;
     // Here is replaceSrc possiblity
-    const slash: string = vscode.window.forceCode.pathSeparator;
-    const validationIdPath: string = `${vscode.workspace.rootPath}${slash}.validationId`;
-    const deployPath: string = `${vscode.workspace.rootPath}${slash}${vscode.window.forceCode.config.src}`;
-    const statsPath: string = `${vscode.workspace.rootPath}${slash}DeployStatistics.log`;
+    const validationIdPath: string = `${vscode.workspace.rootPath}${path.sep}.validationId`;
+    const deployPath: string = `${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}`;
+    const statsPath: string = `${vscode.workspace.rootPath}${path.sep}DeployStatistics.log`;
     var logger: any = (function (fs) {
         var buffer: string = '';
         return {
@@ -28,7 +27,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         }
         function flush() {
             var logFile: any = path.resolve(statsPath);
-            fs.appendFileSync(logFile, buffer, 'utf8');
+            fs.writeFileSync(logFile, buffer, 'utf8');
             buffer = '';
         }
     } (fs));
@@ -91,9 +90,13 @@ export default function deploy(context: vscode.ExtensionContext) {
             if (msg.match(/Deploy is Pending/)) {
                 vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Pending';
             } else if (msg.match(/Components\:/)) {
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploying...';
+                let cnt: string = msg.match(/\d*\/\d*/) ? msg.match(/\d*\/\d*/)[0] : '...';
+                let icon: string = msg.match(/errors\: [1-9]/) ? 'thumbsdown' : 'thumbsup';
+                vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying ${cnt} $(${icon})`;
             } else if (msg.match(/Tests\:/)) {
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: Testing...';
+                let cnt: string = msg.match(/\d*\/\d*/) ? msg.match(/\d*\/\d*/)[0] : '...';
+                let icon: string = msg.match(/errors\: [1-9]/) ? 'thumbsdown' : 'thumbsup';
+                vscode.window.forceCode.statusBarItem.text = `ForceCode: Testing ${cnt} $(${icon})`;
             }
             vscode.window.forceCode.outputChannel.appendLine(msg);
             return _consoleInfoReference.apply(this, arguments);

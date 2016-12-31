@@ -4,3 +4,4 @@ node_modules
 settings.json
 .*
 force.json
+open.spec.js

@@ -1,15 +1,15 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
+import path = require('path');
 import * as error from './../util/error';
 import { configuration } from './../services';
 
 export default function createClass(context: vscode.ExtensionContext) {
-    const slash: string = vscode.window.forceCode.pathSeparator;
     const CUSTOM_CLASS: string = 'Custom';
     var classesPath: string;
     // Here is replaceSrc possiblity
     return configuration().then(config => {
-        classesPath = `${vscode.workspace.rootPath}${slash}${vscode.window.forceCode.config.src}${slash}classes`;
+        classesPath = `${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}${path.sep}classes`;
         if (fs.statSync(classesPath).isDirectory()) {
             return userClassSelection().then(selectedOption => {
                 if (selectedOption) {
@@ -88,7 +88,7 @@ export default function createClass(context: vscode.ExtensionContext) {
         function writeFile() {
             return new Promise(function (resolve, reject) {
                 // Write Class file
-                var finalClassName: string = classesPath + slash + classname + '.cls';
+                var finalClassName: string = classesPath + path.sep + classname + '.cls';
                 fs.stat(finalClassName, function (err, stats) {
                     if (!err) {
                         vscode.window.forceCode.statusBarItem.text = 'ForceCode: Error creating file';
@@ -118,7 +118,7 @@ export default function createClass(context: vscode.ExtensionContext) {
         // Write Metadata file
 
         function writeMetaFile() {
-            var finalMetadataName: string = classesPath + slash + classname + '.cls-meta.xml';
+            var finalMetadataName: string = classesPath + path.sep + classname + '.cls-meta.xml';
             return new Promise(function (resolve, reject) {
                 fs.stat(finalMetadataName, function (err, stats) {
                     if (!err) {

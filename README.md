@@ -35,24 +35,25 @@ You can then enter your credentials to login to your Salesforce org.  Your confi
 The configuration file should look something like...
 
 ``` json
+
 {
     "username": "MonsterMike@Salesforce.com",
     "password": "YourPasswordHere",
     "url": "https://login.salesforce.com",
-    "prefix": "",
     "autoCompile": true,
     "autoRefresh": true,
     "browser": "Google Chrome Canary",
     "poll": 1500,
-    "pollTimeout": 120,
-    "debugOnly": false,
-    "apiVersion": "37.0",
+    "pollTimeout": 1200,
+    "debugOnly": true,
+    "apiVersion": "38.0",
+    "prefix": "",
     "src": "src",
     "deployOptions": {
-        "checkOnly": false,
-        "testLevel": "RunLocalTests",
-        "verbose": false,
-        "ignoreWarnings": false
+      "checkOnly": false,
+      "testLevel": "runLocalTests",
+      "verbose": false,
+      "ignoreWarnings": true
     }
 }
 ```
@@ -64,16 +65,43 @@ Note: the password is in the format "passwordtoken".  Do not try to use any deli
 
 * username: The username for the org you want to connect to.
 * password: The password, with security token, for your user.
+* url: This is the login url for Salesforce.  It's either login.salesforce.com for Developer and Professional editions or test.salesforce.com for sandboxes.
 * autoCompile: When a supported file is saved (works with VSCode's autosave feature) the file is saved/compiled on the server.  Otherwise, use `cmd + opt + s` to save the file to the server.
 * autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on (and you're working on a Mac), the currently active tab in Google Chrome Canary (or your configured browser) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
 * browser: Define which browser you want to reload when the static resource refreshes (this only works with Macs at the moment)
-* url: This is the login url for Salesforce.  It's either login.salesforce.com for Developer and Professional editions or test.salesforce.com for sandboxes.
 * poll: When compiling, this is the interval (in milliseconds) at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
-* pollTimeout: When retrieving packages, or other long running tasks, this is the maximum amount of time (in seconds) it will wait before the process times out.  If you're having trouble retrieving your package, try increasing this number.  Max is 600 (10 minutes).
+* pollTimeout: When retrieving packages, or other long running tasks, this is the maximum amount of time (in seconds) it will wait before the process times out.  If you're having trouble retrieving your package, try increasing this number.  Default is 600 (10 minutes).
 * debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
-* apiVersion: This is the default api version that all your files will be saved with.  If this is not set, this will default to the version of the org in use.  ForceCode will not change the version of an existing file.  This is also the version used for package retrieval.
-* prefix: This is the namespce prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise it will attempt to infer a prefix from the filename.  If you have a namespaced org and do not set this setting, you will have problems.
-* src: This is the src folder that contains your project files
+* apiVersion: This is the default api version that all your files will be saved with.  If this is not set, this will default to the version of the org in use.  ForceCode will not change the version of an existing file.  This is also the version used for package retrieval and deploy.
+* prefix: This is the namespce prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise ForceCode will attempt to infer a prefix from your Salesforce Org.  If you have a namespaced org and do not set this setting, you may have problems, especially if working on an out of date Org.  This should be automatic as of Salesforce 38
+* src: This is the src folder that contains your project files.  Normally this is not needed, but if you want to have a non-standard folder structure, you can designate an arbitrary folder as your Salesforce metadata directory.
+* deployOptions: Deploy your package based on your configured deploy options and the package.xml in your src folder.
+  * checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.  This will generate a `.validationId` file.
+  * ignoreWarnings:  Indicates whether a warning should allow a deployment to complete successfully (true) or not (false).
+  * rollbackOnError: Indicates whether any failure causes a complete rollback (true) or not (false)
+  * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
+  * runTests:        A list of Apex tests to run during deployment (commma separated list)
+  * verbose:         Output execution detail log to a `DeployStatistics.log` file
+  
+There's also one special configuration option that's not included in the force.json, but rather in your vscode settings.json file. This reasoning for separating the files is for portability reasons; to make it easier to share this configuration with others and yourself across projects.
+If you open up your settings.json file, or go to Code > Preferences > Workspace Settings and create a new preference, starting with `force` you should see the filesExclude preference.
+This property allows you to have certain files ignored (exluded) from Static Resources when bundled/deployed.  This allows you to create a modern SPA project in a "spa" folder instead of keeping it in your "resource-bundles" directory.
+However, when we build these SPAs we generally have a ton of preference and source files that we don't want to deploy to Salesforce, both for security and size reasons.
+So, you can create Node glob patterns to ignore. The default configuration is shown below.  
+Glob patterns can be tricky... so a little research and trial and error may be required to get your bundle just right.
+```
+{
+    ".gitignore": true,
+    ".DS_Store": true,
+    ".org_metadata": true,
+    "**/*.map": true,
+    "node_modules/**": true,
+    "bower_modules/**": true,
+    "**.tmp": true,
+    "**/*-meta.xml": true,
+    ".log": true
+}
+```
 
 ## Commands
 
