@@ -6,6 +6,7 @@ import { constants, operatingSystem } from './../services';
 import { configuration } from './../services';
 import * as commands from './../commands';
 const jsforce: any = require('jsforce');
+const pjson : any  = require('./../../../package.json');
 
 export default class ForceService implements forceCode.IForceService {
     public config: forceCode.Config;
@@ -34,7 +35,7 @@ export default class ForceService implements forceCode.IForceService {
             this.conn = new jsforce.Connection({
                 loginUrl: config.url || 'https://login.salesforce.com'
             });
-            this.statusBarItem.text = `ForceCode is Active`;
+            this.statusBarItem.text = `ForceCode ${pjson.version} is Active`;
         }).catch(err => {
             this.statusBarItem.text = 'ForceCode: Missing Configuration';
         });
