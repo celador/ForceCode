@@ -34,13 +34,22 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
         return { name: d, type: 'resource-bundle' };
       });
     }
+    let spaDirectories: Array<any> = [];
+    let spaPath: string = vscode.workspace.rootPath + path.sep + 'spa';
+    if (fs.existsSync(spaPath)) {
+        spaDirectories = fs.readdirSync(spaPath).filter(function (file) {
+            return fs.statSync(path.join(spaPath, file)).isDirectory();
+        }).map(s => {
+            return { name: s, type: 'SPA' };
+        });
+    }
 
     let config: {} = {
       matchOnDescription: true,
       matchOnDetail: true,
       placeHolder: 'Choose a Resource Bundle to bundle',
     };
-    let options: any[] = bundleDirectories.concat([{ name: 'All Static Resources', type: 'resource-bundle' }])
+    let options: any[] = bundleDirectories.concat(spaDirectories).concat([{ name: 'All Static Resources', type: 'resource-bundle' }])
       .map(option => {
         return {
           description: option.name,

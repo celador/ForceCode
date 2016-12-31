@@ -33,7 +33,7 @@ export default {
         description: 'Retrieve metadata to your src directory.',
         detail: 'You will be prompted for the package name or you can choose to retrieve by your package.xml or to retrieve all metadata',
         icon: 'cloud-download',
-        label: 'Retrieve Metadata',
+        label: 'Retrieve Package/Metadata',
     },
     // Get Log(s)
     getLogs: {

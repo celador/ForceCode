@@ -11,7 +11,7 @@ export default function soql(context: vscode.ExtensionContext): Promise<any> {
 
     function getSoqlQuery(svc) {
         let options: vscode.InputBoxOptions = {
-            placeHolder: 'Entery SOQL query',
+            placeHolder: 'Enter SOQL query',
             prompt: `Enter a SOQL query to get the results in a json file in the soql folder`,
         };
         return vscode.window.showInputBox(options).then(query => {
