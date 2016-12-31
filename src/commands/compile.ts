@@ -90,20 +90,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
       vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''}` + spinner();
     }, 50);
 
-
-    // So first, we need to get the current metadata container Id
-    // When ForceCode boots, we create a metadata Container for our workspace... the same way we currently are.
-    // We persist that Id on our 
-    // We then get the members that are part of the container
-
-    // Currently, we always create a new member... 
-    // Create or update the container member
-    // Request a compile
-    // We then poll for the success
-
-    // We then get the members that are part of the container
-
-
     vscode.window.forceCode.isCompiling = true;
     return vscode.window.forceCode.connect(context)
       .then(addToContainer)
