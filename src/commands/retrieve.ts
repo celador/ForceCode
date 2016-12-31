@@ -112,7 +112,7 @@ export default function retrieve(context: vscode.ExtensionContext) {
               }
               var newName: string = name.replace(option.description + path.sep, '');
               // Here is  possiblity
-              fs.outputFileSync(vscode.workspace.rootPath + path.sep + vscode.window.forceCode.config.src + path.sep + newName, data);
+              fs.outputFileSync(`${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}${path.sep}${newName}`, data);
             }
           });
           resolve();
