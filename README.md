@@ -75,12 +75,6 @@ Note: the password is in the format "passwordtoken".  Do not try to use any deli
 * prefix: This is the namespce prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise it will attempt to infer a prefix from the filename.  If you have a namespaced org and do not set this setting, you will have problems.
 * src: This is the src folder that contains your project files
 
-**Special Note**:
-
-By default, VSCode will close the "quick open" dialog, making it difficult to copy/paste your user credentials.  
-Use the following setting to force the dialog to remain open when the window loses focus.  
-`"workbench.quickOpen.closeOnFocusLost": false`
-
 ## Get errors as you type
 
 The Auto-compile feature adds a hook to the save command that will automatically deploy and compile your code to your SFDC org whenever you save.
