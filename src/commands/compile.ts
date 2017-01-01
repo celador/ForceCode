@@ -337,7 +337,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         }
       });
     }
-    function getStatus(): Promise<ContainerAsyncRequest> {
+    function getStatus(): Promise<any> {
       return vscode.window.forceCode.conn.tooling.query(`SELECT Id, MetadataContainerId, MetadataContainerMemberId, State, IsCheckOnly, ` +
         `DeployDetails, ErrorMsg FROM ContainerAsyncRequest WHERE Id='${vscode.window.forceCode.containerAsyncRequestId}'`);
     }

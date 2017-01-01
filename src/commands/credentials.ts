@@ -14,7 +14,6 @@ export default function enterCredentials() {
         .then(cfg => getPassword(cfg))
         .then(cfg => getUrl(cfg))
         .then(cfg => getAutoCompile(cfg))
-        // .then(cfg => setSettings(cfg)):
         .then(cfg => finished(cfg))
         .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
@@ -108,8 +107,8 @@ export default function enterCredentials() {
                 'checkOnly': false,
                 'testLevel': 'runLocalTests',
                 'verbose': false,
-                'ignoreWarnings': true
-            }
+                'ignoreWarnings': true,
+            },
         };
         fs.outputFile(vscode.workspace.rootPath + path.sep + 'force.json', JSON.stringify(Object.assign(defaultOptions, config), undefined, 4));
         return config;

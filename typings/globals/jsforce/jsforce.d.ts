@@ -42,11 +42,15 @@ declare module 'jsforce/index' {
         }
         interface Tooling {
             sobject(name: string): SObject;
+            completions(type?: string): Promise<CompletionResult>;
             executeAnonymous(apexBody: string): Promise<ExecuteAnonymousResult>;
             runTestsAsynchronous(classIds: string[]): Promise<any>;
             runTestsSynchronous(classNames: string[]): Promise<any>;
             runUnitTests(classId: string, testMethods: string[]): Promise<any>;
             query(locator: string): Promise<QueryResult>;
+        }
+        interface CompletionResult {
+            publicDeclarations: {}
         }
         interface DeployResult {
             done: boolean;

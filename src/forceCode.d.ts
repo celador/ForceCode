@@ -30,6 +30,9 @@ export interface Config {
 export interface IForceService {
     operatingSystem?: string;
     config?: Config;
+    completions?: vscode.CompletionItem[];
+    declarations?: any;
+    symbolTable?: any;
     containerId?: string;
     queueCompile?: boolean;
     isCompiling?: boolean;

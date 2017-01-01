@@ -1,12 +1,11 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import * as path from 'path';
-// import * as fs from 'fs-extra';
 import { constants, operatingSystem } from './../services';
 import { configuration } from './../services';
+import { getCompletions } from './../providers/ApexCompletion';
 import * as commands from './../commands';
 const jsforce: any = require('jsforce');
-const pjson : any  = require('./../../../package.json');
+const pjson: any = require('./../../../package.json');
 
 export default class ForceService implements forceCode.IForceService {
     public config: forceCode.Config;
@@ -52,15 +51,15 @@ export default class ForceService implements forceCode.IForceService {
     public newContainer(force: Boolean): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         if (self.containerId && !force) {
-          return Promise.resolve(self);
+            return Promise.resolve(self);
         } else {
-          return self.conn.tooling.sobject('MetadataContainer')
-              .create({ name: 'ForceCode-' + Date.now() })
-              .then(res => {
-                  self.containerId = res.id;
-                  self.containerMembers = [];
-                  return self;
-              });
+            return self.conn.tooling.sobject('MetadataContainer')
+                .create({ name: 'ForceCode-' + Date.now() })
+                .then(res => {
+                    self.containerId = res.id;
+                    self.containerMembers = [];
+                    return self;
+                });
         }
     }
 
@@ -98,19 +97,23 @@ export default class ForceService implements forceCode.IForceService {
                 .login(config.username, config.password)
                 .then(connectionSuccess)
                 .then(getNamespacePrefix)
+                .then(getCompletions)
+                .then(getSymbolTable)
                 .catch(connectionError);
+
+            function getSymbolTable(svc) {
+                var query: string = 'select Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate from ApexClass where NamespacePrefix = \'' + self.config.prefix + '\'';
+                self.conn.tooling.query(query).then(res => {
+                    self.symbolTable = res;
+                });
+                return svc;
+            }
             function connectionSuccess(userInfo) {
                 vscode.window.forceCode.statusBarItem.text = `ForceCode: $(zap) Connected as ${self.config.username} $(zap)`;
                 self.outputChannel.appendLine(`Connected as ${JSON.stringify(userInfo)}`);
                 self.userInfo = userInfo;
                 self.username = config.username;
                 return self;
-            }
-            function connectionError(err) {
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(alert) Connection Error $(alert)`;
-                self.outputChannel.appendLine('================================================================');
-                self.outputChannel.appendLine(err.message);
-                throw err;
             }
             function getNamespacePrefix(svc: forceCode.IForceService) {
                 return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {
@@ -119,6 +122,12 @@ export default class ForceService implements forceCode.IForceService {
                     }
                     return svc;
                 });
+            }
+            function connectionError(err) {
+                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(alert) Connection Error $(alert)`;
+                self.outputChannel.appendLine('================================================================');
+                self.outputChannel.appendLine(err.message);
+                throw err;
             }
         } else {
             // self.outputChannel.appendLine(`Connected as ` + self.config.username);
