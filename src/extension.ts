@@ -55,6 +55,7 @@ export function activate(context: vscode.ExtensionContext): any {
             commands.staticResourceDeployFromFile(textDocument, context);
         }
     }));
+
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider('apex', new ApexCompletionProvider(), '.`', '@' ));
 
     // // Peek Provider Setup
