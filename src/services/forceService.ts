@@ -84,9 +84,13 @@ export default class ForceService implements forceCode.IForceService {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Lazy-load the connection
         if (self.userInfo === undefined || self.config.username !== self.username || !self.config.password) {
-            self.conn = new jsforce.Connection({
-                loginUrl: self.config.url || 'https://login.salesforce.com'
-            });
+            var connectionOptions: any = {
+                loginUrl: self.config.url || 'https://login.salesforce.com',
+            };
+            if (self.config.proxyUrl) {
+                connectionOptions.proxyUrl = self.config.proxyUrl;
+            }
+            self.conn = new jsforce.Connection(connectionOptions);
 
             if (!config.username || !config.password) {
                 vscode.window.forceCode.statusBarItem.text = `ForceCode: $(alert) Missing Credentials $(alert)`;
