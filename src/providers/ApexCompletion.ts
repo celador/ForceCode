@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import _utils from './ApexCompletionUtils';
+const utils: any = new _utils();
 const fetch: any = require('node-fetch');
 
 interface SalesforceClass {
@@ -40,13 +42,17 @@ enum SalesforceType {
     String,
     Exception
 }
+enum typeMember {
+    constructors,
+    methods,
+    properties
+}
 
 function completionItemFromProperty(_class: SalesforceClass, property: SalesforceProperty): vscode.CompletionItem {
     var completionItem: vscode.CompletionItem = new vscode.CompletionItem(property.name, vscode.CompletionItemKind.Method);
     completionItem.detail = '(property) Class.property: type';
     return completionItem;
 }
-
 function completionItemFromMethod(_class: SalesforceClass, method: SalesforceMethod): vscode.CompletionItem {
     var completionItem: vscode.CompletionItem = new vscode.CompletionItem(method.name, vscode.CompletionItemKind.Method);
     completionItem.documentation = method.methodDoc;
@@ -67,13 +73,6 @@ function classMemberCompletions(_class: SalesforceClass, member: typeMember, fn:
     }
     return [];
 }
-
-enum typeMember {
-    constructors,
-    methods,
-    properties
-}
-
 function combine(prev, curr) { return prev.concat(curr); }
 
 export function getCompletions(svc) {
@@ -116,7 +115,8 @@ export function getCompletions(svc) {
 export default class ApexCompletionProvider implements vscode.CompletionItemProvider {
     public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.CompletionItem[]> {
         var completions: vscode.CompletionItem[] = [];
-        // var line: string = this.getEntireLine(document, position);
+        var line: string = utils.getEntireLine(document, position);
+        console.log(line);
         // if (this.matchesConstructor(line)) {
         //     // Get all the Contstructors that should be visible
 
@@ -139,30 +139,32 @@ export default class ApexCompletionProvider implements vscode.CompletionItemProv
         //     word = document.getText(document.getWordRangeAtPosition(position));
 
         // }
-        return Promise.resolve(completions);
+        return Promise.resolve(vscode.window.forceCode.completions);
 
     }
-    public getEntireLine(document: vscode.TextDocument, position: vscode.Position): string {
-        var charCount: number = 0;
-        var line: string = '';
-        while (line.length <= 1 && line.charAt(0) !== ';') {
-            charCount += 1;
-            line = document.getText(new vscode.Range(position.translate(0, -charCount), position))
-        }
-        return line;
+    public matchesModule(line: string) {
+        return line.match(/\s*$/i);
     }
-    public matchesConstructor(line: string) {
-        return line.match(/new\s+[a-z_0-9\.]*$/i);
+    public matchesClass(line: string) {
+        return line.match(/\s*$/i);
     }
-    public wordParser(word: string) {
+    public expressionParser(word: string) {
+        // There are five kinds of tokens:
+        // Modules, Types, Methods, Fields, Constructors
+        // A Module is a collection of Types
+        // A Type is a either a built in type, sObject, or custom (class)
+        // A Method is a function
+        // a Field is a named instance of a Type
+        // A Constructor is a function named for it's class that runs when an instance of the class is instantiated
+
         // Local variables, class names, and namespaces can all hypothetically use the same identifiers, 
         // The Apex parser evaluates expressions in the form of name1.name2.[...].nameN as follows:
         // 1. The parser first assumes that name1 is a local variable with name2 - nameN as field references.
         if (word) {
             //
         }
-        // 2. If the first assumption does not hold true, the parser then assumes that name1 is a class name and name2 is a static variable name
-        // with name3 - nameN as field references.
+        // 2. If the first assumption does not hold true, 
+        // the parser then assumes that name1 is a class name and name2 is a static variable name with name3 - nameN as field references.
         // 3. If the second assumption does not hold true, the parser then assumes that name1 is a namespace name, name2 is a class name,
         // name3 is a static variable name, and name4 - nameN are field references.
         // 4. If the third assumption does not hold true, the parser reports an error.
