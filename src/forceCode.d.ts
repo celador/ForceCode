@@ -21,6 +21,7 @@ export interface Config {
     poll?: number;
     pollTimeout?: number;
     prefix?: string;
+    proxyUrl?: string;
     src?: string;
     url?: string;
     username?: string;
