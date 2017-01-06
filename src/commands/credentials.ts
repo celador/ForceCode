@@ -102,6 +102,7 @@ export default function enterCredentials() {
             browser: 'Google Chrome Canary',
             pollTimeout: 1200,
             debugOnly: true,
+            debugFilter: 'USER_DEBUG|FATAL_ERROR',
             apiVersion: '38.0',
             deployOptions: {
                 'checkOnly': false,

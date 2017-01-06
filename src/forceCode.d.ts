@@ -13,6 +13,7 @@ export interface Config {
     autoRefresh?: boolean;
     browser?: string;
     debugOnly?: boolean;
+    debugFilter?: string;
     deployOptions?: {
         verbose?: boolean,
         checkOnly?: boolean
