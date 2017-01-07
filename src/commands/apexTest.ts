@@ -78,10 +78,12 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                         uncoveredLines = coverage.numLocationsNotCovered,
                         coveredLines = linesOfCode - uncoveredLines,
                         percentageCovered = Math.round((coveredLines / linesOfCode) * 100),
-                        coverageMessage:  string = `Class: ${percentageCovered}% ${coverage.name} ${coveredLines} of ${linesOfCode} covered `;
+                        coverageMessage:  string = `${percentageCovered}% ${coverage.name} ${coveredLines} of ${linesOfCode} covered `;
                     
                     if(coverage.numLocationsNotCovered > 0){
-
+                        coverage.locationsNotCovered.forEach(function(uncovered){
+                            coverageMessage = coverageMessage + `line ${uncovered.line} uncovered\n`;
+                        });
                     }
                     
                     vscode.window.forceCode.outputChannel.appendLine(coverageMessage);
@@ -91,10 +93,12 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
 
             if (res.codeCoverageWarnings.length > 0){
                 res.codeCoverageWarnings.forEach(function(warning ){
-                    var warningMessage:  string = 'CODE COVERAGE WARNING: ' + warning.message ;
+                    var warningMessage:  string = `CODE COVERAGE WARNING: ` + warning.message ;
                     vscode.window.forceCode.outputChannel.appendLine(warningMessage);
                 })
                 
+            }else{
+                vscode.window.forceCode.outputChannel.appendLine('Aggregate coverage for classes in this test run is over 75%');
             }
 
             vscode.window.forceCode.outputChannel.show();
