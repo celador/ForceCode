@@ -41,7 +41,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                 return method.name;
             });
         }else{
-            error.outputError({ message: 'no symbol table' }, vscode.window.forceCode.outputChannel);
+            error.outputError({ message: 'no symbol table'  }, vscode.window.forceCode.outputChannel);
         }
     }
 
@@ -71,6 +71,32 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                 var successMessage: string = 'SUCCESS: ' + success.name + ':' + success.methodName + ' - in ' + success.time + 'ms';
                 vscode.window.forceCode.outputChannel.appendLine(successMessage);
             });
+
+            if (res.codeCoverage.length > 0){
+                res.codeCoverage.forEach(function(coverage ){
+                    var linesOfCode = coverage.numLocations,
+                        uncoveredLines = coverage.numLocationsNotCovered,
+                        coveredLines = linesOfCode - uncoveredLines,
+                        percentageCovered = Math.round((coveredLines / linesOfCode) * 100),
+                        coverageMessage:  string = `Class: ${percentageCovered}% ${coverage.name} ${coveredLines} of ${linesOfCode} covered `;
+                    
+                    if(coverage.numLocationsNotCovered > 0){
+
+                    }
+                    
+                    vscode.window.forceCode.outputChannel.appendLine(coverageMessage);
+                })
+                
+            }
+
+            if (res.codeCoverageWarnings.length > 0){
+                res.codeCoverageWarnings.forEach(function(warning ){
+                    var warningMessage:  string = 'CODE COVERAGE WARNING: ' + warning.message ;
+                    vscode.window.forceCode.outputChannel.appendLine(warningMessage);
+                })
+                
+            }
+
             vscode.window.forceCode.outputChannel.show();
             return res;
         });
