@@ -41,7 +41,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                 return method.name;
             });
         }else{
-            error.outputError('no symbol table', vscode.window.forceCode.outputChannel);
+            error.outputError({ message: 'no symbol table' }, vscode.window.forceCode.outputChannel);
         }
     }
 
