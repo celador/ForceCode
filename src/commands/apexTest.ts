@@ -32,13 +32,17 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     }
 
     function getTestMethods(info): string[] {
-        return info.SymbolTable.methods.filter(function (method) {
-            return method.annotations.some(function (annotation) {
-                return annotation.name === 'IsTest';
+        if(info.SymbolTable){
+            return info.SymbolTable.methods.filter(function (method) {
+                return method.annotations.some(function (annotation) {
+                    return annotation.name === 'IsTest';
+                });
+            }).map(function (method) {
+                return method.name;
             });
-        }).map(function (method) {
-            return method.name;
-        });
+        }else{
+            error.outputError({ message: 'no symbol table' }, vscode.window.forceCode.outputChannel);
+        }
     }
 
     function runCurrentTests(results) {
