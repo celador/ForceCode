@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+
 export default function getToolingTypeFromBody(document: vscode.TextDocument, member = false): string {
-    // var body: string = document.getText();
-    // var bodyParts: string[] = body.split('{');
-    const slash: string = vscode.window.forceCode.pathSeparator;
 
     if (document.fileName.endsWith('.cls')) {
         return member ? 'ApexClassMember' : 'ApexClass';
@@ -22,8 +21,11 @@ export default function getToolingTypeFromBody(document: vscode.TextDocument, me
     if (document.fileName.endsWith('.object')) {
         return 'CustomObject';
     }
+    if (document.fileName.endsWith('.labels')) {
+        return 'CustomLabels';
+    }
 	// Here is replaceSrc possiblity
-    if (document.fileName.indexOf(vscode.window.forceCode.config.src + slash + 'aura') >= 0) {
+    if (document.fileName.indexOf(`${vscode.window.forceCode.config.src}${path.sep}aura`) >= 0) {
         return 'AuraDefinition';
     }
     return undefined;

@@ -1,13 +1,12 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
-// import jsforce = require('jsforce');
+import * as path from 'path';
 import * as error from './../util/error';
 
 import { getIcon, getExtension, getFolder } from './../parsers';
 const TYPEATTRIBUTE: string = 'type';
 
 export default function open(context: vscode.ExtensionContext) {
-    const slash: string = vscode.window.forceCode.pathSeparator;
     let bundleName: string = '';
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Open File';
 
@@ -103,7 +102,7 @@ export default function open(context: vscode.ExtensionContext) {
                 let extension: string = getExtension(defType);
                 let actualFileName: string = extension === 'js' ? bundleName + defType : bundleName;
                 // Here is replaceSrc possiblity
-                filename = vscode.workspace.rootPath + slash + vscode.window.forceCode.config.src + slash + 'aura' + slash + bundleName + slash + actualFileName + '.' + extension;
+                filename = `${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}${path.sep}aura${path.sep}${bundleName}${path.sep}${actualFileName}.${extension}`;
                 let body: string = res.Source;
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {
@@ -116,7 +115,7 @@ export default function open(context: vscode.ExtensionContext) {
                 });
             } else {
                 // Here is replaceSrc possiblity
-                filename = `${vscode.workspace.rootPath}${slash}${vscode.window.forceCode.config.src}${slash}${getFolder(toolingType)}${slash}${res.Name || res.FullName}.${getExtension(toolingType)}`;
+                filename = `${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}${path.sep}${getFolder(toolingType)}${path.sep}${res.Name || res.FullName}.${getExtension(toolingType)}`;
                 let body: string = res.Body || res.Markup;
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {

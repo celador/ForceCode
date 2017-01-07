@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+
 export default function getName(document: vscode.TextDocument, toolingType: string): string {
     if (toolingType === 'ApexClass') {
         return getNameFromClassBody(document);
@@ -8,26 +10,20 @@ export default function getName(document: vscode.TextDocument, toolingType: stri
     return getFileName(document);
 }
 export function getFileName(document: vscode.TextDocument) {
-    // const slash: string = vscode.window.forceCode.pathSeparator;
     var fileName: string = document.fileName.substring(0, document.fileName.lastIndexOf('.'));
-    // split on pathSeparator
-    var fileNameArray: string[] = fileName.split(/[\\\/]/);
+    var fileNameArray: string[] = fileName.split(path.sep);
     // give me the last one, giving me just the fileName
     fileName = fileNameArray[fileNameArray.length - 1];
     return fileName;
 }
 export function getWholeFileName(document: vscode.TextDocument) {
-    // const slash: string = vscode.window.forceCode.pathSeparator;
-    // var fileName: string = document.fileName.substring(0, document.fileName.lastIndexOf('.'));
-    // split on pathSeparator
-    var fileNameArray: string[] = document.fileName.split(/[\\\/]/);
+    var fileNameArray: string[] = document.fileName.split(path.sep);
     // give me the last one, giving me just the fileName
     var fileName = fileNameArray[fileNameArray.length - 1];
     return fileName;
 }
 function getNameFromClassBody(document: vscode.TextDocument): string {
-    const slash: string = vscode.window.forceCode.pathSeparator;
-    var fileNameArray: string[] = getFileName(document).split(slash);
+    var fileNameArray: string[] = getFileName(document).split(path.sep);
     var fileName: string = fileNameArray[fileNameArray.length - 1];
     var bodyParts: string[] = document.getText().split(/(extends|implements|\{)/);
     var firstLine: string = bodyParts.length && bodyParts[0];
@@ -39,11 +35,5 @@ function getNameFromClassBody(document: vscode.TextDocument): string {
     return className;
 }
 export function getAuraNameFromFileName(fileName: string): string {
-    const slash: string = vscode.window.forceCode.pathSeparator;
-	// Here is replaceSrc possiblity
-    // Get the folder and filename part of the path, then split that again on the slashes
-    // We should now have something like ['foo/bar/baz/buzz', 'component/componentController.js']
-    // We should now have something like ['component', 'componentController.js']
-    // So give me the first one
-    return fileName.split(`${vscode.window.forceCode.config.src}${slash}aura${slash}`).pop().split(slash).shift();
+    return fileName.split(`${vscode.window.forceCode.config.src}${path.sep}aura${path.sep}`).pop().split(path.sep).shift();
 }

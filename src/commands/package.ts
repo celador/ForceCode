@@ -8,10 +8,6 @@ import * as error from './../util/error';
 export default function generate(context: vscode.ExtensionContext) {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Package-xml';
     vscode.window.forceCode.outputChannel.clear();
-    // Here is replaceSrc possiblity
-    // const slash: string = vscode.window.forceCode.pathSeparator;
-
-
     return vscode.window.forceCode.connect(context)
         // .then(svc => generator({}))
         .then(finished)
