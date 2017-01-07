@@ -12,7 +12,7 @@ export default class ForceService implements forceCode.IForceService {
     public conn: any;
     public containerId: string;
     public containerMembers: any[];
-    public declarations: { public?: any[], private?: any[], managed?: any[] };
+    public declarations: forceCode.IDeclarations;
     public containerAsyncRequestId: string;
     public userInfo: any;
     public username: string;
@@ -109,18 +109,33 @@ export default class ForceService implements forceCode.IForceService {
                 .catch(connectionError);
 
             function getPrivateDeclarations(svc) {
-                var query: string = 'select Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate from ApexClass where NamespacePrefix = \'' + self.config.prefix + '\'';
-                self.conn.tooling.query(query).then(res => {
-                    self.declarations.private = res;
-                });
+                var query: string = 'SELECT Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix = \'' + self.config.prefix + '\'';
+                self.declarations.private = [];
+                self.conn.tooling.query(query)
+                    .then(res => accumulateAllRecords(res, self.declarations.private));
                 return svc;
             }
             function getManagedDeclarations(svc) {
-                var query: string = 'select Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate from ApexClass where NamespacePrefix != \'' + self.config.prefix + '\'';
-                self.conn.tooling.query(query).then(res => {
-                    self.declarations.managed = res;
-                });
+                var query: string = 'SELECT Id, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix != \'' + self.config.prefix + '\'';
+                self.declarations.managed = [];
+                self.conn.tooling.query(query)
+                    .then(res => accumulateAllRecords(res, self.declarations.managed));
                 return svc;
+            }
+            function accumulateAllRecords(result, accumulator) {
+                if (result && result.done !== undefined && Array.isArray(result.records)) {
+                    if (result.done) {
+                        result.records.forEach(record => {
+                            accumulator.push(record);
+                        });
+                        return result;
+                    } else {
+                        result.records.forEach(record => {
+                            accumulator.push(record);
+                        });
+                        return self.conn.tooling.queryMore(result.nextRecordsUrl).then(res => accumulateAllRecords(res, accumulator));
+                    }
+                }
             }
             function connectionSuccess(userInfo) {
                 vscode.window.forceCode.statusBarItem.text = `ForceCode: $(zap) Connected as ${self.config.username} $(zap)`;

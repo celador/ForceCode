@@ -47,7 +47,8 @@ declare module 'jsforce/index' {
             runTestsAsynchronous(classIds: string[]): Promise<any>;
             runTestsSynchronous(classNames: string[]): Promise<any>;
             runUnitTests(classId: string, testMethods: string[]): Promise<any>;
-            query(locator: string): Promise<QueryResult>;
+            query(query: string): Promise<QueryResult>;
+            queryMore(locator: string): Promise<QueryResult>;
         }
         interface CompletionResult {
             publicDeclarations: {}
@@ -85,6 +86,7 @@ declare module 'jsforce/index' {
             version: string;
             metadata: Metadata;
             tooling: Tooling;
+            limitInfo: any;
             request: any;
             query: any;
             accessToken: string;
@@ -164,6 +166,7 @@ declare module 'jsforce/index' {
             done: boolean; // Flag if the query is fetched all records or not
             nextRecordsUrl?: string; // URL locator for next record set, (available when done = false)
             totalSize: number; // Total size for query
+            locator: string; // Total size for query
             records: Array<any>; // Array of records fetched
         }
 

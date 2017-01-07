@@ -29,16 +29,22 @@ export interface Config {
     // workspaceRoot?: string;
 }
 
+interface IDeclarations {
+    public?: any[],
+    private?: any[],
+    managed?: any[]
+}
+
 export interface IForceService {
     operatingSystem?: string;
     config?: Config;
     completions?: vscode.CompletionItem[];
-    declarations?: any;
+    declarations?: IDeclarations;
     // symbolTable?: any;
     containerId?: string;
     queueCompile?: boolean;
     isCompiling?: boolean;
-    containerMembers: {name: string, id: string }[];
+    containerMembers: { name: string, id: string }[];
     containerAsyncRequestId?: string;
     conn?: jsforce.Connection;
     userInfo?: jsforce.UserInfo;
