@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
 import { constants, operatingSystem } from './../services';
 import { configuration } from './../services';
-import { getCompletions } from './../providers/ApexCompletion';
+import { getPublicDeclarations } from './../providers/ApexCompletion';
 import * as commands from './../commands';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
@@ -12,6 +12,7 @@ export default class ForceService implements forceCode.IForceService {
     public conn: any;
     public containerId: string;
     public containerMembers: any[];
+    public declarations: { public?: any[], private?: any[], managed?: any[] };
     public containerAsyncRequestId: string;
     public userInfo: any;
     public username: string;
@@ -29,6 +30,7 @@ export default class ForceService implements forceCode.IForceService {
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         this.statusBarItem.text = 'ForceCode: Active';
         this.containerMembers = [];
+        this.declarations = {};
         configuration(this).then(config => {
             this.username = config.username || '';
             this.conn = new jsforce.Connection({
@@ -101,14 +103,22 @@ export default class ForceService implements forceCode.IForceService {
                 .login(config.username, config.password)
                 .then(connectionSuccess)
                 .then(getNamespacePrefix)
-                .then(getCompletions)
-                .then(getSymbolTable)
+                .then(getPublicDeclarations)
+                .then(getPrivateDeclarations)
+                .then(getManagedDeclarations)
                 .catch(connectionError);
 
-            function getSymbolTable(svc) {
+            function getPrivateDeclarations(svc) {
                 var query: string = 'select Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate from ApexClass where NamespacePrefix = \'' + self.config.prefix + '\'';
                 self.conn.tooling.query(query).then(res => {
-                    self.symbolTable = res;
+                    self.declarations.private = res;
+                });
+                return svc;
+            }
+            function getManagedDeclarations(svc) {
+                var query: string = 'select Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate from ApexClass where NamespacePrefix != \'' + self.config.prefix + '\'';
+                self.conn.tooling.query(query).then(res => {
+                    self.declarations.managed = res;
                 });
                 return svc;
             }

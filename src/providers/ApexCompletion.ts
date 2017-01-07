@@ -75,14 +75,14 @@ function classMemberCompletions(_class: SalesforceClass, member: typeMember, fn:
 }
 function combine(prev, curr) { return prev.concat(curr); }
 
-export function getCompletions(svc) {
+export function getPublicDeclarations(svc) {
     var requestUrl: string = svc.conn.instanceUrl + '/services/data/v38.0/tooling/completions?type=apex';
     var headers: any = {
         'Accept': 'application/json',
         'Authorization': 'OAuth ' + svc.conn.accessToken,
     };
     fetch(requestUrl, { method: 'GET', headers }).then(response => response.json()).then(json => {
-        svc.declarations = json.publicDeclarations;
+        svc.declarations.public = json.publicDeclarations;
 
 
         // Here we're doing something 

@@ -34,7 +34,7 @@ export interface IForceService {
     config?: Config;
     completions?: vscode.CompletionItem[];
     declarations?: any;
-    symbolTable?: any;
+    // symbolTable?: any;
     containerId?: string;
     queueCompile?: boolean;
     isCompiling?: boolean;

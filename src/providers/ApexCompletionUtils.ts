@@ -14,7 +14,7 @@ export default class ApexCompletionUtils {
 
     public getEntireLine(document: vscode.TextDocument, end: vscode.Position): string {
         // get the text of the document, without comments
-        var code: string = document.getText(new vscode.Range(new vscode.Position(0, 0), end)).replace(/\/\*.*\*\//g, '').replace(/\/\/.*\n/g, '');
+        var code: string = document.getText(new vscode.Range(new vscode.Position(0, 0), end)).replace(/\/\*.*\*\//g, '').replace(/(\/\/.*\n)|(\/\/.*$)/g, '');
         var counter: number = 0;
         var line: string = '';
         if (code.length) {
@@ -33,6 +33,19 @@ export default class ApexCompletionUtils {
         // There may be a token after the whitespace, in which case we follow the standard rules for expression parsing
         // The token can include alphanumberic and underscore characters, and a .
         return line.match(/new\s+[a-z_0-9\.]*$/i);
+    }
+
+    public getNamespaces(): string[] {
+        var declarations: string[] = [];
+        if (vscode.window.forceCode.declarations) {
+            // Public
+            declarations.concat(Object.keys(vscode.window.forceCode.declarations.public || []));
+            // Private
+            declarations.concat(Object.keys(vscode.window.forceCode.declarations.private || []));
+            // Managed
+            declarations.concat(Object.keys(vscode.window.forceCode.declarations.managed || []));
+        }
+        return declarations;
     }
 
     // SomeNamespac<cursor>
