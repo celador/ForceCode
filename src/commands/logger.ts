@@ -2,8 +2,7 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 var logger: any = (function (fs) {
-    const slash: string = vscode.window.forceCode.pathSeparator;
-    const statsPath: string = `${vscode.workspace.rootPath}${slash}DeployStatistics.log`;
+    const statsPath: string = `${vscode.workspace.rootPath}${path.sep}DeployStatistics.log`;
     var buffer: string = '';
     return {
         log: log,

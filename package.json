@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.3.12",
+  "version": "0.4.17",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -100,32 +100,7 @@
       "type": "object",
       "title": "ForceCode configuration",
       "properties": {
-        "force.username": {
-          "type": "string",
-          "default": "",
-          "description": "The Salesforce username to use"
-        },
-        "force.pollTimeout": {
-          "type": "number",
-          "default": 60,
-          "description": "The Polling timeout (in seconds) for Retreive and Deploy commands"
-        },
-        "force.debugOnly": {
-          "type": "boolean",
-          "default": false,
-          "description": "When showing logs in the output panel, should we only show User Debug statements?"
-        },
-        "force.url": {
-          "type": "string",
-          "default": "https://login.salesforce.com",
-          "description": "The Salesforce login url"
-        },
-        "force.autoCompile": {
-          "type": "boolean",
-          "default": false,
-          "description": "Do you wish to automatically compile and deploy Salesforce files?"
-        },
-        "force.excludeFiles": {
+        "force.filesExclude": {
           "type": "object",
           "default": {
             ".gitignore": true,

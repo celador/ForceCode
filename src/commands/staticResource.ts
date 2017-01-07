@@ -6,107 +6,111 @@ import jszip = require('jszip');
 import globule = require('globule');
 import { IForceService } from './../forceCode';
 import * as error from './../util/error';
-var packageName: string = undefined;
-var relativeRoot: string = undefined;
-var outputChannel: vscode.OutputChannel;
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
-    outputChannel = vscode.window.forceCode.outputChannel;
-    const slash: string = vscode.window.forceCode.pathSeparator;
-
-    // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
-    return vscode.window.forceCode.connect(context)
-        .then(getPackageName)
-        .then(getPackagePath)
-        .then(makeZip)
-        .then(bundle)
-        .then(deploy)
-        .then(onComplete)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
-    // =======================================================================================================================================
-    // =======================================================================================================================================
-    // =======================================================================================================================================
-    function getPackageName(service: IForceService) {
-        vscode.window.forceCode.statusBarItem.text = `ForceCode: Get Packages $(list-unordered)`;
-        let bundleDirectories: any[] = [];
-        let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles';
-        if (fs.existsSync(bundlePath)) {
-            bundleDirectories = fs.readdirSync(bundlePath).filter(function (file) {
-                return fs.statSync(path.join(bundlePath, file)).isDirectory();
-            }).map(d => d.split('.resource')[0]).map(d => {
-                return { name: d, type: 'resource-bundle' };
-            });
-        }
-        let spaDirectories: Array<any> = [];
-        let spaPath: string = vscode.workspace.rootPath + slash + 'spa';
-        if (fs.existsSync(spaPath)) {
-            spaDirectories = fs.readdirSync(spaPath).filter(function (file) {
-                return fs.statSync(path.join(spaPath, file)).isDirectory();
-            }).map(s => {
-                return { name: s, type: 'SPA' };
-            });
-        }
-
-        let config: {} = {
-            matchOnDescription: true,
-            matchOnDetail: true,
-            placeHolder: 'Choose a Resource Bundle to bundle',
-        };
-        let options: any[] = bundleDirectories.concat(spaDirectories).map(option => {
-            return {
-                description: option.name,
-                detail: option.type,
-                label: option.name,
-            };
-        });
-        return vscode.window.showQuickPick(options, config);
-
+  // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
+  return vscode.window.forceCode.connect(context)
+    .then(getPackageName)
+    .then(option => {
+      if (option.label === 'All Static Resources') {
+        return bundleAndDeployAll()
+          .then(deployAllComplete)
+          .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+      } else {
+        return bundleAndDeploy(option)
+          .then(deployComplete)
+          .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+      }
+    });
+  // =======================================================================================================================================
+  function getPackageName(service: IForceService): any {
+    vscode.window.forceCode.statusBarItem.text = `ForceCode: Get Packages $(list-unordered)`;
+    let bundleDirectories: any[] = [];
+    let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles';
+    if (fs.existsSync(bundlePath)) {
+      bundleDirectories = fs.readdirSync(bundlePath).filter(function (file) {
+        return fs.statSync(path.join(bundlePath, file)).isDirectory();
+      }).map(d => d.split('.resource')[0]).map(d => {
+        return { name: d, type: 'resource-bundle' };
+      });
     }
+    let spaDirectories: Array<any> = [];
+    let spaPath: string = vscode.workspace.rootPath + path.sep + 'spa';
+    if (fs.existsSync(spaPath)) {
+        spaDirectories = fs.readdirSync(spaPath).filter(function (file) {
+            return fs.statSync(path.join(spaPath, file)).isDirectory();
+        }).map(s => {
+            return { name: s, type: 'SPA' };
+        });
+    }
+
+    let config: {} = {
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: 'Choose a Resource Bundle to bundle',
+    };
+    let options: any[] = bundleDirectories.concat(spaDirectories).concat([{ name: 'All Static Resources', type: 'resource-bundle' }])
+      .map(option => {
+        return {
+          description: option.name,
+          detail: option.type,
+          label: option.name,
+        };
+      });
+    return vscode.window.showQuickPick(options, config);
+
+  }
 }
 
 export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, context: vscode.ExtensionContext): any {
-    return vscode.window.forceCode.connect(context)
-        .then(getPackageName)
-        .then(getPackagePath)
-        .then(makeZip)
-        .then(bundle)
-        .then(deploy)
-        .then(onComplete)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
-    function getPackageName(service: IForceService) {
-        const slash: string = vscode.window.forceCode.pathSeparator;
-        let bundlePath: string = vscode.workspace.rootPath + slash + 'resource-bundles' + slash;
-        var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource')[0];
-        return {
-            detail: 'resource-bundle',
-            label: resourceName
-        };
-    }
+  // This command is run when working in a file, and it's saved... It will auto bundle/deploy that static resource 
+  return vscode.window.forceCode.connect(context)
+    .then(getPackageName)
+    .then(bundleAndDeploy)
+    .then(deployComplete)
+    .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+  // =======================================================================================================================================
+  function getPackageName(service: IForceService) {
+    let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep;
+    var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource')[0];
+    return {
+      detail: 'resource-bundle',
+      label: resourceName,
+    };
+  }
+}
+
+function bundleAndDeploy(option) {
+  let root: string = getPackagePath(option);
+  let zip: any = zipFiles(getFileList(root), root);
+  bundle(zip, option.label);
+  return deploy(zip, option.label).then(deployComplete);
+}
+
+function bundleAndDeployAll() {
+  let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles';
+  if (fs.existsSync(bundlePath)) {
+    return Promise.all(fs.readdirSync(bundlePath).filter(function (file) {
+      return fs.statSync(path.join(bundlePath, file)).isDirectory();
+    }).map(d => {
+      return bundleAndDeploy({
+        detail: 'resource-bundle',
+        label: d.substring(0, d.lastIndexOf('.')),
+      });
+    }));
+  }
 }
 
 function getPackagePath(option) {
-    const slash: string = vscode.window.forceCode.pathSeparator;
-    var bundlePath: string = vscode.workspace.rootPath;
-    vscode.window.forceCode.statusBarItem.text = `ForceCode: Making Zip $(fold)`;
-    packageName = option.label;
-    // Get package data
-    if (option.detail === 'resource-bundle') {
-        bundlePath = vscode.workspace.rootPath + slash + 'resource-bundles' + slash + option.label + '.resource';
-    }
-    if (option.detail === 'SPA') {
-        bundlePath = vscode.workspace.rootPath + slash + 'spa' + slash + option.label;
-    }
-    return bundlePath;
-}
-
-// Make Zip uses the two subsequent functions
-function makeZip(root) {
-    // Create a Zip Object from which we can generate data, with which we do things...
-    //  Get a file list that we generate from a path defined in the package.json.
-    relativeRoot = root;
-    var fileList: any[] = getFileList(relativeRoot);
-    var zip: any = zipFiles(fileList);
-    return zip;
+  var bundlePath: string = vscode.workspace.rootPath;
+  // Get package data
+  if (option.detail === 'resource-bundle') {
+    bundlePath = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep + option.label + '.resource';
+  }
+  if (option.detail === 'SPA') {
+    bundlePath = vscode.workspace.rootPath + path.sep + 'spa' + path.sep + option.label;
+  }
+  return bundlePath;
 }
 
 /**
@@ -116,18 +120,23 @@ function makeZip(root) {
  * @param {String[]} fileList - Array of file paths
  * @return {Zip} - zip blob for use
  */
-function zipFiles(fileList: string[]) {
-    var zip: any = new jszip();
-    const slash: string = vscode.window.forceCode.pathSeparator;
+function zipFiles(fileList: string[], root: string) {
+  var zip: any = new jszip();
+  // Add folders and files to zip object for each file in the list
+  fileList.forEach(function (file) {
+    // the below code should work, according to the documentation
+    // zip.file(file, content, { createFolders: true })
+    // the above code should work, but for some reason it isn't so we have to add the files manually, as per the code below
+    let pathFragments: string[] = file.split(path.sep);
+    // reduce all the directory names, adding Folders to the zip for each folder created
+    // The return of the reduce is the continuation of the parent, so adding folders just works... 
+    // Do that until you have mapped all the folders, then return the zip/folder and add the file from the contents
+    pathFragments.slice(0, -1)
+      .reduce((parent, name) => parent.folder(name), zip)
+      .file(pathFragments[pathFragments.length - 1], fs.readFileSync(root + path.sep + file));
+  });
 
-    // Add files to zip object
-    fileList.forEach(function (file) {
-        // var relativePath = file.split(relativeRoot)[1] || file;
-        var content: any = fs.readFileSync(relativeRoot + slash + file);
-        zip.file(file, content);
-    });
-
-    return zip;
+  return zip;
 }
 
 /**
@@ -138,66 +147,56 @@ function zipFiles(fileList: string[]) {
  * @return {String[]} - Array of paths relative to given root
  */
 function getFileList(root) {
-    const slash: string = vscode.window.forceCode.pathSeparator;
-    // Throw if not a directory
-    if (!fs.statSync(root).isDirectory()) {
-        throw new Error('');
-    }
+  // Throw if not a directory
+  if (!fs.statSync(root).isDirectory()) {
+    throw new Error('');
+  }
 
-    // We trap the relative root in a closure then
-    // Perform the recursive file search
-    return (function innerGetFileList(localPath) {
-        var fileslist: any[] = []; // List of files
-        var files: any = fs.readdirSync(localPath); // Files in current'sfdc' directory
-        var ignoreFiles: {} = vscode.workspace.getConfiguration('force')['filesExclude'] || {
-            '.gitignore': true,
-            '.DS_Store': true,
-            '.org_metadata': true,
-            '.log': true,
-            'node_modules/**': true,
-            'bower_modules/**': true,
-        };
-        var _ignoreFiles: any[] = Object.keys(ignoreFiles).map(key => {
-            return { key: key, value: ignoreFiles[key] };
-        }).filter(setting => setting.value === true)
-            .map(setting => root + slash + setting.key);
+  // We trap the relative root in a closure then
+  // Perform the recursive file search
+  return (function innerGetFileList(localPath) {
+    var fileslist: any[] = []; // List of files
+    var files: any = fs.readdirSync(localPath); // Files in current'sfdc' directory
+    var ignoreFiles: {} = vscode.workspace.getConfiguration('force')['filesExclude'] || {
+      '.gitignore': true,
+      '.DS_Store': true,
+      '.org_metadata': true,
+      '.log': true,
+      'node_modules/**': true,
+      'bower_modules/**': true,
+    };
+    var _ignoreFiles: any[] = Object.keys(ignoreFiles).map(key => {
+      return { key: key, value: ignoreFiles[key] };
+    }).filter(setting => setting.value === true)
+      .map(setting => root + path.sep + setting.key);
 
-        files.forEach(function (file) {
-            var pathname: string = localPath + slash + file;
-            var stat: any = fs.lstatSync(pathname);
+    files.forEach(function (file) {
+      var pathname: string = localPath + path.sep + file;
+      var stat: any = fs.lstatSync(pathname);
 
-            // If file is a directory, recursively add it's children
-            if (stat.isDirectory()) {
-                fileslist = fileslist.concat(innerGetFileList(pathname));
-                // Otherwise, add the file to the file list
-                // } else if (!_ignoreFiles.some(p => isMatch(p, file))) {
-            } else if (!globule.isMatch(_ignoreFiles, pathname, { matchBase: true, dot: true })) {
-                fileslist.push(pathname.replace(root + slash, ''));
-            }
-        });
-        return fileslist;
-    } (root));
+      // If file is a directory, recursively add it's children
+      if (stat.isDirectory()) {
+        fileslist = fileslist.concat(innerGetFileList(pathname));
+      } else if (!globule.isMatch(_ignoreFiles, pathname, { matchBase: true, dot: true })) {
+        fileslist.push(pathname.replace(root + path.sep, ''));
+      }
+    });
+    return fileslist;
+  } (root));
 }
 
-// function isMatch(path, file) {
-//     var regex: RegExp = new RegExp(file + '$');
-//     return path.match(regex);
-// }
 /**
  * @func bundle
  * The zip file is written to the static resource directory
  * @param none
  * @return undefined
  */
-function bundle(zip) {
-    const slash: string = vscode.window.forceCode.pathSeparator;
-    // Here is replaceSrc possiblity
-    var finalPath: string = vscode.workspace.rootPath + slash + vscode.window.forceCode.config.src + slash + 'staticresources' + slash + packageName + '.resource';
-    vscode.window.forceCode.statusBarItem.text = `ForceCode: Bundling Resource $(beaker)`;
-    zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(function (buffer) {
-        fs.outputFile(finalPath, buffer);
-    });
-    return zip;
+function bundle(zip, packageName) {
+  // Here is replaceSrc possiblity
+  var finalPath: string = `${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}${path.sep}staticresources${path.sep}${packageName}.resource`;
+  return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(function (buffer) {
+    return fs.outputFile(finalPath, buffer);
+  });
 }
 
 /**
@@ -206,13 +205,11 @@ function bundle(zip) {
  * @param none
  * @return undefined
  */
-function deploy(zip) {
-    vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying $(rocket)`;
-    // Create the base64 data to send to Salesforce 
-    return zip.generateAsync({ type: 'base64', compression: 'DEFLATE' }).then(function (content) {
-        var metadata: any = makeResourceMetadata(packageName, content);
-        return vscode.window.forceCode.conn.metadata.upsert('StaticResource', metadata);
-    });
+function deploy(zip, packageName) {
+  vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying $(rocket)`;
+  // Create the base64 data to send to Salesforce 
+  return zip.generateAsync({ type: 'base64', compression: 'DEFLATE' })
+    .then(content => vscode.window.forceCode.conn.metadata.upsert('StaticResource', makeResourceMetadata(packageName, content)));
 }
 
 /**
@@ -223,25 +220,32 @@ function deploy(zip) {
  * @return {Metadata[]} - Array with one metadata object
  */
 function makeResourceMetadata(bundleName, content) {
-    return [
-        {
-            fullName: bundleName,
-            description: 'spa data files',
-            content: content,
-            contentType: 'application/zip',
-            cacheControl: 'Private',
-        },
-    ];
+  return [
+    {
+      fullName: bundleName,
+      description: 'spa data files',
+      content: content,
+      contentType: 'application/zip',
+      cacheControl: 'Private',
+    },
+  ];
 }
 
-function onComplete(results) {
-    vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploy Success $(check)`;
-    if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
-        require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
-    }
-    console.log('results are: ', results);
-    console.log('success: ' + results.success);
-    console.log('created: ' + results.created);
-    console.log('fullName: ' + results.fullName);
-    return results;
+function deployComplete(results) {
+  vscode.window.forceCode.statusBarItem.text = `ForceCode: Deployed ${results.fullName} $(check)`;
+  if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
+    require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
+  }
+  return results;
+}
+
+function deployAllComplete(results) {
+  vscode.window.forceCode.statusBarItem.text = `ForceCode: Deployed ${results.length} Resources $(check)`;
+  if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
+    require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
+  }
+  var talliedResults: {} = results.reduce(function (prev, curr, idx, arr) {
+    return Object.assign(prev, curr);
+  }, {});
+  return talliedResults;
 }

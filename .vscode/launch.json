@@ -38,7 +38,7 @@
       "cwd": "${workspaceRoot}",
       "runtimeExecutable": null,
       "args": [
-        "test/foo.spec.js",
+        "test/open.spec.js",
         "--colors"
       ],
       "env": {}
