@@ -78,7 +78,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                         uncoveredLines = coverage.numLocationsNotCovered,
                         coveredLines = linesOfCode - uncoveredLines,
                         percentageCovered = Math.round((coveredLines / linesOfCode) * 100),
-                        coverageMessage:  string = `${percentageCovered}% ${coverage.name} ${coveredLines} of ${linesOfCode} covered `;
+                        coverageMessage:  string = `${percentageCovered}% ${coverage.name} ${coveredLines} of ${linesOfCode} covered \n`;
                     
                     if(coverage.numLocationsNotCovered > 0){
                         coverage.locationsNotCovered.forEach(function(uncovered){
