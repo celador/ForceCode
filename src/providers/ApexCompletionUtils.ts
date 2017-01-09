@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 export interface IApexCompletionUtils {
+    line: string;
     slug: string;
     segments: string[];
     shouldSuggestConstructor: (line: string) => boolean;
@@ -14,24 +15,25 @@ export interface IApexCompletionUtils {
     shouldSuggestVariableMember: () => boolean;
 }
 export default class ApexCompletionUtils implements IApexCompletionUtils {
+    public line: string = '';
     public slug: string = '';
     public segments: string[] = [];
     private FULLY_QUALIFIED_NAME_SEPARATOR_CHAR: string = '.';
     constructor(document: vscode.TextDocument, end: vscode.Position) {
-        var line: string = this.getEntireLine(document, end);
-        this.slug = this.getSlug(line.toLowerCase());
+        this.line = this.getEntireLine(document, end);
+        this.slug = this.getSlug(this.line.toLowerCase());
         this.segments = this.slug.split(this.FULLY_QUALIFIED_NAME_SEPARATOR_CHAR);
     }
 
 
 
-    public shouldSuggestConstructor(line: string): boolean {
+    public shouldSuggestConstructor(): boolean {
         // To match a Constructor, we need to make sure the "new" keyword is contained on the line
         // "new" instantiates types with a constructor, a Type must have a constructor to be able to be used with "new"
         // "new" must preceed whitespace and the cursor and part of the current line
         // There may be a token after the whitespace, in which case we follow the standard rules for expression parsing
         // The token can include alphanumberic and underscore characters, and a .
-        return line.match(/new\s+[a-z_0-9\.]*$/i).length > 0;
+        return this.line.match(/new\s+[a-z_0-9\.]*$/i).length > 0;
     }
     // SomeNamespac<cursor>
     public shouldSuggestNamespace(): boolean {
