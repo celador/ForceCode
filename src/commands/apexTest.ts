@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
+import * as path from 'path';
+import * as fs from 'fs-extra';
 import * as error from './../util/error';
 import { configuration } from './../services';
 
@@ -24,6 +26,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
         .then(svc => getClassInfo(svc))
         .then(id => runCurrentTests(id))
         .then(showResult)
+        .then(showLog)
         .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
 
     function getClassInfo(svc) {
@@ -32,7 +35,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     }
 
     function getTestMethods(info): string[] {
-        if(info.SymbolTable){
+        if (info.SymbolTable) {
             return info.SymbolTable.methods.filter(function (method) {
                 return method.annotations.some(function (annotation) {
                     return annotation.name === 'IsTest';
@@ -40,7 +43,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
             }).map(function (method) {
                 return method.name;
             });
-        }else{
+        } else {
             error.outputError({ message: 'no symbol table' }, vscode.window.forceCode.outputChannel);
         }
     }
@@ -75,6 +78,49 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
             return res;
         });
     }
+    // TODO: Refactor this and the getLog.ts to use a common function
+    // This is Copypasta
+    function showLog(res) {
+        var url: string = `${vscode.window.forceCode.conn._baseUrl()}/sobjects/ApexLog/${res.apexLogId}/Body`;
+        var tempPath: string = `${vscode.workspace.rootPath}${path.sep}.logs${path.sep}${res.apexLogId}.log`;
+        if (vscode.window.forceCode.config.showTestLog) {
+            vscode.window.forceCode.conn.request(url).then(logBody => {
+                fs.stat(tempPath, function (err, stats) {
+                    if (err) {
+                        return open(vscode.Uri.parse(`untitled:${tempPath}`)).then(show).then(replaceAll);
+                    } else {
+                        return open(vscode.Uri.parse(`file:${tempPath}`)).then(show).then(replaceAll);
+                    }
+
+                    function open(uri) {
+                        return vscode.workspace.openTextDocument(uri);
+                    }
+                    function show(_document) {
+                        return vscode.window.showTextDocument(_document, vscode.window.visibleTextEditors.length - 1);
+                    }
+                    function replaceAll(editor) {
+                        var start: vscode.Position = new vscode.Position(0, 0);
+                        var lineCount: number = editor.document.lineCount - 1;
+                        var lastCharNumber: number = editor.document.lineAt(lineCount).text.length;
+                        var end: vscode.Position = new vscode.Position(lineCount, lastCharNumber);
+                        var range: vscode.Range = new vscode.Range(start, end);
+                        editor.edit(builder => builder.replace(range, debugOnly()));
+                    }
+                    function debugOnly() {
+                        if (vscode.window.forceCode.config.debugOnly) {
+                            return logBody.split('\n').filter(l => l.match(new RegExp(vscode.window.forceCode.config.debugFilter || 'USER_DEBUG'))).join('\n');
+                        } else {
+                            return logBody;
+                        }
+                    }
+                });
+            });
+        }
+        return res;
+    }
+
+
+
 
     // function onError(err): any {
     //     error.outputError(err, vscode.window.forceCode.outputChannel);

@@ -23,6 +23,7 @@ export interface Config {
     pollTimeout?: number;
     prefix?: string;
     proxyUrl?: string;
+    showTestLog? : boolean;
     src?: string;
     url?: string;
     username?: string;
