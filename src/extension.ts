@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ForceService, ForceCodeContentProvider } from './services';
 import ApexCompletionProvider from './providers/ApexCompletion';
+import { editorDecorator, documentDecorator } from './decorators/testCoverageDecorator';
 import * as commands from './commands';
 import * as parsers from './parsers';
 
@@ -56,7 +57,12 @@ export function activate(context: vscode.ExtensionContext): any {
         }
     }));
 
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider('apex', new ApexCompletionProvider(), '.`', '@' ));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider('apex', new ApexCompletionProvider(), '.', '@'));
+
+    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorDecorator));
+
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(documentDecorator));
+
 
     // // Peek Provider Setup
     // const peekProvider: any = new commands.PeekFileDefinitionProvider();

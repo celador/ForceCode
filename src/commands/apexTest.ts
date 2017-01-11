@@ -58,6 +58,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
 
     function showResult(res) {
         return configuration().then(config => {
+
             vscode.window.forceCode.outputChannel.clear();
             if (res.failures.length > 0) {
                 vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   ==========================================================');
@@ -75,32 +76,32 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                 vscode.window.forceCode.outputChannel.appendLine(successMessage);
             });
 
-            if (res.codeCoverage.length > 0){
-                res.codeCoverage.forEach(function(coverage ){
+            if (res.codeCoverage.length > 0) {
+                res.codeCoverage.forEach(function (coverage) {
                     var linesOfCode = coverage.numLocations,
                         uncoveredLines = coverage.numLocationsNotCovered,
                         coveredLines = linesOfCode - uncoveredLines,
                         percentageCovered = Math.round((coveredLines / linesOfCode) * 100),
-                        coverageMessage:  string = `${percentageCovered}% ${coverage.name} ${coveredLines} of ${linesOfCode} covered \n`;
-                    
-                    if(coverage.numLocationsNotCovered > 0){
-                        coverage.locationsNotCovered.forEach(function(uncovered){
+                        coverageMessage: string = `${percentageCovered}% ${coverage.name} ${coveredLines} of ${linesOfCode} covered \n`;
+
+                    if (coverage.numLocationsNotCovered > 0) {
+                        coverage.locationsNotCovered.forEach(function (uncovered) {
                             coverageMessage = coverageMessage + `line ${uncovered.line} uncovered\n`;
                         });
                     }
-                    
+
                     vscode.window.forceCode.outputChannel.appendLine(coverageMessage);
-                })
-                
+                });
+
             }
 
-            if (res.codeCoverageWarnings.length > 0){
-                res.codeCoverageWarnings.forEach(function(warning ){
-                    var warningMessage:  string = `CODE COVERAGE WARNING: ` + warning.message ;
+            if (res.codeCoverageWarnings.length > 0) {
+                res.codeCoverageWarnings.forEach(function (warning) {
+                    var warningMessage: string = `CODE COVERAGE WARNING: ` + warning.message;
                     vscode.window.forceCode.outputChannel.appendLine(warningMessage);
                 })
-                
-            }else{
+
+            } else {
                 vscode.window.forceCode.outputChannel.appendLine('Aggregate coverage for classes in this test run is over 75%');
             }
 
