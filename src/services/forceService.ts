@@ -13,6 +13,8 @@ export default class ForceService implements forceCode.IForceService {
     public containerId: string;
     public containerMembers: any[];
     public declarations: forceCode.IDeclarations;
+    public codeCoverage: {} = {};
+    public codeCoverageWarnings: forceCode.ICodeCoverageWarning[];
     public containerAsyncRequestId: string;
     public userInfo: any;
     public username: string;

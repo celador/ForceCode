@@ -30,6 +30,34 @@ export interface Config {
     // workspaceRoot?: string;
 }
 
+interface ILocationsNotCovered {
+    column: Number;
+    line: Number;
+    numExecutions: Number;
+    time: Number;
+}
+
+interface ICodeCoverage {
+    dmlInfo: any[];
+    id: string;
+    locationsNotCovered: ILocationsNotCovered[];
+    methodInfo: any[];
+    name: string;
+    namespace: string;
+    numLocations: Number;
+    numLocationsNotCovered: Number;
+    soqlInfo: any[];
+    soslInfo: any[];
+    type: string;
+}
+
+interface ICodeCoverageWarning {
+    id: string;
+    message: string;
+    name: string;
+    namespace: string;
+}
+
 interface IDeclarations {
     public?: any[],
     private?: any[],
@@ -41,6 +69,8 @@ export interface IForceService {
     config?: Config;
     completions?: vscode.CompletionItem[];
     declarations?: IDeclarations;
+    codeCoverage?: {};
+    codeCoverageWarnings?: ICodeCoverageWarning[];
     // symbolTable?: any;
     containerId?: string;
     queueCompile?: boolean;

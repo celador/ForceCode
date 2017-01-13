@@ -75,34 +75,33 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                 var successMessage: string = 'SUCCESS: ' + success.name + ':' + success.methodName + ' - in ' + success.time + 'ms';
                 vscode.window.forceCode.outputChannel.appendLine(successMessage);
             });
-
+            // Add Line Coverage information
             if (res.codeCoverage.length > 0) {
                 res.codeCoverage.forEach(function (coverage) {
-                    var linesOfCode = coverage.numLocations,
-                        uncoveredLines = coverage.numLocationsNotCovered,
-                        coveredLines = linesOfCode - uncoveredLines,
-                        percentageCovered = Math.round((coveredLines / linesOfCode) * 100),
-                        coverageMessage: string = `${percentageCovered}% ${coverage.name} ${coveredLines} of ${linesOfCode} covered \n`;
-
-                    if (coverage.numLocationsNotCovered > 0) {
-                        coverage.locationsNotCovered.forEach(function (uncovered) {
-                            coverageMessage = coverageMessage + `line ${uncovered.line} uncovered\n`;
-                        });
-                    }
-
-                    vscode.window.forceCode.outputChannel.appendLine(coverageMessage);
+                    vscode.window.forceCode.codeCoverage[coverage.id] = coverage;
                 });
-
             }
 
+            // Add Code Coverage Warnings, maybe as actual Validation Warnings 
             if (res.codeCoverageWarnings.length > 0) {
                 res.codeCoverageWarnings.forEach(function (warning) {
-                    var warningMessage: string = `CODE COVERAGE WARNING: ` + warning.message;
-                    vscode.window.forceCode.outputChannel.appendLine(warningMessage);
-                })
+                    let docWarn: vscode.TextDocument = vscode.workspace.textDocuments.reduce((prev, curr) => {
+                        if (parsers.getFileName(curr).toLowerCase() === 'vscode.window.forceCode.codeCoverage[warning.id].name') {
+                            return curr;
+                        } else if (prev) {
+                            return prev;
+                        }
+                    });
 
-            } else {
-                vscode.window.forceCode.outputChannel.appendLine('Aggregate coverage for classes in this test run is over 75%');
+                    let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(docWarn.fileName);
+                    let diagnostics: vscode.Diagnostic[] = [];
+                    let failureRange: vscode.Range = docWarn.lineAt(0).range;
+                    let warningMessage: string = `CODE COVERAGE WARNING: ` + warning.message;
+                    diagnostics.push(new vscode.Diagnostic(failureRange, warningMessage, 1));
+                    diagnosticCollection.set(docWarn.uri, diagnostics);
+
+                    // vscode.window.forceCode.outputChannel.appendLine(warningMessage);
+                });
             }
 
             vscode.window.forceCode.outputChannel.show();

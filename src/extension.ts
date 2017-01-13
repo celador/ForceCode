@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ForceService, ForceCodeContentProvider } from './services';
 import ApexCompletionProvider from './providers/ApexCompletion';
-import { editorDecorator, documentDecorator } from './decorators/testCoverageDecorator';
+import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator } from './decorators/testCoverageDecorator';
 import * as commands from './commands';
 import * as parsers from './parsers';
 
@@ -46,6 +46,7 @@ export function activate(context: vscode.ExtensionContext): any {
         commands.diff(vscode.window.activeTextEditor.document, context);
     }));
 
+    // AutoCompile Feature
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         const toolingType: string = parsers.getToolingType(textDocument);
         if (toolingType && vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
@@ -57,11 +58,12 @@ export function activate(context: vscode.ExtensionContext): any {
         }
     }));
 
+    // Code Completion Provider
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider('apex', new ApexCompletionProvider(), '.', '@'));
 
-    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorDecorator));
-
-    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(documentDecorator));
+    // Text Coverage Decorators
+    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator));
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(documentUpdateApexCoverageDecorator));
 
 
     // // Peek Provider Setup
