@@ -1,9 +1,12 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as path from 'path';
-import * as fs from 'fs-extra';
+import * as forceCode from './../forceCode';
+// import jsforce = require('jsforce');
+// import Workspace from './../services/workspace';
 import * as error from './../util/error';
 import { configuration } from './../services';
+const fs: any = require('fs-extra');
 
 export default function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
@@ -57,10 +60,9 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     // =======================================================================================================================================
 
     function showResult(res) {
-        return configuration().then(config => {
-
+        return configuration().then(results => {
             vscode.window.forceCode.outputChannel.clear();
-            if (res.failures.length > 0) {
+            if (res.failures.length) {
                 vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   ==========================================================');
                 vscode.window.forceCode.statusBarItem.text = 'ForceCode: Some Tests Failed $(thumbsdown)';
             } else {
@@ -70,41 +72,47 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                 var errorMessage: string = 'FAILED: ' + failure.stackTrace + '\n' + failure.message;
                 vscode.window.forceCode.outputChannel.appendLine(errorMessage);
             });
-            if (res.failures.length > 0) { vscode.window.forceCode.outputChannel.appendLine('======================================================================================================================================='); }
+            if (res.failures.length) { vscode.window.forceCode.outputChannel.appendLine('======================================================================================================================================='); }
             res.successes.forEach(function (success) {
                 var successMessage: string = 'SUCCESS: ' + success.name + ':' + success.methodName + ' - in ' + success.time + 'ms';
                 vscode.window.forceCode.outputChannel.appendLine(successMessage);
             });
             // Add Line Coverage information
-            if (res.codeCoverage.length > 0) {
+            if (res.codeCoverage.length) {
                 res.codeCoverage.forEach(function (coverage) {
                     vscode.window.forceCode.codeCoverage[coverage.id] = coverage;
                 });
             }
 
             // Add Code Coverage Warnings, maybe as actual Validation Warnings 
-            if (res.codeCoverageWarnings.length > 0) {
+            if (res.codeCoverageWarnings.length && vscode.window.forceCode.workspaceMembers.length) {
                 res.codeCoverageWarnings.forEach(function (warning) {
-                    let docWarn: vscode.TextDocument = vscode.workspace.textDocuments.reduce((prev, curr) => {
-                        if (parsers.getFileName(curr).toLowerCase() === 'vscode.window.forceCode.codeCoverage[warning.id].name') {
+
+                    let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers.reduce((prev, curr) => {
+                        let coverage: any = vscode.window.forceCode.codeCoverage[warning.id];
+                        if (curr.name === coverage.name && curr.memberInfo && curr.memberInfo.type && curr.memberInfo.type.indexOf(coverage.type) >= 0) {
                             return curr;
                         } else if (prev) {
                             return prev;
                         }
-                    });
+                    }, undefined);
 
-                    let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(docWarn.fileName);
-                    let diagnostics: vscode.Diagnostic[] = [];
-                    let failureRange: vscode.Range = docWarn.lineAt(0).range;
-                    let warningMessage: string = `CODE COVERAGE WARNING: ` + warning.message;
-                    diagnostics.push(new vscode.Diagnostic(failureRange, warningMessage, 1));
-                    diagnosticCollection.set(docWarn.uri, diagnostics);
+                    if (member) {
+                        let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(member.memberInfo.type);
+                        let diagnostics: vscode.Diagnostic[] = [];
+                        let warningMessage: string = warning.message;
+                        let docUri: vscode.Uri = vscode.Uri.file(member.path);
+                        let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(0, 0));
+                        diagnostics.push(new vscode.Diagnostic(docLocation.range, warningMessage, 1));
+                        diagnosticCollection.set(docUri, diagnostics);
+                    } else if (warning.message) {
+                        vscode.window.forceCode.outputChannel.appendLine(warning.message);
+                    }
 
-                    // vscode.window.forceCode.outputChannel.appendLine(warningMessage);
                 });
             }
 
-            vscode.window.forceCode.outputChannel.show();
+            // vscode.window.forceCode.outputChannel.show();
             return res;
         });
     }

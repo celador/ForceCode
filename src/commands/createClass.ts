@@ -9,7 +9,7 @@ export default function createClass(context: vscode.ExtensionContext) {
     var classesPath: string;
     // Here is replaceSrc possiblity
     return configuration().then(config => {
-        classesPath = `${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}${path.sep}classes`;
+        classesPath = `${vscode.window.forceCode.workspaceRoot}${path.sep}classes`;
         if (fs.statSync(classesPath).isDirectory()) {
             return userClassSelection().then(selectedOption => {
                 if (selectedOption) {

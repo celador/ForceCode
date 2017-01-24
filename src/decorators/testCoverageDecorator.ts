@@ -39,7 +39,7 @@ export function documentUpdateApexCoverageDecorator(event) {
     }
 };
 
-function triggerUpdateDecorations() {
+export function triggerUpdateDecorations() {
     // Wait half a second before updating the document
     if (timeout) {
         clearTimeout(timeout);
@@ -52,16 +52,19 @@ function updateDecorations() {
         return;
     }
     const uncoveredLines: vscode.DecorationOptions[] = [];
-    // const coveredLines: vscode.DecorationOptions[] = [];
-    var classIds: string[] = Object.keys(vscode.window.forceCode.codeCoverage);
-    classIds.forEach(id => {
+
+    Object.keys(vscode.window.forceCode.codeCoverage).forEach(id => {
         let coverage: forceCode.ICodeCoverage = vscode.window.forceCode.codeCoverage[id];
-        if (coverage.namespace === vscode.window.forceCode.config.prefix && coverage.name === parsers.getFileName(activeEditor.document).toLowerCase()) {
-            coverage.locationsNotCovered.forEach(notCovered => {
-                let lineNumber: Number = notCovered.line;
-                let decorationRange: vscode.DecorationOptions = { range: activeEditor.document.lineAt(Number(lineNumber)).range, hoverMessage: 'Line ' + lineNumber + ' not covered by a test' };
-                uncoveredLines.push(decorationRange);
-            });
+        if (coverage.namespace === vscode.window.forceCode.config.prefix) {
+            if (coverage.name.toLowerCase() === parsers.getFileName(activeEditor.document).toLowerCase()) {
+                if (coverage.type === parsers.getCoverageType(activeEditor.document)) {
+                    coverage.locationsNotCovered.forEach(notCovered => {
+                        let lineNumber: Number = notCovered.line.valueOf() + 1;
+                        let decorationRange: vscode.DecorationOptions = { range: activeEditor.document.lineAt(Number(lineNumber)).range, hoverMessage: 'Line ' + lineNumber + ' not covered by a test' };
+                        uncoveredLines.push(decorationRange);
+                    });
+                }
+            }
         }
     });
     activeEditor.setDecorations(uncoveredDecorationType, uncoveredLines);

@@ -37,6 +37,16 @@ interface ILocationsNotCovered {
     time: Number;
 }
 
+interface IWorkspaceMember {
+    name: string;
+    path: string;
+    memberInfo: jsforce.IMetadataFileProperties;
+}
+
+export interface IWorkspaceService {
+    getWorkspaceMembers: () => Promise<IWorkspaceMember[]>;
+}
+
 interface ICodeCoverage {
     dmlInfo: any[];
     id: string;
@@ -64,10 +74,33 @@ interface IDeclarations {
     managed?: any[]
 }
 
+interface IContainerMember {
+    name: string;
+    id: string;
+}
+
+interface IMetadataObject {
+    directoryName: string;
+    inFolder: boolean;
+    metaFile: boolean;
+    suffix: string;
+    xmlName: string;
+    childXmlNames?: string[];
+}
+
+// interface IMetadataDescribe {
+//     metadataObjects: IMetadataObject[];
+//     organizationNamespace: string;
+//     partialSaveAllowed: boolean;
+//     testRequired: boolean;
+// }
+
 export interface IForceService {
     operatingSystem?: string;
     config?: Config;
+    workspaceRoot: string;
     completions?: vscode.CompletionItem[];
+    metadata: jsforce.IMetadataFileProperties[];
     declarations?: IDeclarations;
     codeCoverage?: {};
     codeCoverageWarnings?: ICodeCoverageWarning[];
@@ -75,7 +108,8 @@ export interface IForceService {
     containerId?: string;
     queueCompile?: boolean;
     isCompiling?: boolean;
-    containerMembers: { name: string, id: string }[];
+    workspaceMembers: IWorkspaceMember[];
+    containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
     conn?: jsforce.Connection;
     userInfo?: jsforce.UserInfo;
@@ -85,6 +119,7 @@ export interface IForceService {
     connect(context: vscode.ExtensionContext): Promise<IForceService>;
     newContainer(force: Boolean): Promise<IForceService>;
     clearLog(): void;
+    refreshApexMetadata(): Promise<any>;
 }
 
 export interface ForceCodeError {

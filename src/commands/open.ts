@@ -102,7 +102,7 @@ export default function open(context: vscode.ExtensionContext) {
                 let extension: string = getExtension(defType);
                 let actualFileName: string = extension === 'js' ? bundleName + defType : bundleName;
                 // Here is replaceSrc possiblity
-                filename = `${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}${path.sep}aura${path.sep}${bundleName}${path.sep}${actualFileName}.${extension}`;
+                filename = `${vscode.window.forceCode.workspaceRoot}${path.sep}aura${path.sep}${bundleName}${path.sep}${actualFileName}.${extension}`;
                 let body: string = res.Source;
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {
@@ -115,7 +115,7 @@ export default function open(context: vscode.ExtensionContext) {
                 });
             } else {
                 // Here is replaceSrc possiblity
-                filename = `${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}${path.sep}${getFolder(toolingType)}${path.sep}${res.Name || res.FullName}.${getExtension(toolingType)}`;
+                filename = `${vscode.window.forceCode.workspaceRoot}${path.sep}${getFolder(toolingType)}${path.sep}${res.Name || res.FullName}.${getExtension(toolingType)}`;
                 let body: string = res.Body || res.Markup;
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {

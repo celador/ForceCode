@@ -19,7 +19,7 @@ export function getFileName(document: vscode.TextDocument) {
 export function getWholeFileName(document: vscode.TextDocument) {
     var fileNameArray: string[] = document.fileName.split(path.sep);
     // give me the last one, giving me just the fileName
-    var fileName = fileNameArray[fileNameArray.length - 1];
+    var fileName: string = fileNameArray[fileNameArray.length - 1];
     return fileName;
 }
 function getNameFromClassBody(document: vscode.TextDocument): string {

@@ -1,9 +1,12 @@
 import * as vscode from 'vscode';
+import Workspace from './workspace';
 import * as forceCode from './../forceCode';
 import { constants, operatingSystem } from './../services';
 import { configuration } from './../services';
+import * as error from './../util/error';
 import { getPublicDeclarations } from './../providers/ApexCompletion';
 import * as commands from './../commands';
+import jsf = require('jsforce');
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
@@ -11,7 +14,8 @@ export default class ForceService implements forceCode.IForceService {
     public config: forceCode.Config;
     public conn: any;
     public containerId: string;
-    public containerMembers: any[];
+    public containerMembers: forceCode.IContainerMember[];
+    public metadata: jsf.IMetadataFileProperties[];
     public declarations: forceCode.IDeclarations;
     public codeCoverage: {} = {};
     public codeCoverageWarnings: forceCode.ICodeCoverageWarning[];
@@ -21,6 +25,8 @@ export default class ForceService implements forceCode.IForceService {
     public statusBarItem: vscode.StatusBarItem;
     public outputChannel: vscode.OutputChannel;
     public operatingSystem: string;
+    public workspaceRoot: string;
+    public workspaceMembers: forceCode.IWorkspaceMember[];
 
     constructor() {
         // Set the ForceCode configuration
@@ -32,6 +38,7 @@ export default class ForceService implements forceCode.IForceService {
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         this.statusBarItem.text = 'ForceCode: Active';
         this.containerMembers = [];
+        this.metadata = [];
         this.declarations = {};
         configuration(this).then(config => {
             this.username = config.username || '';
@@ -67,6 +74,26 @@ export default class ForceService implements forceCode.IForceService {
         }
     }
 
+    public refreshApexMetadata() {
+        return vscode.window.forceCode.conn.metadata.describe().then(describe => {
+            var apexTypes: string[] = describe.metadataObjects
+                .filter(o => o.xmlName.startsWith('ApexClass') || o.xmlName.startsWith('ApexTrigger'))
+                .map(o => {
+                    return {
+                        type: o.xmlName,
+                        folder: o.directoryName,
+                    };
+                });
+
+            return vscode.window.forceCode.conn.metadata.list(apexTypes).then(res => {
+                vscode.window.forceCode.metadata = res;
+                return res;
+            }).then(new Workspace().getWorkspaceMembers).then(members => {
+                this.workspaceMembers = members;
+            });
+        });
+    }
+
     // TODO: Add keychain access so we don't have to use a username or password'
     // var keychain = require('keytar')
     private setupConfig(): Promise<forceCode.IForceService> {
@@ -89,7 +116,7 @@ export default class ForceService implements forceCode.IForceService {
         // Lazy-load the connection
         if (self.userInfo === undefined || self.config.username !== self.username || !self.config.password) {
             var connectionOptions: any = {
-                loginUrl: self.config.url || 'https://login.salesforce.com',
+                loginUrl: self.config.url || 'https://login.salesforce.com'
             };
             if (self.config.proxyUrl) {
                 connectionOptions.proxyUrl = self.config.proxyUrl;
@@ -104,11 +131,18 @@ export default class ForceService implements forceCode.IForceService {
             return self.conn
                 .login(config.username, config.password)
                 .then(connectionSuccess)
+                .catch(connectionError)
                 .then(getNamespacePrefix)
+                .then(refreshApexMetadata)
                 .then(getPublicDeclarations)
                 .then(getPrivateDeclarations)
                 .then(getManagedDeclarations)
-                .catch(connectionError);
+                .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+
+            function refreshApexMetadata(svc) {
+                vscode.window.forceCode.refreshApexMetadata();
+                return svc;
+            }
 
             function getPrivateDeclarations(svc) {
                 var query: string = 'SELECT Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix = \'' + self.config.prefix + '\'';

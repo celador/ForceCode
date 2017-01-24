@@ -26,7 +26,7 @@ declare module 'jsforce/index' {
             success: string; // Flag if the code is executed successfully
         }
         interface SObject {
-            find(config: {});
+            find(config?: {});
             create(records: Array<any>, options?: {}): Promise<Array<RecordResult>>;
             create(records: Array<any>, options?: {}, callback?: () => {}): Array<RecordResult>;
             create(record: any): Promise<RecordResult>;
@@ -49,6 +49,10 @@ declare module 'jsforce/index' {
             runUnitTests(classId: string, testMethods: string[]): Promise<any>;
             query(query: string): Promise<QueryResult>;
             queryMore(locator: string): Promise<QueryResult>;
+            describeGlobal(): Promise<ToolingDescribeResult>
+        }
+        interface ToolingDescribeResult {
+            
         }
         interface CompletionResult {
             publicDeclarations: {}
@@ -68,12 +72,27 @@ declare module 'jsforce/index' {
             stream(): NodeJS.ReadableStream;
             then(): Promise<any>;
         }
+        interface IMetadataFileProperties {
+            createdById: string;
+            createdByName: string;
+            createdDate: string;
+            fileName: string;
+            fullName: string;
+            id: string;
+            lastModifiedById: string;
+            lastModifiedByName: string;
+            lastModifiedDate: string;
+            manageableState: string;
+            namespacePrefix: string;
+            type: string;
+        }
         interface Metadata {
             pollTimeout: number;
             pollInterval: number;
             describe(): Promise<any>;
             checkDeployStatus(processId: string, {}): Promise<any>;
             checkRetrieveStatus(id: string): Promise<any>;
+            list(queries: string[], version?: string) : Promise<IMetadataFileProperties[]>
             retrieve({}): { stream(): NodeJS.ReadableStream };
             retrieve({}): Promise<RetrieveResult>;
             deploy({}, {}): Promise<DeployResult>;
