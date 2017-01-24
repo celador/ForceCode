@@ -4,6 +4,7 @@ import ApexCompletionProvider from './providers/ApexCompletion';
 import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator } from './decorators/testCoverageDecorator';
 import * as commands from './commands';
 import * as parsers from './parsers';
+import { updateDecorations } from './decorators/testCoverageDecorator';
 
 export function activate(context: vscode.ExtensionContext): any {
     vscode.window.forceCode = new ForceService();
@@ -48,6 +49,7 @@ export function activate(context: vscode.ExtensionContext): any {
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.toggleCoverage', () => {
         vscode.window.forceCode.config.showTestCoverage = !vscode.window.forceCode.config.showTestCoverage;
+        updateDecorations();
     }));
 
     // AutoCompile Feature

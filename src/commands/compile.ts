@@ -37,7 +37,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     var Id: string = undefined;
     /* tslint:enable */
     // Start doing stuff
-    vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''}` + spinner();
+    vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''}` + spinner();
     if (toolingType === undefined) {
         return Promise
             .reject({ message: 'Unknown Tooling Type.  Ensure the body is well formed' })
@@ -69,7 +69,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             .catch(onError);
     } else {
         // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-        // vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''}` + spinner();
         if (vscode.window.forceCode.isCompiling) {
             vscode.window.forceCode.queueCompile = true;
             return Promise.reject({ message: 'Already compiling' });
@@ -90,7 +89,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 checkCount = 0;
                 vscode.window.forceCode.statusBarItem.color = 'red';
             }
-            vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''}` + spinner();
+            vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''}` + spinner();
         }, 50);
 
         vscode.window.forceCode.isCompiling = true;
@@ -109,7 +108,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         return type === 'PermissionSet' || type === 'CustomObject' || type === 'CustomLabels';
     }
     function createMetaData(svc) {
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Create Metadata';
+        vscode.window.forceCode.statusBarItem.text = 'Create Metadata';
         return new Promise(function (resolve, reject) {
             parseString(Source, { explicitArray: false, async: true }, function (err, result) {
                 if (err) {
@@ -125,17 +124,17 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
 
     function compileMetadata(metadata) {
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploying...';
+        vscode.window.forceCode.statusBarItem.text = 'Deploying...';
         return vscode.window.forceCode.conn.metadata.upsert(toolingType, [metadata]);
     }
 
     function reportMetadataResults(result) {
         if (result.success) {
-            vscode.window.forceCode.statusBarItem.text = 'ForceCode: Successly deployed ' + result.fullName;
+            vscode.window.forceCode.statusBarItem.text = 'Successly deployed ' + result.fullName;
             return result;
         } else {
             var error: any = result.errors[0];
-            vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + error;
+            vscode.window.forceCode.statusBarItem.text = '' + error;
             throw { message: error };
         }
     }
@@ -287,7 +286,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             } else {
                 // Tooling Object does not exist
                 // CREATE it
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: Creating ' + name;
+                vscode.window.forceCode.statusBarItem.text = 'Creating ' + name;
                 return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
                     return vscode.window.forceCode;
                 });
@@ -323,11 +322,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // =======================================================================================================================================
     // =======================================================================================================================================
     function getCompileStatus(): Promise<any> {
-        vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''}` + spinner();
+        vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''}` + spinner();
         return nextStatus();
         function nextStatus() {
             checkCount += 1;
-            // vscode.window.forceCode.statusBarItem.text = 'ForceCode: Get Status...' + checkCount;
             // Set a timeout to auto fail the compile after 30 seconds
             return getStatus().then(res => {
                 if (isFinished(res)) {
@@ -388,19 +386,19 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             res.errors.forEach(err => {
                 console.error(err);
             });
-            vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`;
+            vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(alert)`;
         } else if (res.State === 'Error') {
-            vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`;
+            vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(alert)`;
         }
         // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
         diagnosticCollection.set(document.uri, diagnostics);
         if (diagnostics.length > 0) {
             // FAILURE !!! 
-            vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''} $(alert)`;
+            vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(alert)`;
             return false;
         } else {
             // SUCCESS !!! 
-            vscode.window.forceCode.statusBarItem.text = `ForceCode: ${name} ${DefType ? DefType : ''} $(check)`;
+            vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(check)`;
             return true;
         }
     }

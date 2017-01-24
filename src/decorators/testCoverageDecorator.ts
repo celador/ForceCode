@@ -8,7 +8,7 @@ const uncoveredDecorationType: vscode.TextEditorDecorationType = vscode.window.c
     // borderWidth: '1px',
     // borderStyle: 'dashed',
     overviewRulerColor: 'rgba(247,98,34,1)',
-    overviewRulerLane: vscode.OverviewRulerLane.Full,
+    overviewRulerLane: vscode.OverviewRulerLane.Right,
     isWholeLine: true,
     light: {
         // this color will be used in light color themes
@@ -48,7 +48,7 @@ export function triggerUpdateDecorations() {
     timeout = setTimeout(updateDecorations, 500);
 }
 
-function updateDecorations() {
+export function updateDecorations() {
     if (!activeEditor) {
         return;
     }
@@ -60,10 +60,13 @@ function updateDecorations() {
                 if (coverage.name.toLowerCase() === parsers.getFileName(activeEditor.document).toLowerCase()) {
                     if (coverage.type === parsers.getCoverageType(activeEditor.document)) {
                         coverage.locationsNotCovered.forEach(notCovered => {
-                            let lineNumber: Number = notCovered.line.valueOf() + 1;
+                            let lineNumber: number = notCovered.line.valueOf() - 1;
                             let decorationRange: vscode.DecorationOptions = { range: activeEditor.document.lineAt(Number(lineNumber)).range, hoverMessage: 'Line ' + lineNumber + ' not covered by a test' };
                             uncoveredLines.push(decorationRange);
                         });
+                        var covered: number = coverage.numLocationsNotCovered.valueOf();
+                        var total: number = coverage.numLocations.valueOf();
+                        vscode.window.forceCode.statusBarItem.text = (((total - covered) / total) * 100).toFixed(2) + '% covered';
                     }
                 }
             }
