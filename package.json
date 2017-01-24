@@ -58,6 +58,15 @@
         "command": "ForceCode.staticResource",
         "title": "Force: Bundle / Deploy Static Resource",
         "description": "Bundles a Resource Bundle into a Static Resource and optionally deploys"
+      },
+      {
+        "command": "ForceCode.toggleCoverage",
+        "title": "Force: Toggle Test Coverage",
+        "description": "Toggle the test coverage for Apex classes and triggers",
+        "icon": {
+            "light": "./images/coverage.svg",
+            "dark": "./images/coverage.svg"
+        }
       }
     ],
     "keybindings": [
@@ -223,20 +232,24 @@
       }
     ],
     "menus": {
-      "editor/title": [],
+      "editor/title": [{
+            "when": "resourceLangId == apex",
+            "command": "ForceCode.toggleCoverage",
+            "group": "navigation"
+        }],
       "explorer/context": [
         {
-          "when": "resourceLangId == 'apex'",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == 'visualforce'",
+          "when": "resourceLangId == visualforce",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == 'xml'",
+          "when": "resourceLangId == xml",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         }
