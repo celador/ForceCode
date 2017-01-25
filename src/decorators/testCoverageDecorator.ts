@@ -66,7 +66,7 @@ export function updateDecorations() {
                         });
                         var covered: number = coverage.numLocationsNotCovered.valueOf();
                         var total: number = coverage.numLocations.valueOf();
-                        vscode.window.forceCode.statusBarItem.text = (((total - covered) / total) * 100).toFixed(2) + '% covered';
+                        vscode.window.forceCode.statusBarItem.text = coverage.name + ' ' + (((total - covered) / total) * 100).toFixed(2) + '% covered';
                     }
                 }
             }

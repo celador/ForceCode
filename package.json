@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -10,7 +10,7 @@
   "engines": {
     "vscode": "^1.8.0"
   },
-  "icon": "images/salesforce_logo.png",
+  "icon": "images/new-logo.png",
   "categories": [
     "Other"
   ],
