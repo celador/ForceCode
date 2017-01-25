@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -64,8 +64,8 @@
         "title": "Force: Toggle Test Coverage",
         "description": "Toggle the test coverage for Apex classes and triggers",
         "icon": {
-            "light": "./images/coverage.svg",
-            "dark": "./images/coverage.svg"
+          "light": "./images/coverage.svg",
+          "dark": "./images/coverage.svg"
         }
       }
     ],
@@ -232,11 +232,13 @@
       }
     ],
     "menus": {
-      "editor/title": [{
-            "when": "resourceLangId == apex",
-            "command": "ForceCode.toggleCoverage",
-            "group": "navigation"
-        }],
+      "editor/title": [
+        {
+          "when": "resourceLangId == apex",
+          "command": "ForceCode.toggleCoverage",
+          "group": "navigation"
+        }
+      ],
       "explorer/context": [
         {
           "when": "resourceLangId == apex",
@@ -266,9 +268,9 @@
     "test": "node ./node_modules/vscode/bin/test",
     "tslint": "tslint -c tslint.json src/**/*.ts"
   },
-"extensionDependencies": [
-      "JohnAaronNelson.apex",
-      "JohnAaronNelson.visualforce"
+  "extensionDependencies": [
+    "JohnAaronNelson.apex",
+    "JohnAaronNelson.visualforce"
   ],
   "dependencies": {
     "archiver": "^1.2.0",
