@@ -266,6 +266,10 @@
     "test": "node ./node_modules/vscode/bin/test",
     "tslint": "tslint -c tslint.json src/**/*.ts"
   },
+"extensionDependencies": [
+      "JohnAaronNelson.apex",
+      "JohnAaronNelson.visualforce"
+  ],
   "dependencies": {
     "archiver": "^1.2.0",
     "cs-jsforce-metadata-tools": "^1.2.6",
