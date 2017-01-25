@@ -57,7 +57,7 @@ export default function open(context: vscode.ExtensionContext) {
 
     // =======================================================================================================================================
     function getFile(res: any) {
-        if (res.detail === 'AuraDefinitionBundle') {
+        if (res && res.detail === 'AuraDefinitionBundle') {
             return vscode.window.forceCode.conn.tooling.query(`SELECT Id, AuraDefinitionBundleId, AuraDefinitionBundle.DeveloperName, DefType, Format FROM AuraDefinition where AuraDefinitionBundleId = '${res.description}'`).then(function (auraDefinitionResults) {
                 if (auraDefinitionResults.records && auraDefinitionResults.records.length > 0) {
                     bundleName = auraDefinitionResults.records[0].AuraDefinitionBundle.DeveloperName;
@@ -76,7 +76,7 @@ export default function open(context: vscode.ExtensionContext) {
             return vscode.window.forceCode.conn.tooling.sobject(res.detail)
                 .find({ Id: res.description }).execute();
         } else {
-            throw 'No file selected to open';
+            throw { message: 'No file selected to open' };
         }
     }
 

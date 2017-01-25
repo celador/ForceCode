@@ -53,7 +53,7 @@ export function updateDecorations() {
         return;
     }
     const uncoveredLines: vscode.DecorationOptions[] = [];
-    if (vscode.window.forceCode.config.showTestCoverage) {
+    if (vscode.window.forceCode && vscode.window.forceCode.config && vscode.window.forceCode.config.showTestCoverage) {
         Object.keys(vscode.window.forceCode.codeCoverage).forEach(id => {
             let coverage: forceCode.ICodeCoverage = vscode.window.forceCode.codeCoverage[id];
             if (coverage.namespace === vscode.window.forceCode.config.prefix) {
