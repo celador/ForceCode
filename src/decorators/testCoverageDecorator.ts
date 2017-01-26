@@ -56,7 +56,7 @@ export function updateDecorations() {
     if (vscode.window.forceCode && vscode.window.forceCode.config && vscode.window.forceCode.config.showTestCoverage) {
         Object.keys(vscode.window.forceCode.codeCoverage).forEach(id => {
             let coverage: forceCode.ICodeCoverage = vscode.window.forceCode.codeCoverage[id];
-            if (coverage.namespace === vscode.window.forceCode.config.prefix) {
+            if ((coverage.namespace ? coverage.namespace : "") == vscode.window.forceCode.config.prefix) {
                 if (coverage.name.toLowerCase() === parsers.getFileName(activeEditor.document).toLowerCase()) {
                     if (coverage.type === parsers.getCoverageType(activeEditor.document)) {
                         coverage.locationsNotCovered.forEach(notCovered => {
