@@ -53,6 +53,7 @@ export function updateDecorations() {
         return;
     }
     const uncoveredLines: vscode.DecorationOptions[] = [];
+    var coverageChannel = vscode.window.createOutputChannel('Apex Test Coverage');
     if (vscode.window.forceCode && vscode.window.forceCode.config && vscode.window.forceCode.config.showTestCoverage) {
         Object.keys(vscode.window.forceCode.codeCoverage).forEach(id => {
             let coverage: forceCode.ICodeCoverage = vscode.window.forceCode.codeCoverage[id];
@@ -62,6 +63,7 @@ export function updateDecorations() {
                         coverage.locationsNotCovered.forEach(notCovered => {
                             let lineNumber: number = notCovered.line.valueOf() - 1;
                             let decorationRange: vscode.DecorationOptions = { range: activeEditor.document.lineAt(Number(lineNumber)).range, hoverMessage: 'Line ' + lineNumber + ' not covered by a test' };
+                            coverageChannel.appendLine(coverage.name + ' line ' + notCovered.line + ' not covered.')
                             uncoveredLines.push(decorationRange);
                         });
                         var covered: number = coverage.numLocationsNotCovered.valueOf();
