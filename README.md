@@ -128,16 +128,17 @@ Menu: \>ForceCode Menu... Run Unit Tests
 Mac: alt + cmd + t  
 Win: ctrl + shift + t  
 Run the tests in the currently open file.  
-For easy and fun TDD, keep the class you're working on open in one pane, and your tests in the other. 
-AutoCompile means you The tests will execute and output the results below.
+For easy and fun TDD, keep the class you're working on open in one pane, and your tests in the other.
+Use the keyboard shortcut and the tests will execute.  The results of your tests will display below, along with errors.
+Code coverage will also be generated and display in your Class file.
 
 ### Execute Anonymous
 
 Manu: \>Force: Execute Anonymous  
 Mac: alt + cmd + e  
 Win: ctrl + shift + e  
-Open any file, untitled or otherwise, and use the key combo to run the code and get back the results in the output pane. I usually name my file something like anonymous.apex  
-I've also applied the .apex extension to the Apex languge syntax. I also typically create a `.apex` directory in my project where I store these scratch files. 
+Open any file, untitled or otherwise, and use the key combo to run the code and get back the results in the output pane. I usually name my file something like anonymous.apex and put it in a .apex folder in my root, and add that folder to my .gitignore, retaining all your scratch code in nice, tidy. and safe way.
+I've applied the .apex extension to the Apex languge syntax. I also typically create a `.apex` directory in my project where I store these scratch files. 
 Doing this allows you to more easily differentiate between your anonymous scratch files and actual apex classes, but you get syntax highlighting and code completion and do not deploy the code by mistake.  
 To only show the User Debug lines, you can set the `debugOnly` setting to `true`.  
 
@@ -204,7 +205,6 @@ The manual process doesn't automatically create the meta.xml file, so doesn't wo
 ## Future goals
 
 * Test runner (kind of done)
-
-* Intellisense code completion
-* Debug Apex code with breakpoints in the editor
+* Intellisense code completion (in progress)
+* Implement checkpoints in the editor
 * Integrate with Yo Force to provide scaffolding of files.
