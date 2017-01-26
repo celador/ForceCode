@@ -94,8 +94,8 @@ export default class ForceService implements forceCode.IForceService {
             self.conn = new jsforce.Connection(connectionOptions);
 
             if (!config.username || !config.password) {
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(alert) Missing Credentials $(alert)`;
-                throw { message: 'No Credentials' };
+                vscode.window.forceCode.outputChannel.appendLine('The force.json file seems to not have a username and/or password. Pease insure you have a properly formatted config file, or submit an issue to the repo @ https"//github.com/celador/forcecode/issues ');
+                throw { message: 'ForceCode: $(alert) Missing Credentials $(alert)' };
             }
             vscode.window.forceCode.statusBarItem.text = `ForceCode: $(plug) Connecting as ${config.username}`;
             return self.conn
