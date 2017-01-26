@@ -94,7 +94,7 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
         });
         function debugOnly(shouldShowOnlyDebugLines) {
             if (shouldShowOnlyDebugLines) {
-                return res.header.debugLog.split('\n').filter(l => l.match(/USER_DEBUG/)).join('\n');
+                return res.header.debugLog.split('\n').filter(l => l.match(new RegExp(vscode.window.forceCode.config.debugFilter || 'USER_DEBUG'))).join('\n');
             } else {
                 return res.header.debugLog;
             }

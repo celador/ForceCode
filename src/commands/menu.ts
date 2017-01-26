@@ -4,8 +4,11 @@ import model from './../models/commands';
 import * as error from './../util/error';
 
 export default function showMenu(context: vscode.ExtensionContext) {
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode Menu';
-
+    if (vscode.window.forceCode.conn && vscode.window.forceCode.conn.limitInfo && vscode.window.forceCode.conn.limitInfo.apiUsage) {
+        vscode.window.forceCode.statusBarItem.text = 'Limits: ' + vscode.window.forceCode.conn.limitInfo.apiUsage.used + '/' + vscode.window.forceCode.conn.limitInfo.apiUsage.limit;
+    } else {
+        vscode.window.forceCode.statusBarItem.text = 'ForceCode Menu';
+    }
     return vscode.window.forceCode.connect(context)
         .then(svc => displayMenu())
         .then(res => processResult(res))

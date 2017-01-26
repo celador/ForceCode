@@ -13,8 +13,8 @@ export default function deploy(context: vscode.ExtensionContext) {
     var _consoleLogReference: any = console.log;
     // Here is replaceSrc possiblity
     const validationIdPath: string = `${vscode.workspace.rootPath}${path.sep}.validationId`;
-    const deployPath: string = `${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}`;
     const statsPath: string = `${vscode.workspace.rootPath}${path.sep}DeployStatistics.log`;
+    const deployPath: string = vscode.window.forceCode.workspaceRoot;
     var logger: any = (function (fs) {
         var buffer: string = '';
         return {
