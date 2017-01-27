@@ -58,7 +58,6 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
         return vscode.window.forceCode.conn.tooling.runUnitTests(info.Id, methodNames);
     }
     // =======================================================================================================================================
-
     function showResult(res) {
         return configuration().then(results => {
             vscode.window.forceCode.outputChannel.clear();
@@ -68,8 +67,36 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
             } else {
                 vscode.window.forceCode.statusBarItem.text = 'ForceCode: All Tests Passed $(thumbsup)';
             }
+            let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Test Failures');
             res.failures.forEach(function (failure) {
-                var errorMessage: string = 'FAILED: ' + failure.stackTrace + '\n' + failure.message;
+                let re: RegExp = /^(Class|Trigger)\.\S*\.(\S*)\.(\S*)\:\sline\s(\d*)\,\scolumn\s(\d*)$/ig;
+                let matches: string[] = re.exec(failure.stackTrace);
+                if (matches && matches.length && matches.length === 6) {
+                    let typ: string = matches[1];
+                    let cls: string = matches[2];
+                    // let method: string = matches[3];
+                    let lin: number = +matches[4];
+                    let col: number = +matches[5];
+                    // get URI of document from class name and workspace path
+                    let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
+                    let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
+                        if (prev) { return prev; }
+                        return curr.name === cls ? curr : undefined;
+                    }, undefined);
+                    if (member) {
+                        let docUri: vscode.Uri = vscode.Uri.file(member.path);
+                        let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(lin, col));
+                        let diagnostics: vscode.Diagnostic[] = [];
+                        if (diagnosticCollection.has(docUri)) {
+                            let ds = diagnosticCollection.get(docUri);
+                            diagnostics = diagnostics.concat(ds);
+                        }
+                        let diagnostic = new vscode.Diagnostic(docLocation.range, failure.message, vscode.DiagnosticSeverity.Error);
+                        diagnostics.push(diagnostic);
+                        diagnosticCollection.set(docUri, diagnostics);
+                    }
+                }
+                let errorMessage: string = 'FAILED: ' + failure.stackTrace + '\n' + failure.message;
                 vscode.window.forceCode.outputChannel.appendLine(errorMessage);
             });
             if (res.failures.length) { vscode.window.forceCode.outputChannel.appendLine('======================================================================================================================================='); }
@@ -156,14 +183,5 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
         }
         return res;
     }
-
-
-
-
-    // function onError(err): any {
-    //     error.outputError(err, vscode.window.forceCode.outputChannel);
-    //     return err;
-    // }
-
     // =======================================================================================================================================
 }
