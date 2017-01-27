@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import { IApexCompletionUtils } from './ApexCompletionUtils';
-import _utils from './ApexCompletionUtils';
-const fetch: any = require('node-fetch');
+import { IApexCompletionUtils } from './ApexCompletionHelper';
+import _utils from './ApexCompletionHelper';
 
 interface SalesforceClass {
     constructors: SalesforceConstructor[];
@@ -196,17 +195,6 @@ function classMemberCompletions(_class: SalesforceClass, member: typeMember, fn:
 }
 function combine(prev, curr) { return prev.concat(curr); }
 
-export function getPublicDeclarations(svc) {
-    var requestUrl: string = svc.conn.instanceUrl + '/services/data/v38.0/tooling/completions?type=apex';
-    var headers: any = {
-        'Accept': 'application/json',
-        'Authorization': 'OAuth ' + svc.conn.accessToken,
-    };
-    fetch(requestUrl, { method: 'GET', headers }).then(response => response.json()).then(json => {
-        svc.declarations.public = json.publicDeclarations;
-    });
-    return svc;
-}
 function expressionParser(word: string) {
     // There are five kinds of tokens:
     // Modules, Types, Methods, Fields, Constructors

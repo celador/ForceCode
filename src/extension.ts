@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { ForceService, ForceCodeContentProvider } from './services';
+import { ForceService } from './services';
+import ForceCodeContentProvider from './providers/ContentProvider';
 import ApexCompletionProvider from './providers/ApexCompletion';
 import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator } from './decorators/testCoverageDecorator';
 import * as commands from './commands';

@@ -68,6 +68,18 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                 vscode.window.forceCode.statusBarItem.text = 'ForceCode: All Tests Passed $(thumbsup)';
             }
             let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Test Failures');
+            res.successes.forEach(function (success) {
+                let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
+                let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
+                    if (prev) { return prev; }
+                    return curr.name === success.name ? curr : undefined;
+                }, undefined);
+                if (member) {
+                    let docUri: vscode.Uri = vscode.Uri.file(member.path);
+                    let diagnostics: vscode.Diagnostic[] = [];
+                    diagnosticCollection.set(docUri, diagnostics);
+                }
+            });
             res.failures.forEach(function (failure) {
                 let re: RegExp = /^(Class|Trigger)\.\S*\.(\S*)\.(\S*)\:\sline\s(\d*)\,\scolumn\s(\d*)$/ig;
                 let matches: string[] = re.exec(failure.stackTrace);

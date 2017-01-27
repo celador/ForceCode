@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import Workspace from './workspace';
 import * as forceCode from './../forceCode';
-import { constants, operatingSystem } from './../services';
+import { operatingSystem } from './../services';
+import constants from './../models/constants';
 import { configuration } from './../services';
 import * as error from './../util/error';
-import { getPublicDeclarations } from './../providers/ApexCompletion';
 import * as commands from './../commands';
 import jsf = require('jsforce');
 const jsforce: any = require('jsforce');
@@ -141,6 +141,18 @@ export default class ForceService implements forceCode.IForceService {
 
             function refreshApexMetadata(svc) {
                 vscode.window.forceCode.refreshApexMetadata();
+                return svc;
+            }
+
+            function getPublicDeclarations(svc) {
+                var requestUrl: string = svc.conn.instanceUrl + '/services/data/v38.0/tooling/completions?type=apex';
+                var headers: any = {
+                    'Accept': 'application/json',
+                    'Authorization': 'OAuth ' + svc.conn.accessToken,
+                };
+                require('node-fetch')(requestUrl, { method: 'GET', headers }).then(response => response.json()).then(json => {
+                    svc.declarations.public = json.publicDeclarations;
+                });
                 return svc;
             }
 
