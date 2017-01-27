@@ -85,13 +85,13 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                     }, undefined);
                     if (member) {
                         let docUri: vscode.Uri = vscode.Uri.file(member.path);
-                        let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(lin, col));
+                        let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(lin - 1, col));
                         let diagnostics: vscode.Diagnostic[] = [];
                         if (diagnosticCollection.has(docUri)) {
-                            let ds = diagnosticCollection.get(docUri);
+                            let ds: vscode.Diagnostic[] = diagnosticCollection.get(docUri);
                             diagnostics = diagnostics.concat(ds);
                         }
-                        let diagnostic = new vscode.Diagnostic(docLocation.range, failure.message, vscode.DiagnosticSeverity.Error);
+                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(docLocation.range, failure.message, vscode.DiagnosticSeverity.Error);
                         diagnostics.push(diagnostic);
                         diagnosticCollection.set(docUri, diagnostics);
                     }
