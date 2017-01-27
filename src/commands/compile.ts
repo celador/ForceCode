@@ -4,6 +4,7 @@ import sleep from './../util/sleep';
 import { IForceService } from './../forceCode';
 import * as error from './../util/error';
 const parseString: any = require('xml2js').parseString;
+const moment: any = require('moment');
 
 var elegantSpinner: any = require('elegant-spinner');
 const UPDATE: boolean = true;
@@ -17,6 +18,7 @@ interface ContainerAsyncRequest {
     errors?: any[];
     State?: string;
 }
+
 
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
     const body: string = document.getText();
@@ -267,11 +269,39 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             });
         }
 
+        interface MetadataResult {
+            ApiVersion: number;
+            attributes: {};
+            Body: string;
+            BodyCrc: number;
+            CreatedById: string;
+            CreatedDate: string;
+            FullName: string;
+            Id: string;
+            IsValid: boolean;
+            LastModifiedById: string;
+            LastModifiedDate: string;
+            LengthWithoutComments: number;
+            ManageableState: string;
+            Metadata: {};
+            Name: string;
+            NamespacePrefix: string;
+            Status: string;
+            SymbolTable: {};
+            SystemModstamp: string;
+        }
+
         function addMember(records) {
             if (records.length === 1) {
                 // Tooling Object already exists
                 //  UPDATE it
-                var record: { Id: string, Metadata: {} } = records[0];
+                var record: MetadataResult = records[0];
+                var remoteModified = moment(record.SystemModstamp);
+                // Get the modified date of the local file... 
+                // var localModified = vscode.window.forceCode.metadata.reduce((p, c) => {
+                //     return 
+                // })
+
                 var member: {} = {
                     Body: body,
                     ContentEntityId: record.Id,
