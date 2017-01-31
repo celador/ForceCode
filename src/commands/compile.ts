@@ -2,9 +2,15 @@ import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import sleep from './../util/sleep';
 import { IForceService } from './../forceCode';
+import * as forceCode from './../forceCode';
 import * as error from './../util/error';
+import fs = require('fs-extra');
+import diff from './diff';
+// import jsforce = require('jsforce');
 const parseString: any = require('xml2js').parseString;
 const moment: any = require('moment');
+
+// TODO: Refactor some things out of this file.  It's getting too big.
 
 var elegantSpinner: any = require('elegant-spinner');
 const UPDATE: boolean = true;
@@ -244,17 +250,22 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // =======================================================================================================================================
     // =================================  Tooling Objects (Class, Page, Component, Trigger)  =================================================
     // =======================================================================================================================================
-
     function addToContainer(svc: IForceService) {
         // We will push the filename on to the members array to make sure that the next time we compile, 
+        var fc: IForceService = vscode.window.forceCode;
         var hasActiveContainer: Boolean = svc.containerId !== undefined;
-        var fileIsOnlyMember: Boolean = (vscode.window.forceCode.containerMembers.length === 1) && vscode.window.forceCode.containerMembers.every(m => m.name === name);
+        var fileIsOnlyMember: Boolean = (fc.containerMembers.length === 1) && fc.containerMembers.every(m => m.name === name);
         if (hasActiveContainer && fileIsOnlyMember) {
-            return updateMember(vscode.window.forceCode.containerMembers[0]);
+            // This is what happens when we had an error on the previous compile.  
+            // We want to just update the member and try to compile again
+            return updateMember(fc.containerMembers[0]);
         } else {
+            // Otherwise, we create a new Container
             return svc.newContainer(true).then(() => {
-                return vscode.window.forceCode.conn.tooling.sobject(toolingType)
-                    .find({ Name: fileName, NamespacePrefix: vscode.window.forceCode.config.prefix || '' }).execute()
+                // Then Get the files info from the type, name, and prefix
+                // Then Add the new member, updating the contents.
+                return fc.conn.tooling.sobject(toolingType)
+                    .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' }).execute()
                     .then(records => addMember(records));
             });
         }
@@ -264,14 +275,14 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 Body: body,
                 Id: records.id,
             };
-            return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).update(member).then(res => {
-                return vscode.window.forceCode;
+            return fc.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).update(member).then(res => {
+                return fc;
             });
         }
 
         interface MetadataResult {
             ApiVersion: number;
-            attributes: {};
+            attributes: { type: string };
             Body: string;
             BodyCrc: number;
             CreatedById: string;
@@ -290,38 +301,82 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             SymbolTable: {};
             SystemModstamp: string;
         }
+        function getWorkspaceMemberForMetadataResult(record: MetadataResult) {
+            return fc.workspaceMembers ? fc.workspaceMembers.reduce((acc, member) => {
+                if (acc) { return acc; }
+                let namespaceMatch: boolean = member.memberInfo.namespacePrefix === record.NamespacePrefix;
+                let nameMatch: boolean = member.name.toLowerCase() === record.Name.toLowerCase();
+                let typeMatch: boolean = member.memberInfo.type === record.attributes.type;
+                if (namespaceMatch && nameMatch && typeMatch) {
+                    return member;
+                }
+            }, undefined) : undefined;
+        }
+        function shouldCompile(record) {
+            let mem: forceCode.IWorkspaceMember = getWorkspaceMemberForMetadataResult(record);
+            if (mem && record.LastModifiedById !== mem.memberInfo.lastModifiedById) {
+                // throw up an alert
+                return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
+                    if (s === 'Diff') {
+                        diff(document, context);
+                        return false;
+                    }
+                    if (s === 'Overwrite') {
+                        return true;
+                    }
+                    return false;
+                });
+            } else if (!vscode.window.forceCode.metadata) {
+                // We don't have a workspace member for this file yet.  
+                // We just booted and haven't retrieved it yet or something went wrong.
+                return vscode.window.showWarningMessage('org_metadata not found', 'Save', 'Wait').then(s => {
+                    if (s === 'Save') {
+                        return true;
+                    }
+                    if (s === 'Wait') {
+                        return false;
+                    }
+                    return false;
+                });
+            } else {
+                return Promise.resolve(true);
+            }
 
+        }
         function addMember(records) {
-            if (records.length === 1) {
+            if (records.length > 0) {
                 // Tooling Object already exists
                 //  UPDATE it
                 var record: MetadataResult = records[0];
-                var remoteModified = moment(record.SystemModstamp);
                 // Get the modified date of the local file... 
-                // var localModified = vscode.window.forceCode.metadata.reduce((p, c) => {
-                //     return 
-                // })
-
                 var member: {} = {
                     Body: body,
                     ContentEntityId: record.Id,
-                    Id: vscode.window.forceCode.containerId,
+                    Id: fc.containerId,
                     Metadata: record.Metadata,
-                    MetadataContainerId: vscode.window.forceCode.containerId,
+                    MetadataContainerId: fc.containerId,
                 };
-                return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).create(member).then(res => {
-                    vscode.window.forceCode.containerMembers.push({ name, id: res.id });
-                    return vscode.window.forceCode;
+                return shouldCompile(record).then(should => {
+                    if (should) {
+                        return fc.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).create(member).then(res => {
+                            fc.containerMembers.push({ name, id: res.id });
+                            return fc;
+                        });
+                    } else {
+                        throw { message: record.Name + ' not saved' };
+                    }
                 });
             } else {
+                // Results was 0, meaning...
                 // Tooling Object does not exist
-                // CREATE it
-                vscode.window.forceCode.statusBarItem.text = 'Creating ' + name;
-                return vscode.window.forceCode.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
-                    return vscode.window.forceCode;
+                // so we CREATE it
+                fc.statusBarItem.text = 'Creating ' + name;
+                return fc.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
+                    return fc;
                 });
             }
         }
+
         function createObject(text: string): {} {
             if (toolingType === 'ApexClass' || toolingType === 'ApexTrigger') {
                 return { Body: text };
@@ -336,8 +391,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         }
     }
     // =======================================================================================================================================
-    // =======================================================================================================================================
-    // =======================================================================================================================================
     function requestCompile() {
         return vscode.window.forceCode.conn.tooling.sobject('ContainerAsyncRequest').create({
             IsCheckOnly: false,
@@ -348,8 +401,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return vscode.window.forceCode;
         });
     }
-    // =======================================================================================================================================
-    // =======================================================================================================================================
     // =======================================================================================================================================
     function getCompileStatus(): Promise<any> {
         vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''}` + spinner();
@@ -391,8 +442,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         }
     }
     // =======================================================================================================================================
-    // =======================================================================================================================================
-    // =======================================================================================================================================
     function finished(res: any): boolean {
         // Create a diagnostic Collection for the current file.  Overwriting the last...
         var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
@@ -432,7 +481,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return true;
         }
     }
-
     function containerFinished(createNewContainer: boolean): any {
         // We got some records in our response
         vscode.window.forceCode.isCompiling = false;

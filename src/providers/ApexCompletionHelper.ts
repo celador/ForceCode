@@ -21,11 +21,9 @@ export default class ApexCompletionUtils implements IApexCompletionUtils {
     private FULLY_QUALIFIED_NAME_SEPARATOR_CHAR: string = '.';
     constructor(document: vscode.TextDocument, end: vscode.Position) {
         this.line = this.getEntireLine(document, end);
-        this.slug = this.getSlug(this.line.toLowerCase());
+        this.slug = this.getSlug(document, end);
         this.segments = this.slug.split(this.FULLY_QUALIFIED_NAME_SEPARATOR_CHAR);
     }
-
-
 
     public shouldSuggestConstructor(): boolean {
         // To match a Constructor, we need to make sure the "new" keyword is contained on the line
@@ -58,11 +56,11 @@ export default class ApexCompletionUtils implements IApexCompletionUtils {
     }
     // new SomeTyp<cursor>
     public shouldSuggestTopLevelConstructor(): boolean {
-        return this.segments.length <= 1;
+        return this.isConstructor() && this.segments.length <= 1;
     }
     // new SomeNamespace.SomeTyp<cursor>
     public shouldSuggestNamespacedConstructor(): boolean {
-        return this.segments.length === 2;
+        return  this.isConstructor() && this.segments.length === 2;
     }
     // someVariabl<cursor>
     public shouldSuggestVariableName(): boolean {
@@ -71,6 +69,11 @@ export default class ApexCompletionUtils implements IApexCompletionUtils {
     // someVariable.someMembe<cursor>
     public shouldSuggestVariableMember(): boolean {
         return this.segments.length === 2;
+    }
+
+    private isConstructor(): boolean {
+        let matches: RegExpMatchArray = this.line.replace(this.slug, '').match(/new\s$/);
+        return matches && matches.length > 0;
     }
 
     private getEntireLine(document: vscode.TextDocument, end: vscode.Position): string {
@@ -85,11 +88,21 @@ export default class ApexCompletionUtils implements IApexCompletionUtils {
                 line = code.slice(code.length - counter);
             } while (line.charAt(0) !== ';' && code.length > counter);
         }
-        return line;
+        return line.slice(1).trim();
     }
-    private getSlug(line: string) {
-        var matches: string[] = line.match(/[\S\.]*$/);
-        if (matches.length) { return matches[0]; }
-        return '';
+
+    private getSlug(document: vscode.TextDocument, end: vscode.Position): string {
+        // get the text of the document, without comments
+        var code: string = document.getText(new vscode.Range(new vscode.Position(0, 0), end)).replace(/\/\*.*\*\//g, '').replace(/(\/\/.*\n)|(\/\/.*$)/g, '');
+        var counter: number = 0;
+        var line: string = '';
+        if (code.length) {
+            // scan left until we reach a semicolon or the beginning of the file
+            do {
+                counter += 1;
+                line = code.slice(code.length - counter);
+            } while (line.charAt(0).match(/[A-Za-z_0-9\.]/) && code.length > counter);
+        }
+        return line.slice(1).trim().toLowerCase();
     }
 }

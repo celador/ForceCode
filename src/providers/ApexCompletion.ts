@@ -15,6 +15,7 @@ interface SalesforceMethod {
     name: string;
     parameters: SalesforceParameter[];
     references: any[];
+    returnType?: string;
 }
 interface SalesforceProperty {
     name: string;
@@ -61,6 +62,12 @@ export default class ApexCompletionProvider implements vscode.CompletionItemProv
             if (utils.shouldSuggestNamespacedType()) {
                 completions = completions.concat(getNamespacedTypeCompletions(utils.segments[0]));
             }
+            if (utils.shouldSuggestTopLevelMember()) {
+                completions = completions.concat(getTopLevelMemberCompletions(utils.segments[0]));
+            }
+            if (utils.shouldSuggestNamespacedMember()) {
+                // completions = completions.concat(getNamespacedMemberCompletions(utils.segments[0], utils.segments[1]));
+            }
         }
         return Promise.resolve(completions);
     }
@@ -95,7 +102,6 @@ function isManagedNamespace(namespace: string) {
 
 function getNamespacedTypeCompletions(namespace: string) {
     var classCompletions: vscode.CompletionItem[] = [];
-    // Top-level types don't need namespace prefix, 
     if (vscode.window.forceCode.declarations && vscode.window.forceCode.declarations.public && isPublicNamespace(namespace)) {
         return completionItemsFromPublicNamespace(getPublicNamespace(namespace));
     }
@@ -107,6 +113,53 @@ function getNamespacedTypeCompletions(namespace: string) {
     }
     return classCompletions;
 }
+
+function getTopLevelMemberCompletions(topLevelType: string) {
+    var memberCompletions: vscode.CompletionItem[] = [];
+    // Top Level Members are public/global properties and public/global methods of top level types
+    // Top Level Types are all types in the System and Schema namespaces and all private top level types
+    // If we get any result from that, we return completions for
+    // Get Top Level Public Members
+    if (vscode.window.forceCode.declarations && vscode.window.forceCode.declarations.public) {
+        // We need to get the types in the System and Schema namespaces 
+        let completions = typeCompletions('System').concat(typeCompletions('Schema')).reduce(combine, []);
+        memberCompletions = memberCompletions.concat(completions);
+    }
+    // Get Top Level Private Members.  Top level Private members are methods and properties in any custom code.
+    // We filter the private types by the topLevelType parameter
+    // We return the Properties and Methods for that type
+    // TODO: Implement
+    return memberCompletions;
+    // Managed Members have to use a namespace, so we don't return them
+
+    function typeCompletions(namespace) {
+        return Object.keys(vscode.window.forceCode.declarations.public[namespace]).filter(key => {
+            // We then filter those types by the topLevelType name parameter    
+            return key.toLowerCase() === topLevelType.toLowerCase();
+        }).map(key => {
+            let type: SalesforceClass = vscode.window.forceCode.declarations.public[namespace][key];
+            // Properties And Methods
+            if (type) {
+                let methodCompletions: vscode.CompletionItem[] = type.methods.map(m => {
+                    var completion: vscode.CompletionItem = new vscode.CompletionItem(m.name, vscode.CompletionItemKind.Method);
+                    // var methods: string = type.methods.length ? `Methods:\n${type.methods.map(m => `${m.isStatic ? 'static' : 'instance'} ${m.name}(${m.parameters.map(p => `${p.name}:${p.type}`).join(', ')})`).join('\n')}` : '';
+                    completion.detail = `(method) ${key}.${m.name}(${m.parameters.map(p => `${p.name}:${p.type}`).join(', ')}): ${m.returnType || undefined}`;
+                    completion.insertText = `${m.name}(${m.parameters.map(p => `${p.name}`).join(', ')})`;
+                    return completion;
+                });
+                let propertyCompletions: vscode.CompletionItem[] = type.properties.map(p => {
+                    var completion: vscode.CompletionItem = new vscode.CompletionItem(p.name, vscode.CompletionItemKind.Property);
+                    completion.detail = '(property) ' + key + '.' + p.name;
+                    completion.insertText = p.name;
+                    return completion;
+                });
+                return methodCompletions.concat(propertyCompletions);
+            }
+            return [];
+        }).reduce(combine, []);
+    }
+}
+
 
 function getTopLevelTypeCompletions() {
     var classCompletions: vscode.CompletionItem[] = [];
@@ -149,10 +202,10 @@ function completionItemsFromPublicNamespace(namespace): vscode.CompletionItem[] 
         var completion: vscode.CompletionItem = new vscode.CompletionItem(name, vscode.CompletionItemKind.Class);
         var type: any = vscode.window.forceCode.declarations.public[namespace][name];
         var constructors: string = type.constructors.length ? `Constructors:\n${type.constructors.map(m => `${m.name}(${m.parameters.map(p => `${p.name}:${p.type}`).join(', ')})`).join('\n')}` : '';
-        var methods: string = type.methods.length ? `Methods:\n${type.methods.map(m => `${m.isStatic ? 'static' : 'instance'} ${m.name}(${m.parameters.map(p => `${p.name}:${p.type}`).join(', ')})`).join('\n')}` : '';
+        var methods: string = type.methods.length ? `Methods:\n${type.methods.map(m => `${m.isStatic ? 'static' : 'instance'} ${m.returnType} ${m.name}(${m.parameters.map(p => `${p.name}:${p.type}`).join(', ')})`).join('\n')}` : '';
         var properties: string = type.properties.length ? `Properties:\n${type.properties.map(m => `${m.name}`).join('\n')}` : '';
         completion.detail = namespace + '.' + name;
-        completion.documentation = [constructors, methods, properties].reduce((p, c) => p ? p + '\n' + c : (c ? c : ''));
+        completion.documentation = [constructors, methods, properties].reduce((p, c) => p ? p + '\n\n' + c : (c ? c : ''));
         return completion;
     });
 }
@@ -164,7 +217,7 @@ function completionItemFromCustomType(record) {
     var constructors: string = record.SymbolTable.constructors.length ? `Constructors:\n${record.SymbolTable.constructors.map(m => `${m.name}(${m.parameters.map(p => `${p.name}:${p.type}`).join(', ')})`).join('\n')}` : '';
     var methods: string = record.SymbolTable.methods.length ? `Methods:\n${record.SymbolTable.methods.map(m => `${m.modifiers.join(' ')} ${m.name}(${m.parameters.map(p => `${p.name}:${p.type}`).join(', ')})`).join('\n')}` : '';
     var properties: string = record.SymbolTable.properties.length ? `Properties:\n${record.SymbolTable.properties.map(m => `${m.name}`).join('\n')}` : '';
-    completion.documentation = signature + '\n' + [constructors, methods, properties].reduce((p, c) => p ? p + '\n' + c : (c ? c : ''));
+    completion.documentation = signature + '\n' + [constructors, methods, properties].reduce((p, c) => p ? p + '\n\n' + c : (c ? c : ''));
     return completion;
 }
 
