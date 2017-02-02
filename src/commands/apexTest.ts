@@ -1,7 +1,12 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
+import * as path from 'path';
+import * as forceCode from './../forceCode';
+// import jsforce = require('jsforce');
+// import Workspace from './../services/workspace';
 import * as error from './../util/error';
 import { configuration } from './../services';
+const fs: any = require('fs-extra');
 
 export default function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
@@ -24,6 +29,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
         .then(svc => getClassInfo(svc))
         .then(id => runCurrentTests(id))
         .then(showResult)
+        .then(showLog)
         .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
 
     function getClassInfo(svc) {
@@ -32,7 +38,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     }
 
     function getTestMethods(info): string[] {
-        if(info.SymbolTable){
+        if (info.SymbolTable) {
             return info.SymbolTable.methods.filter(function (method) {
                 return method.annotations.some(function (annotation) {
                     return annotation.name === 'IsTest';
@@ -40,7 +46,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
             }).map(function (method) {
                 return method.name;
             });
-        }else{
+        } else {
             error.outputError({ message: 'no symbol table' }, vscode.window.forceCode.outputChannel);
         }
     }
@@ -52,64 +58,142 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
         return vscode.window.forceCode.conn.tooling.runUnitTests(info.Id, methodNames);
     }
     // =======================================================================================================================================
-
     function showResult(res) {
-        return configuration().then(config => {
+        return configuration().then(results => {
             vscode.window.forceCode.outputChannel.clear();
-            if (res.failures.length > 0) {
+            if (res.failures.length) {
                 vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   ==========================================================');
                 vscode.window.forceCode.statusBarItem.text = 'ForceCode: Some Tests Failed $(thumbsdown)';
             } else {
                 vscode.window.forceCode.statusBarItem.text = 'ForceCode: All Tests Passed $(thumbsup)';
             }
+            let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Test Failures');
+            res.successes.forEach(function (success) {
+                let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
+                let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
+                    if (prev) { return prev; }
+                    return curr.name === success.name ? curr : undefined;
+                }, undefined);
+                if (member) {
+                    let docUri: vscode.Uri = vscode.Uri.file(member.path);
+                    let diagnostics: vscode.Diagnostic[] = [];
+                    diagnosticCollection.set(docUri, diagnostics);
+                }
+            });
             res.failures.forEach(function (failure) {
-                var errorMessage: string = 'FAILED: ' + failure.stackTrace + '\n' + failure.message;
+                let re: RegExp = /^(Class|Trigger)\.\S*\.(\S*)\.(\S*)\:\sline\s(\d*)\,\scolumn\s(\d*)$/ig;
+                let matches: string[] = re.exec(failure.stackTrace);
+                if (matches && matches.length && matches.length === 6) {
+                    let typ: string = matches[1];
+                    let cls: string = matches[2];
+                    // let method: string = matches[3];
+                    let lin: number = +matches[4];
+                    let col: number = +matches[5];
+                    // get URI of document from class name and workspace path
+                    let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
+                    let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
+                        if (prev) { return prev; }
+                        return curr.name === cls ? curr : undefined;
+                    }, undefined);
+                    if (member) {
+                        let docUri: vscode.Uri = vscode.Uri.file(member.path);
+                        let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(lin - 1, col));
+                        let diagnostics: vscode.Diagnostic[] = [];
+                        if (diagnosticCollection.has(docUri)) {
+                            let ds: vscode.Diagnostic[] = diagnosticCollection.get(docUri);
+                            diagnostics = diagnostics.concat(ds);
+                        }
+                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(docLocation.range, failure.message, vscode.DiagnosticSeverity.Error);
+                        diagnostics.push(diagnostic);
+                        diagnosticCollection.set(docUri, diagnostics);
+                    }
+                }
+                let errorMessage: string = 'FAILED: ' + failure.stackTrace + '\n' + failure.message;
                 vscode.window.forceCode.outputChannel.appendLine(errorMessage);
             });
-            if (res.failures.length > 0) { vscode.window.forceCode.outputChannel.appendLine('======================================================================================================================================='); }
+            if (res.failures.length) { vscode.window.forceCode.outputChannel.appendLine('======================================================================================================================================='); }
             res.successes.forEach(function (success) {
                 var successMessage: string = 'SUCCESS: ' + success.name + ':' + success.methodName + ' - in ' + success.time + 'ms';
                 vscode.window.forceCode.outputChannel.appendLine(successMessage);
             });
+            // Add Line Coverage information
+            if (res.codeCoverage.length) {
+                res.codeCoverage.forEach(function (coverage) {
+                    vscode.window.forceCode.codeCoverage[coverage.id] = coverage;
+                });
+            }
 
-            if (res.codeCoverage.length > 0){
-                res.codeCoverage.forEach(function(coverage ){
-                    var linesOfCode = coverage.numLocations,
-                        uncoveredLines = coverage.numLocationsNotCovered,
-                        coveredLines = linesOfCode - uncoveredLines,
-                        percentageCovered = Math.round((coveredLines / linesOfCode) * 100),
-                        coverageMessage:  string = `${percentageCovered}% ${coverage.name} ${coveredLines} of ${linesOfCode} covered \n`;
-                    
-                    if(coverage.numLocationsNotCovered > 0){
-                        coverage.locationsNotCovered.forEach(function(uncovered){
-                            coverageMessage = coverageMessage + `line ${uncovered.line} uncovered\n`;
-                        });
+            // Add Code Coverage Warnings, maybe as actual Validation Warnings 
+            if (res.codeCoverageWarnings.length && vscode.window.forceCode.workspaceMembers.length) {
+                res.codeCoverageWarnings.forEach(function (warning) {
+
+                    let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers.reduce((prev, curr) => {
+                        let coverage: any = vscode.window.forceCode.codeCoverage[warning.id];
+                        if (curr.name === coverage.name && curr.memberInfo && curr.memberInfo.type && curr.memberInfo.type.indexOf(coverage.type) >= 0) {
+                            return curr;
+                        } else if (prev) {
+                            return prev;
+                        }
+                    }, undefined);
+
+                    if (member) {
+                        let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(member.memberInfo.type);
+                        let diagnostics: vscode.Diagnostic[] = [];
+                        let warningMessage: string = warning.message;
+                        let docUri: vscode.Uri = vscode.Uri.file(member.path);
+                        let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(0, 0));
+                        diagnostics.push(new vscode.Diagnostic(docLocation.range, warningMessage, 1));
+                        diagnosticCollection.set(docUri, diagnostics);
+                    } else if (warning.message) {
+                        vscode.window.forceCode.outputChannel.appendLine(warning.message);
                     }
-                    
-                    vscode.window.forceCode.outputChannel.appendLine(coverageMessage);
-                })
-                
+
+                });
             }
 
-            if (res.codeCoverageWarnings.length > 0){
-                res.codeCoverageWarnings.forEach(function(warning ){
-                    var warningMessage:  string = `CODE COVERAGE WARNING: ` + warning.message ;
-                    vscode.window.forceCode.outputChannel.appendLine(warningMessage);
-                })
-                
-            }else{
-                vscode.window.forceCode.outputChannel.appendLine('Aggregate coverage for classes in this test run is over 75%');
-            }
-
-            vscode.window.forceCode.outputChannel.show();
+            // vscode.window.forceCode.outputChannel.show();
             return res;
         });
     }
+    // TODO: Refactor this and the getLog.ts to use a common function
+    // This is Copypasta
+    function showLog(res) {
+        var url: string = `${vscode.window.forceCode.conn._baseUrl()}/sobjects/ApexLog/${res.apexLogId}/Body`;
+        var tempPath: string = `${vscode.workspace.rootPath}${path.sep}.logs${path.sep}${res.apexLogId}.log`;
+        if (vscode.window.forceCode.config.showTestLog) {
+            vscode.window.forceCode.conn.request(url).then(logBody => {
+                fs.stat(tempPath, function (err, stats) {
+                    if (err) {
+                        return open(vscode.Uri.parse(`untitled:${tempPath}`)).then(show).then(replaceAll);
+                    } else {
+                        return open(vscode.Uri.parse(`file:${tempPath}`)).then(show).then(replaceAll);
+                    }
 
-    // function onError(err): any {
-    //     error.outputError(err, vscode.window.forceCode.outputChannel);
-    //     return err;
-    // }
-
+                    function open(uri) {
+                        return vscode.workspace.openTextDocument(uri);
+                    }
+                    function show(_document) {
+                        return vscode.window.showTextDocument(_document, vscode.window.visibleTextEditors.length - 1);
+                    }
+                    function replaceAll(editor) {
+                        var start: vscode.Position = new vscode.Position(0, 0);
+                        var lineCount: number = editor.document.lineCount - 1;
+                        var lastCharNumber: number = editor.document.lineAt(lineCount).text.length;
+                        var end: vscode.Position = new vscode.Position(lineCount, lastCharNumber);
+                        var range: vscode.Range = new vscode.Range(start, end);
+                        editor.edit(builder => builder.replace(range, debugOnly()));
+                    }
+                    function debugOnly() {
+                        if (vscode.window.forceCode.config.debugOnly) {
+                            return logBody.split('\n').filter(l => l.match(new RegExp(vscode.window.forceCode.config.debugFilter || 'USER_DEBUG'))).join('\n');
+                        } else {
+                            return logBody;
+                        }
+                    }
+                });
+            });
+        }
+        return res;
+    }
     // =======================================================================================================================================
 }

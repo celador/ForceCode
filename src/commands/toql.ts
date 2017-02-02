@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as error from './../util/error';
 
 export default function toql(context: vscode.ExtensionContext): Promise<any> {
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Run SOQL Query';
+    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Run TOQL Query';
     return vscode.window.forceCode.connect(context)
         .then(svc => getToqlQuery(svc))
         .then(finished, onError);

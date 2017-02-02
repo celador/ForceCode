@@ -75,7 +75,7 @@ export default function retrieve(context: vscode.ExtensionContext) {
           }).stream());
         });
       } else if (option.description === 'packaged') {
-        var xmlFilePath: string = `${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}${path.sep}package.xml`;
+        var xmlFilePath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}package.xml`;
         var data: any = fs.readFileSync(xmlFilePath);
         parseString(data, { explicitArray: false }, function (err, dom) {
           if (err) { reject(err); } else {
@@ -112,7 +112,7 @@ export default function retrieve(context: vscode.ExtensionContext) {
               }
               var newName: string = name.replace(option.description + path.sep, '');
               // Here is  possiblity
-              fs.outputFileSync(`${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}${path.sep}${newName}`, data);
+              fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${newName}`, data);
             }
           });
           resolve();

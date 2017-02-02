@@ -9,11 +9,11 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
     return new Promise(function (resolve, reject) {
         var self: forceCode.IForceService = service || vscode.window.forceCode;
         try {
-            self.config = _.extend(self.config, fs.readJsonSync(vscode.workspace.rootPath + path.sep + 'force.json'));
+            self.config = _.extend(self.config || {}, fs.readJsonSync(vscode.workspace.rootPath + path.sep + 'force.json'));
             if (typeof self.config === 'object' && !self.config.src) {
                 self.config.src = 'src';
             }
-            // self.config.workspaceRoot = `${vscode.workspace.rootPath}${path.sep}${self.config.src}${path.sep}`;
+            self.workspaceRoot = `${vscode.workspace.rootPath}${path.sep}${self.config.src}`;
             resolve(self.config);
         } catch (err) {
             self.config = {};

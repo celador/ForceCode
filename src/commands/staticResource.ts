@@ -193,7 +193,7 @@ function getFileList(root) {
  */
 function bundle(zip, packageName) {
   // Here is replaceSrc possiblity
-  var finalPath: string = `${vscode.workspace.rootPath}${path.sep}${vscode.window.forceCode.config.src}${path.sep}staticresources${path.sep}${packageName}.resource`;
+  var finalPath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}staticresources${path.sep}${packageName}.resource`;
   return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(function (buffer) {
     return fs.outputFile(finalPath, buffer);
   });

@@ -26,7 +26,7 @@ declare module 'jsforce/index' {
             success: string; // Flag if the code is executed successfully
         }
         interface SObject {
-            find(config: {});
+            find(config?: {});
             create(records: Array<any>, options?: {}): Promise<Array<RecordResult>>;
             create(records: Array<any>, options?: {}, callback?: () => {}): Array<RecordResult>;
             create(record: any): Promise<RecordResult>;
@@ -42,11 +42,20 @@ declare module 'jsforce/index' {
         }
         interface Tooling {
             sobject(name: string): SObject;
+            completions(type?: string): Promise<CompletionResult>;
             executeAnonymous(apexBody: string): Promise<ExecuteAnonymousResult>;
             runTestsAsynchronous(classIds: string[]): Promise<any>;
             runTestsSynchronous(classNames: string[]): Promise<any>;
             runUnitTests(classId: string, testMethods: string[]): Promise<any>;
-            query(locator: string): Promise<QueryResult>;
+            query(query: string): Promise<QueryResult>;
+            queryMore(locator: string): Promise<QueryResult>;
+            describeGlobal(): Promise<ToolingDescribeResult>
+        }
+        interface ToolingDescribeResult {
+            
+        }
+        interface CompletionResult {
+            publicDeclarations: {}
         }
         interface DeployResult {
             done: boolean;
@@ -63,12 +72,27 @@ declare module 'jsforce/index' {
             stream(): NodeJS.ReadableStream;
             then(): Promise<any>;
         }
+        interface IMetadataFileProperties {
+            createdById: string;
+            createdByName: string;
+            createdDate: string;
+            fileName: string;
+            fullName: string;
+            id: string;
+            lastModifiedById: string;
+            lastModifiedByName: string;
+            lastModifiedDate: string;
+            manageableState: string;
+            namespacePrefix: string;
+            type: string;
+        }
         interface Metadata {
             pollTimeout: number;
             pollInterval: number;
             describe(): Promise<any>;
             checkDeployStatus(processId: string, {}): Promise<any>;
             checkRetrieveStatus(id: string): Promise<any>;
+            list(queries: string[], version?: string) : Promise<IMetadataFileProperties[]>
             retrieve({}): { stream(): NodeJS.ReadableStream };
             retrieve({}): Promise<RetrieveResult>;
             deploy({}, {}): Promise<DeployResult>;
@@ -81,6 +105,7 @@ declare module 'jsforce/index' {
             version: string;
             metadata: Metadata;
             tooling: Tooling;
+            limitInfo: any;
             request: any;
             query: any;
             accessToken: string;
@@ -160,6 +185,7 @@ declare module 'jsforce/index' {
             done: boolean; // Flag if the query is fetched all records or not
             nextRecordsUrl?: string; // URL locator for next record set, (available when done = false)
             totalSize: number; // Total size for query
+            locator: string; // Total size for query
             records: Array<any>; // Array of records fetched
         }
 

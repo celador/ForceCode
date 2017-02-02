@@ -80,6 +80,7 @@ The configuration file should look something like...
     "poll": 1500,
     "pollTimeout": 1200,
     "debugOnly": true,
+    "debugFilter": 'USER_DEBUG|FATAL_ERROR',
     "apiVersion": "38.0",
     "prefix": "",
     "src": "src",
@@ -106,6 +107,7 @@ Note: the password is in the format "passwordtoken".  Do not try to use any deli
 * poll: When compiling, this is the interval \(in milliseconds\) at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
 * pollTimeout: When retrieving packages, or other long running tasks, this is the maximum amount of time \(in seconds\) it will wait before the process times out.  If you're having trouble retrieving your package, try increasing this number.  Default is 600 \(10 minutes\).
 * debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
+* debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
 * apiVersion: This is the default api version that all your files will be saved with.  If this is not set, this will default to the version of the org in use.  ForceCode will not change the version of an existing file.  This is also the version used for package retrieval and deploy.
 * prefix: This is the namespce prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise ForceCode will attempt to infer a prefix from your Salesforce Org.  If you have a namespaced org and do not set this setting, you may have problems, especially if working on an out of date Org.  This should be automatic as of Salesforce 38
 * src: This is the src folder that contains your project files.  Normally this is not needed, but if you want to have a non-standard folder structure, you can designate an arbitrary folder as your Salesforce metadata directory.
@@ -161,17 +163,26 @@ Menu: &gt;ForceCode Menu... Run Unit Tests
 Mac: alt + cmd + t  
 Win: ctrl + shift + t  
 Run the tests in the currently open file.  
+<<<<<<< HEAD
 For easy and fun TDD, keep the class you're working on open in one pane, and your tests in the other.  
 AutoCompile means you The tests will execute and output the results below.
+=======
+For easy and fun TDD, keep the class you're working on open in one pane, and your tests in the other.
+Use the keyboard shortcut and the tests will execute.  The results of your tests will display below, along with errors.
+Code coverage will also be generated and display in your Class file.
+>>>>>>> codeCompletion
 
 ### Execute Anonymous
 
 Manu: &gt;Force: Execute Anonymous  
 Mac: alt + cmd + e  
 Win: ctrl + shift + e  
-Open any file, untitled or otherwise, and use the key combo to run the code and get back the results in the output pane. I usually name my file something like anonymous.apex  
-I've also applied the .apex extension to the Apex languge syntax.  Doing this allows you to more easily differentiate between your anonymous scratch files and actual apex classes.  
-To only show the User Debug lines, you can set the `debugOnly` setting to `true`
+Open any file, untitled or otherwise, and use the key combo to run the code and get back the results in the output pane. I usually name my file something like anonymous.apex and put it in a .apex folder in my root, and add that folder to my .gitignore, retaining all your scratch code in nice, tidy. and safe way.
+I've applied the .apex extension to the Apex languge syntax. I also typically create a `.apex` directory in my project where I store these scratch files. 
+Doing this allows you to more easily differentiate between your anonymous scratch files and actual apex classes, but you get syntax highlighting and code completion and do not deploy the code by mistake.  
+To only show the User Debug lines, you can set the `debugOnly` setting to `true`.  
+
+Also, take note of the debugFilter property.  This is where you can set a regular expression filter to use with the debugOnly flag, removing all the noise from debugging.
 
 ### Open
 
@@ -232,10 +243,16 @@ The manual process doesn't automatically create the meta.xml file, so doesn't wo
 
 ## Future goals
 
+<<<<<<< HEAD
 * Test runner \(kind of done\)
 
 * Intellisense code completion
 
 * Debug Apex code with breakpoints in the editor
 
+=======
+* Test runner (kind of done)
+* Intellisense code completion (in progress)
+* Implement checkpoints in the editor
+>>>>>>> codeCompletion
 * Integrate with Yo Force to provide scaffolding of files.
