@@ -1,4 +1,4 @@
-<img src="images/logo-type.svg">
+<img src="https://rawgithub.com/celador/ForceCode/Documentation/images/logo-type.svg">
 
 # ForceCode for Visual Studio Code
 
