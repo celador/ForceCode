@@ -1,9 +1,16 @@
-# Summary
+# ForceCode
 
-## Overview
+## Getting Started
 
-* [My Awesome API](README.md)
+* [Overview](README.md#overview)
+* [Features](README.md#features)
+* [Configuration](README.md#configuration)
+* [Config](README.md#issues)
+* [Issues](README.md#issues)
 
-## Methods
+## Commands
 
 * [Defining Methods](methods.md)
+
+## Contributing
+

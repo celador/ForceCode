@@ -4,6 +4,8 @@
 [![Installs](http://vsmarketplacebadge.apphb.com/installs/JohnAaronNelson.ForceCode.svg)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)  
 [![Ratings](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.svg)](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.svg)
 
+## Overview
+
 This extension is a companion for SFDC development with Visual Studio Code.  
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.  
 There's no complicated setup process or project configurations, no external apps to keep open, and no jarring errors knocking you out of your flow.
@@ -14,6 +16,7 @@ To get syntax highlighting, make sure you install the Visualforce and Apex exten
 
 Documentation can be found at [https://johnaaronnelson.gitbooks.io/forcecode/content/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
 Documentation modifications are done in the Documentation branch.  (This is a test)
+
 
 ## Issues
 
