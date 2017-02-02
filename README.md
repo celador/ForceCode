@@ -55,10 +55,6 @@ There's no complicated setup process or project configurations, no external apps
 * ~~Create Package.xml~~ (on hold)
     * Functionality provided by the npm [package-xml](https://www.npmjs.com/package/package-xml) package
 
-## Documentation
-
-Documentation site can be found at [https://johnaaronnelson.gitbooks.io/forcecode/content/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
-
 ## Issues
 
 Please submit any issues or feature requests to [https://github.com/celador/ForceCode/issues](https://github.com/celador/ForceCode/issues)  
@@ -197,12 +193,6 @@ Menu: &gt;Force: Save/Deploy/Compile
 Mac: alt + cmd + b  
 Win: ctrl + shift + b
 
-### Build package.xml
-
-Menu: &gt;ForceCode Menu ... Package-xml
-
-Generate a package.xml file in your src directory based on its contents. You can give the package a name, which makes your package easy to retrieve later on, or you can generate a package without a name. You can then use this package.xml to deploy your package.
-
 ### Deploy Package
 
 Menu: &gt;ForceCode Menu ... Deploy Package
@@ -237,10 +227,40 @@ Menu: &gt;Force: Get Logs
 Menu: &gt;ForceCode Menu ... Create Class  
 This will automatically create classes based on `apiVersion` else it defaults to '37.0'.
 
+### Build package.xml
+
+Menu: &gt;ForceCode Menu ... Package-xml
+
+Generate a package.xml file in your src directory based on its contents. You can give the package a name, which makes your package easy to retrieve later on, or you can generate a package without a name. You can then use this package.xml to deploy your package.
+
 **SPECIAL NOTE**  
 You can create Classes, Triggers, Components, and Pages by simply creating the file anywhere in your project structure.  
 When you save it, it'll create the file if it doesn't exist, and update it if it does.  
 The manual process doesn't automatically create the meta.xml file, so doesn't work seamlessly with CI.  However there's no easier way to connect to your org, open a file, modify it and save it back to your org.  This means working with multiple orgs is easier than ever.
+
+
+## Help Develop ForceCode 
+
+### Clone the repo
+
+Step 1.  Clone this repo to your local machine, like you would with any other Git repository.
+
+### Open the folder
+
+Step 2.  Open the folder you just created when you cloned the repo.
+
+### Install the dependencies
+
+Step 3.  Open the terminal by pressing `ctrl` + `~` and install the dependencies by running `npm install`
+
+### Run the extension
+
+Step 4.  Press F5 to start debugging the extension. A new VSCode window will open up.  Open your Salesforce project.
+
+### Debug the extension
+
+Step 5.  Find the file for the command you want to run, and put in a breakpoint. Run the command to hit the breakpoint and start exploring the variables
+
 
 ## Future goals
 
@@ -248,3 +268,7 @@ The manual process doesn't automatically create the meta.xml file, so doesn't wo
 * Intellisense code completion (in progress)
 * Implement checkpoints in the editor
 * Integrate with Yo Force to provide scaffolding of files.
+
+## Documentation
+
+Documentation site can be found at [https://johnaaronnelson.gitbooks.io/forcecode/content/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
