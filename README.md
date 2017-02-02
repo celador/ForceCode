@@ -10,8 +10,6 @@ This extension is a companion for SFDC development with Visual Studio Code.
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.  
 There's no complicated setup process or project configurations, no external apps to keep open, and no jarring errors knocking you out of your flow.
 
-To get syntax highlighting, make sure you install the Visualforce and Apex extensions.
-
 ## Documentation
 
 Documentation can be found at [https://johnaaronnelson.gitbooks.io/forcecode/content/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
@@ -25,16 +23,41 @@ I use this extension every day, so if there is something not working, I would ap
 
 ## Features
 
-* Execute Anonymous
-* View Debug Logs
-* Open / Retrieve a file
 * Save / Compile / Deploy a file
-  * Works with Classes, Triggers, Components, Pages, Permission Sets, Objects, and Lightning Components
+  * Works with Classes, Triggers, Components, Pages, Permission Sets, Objects, Custom Labels, and Lightning Components
   * Provides line errors in the editor
+  * Works great with autosave
+* Run Unit Tests
+    * Code coverage highlighting in the editor
+    * Coverage warnings and percents
+    * Errors in the editor on test failures
+    * Auto-open test log
+* Diff server & local versions
+* Execute Anonymous
+* View / Save Debug Logs
+* Open / Retrieve a file
+  * Works with Classes, Triggers, Components, Pages, Static Resources, and Lightning Components
 * Retrieve Package
-* Bundle & Deploy Static Resource
-* Create Classes from templates
+    * Select from available Packages
+    * Retrive All Metadata
+    * Retrieve by Package.xml    
 * Deploy Package
+* Bundle & Deploy Static Resources on save
+    * Auto refresh the browser on save
+    * Works great with autosave
+* Create Classes from templates
+* Syntax Highlighting for Visualforce and Apex 
+    * Syntax highlighting provided by the Visualforce and Apex extensions. 
+* SOQL and Tooling query
+    * Quickly run [SOQL Queries](https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql.htm)
+    * Query [Tooling Objects](https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/reference_objects_list.htm)
+    * Results returned as JSON 
+* Arbitrary folder structure
+    * Define your project `src` folder
+    * Flexible project structure
+* API Limit Warnings
+* ~~Create Package.xml~~
+    * Functionality provided by the npm [package-xml](https://www.npmjs.com/package/package-xml) package
 
 ## Configuration
 
