@@ -15,7 +15,6 @@ There's no complicated setup process or project configurations, no external apps
 Documentation can be found at [https://johnaaronnelson.gitbooks.io/forcecode/content/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
 Documentation modifications are done in the Documentation branch.  (This is a test)
 
-
 ## Issues
 
 Please submit any issues to [https://github.com/celador/ForceCode/issues](https://github.com/celador/ForceCode/issues)  
