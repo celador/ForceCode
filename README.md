@@ -12,9 +12,8 @@ To get syntax highlighting, make sure you install the Visualforce and Apex exten
 
 ## Documentation
 
-Documentation can be found at [https://johnaaronnelson.gitbooks.io/forcecode/content/](https://johnaaronnelson.gitbooks.io/forcecode/content/)
-
-Documentation lives in the Documentation branch
+Documentation can be found at [https://johnaaronnelson.gitbooks.io/forcecode/content/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
+Documentation modifications are done in the Documentation branch
 
 ## Issues
 
@@ -95,7 +94,7 @@ However, when we build these SPAs we generally have a ton of preference and sour
 So, you can create Node glob patterns to ignore. The default configuration is shown below.  
 Glob patterns can be tricky... so a little research and trial and error may be required to get your bundle just right.
 
-```
+```json
 {
     ".gitignore": true,
     ".DS_Store": true,
@@ -210,6 +209,3 @@ The manual process doesn't automatically create the meta.xml file, so doesn't wo
 * Debug Apex code with breakpoints in the editor
 
 * Integrate with Yo Force to provide scaffolding of files.
-
-
-
