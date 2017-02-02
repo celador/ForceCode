@@ -1,12 +1,10 @@
+[![Logo](https://rawgithub.com/celador/ForceCode/Documentation/images/logo-type.svg)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 
-<img src="https://rawgithub.com/celador/ForceCode/Documentation/images/logo-type.svg">
-<p align="justify">
+# ForceCode for Visual Studio Code
 
 [![Version](http://vsmarketplacebadge.apphb.com/version/JohnAaronNelson.ForceCode.svg)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 [![Installs](http://vsmarketplacebadge.apphb.com/installs/JohnAaronNelson.ForceCode.svg)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 [![Ratings](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.svg)](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.svg)
-
-</p>
 
 ## Overview
 
