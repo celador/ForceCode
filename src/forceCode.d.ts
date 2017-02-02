@@ -25,6 +25,7 @@ export interface Config {
     proxyUrl?: string;
     showTestCoverage? : boolean;
     showTestLog? : boolean;
+    spaDist? : string;
     src?: string;
     url?: string;
     username?: string;

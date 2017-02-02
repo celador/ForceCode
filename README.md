@@ -86,12 +86,14 @@ The configuration file should look something like...
     "prefix": "",
     "showTestCoverage": true,
     "showTestLog": false,
+    "spaDist": "dist",
     "src": "src",
     "deployOptions": {
       "checkOnly": false,
+      "ignoreWarnings": true,
+      "rollbackOnError": true,
       "testLevel": "runLocalTests",
-      "verbose": false,
-      "ignoreWarnings": true
+      "verbose": true,
     }
 }
 ```
@@ -105,14 +107,17 @@ Note: the password is in the format "passwordtoken".  Do not try to use any deli
 * password: The password, with security token, for your user.
 * url: This is the login url for Salesforce.  It's either login.salesforce.com for Developer and Professional editions or test.salesforce.com for sandboxes.
 * autoCompile: When a supported file is saved \(works with VSCode's autosave feature\) the file is saved/compiled on the server.  Otherwise, use `cmd + opt + s` to save the file to the server.
+* apiVersion: This is the default api version that all your files will be saved with.  If this is not set, this will default to the version of the org in use.  ForceCode will not change the version of an existing file.  This is also the version used for package retrieval and deploy.
 * autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on \(and you're working on a Mac\), the currently active tab in Google Chrome Canary \(or your configured browser\) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
 * browser: Define which browser you want to reload when the static resource refreshes \(this only works with Macs at the moment\)
+* debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
+* debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
 * poll: When compiling, this is the interval \(in milliseconds\) at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
 * pollTimeout: When retrieving packages, or other long running tasks, this is the maximum amount of time \(in seconds\) it will wait before the process times out.  If you're having trouble retrieving your package, try increasing this number.  Default is 600 \(10 minutes\).
-* debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
-* debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
-* apiVersion: This is the default api version that all your files will be saved with.  If this is not set, this will default to the version of the org in use.  ForceCode will not change the version of an existing file.  This is also the version used for package retrieval and deploy.
 * prefix: This is the namespce prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise ForceCode will attempt to infer a prefix from your Salesforce Org.  If you have a namespaced org and do not set this setting, you may have problems, especially if working on an out of date Org.  This should be automatic as of Salesforce 38
+* showTestCoverage: This flag determines if Apex code coverage highlighting should be shown or hidden in the editor.  This can be toggled for the open editor by clicking the colorful icon in the editor bar.
+* showTestLog: This flag determines if the Log file for the last test run should show up after the tests are complete.  This is nice for debugging tests.  Use this in conjunction with the other debug flags to keep your output tidy.
+* spaDist: When working with SPAs we usually have a "distribution" folder where we build our files to.  If this string is set, and a SPA is bundled and deployed, this folder will be used as the distribution folder, otherwise the spa project will be deployed.
 * src: This is the src folder that contains your project files.  Normally this is not needed, but if you want to have a non-standard folder structure, you can designate an arbitrary folder as your Salesforce metadata directory.
 * deployOptions: Deploy your package based on your configured deploy options and the package.xml in your src folder.
   * checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.  This will generate a `.validationId` file.
@@ -196,6 +201,13 @@ Win: ctrl + shift + o
 Menu: &gt;Force: Save/Deploy/Compile  
 Mac: alt + cmd + b  
 Win: ctrl + shift + b
+
+ForceCode looks for Static Resources in two places.  The first is `resource-bundles`, the second is `spa`.  Typically, static resources go in the resource-bundles folder, and the resource is named something like `foo.resource` where foo is the name of the static resource.
+So, to create a new Static Resource, ensure the resource-bundles folder exists in the root of your project folder.  Then create a new folder named how you want your static resource to be named with `.resource` at the end of the name.  You can now Bundle and Deploy this Static Resource.
+Whenever you save a file that lives in a resource bundles folder, the resource will automatically bundle and deploy to your org.  Use this in conjunction with autoRefresh flag and browser property to get a browsersync-like experience
+
+If you build SPAs, typically you will have a `spa` folder.  You will likely keep a package.json in that folder which describes that Javascript project. You will build your distribution files to your 'dist' folder.
+These folders do not automatically deploy since we typically run these offline with `jsr-mocks`
 
 ### Deploy Package
 
