@@ -26,9 +26,9 @@
 
 ## Help Improve ForceCode
 
-* [Clone](Contributing.md#clone-the-repo)
-* [Open](Contributing.md#open-the-folder)
-* [Install](Contributing.md#install-the-dependencies)
-* [Run](Contributing.md#run-the-extension)
-* [Debug](Contributing.md#debug-the-extension)
+* [Clone](README.md#clone-the-repo)
+* [Open](README.md#open-the-folder)
+* [Install](README.md#install-the-dependencies)
+* [Run](README.md#run-the-extension)
+* [Debug](README.md#debug-the-extension)
 
