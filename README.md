@@ -246,7 +246,7 @@ Menu: &gt;Force: Get Logs
 Menu: &gt;ForceCode Menu ... Create Class  
 This will automatically create classes based on `apiVersion` else it defaults to '37.0'.
 
-### Build package.xml
+### ~~Build package.xml~~
 
 Menu: &gt;ForceCode Menu ... Package-xml
 
@@ -266,7 +266,7 @@ Step 1.  Clone this repo to your local machine, like you would with any other Gi
 
 ### Open the folder
 
-Step 2.  Open the folder you just created when you cloned the repo.
+Step 2.  Open the folder you just created when you cloned the repo in VSCode.
 
 ### Install the dependencies
 
@@ -274,11 +274,13 @@ Step 3.  Open the terminal by pressing `ctrl` + `~` and install the dependencies
 
 ### Run the extension
 
-Step 4.  Press F5 to start debugging the extension. A new VSCode window will open up.  Open your Salesforce project.
+Step 4.  Press F5 to start debugging the extension. Another VSCode window will open up, which will host your extension.  Open your Salesforce project and start working.
 
 ### Debug the extension
 
-Step 5.  Find the file for the command you want to run, and put in a breakpoint. Run the command to hit the breakpoint and start exploring the variables
+Step 5.  Find the file for the command you want to run and debug, and put in a breakpoint. Run the command to hit the breakpoint and start exploring the variables.  
+
+Step 6.  Have Fun!
 
 
 ## Future goals
