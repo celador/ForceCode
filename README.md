@@ -32,31 +32,35 @@ I use this extension every day, so if there is something not working, I would ap
     * Coverage warnings and percents
     * Errors in the editor on test failures
     * Auto-open test log
+* Easily switch credentials when working with multiple dev orgs
 * Diff server & local versions
 * Execute Anonymous
 * View / Save Debug Logs
 * Open / Retrieve a file
   * Works with Classes, Triggers, Components, Pages, Static Resources, and Lightning Components
+* Deploy Package
+    * Replaces need for CumulusCI w/ Ant
+    * Retrieve detailed deploy information
+    * Runs Validation deploys
 * Retrieve Package
     * Select from available Packages
     * Retrive All Metadata
     * Retrieve by Package.xml    
-* Deploy Package
 * Bundle & Deploy Static Resources on save
     * Auto refresh the browser on save
     * Works great with autosave
 * Create Classes from templates
 * Syntax Highlighting for Visualforce and Apex 
-    * Syntax highlighting provided by the Visualforce and Apex extensions. 
+    * Functionality provided by the Visualforce and Apex extensions. 
 * SOQL and Tooling query
     * Quickly run [SOQL Queries](https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql.htm)
     * Query [Tooling Objects](https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/reference_objects_list.htm)
     * Results returned as JSON 
 * Arbitrary folder structure
-    * Define your project `src` folder
+    * Change your project `src` folder
     * Flexible project structure
 * API Limit Warnings
-* ~~Create Package.xml~~
+* ~~Create Package.xml~~ (on hold)
     * Functionality provided by the npm [package-xml](https://www.npmjs.com/package/package-xml) package
 
 ## Configuration
