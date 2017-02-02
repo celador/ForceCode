@@ -8,19 +8,9 @@
 
 ## Overview
 
-This extension is a companion for SFDC development with Visual Studio Code.  
+This extension is a companion for SFDC (Salesforce.com) development with Visual Studio Code.  
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.  
 There's no complicated setup process or project configurations, no external apps to keep open, and no jarring errors knocking you out of your flow.
-
-## Documentation
-
-Documentation can be found at [https://johnaaronnelson.gitbooks.io/forcecode/content/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
-Documentation modifications are done in the Documentation branch.  (This is a test)
-
-## Issues
-
-Please submit any issues to [https://github.com/celador/ForceCode/issues](https://github.com/celador/ForceCode/issues)  
-I use this extension every day, so if there is something not working, I would appreciate it if you explained your error so I can fix it.
 
 ## Features
 
@@ -33,8 +23,7 @@ I use this extension every day, so if there is something not working, I would ap
     * Coverage warnings and percents
     * Errors in the editor on test failures
     * Auto-open test log
-* Easily switch credentials when working with multiple dev orgs
-* Diff server & local versions
+* Intellisense / Code Completion for Apex (in progress)
 * Execute Anonymous
 * View / Save Debug Logs
 * Open / Retrieve a file
@@ -43,32 +32,43 @@ I use this extension every day, so if there is something not working, I would ap
     * Replaces need for CumulusCI w/ Ant
     * Retrieve detailed deploy information
     * Runs Validation deploys
-* Retrieve Package
-    * Select from available Packages
-    * Retrive All Metadata
-    * Retrieve by Package.xml    
+* Retrieve Package - three options
+    * Retrieve all metadata
+    * Retrieve by selecting from available Packages
+    * Retrieve by package.xml    
 * Bundle & Deploy Static Resources on save
     * Auto refresh the browser on save
     * Works great with autosave
 * Create Classes from templates
-* Syntax Highlighting for Visualforce and Apex 
-    * Functionality provided by the Visualforce and Apex extensions. 
+* Easily switch credentials when working with multiple dev orgs
+* Diff server & local versions
 * SOQL and Tooling query
     * Quickly run [SOQL Queries](https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql.htm)
     * Query [Tooling Objects](https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/reference_objects_list.htm)
-    * Results returned as JSON 
+    * Results are returned as JSON 
 * Arbitrary folder structure
     * Change your project `src` folder
     * Flexible project structure
 * API Limit Warnings
+* Syntax Highlighting for Visualforce and Apex 
+    * Functionality provided by the Visualforce and Apex extensions. 
 * ~~Create Package.xml~~ (on hold)
     * Functionality provided by the npm [package-xml](https://www.npmjs.com/package/package-xml) package
+
+## Documentation
+
+Documentation site can be found at [https://johnaaronnelson.gitbooks.io/forcecode/content/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
+
+## Issues
+
+Please submit any issues or feature requests to [https://github.com/celador/ForceCode/issues](https://github.com/celador/ForceCode/issues)  
 
 ## Configuration
 
 To begin, press `Opt+Cmd+C` or open the Command Pallet and type `>ForceCode: Menu` to bring up the ForceCode Menu  
 You can then enter your credentials to login to your Salesforce org.  Your configuration file will be stored in the base project directory as `force.json`.  
-The configuration file should look something like...
+You need to have a folder opened in VSCode to be able to store this configuration file.
+The configuration file should look something like...  
 
 ```json
 {
@@ -76,14 +76,16 @@ The configuration file should look something like...
     "password": "YourPasswordHere",
     "url": "https://login.salesforce.com",
     "autoCompile": true,
+    "apiVersion": "38.0",
     "autoRefresh": true,
     "browser": "Google Chrome Canary",
+    "debugFilter": 'USER_DEBUG|FATAL_ERROR',
+    "debugOnly": true,
     "poll": 1500,
     "pollTimeout": 1200,
-    "debugOnly": true,
-    "debugFilter": 'USER_DEBUG|FATAL_ERROR',
-    "apiVersion": "38.0",
     "prefix": "",
+    "showTestCoverage": true,
+    "showTestLog": false,
     "src": "src",
     "deployOptions": {
       "checkOnly": false,
@@ -94,7 +96,7 @@ The configuration file should look something like...
 }
 ```
 
-It's probably best to go ahead and create your config file `force.json` in the root of your workspace.  Copy the below configuration and fill in the values.  
+It's probably best to go ahead and create your config file `force.json` in the root of your workspace.  Copy the above configuration and fill in the values.  
 Note: the password is in the format "passwordtoken".  Do not try to use any delimiters.
 
 ### Options
@@ -156,7 +158,10 @@ Otherwise, you will need to use alt + cmd + s to save/compile your file.
 #### Get errors as you type
 
 The Auto-compile feature adds a hook to the save command that will automatically deploy and compile your code to your SFDC org whenever you save.  
-This works great with VSCode's autosave feature, providing errors as you type.
+This works great with VSCode's autosave feature, providing errors as you type.  
+
+Don't worry about waiting while the file is compiling, just keep typing.  
+If a compile is in process, ForceCode will queue a compile, so you won't waste API calls and run up your limits compiling on every save.
 
 ### Run Apex Unit Tests
 
