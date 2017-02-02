@@ -206,8 +206,11 @@ ForceCode looks for Static Resources in two places.  The first is `resource-bund
 So, to create a new Static Resource, ensure the resource-bundles folder exists in the root of your project folder.  Then create a new folder named how you want your static resource to be named with `.resource` at the end of the name.  You can now Bundle and Deploy this Static Resource.
 Whenever you save a file that lives in a resource bundles folder, the resource will automatically bundle and deploy to your org.  Use this in conjunction with autoRefresh flag and browser property to get a browsersync-like experience
 
-If you build SPAs, typically you will have a `spa` folder.  You will likely keep a package.json in that folder which describes that Javascript project. You will build your distribution files to your 'dist' folder.
-These folders do not automatically deploy since we typically run these offline with `jsr-mocks`
+If you build SPAs, typically you will have a `spa` folder, then another folder named for your static resource, like `spa/foo`.
+This folder is your Javascript project, where your package.json lives.
+You will build your distribution files to a 'dist' folder or another folder determined by the `spaDist` config property.
+
+SPA folders do not automatically deploy.  We typically run these offline with `jsr-mocks` and webpack and only deploy when we want to publish.
 
 ### Deploy Package
 
