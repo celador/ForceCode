@@ -163,14 +163,9 @@ Menu: &gt;ForceCode Menu... Run Unit Tests
 Mac: alt + cmd + t  
 Win: ctrl + shift + t  
 Run the tests in the currently open file.  
-<<<<<<< HEAD
-For easy and fun TDD, keep the class you're working on open in one pane, and your tests in the other.  
-AutoCompile means you The tests will execute and output the results below.
-=======
 For easy and fun TDD, keep the class you're working on open in one pane, and your tests in the other.
 Use the keyboard shortcut and the tests will execute.  The results of your tests will display below, along with errors.
 Code coverage will also be generated and display in your Class file.
->>>>>>> codeCompletion
 
 ### Execute Anonymous
 
@@ -243,16 +238,7 @@ The manual process doesn't automatically create the meta.xml file, so doesn't wo
 
 ## Future goals
 
-<<<<<<< HEAD
-* Test runner \(kind of done\)
-
-* Intellisense code completion
-
-* Debug Apex code with breakpoints in the editor
-
-=======
 * Test runner (kind of done)
 * Intellisense code completion (in progress)
 * Implement checkpoints in the editor
->>>>>>> codeCompletion
 * Integrate with Yo Force to provide scaffolding of files.
