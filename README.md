@@ -12,6 +12,10 @@ This extension is a companion for SFDC (Salesforce.com) development with Visual 
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.  
 There's no complicated setup process or project configurations, no external apps to keep open, and no jarring errors knocking you out of your flow.
 
+### Documentation
+
+Documentation site can be found at [https://johnaaronnelson.gitbooks.io/forcecode/content/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
+
 ## Features
 
 * Save / Compile / Deploy a file
@@ -268,7 +272,3 @@ Step 5.  Find the file for the command you want to run, and put in a breakpoint.
 * Intellisense code completion (in progress)
 * Implement checkpoints in the editor
 * Integrate with Yo Force to provide scaffolding of files.
-
-## Documentation
-
-Documentation site can be found at [https://johnaaronnelson.gitbooks.io/forcecode/content/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
