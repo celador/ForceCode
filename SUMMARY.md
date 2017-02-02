@@ -6,7 +6,7 @@
 * [Features](README.md#features)
 * [Issues](README.md#issues)
 * [Configuration](README.md#configuration)
-* [Options](README.md#configuration)
+* [Options](README.md#options)
 
 ## Commands
 
