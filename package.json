@@ -8,7 +8,7 @@
   },
   "license": "MIT",
   "engines": {
-    "vscode": "^1.8.0"
+    "vscode": "^1.9.0"
   },
   "icon": "images/new-logo.png",
   "categories": [
@@ -38,6 +38,11 @@
         "command": "ForceCode.apexTest",
         "title": "Force: Test",
         "description": "Run Apex unit tests"
+      },
+      {
+        "command": "ForceCode.documentMethod",
+        "title": "Force: Document Apex Method",
+        "description": "Document this Apex method with JSDoc syntax"
       },
       {
         "command": "ForceCode.compile",
@@ -75,6 +80,12 @@
         "command": "ForceCode.apexTest",
         "when": "resourceLangId == apex && editorFocus",
         "win": "ctrl+shift+t"
+      },
+      {
+        "command": "ForceCode.documentMethod",
+        "key": "alt+cmd+d",
+        "win": "ctrl+shift+d",
+        "when": "editorFocus && resourceLangId == apex"
       },
       {
         "command": "ForceCode.showMenu",

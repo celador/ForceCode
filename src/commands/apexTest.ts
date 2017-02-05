@@ -84,7 +84,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                 let re: RegExp = /^(Class|Trigger)\.\S*\.(\S*)\.(\S*)\:\sline\s(\d*)\,\scolumn\s(\d*)$/ig;
                 let matches: string[] = re.exec(failure.stackTrace);
                 if (matches && matches.length && matches.length === 6) {
-                    let typ: string = matches[1];
+                    // let typ: string = matches[1];
                     let cls: string = matches[2];
                     // let method: string = matches[3];
                     let lin: number = +matches[4];
@@ -98,12 +98,13 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                     if (member) {
                         let docUri: vscode.Uri = vscode.Uri.file(member.path);
                         let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(lin - 1, col));
+                        let failureRange: vscode.Range = docLocation.range.with(new vscode.Position(lin, Number.MAX_VALUE));
                         let diagnostics: vscode.Diagnostic[] = [];
                         if (diagnosticCollection.has(docUri)) {
                             let ds: vscode.Diagnostic[] = diagnosticCollection.get(docUri);
                             diagnostics = diagnostics.concat(ds);
                         }
-                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(docLocation.range, failure.message, vscode.DiagnosticSeverity.Error);
+                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(failureRange, failure.message, vscode.DiagnosticSeverity.Error);
                         diagnostics.push(diagnostic);
                         diagnosticCollection.set(docUri, diagnostics);
                     }
@@ -137,13 +138,13 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                     }, undefined);
 
                     if (member) {
-                        let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(member.memberInfo.type);
+                        let diagnosticCollection2: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(member.memberInfo.type);
                         let diagnostics: vscode.Diagnostic[] = [];
                         let warningMessage: string = warning.message;
                         let docUri: vscode.Uri = vscode.Uri.file(member.path);
                         let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(0, 0));
                         diagnostics.push(new vscode.Diagnostic(docLocation.range, warningMessage, 1));
-                        diagnosticCollection.set(docUri, diagnostics);
+                        diagnosticCollection2.set(docUri, diagnostics);
                     } else if (warning.message) {
                         vscode.window.forceCode.outputChannel.appendLine(warning.message);
                     }
