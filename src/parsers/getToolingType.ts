@@ -25,8 +25,21 @@ export default function getToolingTypeFromBody(document: vscode.TextDocument, me
         return 'CustomLabels';
     }
 	// Here is replaceSrc possiblity
+    // if (document.fileName.indexOf(`${vscode.window.forceCode.workspaceRoot}${path.sep}aura`) >= 0) {
     if (document.fileName.indexOf(`${vscode.window.forceCode.config.src}${path.sep}aura`) >= 0) {
         return 'AuraDefinition';
+    }
+    return undefined;
+}
+
+
+export function getCoverageType(document: vscode.TextDocument): string {
+
+    if (document.fileName.endsWith('.cls')) {
+        return 'Class';
+    }
+    if (document.fileName.endsWith('.trigger')) {
+        return 'Trigger';
     }
     return undefined;
 }

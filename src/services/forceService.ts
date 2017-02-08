@@ -1,24 +1,32 @@
 import * as vscode from 'vscode';
+import Workspace from './workspace';
 import * as forceCode from './../forceCode';
-import * as path from 'path';
-// import * as fs from 'fs-extra';
-import { constants, operatingSystem } from './../services';
+import { operatingSystem } from './../services';
+import constants from './../models/constants';
 import { configuration } from './../services';
+import * as error from './../util/error';
 import * as commands from './../commands';
+import jsf = require('jsforce');
 const jsforce: any = require('jsforce');
-const pjson : any  = require('./../../../package.json');
+const pjson: any = require('./../../../package.json');
 
 export default class ForceService implements forceCode.IForceService {
     public config: forceCode.Config;
     public conn: any;
     public containerId: string;
-    public containerMembers: any[];
+    public containerMembers: forceCode.IContainerMember[];
+    public metadata: jsf.IMetadataFileProperties[];
+    public declarations: forceCode.IDeclarations;
+    public codeCoverage: {} = {};
+    public codeCoverageWarnings: forceCode.ICodeCoverageWarning[];
     public containerAsyncRequestId: string;
     public userInfo: any;
     public username: string;
     public statusBarItem: vscode.StatusBarItem;
     public outputChannel: vscode.OutputChannel;
     public operatingSystem: string;
+    public workspaceRoot: string;
+    public workspaceMembers: forceCode.IWorkspaceMember[];
 
     constructor() {
         // Set the ForceCode configuration
@@ -30,6 +38,8 @@ export default class ForceService implements forceCode.IForceService {
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         this.statusBarItem.text = 'ForceCode: Active';
         this.containerMembers = [];
+        this.metadata = [];
+        this.declarations = {};
         configuration(this).then(config => {
             this.username = config.username || '';
             this.conn = new jsforce.Connection({
@@ -52,16 +62,36 @@ export default class ForceService implements forceCode.IForceService {
     public newContainer(force: Boolean): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         if (self.containerId && !force) {
-          return Promise.resolve(self);
+            return Promise.resolve(self);
         } else {
-          return self.conn.tooling.sobject('MetadataContainer')
-              .create({ name: 'ForceCode-' + Date.now() })
-              .then(res => {
-                  self.containerId = res.id;
-                  self.containerMembers = [];
-                  return self;
-              });
+            return self.conn.tooling.sobject('MetadataContainer')
+                .create({ name: 'ForceCode-' + Date.now() })
+                .then(res => {
+                    self.containerId = res.id;
+                    self.containerMembers = [];
+                    return self;
+                });
         }
+    }
+
+    public refreshApexMetadata() {
+        return vscode.window.forceCode.conn.metadata.describe().then(describe => {
+            var apexTypes: string[] = describe.metadataObjects
+                .filter(o => o.xmlName.startsWith('ApexClass') || o.xmlName.startsWith('ApexTrigger'))
+                .map(o => {
+                    return {
+                        type: o.xmlName,
+                        folder: o.directoryName,
+                    };
+                });
+
+            return vscode.window.forceCode.conn.metadata.list(apexTypes).then(res => {
+                vscode.window.forceCode.metadata = res;
+                return res;
+            }).then(new Workspace().getWorkspaceMembers).then(members => {
+                this.workspaceMembers = members;
+            });
+        });
     }
 
     // TODO: Add keychain access so we don't have to use a username or password'
@@ -86,7 +116,7 @@ export default class ForceService implements forceCode.IForceService {
         // Lazy-load the connection
         if (self.userInfo === undefined || self.config.username !== self.username || !self.config.password) {
             var connectionOptions: any = {
-                loginUrl: self.config.url || 'https://login.salesforce.com',
+                loginUrl: self.config.url || 'https://login.salesforce.com'
             };
             if (self.config.proxyUrl) {
                 connectionOptions.proxyUrl = self.config.proxyUrl;
@@ -101,20 +131,66 @@ export default class ForceService implements forceCode.IForceService {
             return self.conn
                 .login(config.username, config.password)
                 .then(connectionSuccess)
+                .catch(connectionError)
                 .then(getNamespacePrefix)
-                .catch(connectionError);
+                .then(refreshApexMetadata)
+                .then(getPublicDeclarations)
+                .then(getPrivateDeclarations)
+                .then(getManagedDeclarations)
+                .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+
+            function refreshApexMetadata(svc) {
+                vscode.window.forceCode.refreshApexMetadata();
+                return svc;
+            }
+
+            function getPublicDeclarations(svc) {
+                var requestUrl: string = svc.conn.instanceUrl + '/services/data/v38.0/tooling/completions?type=apex';
+                var headers: any = {
+                    'Accept': 'application/json',
+                    'Authorization': 'OAuth ' + svc.conn.accessToken,
+                };
+                require('node-fetch')(requestUrl, { method: 'GET', headers }).then(response => response.json()).then(json => {
+                    svc.declarations.public = json.publicDeclarations;
+                });
+                return svc;
+            }
+
+            function getPrivateDeclarations(svc) {
+                var query: string = 'SELECT Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix = \'' + self.config.prefix + '\'';
+                self.declarations.private = [];
+                self.conn.tooling.query(query)
+                    .then(res => accumulateAllRecords(res, self.declarations.private));
+                return svc;
+            }
+            function getManagedDeclarations(svc) {
+                var query: string = 'SELECT Id, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix != \'' + self.config.prefix + '\'';
+                self.declarations.managed = [];
+                self.conn.tooling.query(query)
+                    .then(res => accumulateAllRecords(res, self.declarations.managed));
+                return svc;
+            }
+            function accumulateAllRecords(result, accumulator) {
+                if (result && result.done !== undefined && Array.isArray(result.records)) {
+                    if (result.done) {
+                        result.records.forEach(record => {
+                            accumulator.push(record);
+                        });
+                        return result;
+                    } else {
+                        result.records.forEach(record => {
+                            accumulator.push(record);
+                        });
+                        return self.conn.tooling.queryMore(result.nextRecordsUrl).then(res => accumulateAllRecords(res, accumulator));
+                    }
+                }
+            }
             function connectionSuccess(userInfo) {
                 vscode.window.forceCode.statusBarItem.text = `ForceCode: $(zap) Connected as ${self.config.username} $(zap)`;
                 self.outputChannel.appendLine(`Connected as ${JSON.stringify(userInfo)}`);
                 self.userInfo = userInfo;
                 self.username = config.username;
                 return self;
-            }
-            function connectionError(err) {
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(alert) Connection Error $(alert)`;
-                self.outputChannel.appendLine('================================================================');
-                self.outputChannel.appendLine(err.message);
-                throw err;
             }
             function getNamespacePrefix(svc: forceCode.IForceService) {
                 return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {
@@ -123,6 +199,12 @@ export default class ForceService implements forceCode.IForceService {
                     }
                     return svc;
                 });
+            }
+            function connectionError(err) {
+                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(alert) Connection Error $(alert)`;
+                self.outputChannel.appendLine('================================================================');
+                self.outputChannel.appendLine(err.message);
+                throw err;
             }
         } else {
             // self.outputChannel.appendLine(`Connected as ` + self.config.username);
