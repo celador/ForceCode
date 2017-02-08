@@ -88,6 +88,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                     let cls: string = matches[2];
                     // let method: string = matches[3];
                     let lin: number = +matches[4];
+                    let _lin: number = lin > 0 ? lin - 1 : 0;
                     let col: number = +matches[5];
                     // get URI of document from class name and workspace path
                     let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
@@ -97,8 +98,8 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                     }, undefined);
                     if (member) {
                         let docUri: vscode.Uri = vscode.Uri.file(member.path);
-                        let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(lin - 1, col));
-                        let failureRange: vscode.Range = docLocation.range.with(new vscode.Position(lin, Number.MAX_VALUE));
+                        let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(_lin, col));
+                        let failureRange: vscode.Range = docLocation.range.with(new vscode.Position(_lin, Number.MAX_VALUE));
                         let diagnostics: vscode.Diagnostic[] = [];
                         if (diagnosticCollection.has(docUri)) {
                             let ds: vscode.Diagnostic[] = diagnosticCollection.get(docUri);
@@ -174,7 +175,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                         return vscode.workspace.openTextDocument(uri);
                     }
                     function show(_document) {
-                        return vscode.window.showTextDocument(_document, vscode.window.visibleTextEditors.length - 1);
+                        return vscode.window.showTextDocument(_document, vscode.window.visibleTextEditors.length + 1);
                     }
                     function replaceAll(editor) {
                         var start: vscode.Position = new vscode.Position(0, 0);
