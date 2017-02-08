@@ -175,7 +175,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                         return vscode.workspace.openTextDocument(uri);
                     }
                     function show(_document) {
-                        return vscode.window.showTextDocument(_document, vscode.window.visibleTextEditors.length + 1);
+                        return vscode.window.showTextDocument(_document, 3);
                     }
                     function replaceAll(editor) {
                         var start: vscode.Position = new vscode.Position(0, 0);
