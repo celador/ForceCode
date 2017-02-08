@@ -14,7 +14,7 @@ There's no complicated setup process or project configurations, no external apps
 
 ### Documentation
 
-Documentation site can be found at [https://johnaaronnelson.gitbooks.io/forcecode/content/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
+Documentation site can be found at [https://codescience.com/forcecode/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
 
 ## Features
 
