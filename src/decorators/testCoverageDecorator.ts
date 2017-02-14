@@ -54,8 +54,8 @@ export function updateDecorations() {
         return;
     }
     var uncoveredLineOptions: vscode.DecorationOptions[] = [];
-    if (vscode.window.forceCode && vscode.window.forceCode.config && vscode.window.forceCode.config.showTestCoverage) {
-        uncoveredLineOptions = getUncoveredLineOptions(activeEditor.document)
+    if (vscode.window.forceCode && vscode.window.forceCode.config && vscode.window.forceCode.config.showTestCoverage && activeEditor) {
+        uncoveredLineOptions = getUncoveredLineOptions(activeEditor.document);
     }
     activeEditor.setDecorations(uncoveredLineStyle, uncoveredLineOptions);
     // activeEditor.setDecorations(coveredDecorationType, coveredLines);

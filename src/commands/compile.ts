@@ -140,6 +140,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         if (result.success) {
             vscode.window.forceCode.statusBarItem.text = 'Successly deployed ' + result.fullName;
             return result;
+        } else if (Array.isArray(result) && result.length) {
+            vscode.window.forceCode.statusBarItem.text = 'Successly deployed ' + result[0].fullName;
+            return result;
         } else {
             var error: any = result.errors[0];
             vscode.window.forceCode.statusBarItem.text = '' + error;
@@ -495,7 +498,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     function onError(err): any {
         if (toolingType === 'AuraDefinition') {
             return toolingError(err);
-        } else if (toolingType === 'CustomObject') {
+        } else if (toolingType === 'CustomObject' || toolingType === 'CustomLabels') {
+            // Modify this if statement to check if any metadata type
             return metadataError(err);
         } else {
             clearInterval(interval);

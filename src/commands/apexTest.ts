@@ -105,7 +105,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                             let ds: vscode.Diagnostic[] = diagnosticCollection.get(docUri);
                             diagnostics = diagnostics.concat(ds);
                         }
-                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(failureRange, failure.message, vscode.DiagnosticSeverity.Error);
+                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(failureRange, failure.message, vscode.DiagnosticSeverity.Information);
                         diagnostics.push(diagnostic);
                         diagnosticCollection.set(docUri, diagnostics);
                     }
