@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.5.14",
+  "version": "0.5.15",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -48,6 +48,11 @@
         "command": "ForceCode.compile",
         "title": "Force: Save/Deploy/Compile",
         "description": "Compile a Salesforce file"
+      },
+      {
+        "command": "ForceCode.refresh",
+        "title": "Force: Refresh from server",
+        "description": "Refresh a Salesforce file"
       },
       {
         "command": "ForceCode.executeAnonymous",
@@ -264,6 +269,21 @@
         {
           "when": "resourceLangId == xml",
           "command": "ForceCode.compile",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == apex",
+          "command": "ForceCode.refresh",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == visualforce",
+          "command": "ForceCode.refresh",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == xml",
+          "command": "ForceCode.refresh",
           "group": "ForceCode"
         }
       ]
