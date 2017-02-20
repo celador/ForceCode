@@ -46,7 +46,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     /* tslint:enable */
     // Start doing stuff
     vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''}` + spinner();
-    if (isMetadata(document)) {
+    if (isMetadata(document) && toolingType === undefined) {
         // This process uses the Metadata API to deploy specific files
         // This is where we extend it to create any kind of metadata
         // Currently only Objects and Permission sets ...
