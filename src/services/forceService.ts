@@ -15,7 +15,8 @@ export default class ForceService implements forceCode.IForceService {
     public conn: any;
     public containerId: string;
     public containerMembers: forceCode.IContainerMember[];
-    public metadata: jsf.IMetadataFileProperties[];
+    public describe: forceCode.IMetadataDescribe;
+    public apexMetadata: jsf.IMetadataFileProperties[];
     public declarations: forceCode.IDeclarations;
     public codeCoverage: {} = {};
     public codeCoverageWarnings: forceCode.ICodeCoverageWarning[];
@@ -38,7 +39,7 @@ export default class ForceService implements forceCode.IForceService {
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         this.statusBarItem.text = 'ForceCode: Active';
         this.containerMembers = [];
-        this.metadata = [];
+        this.apexMetadata = [];
         this.declarations = {};
         configuration(this).then(config => {
             this.username = config.username || '';
@@ -76,6 +77,7 @@ export default class ForceService implements forceCode.IForceService {
 
     public refreshApexMetadata() {
         return vscode.window.forceCode.conn.metadata.describe().then(describe => {
+            vscode.window.forceCode.describe = describe;
             var apexTypes: string[] = describe.metadataObjects
                 .filter(o => o.xmlName.startsWith('ApexClass') || o.xmlName.startsWith('ApexTrigger'))
                 .map(o => {
@@ -86,7 +88,7 @@ export default class ForceService implements forceCode.IForceService {
                 });
 
             return vscode.window.forceCode.conn.metadata.list(apexTypes).then(res => {
-                vscode.window.forceCode.metadata = res;
+                vscode.window.forceCode.apexMetadata = res;
                 return res;
             }).then(new Workspace().getWorkspaceMembers).then(members => {
                 this.workspaceMembers = members;

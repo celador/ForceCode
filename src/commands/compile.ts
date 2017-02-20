@@ -46,9 +46,19 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     /* tslint:enable */
     // Start doing stuff
     vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''}` + spinner();
-    if (toolingType === undefined) {
+    if (isMetadata(document)) {
+        // This process uses the Metadata API to deploy specific files
+        // This is where we extend it to create any kind of metadata
+        // Currently only Objects and Permission sets ...
+        return vscode.window.forceCode.connect(context)
+            .then(createMetaData)
+            .then(compileMetadata)
+            .then(reportMetadataResults)
+            .then(finished)
+            .catch(onError);
+    } else if (toolingType === undefined) {
         return Promise
-            .reject({ message: 'Unknown Tooling Type.  Ensure the body is well formed' })
+            .reject({ message: 'Metadata Describe Error. Please try again.' })
             .catch(onError);
     } else if (toolingType === 'AuraDefinition') {
         DefType = getAuraDefTypeFromDocument(document);
@@ -64,17 +74,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                     )
                 )
             ).then(finished, onError);
-    } else if (isMetadata(toolingType)) {
-        Source = document.getText();
-        // This process uses the Metadata API to deploy specific files
-        // This is where we extend it to create any kind of metadata
-        // Currently only Objects and Permission sets ...
-        return vscode.window.forceCode.connect(context)
-            .then(createMetaData)
-            .then(compileMetadata)
-            .then(reportMetadataResults)
-            .then(finished)
-            .catch(onError);
     } else {
         // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
         if (vscode.window.forceCode.isCompiling) {
@@ -112,36 +111,56 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // =======================================================================================================================================
     // ================================                  All Metadata                  ===========================================
     // =======================================================================================================================================
-    function isMetadata(type) {
-        return type === 'PermissionSet' || type === 'CustomObject' || type === 'CustomLabels';
+    function isMetadata(doc: vscode.TextDocument) {
+        if (vscode.window.forceCode.describe && vscode.window.forceCode.describe.metadataObjects) {
+            return getMetaType(doc) !== undefined;
+        }
+        return false;
     }
+    function getMetaType(doc: vscode.TextDocument) {
+        if (vscode.window.forceCode.describe && vscode.window.forceCode.describe.metadataObjects) {
+            let extension: string = doc.fileName.slice(doc.fileName.lastIndexOf('.')).replace('.', '');
+            let foo: any[] = vscode.window.forceCode.describe.metadataObjects.filter(o => {
+                return o.suffix === extension;
+            });
+            if (foo.length) {
+                return foo[0].xmlName;
+            }
+        }
+    }
+
     function createMetaData(svc) {
         vscode.window.forceCode.statusBarItem.text = 'Create Metadata';
+        let text: string = document.getText();
+
         return new Promise(function (resolve, reject) {
-            parseString(Source, { explicitArray: false, async: true }, function (err, result) {
+            parseString(text, { explicitArray: false, async: true }, function (err, result) {
                 if (err) {
                     reject(err);
                 }
-                var metadata: any = result[toolingType];
-                delete metadata['$'];
-                delete metadata['_'];
-                metadata.fullName = fileName;
-                resolve(metadata);
+                var metadata: any = result[getMetaType(document)];
+                if (metadata) {
+                    delete metadata['$'];
+                    delete metadata['_'];
+                    metadata.fullName = fileName;
+                    resolve(metadata);
+                }
+                reject({ message: getMetaType(document) + ' metadata type not found in org' });
             });
         });
     }
 
     function compileMetadata(metadata) {
         vscode.window.forceCode.statusBarItem.text = 'Deploying...';
-        return vscode.window.forceCode.conn.metadata.upsert(toolingType, [metadata]);
+        return vscode.window.forceCode.conn.metadata.upsert(getMetaType(document), [metadata]);
     }
 
     function reportMetadataResults(result) {
-        if (result.success) {
-            vscode.window.forceCode.statusBarItem.text = 'Successly deployed ' + result.fullName;
-            return result;
-        } else if (Array.isArray(result) && result.length) {
+        if (Array.isArray(result) && result.length) {
             vscode.window.forceCode.statusBarItem.text = 'Successly deployed ' + result[0].fullName;
+            return result;
+        } else if (typeof result === 'object' && result.success) {
+            vscode.window.forceCode.statusBarItem.text = 'Successly deployed ' + result.fullName;
             return result;
         } else {
             var error: any = result.errors[0];
@@ -165,7 +184,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').create({
                 'DeveloperName': name,
                 'MasterLabel': name,
-                'ApiVersion': vscode.window.forceCode.config.apiVersion || '37.0',
+                'ApiVersion': vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version || '37.0',
                 'Description': name.replace('_', ' '),
             }).then(bundle => {
                 results[0] = [bundle];
@@ -329,7 +348,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                     }
                     return false;
                 });
-            } else if (!vscode.window.forceCode.metadata) {
+            } else if (!vscode.window.forceCode.apexMetadata) {
                 // We don't have a workspace member for this file yet.  
                 // We just booted and haven't retrieved it yet or something went wrong.
                 return vscode.window.showWarningMessage('org_metadata not found', 'Save', 'Wait').then(s => {

@@ -38,7 +38,7 @@ export default class Workspace implements forceCode.IWorkspaceService {
             var filename: string = pathParts[pathParts.length - 1];
             var name: string = filename.substring(0, filename.lastIndexOf('.'));
 
-            return vscode.window.forceCode.metadata.filter(member => {
+            return vscode.window.forceCode.apexMetadata.filter(member => {
                 return member.fullName === name;
             });
         }
