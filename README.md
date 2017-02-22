@@ -271,6 +271,7 @@ Step 2.  Open the folder you just created when you cloned the repo in VSCode.
 ### Install the dependencies
 
 Step 3.  Open the terminal by pressing `ctrl` + `~` and install the dependencies by running `npm install`
+    Note:  You must have Typescript installed globally `npm install typescript -g`
 
 ### Run the extension
 
