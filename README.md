@@ -271,11 +271,11 @@ Step 2.  Open the folder you just created when you cloned the repo in VSCode.
 ### Install the dependencies
 
 Step 3.  Open the terminal by pressing `ctrl` + `~` and install the dependencies by running `npm install`
-    Note:  You must have Typescript installed globally `npm install typescript -g`
 
 ### Run the extension
 
 Step 4.  Press F5 to start debugging the extension. Another VSCode window will open up, which will host your extension.  Open your Salesforce project and start working.
+         If you get an error, ensure you have Typescript installed globally `npm install typescript -g`
 
 ### Debug the extension
 

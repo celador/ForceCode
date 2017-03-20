@@ -400,8 +400,15 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         }
 
         function createObject(text: string): {} {
-            if (toolingType === 'ApexClass' || toolingType === 'ApexTrigger') {
+            if (toolingType === 'ApexClass') {
                 return { Body: text };
+            } else if (toolingType === 'ApexTrigger') {
+                let matches: RegExpExecArray = /\btrigger\b\s\w*\s\bon\b\s(\w*)\s\(/.exec(text);
+                if (matches) {
+                    return { Body: text, TableEnumOrId: matches[1] };
+                } else {
+                    throw { message: 'Could not get object name from Trigger' };
+                }
             } else if (toolingType === 'ApexPage' || toolingType === 'ApexComponent') {
                 return {
                     Markup: text,
