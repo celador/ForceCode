@@ -156,14 +156,18 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
 
     function reportMetadataResults(result) {
-        if (Array.isArray(result) && result.length) {
-            vscode.window.forceCode.statusBarItem.text = 'Successly deployed ' + result[0].fullName;
+        if (Array.isArray(result) && result.length && !result.some(i => !i.success)) {
+            vscode.window.forceCode.statusBarItem.text = 'Successfully deployed ' + result[0].fullName;
             return result;
+        } else if (Array.isArray(result) && result.length && result.some(i => !i.success)) {
+            let error: string = result.filter(i => !i.success).map(i => i.fullName).join(', ') + ' Failed';
+            vscode.window.forceCode.statusBarItem.text = '' + error;
+            throw { message: error };
         } else if (typeof result === 'object' && result.success) {
-            vscode.window.forceCode.statusBarItem.text = 'Successly deployed ' + result.fullName;
+            vscode.window.forceCode.statusBarItem.text = 'Successfully deployed ' + result.fullName;
             return result;
         } else {
-            var error: any = result.errors[0];
+            var error: any = result.errors ? result.errors[0] : 'Unknown Error';
             vscode.window.forceCode.statusBarItem.text = '' + error;
             throw { message: error };
         }
