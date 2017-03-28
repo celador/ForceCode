@@ -12,7 +12,9 @@ export default function retrieve(context: vscode.ExtensionContext) {
     .then(svc => showPackageOptions(svc.conn))
     .then(opt => getPackage(opt))
     .then(finished)
-    .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+    .catch(function(err){
+      error.outputError(err, vscode.window.forceCode.outputChannel)
+    }); 
   // =======================================================================================================================================
   // =======================================================================================================================================
   // =======================================================================================================================================
@@ -25,7 +27,14 @@ export default function retrieve(context: vscode.ExtensionContext) {
     };
     var body: string = 'action=EXTENT&extent=PACKAGES';
     return fetch(requestUrl, { method: 'POST', headers, body }).then(function (response) {
-      return response.text();
+      if(response.status === 200){
+          return response.text();
+      }else{
+          //return response.statusText;
+          vscode.window.forceCode.statusBarItem.text = response.statusText ;
+          return JSON.stringify({PACKAGES : {packages:[]}});
+      }
+
     }).then(function (json) {
       return JSON.parse(json.replace('while(1);\n', '')).PACKAGES.packages;
     });
