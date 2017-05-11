@@ -66,7 +66,7 @@ Please submit any issues or feature requests to [https://github.com/celador/Forc
 ## Configuration
 
 To begin, press `Opt+Cmd+C` or open the Command Pallet and type `>ForceCode: Menu` to bring up the ForceCode Menu  
-You can then enter your credentials to login to your Salesforce org.  Your configuration file will be stored in the base project directory as `force.json`.  
+You can then enter your credentials to login to your Salesforce org.  Your configuration file will be stored in the `.vscode` directory of your base project as `force.json`.  
 You need to have a folder opened in VSCode to be able to store this configuration file.
 The configuration file should look something like...  
 
@@ -98,7 +98,7 @@ The configuration file should look something like...
 }
 ```
 
-It's probably best to go ahead and create your config file `force.json` in the root of your workspace.  Copy the above configuration and fill in the values.  
+It's probably best to go ahead and create your config file `force.json` in the `.vscode` directory of your workspace.  Copy the above configuration and fill in the values.  
 Note: the password is in the format "passwordtoken".  Do not try to use any delimiters.
 
 ### Options
