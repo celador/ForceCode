@@ -16,6 +16,9 @@ There's no complicated setup process or project configurations, no external apps
 
 Documentation site can be found at [https://codescience.com/forcecode/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
 
+ ### Permissions
+  Please note that the following permissions are required to develop on the Force.com platform: [https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_intro_permissions.htm](https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_intro_permissions.htm)
+
 ## Features
 
 * Save / Compile / Deploy a file
