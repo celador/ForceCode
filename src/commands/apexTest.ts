@@ -37,13 +37,24 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
             .find({ Name: name, NamespacePrefix: vscode.window.forceCode.config.prefix || '' }).execute();
     }
 
+	function selectionContainsMethod(method) {
+		return vscode.window.activeTextEditor.selections.some(function(selection) {
+			return document.getText(new vscode.Range(selection.start, selection.end)).indexOf(method.name) > -1;
+		});
+	}
+
     function getTestMethods(info): string[] {
         if (info.SymbolTable) {
-            return info.SymbolTable.methods.filter(function (method) {
+            var testMethods = info.SymbolTable.methods.filter(function (method) {
                 return method.annotations.some(function (annotation) {
                     return annotation.name === 'IsTest';
                 });
-            }).map(function (method) {
+            });
+			var selectionsContainsMethodNames = testMethods.some(selectionContainsMethod);
+			if (selectionsContainsMethodNames) {
+				testMethods = testMethods.filter(selectionContainsMethod);
+			} 
+			return testMethods.map(function (method) {
                 return method.name;
             });
         } else {
@@ -126,7 +137,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
             }
 
             // Add Code Coverage Warnings, maybe as actual Validation Warnings 
-            if (res.codeCoverageWarnings.length && vscode.window.forceCode.workspaceMembers.length) {
+            if (res.codeCoverageWarnings.length && Array.isArray(vscode.window.forceCode.workspaceMembers) && vscode.window.forceCode.workspaceMembers.length) {
                 res.codeCoverageWarnings.forEach(function (warning) {
 
                     let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers.reduce((prev, curr) => {
