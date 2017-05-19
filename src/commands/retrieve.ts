@@ -48,7 +48,12 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         };
         var body: string = 'action=EXTENT&extent=PACKAGES';
         return fetch(requestUrl, { method: 'POST', headers, body }).then(function (response) {
-            return response.text();
+            if (response.status === 200) {
+                return response.text();
+            } else {
+                vscode.window.forceCode.statusBarItem.text = response.statusText;
+                return JSON.stringify({ PACKAGES: { packages: [] } });
+            }
         }).then(function (json) {
             return JSON.parse(json.replace('while(1);\n', '')).PACKAGES.packages;
         });
