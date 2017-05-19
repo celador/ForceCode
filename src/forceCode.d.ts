@@ -90,19 +90,20 @@ interface IMetadataObject {
     childXmlNames?: string[];
 }
 
-// interface IMetadataDescribe {
-//     metadataObjects: IMetadataObject[];
-//     organizationNamespace: string;
-//     partialSaveAllowed: boolean;
-//     testRequired: boolean;
-// }
+export interface IMetadataDescribe {
+    metadataObjects: IMetadataObject[];
+    organizationNamespace: string;
+    partialSaveAllowed: boolean;
+    testRequired: boolean;
+}
 
 export interface IForceService {
     operatingSystem?: string;
     config?: Config;
     workspaceRoot: string;
     completions?: vscode.CompletionItem[];
-    metadata: jsforce.IMetadataFileProperties[];
+    describe: IMetadataDescribe;
+    apexMetadata: jsforce.IMetadataFileProperties[];
     declarations?: IDeclarations;
     codeCoverage?: {};
     codeCoverageWarnings?: ICodeCoverageWarning[];
@@ -123,6 +124,7 @@ export interface IForceService {
     clearLog(): void;
     refreshApexMetadata(): Promise<any>;
 }
+
 
 export interface ForceCodeError {
     message: string;
