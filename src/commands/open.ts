@@ -114,7 +114,6 @@ export default function open(context: vscode.ExtensionContext) {
                     });
                 });
             } else {
-                // Here is replaceSrc possiblity
                 filename = `${vscode.window.forceCode.workspaceRoot}${path.sep}${getFolder(toolingType)}${path.sep}${res.Name || res.FullName}.${getExtension(toolingType)}`;
                 let body: string = res.Body || res.Markup;
                 return new Promise((resolve, reject) => {

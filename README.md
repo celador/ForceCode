@@ -176,7 +176,11 @@ If a compile is in process, ForceCode will queue a compile, so you won't waste A
 Menu: &gt;ForceCode Menu... Run Unit Tests  
 Mac: alt + cmd + t  
 Win: ctrl + shift + t  
-Run the tests in the currently open file.  
+Run tests in the currently open file.  
+You can run all tests in the current file or any individual tests in the current file.
+To run all tests in the current file, make sure you have no text selected and use the hotkey.
+If you have and text selected that contains a corresponding test method name, it will run only those tests.
+
 For easy and fun TDD, keep the class you're working on open in one pane, and your tests in the other.
 Use the keyboard shortcut and the tests will execute.  The results of your tests will display below, along with errors.
 Code coverage will also be generated and display in your Class file.
@@ -278,6 +282,7 @@ Step 3.  Open the terminal by pressing `ctrl` + `~` and install the dependencies
 ### Run the extension
 
 Step 4.  Press F5 to start debugging the extension. Another VSCode window will open up, which will host your extension.  Open your Salesforce project and start working.
+         If you get an error, ensure you have Typescript installed globally `npm install typescript -g`
 
 ### Debug the extension
 

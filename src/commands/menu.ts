@@ -22,6 +22,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
         var quickpick: any[] = [model.enterCredentials];
         if (vscode.window.forceCode.userInfo !== undefined) {
             quickpick.push(model.openFile);
+            quickpick.push(model.dx);
             quickpick.push(model.compileDeploy);
             quickpick.push(model.executeAnonymous);
             quickpick.push(model.resourceBundle);
@@ -30,11 +31,9 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.runUnitTests);
             quickpick.push(model.deployPackage);
             quickpick.push(model.diff);
-            // Experimental
             quickpick.push(model.package);
             quickpick.push(model.soql);
             quickpick.push(model.toql);
-            // Deprecated
             quickpick.push(model.getLogs);
         }
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
@@ -68,6 +67,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.package.description: return commands.generator(context);
                 case model.createClass.description: return commands.createClass(context);
                 case model.runUnitTests.description: return commands.apexTest(vscode.window.activeTextEditor.document, context);
+                case model.dx.description: return commands.dx(context);
                 default: break;
             }
         }

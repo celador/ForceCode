@@ -1,6 +1,6 @@
 {
   "name": "ForceCode",
-  "version": "0.5.13",
+  "version": "0.5.21",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -48,6 +48,11 @@
         "command": "ForceCode.compile",
         "title": "Force: Save/Deploy/Compile",
         "description": "Compile a Salesforce file"
+      },
+      {
+        "command": "ForceCode.refresh",
+        "title": "Force: Refresh from server",
+        "description": "Refresh a Salesforce file"
       },
       {
         "command": "ForceCode.executeAnonymous",
@@ -265,6 +270,21 @@
           "when": "resourceLangId == xml",
           "command": "ForceCode.compile",
           "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == apex",
+          "command": "ForceCode.refresh",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == visualforce",
+          "command": "ForceCode.refresh",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == xml",
+          "command": "ForceCode.refresh",
+          "group": "ForceCode"
         }
       ]
     }
@@ -272,8 +292,8 @@
   "scripts": {
     "bump": "npm version patch && git push && git push --tags && vsce publish",
     "rebuild": "./node_modules/.bin/electron-rebuild -n 49 -v 1.3.8",
-    "vscode:prepublish": "tsc -p ./",
-    "compile": "tsc -watch -p ./",
+    "vscode:prepublish": "./node_modules/typescript/bin/tsc -p ./",
+    "compile": "./node_modules/typescript/bin/tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "clean": "rm -rf node_modules/",
     "test": "node ./node_modules/vscode/bin/test",
@@ -297,6 +317,7 @@
     "node-fetch": "^1.6.3",
     "node-zip": "^1.1.1",
     "os": "^0.1.1",
+    "salesforcedx": "^39.0.11",
     "sequin": "^0.1.0",
     "typescript": "^2.0.7",
     "unzip": "^0.1.11",
