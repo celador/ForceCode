@@ -1,12 +1,10 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import * as path from 'path';
 import * as forceCode from './../forceCode';
 // import jsforce = require('jsforce');
 // import Workspace from './../services/workspace';
 import * as error from './../util/error';
 import { configuration } from './../services';
-const fs: any = require('fs-extra');
 
 export default function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
@@ -37,11 +35,11 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
             .find({ Name: name, NamespacePrefix: vscode.window.forceCode.config.prefix || '' }).execute();
     }
 
-	function selectionContainsMethod(method) {
-		return vscode.window.activeTextEditor.selections.some(function(selection) {
-			return document.getText(new vscode.Range(selection.start, selection.end)).indexOf(method.name) > -1;
-		});
-	}
+    function selectionContainsMethod(method) {
+        return vscode.window.activeTextEditor.selections.some(function (selection) {
+            return document.getText(new vscode.Range(selection.start, selection.end)).indexOf(method.name) > -1;
+        });
+    }
 
     function getTestMethods(info): string[] {
         if (info.SymbolTable) {
@@ -50,11 +48,11 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                     return annotation.name === 'IsTest';
                 });
             });
-			var selectionsContainsMethodNames = testMethods.some(selectionContainsMethod);
-			if (selectionsContainsMethodNames) {
-				testMethods = testMethods.filter(selectionContainsMethod);
-			} 
-			return testMethods.map(function (method) {
+            var selectionsContainsMethodNames = testMethods.some(selectionContainsMethod);
+            if (selectionsContainsMethodNames) {
+                testMethods = testMethods.filter(selectionContainsMethod);
+            }
+            return testMethods.map(function (method) {
                 return method.name;
             });
         } else {
@@ -163,47 +161,13 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
 
                 });
             }
-
-            // vscode.window.forceCode.outputChannel.show();
             return res;
         });
     }
-    // TODO: Refactor this and the getLog.ts to use a common function
-    // This is Copypasta
     function showLog(res) {
-        var url: string = `${vscode.window.forceCode.conn._baseUrl()}/sobjects/ApexLog/${res.apexLogId}/Body`;
-        var tempPath: string = `${vscode.workspace.rootPath}${path.sep}.logs${path.sep}${res.apexLogId}.log`;
         if (vscode.window.forceCode.config.showTestLog) {
-            vscode.window.forceCode.conn.request(url).then(logBody => {
-                fs.stat(tempPath, function (err, stats) {
-                    if (err) {
-                        return open(vscode.Uri.parse(`untitled:${tempPath}`)).then(show).then(replaceAll);
-                    } else {
-                        return open(vscode.Uri.parse(`file:${tempPath}`)).then(show).then(replaceAll);
-                    }
-
-                    function open(uri) {
-                        return vscode.workspace.openTextDocument(uri);
-                    }
-                    function show(_document) {
-                        return vscode.window.showTextDocument(_document, 3);
-                    }
-                    function replaceAll(editor) {
-                        var start: vscode.Position = new vscode.Position(0, 0);
-                        var lineCount: number = editor.document.lineCount - 1;
-                        var lastCharNumber: number = editor.document.lineAt(lineCount).text.length;
-                        var end: vscode.Position = new vscode.Position(lineCount, lastCharNumber);
-                        var range: vscode.Range = new vscode.Range(start, end);
-                        editor.edit(builder => builder.replace(range, debugOnly()));
-                    }
-                    function debugOnly() {
-                        if (vscode.window.forceCode.config.debugOnly) {
-                            return logBody.split('\n').filter(l => l.match(new RegExp(vscode.window.forceCode.config.debugFilter || 'USER_DEBUG'))).join('\n');
-                        } else {
-                            return logBody;
-                        }
-                    }
-                });
+            return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${res.apexLogId}.log`)).then(function (_document: vscode.TextDocument) {
+                return vscode.window.showTextDocument(_document, 3, true);
             });
         }
         return res;

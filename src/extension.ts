@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ForceService } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
+import ForceCodeLogProvider from './providers/LogProvider';
 import ApexCompletionProvider from './providers/ApexCompletion';
 import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator } from './decorators/testCoverageDecorator';
 import * as commands from './commands';
@@ -11,6 +12,7 @@ export function activate(context: vscode.ExtensionContext): any {
     vscode.window.forceCode = new ForceService();
 
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('forcecode', new ForceCodeContentProvider()));
+    context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('sflog', new ForceCodeLogProvider()));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.documentMethod', () => {
         commands.documentMethod(context);
