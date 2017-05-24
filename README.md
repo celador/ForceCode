@@ -40,6 +40,7 @@ Please note that the following permissions are required to develop on the Force.
     * Coverage warnings and percents
     * Errors in the editor on test failures
     * Auto-open test log
+    * Easy to run a single tests, multiple tests, or all tests in a Class
 * Intellisense / Code Completion for Apex (in progress)
 * Execute Anonymous
 * View / Save Debug Logs
@@ -187,9 +188,10 @@ Menu: &gt;ForceCode Menu... Run Unit Tests
 Mac: alt + cmd + t  
 Win: ctrl + shift + t  
 Run tests in the currently open file.  
+
 You can run all tests in the current file or any individual tests in the current file.
 To run all tests in the current file, make sure you have no text selected and use the hotkey.
-If you have and text selected that contains a corresponding test method name, it will run only those tests.
+If you have any text selected that contains a corresponding test method name, it will run only those tests.  So, to run a single test, simply highlight the method name and execute the "Run Apex Tests" command
 
 For easy and fun TDD, keep the class you're working on open in one pane, and your tests in the other.
 Use the keyboard shortcut and the tests will execute.  The results of your tests will display below, along with errors.
@@ -303,10 +305,8 @@ Step 6.  Have Fun!
 
 ## Future goals
 
-* Test runner (kind of done)
 * Intellisense code completion (in progress)
 * Implement checkpoints in the editor
-* Integrate with Yo Force to provide scaffolding of files.
 
 ## Change Log
 
