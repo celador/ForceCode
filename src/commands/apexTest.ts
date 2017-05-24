@@ -43,12 +43,12 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
 
     function getTestMethods(info): string[] {
         if (info.SymbolTable) {
-            var testMethods = info.SymbolTable.methods.filter(function (method) {
+            var testMethods: any[] = info.SymbolTable.methods.filter(function (method) {
                 return method.annotations.some(function (annotation) {
                     return annotation.name === 'IsTest';
                 });
             });
-            var selectionsContainsMethodNames = testMethods.some(selectionContainsMethod);
+            var selectionsContainsMethodNames: boolean = testMethods.some(selectionContainsMethod);
             if (selectionsContainsMethodNames) {
                 testMethods = testMethods.filter(selectionContainsMethod);
             }
@@ -166,7 +166,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     }
     function showLog(res) {
         if (vscode.window.forceCode.config.showTestLog) {
-            return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${res.apexLogId}.log`)).then(function (_document: vscode.TextDocument) {
+            return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${res.apexLogId}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
                 return vscode.window.showTextDocument(_document, 3, true);
             });
         }
