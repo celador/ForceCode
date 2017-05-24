@@ -54,8 +54,14 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 vscode.window.forceCode.statusBarItem.text = response.statusText;
                 return JSON.stringify({ PACKAGES: { packages: [] } });
             }
-        }).then(function (json) {
-            return JSON.parse(json.replace('while(1);\n', '')).PACKAGES.packages;
+        }).then(function (json: string) {
+            if (json.trim().startsWith('<')) {
+                return [];
+            } else {
+                return JSON.parse(json.replace('while(1);\n', '')).PACKAGES.packages;
+            }
+        }).catch(function () {
+            return [];
         });
     }
 
@@ -70,6 +76,13 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                         description: pkg.Name,
                     };
                 });
+            if (Array.isArray(packages) && packages.length === 0) {
+                options.push({
+                    label: '$(briefcase) Retrieve by name',
+                    detail: `Packaged (Enter the package name manually)`,
+                    description: 'manual',
+                });
+            }
             options.push({
                 label: '$(package) Retrieve by package.xml',
                 detail: `Packaged (Retrieve metadata defined in Package.xml)`,
@@ -86,6 +99,18 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 placeHolder: 'Retrieve Package',
             };
             return vscode.window.showQuickPick(options, config);
+        }).then(function (res) {
+            if (res.description === 'manual') {
+                return vscode.window.showInputBox({
+                    ignoreFocusOut: true,
+                    prompt: 'enter your package name',
+                }).then(function (name) {
+                    return {
+                        description: name
+                    };
+                });
+            }
+            return res;
         });
     }
 
@@ -196,32 +221,36 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     }
 
     function processResult(stream: NodeJS.ReadableStream) {
-        return new Promise(function (resolve, reject) {
-            var bufs: any = [];
-            stream.on('data', function (d) {
-                bufs.push(d);
-            });
-            stream.on('error', function (err) {
-                reject(err);
-            });
-            stream.on('end', function () {
-                var reader: any[] = ZIP.Reader(Buffer.concat(bufs));
-                reader.forEach(function (entry) {
-                    if (entry.isFile()) {
-                        var name: string = entry.getName();
-                        var data: NodeBuffer = entry.getData();
-                        if (option && option.description === 'packaged') {
-                            option.description = 'unpackaged';
-                        }
-                        if (option && option.description) {
-                            name = name.replace(option.description + path.sep, '');
-                        }
-                        fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
-                    }
+        if (Buffer.isBuffer(stream)) {
+            return new Promise(function (resolve, reject) {
+                var bufs: any = [];
+                stream.on('data', function (d) {
+                    bufs.push(d);
                 });
-                resolve({ success: true });
+                stream.on('error', function (err) {
+                    reject(err);
+                });
+                stream.on('end', function () {
+                    var reader: any[] = ZIP.Reader(Buffer.concat(bufs));
+                    reader.forEach(function (entry) {
+                        if (entry.isFile()) {
+                            var name: string = entry.getName();
+                            var data: NodeBuffer = entry.getData();
+                            if (option && option.description === 'packaged') {
+                                option.description = 'unpackaged';
+                            }
+                            if (option && option.description) {
+                                name = name.replace(option.description + path.sep, '');
+                            }
+                            fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
+                        }
+                    });
+                    resolve({ success: true });
+                });
             });
-        });
+        } else {
+            return Promise.reject({ message: 'Package Not Found' });
+        }
     }
     // =======================================================================================================================================
     // =======================================================================================================================================
