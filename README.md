@@ -307,3 +307,9 @@ Step 6.  Have Fun!
 * Intellisense code completion (in progress)
 * Implement checkpoints in the editor
 * Integrate with Yo Force to provide scaffolding of files.
+
+## Change Log
+
+* 0.5.23 
+  - Reorder "Create Class" command options to make Custom the default option
+  - Change "Get Logs" behavior to not create an "untitled" log file
