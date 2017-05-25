@@ -221,7 +221,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     }
 
     function processResult(stream: NodeJS.ReadableStream) {
-        if (Buffer.isBuffer(stream)) {
+        // if (Buffer.isBuffer(stream)) {
             return new Promise(function (resolve, reject) {
                 var bufs: any = [];
                 stream.on('data', function (d) {
@@ -248,9 +248,9 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                     resolve({ success: true });
                 });
             });
-        } else {
-            return Promise.reject({ message: 'Package Not Found' });
-        }
+        // } else {
+        //     return Promise.reject({ message: 'Package Not Found' });
+        // }
     }
     // =======================================================================================================================================
     // =======================================================================================================================================
