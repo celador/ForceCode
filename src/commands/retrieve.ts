@@ -6,6 +6,7 @@ const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
 var tools: any = require('cs-jsforce-metadata-tools');
+var elegantSpinner: any = require('elegant-spinner');
 
 export default function retrieve(context: vscode.ExtensionContext, resource?: vscode.Uri) {
     vscode.window.forceCode.statusBarItem.text = 'Retrieve Started';
@@ -13,6 +14,8 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     const _consoleInfoReference: any = console.info;
     const _consoleErrorReference: any = console.error;
     const _consoleLogReference: any = console.log;
+    const spinner: any = elegantSpinner();
+    var interval: any = undefined;
     const statsPath: string = `${vscode.workspace.rootPath}${path.sep}RetrieveStatistics.log`;
     var logger: any = (function (fs) {
         var buffer: string = '';
@@ -122,7 +125,10 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         vscode.window.forceCode.conn.metadata.pollTimeout = (vscode.window.forceCode.config.pollTimeout || 600) * 1000;
 
         if (opt) {
-            vscode.window.forceCode.statusBarItem.text = 'Retrieving ' + option.description;
+            clearInterval(interval);
+            interval = setInterval(function () {
+                vscode.window.forceCode.statusBarItem.text = `Retrieve ${option.description} ` + spinner();
+            }, 50);
             return new Promise(pack);
         } else if (resource) {
             return new Promise(function (resolve, reject) {
@@ -252,10 +258,15 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     // =======================================================================================================================================
     // =======================================================================================================================================
     function finished(res): boolean {
+        clearInterval(interval);
         if (res.success) {
-            vscode.window.forceCode.statusBarItem.text = 'Retrieve $(thumbsup)';
+            setTimeout(function() {
+                vscode.window.forceCode.statusBarItem.text = `Retrieve ${option.description} $(thumbsup)`;
+            }, 100);
         } else {
-            vscode.window.forceCode.statusBarItem.text = 'Retrieve Errors $(thumbsdown)';
+            setTimeout(function() {
+                vscode.window.forceCode.statusBarItem.text = 'Retrieve Errors $(thumbsdown)';
+            }, 100);
         }
         tools.reportRetrieveResult(res, logger, vscode.window.forceCode.config.deployOptions.verbose);
         logger.flush();
@@ -263,19 +274,17 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         return res;
     }
     function onError(err) {
+        clearInterval(interval);
         unregisterProxy();
-        vscode.window.forceCode.statusBarItem.text = 'Retrieve Errors $(thumbsdown)';
+        setTimeout(function() {
+            vscode.window.forceCode.statusBarItem.text = 'Retrieve Errors $(thumbsdown)';
+        }, 100);
         return error.outputError(err, vscode.window.forceCode.outputChannel);
     }
     // =======================================================================================================================================
     function registerProxy() {
         console.info = function () {
             var msg: string = arguments[0];
-            if (msg.match(/InProgress/)) {
-                vscode.window.forceCode.statusBarItem.text = 'Retrieve In Progress';
-            } else {
-                vscode.window.forceCode.statusBarItem.text = 'Unknown status';
-            }
             vscode.window.forceCode.outputChannel.appendLine(msg);
             return _consoleInfoReference.apply(this, arguments);
         };
