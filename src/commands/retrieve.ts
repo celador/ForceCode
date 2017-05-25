@@ -76,13 +76,13 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                         description: pkg.Name,
                     };
                 });
-            if (Array.isArray(packages) && packages.length === 0) {
-                options.push({
-                    label: '$(briefcase) Retrieve by name',
-                    detail: `Packaged (Enter the package name manually)`,
-                    description: 'manual',
-                });
-            }
+            // if (Array.isArray(packages) && packages.length === 0) {
+            options.push({
+                label: '$(briefcase) Retrieve by name',
+                detail: `Packaged (Enter the package name manually)`,
+                description: 'manual',
+            });
+            // }
             options.push({
                 label: '$(package) Retrieve by package.xml',
                 detail: `Packaged (Retrieve metadata defined in Package.xml)`,
@@ -221,36 +221,32 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     }
 
     function processResult(stream: NodeJS.ReadableStream) {
-        // if (Buffer.isBuffer(stream)) {
-            return new Promise(function (resolve, reject) {
-                var bufs: any = [];
-                stream.on('data', function (d) {
-                    bufs.push(d);
-                });
-                stream.on('error', function (err) {
-                    reject(err);
-                });
-                stream.on('end', function () {
-                    var reader: any[] = ZIP.Reader(Buffer.concat(bufs));
-                    reader.forEach(function (entry) {
-                        if (entry.isFile()) {
-                            var name: string = entry.getName();
-                            var data: NodeBuffer = entry.getData();
-                            if (option && option.description === 'packaged') {
-                                option.description = 'unpackaged';
-                            }
-                            if (option && option.description) {
-                                name = name.replace(option.description + path.sep, '');
-                            }
-                            fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
-                        }
-                    });
-                    resolve({ success: true });
-                });
+        return new Promise(function (resolve, reject) {
+            var bufs: any = [];
+            stream.on('data', function (d) {
+                bufs.push(d);
             });
-        // } else {
-        //     return Promise.reject({ message: 'Package Not Found' });
-        // }
+            stream.on('error', function (err) {
+                reject(err || {message: 'package not found'});
+            });
+            stream.on('end', function () {
+                var reader: any[] = ZIP.Reader(Buffer.concat(bufs));
+                reader.forEach(function (entry) {
+                    if (entry.isFile()) {
+                        var name: string = entry.getName();
+                        var data: NodeBuffer = entry.getData();
+                        if (option && option.description === 'packaged') {
+                            option.description = 'unpackaged';
+                        }
+                        if (option && option.description) {
+                            name = name.replace(option.description + path.sep, '');
+                        }
+                        fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
+                    }
+                });
+                resolve({ success: true });
+            });
+        });
     }
     // =======================================================================================================================================
     // =======================================================================================================================================
