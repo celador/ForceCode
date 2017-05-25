@@ -76,13 +76,13 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                         description: pkg.Name,
                     };
                 });
-            // if (Array.isArray(packages) && packages.length === 0) {
-            options.push({
-                label: '$(briefcase) Retrieve by name',
-                detail: `Packaged (Enter the package name manually)`,
-                description: 'manual',
-            });
-            // }
+            if (Array.isArray(packages) && packages.length === 0) {
+                options.push({
+                    label: '$(briefcase) Retrieve by name',
+                    detail: `Packaged (Enter the package name manually)`,
+                    description: 'manual',
+                });
+            }
             options.push({
                 label: '$(package) Retrieve by package.xml',
                 detail: `Packaged (Retrieve metadata defined in Package.xml)`,
