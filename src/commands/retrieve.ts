@@ -150,7 +150,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                         .map(o => {
                             return {
                                 name: o.xmlName,
-                                members: '*'
+                                members: '*',
                             };
                         });
                     // List the Metadata by that type

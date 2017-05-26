@@ -4,11 +4,9 @@ import sleep from './../util/sleep';
 import { IForceService } from './../forceCode';
 import * as forceCode from './../forceCode';
 import * as error from './../util/error';
-import fs = require('fs-extra');
 import diff from './diff';
 // import jsforce = require('jsforce');
 const parseString: any = require('xml2js').parseString;
-const moment: any = require('moment');
 
 // TODO: Refactor some things out of this file.  It's getting too big.
 

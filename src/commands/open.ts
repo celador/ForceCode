@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import * as error from './../util/error';
+const ZIP: any = require('zip');
+const fetch: any = require('node-fetch');
 
 import { getIcon, getExtension, getFolder } from './../parsers';
 const TYPEATTRIBUTE: string = 'type';
@@ -113,7 +115,36 @@ export default function open(context: vscode.ExtensionContext) {
                         resolve(true);
                     });
                 });
-            } else {
+            } else if (toolingType === 'StaticResource') {
+                var headers: any = {
+                    'Accept': 'application/json',
+                    'Authorization': 'OAuth ' + vscode.window.forceCode.conn.accessToken,
+                };
+                return fetch(vscode.window.forceCode.conn.instanceUrl + res.Body, { method: 'GET', headers }).then(resource => {
+                    return new Promise(function (resolve, reject) {
+                        var bufs: any = [];
+                        resource.body.on('data', function (d) {
+                            bufs.push(d);
+                        });
+                        resource.body.on('error', function (err) {
+                            reject(err || {message: 'package not found'});
+                        });
+                        resource.body.on('end', function () {
+                            var reader: any[] = ZIP.Reader(Buffer.concat(bufs));
+                            reader.forEach(function (entry) {
+                                if (entry.isFile()) {
+                                    var name: string = entry.getName();
+                                    var data: NodeBuffer = entry.getData();
+                                    var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource${path.sep}${name}`;
+                                    fs.outputFileSync(filePath, data);
+                                }
+                            });
+                            resolve({ success: true });
+                        });
+                    });
+                });
+
+            }else {
                 filename = `${vscode.window.forceCode.workspaceRoot}${path.sep}${getFolder(toolingType)}${path.sep}${res.Name || res.FullName}.${getExtension(toolingType)}`;
                 let body: string = res.Body || res.Markup;
                 return new Promise((resolve, reject) => {
