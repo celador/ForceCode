@@ -30,7 +30,7 @@ function getNameFromClassBody(document: vscode.TextDocument): string {
     var words: string[] = firstLine.trim().split(' ');
     var className: string = words.length && words[words.length - 1];
     if (fileName !== className) {
-        vscode.window.forceCode.outputChannel.appendLine(`It appears to me that the Class Name (${className}) is not the same as the File Name (${fileName}).  You may want to fix this.  Be warned, I am saving it as ${className}`);
+        return fileName;
     }
     return className;
 }

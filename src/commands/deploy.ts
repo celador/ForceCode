@@ -11,7 +11,6 @@ export default function deploy(context: vscode.ExtensionContext) {
     var _consoleInfoReference: any = console.info;
     var _consoleErrorReference: any = console.error;
     var _consoleLogReference: any = console.log;
-    // Here is replaceSrc possiblity
     const validationIdPath: string = `${vscode.workspace.rootPath}${path.sep}.validationId`;
     const statsPath: string = `${vscode.workspace.rootPath}${path.sep}DeployStatistics.log`;
     const deployPath: string = vscode.window.forceCode.workspaceRoot;

@@ -35,8 +35,8 @@ export default function createClass(context: vscode.ExtensionContext) {
     function userClassSelection() {
         var classOptions: any = [
             {
-                title: 'Repository',
-                description: 'The Repository layer contains code responsible for querying records from the database.',
+                title: CUSTOM_CLASS,
+                description: 'Any custom class that does not fit standard conventions.',
             }, {
                 title: 'Controller',
                 description: 'The Controller layer marshals data from the service to provide to the view.',
@@ -47,8 +47,8 @@ export default function createClass(context: vscode.ExtensionContext) {
                 title: 'Service',
                 description: 'The Service Layer contains business logic, calculations, and processes.',
             }, {
-                title: CUSTOM_CLASS,
-                description: 'Any custom class that does not fit standard conventions.',
+                title: 'Repository',
+                description: 'The Repository layer contains code responsible for querying records from the database.',
             },
         ];
         let options: vscode.QuickPickItem[] = classOptions.map(res => {
@@ -116,7 +116,6 @@ export default function createClass(context: vscode.ExtensionContext) {
             });
         }
         // Write Metadata file
-
         function writeMetaFile() {
             var finalMetadataName: string = classesPath + path.sep + classname + '.cls-meta.xml';
             return new Promise(function (resolve, reject) {
@@ -128,7 +127,7 @@ export default function createClass(context: vscode.ExtensionContext) {
 
                         var metaFile: string = `<?xml version="1.0" encoding="UTF-8"?>
 <ApexClass xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>${config.apiVersion || '37.0'}</apiVersion>
+    <apiVersion>${config.apiVersion || vscode.window.forceCode.conn.version || '37.0'}</apiVersion>
     <status>Active</status>
 </ApexClass>`;
 

@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
 import jsforce = require('jsforce');
-import * as path from 'path';
-import * as fs from 'fs-extra';
 import { IForceService } from './../forceCode';
 import * as error from './../util/error';
 const moment: any = require('moment');
@@ -30,7 +28,6 @@ export default function getLog(context: vscode.ExtensionContext) {
         .then(setConnection)
         .then(getLast10Logs)
         .then(displayOptions)
-        .then(getLogById)
         .then(showLog)
         .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
 
@@ -62,36 +59,13 @@ export default function getLog(context: vscode.ExtensionContext) {
         return vscode.window.showQuickPick(options);
     }
 
-    function getLogById(result: vscode.QuickPickItem): Promise<string> {
-        getLogService.logId = result.description;
-        var url: string = `${getLogService.connection._baseUrl()}/sobjects/ApexLog/${getLogService.logId}/Body`;
-        return getLogService.connection.request(url);
-    }
-
-    function showLog(logBody) {
-        var tempPath: string = `${vscode.workspace.rootPath}${path.sep}.logs${path.sep}${getLogService.logId}.log`;
-        fs.stat(tempPath, function (err, stats) {
-            if (err) {
-                return open(vscode.Uri.parse(`untitled:${tempPath}`)).then(show).then(replaceAll);
-            } else {
-                return open(vscode.Uri.parse(`file:${tempPath}`)).then(show);
-            }
-
-            function open(uri) {
-                return vscode.workspace.openTextDocument(uri);
-            }
-            function show(document) {
-                return vscode.window.showTextDocument(document, vscode.window.visibleTextEditors.length - 1);
-            }
-            function replaceAll(editor) {
-                var start: vscode.Position = new vscode.Position(0, 0);
-                var lineCount: number = editor.document.lineCount - 1;
-                var lastCharNumber: number = editor.document.lineAt(lineCount).text.length;
-                var end: vscode.Position = new vscode.Position(lineCount, lastCharNumber);
-                var range: vscode.Range = new vscode.Range(start, end);
-                editor.edit(builder => builder.replace(range, logBody));
-            }
-        })
+    function showLog(res) {
+        if (vscode.window.forceCode.config.showTestLog) {
+            return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${res.description}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
+                return vscode.window.showTextDocument(_document, 3, true);
+            });
+        }
+        return res;
     }
 }
 

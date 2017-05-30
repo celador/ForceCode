@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ForceService } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
+import ForceCodeLogProvider from './providers/LogProvider';
 import ApexCompletionProvider from './providers/ApexCompletion';
 import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator } from './decorators/testCoverageDecorator';
 import * as commands from './commands';
@@ -11,6 +12,7 @@ export function activate(context: vscode.ExtensionContext): any {
     vscode.window.forceCode = new ForceService();
 
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('forcecode', new ForceCodeContentProvider()));
+    context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('sflog', new ForceCodeLogProvider()));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.documentMethod', () => {
         commands.documentMethod(context);
@@ -28,7 +30,12 @@ export function activate(context: vscode.ExtensionContext): any {
         commands.getLog(context);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.open', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.open', (selectedResource?: vscode.Uri) => {
+        if (selectedResource.path) {
+            vscode.workspace.openTextDocument(selectedResource).then(doc => commands.compile(doc, context));
+        } else {
+            commands.compile(vscode.window.activeTextEditor.document, context);
+        }
         commands.open(context);
     }));
 
@@ -44,8 +51,17 @@ export function activate(context: vscode.ExtensionContext): any {
         commands.apexTest(vscode.window.activeTextEditor.document, context);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.compile', () => {
-        commands.compile(vscode.window.activeTextEditor.document, context);
+    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.refresh', (selectedResource?: vscode.Uri) => {
+        commands.retrieve(context, selectedResource);
+    }));
+
+    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.compile', (selectedResource?: vscode.Uri) => {
+        if (selectedResource.path) {
+            vscode.workspace.openTextDocument(selectedResource)
+                .then(doc => commands.compile(doc, context));
+        } else {
+            commands.compile(vscode.window.activeTextEditor.document, context);
+        }
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.diff', () => {

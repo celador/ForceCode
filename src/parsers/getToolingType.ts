@@ -15,15 +15,6 @@ export default function getToolingTypeFromBody(document: vscode.TextDocument, me
     if (document.fileName.endsWith('.page')) {
         return member ? 'ApexPageMember' : 'ApexPage';
     }
-    if (document.fileName.endsWith('.permissionset')) {
-        return 'PermissionSet';
-    }
-    if (document.fileName.endsWith('.object')) {
-        return 'CustomObject';
-    }
-    if (document.fileName.endsWith('.labels')) {
-        return 'CustomLabels';
-    }
 	// Here is replaceSrc possiblity
     // if (document.fileName.indexOf(`${vscode.window.forceCode.workspaceRoot}${path.sep}aura`) >= 0) {
     if (document.fileName.indexOf(`${vscode.window.forceCode.config.src}${path.sep}aura`) >= 0) {
