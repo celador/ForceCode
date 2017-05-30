@@ -107,7 +107,7 @@ The configuration file should look something like...
       "ignoreWarnings": true,
       "rollbackOnError": true,
       "testLevel": "runLocalTests",
-      "verbose": true,
+      "verbose": true
     }
 }
 ```
