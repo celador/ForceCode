@@ -24,7 +24,8 @@
     "url": "https://github.com/celador/ForceCode.git"
   },
   "activationEvents": [
-    "*"
+    "onCommand:ForceCode.showMenu",
+    "workspaceContains:.vscode/force.json"
   ],
   "main": "./out/src/extension",
   "contributes": {
