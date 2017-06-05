@@ -15,8 +15,8 @@ export default function documentMethod(context: vscode.ExtensionContext) {
  * @returns \${2:{null}}
  **/`;
 
-    let snippet: vscode.SnippetString = new vscode.SnippetString(snippetString);
+    // let snippet: vscode.SnippetString = new vscode.SnippetString(snippetString);
 
-    vscode.window.activeTextEditor.insertSnippet(snippet);
+    // vscode.window.activeTextEditor.insertSnippet(snippet);
     return;
 }

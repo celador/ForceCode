@@ -153,8 +153,7 @@
         ],
         "aliases": [
           "Apex"
-        ],
-        "configuration": "./languages/apex-language-configuration.json"
+        ]
       },
       {
         "id": "visualforce",
