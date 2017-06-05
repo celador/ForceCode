@@ -111,7 +111,7 @@ export default function enterCredentials() {
                 'ignoreWarnings': true,
             },
         };
-        fs.outputFile(vscode.workspace.rootPath + path.sep + 'force.json', JSON.stringify(Object.assign(defaultOptions, config), undefined, 4));
+        fs.outputFile(vscode.workspace.rootPath + path.sep + '.vscode'  + path.sep + 'force.json', JSON.stringify(Object.assign(defaultOptions, config), undefined, 4));
         return config;
     }
 }
