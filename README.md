@@ -6,14 +6,13 @@
 [![Installs](http://vsmarketplacebadge.apphb.com/installs/JohnAaronNelson.ForceCode.svg)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 [![Ratings](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.svg)](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.svg)
 
-<iframe
-  src="https://carlo.github.io/patreon-buttons/patreon-btn.html?creator=johnaaronnelson"
-  allowtransparency="true"
-  frameborder="0"
-  scrolling="0"
-  width="110"
-  height="20">
-</iframe>
+## Deprecation
+
+This extension has been deprecated in favor of [Salesforce DX](https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode) 
+
+This extension will no longer receive any updates.  You may continue to use this extension for as long as you want.  
+
+If you would like to see this project continue, please let me know.
 
 ## Overview
 
