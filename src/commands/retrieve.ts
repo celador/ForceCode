@@ -247,6 +247,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                         if (option && option.description) {
                             name = name.replace(option.description + path.sep, '');
                         }
+                        name = path.normalize(name);
                         fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
                     }
                 });
