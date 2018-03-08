@@ -1,4 +1,4 @@
-[![Logo](https://rawgithub.com/celador/ForceCode/Documentation/images/logo-type.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
+[![Logo](https://raw.githubusercontent.com/celador/ForceCode/master/images/logo-type.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 
 # ForceCode for Visual Studio Code
 
