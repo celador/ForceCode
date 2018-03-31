@@ -52,6 +52,13 @@ export default class ForceService implements forceCode.IForceService {
         });
     }
 
+    public resetMenu() {
+        setTimeout(function() {
+            vscode.window.forceCode.statusBarItem.color = 'white';
+            vscode.window.forceCode.statusBarItem.text = 'ForceCode Menu';
+        }, 5000);
+    }
+
     public clearLog() {
         this.outputChannel.clear();
     }
