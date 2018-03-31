@@ -9,6 +9,7 @@ import * as commands from './../commands';
 import jsf = require('jsforce');
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
+var statusInterval: any = undefined;
 
 export default class ForceService implements forceCode.IForceService {
     public config: forceCode.Config;
@@ -52,6 +53,7 @@ export default class ForceService implements forceCode.IForceService {
                 this.statusBarItem.text = `ForceCode ${pjson.version} is Active`;
                 this.connect();
                 this.statusBarItem.show();
+                this.resetMenu();
             }
         }).catch(err => {
             this.statusBarItem.text = 'ForceCode: Missing Configuration';
@@ -59,6 +61,13 @@ export default class ForceService implements forceCode.IForceService {
     }
     public connect(): Promise<forceCode.IForceService> {
         return this.setupConfig().then(this.login);
+    }
+
+    public resetMenu() {
+        setTimeout(function() {
+            vscode.window.forceCode.statusBarItem.color = 'white';
+            vscode.window.forceCode.statusBarItem.text = 'ForceCode Menu';
+        }, 5000);
     }
 
     public clearLog() {
@@ -194,7 +203,21 @@ export default class ForceService implements forceCode.IForceService {
             }
             function connectionSuccess(userInfo) {
                 //vscode.window.forceCode.statusBarItem.text = `ForceCode: $(zap) Connected as ${self.config.username} $(zap)`;
-                self.statusBarItem_UserInfo.text = 'Connected as ' + self.config.username;
+                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username;
+                
+                // for status bar updates. update every 5 seconds
+                clearInterval(statusInterval);
+                statusInterval = setInterval(function () {
+                    var lim = '';
+                    if (vscode.window.forceCode.conn && vscode.window.forceCode.conn.limitInfo && vscode.window.forceCode.conn.limitInfo.apiUsage) {
+                        lim = ' - Limits: ' + vscode.window.forceCode.conn.limitInfo.apiUsage.used + '/' + vscode.window.forceCode.conn.limitInfo.apiUsage.limit;
+                    }
+                    if(vscode.window.forceCode.config.username) {
+                        vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username + lim;
+                    } else {
+                        vscode.window.forceCode.statusBarItem_UserInfo.text = '$(alert) ForceCode not connected $(alert)';
+                    }
+                }, 5000);
                 self.statusBarItem_UserInfo.show();
                 self.outputChannel.appendLine(`Connected as ${JSON.stringify(userInfo)}`);
                 self.userInfo = userInfo;

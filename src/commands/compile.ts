@@ -157,6 +157,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
 
     function reportMetadataResults(result) {
+        vscode.window.forceCode.resetMenu();
         if (Array.isArray(result) && result.length && !result.some(i => !i.success)) {
             vscode.window.forceCode.statusBarItem.text = 'Successfully deployed ' + result[0].fullName;
             return result;
@@ -506,6 +507,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
         diagnosticCollection.set(document.uri, diagnostics);
         clearInterval(interval);
+        vscode.window.forceCode.resetMenu();
         if (diagnostics.length > 0) {
             // FAILURE !!! 
             vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(alert)`;

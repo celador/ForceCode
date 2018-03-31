@@ -123,6 +123,7 @@ export interface IForceService {
     connect(context: vscode.ExtensionContext): Promise<IForceService>;
     newContainer(force: Boolean): Promise<IForceService>;
     clearLog(): void;
+    resetMenu(): void;
     refreshApexMetadata(): Promise<any>;
 }
 

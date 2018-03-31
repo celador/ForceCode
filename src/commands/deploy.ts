@@ -72,6 +72,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         } else {
             vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Errors $(thumbsdown)';
         }
+        vscode.window.forceCode.resetMenu();
         tools.reportDeployResult(res, logger, deployOptions.verbose);
         logger.flush();
         unregisterProxy();
@@ -80,6 +81,7 @@ export default function deploy(context: vscode.ExtensionContext) {
     function onError(err) {
         unregisterProxy();
         vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Errors $(thumbsdown)';
+        vscode.window.forceCode.resetMenu();
         return error.outputError(err, vscode.window.forceCode.outputChannel);
     }
     // =======================================================================================================================================
@@ -97,6 +99,7 @@ export default function deploy(context: vscode.ExtensionContext) {
                 let icon: string = msg.match(/errors\: [1-9]/) ? 'thumbsdown' : 'thumbsup';
                 vscode.window.forceCode.statusBarItem.text = `ForceCode: Testing ${cnt} $(${icon})`;
             }
+            vscode.window.forceCode.resetMenu();
             vscode.window.forceCode.outputChannel.appendLine(msg);
             return _consoleInfoReference.apply(this, arguments);
         };

@@ -76,6 +76,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
             } else {
                 vscode.window.forceCode.statusBarItem.text = 'ForceCode: All Tests Passed $(thumbsup)';
             }
+            vscode.window.forceCode.resetMenu();
             let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Test Failures');
             res.successes.forEach(function (success) {
                 let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;

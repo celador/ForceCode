@@ -162,6 +162,7 @@ export default function open(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     function finished(rsp): boolean {
         vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieve Finished';
+        vscode.window.forceCode.resetMenu();
         return true;
     }
     // =======================================================================================================================================

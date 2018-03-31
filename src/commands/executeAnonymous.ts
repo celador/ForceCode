@@ -83,6 +83,7 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
         } else {
             vscode.window.forceCode.statusBarItem.text = `ForceCode: Execute Anonymous Success $(check)`;
         }
+        vscode.window.forceCode.resetMenu();
         return res;
     }
     function showResult(res) {

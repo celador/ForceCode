@@ -241,6 +241,7 @@ function deployComplete(results) {
     if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
         require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
     }
+    vscode.window.forceCode.resetMenu();
     return results;
 }
 
@@ -249,6 +250,7 @@ function deployAllComplete(results) {
     if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
         require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
     }
+    vscode.window.forceCode.resetMenu();
     var talliedResults: {} = results.reduce(function (prev, curr, idx, arr) {
         return Object.assign(prev, curr);
     }, {});

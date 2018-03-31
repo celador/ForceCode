@@ -28,10 +28,12 @@ export default function toql(context: vscode.ExtensionContext): Promise<any> {
     function finished() {
         // Take the results
         // And write them to a file
+        vscode.window.forceCode.resetMenu();
     }
     function onError(err) {
         // Take the results
         // And write them to a file
+        vscode.window.forceCode.resetMenu();
         error.outputError({ message: err }, vscode.window.forceCode.outputChannel);
     }
     // =======================================================================================================================================

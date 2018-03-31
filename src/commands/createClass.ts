@@ -112,6 +112,7 @@ export default function createClass(context: vscode.ExtensionContext) {
                         vscode.window.showErrorMessage(err.code);
                         reject(err);
                     }
+                    vscode.window.forceCode.resetMenu();
                 });
             });
         }
@@ -143,6 +144,7 @@ export default function createClass(context: vscode.ExtensionContext) {
                         vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + err.code;
                         reject(err);
                     }
+                    vscode.window.forceCode.resetMenu();
                 });
 
             });

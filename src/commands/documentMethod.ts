@@ -6,6 +6,7 @@ import * as error from './../util/error';
 
 export default function documentMethod(context: vscode.ExtensionContext) {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Document Method';
+    vscode.window.forceCode.resetMenu();
 
     let snippetString: string = `\
 /**

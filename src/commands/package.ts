@@ -17,10 +17,12 @@ export default function generate(context: vscode.ExtensionContext) {
 
     // =======================================================================================================================================
     function finished(res): boolean {
+        vscode.window.forceCode.resetMenu();
         return res;
     }
     function onError(err) {
         vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Errors $(thumbsdown)';
+        vscode.window.forceCode.resetMenu();
         return error.outputError(err, vscode.window.forceCode.outputChannel);
     }
     // =======================================================================================================================================
