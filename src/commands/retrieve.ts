@@ -208,6 +208,21 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 retrieveComponents(resolve, { types: types });
             }
 
+            function getSpecificTypeMetadata(metadataType: string) {
+                vscode.window.forceCode.conn.metadata.describe().then(res => {
+                    var types: any[] = res.metadataObjects
+                        .filter(o => o.xmlName === metadataType)
+                        .map(r => {
+                            return { name: r.xmlName, members: '*' };
+                        });
+
+                    resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                        unpackaged: { types: types },
+                        apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
+                    }).stream());
+                });
+            }
+
             function unpackaged() {
                 var xmlFilePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}package.xml`;
                 var data: any = fs.readFileSync(xmlFilePath);
