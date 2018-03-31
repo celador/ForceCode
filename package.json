@@ -344,6 +344,17 @@
           "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
         },
         {
+          "when": "resourceLangId == apex",
+          "command": "ForceCode.refresh",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == visualforce",
+          "command": "ForceCode.refresh",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == xml",
           "command": "ForceCode.refresh",
           "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
         },
