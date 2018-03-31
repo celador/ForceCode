@@ -200,7 +200,7 @@ export default class ForceService implements forceCode.IForceService {
             }
             function connectionSuccess(userInfo) {
                 //vscode.window.forceCode.statusBarItem.text = `ForceCode: $(zap) Connected as ${self.config.username} $(zap)`;
-                self.statusBarItem_UserInfo.text = 'Connected as ${self.config.username}';
+                self.statusBarItem_UserInfo.text = 'Connected as ' + self.config.username;
                 self.statusBarItem_UserInfo.show();
                 self.outputChannel.appendLine(`Connected as ${JSON.stringify(userInfo)}`);
                 self.userInfo = userInfo;
