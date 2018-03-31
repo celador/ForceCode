@@ -263,7 +263,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         clearInterval(interval);
         if (res.success) {
             setTimeout(function() {
-                vscode.window.forceCode.statusBarItem.text = `Retrieve ${option.description} $(thumbsup)`;
+                vscode.window.forceCode.statusBarItem.text = `Retrieve Finished $(thumbsup)`;
             }, 100);
         } else {
             setTimeout(function() {
