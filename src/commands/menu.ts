@@ -16,23 +16,24 @@ export default function showMenu(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
 
     function displayMenu() {
-        var quickpick: any[] = [model.enterCredentials];
+        var quickpick: any[] = [];
         if (vscode.window.forceCode.userInfo !== undefined) {
             quickpick.push(model.openFile);
-            quickpick.push(model.dx);
-            quickpick.push(model.compileDeploy);
-            quickpick.push(model.executeAnonymous);
-            quickpick.push(model.resourceBundle);
-            quickpick.push(model.retrievePackage);
             quickpick.push(model.createClass);
             quickpick.push(model.runUnitTests);
-            quickpick.push(model.deployPackage);
-            quickpick.push(model.diff);
-            quickpick.push(model.package);
-            quickpick.push(model.soql);
-            quickpick.push(model.toql);
+            quickpick.push(model.executeAnonymous);
             quickpick.push(model.getLogs);
+            quickpick.push(model.soql);
+            quickpick.push(model.diff);
+            quickpick.push(model.compileDeploy);
+            quickpick.push(model.resourceBundle);
+            quickpick.push(model.retrievePackage);
+            quickpick.push(model.deployPackage);
+            quickpick.push(model.package);
+            quickpick.push(model.toql);
+            quickpick.push(model.dx);
         }
+        quickpick.push(model.enterCredentials);
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
             return {
                 description: `${record.description}`,
