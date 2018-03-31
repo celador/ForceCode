@@ -24,9 +24,6 @@
     "url": "https://github.com/daishi4u/ForceCode.git"
   },
   "activationEvents": [
-    "onLanguage:xml",
-    "onLanguage:visualforce",
-    "onLanguage:apex",
     "workspaceContains:**/force.json"
   ],
   "main": "./out/src/extension",
