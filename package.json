@@ -312,6 +312,17 @@
           "group": "ForceCode"
         },
         {
+          "when": "resourceLangId == apex",
+          "command": "ForceCode.refresh",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == visualforce",
+          "command": "ForceCode.refresh",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == xml",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         }
