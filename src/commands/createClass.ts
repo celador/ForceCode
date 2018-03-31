@@ -84,7 +84,8 @@ export default function createClass(context: vscode.ExtensionContext) {
     }
 
     function generateFile(classname, config) {
-        return Promise.all([writeFile(), writeMetaFile()]);
+        //return Promise.all([writeFile(), writeMetaFile()]);
+        return Promise.all([writeFile()]);
         function writeFile() {
             return new Promise(function (resolve, reject) {
                 // Write Class file
@@ -116,6 +117,7 @@ export default function createClass(context: vscode.ExtensionContext) {
                 });
             });
         }
+        /*
         // Write Metadata file
         function writeMetaFile() {
             var finalMetadataName: string = classesPath + path.sep + classname + '.cls-meta.xml';
@@ -149,7 +151,7 @@ export default function createClass(context: vscode.ExtensionContext) {
 
             });
         }
-
+        */
 
 
     }
