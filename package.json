@@ -319,7 +319,7 @@
     }
   },
   "scripts": {
-    "bump": "npm version patch && git push && git push --tags && vsce publish",
+    "bump": "npm version patch && git push && git push --tags && npx package",
     "rebuild": "electron-rebuild -n 49 -v 1.3.8",
     "vscode:prepublish": "tsc -p ./",
     "compile": "tsc -watch -p ./",
