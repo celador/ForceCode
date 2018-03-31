@@ -24,7 +24,7 @@
     "url": "https://github.com/daishi4u/ForceCode.git"
   },
   "activationEvents": [
-    "workspaceContains:**/force.json"
+    "*"
   ],
   "main": "./out/src/extension",
   "contributes": {

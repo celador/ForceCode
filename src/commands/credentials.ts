@@ -99,7 +99,6 @@ export default function enterCredentials() {
     function finished(config) {
         const defaultOptions: {} = {
             autoRefresh: false,
-            autoComplete: false,
             browser: 'Google Chrome Canary',
             pollTimeout: 1200,
             debugOnly: true,

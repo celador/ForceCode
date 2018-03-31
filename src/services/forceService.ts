@@ -39,7 +39,7 @@ export default class ForceService implements forceCode.IForceService {
         this.statusBarItem_UserInfo = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 5);
         this.statusBarItem.command = 'ForceCode.showMenu';
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
-        this.statusBarItem.text = 'ForceCode: Active';
+        //this.statusBarItem.text = 'ForceCode: Active';
         this.containerMembers = [];
         this.apexMetadata = [];
         this.declarations = {};
@@ -48,14 +48,14 @@ export default class ForceService implements forceCode.IForceService {
             this.conn = new jsforce.Connection({
                 loginUrl: config.url || 'https://login.salesforce.com'
             });
-            this.statusBarItem.text = `ForceCode ${pjson.version} is Active`;
             if(config.username) {
+                this.statusBarItem.text = `ForceCode ${pjson.version} is Active`;
                 this.connect();
+                this.statusBarItem.show();
             }
         }).catch(err => {
             this.statusBarItem.text = 'ForceCode: Missing Configuration';
         });
-        this.statusBarItem.show();
     }
     public connect(): Promise<forceCode.IForceService> {
         return this.setupConfig().then(this.login);
@@ -152,35 +152,29 @@ export default class ForceService implements forceCode.IForceService {
             }
 
             function getPublicDeclarations(svc) {
-                if (self.config.autoComplete) {
-                    var requestUrl: string = svc.conn.instanceUrl + '/services/data/v38.0/tooling/completions?type=apex';
-                    var headers: any = {
-                        'Accept': 'application/json',
-                        'Authorization': 'OAuth ' + svc.conn.accessToken,
-                    };
-                    require('node-fetch')(requestUrl, { method: 'GET', headers }).then(response => response.json()).then(json => {
-                        svc.declarations.public = json.publicDeclarations;
-                    });
-                }
+                var requestUrl: string = svc.conn.instanceUrl + '/services/data/v38.0/tooling/completions?type=apex';
+                var headers: any = {
+                    'Accept': 'application/json',
+                    'Authorization': 'OAuth ' + svc.conn.accessToken,
+                };
+                require('node-fetch')(requestUrl, { method: 'GET', headers }).then(response => response.json()).then(json => {
+                    svc.declarations.public = json.publicDeclarations;
+                });
                 return svc;
             }
 
             function getPrivateDeclarations(svc) {
-                if (self.config.autoComplete) {
-                    var query: string = 'SELECT Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix = \'' + self.config.prefix + '\'';
-                    self.declarations.private = [];
-                    self.conn.tooling.query(query)
-                        .then(res => accumulateAllRecords(res, self.declarations.private));
-                }
+                var query: string = 'SELECT Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix = \'' + self.config.prefix + '\'';
+                self.declarations.private = [];
+                self.conn.tooling.query(query)
+                    .then(res => accumulateAllRecords(res, self.declarations.private));
                 return svc;
             }
             function getManagedDeclarations(svc) {
-                if (self.config.autoComplete) {
-                    var query: string = 'SELECT Id, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix != \'' + self.config.prefix + '\'';
-                    self.declarations.managed = [];
-                    self.conn.tooling.query(query)
-                        .then(res => accumulateAllRecords(res, self.declarations.managed));
-                }
+                var query: string = 'SELECT Id, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix != \'' + self.config.prefix + '\'';
+                self.declarations.managed = [];
+                self.conn.tooling.query(query)
+                    .then(res => accumulateAllRecords(res, self.declarations.managed));
                 return svc;
             }
             function accumulateAllRecords(result, accumulator) {

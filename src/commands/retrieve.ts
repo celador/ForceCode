@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import * as error from './../util/error';
+import * as parsers from './../parsers';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
@@ -29,7 +30,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         }
         function flush() {
             var logFile: any = path.resolve(statsPath);
-            fs.writeFileSync(logFile, buffer, 'utf8');
+            fs.writeFileSync(logFile, buffer);//, 'utf8');
             buffer = '';
         }
     }(fs));
@@ -96,6 +97,21 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 detail: `All Unpackaged`,
                 description: 'unpackaged',
             });
+            // options.push({
+            //     label: '$(cloud-download) Get All Apex Classes from org',
+            //     detail: `All Apex Classes`,
+            //     description: 'apexclasses',
+            // });
+            // options.push({
+            //     label: '$(cloud-download) Get All Apex Pages from org',
+            //     detail: `All Apex Pages`,
+            //     description: 'apexpages',
+            // });
+            // options.push({
+            //     label: '$(cloud-download) Get All Aura Components from org',
+            //     detail: `All Aura Bundles`,
+            //     description: 'aurabundles',
+            // });
             let config: {} = {
                 matchOnDescription: true,
                 matchOnDetail: true,
@@ -134,59 +150,164 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             return new Promise(function (resolve, reject) {
                 vscode.window.forceCode.conn.metadata.describe().then(describe => {
                     // Get the Metadata Object type
-                    let extension: string = resource.fsPath.slice(resource.fsPath.lastIndexOf('.')).replace('.', '');
-                    var metadataTypes: any[] = describe.metadataObjects
-                        .filter(o => o.suffix === extension);
-
-                    var listTypes: any[] = metadataTypes
-                        .map(o => {
-                            return {
-                                type: o.xmlName,
-                                folder: o.directoryName,
-                            };
-                        });
-
-                    var retrieveTypes: any[] = metadataTypes
-                        .map(o => {
-                            return {
-                                name: o.xmlName,
-                                members: '*',
-                            };
-                        });
-                    // List the Metadata by that type
-                    return vscode.window.forceCode.conn.metadata.list(listTypes).then(res => {
-                        let fileName: string = resource.fsPath.slice(resource.fsPath.lastIndexOf(path.sep) + 1);
-                        var files: string[] = [];
-                        // Match the metadata against the filepath
-                        if (Array.isArray(res)) {
-                            files = res.filter(t => {
-                                let r: string = '\\' + path.sep + '(' + vscode.window.forceCode.config.prefix + ')*' + '(\\\_\\\_)*' + fileName;
-                                return t.fileName.match(new RegExp(r, 'i'));
-                            }).map(t => {
-                                return t.fileName;
+                    // let extension: string = resource.fsPath.slice(resource.fsPath.lastIndexOf('.')).replace('.', '');
+                    var isDirectory: Boolean = fs.lstatSync(resource.fsPath).isDirectory();
+                    if (isDirectory) {
+                        var baseDirectoryName: string = path.parse(resource.fsPath).name;
+                        var types: any[] = describe.metadataObjects
+                            .filter(o => o.directoryName === baseDirectoryName)
+                            .map(r => {
+                                return { name: r.xmlName, members: '*' };
                             });
-                        } else if (typeof res === 'object') {
-                            files.push(res['fileName']);
-                        }
-                        // Retrieve the file by it's name
-                        resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                            singlePackage: true,
-                            specificFiles: files,
-                            unpackaged: { types: retrieveTypes },
-                            apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
-                        }).stream());
-                    });
 
+                        if (types.length <= 0) {
+                            types = getAuraBundle(resource.fsPath, describe, resolve);
+                            // // if nothing was found, then check if this is an AURA componet...
+                            // baseDirectoryName = parsers.getAuraNameFromFileName(resource.fsPath);
+                            // types = describe.metadataObjects
+                            //     .filter(o => o.xmlName === 'AuraDefinitionBundle')
+                            //     .map(r => {
+                            //         return { name: r.xmlName, members: baseDirectoryName };
+                            //     });
+                        }
+
+                        if (types.length > 0) {
+                            retrieveComponents(resolve, types, types[0].name);
+                        }
+                        // showSpinner(types[0].name);
+                        // clearInterval(interval);
+                        // interval = setInterval(function () {
+                        //     vscode.window.forceCode.statusBarItem.text = `Retrieve ${types[0].name} ` + spinner();
+                        // }, 50);
+
+                        // resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                        //     unpackaged: { types: types },
+                        //     apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
+                        // }).stream());
+
+                        // return;
+                    }
+                    else {
+
+                        let extension: string = path.extname(resource.fsPath).replace('.', '');
+                        var metadataTypes: any[] = describe.metadataObjects
+                            .filter(o => o.suffix === extension);
+
+                        // var 
+
+                        vscode.workspace.openTextDocument(resource).then(doc => {
+                            var toolingType = parsers.getToolingType(doc)
+                            const name: string = parsers.getName(doc, toolingType);
+                            if (toolingType === 'AuraDefinition') {
+                                var types: any[] = describe.metadataObjects
+                                    .filter(o => o.xmlName === 'AuraDefinitionBundle')
+                                    .map(r => {
+                                        return { name: r.xmlName, members: name };
+                                    });
+
+                                showSpinner(name);
+                                // clearInterval(interval);
+                                // interval = setInterval(function () {
+                                //     vscode.window.forceCode.statusBarItem.text = `Retrieve ${name} ` + spinner();
+                                // }, 50);
+
+                                resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                                    unpackaged: { types: types },
+                                    apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
+                                }).stream());
+                            }
+                            else {
+                                var listTypes: any[] = metadataTypes
+                                    .map(o => {
+                                        return {
+                                            type: o.xmlName,
+                                            folder: o.directoryName,
+                                        };
+                                    });
+
+                                var retrieveTypes: any[] = metadataTypes
+                                    .map(o => {
+                                        return {
+                                            name: o.xmlName,
+                                            members: '*',
+                                        };
+                                    });
+                                // List the Metadata by that type
+                                return vscode.window.forceCode.conn.metadata.list(listTypes).then(res => {
+                                    let fileName: string = resource.fsPath.slice(resource.fsPath.lastIndexOf(path.sep) + 1);
+                                    var files: string[] = [];
+
+                                    // Match the metadata against the filepath
+                                    if (Array.isArray(res)) {
+                                        files = res.filter(t => {
+                                            return t.fileName.match(fileName);
+                                            // let r: string = '\\' + path.sep + '(' + vscode.window.forceCode.config.prefix + ')*' + '(\\\_\\\_)*' + fileName;
+                                            // return t.fileName.match(new RegExp(r, 'i'));
+                                        }).map(t => {
+                                            return t.fileName;
+                                        });
+                                    } else if (typeof res === 'object') {
+                                        files.push(res['fileName']);
+                                    }
+
+                                    showSpinner(fileName);
+                                    // clearInterval(interval);
+                                    // interval = setInterval(function () {
+                                    //     vscode.window.forceCode.statusBarItem.text = `Retrieve ${fileName} ` + spinner();
+                                    // }, 50);
+
+                                    // Retrieve the file by it's name
+                                    resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                                        singlePackage: true,
+                                        specificFiles: files,
+                                        unpackaged: { types: retrieveTypes },
+                                        apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
+                                    }).stream());
+                                });
+                            }
+                        });
+                    }
                 });
             });
         }
 
+        function getAuraBundle(fsPath, describe, resolve): any[] {
+            // if nothing was found, then check if this is an AURA componet...
+            var baseDirectoryName: string = parsers.getAuraNameFromFileName(resource.fsPath);
+            var types: any[] = describe.metadataObjects
+                .filter(o => o.xmlName === 'AuraDefinitionBundle')
+                .map(r => {
+                    return { name: r.xmlName, members: baseDirectoryName };
+                });
+            return types;
+        }
+
+        function showSpinner(name) {
+            clearInterval(interval);
+            interval = setInterval(function () {
+                vscode.window.forceCode.statusBarItem.text = `Retrieve ${name} ` + spinner();
+            }, 50);
+        }
+
+        function retrieveComponents(resolve, types, name) {
+            showSpinner(name);
+            resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                unpackaged: { types: types },
+                apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
+            }).stream());
+        }
 
         function pack(resolve, reject) {
             if (option.description === 'unpackaged') {
                 all();
             } else if (option.description === 'packaged') {
                 unpackaged();
+            } else if (option.description === 'apexclasses') {
+                getSpecificTypeMetadata('ApexClass');
+            } else if (option.description === 'apexpages') {
+                getSpecificTypeMetadata('ApexPage');
+            } else if (option.description === 'aurabundles') {
+                getSpecificTypeMetadata('AuraDefinitionBundle');
             } else {
                 packaged();
             }
@@ -196,6 +317,21 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                     var types: any[] = res.metadataObjects.map(r => {
                         return { name: r.xmlName, members: '*' };
                     });
+                    resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                        unpackaged: { types: types },
+                        apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
+                    }).stream());
+                });
+            }
+
+            function getSpecificTypeMetadata(metadataType: string) {
+                vscode.window.forceCode.conn.metadata.describe().then(res => {
+                    var types: any[] = res.metadataObjects
+                        .filter(o => o.xmlName === metadataType)
+                        .map(r => {
+                            return { name: r.xmlName, members: '*' };
+                        });
+
                     resolve(vscode.window.forceCode.conn.metadata.retrieve({
                         unpackaged: { types: types },
                         apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
@@ -233,7 +369,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 bufs.push(d);
             });
             stream.on('error', function (err) {
-                reject(err || {message: 'package not found'});
+                reject(err || { message: 'package not found' });
             });
             stream.on('end', function () {
                 var reader: any[] = ZIP.Reader(Buffer.concat(bufs));
@@ -247,7 +383,8 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                         if (option && option.description) {
                             name = path.normalize(name).replace(option.description + path.sep, '');
                         }
-                        if(name != 'package.xml') {
+                        name = path.normalize(name).replace('unpackaged' + path.sep, '');
+                        if (name != 'package.xml') {
                             fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
                         }
                     }
@@ -262,11 +399,15 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     function finished(res): boolean {
         clearInterval(interval);
         if (res.success) {
-            setTimeout(function() {
-                vscode.window.forceCode.statusBarItem.text = `Retrieve Finished $(thumbsup)`;
+            setTimeout(function () {
+                if (option) {
+                    vscode.window.forceCode.statusBarItem.text = `Retrieve ${option.description} $(thumbsup)`;
+                } else {
+                    vscode.window.forceCode.statusBarItem.text = `Retrieve $(thumbsup)`;
+                }
             }, 100);
         } else {
-            setTimeout(function() {
+            setTimeout(function () {
                 vscode.window.forceCode.statusBarItem.text = 'Retrieve Errors $(thumbsdown)';
             }, 100);
         }
@@ -278,7 +419,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     function onError(err) {
         clearInterval(interval);
         unregisterProxy();
-        setTimeout(function() {
+        setTimeout(function () {
             vscode.window.forceCode.statusBarItem.text = 'Retrieve Errors $(thumbsdown)';
         }, 100);
         return error.outputError(err, vscode.window.forceCode.outputChannel);

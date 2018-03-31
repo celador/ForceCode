@@ -86,9 +86,7 @@ export function activate(context: vscode.ExtensionContext): any {
     }));
 
     // Code Completion Provider
-    if(vscode.window.forceCode.config.autoComplete) {
-        context.subscriptions.push(vscode.languages.registerCompletionItemProvider('apex', new ApexCompletionProvider(), '.', '@'));
-    }
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider('apex', new ApexCompletionProvider(), '.', '@'));
     
     // Text Coverage Decorators
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator));

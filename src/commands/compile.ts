@@ -512,6 +512,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return false;
         } else {
             // SUCCESS !!! 
+            vscode.window.forceCode.statusBarItem.color = 'white';
             vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(check)`;
             return true;
         }
@@ -528,6 +529,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
     // =======================================================================================================================================
     function onError(err): any {
+        clearInterval(interval);
         if (toolingType === 'AuraDefinition') {
             //return toolingError(err);
             error.outputError(err, vscode.window.forceCode.outputChannel);
