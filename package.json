@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -45,7 +45,7 @@
         "command": "ForceCode.documentMethod",
         "title": "Document Apex Method",
         "description": "Document this Apex method with JSDoc syntax",
-        "category": "ForceCode"        
+        "category": "ForceCode"
       },
       {
         "command": "ForceCode.compile",
@@ -311,7 +311,7 @@
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
-        {         
+        {
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         }
