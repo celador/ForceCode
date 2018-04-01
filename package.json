@@ -303,6 +303,21 @@
           "when": "resourceLangId == apex && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.diff",
           "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == apex",
+          "command": "ForceCode.apexTest",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == apex",
+          "command": "ForceCode.documentMethod",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == apex",
+          "command": "ForceCode.toggleCoverage",
+          "group": "ForceCode"
         }
       ],
       "explorer/context": [
