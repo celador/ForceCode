@@ -69,10 +69,10 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
         var uncoveredLineDecorations: vscode.DecorationOptions[] = [];
         let fileCoverage: forceCode.ICodeCoverage = vscode.window.forceCode.codeCoverage[id];
         if (fileCoverage) {
-            let namespaceMatch: boolean = (fileCoverage.namespace ? fileCoverage.namespace : '') === vscode.window.forceCode.config.prefix;
+            //let namespaceMatch: boolean = (fileCoverage.namespace ? fileCoverage.namespace : '') === vscode.window.forceCode.config.prefix;
             let nameMatch: boolean = fileCoverage.name.toLowerCase() === parsers.getFileName(document).toLowerCase();
             let typeMatch: boolean = fileCoverage.type === parsers.getCoverageType(document);
-            if (namespaceMatch && nameMatch && typeMatch) {
+            if (nameMatch && typeMatch) {
                 fileCoverage.locationsNotCovered.forEach(notCovered => {
                     let lineNumber: number = notCovered.line.valueOf() - 1;
                     let decorationRange: vscode.DecorationOptions = { range: document.lineAt(Number(lineNumber)).range, hoverMessage: 'Line ' + lineNumber + ' not covered by a test' };

@@ -293,6 +293,21 @@
           "when": "resourceLangId == xml",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == apex",
+          "command": "ForceCode.apexTest",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == apex",
+          "command": "ForceCode.documentMethod",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == apex",
+          "command": "ForceCode.toggleCoverage",
+          "group": "ForceCode"
         }
       ],
       "explorer/context": [
