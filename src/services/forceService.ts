@@ -36,6 +36,7 @@ export default class ForceService implements forceCode.IForceService {
         this.operatingSystem = operatingSystem.getOS();
         // Setup username and outputChannel
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
+        //this.outputChannel.show();
         this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
         this.statusBarItem_UserInfo = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 5);
         this.statusBarItem.command = 'ForceCode.showMenu';
@@ -113,7 +114,6 @@ export default class ForceService implements forceCode.IForceService {
     // TODO: Add keychain access so we don't have to use a username or password'
     // var keychain = require('keytar')
     private setupConfig(): Promise<forceCode.Config> {
-        this.outputChannel.show();
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Setup username and outputChannel
         self.username = (self.config && self.config.username) || '';

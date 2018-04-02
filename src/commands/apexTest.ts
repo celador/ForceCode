@@ -5,6 +5,8 @@ import * as forceCode from './../forceCode';
 // import Workspace from './../services/workspace';
 import * as error from './../util/error';
 import { configuration } from './../services';
+var testTimeout: number = undefined;
+var testInterval: any = undefined;
 
 export default function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
@@ -23,16 +25,37 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     var Id: string = undefined;
     /* tslint:enable */
     // Start doing stuff
-    return vscode.window.forceCode.connect(context)
-        .then(svc => getClassInfo(svc))
-        .then(id => runCurrentTests(id))
-        .then(showResult)
-        .then(showLog)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+    testTimeout = 0;
+    return startTest();
+
+    function startTest() {
+        testTimeout++;
+        clearInterval(testInterval);
+        if(testTimeout < 10)
+        {
+            // will attempt every 2 seconds for up to 20 seconds then give up
+            return vscode.window.forceCode.connect(context)
+                .then(svc => getClassInfo(svc))
+                .then(id => runCurrentTests(id))
+                .then(showResult)
+                .then(showLog)
+                .catch(function() {
+                    testInterval = setInterval(function() {
+                        startTest();
+                    }, 2000);
+                });
+        }
+        else
+        {
+            vscode.window.forceCode.statusBarItem.text = "Failed to run unit tests, please wait a couple minutes and try again";
+            vscode.window.forceCode.resetMenu();
+            return;
+        }
+    }
 
     function getClassInfo(svc) {
         return vscode.window.forceCode.conn.tooling.sobject(toolingType)
-            .find({ Name: name, NamespacePrefix: vscode.window.forceCode.config.prefix || '' }).execute();
+            .find({ Name: name}).execute();
     }
 
     function selectionContainsMethod(method) {
@@ -41,30 +64,10 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
         });
     }
 
-    function getTestMethods(info): string[] {
-        if (info.SymbolTable) {
-            var testMethods: any[] = info.SymbolTable.methods.filter(function (method) {
-                return method.annotations.some(function (annotation) {
-                    return annotation.name === 'IsTest';
-                });
-            });
-            var selectionsContainsMethodNames: boolean = testMethods.some(selectionContainsMethod);
-            if (selectionsContainsMethodNames) {
-                testMethods = testMethods.filter(selectionContainsMethod);
-            }
-            return testMethods.map(function (method) {
-                return method.name;
-            });
-        } else {
-            error.outputError({ message: 'no symbol table' }, vscode.window.forceCode.outputChannel);
-        }
-    }
-
     function runCurrentTests(results) {
         var info: any = results[0];
-        var methodNames: string[] = getTestMethods(info);
         vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
-        return vscode.window.forceCode.conn.tooling.runUnitTests(info.Id, methodNames);
+        return vscode.window.forceCode.conn.tooling.runUnitTests(info.Id);
     }
     // =======================================================================================================================================
     function showResult(res) {

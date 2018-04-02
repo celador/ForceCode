@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
@@ -37,7 +37,7 @@
       },
       {
         "command": "ForceCode.apexTest",
-        "title": "Test",
+        "title": "Run Unit Tests in this Class",
         "description": "Run Apex unit tests",
         "category": "ForceCode"
       },
