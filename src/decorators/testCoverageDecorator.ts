@@ -75,7 +75,7 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
             if (nameMatch && typeMatch) {
                 fileCoverage.locationsNotCovered.forEach(notCovered => {
                     let lineNumber: number = notCovered.line.valueOf() - 1;
-                    let decorationRange: vscode.DecorationOptions = { range: document.lineAt(Number(lineNumber)).range, hoverMessage: 'Line ' + lineNumber + ' not covered by a test' };
+                    let decorationRange: vscode.DecorationOptions = { range: document.lineAt(Number(lineNumber)).range, hoverMessage: 'Line ' + (lineNumber + 1) + ' not covered by a test' };
                     uncoveredLineDecorations.push(decorationRange);
                     // Add output to output channel
                     coverageChannel.appendLine(fileCoverage.name + ' line ' + notCovered.line + ' not covered.')
@@ -83,6 +83,7 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
                 var covered: number = fileCoverage.numLocationsNotCovered.valueOf();
                 var total: number = fileCoverage.numLocations.valueOf();
                 vscode.window.forceCode.statusBarItem.text = fileCoverage.name + ' ' + (((total - covered) / total) * 100).toFixed(2) + '% covered';
+                vscode.window.forceCode.resetMenu();
             }
         }
         return uncoveredLineDecorations;
