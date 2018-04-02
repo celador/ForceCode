@@ -26,9 +26,14 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     /* tslint:enable */
     // Start doing stuff
     testTimeout = 0;
-    return startTest();
+    if(!vscode.window.forceCode.isTestRunning)
+    {
+        return startTest();
+    }
+    return;
 
     function startTest() {
+        vscode.window.forceCode.isTestRunning = true;
         testTimeout++;
         clearInterval(testInterval);
         if(testTimeout < 10)
@@ -38,6 +43,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                 .then(svc => getClassInfo(svc))
                 .then(id => runCurrentTests(id))
                 .then(showResult)
+                .then(function() {vscode.window.forceCode.isTestRunning = false;})
                 .then(showLog)
                 .catch(function() {
                     testInterval = setInterval(function() {
@@ -47,6 +53,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
         }
         else
         {
+            vscode.window.forceCode.isTestRunning = false;
             vscode.window.forceCode.statusBarItem.text = "Failed to run unit tests, please wait a couple minutes and try again";
             vscode.window.forceCode.resetMenu();
             return;

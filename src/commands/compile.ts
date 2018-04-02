@@ -25,6 +25,11 @@ interface ContainerAsyncRequest {
 
 
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
+    if (vscode.window.forceCode.isCompiling) {
+        vscode.window.forceCode.queueCompile = true;
+        return Promise.reject({ message: 'Already compiling' });
+    }
+
     const body: string = document.getText();
     const ext: string = parsers.getFileExtension(document);
     const toolingType: string = parsers.getToolingType(document);
@@ -77,10 +82,14 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             ).then(finished, onError);
     } else {
         // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-        if (vscode.window.forceCode.isCompiling) {
-            vscode.window.forceCode.queueCompile = true;
-            return Promise.reject({ message: 'Already compiling' });
-        }
+        // clear the code coverage
+        Object.keys(vscode.window.forceCode.codeCoverage).reduce((opts, id) => {
+            if(vscode.window.forceCode.codeCoverage[id].name.toLowerCase() === fileName.toLowerCase())
+            {
+                delete vscode.window.forceCode.codeCoverage[id];
+            }
+            return opts;
+        }, []);
         clearInterval(interval);
         interval = setInterval(function () {
             if (checkCount <= 10) {

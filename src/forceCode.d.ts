@@ -111,6 +111,7 @@ export interface IForceService {
     containerId?: string;
     queueCompile?: boolean;
     isCompiling?: boolean;
+    isTestRunning?: boolean;
     workspaceMembers: IWorkspaceMember[];
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
