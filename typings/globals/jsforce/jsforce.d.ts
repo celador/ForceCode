@@ -46,7 +46,7 @@ declare module 'jsforce/index' {
             executeAnonymous(apexBody: string): Promise<ExecuteAnonymousResult>;
             runTestsAsynchronous(classIds: string[]): Promise<any>;
             runTestsSynchronous(classNames: string[]): Promise<any>;
-            runUnitTests(classId: string, testMethods: string[]): Promise<any>;
+            runUnitTests(classId: string): Promise<any>;
             query(query: string): Promise<QueryResult>;
             queryMore(locator: string): Promise<QueryResult>;
             describeGlobal(): Promise<ToolingDescribeResult>
