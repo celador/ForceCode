@@ -6,7 +6,6 @@ import createClass from './createClass';
 import credentials from './credentials';
 import deploy from './deploy';
 import diff from './diff';
-import dx from './dx';
 import documentMethod from './documentMethod';
 import executeAnonymous from './executeAnonymous';
 import generator from './package';
@@ -27,7 +26,6 @@ export {
     credentials,
     deploy,
     diff,
-    dx,
     documentMethod,
     executeAnonymous,
     generator,

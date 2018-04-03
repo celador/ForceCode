@@ -73,7 +73,6 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
 
     function runCurrentTests(results) {
         var info: any = results[0];
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
         return vscode.window.forceCode.conn.tooling.runUnitTests(info.Id);
     }
     // =======================================================================================================================================

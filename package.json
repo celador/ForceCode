@@ -370,7 +370,6 @@
     "node-fetch": "^2.1.1",
     "node-zip": "^1.1.1",
     "os": "^0.1.1",
-    "salesforcedx": "^42.5.0",
     "sequin": "^0.1.1",
     "typescript": "^2.5.3",
     "unzip": "^0.1.11",
