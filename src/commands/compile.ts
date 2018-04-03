@@ -25,9 +25,9 @@ interface ContainerAsyncRequest {
 
 
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
-    if (vscode.window.forceCode.isCompiling) {
-        vscode.window.forceCode.queueCompile = true;
-        return Promise.reject({ message: 'Already compiling' });
+    if (vscode.window.forceCode.isCompiling || vscode.window.forceCode.isTestRunning) {
+        vscode.window.forceCode.queueCompile.push([document, context]);
+        return Promise.reject({ message: 'Already compiling or running unit tests' });
     }
 
     const body: string = document.getText();
@@ -82,14 +82,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             ).then(finished, onError);
     } else {
         // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-        // clear the code coverage
-        Object.keys(vscode.window.forceCode.codeCoverage).reduce((opts, id) => {
-            if(vscode.window.forceCode.codeCoverage[id].name.toLowerCase() === fileName.toLowerCase())
-            {
-                delete vscode.window.forceCode.codeCoverage[id];
-            }
-            return opts;
-        }, []);
         clearInterval(interval);
         interval = setInterval(function () {
             if (checkCount <= 10) {
@@ -532,9 +524,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         // We got some records in our response
         vscode.window.forceCode.isCompiling = false;
         return vscode.window.forceCode.newContainer(createNewContainer).then(res => {
-            if (vscode.window.forceCode.queueCompile) {
-                vscode.window.forceCode.queueCompile = false;
-                return compile(document, context);
+            if (vscode.window.forceCode.queueCompile.length > 0) {
+                var toCompile = vscode.window.forceCode.queueCompile.pop();
+                return compile(toCompile[0], toCompile[1]);
             }
         });
     }

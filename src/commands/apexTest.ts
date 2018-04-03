@@ -5,10 +5,13 @@ import * as forceCode from './../forceCode';
 // import Workspace from './../services/workspace';
 import * as error from './../util/error';
 import { configuration } from './../services';
-var testTimeout: number = undefined;
-var testInterval: any = undefined;
 
 export default function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
+    if(vscode.window.forceCode.isTestRunning)
+    {
+        vscode.window.forceCode.queueTest.push([document, context]);
+        return Promise.reject({ message: 'Already compiling or running unit tests' });
+    }
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
 
     // const body: string = document.getText();
@@ -25,28 +28,32 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     var Id: string = undefined;
     /* tslint:enable */
     // Start doing stuff
-    testTimeout = 0;
-    if(!vscode.window.forceCode.isTestRunning)
-    {
-        return startTest();
-    }
-    return;
+    vscode.window.forceCode.testTimeout = 0;
+    return startTest();
 
     function startTest() {
         vscode.window.forceCode.isTestRunning = true;
-        testTimeout++;
-        clearInterval(testInterval);
-        if(testTimeout < 10)
+        vscode.window.forceCode.testTimeout++;
+        clearInterval(vscode.window.forceCode.testInterval);
+        if(vscode.window.forceCode.testTimeout < 10)
         {
             // will attempt every 2 seconds for up to 20 seconds then give up
             return vscode.window.forceCode.connect(context)
                 .then(svc => getClassInfo(svc))
                 .then(id => runCurrentTests(id))
                 .then(showResult)
-                .then(function() {vscode.window.forceCode.isTestRunning = false;})
                 .then(showLog)
+                .then(function() {
+                    vscode.window.forceCode.isTestRunning = false;
+                    if(vscode.window.forceCode.queueTest.length > 0)
+                    {
+                        var queue = vscode.window.forceCode.queueTest.pop();
+                        return apexTest(queue[0], queue[1]);
+                    }
+                    return;
+                })
                 .catch(function() {
-                    testInterval = setInterval(function() {
+                    vscode.window.forceCode.testInterval = setInterval(function() {
                         startTest();
                     }, 2000);
                 });
@@ -61,20 +68,20 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     }
 
     function getClassInfo(svc) {
-        clearInterval(testInterval);
+        clearInterval(vscode.window.forceCode.testInterval);
         return vscode.window.forceCode.conn.tooling.sobject(toolingType)
             .find({ Name: name}).execute();
     }
 
     function runCurrentTests(results) {
-        clearInterval(testInterval);
+        clearInterval(vscode.window.forceCode.testInterval);
         var info: any = results[0];
         vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
         return vscode.window.forceCode.conn.tooling.runUnitTests(info.Id);
     }
     // =======================================================================================================================================
     function showResult(res) {
-        clearInterval(testInterval);
+        clearInterval(vscode.window.forceCode.testInterval);
         return configuration().then(results => {
             vscode.window.forceCode.outputChannel.clear();
             if (res.failures.length) {
@@ -173,7 +180,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
         });
     }
     function showLog(res) {
-        clearInterval(testInterval);
+        clearInterval(vscode.window.forceCode.testInterval);
         if (vscode.window.forceCode.config.showTestLog) {
             return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${res.apexLogId}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
                 return vscode.window.showTextDocument(_document, 3, true);

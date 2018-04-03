@@ -9,7 +9,6 @@ import * as commands from './../commands';
 import jsf = require('jsforce');
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
-var statusInterval: any = undefined;
 
 export default class ForceService implements forceCode.IForceService {
     public config: forceCode.Config;
@@ -30,8 +29,17 @@ export default class ForceService implements forceCode.IForceService {
     public operatingSystem: string;
     public workspaceRoot: string;
     public workspaceMembers: forceCode.IWorkspaceMember[];
+    public queueCompile: any[];
+    public isCompiling: boolean;
+    public testTimeout: number;
+    public testInterval: any;
+    public isTestRunning: boolean;
+    public queueTest: any[];
+    public statusInterval: any; 
 
     constructor() {
+        this.queueCompile = new Array();
+        this.queueTest = new Array();
         // Set the ForceCode configuration
         this.operatingSystem = operatingSystem.getOS();
         // Setup username and outputChannel
@@ -207,8 +215,8 @@ export default class ForceService implements forceCode.IForceService {
                 vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username;
                 
                 // for status bar updates. update every 5 seconds
-                clearInterval(statusInterval);
-                statusInterval = setInterval(function () {
+                clearInterval(vscode.window.forceCode.statusInterval);
+                vscode.window.forceCode.statusInterval = setInterval(function () {
                     var lim = '';
                     if (vscode.window.forceCode.conn && vscode.window.forceCode.conn.limitInfo && vscode.window.forceCode.conn.limitInfo.apiUsage) {
                         lim = ' - Limits: ' + vscode.window.forceCode.conn.limitInfo.apiUsage.used + '/' + vscode.window.forceCode.conn.limitInfo.apiUsage.limit;

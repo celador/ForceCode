@@ -85,6 +85,18 @@ export function activate(context: vscode.ExtensionContext): any {
         }
     }));
 
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(function(event) {
+        // clear the code coverage
+        var file = parsers.getFileName(event.document);
+        Object.keys(vscode.window.forceCode.codeCoverage).forEach(function(id) {
+            if(vscode.window.forceCode.codeCoverage[id].name.toLowerCase() === file.toLowerCase())
+            {
+                delete vscode.window.forceCode.codeCoverage[id];
+                updateDecorations();
+            }
+        });
+    }));
+
     // Code Completion Provider
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider('apex', new ApexCompletionProvider(), '.', '@'));
     
