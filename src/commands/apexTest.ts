@@ -34,7 +34,6 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     function startTest() {
         vscode.window.forceCode.isTestRunning = true;
         vscode.window.forceCode.testTimeout++;
-        clearInterval(vscode.window.forceCode.testInterval);
         if(vscode.window.forceCode.testTimeout < 10)
         {
             // will attempt every 2 seconds for up to 20 seconds then give up
@@ -53,7 +52,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                     return;
                 })
                 .catch(function() {
-                    vscode.window.forceCode.testInterval = setInterval(function() {
+                    vscode.window.forceCode.testInterval = setTimeout(function() {
                         startTest();
                     }, 2000);
                 });
@@ -68,20 +67,17 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     }
 
     function getClassInfo(svc) {
-        clearInterval(vscode.window.forceCode.testInterval);
         return vscode.window.forceCode.conn.tooling.sobject(toolingType)
             .find({ Name: name}).execute();
     }
 
     function runCurrentTests(results) {
-        clearInterval(vscode.window.forceCode.testInterval);
         var info: any = results[0];
         vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
         return vscode.window.forceCode.conn.tooling.runUnitTests(info.Id);
     }
     // =======================================================================================================================================
     function showResult(res) {
-        clearInterval(vscode.window.forceCode.testInterval);
         return configuration().then(results => {
             vscode.window.forceCode.outputChannel.clear();
             if (res.failures.length) {
@@ -180,7 +176,6 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
         });
     }
     function showLog(res) {
-        clearInterval(vscode.window.forceCode.testInterval);
         if (vscode.window.forceCode.config.showTestLog) {
             return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${res.apexLogId}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
                 return vscode.window.showTextDocument(_document, 3, true);
