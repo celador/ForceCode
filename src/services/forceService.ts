@@ -170,7 +170,7 @@ export default class ForceService implements forceCode.IForceService {
             }
 
             function getPublicDeclarations(svc) {
-                var requestUrl: string = svc.conn.instanceUrl + '/services/data/v38.0/tooling/completions?type=apex';
+                var requestUrl: string = svc.conn.instanceUrl + '/services/data/v42.0/tooling/completions?type=apex';
                 var headers: any = {
                     'Accept': 'application/json',
                     'Authorization': 'OAuth ' + svc.conn.accessToken,

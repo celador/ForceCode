@@ -102,7 +102,7 @@ export default function enterCredentials() {
             pollTimeout: 1200,
             debugOnly: true,
             debugFilter: 'USER_DEBUG|FATAL_ERROR',
-            apiVersion: '38.0',
+            apiVersion: '42.0',
             deployOptions: {
                 'checkOnly': false,
                 'testLevel': 'runLocalTests',
