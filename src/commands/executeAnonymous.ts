@@ -13,12 +13,18 @@ export interface IExecuteAnonymousService {
 };
 
 export default function executeAnonymous(document: vscode.TextDocument, context: vscode.ExtensionContext): any {
-    let apexBody: string = document.getText();
-    // vscode.window.forceCode = vscode.window.forceCode;
-    // vscode.window.forceCode.outputChannel = ;
+    const editor = vscode.window.activeTextEditor;
+    var selection = editor.selection;
+    var text = editor.document.getText(selection);
+    if(text === '')
+    {
+        vscode.window.forceCode.statusBarItem.text = 'No text selected to execute, please select code to run...';
+        vscode.window.forceCode.resetMenu();
+        return;
+    }
     return vscode.window.forceCode.connect(context)
-        .then(svc => invokeExecuteAnonymous(apexBody))
-        .then(res => runDiagnostics(res, document))
+        .then(svc => invokeExecuteAnonymous(text))
+        .then(res => runDiagnostics(res, document, selection))
         .then(showResult)
         .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
 
@@ -60,15 +66,20 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
             return res;
         });
     }
-    function runDiagnostics(res: jsforce.ExecuteAnonymousResponse, _document: vscode.TextDocument) {
+
+    function runDiagnostics(res: jsforce.ExecuteAnonymousResponse, _document: vscode.TextDocument, sel: any) {
         // Create a diagnostic Collection for the current file.  Overwriting the last...
         var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(_document.fileName);
         var diagnostics: vscode.Diagnostic[] = [];
         var result: any = res.body.result;
         // var header: any = res.header;
         if (result.compiled === 'false') {
-            const lineNumber: number = Number(result.line) - 1;
-            const columnNumber: number = Number(result.column);
+            const lineNumber: number = Number(result.line) - 1 + sel.start.line;
+            var col = 0;
+            if(lineNumber === sel.start.line) {
+                col = sel.start.character;
+            }
+            const columnNumber: number = Number(result.column) - 1 + col;
             var failureRange: vscode.Range = _document.lineAt(lineNumber).range;
             if (columnNumber > 0) {
                 failureRange = failureRange.with(new vscode.Position(lineNumber, columnNumber));
@@ -83,10 +94,11 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
         } else {
             vscode.window.forceCode.statusBarItem.text = `ForceCode: Execute Anonymous Success $(check)`;
         }
-        vscode.window.forceCode.resetMenu();
         return res;
     }
+
     function showResult(res) {
+        vscode.window.forceCode.resetMenu();
         return configuration().then(config => {
             vscode.window.forceCode.outputChannel.clear();
             vscode.window.forceCode.outputChannel.appendLine(debugOnly(config.debugOnly));
