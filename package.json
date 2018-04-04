@@ -318,6 +318,11 @@
           "when": "resourceLangId == apex",
           "command": "ForceCode.toggleCoverage",
           "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == apex",
+          "command": "ForceCode.executeAnonymous",
+          "group": "ForceCode"
         }
       ],
       "explorer/context": [

@@ -50,7 +50,6 @@ export default function executeAnonymous(document: vscode.TextDocument): any {
         } else {
             vscode.window.forceCode.showStatus(`ForceCode: Execute Anonymous Success $(check)`);
         }
-        vscode.window.forceCode.resetMenu();
         return res;
     }
 
