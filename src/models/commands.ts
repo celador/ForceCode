@@ -84,13 +84,6 @@ export default {
         icon: 'telescope',
         label: 'Tooling Query',
     },
-    // Run SOQL
-    package: {
-        description: 'Generate Package.xml file from the contents of a directory',
-        detail: 'Generate a Package.xml file for a directory',
-        icon: 'gift',
-        label: 'Package-xml',
-    },
     // Diff Files
     diff: {
         description: 'Diff the current file with what is on the server',
