@@ -99,10 +99,4 @@ export function activate(context: vscode.ExtensionContext): any {
     // Text Coverage Decorators
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator));
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(documentUpdateApexCoverageDecorator));
-
-
-    // // Peek Provider Setup
-    // const peekProvider: any = new commands.PeekFileDefinitionProvider();
-    // const definitionProvider: any = vscode.languages.registerDefinitionProvider(constants.PEEK_FILTER, peekProvider);
-    // context.subscriptions.push(definitionProvider);
 }

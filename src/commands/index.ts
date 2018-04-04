@@ -1,5 +1,4 @@
 /* tslint:disable:no-unused-variable */
-import PeekFileDefinitionProvider from './lens';
 import apexTest from './apexTest';
 import compile from './compile';
 import createClass from './createClass';
@@ -18,7 +17,6 @@ import toql from './toql';
 import {staticResourceDeployFromFile} from './staticResource';
 
 export {
-    PeekFileDefinitionProvider,
     apexTest,
     compile,
     createClass,
