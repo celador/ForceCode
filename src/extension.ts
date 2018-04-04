@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { ForceService } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
-import ApexCompletionProvider from './providers/ApexCompletion';
 import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator } from './decorators/testCoverageDecorator';
 import * as commands from './commands';
 import * as parsers from './parsers';
@@ -96,9 +95,6 @@ export function activate(context: vscode.ExtensionContext): any {
             }
         });
     }));
-
-    // Code Completion Provider
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider('apex', new ApexCompletionProvider(), '.', '@'));
     
     // Text Coverage Decorators
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator));

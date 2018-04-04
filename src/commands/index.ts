@@ -8,7 +8,6 @@ import deploy from './deploy';
 import diff from './diff';
 import documentMethod from './documentMethod';
 import executeAnonymous from './executeAnonymous';
-import generator from './package';
 import getLog from './getLog';
 import open from './open';
 import retrieve from './retrieve';
@@ -28,7 +27,6 @@ export {
     diff,
     documentMethod,
     executeAnonymous,
-    generator,
     getLog,
     open,
     retrieve,
