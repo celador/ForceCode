@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as error from './../util/error';
 import { configuration } from './../services';
 import * as jsforce from 'jsforce';
+import * as logging from './../providers/LogProvider';
 
 export interface IExecuteAnonymousService {
     userId?: string;
@@ -101,17 +102,10 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
         vscode.window.forceCode.resetMenu();
         return configuration().then(config => {
             vscode.window.forceCode.outputChannel.clear();
-            vscode.window.forceCode.outputChannel.appendLine(debugOnly(config.debugOnly));
+            vscode.window.forceCode.outputChannel.appendLine(logging.filterLog(res.header.debugLog));
             vscode.window.forceCode.outputChannel.show();
             return res;
         });
-        function debugOnly(shouldShowOnlyDebugLines) {
-            if (shouldShowOnlyDebugLines) {
-                return res.header.debugLog.split('\n').filter(l => l.match(new RegExp(vscode.window.forceCode.config.debugFilter || 'USER_DEBUG'))).join('\n');
-            } else {
-                return res.header.debugLog;
-            }
-        }
     }
 
 }

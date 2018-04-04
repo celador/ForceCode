@@ -34,7 +34,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     function startTest() {
         vscode.window.forceCode.isTestRunning = true;
         vscode.window.forceCode.testTimeout++;
-        if(vscode.window.forceCode.testTimeout < 10)
+        if(vscode.window.forceCode.testTimeout < 15)
         {
             // will attempt every 2 seconds for up to 20 seconds then give up
             return vscode.window.forceCode.connect(context)
