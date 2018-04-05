@@ -7,18 +7,22 @@ import * as error from './../util/error';
 import { configuration } from './../services';
 
 export default function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
+    const toolingType: string = parsers.getToolingType(document);
+    const name: string = parsers.getName(document, toolingType);
+    if(!name.toLowerCase().includes('test'))
+    {
+        vscode.window.forceCode.statusBarItem.text = "ForceCode: Not a test class. Name must contain 'test'";
+        vscode.window.forceCode.resetMenu();
+        return Promise.reject({ message: 'Not a test class' });
+    }
+
     if(vscode.window.forceCode.isTestRunning)
     {
         vscode.window.forceCode.queueTest.push([document, context]);
         return Promise.reject({ message: 'Already compiling or running unit tests' });
     }
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
-
-    // const body: string = document.getText();
-    // const ext: string = parsers.getFileExtension(document);
-    const toolingType: string = parsers.getToolingType(document);
-    // const fileName: string = parsers.getFileName(document);
-    const name: string = parsers.getName(document, toolingType);
+    
     /* tslint:disable */
     var DefType: string = undefined;
     var Format: string = undefined;
