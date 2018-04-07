@@ -320,7 +320,7 @@
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex",
+          "when": "resourceLangId == apex && editorHasSelection",
           "command": "ForceCode.executeAnonymous",
           "group": "ForceCode"
         }
