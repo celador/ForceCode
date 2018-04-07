@@ -361,6 +361,11 @@
     "package": "vsce package",
     "install-extension": "code --install-extension"
   },
+  "extensionDependencies": [
+		"salesforce.salesforcedx-vscode-apex",
+		"salesforce.salesforcedx-vscode-visualforce",
+		"salesforce.salesforcedx-vscode-lightning"
+	],
   "dependencies": {
     "archiver": "^2.1.1",
     "cs-jsforce-metadata-tools": "^1.2.10",

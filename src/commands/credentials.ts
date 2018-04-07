@@ -98,6 +98,8 @@ export default function enterCredentials() {
     function finished(config) {
         const defaultOptions: {} = {
             autoRefresh: false,
+            showTestCoverage: true,
+            showTestLog: true,
             browser: 'Google Chrome Canary',
             pollTimeout: 1200,
             debugOnly: true,
@@ -110,7 +112,16 @@ export default function enterCredentials() {
                 'ignoreWarnings': true,
             },
         };
+        // add in a bare sfdx-project.json file for language support from official salesforce extensions
+        const sfdx: {} = {
+            namespace: "", 
+            sfdcLoginUrl: "https://test.salesforce.com", 
+            sourceApiVersion: "42.0",
+        };
+        fs.outputFile(vscode.workspace.rootPath + path.sep + 'sfdx-project.json', JSON.stringify(sfdx, undefined, 4));
         fs.outputFile(vscode.workspace.rootPath + path.sep + 'force.json', JSON.stringify(Object.assign(defaultOptions, config), undefined, 4));
+        // show the menu
+        vscode.window.forceCode.statusBarItem.show();
         return config;
     }
 }
