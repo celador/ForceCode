@@ -211,7 +211,7 @@ export default class ForceService implements forceCode.IForceService {
                 }
             }
             function connectionSuccess(userInfo) {
-                //vscode.window.forceCode.statusBarItem.text = `ForceCode: $(zap) Connected as ${self.config.username} $(zap)`;
+                vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
                 vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username;
                 
                 // for status bar updates. update every 5 seconds
