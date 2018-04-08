@@ -97,21 +97,26 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 detail: `All Unpackaged`,
                 description: 'unpackaged',
             });
-            // options.push({
-            //     label: '$(cloud-download) Get All Apex Classes from org',
-            //     detail: `All Apex Classes`,
-            //     description: 'apexclasses',
-            // });
-            // options.push({
-            //     label: '$(cloud-download) Get All Apex Pages from org',
-            //     detail: `All Apex Pages`,
-            //     description: 'apexpages',
-            // });
-            // options.push({
-            //     label: '$(cloud-download) Get All Aura Components from org',
-            //     detail: `All Aura Bundles`,
-            //     description: 'aurabundles',
-            // });
+            options.push({
+                label: '$(cloud-download) Get All Apex Classes from org',
+                detail: `All Apex Classes`,
+                description: 'apexclasses',
+            });
+             options.push({
+                label: '$(cloud-download) Get All Apex Pages from org',
+                detail: `All Apex Pages`,
+                description: 'apexpages',
+            });
+            options.push({
+                label: '$(cloud-download) Get All Aura Components from org',
+                detail: `All Aura Bundles`,
+                description: 'aurabundles',
+            });
+            options.push({
+                label: '$(cloud-download) Get All Custom Objects from org',
+                detail: `All Custom Objects`,
+                description: 'customobj',
+            });
             let config: {} = {
                 matchOnDescription: true,
                 matchOnDetail: true,
@@ -278,6 +283,8 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 getSpecificTypeMetadata('ApexPage');
             } else if (option.description === 'aurabundles') {
                 getSpecificTypeMetadata('AuraDefinitionBundle');
+            } else if (option.description === 'customobj') {
+                getSpecificTypeMetadata('CustomObject');
             } else {
                 packaged();
             }
