@@ -5,6 +5,7 @@ interface Arg {
     name: string;
     optional: boolean;
     hidden: boolean;
+    value: string;
 }
 
 interface Topic {
@@ -108,35 +109,34 @@ export default function open(context: vscode.ExtensionContext) {
                 return t.name === theCmd.topic;
             })[0];
             var flags: {} = {};
-            console.log(theCmd.flags);
             theCmd.flags.forEach(f => {
-                flags[f.name] = {value: undefined};
-                flags[f.name]
+                flags[f.name] = f.type === 'flag' ? true : f.default;
             });
-    
-            var argsToSend = new Array();
+        
+            var cliContext: Context = {
+                command: theCmd,
+                topic: topic,
+                flags: {}
+            };
+
             if(result !== undefined) {
                 var theArgsArray = result.split('-'); 
                 theArgsArray.forEach(function(i) {
                     if(i.length > 0) {
                         var curCmd = new Array();
-                        if(i.indexOf('-')) {    // then go by name
-                            curCmd = i.replace('-', '').split(' ');
-                        } else {
-                            curCmd = i.split(' ');
-                        }
+                        console.log(i);
+                        curCmd = i.trim().split(' ');
                         console.log(curCmd);
-                        flags[curCmd[0]].value = curCmd[1];
+                        if(curCmd.length >= 2)
+                            cliContext.flags[curCmd[0]] = curCmd[1];
+                        else
+                            cliContext.flags[curCmd[0]] = true;
                     }
                 });
             }
-    
-            var cliContext: Context = {
-                command: theCmd,
-                topic: topic,
-                flags: flags,
-                //args: argsToSend
-            };
+
+            console.log(cliContext);
+
             return theCmd.run(cliContext);
         });
     }
