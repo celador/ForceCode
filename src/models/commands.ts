@@ -1,4 +1,10 @@
 export default {
+    dx : {
+        description: 'Salesforce DX Commands',
+        detail: 'DX',
+        icon: 'broadcast',
+        label: 'Salesforce DX',
+    },
     // Enter Salesforce Credentials
     enterCredentials : {
         description: 'Enter the credentials you wish to use.',

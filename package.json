@@ -381,9 +381,11 @@
     "node-fetch": "^2.1.1",
     "node-zip": "^1.1.1",
     "os": "^0.1.1",
+    "salesforce-alm": "^42.9.0",
     "sequin": "^0.1.1",
     "typescript": "^2.5.3",
     "unzip": "^0.1.11",
+    "util.promisify": "^1.0.0",
     "vscode": "^1.1.11",
     "xml2js": "^0.4.19",
     "zip": "^1.2.0"
