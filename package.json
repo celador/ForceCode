@@ -395,6 +395,8 @@
     "@types/node": "^9.4.6",
     "chai": "^4.1.2",
     "electron-rebuild": "^1.7.3",
-    "mocha": "^5.0.4"
+    "mocha": "^5.0.4",
+    "rimraf": "^2.6.2",
+    "vsce": "^1.39.0"
   }
 }
