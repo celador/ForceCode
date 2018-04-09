@@ -47,6 +47,7 @@ interface Flag {
     name: string;
     required: boolean;
     type: string;
+    char: string;
 }
 
 interface Command {
@@ -120,17 +121,28 @@ export default function open(context: vscode.ExtensionContext) {
             };
 
             if(result !== undefined) {
-                var theArgsArray = result.split('-'); 
+                var theArgsArray = result.trim().split('-'); 
                 theArgsArray.forEach(function(i) {
                     if(i.length > 0) {
                         var curCmd = new Array();
                         console.log(i);
                         curCmd = i.trim().split(' ');
+                        var commandName = curCmd[0];
+                        if(curCmd[0].length === 1) {
+                            // this means we need to search for the argument name
+                            theCmd.flags.some(fl => {
+                                if(fl.char === commandName)
+                                {
+                                    commandName = fl.name;
+                                    return true;
+                                }
+                            });
+                        }
                         console.log(curCmd);
-                        if(curCmd.length >= 2)
-                            cliContext.flags[curCmd[0]] = curCmd[1];
+                        if(curCmd.length === 2)
+                            cliContext.flags[commandName] = curCmd[1];
                         else
-                            cliContext.flags[curCmd[0]] = true;
+                            cliContext.flags[commandName] = true;
                     }
                 });
             }
