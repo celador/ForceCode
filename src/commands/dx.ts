@@ -70,8 +70,7 @@ export default function open(context: vscode.ExtensionContext) {
 
     return vscode.window.forceCode.connect(context)
         .then(svc => showFileOptions())
-        .then(getArgs)
-        .then(runCommand)
+        .then(getArgsAndRun)
         .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     function showFileOptions() {
@@ -92,37 +91,54 @@ export default function open(context: vscode.ExtensionContext) {
         return vscode.window.showQuickPick(options, config);
     }
 
-    function getArgs(opt: vscode.QuickPickItem): any {
-        var cmd = alm.commands.filter(c => {
+    function getArgsAndRun(opt: vscode.QuickPickItem): any {
+        theCmd = alm.commands.filter(c => {
             return (c.topic + ':' + c.command) === opt.label;
         })[0];
+        
         let options: vscode.InputBoxOptions = {
             ignoreFocusOut: true,
             value: '',
             placeHolder: 'enter the arguements for this dx function',
-            prompt: cmd.usage,
+            prompt: theCmd.usage,
         };
         // this needs to wait for this input to get done somehow!!!
-        vscode.window.showInputBox(options).then(function (result: string) {
-            cmd.command += result;
-            return cmd;
+        return vscode.window.showInputBox(options).then(function (result: string) {
+            var topic: Topic = alm.topics.filter(t => {
+                return t.name === theCmd.topic;
+            })[0];
+            var flags: {} = {};
+            console.log(theCmd.flags);
+            theCmd.flags.forEach(f => {
+                flags[f.name] = {value: undefined};
+                flags[f.name]
+            });
+    
+            var argsToSend = new Array();
+            if(result !== undefined) {
+                var theArgsArray = result.split('-'); 
+                theArgsArray.forEach(function(i) {
+                    if(i.length > 0) {
+                        var curCmd = new Array();
+                        if(i.indexOf('-')) {    // then go by name
+                            curCmd = i.replace('-', '').split(' ');
+                        } else {
+                            curCmd = i.split(' ');
+                        }
+                        console.log(curCmd);
+                        flags[curCmd[0]].value = curCmd[1];
+                    }
+                });
+            }
+    
+            var cliContext: Context = {
+                command: theCmd,
+                topic: topic,
+                flags: flags,
+                //args: argsToSend
+            };
+            return theCmd.run(cliContext);
         });
-    }
-
-    function runCommand(cmd: Command) {
-        var topic: Topic = alm.topics.filter(t => {
-            return t.name === cmd.topic;
-        })[0];
-        var flags: {} = {};
-        cmd.flags.forEach(f => {
-            flags[f.name] = f.type === 'flag' ? true : f.default;
-        });
-        var cliContext: Context = {
-            command: cmd,
-            topic: topic,
-            flags: flags
-        };
-        return cmd.run(cliContext);
     }
 
     // =======================================================================================================================================
