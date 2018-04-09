@@ -1,0 +1,1 @@
+This file in this folder needs copied into salesforce-alm/dist/lib otherwise there are errors!!
