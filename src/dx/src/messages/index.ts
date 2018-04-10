@@ -12,7 +12,7 @@ import {
   DEFAULT_LOCALE,
   Localization,
   Message
-} from '../../../salesforcedx-utils-vscode/out/src/i18n';
+} from '../i18n';
 
 function loadMessageBundle(config?: Config): Message {
   function resolveFileName(locale: string): string {
@@ -42,5 +42,5 @@ function loadMessageBundle(config?: Config): Message {
 }
 
 export const nls = new Localization(
-  loadMessageBundle(JSON.parse(process.env.VSCODE_NLS_CONFIG))
+  loadMessageBundle(JSON.parse('{}'))  //loadMessageBundle(JSON.parse(process.env.VSCODE_NLS_CONFIG))
 );
