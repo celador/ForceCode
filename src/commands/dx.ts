@@ -73,6 +73,7 @@ export default function open(context: vscode.ExtensionContext) {
     return vscode.window.forceCode.connect(context)
         .then(svc => showFileOptions())
         .then(getArgsAndRun)
+        .then(out => vscode.window.forceCode.outputChannel.appendLine(out))
         .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     function showFileOptions() {
