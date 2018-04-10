@@ -41,50 +41,43 @@
         "command": "ForceCode.apexTest",
         "title": "Run Unit Tests in this Class",
         "description": "Run Apex unit tests",
-        "category": "ForceCode",
-        "when": "workspaceContains:force.json && resourceLangId == apex"
+        "category": "ForceCode"
       },
       {
         "command": "ForceCode.documentMethod",
         "title": "Document Apex Method",
         "description": "Document this Apex method with JSDoc syntax",
-        "category": "ForceCode",
-        "when": "workspaceContains:force.json && resourceLangId == apex"
+        "category": "ForceCode"
       },
       {
         "command": "ForceCode.compile",
         "title": "Save/Deploy/Compile",
         "description": "Compile a Salesforce file",
-        "category": "ForceCode",
-        "when": "workspaceContains:force.json"
+        "category": "ForceCode"
       },
       {
         "command": "ForceCode.refresh",
         "title": "Refresh from server",
         "description": "Refresh a Salesforce file",
-        "category": "ForceCode",
-        "when": "workspaceContains:force.json"
+        "category": "ForceCode"
       },
       {
         "command": "ForceCode.executeAnonymous",
         "title": "Execute Anonymous",
         "description": "Execute Anonymous Apex and get the debug result",
-        "category": "ForceCode",
-        "when": "workspaceContains:force.json && resourceLangId == apex"
+        "category": "ForceCode"
       },
       {
         "command": "ForceCode.open",
         "title": "Get Class, Page, or Trigger",
         "description": "Open a Salesforce file",
-        "category": "ForceCode",
-        "when": "workspaceContains:force.json"
+        "category": "ForceCode"
       },
       {
         "command": "ForceCode.staticResource",
         "title": "Bundle / Deploy Static Resource",
         "description": "Bundles a Resource Bundle into a Static Resource and optionally deploys",
-        "category": "ForceCode",
-        "when": "workspaceContains:force.json"
+        "category": "ForceCode"
       },
       {
         "command": "ForceCode.toggleCoverage",
@@ -94,22 +87,21 @@
           "light": "./images/coverage.svg",
           "dark": "./images/coverage.svg"
         },
-        "category": "ForceCode",
-        "when": "workspaceContains:force.json && resourceLangId == apex"
+        "category": "ForceCode"
       }
     ],
     "keybindings": [
       {
         "key": "alt+cmd+t",
         "command": "ForceCode.apexTest",
-        "when": "resourceLangId == apex && editorFocus && workspaceContains:force.json",
+        "when": "resourceLangId == apex && editorFocus",
         "win": "ctrl+shift+t"
       },
       {
         "command": "ForceCode.documentMethod",
         "key": "alt+cmd+d",
         "win": "ctrl+shift+d",
-        "when": "editorFocus && resourceLangId == apex && workspaceContains:force.json"
+        "when": "editorFocus && resourceLangId == apex"
       },
       {
         "command": "ForceCode.showMenu",
@@ -121,25 +113,23 @@
         "command": "ForceCode.compile",
         "key": "alt+cmd+s",
         "win": "ctrl+shift+s",
-        "when": "editorFocus && workspaceContains:force.json"
+        "when": "editorFocus"
       },
       {
         "command": "ForceCode.executeAnonymous",
         "key": "alt+cmd+e",
         "win": "ctrl+shift+e",
-        "when": "editorFocus && resourceLangId == apex && workspaceContains:force.json"
+        "when": "editorFocus && resourceLangId == apex"
       },
       {
         "command": "ForceCode.open",
         "key": "alt+cmd+o",
-        "win": "ctrl:shift+o",
-        "when": "workspaceContains:force.json"
+        "win": "ctrl:shift+o"
       },
       {
         "command": "ForceCode.staticResource",
         "key": "alt+cmd+b",
-        "win": "ctrl+shift+b",
-        "when": "workspaceContains:force.json"
+        "win": "ctrl+shift+b"
       }
     ],
     "configuration": {
@@ -270,91 +260,91 @@
     "menus": {
       "editor/title": [
         {
-          "when": "resourceLangId == apex && workspaceContains:force.json",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.toggleCoverage",
           "group": "navigation"
         }
       ],
       "editor/context": [
         {
-          "when": "resourceLangId == apex && workspaceContains:force.json",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == visualforce && workspaceContains:force.json",
+          "when": "resourceLangId == visualforce",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == xml && workspaceContains:force.json",
+          "when": "resourceLangId == xml",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && workspaceContains:force.json",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == visualforce && workspaceContains:force.json",
+          "when": "resourceLangId == visualforce",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == xml && workspaceContains:force.json",
+          "when": "resourceLangId == xml",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && workspaceContains:force.json",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.apexTest",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && workspaceContains:force.json",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.documentMethod",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && workspaceContains:force.json",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.toggleCoverage",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && editorHasSelection && workspaceContains:force.json",
+          "when": "resourceLangId == apex && editorHasSelection",
           "command": "ForceCode.executeAnonymous",
           "group": "ForceCode"
         }
       ],
       "explorer/context": [
         {
-          "when": "resourceLangId == apex && workspaceContains:force.json",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == visualforce && workspaceContains:force.json",
+          "when": "resourceLangId == visualforce",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == xml && workspaceContains:force.json",
+          "when": "resourceLangId == xml",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && workspaceContains:force.json",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == visualforce && workspaceContains:force.json",
+          "when": "resourceLangId == visualforce",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == xml && workspaceContains:force.json",
+          "when": "resourceLangId == xml",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         }

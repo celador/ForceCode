@@ -12,6 +12,8 @@ export function getIcon(toolingType: string) {
             return 'gist';
         case 'ApexLog':
             return 'bug';
+        case 'StandardObject':
+            return 'gist';
         case 'CustomObject':
             return 'gist';
         default:
