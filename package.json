@@ -305,22 +305,22 @@
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && workspaceContains:force.json",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.apexTest",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && workspaceContains:force.json",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.documentMethod",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && workspaceContains:force.json",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.toggleCoverage",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && editorHasSelection && workspaceContains:force.json",
+          "when": "resourceLangId == apex && editorHasSelection",
           "command": "ForceCode.executeAnonymous",
           "group": "ForceCode"
         }
@@ -364,17 +364,17 @@
           "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
         },
         {
-          "when": "resourceLangId == apex && workspaceContains:force.json",
+          "when": "resourceLangId == apex",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == visualforce && workspaceContains:force.json",
+          "when": "resourceLangId == visualforce",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == xml && workspaceContains:force.json",
+          "when": "resourceLangId == xml",
           "command": "ForceCode.refresh",
           "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
         },
