@@ -9,9 +9,9 @@ import {
   CliCommandExecutor,
   CommandOutput,
   SfdxCommandBuilder
-} from '../../../salesforcedx-utils-vscode/out/src/cli';
+} from '../cli';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
-import { CLIENT_ID } from '../constants';
+import { CLIENT_ID } from '../../constants';
 
 export interface SObject {
   actionOverrides: any[];
@@ -171,8 +171,8 @@ type SubResponse = { statusCode: number; result: SObject };
 type BatchResponse = { hasErrors: boolean; results: SubResponse[] };
 
 export class SObjectDescribe {
-  private accessToken: string;
-  private instanceUrl: string;
+  private accessToken: string = '';
+  private instanceUrl: string = '';
   private readonly servicesPath: string = 'services/data';
   // the targetVersion should be consistent with the Cli even if only using REST calls
   private targetVersion = '';
@@ -183,7 +183,7 @@ export class SObjectDescribe {
   // get the token and url by calling the org - short term, should really be able to get it from the sfdx project
   // also set the proper target apiVersion
   private async setupConnection(projectPath: string, username?: string) {
-    if (!this.accessToken) {
+    if (this.accessToken === '') {
       let orgInfo: any;
       const builder = new SfdxCommandBuilder().withArg('force:org:display');
       if (username) {

@@ -4,8 +4,8 @@
 * Licensed under the BSD 3-Clause license.
 * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
-import { SFDX_PROJECT_FILE } from '../../../salesforcedx-utils-vscode/out/src';
-import { LocalCommandExecution } from '../../../salesforcedx-utils-vscode/out/src/cli';
+import { SFDX_PROJECT_FILE } from '../../constants';
+import { LocalCommandExecution } from '../cli';
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import { EOL } from 'os';
