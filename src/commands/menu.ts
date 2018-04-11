@@ -18,6 +18,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
     function displayMenu() {
         var quickpick: any[] = [];
         if (vscode.window.forceCode.userInfo !== undefined) {
+            quickpick.push(model.codeCompletionRefresh);
             quickpick.push(model.openFile);
             quickpick.push(model.createClass);
             quickpick.push(model.runUnitTests);
@@ -31,7 +32,6 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.deployPackage);
             quickpick.push(model.toql);
             quickpick.push(model.dx);
-            quickpick.push(model.codeCompletionRefresh);
         }
         quickpick.push(model.enterCredentials);
         let options: vscode.QuickPickItem[] = quickpick.map(record => {

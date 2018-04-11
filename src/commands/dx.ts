@@ -58,7 +58,7 @@ interface Command {
     help: string;
     longDescription: string;
     requiresWorkspace: boolean;
-    run: (ctx: any) => any;
+    run: (ctx: any) => Promise<string>;
     supportsTargetDevHubUsername: boolean;
     supportsTargetUsername: boolean;
     topic: string;
@@ -118,7 +118,7 @@ export default function open(context: vscode.ExtensionContext) {
 *   This does all the work. It will run a cli command through the built in dx.
 *   Takes a command as an argument and a string for the command's arguments.
 */
-export function runCommand(cmd: Command, arg: string): Promise<string> {
+export async function runCommand(cmd: Command, arg: string): Promise<string> {
     var topic: Topic = alm.topics.filter(t => {
         return t.name === cmd.topic;
     })[0];
@@ -162,5 +162,5 @@ export function runCommand(cmd: Command, arg: string): Promise<string> {
 
     console.log(cliContext);
 
-    return cmd.run(cliContext);
+    return Promise.resolve(cmd.run(cliContext));
 }
