@@ -12,6 +12,7 @@ import 'rxjs/add/observable/interval';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { Subscription } from 'rxjs/Subscription';
+import * as dx from '../../commands/dx';
 
 // tslint:disable-next-line:no-var-requires
 const kill = require('tree-kill');
@@ -32,12 +33,15 @@ export class CliCommandExecutor {
   }
 
   // this should return something other than 'any'
-  public execute(cancellationToken?: CancellationToken): any {
-    /*const childProcess = spawn(
-      this.command.command,
-      this.command.args,
-      this.options
-    );*/
+  public async execute(): Promise<string> {
+    var alm: any = require('salesforce-alm');
+    var theCmd = alm.commands.filter(c => {
+      return (c.topic + ':' + c.command) === this.command.args[0];
+    })[0];
     // This will be all we need
+    // need to find the command based this.command.args[0]
+    // the 'flags' will be in the rest of the array
+    this.command.args.shift();    // remove the command from the array
+    return dx.runCommand(theCmd, this.command.args.join());
   }
 }

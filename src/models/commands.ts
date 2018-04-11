@@ -1,4 +1,10 @@
 export default {
+    codeCompletionRefresh : {
+        description: 'Refresh all objects from org',
+        detail: 'Allows code completion with custom fields and objects by downloading org data.',
+        icon: 'broadcast',
+        label: 'Code Completion Refresh',
+    },
     dx : {
         description: 'Salesforce DX Commands',
         detail: 'DX',

@@ -1,5 +1,6 @@
 /* tslint:disable:no-unused-variable */
 import apexTest from './apexTest';
+import codeCompletionRefresh from './codeCompletionRefresh'
 import compile from './compile';
 import createClass from './createClass';
 import credentials from './credentials';
@@ -19,6 +20,7 @@ import {staticResourceDeployFromFile} from './staticResource';
 
 export {
     apexTest,
+    codeCompletionRefresh,
     compile,
     createClass,
     credentials,

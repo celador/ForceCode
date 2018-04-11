@@ -31,6 +31,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.deployPackage);
             quickpick.push(model.toql);
             quickpick.push(model.dx);
+            quickpick.push(model.codeCompletionRefresh);
         }
         quickpick.push(model.enterCredentials);
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
@@ -64,6 +65,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.createClass.description: return commands.createClass(context);
                 case model.runUnitTests.description: return commands.apexTest(vscode.window.activeTextEditor.document, context);
                 case model.dx.description: return commands.dx(context);
+                case model.codeCompletionRefresh.description: return commands.codeCompletionRefresh(context);
                 default: break;
             }
         }

@@ -4,8 +4,9 @@
 * Licensed under the BSD 3-Clause license.
 * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
-import { SFDX_PROJECT_FILE } from '../../constants';
-import { LocalCommandExecution } from '../cli';
+import * as vscode from 'vscode';
+import { SFDX_PROJECT_FILE } from '../constants';
+//import { LocalCommandExecution } from '../cli';
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import { EOL } from 'os';
@@ -19,6 +20,8 @@ import {
   SObjectDescribe
 } from '../describe';
 import { nls } from '../messages';
+import * as error from '../../util/error';
+import { messages } from '../messages/i18n';
 
 export interface CancellationToken {
   isCancellationRequested: boolean;
@@ -31,8 +34,6 @@ const STANDARDOBJECTS_DIR = 'standardObjects';
 const CUSTOMOBJECTS_DIR = 'customObjects';
 
 export class FauxClassGenerator {
-  private emitter: EventEmitter;
-  private cancellationToken: CancellationToken | undefined;
 
   // the empty string is used to represent the need for a special case
   // usually multiple fields with specialized names
@@ -67,40 +68,12 @@ export class FauxClassGenerator {
     ['complexvalue', 'Object']
   ]);
 
-  constructor(emitter: EventEmitter, cancellationToken?: CancellationToken) {
-    this.emitter = emitter;
-    this.cancellationToken = cancellationToken;
-  }
-
-  private errorExit(errorMessage: string): Promise<string> {
-    this.emitter.emit(LocalCommandExecution.STDERR_EVENT, `${errorMessage}\n`);
-    this.emitter.emit(
-      LocalCommandExecution.ERROR_EVENT,
-      new Error(errorMessage)
-    );
-    this.emitter.emit(
-      LocalCommandExecution.EXIT_EVENT,
-      LocalCommandExecution.FAILURE_CODE
-    );
-    return Promise.reject(
-      `${LocalCommandExecution.FAILURE_CODE.toString()} - ${errorMessage}`
-    );
-  }
-
-  private successExit(): Promise<string> {
-    this.emitter.emit(
-      LocalCommandExecution.EXIT_EVENT,
-      LocalCommandExecution.SUCCESS_CODE
-    );
-    return Promise.resolve(LocalCommandExecution.SUCCESS_CODE.toString());
-  }
-
-  private cancelExit(): Promise<string> {
-    this.emitter.emit(
-      LocalCommandExecution.EXIT_EVENT,
-      LocalCommandExecution.FAILURE_CODE
-    );
-    return Promise.resolve(nls.localize('faux_generation_cancelled_text'));
+  public errorExit(err: string) {
+    // Take the results
+    // And write them to a file
+    vscode.window.forceCode.resetMenu();
+    error.outputError({ message: err }, vscode.window.forceCode.outputChannel);
+    return err;
   }
 
   public async generate(
@@ -147,12 +120,6 @@ export class FauxClassGenerator {
     let j = 0;
     while (j < sobjects.length) {
       try {
-        if (
-          this.cancellationToken &&
-          this.cancellationToken.isCancellationRequested
-        ) {
-          return this.cancelExit();
-        }
         fetchedSObjects = fetchedSObjects.concat(
           await describe.describeSObjectBatch(projectPath, sobjects, j)
         );
@@ -186,7 +153,7 @@ export class FauxClassGenerator {
       return this.errorExit(e);
     }
 
-    return this.successExit();
+    return 'Success!!!';
   }
 
   private stripId(name: string): string {
@@ -362,8 +329,8 @@ export class FauxClassGenerator {
 
   private logSObjects(sobjectKind: string, fetchedLength: number) {
     if (fetchedLength > 0) {
-      this.emitter.emit(
-        LocalCommandExecution.STDOUT_EVENT,
+      vscode.window.forceCode.outputChannel.appendLine('================================     DONE!!     ================================\n');
+      vscode.window.forceCode.outputChannel.appendLine(
         nls.localize('fetched_sobjects_length_text', fetchedLength, sobjectKind)
       );
     }

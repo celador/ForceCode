@@ -7,11 +7,12 @@
 
 import {
   CliCommandExecutor,
-  CommandOutput,
-  SfdxCommandBuilder
+  //CommandOutput,
+  CommandBuilder
 } from '../cli';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
-import { CLIENT_ID } from '../../constants';
+import { CLIENT_ID } from '../constants';
+import * as dx from '../../commands/dx';
 
 export interface SObject {
   actionOverrides: any[];
@@ -185,16 +186,15 @@ export class SObjectDescribe {
   private async setupConnection(projectPath: string, username?: string) {
     if (this.accessToken === '') {
       let orgInfo: any;
-      const builder = new SfdxCommandBuilder().withArg('force:org:display');
+      const builder = new CommandBuilder().withArg('force:org:display');
       if (username) {
         builder.args.push('--targetusername', username);
       }
       const command = builder.withJson().build();
       const execution = new CliCommandExecutor(command, {
         cwd: projectPath
-      }).execute();
-      const cmdOutput = new CommandOutput();
-      const result = await cmdOutput.getCmdResult(execution);
+      });
+      const result = await execution.execute();
       orgInfo = JSON.parse(result).result;
       this.accessToken = orgInfo.accessToken;
       this.instanceUrl = orgInfo.instanceUrl;
@@ -205,13 +205,12 @@ export class SObjectDescribe {
   }
 
   private async getTargetApiVersion(projectPath: string): Promise<string> {
-    const builder = new SfdxCommandBuilder().withArg('force');
+    const builder = new CommandBuilder().withArg('force');
     const command = builder.withJson().build();
     const execution = new CliCommandExecutor(command, {
       cwd: projectPath
-    }).execute();
-    const cmdOutput = new CommandOutput();
-    const result = await cmdOutput.getCmdResult(execution);
+    });
+    const result = await execution.execute();
     const apiVersion = JSON.parse(result).result.apiVersion;
     return apiVersion;
   }
@@ -265,7 +264,7 @@ export class SObjectDescribe {
     type: SObjectCategory,
     username?: string
   ): Promise<string[]> {
-    const builder = new SfdxCommandBuilder()
+    const builder = new CommandBuilder()
       .withArg('force:schema:sobject:list')
       .withFlag('--sobjecttypecategory', type.toString());
     if (username) {
@@ -274,12 +273,11 @@ export class SObjectDescribe {
     const command = builder.withJson().build();
     const execution = new CliCommandExecutor(command, {
       cwd: projectPath
-    }).execute();
+    });
 
-    const cmdOutput = new CommandOutput();
     let result: string;
     try {
-      result = await cmdOutput.getCmdResult(execution);
+      result = await execution.execute();
     } catch (e) {
       return Promise.reject(e);
     }

@@ -6,7 +6,6 @@
  */
 
 export interface Command {
-  readonly command: string;
   readonly description?: string;
   readonly args: string[];
 
@@ -14,12 +13,12 @@ export interface Command {
   toCommand(): string;
 }
 
-export { CommandBuilder, SfdxCommandBuilder } from './commandBuilder';
+export { CommandBuilder } from './commandBuilder';
 export {
   CliCommandExecutor,
-  CliCommandExecution,
-  CommandExecution,
-  CompositeCliCommandExecutor
+  //CliCommandExecution,
+  //CommandExecution,
+  //CompositeCliCommandExecutor
 } from './commandExecutor';
-export { CommandOutput } from './commandOutput';
-export { LocalCommandExecution } from './localCommandExecutor';
+//export { CommandOutput } from './commandOutput';
+//export { LocalCommandExecution } from './localCommandExecutor';

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as error from './../util/error';
+var alm: any = require('salesforce-alm');
 
 interface Arg {
     name: string;
@@ -65,7 +66,6 @@ interface Command {
 }
 
 export default function open(context: vscode.ExtensionContext) {
-    var alm: any = require('salesforce-alm');
     var theCmd: any = undefined;
     vscode.window.forceCode.statusBarItem.text = 'DX Menu';
     vscode.window.forceCode.resetMenu();
@@ -76,7 +76,7 @@ export default function open(context: vscode.ExtensionContext) {
         .then(out => vscode.window.forceCode.outputChannel.appendLine(out))
         .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
-    function showFileOptions() {
+    function showFileOptions(): Thenable<vscode.QuickPickItem> {
         let options: vscode.QuickPickItem[] = alm.commands.filter(c => {
             return !c.hidden;
         }).map(c => {
@@ -94,7 +94,7 @@ export default function open(context: vscode.ExtensionContext) {
         return vscode.window.showQuickPick(options, config);
     }
 
-    function getArgsAndRun(opt: vscode.QuickPickItem): any {
+    function getArgsAndRun(opt: vscode.QuickPickItem): Thenable<string> {
         theCmd = alm.commands.filter(c => {
             return (c.topic + ':' + c.command) === opt.label;
         })[0];
@@ -107,52 +107,60 @@ export default function open(context: vscode.ExtensionContext) {
         };
         // this needs to wait for this input to get done somehow!!!
         return vscode.window.showInputBox(options).then(function (result: string) {
-            var topic: Topic = alm.topics.filter(t => {
-                return t.name === theCmd.topic;
-            })[0];
-            var flags: {} = {};
-            theCmd.flags.forEach(f => {
-                flags[f.name] = f.type === 'flag' ? true : f.default;
-            });
-        
-            var cliContext: Context = {
-                command: theCmd,
-                topic: topic,
-                flags: {}
-            };
-
-            if(result !== undefined) {
-                var theArgsArray = result.trim().split('-'); 
-                theArgsArray.forEach(function(i) {
-                    if(i.length > 0) {
-                        var curCmd = new Array();
-                        console.log(i);
-                        curCmd = i.trim().split(' ');
-                        var commandName = curCmd[0];
-                        if(curCmd[0].length === 1) {
-                            // this means we need to search for the argument name
-                            theCmd.flags.some(fl => {
-                                if(fl.char === commandName)
-                                {
-                                    commandName = fl.name;
-                                    return true;
-                                }
-                            });
-                        }
-                        console.log(curCmd);
-                        if(curCmd.length === 2)
-                            cliContext.flags[commandName] = curCmd[1];
-                        else
-                            cliContext.flags[commandName] = true;
-                    }
-                });
-            }
-
-            console.log(cliContext);
-
-            return theCmd.run(cliContext);
+            return runCommand(theCmd, result);
         });
     }
 
     // =======================================================================================================================================
+}
+
+/*
+*   This does all the work. It will run a cli command through the built in dx.
+*   Takes a command as an argument and a string for the command's arguments.
+*/
+export function runCommand(cmd: Command, arg: string): Promise<string> {
+    var topic: Topic = alm.topics.filter(t => {
+        return t.name === cmd.topic;
+    })[0];
+    var flags: {} = {};
+    /*cmd.flags.forEach(f => {
+        flags[f.name] = f.type === 'flag' ? true : f.default;
+    });*/
+
+    var cliContext: Context = {
+        command: cmd,
+        topic: topic,
+        flags: {}
+    };
+
+    if(arg !== undefined && arg !== '') {
+        var theArgsArray = arg.trim().split('-'); 
+        theArgsArray.forEach(function(i) {
+            if(i.length > 0) {
+                var curCmd = new Array();
+                console.log(i);
+                curCmd = i.trim().split(' ');
+                var commandName = curCmd[0];
+                if(curCmd[0].length === 1) {
+                    // this means we need to search for the argument name
+                    cmd.flags.some(fl => {
+                        if(fl.char === commandName)
+                        {
+                            commandName = fl.name;
+                            return true;
+                        }
+                    });
+                }
+                console.log(curCmd);
+                if(curCmd.length === 2)
+                    cliContext.flags[commandName] = curCmd[1];
+                else
+                    cliContext.flags[commandName] = true;
+            }
+        });
+    }
+
+    console.log(cliContext);
+
+    return cmd.run(cliContext);
 }

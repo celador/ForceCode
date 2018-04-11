@@ -6,12 +6,10 @@
  */
 
 export class Command {
-  public readonly command: string;
   public readonly description?: string;
   public readonly args: string[];
 
   public constructor(builder: CommandBuilder) {
-    this.command = builder.command;
     this.description = builder.description;
     this.args = builder.args;
   }
@@ -19,22 +17,17 @@ export class Command {
   public toString(): string {
     return this.description
       ? this.description
-      : `${this.command} ${this.args.join(' ')}`;
+      : `${this.args.join(' ')}`;
   }
 
   public toCommand(): string {
-    return `${this.command} ${this.args.join(' ')}`;
+    return `${this.args.join(' ')}`;
   }
 }
 
 export class CommandBuilder {
-  public readonly command: string;
   public description?: string;
   public args: string[] = [];
-
-  public constructor(command: string) {
-    this.command = command;
-  }
 
   public withDescription(description: string): CommandBuilder {
     this.description = description;
@@ -58,11 +51,5 @@ export class CommandBuilder {
 
   public build(): Command {
     return new Command(this);
-  }
-}
-
-export class SfdxCommandBuilder extends CommandBuilder {
-  public constructor() {
-    super('sfdx');
   }
 }
