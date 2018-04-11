@@ -153,6 +153,7 @@ export class FauxClassGenerator {
       return this.errorExit(e);
     }
 
+    vscode.window.forceCode.outputChannel.appendLine('===================================DONE!!!===============================');
     return 'Success!!!';
   }
 
@@ -227,6 +228,7 @@ export class FauxClassGenerator {
 
   // VisibleForTesting
   public generateFauxClass(folderPath: string, sobject: SObject): string {
+    vscode.window.forceCode.outputChannel.appendLine('Generating faux class for ' + sobject.name);
     if (!fs.existsSync(folderPath)) {
       fs.mkdirSync(folderPath);
     }
@@ -315,6 +317,7 @@ export class FauxClassGenerator {
 
   private createIfNeededOutputFolder(folderPath: string): boolean {
     if (!fs.existsSync(folderPath)) {
+      vscode.window.forceCode.outputChannel.appendLine('Creating output folder in ' + folderPath);
       mkdir('-p', folderPath);
       return fs.existsSync(folderPath);
     }
@@ -323,13 +326,13 @@ export class FauxClassGenerator {
 
   private cleanupSObjectFolders(baseSObjectsFolder: string) {
     if (fs.existsSync(baseSObjectsFolder)) {
+      vscode.window.forceCode.outputChannel.appendLine('Cleaning previously downloaded objects in ' + baseSObjectsFolder);
       rm('-rf', baseSObjectsFolder);
     }
   }
 
   private logSObjects(sobjectKind: string, fetchedLength: number) {
     if (fetchedLength > 0) {
-      vscode.window.forceCode.outputChannel.appendLine('================================     DONE!!     ================================\n');
       vscode.window.forceCode.outputChannel.appendLine(
         nls.localize('fetched_sobjects_length_text', fetchedLength, sobjectKind)
       );

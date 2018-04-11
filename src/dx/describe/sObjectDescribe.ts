@@ -10,6 +10,7 @@ import {
   //CommandOutput,
   CommandBuilder
 } from '../cli';
+import * as vscode from 'vscode';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
 import { CLIENT_ID } from '../constants';
 import * as dx from '../../commands/dx';
@@ -184,6 +185,7 @@ export class SObjectDescribe {
   // get the token and url by calling the org - short term, should really be able to get it from the sfdx project
   // also set the proper target apiVersion
   private async setupConnection(projectPath: string, username?: string) {
+    vscode.window.forceCode.outputChannel.appendLine('Checking connection...');
     if (this.accessToken === '') {
       let orgInfo: any;
       const builder = new CommandBuilder().withArg('force:org:display');
@@ -194,25 +196,13 @@ export class SObjectDescribe {
       const execution = new CliCommandExecutor(command, {
         cwd: projectPath
       });
-      const result = await execution.execute();
-      orgInfo = JSON.parse(result).result;
+      orgInfo = await execution.execute();
       this.accessToken = orgInfo.accessToken;
       this.instanceUrl = orgInfo.instanceUrl;
     }
     if (!this.targetVersion) {
-      this.targetVersion = await this.getTargetApiVersion(projectPath);
+      this.targetVersion = vscode.window.forceCode.config.apiVersion;
     }
-  }
-
-  private async getTargetApiVersion(projectPath: string): Promise<string> {
-    const builder = new CommandBuilder().withArg('force');
-    const command = builder.withJson().build();
-    const execution = new CliCommandExecutor(command, {
-      cwd: projectPath
-    });
-    const result = await execution.execute();
-    const apiVersion = '42.0';  //JSON.parse(result).result.apiVersion;   // we need to fix this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    return apiVersion;
   }
 
   private getVersion(): string {
@@ -264,6 +254,7 @@ export class SObjectDescribe {
     type: SObjectCategory,
     username?: string
   ): Promise<string[]> {
+    await this.setupConnection(projectPath, username);
     const builder = new CommandBuilder()
       .withArg('force:schema:sobject:list')
       .withFlag('--sobjecttypecategory', type.toString());
@@ -275,19 +266,10 @@ export class SObjectDescribe {
       cwd: projectPath
     });
 
-    let result: string;
+    let result: string[];
     try {
       result = await execution.execute();
-    } catch (e) {
-      return Promise.reject(e);
-    }
-    console.log('made it past getting json data as string');
-    try {
-      const sobjects = JSON.parse(result).result as string[];
-      //const sobjects = JSON.stringify(JSON.parse(result).result).replace('{','').replace('}','').replace('"','').split(',');
-      console.log('----------->>>>>>>>>sobjects<<<<<<<<<--------' + sobjects);
-      console.log('turned the data into json');
-      return Promise.resolve(sobjects);
+      return Promise.resolve(result);
     } catch (e) {
       return Promise.reject(result);
     }

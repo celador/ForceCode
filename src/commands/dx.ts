@@ -58,7 +58,7 @@ interface Command {
     help: string;
     longDescription: string;
     requiresWorkspace: boolean;
-    run: (ctx: any) => Promise<object>;
+    run: (ctx: any) => Promise<string[]>;
     supportsTargetDevHubUsername: boolean;
     supportsTargetUsername: boolean;
     topic: string;
@@ -73,7 +73,7 @@ export default function open(context: vscode.ExtensionContext) {
     return vscode.window.forceCode.connect(context)
         .then(svc => showFileOptions())
         .then(getArgsAndRun)
-        .then(out => vscode.window.forceCode.outputChannel.appendLine(out))
+        .then(out => vscode.window.forceCode.outputChannel.appendLine(out[0]))
         .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     function showFileOptions(): Thenable<vscode.QuickPickItem> {
@@ -94,7 +94,7 @@ export default function open(context: vscode.ExtensionContext) {
         return vscode.window.showQuickPick(options, config);
     }
 
-    function getArgsAndRun(opt: vscode.QuickPickItem): Thenable<string> {
+    function getArgsAndRun(opt: vscode.QuickPickItem): Thenable<string | string[]> {
         theCmd = alm.commands.filter(c => {
             return (c.topic + ':' + c.command) === opt.label;
         })[0];
@@ -118,14 +118,11 @@ export default function open(context: vscode.ExtensionContext) {
 *   This does all the work. It will run a cli command through the built in dx.
 *   Takes a command as an argument and a string for the command's arguments.
 */
-export async function runCommand(cmd: Command, arg: string): Promise<string> {
+export async function runCommand(cmd: Command, arg: string): Promise<string[]> {
     var topic: Topic = alm.topics.filter(t => {
         return t.name === cmd.topic;
     })[0];
     var flags: {} = {};
-    /*cmd.flags.forEach(f => {
-        flags[f.name] = f.type === 'flag' ? true : f.default;
-    });*/
 
     var cliContext: Context = {
         command: cmd,
@@ -159,16 +156,7 @@ export async function runCommand(cmd: Command, arg: string): Promise<string> {
             }
         });
     }
+    var objresult = await cmd.run(cliContext);
 
-    //console.log(cliContext);
-    // we need to check for an object then return a string here
-    var objresult = cmd.run(cliContext);
-    var stringres: string;
-    if(cliContext.flags['json'] !== undefined) {
-        stringres = JSON.stringify(objresult);
-    } else {
-        stringres = objresult.toString();
-    }
-
-    return Promise.resolve(stringres);
+    return Promise.resolve(objresult);
 }
