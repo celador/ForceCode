@@ -281,8 +281,12 @@ export class SObjectDescribe {
     } catch (e) {
       return Promise.reject(e);
     }
+    console.log('made it past getting json data as string');
     try {
       const sobjects = JSON.parse(result).result as string[];
+      //const sobjects = JSON.stringify(JSON.parse(result).result).replace('{','').replace('}','').replace('"','').split(',');
+      console.log('----------->>>>>>>>>sobjects<<<<<<<<<--------' + sobjects);
+      console.log('turned the data into json');
       return Promise.resolve(sobjects);
     } catch (e) {
       return Promise.reject(result);

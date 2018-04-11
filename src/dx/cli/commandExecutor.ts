@@ -35,13 +35,19 @@ export class CliCommandExecutor {
   // this should return something other than 'any'
   public async execute(): Promise<string> {
     var alm: any = require('salesforce-alm');
+    var curCmd = this.command.args.shift().replace('force:', '');
     var theCmd = alm.commands.filter(c => {
-      return (c.topic + ':' + c.command) === this.command.args[0];
+      console.log('topic:' + c.topic);
+      console.log('command:' + c.command);
+      return (c.topic + ':' + c.command) === curCmd;
     })[0];
+    console.log('theCmd:' + theCmd);
+    console.log('command: ' + this.command);
     // This will be all we need
     // need to find the command based this.command.args[0]
     // the 'flags' will be in the rest of the array
-    this.command.args.shift();    // remove the command from the array
-    return dx.runCommand(theCmd, this.command.args.join());
+    console.log('command after shift: ' + this.command);
+    var result = dx.runCommand(theCmd, this.command.args.join(' '));
+    return Promise.resolve(result);
   }
 }
