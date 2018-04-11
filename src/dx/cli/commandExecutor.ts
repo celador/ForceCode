@@ -37,17 +37,17 @@ export class CliCommandExecutor {
     var alm: any = require('salesforce-alm');
     var curCmd = this.command.args.shift().replace('force:', '');
     var theCmd = alm.commands.filter(c => {
-      console.log('topic:' + c.topic);
-      console.log('command:' + c.command);
+      //console.log('topic:' + c.topic);
+      //console.log('command:' + c.command);
       return (c.topic + ':' + c.command) === curCmd;
     })[0];
-    console.log('theCmd:' + theCmd);
+    console.log('curCmd:' + curCmd);
+    console.log('theCmd:' + theCmd.command);
     console.log('command: ' + this.command);
     // This will be all we need
     // need to find the command based this.command.args[0]
     // the 'flags' will be in the rest of the array
-    console.log('command after shift: ' + this.command);
-    var result = dx.runCommand(theCmd, this.command.args.join(' '));
-    return Promise.resolve(result);
+    //console.log('command after shift: ' + this.command);
+    return Promise.resolve(dx.runCommand(theCmd, this.command.args.join(' ')));
   }
 }

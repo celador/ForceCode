@@ -58,7 +58,7 @@ interface Command {
     help: string;
     longDescription: string;
     requiresWorkspace: boolean;
-    run: (ctx: any) => Promise<string>;
+    run: (ctx: any) => Promise<object>;
     supportsTargetDevHubUsername: boolean;
     supportsTargetUsername: boolean;
     topic: string;
@@ -138,7 +138,7 @@ export async function runCommand(cmd: Command, arg: string): Promise<string> {
         theArgsArray.forEach(function(i) {
             if(i.length > 0) {
                 var curCmd = new Array();
-                console.log(i);
+                //console.log(i);
                 curCmd = i.trim().split(' ');
                 var commandName = curCmd[0];
                 if(curCmd[0].length === 1) {
@@ -151,7 +151,7 @@ export async function runCommand(cmd: Command, arg: string): Promise<string> {
                         }
                     });
                 }
-                console.log(curCmd);
+                //console.log(curCmd);
                 if(curCmd.length === 2)
                     cliContext.flags[commandName] = curCmd[1];
                 else
@@ -160,7 +160,15 @@ export async function runCommand(cmd: Command, arg: string): Promise<string> {
         });
     }
 
-    console.log(cliContext);
+    //console.log(cliContext);
+    // we need to check for an object then return a string here
+    var objresult = cmd.run(cliContext);
+    var stringres: string;
+    if(cliContext.flags['json'] !== undefined) {
+        stringres = JSON.stringify(objresult);
+    } else {
+        stringres = objresult.toString();
+    }
 
-    return Promise.resolve(cmd.run(cliContext));
+    return Promise.resolve(stringres);
 }
