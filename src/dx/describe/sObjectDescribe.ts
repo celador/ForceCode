@@ -10,10 +10,9 @@ import {
   //CommandOutput,
   CommandBuilder
 } from '../cli';
-import * as vscode from 'vscode';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
 import { CLIENT_ID } from '../constants';
-import constants from './../../models/constants';
+import * as dx from '../../commands/dx';
 
 export interface SObject {
   actionOverrides: any[];
@@ -184,29 +183,84 @@ export class SObjectDescribe {
 
   // get the token and url by calling the org - short term, should really be able to get it from the sfdx project
   // also set the proper target apiVersion
-  private async setupConnection(username?: string) {
+  private async setupConnection(projectPath: string, username?: string) {
     if (this.accessToken === '') {
       let orgInfo: any;
       const builder = new CommandBuilder().withArg('force:org:display');
       if (username) {
         builder.args.push('--targetusername', username);
       }
-      const command = builder.build();
-      const execution = new CliCommandExecutor(command);
-      orgInfo = await execution.execute();
+      const command = builder.withJson().build();
+      const execution = new CliCommandExecutor(command, {
+        cwd: projectPath
+      });
+      const result = await execution.execute();
+      orgInfo = JSON.parse(result).result;
       this.accessToken = orgInfo.accessToken;
       this.instanceUrl = orgInfo.instanceUrl;
     }
     if (!this.targetVersion) {
-      this.targetVersion = constants.API_VERSION;
+      this.targetVersion = await this.getTargetApiVersion(projectPath);
     }
+  }
+
+  private async getTargetApiVersion(projectPath: string): Promise<string> {
+    const builder = new CommandBuilder().withArg('force');
+    const command = builder.withJson().build();
+    const execution = new CliCommandExecutor(command, {
+      cwd: projectPath
+    });
+    const result = await execution.execute();
+    const apiVersion = JSON.parse(result).result.apiVersion;
+    return apiVersion;
   }
 
   private getVersion(): string {
     return `${this.versionPrefix}${this.targetVersion}`;
   }
 
+  public async describeSObject(
+    projectPath: string,
+    type: string,
+    username?: string
+  ): Promise<SObject> {
+    await this.setupConnection(projectPath, username);
+
+    const urlElements = [
+      this.instanceUrl,
+      this.servicesPath,
+      this.getVersion(),
+      this.sobjectsPart,
+      type,
+      'describe'
+    ];
+
+    const requestUrl = urlElements.join('/');
+
+    const options: XHROptions = {
+      type: 'GET',
+      url: requestUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `OAuth ${this.accessToken}`,
+        'User-Agent': 'salesforcedx-extension',
+        'Sforce-Call-Options': `client=${CLIENT_ID}`
+      }
+    };
+
+    try {
+      const response: XHRResponse = await xhr(options);
+      const sobject = JSON.parse(response.responseText) as SObject;
+      return Promise.resolve(sobject);
+    } catch (error) {
+      const xhrResponse: XHRResponse = error;
+      return Promise.reject(xhrResponse.responseText);
+    }
+  }
+
   public async describeGlobal(
+    projectPath: string,
     type: SObjectCategory,
     username?: string
   ): Promise<string[]> {
@@ -216,26 +270,34 @@ export class SObjectDescribe {
     if (username) {
       builder.args.push('--targetusername', username);
     }
-    const command = builder.build();
-    const execution = new CliCommandExecutor(command);
+    const command = builder.withJson().build();
+    const execution = new CliCommandExecutor(command, {
+      cwd: projectPath
+    });
 
-    let result: string[];
+    let result: string;
     try {
       result = await execution.execute();
-      return Promise.resolve(result);
     } catch (e) {
       return Promise.reject(e);
+    }
+    try {
+      const sobjects = JSON.parse(result).result as string[];
+      return Promise.resolve(sobjects);
+    } catch (e) {
+      return Promise.reject(result);
     }
   }
 
   public async describeSObjectBatch(
+    projectPath: string,
     types: string[],
     nextToProcess: number,
     username?: string
   ): Promise<SObject[]> {
     const batchSize = 25;
 
-    await this.setupConnection(username);
+    await this.setupConnection(projectPath, username);
 
     const batchRequest: BatchRequest = { batchRequests: [] };
 
@@ -244,7 +306,6 @@ export class SObjectDescribe {
       i < nextToProcess + batchSize && i < types.length;
       i++
     ) {
-      vscode.window.forceCode.outputChannel.appendLine('Processing decription for ' + types[i]);
       const urlElements = [
         this.getVersion(),
         this.sobjectsPart,

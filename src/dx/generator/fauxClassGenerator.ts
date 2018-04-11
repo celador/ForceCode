@@ -7,9 +7,11 @@
 import * as vscode from 'vscode';
 import { SFDX_PROJECT_FILE } from '../constants';
 //import { LocalCommandExecution } from '../cli';
+import { EventEmitter } from 'events';
+import * as fs from 'fs';
 import { EOL } from 'os';
 import * as path from 'path';
-import * as fs from 'fs-extra';
+import { mkdir, rm } from 'shelljs';
 import {
   ChildRelationship,
   Field,
@@ -18,6 +20,8 @@ import {
   SObjectDescribe
 } from '../describe';
 import { nls } from '../messages';
+import * as error from '../../util/error';
+import { messages } from '../messages/i18n';
 
 export interface CancellationToken {
   isCancellationRequested: boolean;
@@ -30,6 +34,7 @@ const STANDARDOBJECTS_DIR = 'standardObjects';
 const CUSTOMOBJECTS_DIR = 'customObjects';
 
 export class FauxClassGenerator {
+
   // the empty string is used to represent the need for a special case
   // usually multiple fields with specialized names
   private static typeMapping: Map<string, string> = new Map([
@@ -58,20 +63,23 @@ export class FauxClassGenerator {
     ['combobox', 'String'],
     ['time', 'Time'],
     // TBD what are these mapped to and how to create them
-    // ['calculated', 'xxx'],
-    // ['masterrecord', 'xxx'],
+    //['calculated', 'xxx'],
+    //['masterrecord', 'xxx'],
     ['complexvalue', 'Object']
   ]);
-  
-  private static fieldName(decl: string): string {
-    return decl.substr(decl.indexOf(' ') + 1);
+
+  public errorExit(err: string) {
+    // Take the results
+    // And write them to a file
+    vscode.window.forceCode.resetMenu();
+    error.outputError({ message: err }, vscode.window.forceCode.outputChannel);
+    return err;
   }
 
   public async generate(
     projectPath: string,
     type: SObjectCategory
   ): Promise<string> {
-    vscode.window.forceCode.outputChannel.appendLine('===================Starting refresh of ' + type + ' objects from org=====================');
     const sobjectsFolderPath = path.join(
       projectPath,
       SFDX_DIR,
@@ -91,15 +99,11 @@ export class FauxClassGenerator {
       !fs.existsSync(projectPath) ||
       !fs.existsSync(path.join(projectPath, SFDX_PROJECT_FILE))
     ) {
-      throw nls.localize('no_generate_if_not_in_project', sobjectsFolderPath);
+      return this.errorExit(
+        nls.localize('no_generate_if_not_in_project', sobjectsFolderPath)
+      );
     }
-    if(type === SObjectCategory.ALL) {
-      this.cleanupSObjectFolders(sobjectsFolderPath);
-    } else if(type ===SObjectCategory.CUSTOM) {
-      this.cleanupSObjectFolders(customSObjectsFolderPath);
-    } else {
-      this.cleanupSObjectFolders(standardSObjectsFolderPath);
-    }
+    this.cleanupSObjectFolders(sobjectsFolderPath);
 
     const describe = new SObjectDescribe();
     const standardSObjects: SObject[] = [];
@@ -107,19 +111,23 @@ export class FauxClassGenerator {
     let fetchedSObjects: SObject[] = [];
     let sobjects: string[] = [];
     try {
-      sobjects = await describe.describeGlobal(type);
+      sobjects = await describe.describeGlobal(projectPath, type);
     } catch (e) {
-      throw nls.localize('failure_fetching_sobjects_list_text', e);
+      return this.errorExit(
+        nls.localize('failure_fetching_sobjects_list_text', e)
+      );
     }
     let j = 0;
     while (j < sobjects.length) {
       try {
         fetchedSObjects = fetchedSObjects.concat(
-          await describe.describeSObjectBatch(sobjects, j)
+          await describe.describeSObjectBatch(projectPath, sobjects, j)
         );
         j = fetchedSObjects.length;
       } catch (e) {
-        throw nls.localize('failure_in_sobject_describe_text', e);
+        return this.errorExit(
+          nls.localize('failure_in_sobject_describe_text', e)
+        );
       }
     }
 
@@ -133,30 +141,19 @@ export class FauxClassGenerator {
 
     this.logFetchedObjects(standardSObjects, customSObjects);
 
-    this.generateFauxClasses(standardSObjects, standardSObjectsFolderPath);
-    this.generateFauxClasses(customSObjects, customSObjectsFolderPath);
+    try {
+      this.generateFauxClasses(standardSObjects, standardSObjectsFolderPath);
+    } catch (e) {
+      return this.errorExit(e);
+    }
 
-    vscode.window.forceCode.outputChannel.appendLine('=========================================DONE!!!=========================================');
+    try {
+      this.generateFauxClasses(customSObjects, customSObjectsFolderPath);
+    } catch (e) {
+      return this.errorExit(e);
+    }
+
     return 'Success!!!';
-  }
-
-    // VisibleForTesting
-    public generateFauxClassText(sobject: SObject): string {
-      const declarations: string[] = this.generateFauxClassDecls(sobject);
-      return this.generateFauxClassTextFromDecls(sobject.name, declarations);
-    }
-
-  // VisibleForTesting
-  public generateFauxClass(folderPath: string, sobject: SObject): string {
-    vscode.window.forceCode.outputChannel.appendLine('Generating faux class for ' + sobject.name);
-    if (!fs.existsSync(folderPath)) {
-      fs.mkdirpSync(folderPath);
-    }
-    const fauxClassPath = path.join(folderPath, sobject.name + '.cls');
-    fs.writeFileSync(fauxClassPath, this.generateFauxClassText(sobject), {
-      mode: 0o444
-    });
-    return fauxClassPath;
   }
 
   private stripId(name: string): string {
@@ -213,6 +210,10 @@ export class FauxClassGenerator {
     return decls;
   }
 
+  private static fieldName(decl: string): string {
+    return decl.substr(decl.indexOf(' ') + 1);
+  }
+
   private generateFauxClasses(sobjects: SObject[], targetFolder: string): void {
     if (!this.createIfNeededOutputFolder(targetFolder)) {
       throw nls.localize('no_sobject_output_folder_text', targetFolder);
@@ -222,6 +223,18 @@ export class FauxClassGenerator {
         this.generateFauxClass(targetFolder, sobject);
       }
     }
+  }
+
+  // VisibleForTesting
+  public generateFauxClass(folderPath: string, sobject: SObject): string {
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath);
+    }
+    const fauxClassPath = path.join(folderPath, sobject.name + '.cls');
+    fs.writeFileSync(fauxClassPath, this.generateFauxClassText(sobject), {
+      mode: 0o444
+    });
+    return fauxClassPath;
   }
 
   private generateFauxClassDecls(sobject: SObject): string[] {
@@ -294,10 +307,15 @@ export class FauxClassGenerator {
     return generatedClass;
   }
 
+  //VisibleForTesting
+  public generateFauxClassText(sobject: SObject): string {
+    const declarations: string[] = this.generateFauxClassDecls(sobject);
+    return this.generateFauxClassTextFromDecls(sobject.name, declarations);
+  }
+
   private createIfNeededOutputFolder(folderPath: string): boolean {
     if (!fs.existsSync(folderPath)) {
-      vscode.window.forceCode.outputChannel.appendLine('Creating output folder in ' + folderPath);
-      fs.mkdirpSync(folderPath);
+      mkdir('-p', folderPath);
       return fs.existsSync(folderPath);
     }
     return true;
@@ -305,13 +323,13 @@ export class FauxClassGenerator {
 
   private cleanupSObjectFolders(baseSObjectsFolder: string) {
     if (fs.existsSync(baseSObjectsFolder)) {
-      vscode.window.forceCode.outputChannel.appendLine('Cleaning previously downloaded objects in ' + baseSObjectsFolder);
-      fs.removeSync(baseSObjectsFolder);
+      rm('-rf', baseSObjectsFolder);
     }
   }
 
   private logSObjects(sobjectKind: string, fetchedLength: number) {
     if (fetchedLength > 0) {
+      vscode.window.forceCode.outputChannel.appendLine('================================     DONE!!     ================================\n');
       vscode.window.forceCode.outputChannel.appendLine(
         nls.localize('fetched_sobjects_length_text', fetchedLength, sobjectKind)
       );
