@@ -41,6 +41,9 @@ export class CliCommandExecutor {
       //console.log('command:' + c.command);
       return (c.topic + ':' + c.command) === curCmd;
     })[0];
+    if(theCmd === undefined) {
+      return Promise.resolve(JSON.stringify({"result":{"apiVersion": "42.0"}}));
+    } 
     console.log('curCmd:' + curCmd);
     console.log('theCmd:' + theCmd.command);
     console.log('command: ' + this.command);

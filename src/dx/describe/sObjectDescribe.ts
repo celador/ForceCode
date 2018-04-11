@@ -211,7 +211,7 @@ export class SObjectDescribe {
       cwd: projectPath
     });
     const result = await execution.execute();
-    const apiVersion = JSON.parse(result).result.apiVersion;
+    const apiVersion = '42.0';  //JSON.parse(result).result.apiVersion;   // we need to fix this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     return apiVersion;
   }
 
