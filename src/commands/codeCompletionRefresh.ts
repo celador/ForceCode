@@ -20,7 +20,7 @@ export default async function codeCompletionRefresh(context: vscode.ExtensionCon
     let config: {} = {
         matchOnDescription: true,
         matchOnDetail: true,
-        placeHolder: 'Run a command',
+        placeHolder: 'Choose an option...',
     };
     var objectsToGet: SObjectCategory;
     await vscode.window.showQuickPick(options, config).then((res: vscode.QuickPickItem) => {
