@@ -6,7 +6,7 @@
  */
 
 import * as vscode from 'vscode';
-import * as dx from '../../commands/dx';
+import * as dx from '../../services/runDXCmd';
 
 import { Command } from './';
 
