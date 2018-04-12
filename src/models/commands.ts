@@ -1,7 +1,19 @@
 export default {
+    dxLogin : {
+        description: 'Log in to the DX built-in cli',
+        detail: 'You must login to DX first to run DX commands or before refreshing objects from the org.',
+        icon: 'key',
+        label: 'DX Login',
+    },
+    dxLogout : {
+        description: 'Log out from the DX built-in cli',
+        detail: 'You must login to DX first or if you receive errors. Allows code completion with custom fields and objects by downloading org data.',
+        icon: 'key',
+        label: 'DX Logout',
+    },
     codeCompletionRefresh : {
-        description: 'Refresh all objects from org',
-        detail: 'Allows code completion with custom fields and objects by downloading org data.',
+        description: 'Refresh objects from org',
+        detail: 'You must login to DX first or if you receive errors. Allows code completion with custom fields and objects by downloading org data.',
         icon: 'broadcast',
         label: 'Code Completion Refresh',
     },

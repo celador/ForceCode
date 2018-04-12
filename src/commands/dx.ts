@@ -51,7 +51,7 @@ interface Flag {
     char: string;
 }
 
-interface Command {
+export interface Command {
     command: string;
     description: string;
     flags: Flag[];
