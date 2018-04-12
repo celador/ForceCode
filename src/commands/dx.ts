@@ -73,7 +73,7 @@ export default function open(context: vscode.ExtensionContext) {
     return vscode.window.forceCode.connect(context)
         .then(svc => showFileOptions())
         .then(getArgsAndRun)
-        .then(out => vscode.window.forceCode.outputChannel.appendLine(out[0]))
+        .then(out => vscode.window.forceCode.outputChannel.appendLine(out.toString()))
         .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     function showFileOptions(): Thenable<vscode.QuickPickItem> {
@@ -94,7 +94,7 @@ export default function open(context: vscode.ExtensionContext) {
         return vscode.window.showQuickPick(options, config);
     }
 
-    function getArgsAndRun(opt: vscode.QuickPickItem): Thenable<string | string[]> {
+    function getArgsAndRun(opt: vscode.QuickPickItem): Thenable<string[]> {
         theCmd = alm.commands.filter(c => {
             return (c.topic + ':' + c.command) === opt.label;
         })[0];
@@ -107,7 +107,8 @@ export default function open(context: vscode.ExtensionContext) {
         };
         // this needs to wait for this input to get done somehow!!!
         return vscode.window.showInputBox(options).then(function (result: string) {
-            return runCommand(theCmd, result);
+            if(result != undefined && result != '')
+                return runCommand(theCmd, result);
         });
     }
 

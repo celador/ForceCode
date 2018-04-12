@@ -185,7 +185,6 @@ export class SObjectDescribe {
   // get the token and url by calling the org - short term, should really be able to get it from the sfdx project
   // also set the proper target apiVersion
   private async setupConnection(projectPath: string, username?: string) {
-    vscode.window.forceCode.outputChannel.appendLine('Checking connection...');
     if (this.accessToken === '') {
       let orgInfo: any;
       const builder = new CommandBuilder().withArg('force:org:display');
@@ -201,7 +200,7 @@ export class SObjectDescribe {
       this.instanceUrl = orgInfo.instanceUrl;
     }
     if (!this.targetVersion) {
-      this.targetVersion = vscode.window.forceCode.config.apiVersion;
+      this.targetVersion = '42.0';
     }
   }
 
@@ -209,52 +208,12 @@ export class SObjectDescribe {
     return `${this.versionPrefix}${this.targetVersion}`;
   }
 
-  public async describeSObject(
-    projectPath: string,
-    type: string,
-    username?: string
-  ): Promise<SObject> {
-    await this.setupConnection(projectPath, username);
-
-    const urlElements = [
-      this.instanceUrl,
-      this.servicesPath,
-      this.getVersion(),
-      this.sobjectsPart,
-      type,
-      'describe'
-    ];
-
-    const requestUrl = urlElements.join('/');
-
-    const options: XHROptions = {
-      type: 'GET',
-      url: requestUrl,
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        Authorization: `OAuth ${this.accessToken}`,
-        'User-Agent': 'salesforcedx-extension',
-        'Sforce-Call-Options': `client=${CLIENT_ID}`
-      }
-    };
-
-    try {
-      const response: XHRResponse = await xhr(options);
-      const sobject = JSON.parse(response.responseText) as SObject;
-      return Promise.resolve(sobject);
-    } catch (error) {
-      const xhrResponse: XHRResponse = error;
-      return Promise.reject(xhrResponse.responseText);
-    }
-  }
-
   public async describeGlobal(
     projectPath: string,
     type: SObjectCategory,
     username?: string
   ): Promise<string[]> {
-    await this.setupConnection(projectPath, username);
+    vscode.window.forceCode.outputChannel.appendLine('Getting descriptions for all objects...');
     const builder = new CommandBuilder()
       .withArg('force:schema:sobject:list')
       .withFlag('--sobjecttypecategory', type.toString());
@@ -271,7 +230,7 @@ export class SObjectDescribe {
       result = await execution.execute();
       return Promise.resolve(result);
     } catch (e) {
-      return Promise.reject(result);
+      return Promise.reject(e);
     }
   }
 
@@ -292,6 +251,7 @@ export class SObjectDescribe {
       i < nextToProcess + batchSize && i < types.length;
       i++
     ) {
+      vscode.window.forceCode.outputChannel.appendLine('Processing decription for ' + types[i]);
       const urlElements = [
         this.getVersion(),
         this.sobjectsPart,
