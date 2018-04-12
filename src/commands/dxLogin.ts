@@ -11,7 +11,7 @@ export default async function dxLogin(context: vscode.ExtensionContext): Promise
         var theCmd: dx.Command = alm.commands.filter(c => {
             return (c.topic + ':' + c.command) === 'auth:web:login';
         })[0];
-        var output: string[] = await dx.runCommand(theCmd, '--instanceurl ' + vscode.window.forceCode.config.url + ' --defaultusername');
+        var output: string[] = await dx.runCommand(theCmd, '--instanceurl ' + vscode.window.forceCode.config.url + ' --setdefaultusername');
         vscode.window.forceCode.outputChannel.appendLine(output.toString());
         vscode.window.forceCode.statusBarItem.text = 'ForceCode: Login complete!!!';
         vscode.window.forceCode.resetMenu();
