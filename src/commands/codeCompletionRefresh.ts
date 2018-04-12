@@ -36,18 +36,21 @@ export default async function codeCompletionRefresh(context: vscode.ExtensionCon
             objectsToGet = SObjectCategory.CUSTOM;
         }
         vscode.window.forceCode.statusBarItem.text = 'ForceCode: Refreshing ' + res.label + ' Objects from Org, this could take a VERY LONG TIME!!!';
+    }).then(async function() {
+        vscode.window.forceCode.outputChannel.clear();
+        vscode.window.forceCode.outputChannel.show();
+        var gen = new ccr.FauxClassGenerator();
+        try {
+            var startTime = (new Date()).getTime();
+            await gen.generate(vscode.workspace.rootPath, objectsToGet);
+            var endTime = (new Date()).getTime();
+            vscode.window.forceCode.outputChannel.appendLine('Refresh took ' + Math.round((endTime - startTime) / (1000 * 60)) + ' minutes.');
+            vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieval of objects complete!!!';
+            vscode.window.forceCode.resetMenu();
+            return Promise.resolve();
+        } catch(e) {
+            return Promise.reject(error.outputError(e, vscode.window.forceCode.outputChannel));
+        }
     });
-
-    vscode.window.forceCode.outputChannel.clear();
-    vscode.window.forceCode.outputChannel.show();
-    var gen = new ccr.FauxClassGenerator();
-    try {
-        await gen.generate(vscode.workspace.rootPath, objectsToGet);
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieval of objects complete!!!';
-        vscode.window.forceCode.resetMenu();
-        return Promise.resolve();
-    } catch(e) {
-        return Promise.reject(error.outputError(e, vscode.window.forceCode.outputChannel));
-    }
     // =======================================================================================================================================
 }
