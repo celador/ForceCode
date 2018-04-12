@@ -80,6 +80,7 @@ export class FauxClassGenerator {
     projectPath: string,
     type: SObjectCategory
   ): Promise<string> {
+    vscode.window.forceCode.outputChannel.appendLine('===================Starting refresh of ' + type + ' objects from org=====================');
     const sobjectsFolderPath = path.join(
       projectPath,
       SFDX_DIR,
@@ -153,7 +154,7 @@ export class FauxClassGenerator {
       return this.errorExit(e);
     }
 
-    vscode.window.forceCode.outputChannel.appendLine('===================================DONE!!!===============================');
+    vscode.window.forceCode.outputChannel.appendLine('=========================================DONE!!!=========================================');
     return 'Success!!!';
   }
 

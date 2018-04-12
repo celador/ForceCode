@@ -383,12 +383,9 @@
     "node-zip": "^1.1.1",
     "os": "^0.1.1",
     "request-light": "^0.2.2",
-    "rxjs": "^5.4.1",
     "salesforce-alm": "^42.9.0",
     "sequin": "^0.1.1",
     "shelljs": "^0.7.8",
-    "tree-kill": "^1.1.0",
-    "typescript": "^2.5.3",
     "unzip": "^0.1.11",
     "util.promisify": "^1.0.0",
     "vscode": "^1.1.11",
@@ -418,6 +415,7 @@
     "rimraf": "^2.6.2",
     "sinon": "^2.3.6",
     "source-map-support": "^0.4.15",
+    "typescript": "^2.5.3",
     "vsce": "^1.39.0"
   }
 }
