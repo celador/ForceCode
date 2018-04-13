@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as error from './../util/error';
 import * as dx from '../services/runDXCmd';
+import * as fs from 'fs-extra';
+import * as path from 'path';
 var alm: any = require('salesforce-alm');
 
 export default function open(context: vscode.ExtensionContext) {
@@ -12,6 +14,7 @@ export default function open(context: vscode.ExtensionContext) {
         .then(svc => showFileOptions())
         .then(getArgsAndRun)
         .then(out => vscode.window.forceCode.outputChannel.appendLine(dx.outputToString(out)))
+        .then(showLogFile)
         .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     function showFileOptions(): Thenable<vscode.QuickPickItem> {
@@ -52,6 +55,13 @@ export default function open(context: vscode.ExtensionContext) {
                     return ['Error running dx command:' + e];
                 }
             }
+        });
+    }
+
+    function showLogFile() {
+        var p: fs.PathLike = vscode.workspace.rootPath + path.sep + 'dx.log';
+        return vscode.workspace.openTextDocument(p).then(doc => {
+            vscode.window.showTextDocument(doc);
         });
     }
 

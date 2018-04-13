@@ -19,7 +19,7 @@ export default {
     },
     dx : {
         description: 'Salesforce DX Commands',
-        detail: 'DX',
+        detail: 'Run DX commands, just like on a command line.',
         icon: 'broadcast',
         label: 'Salesforce DX',
     },
