@@ -72,6 +72,14 @@ export function activate(context: vscode.ExtensionContext): any {
         updateDecorations();
     }));
 
+    context.subscriptions.push(vscode.commands.registerCommand('sfdx.force.apex.test.class.run.delegate', () => {
+        commands.apexTest(vscode.window.activeTextEditor.document, context);
+    }));
+
+    context.subscriptions.push(vscode.commands.registerCommand('sfdx.force.apex.test.method.run.delegate', () => {
+        commands.apexTest(vscode.window.activeTextEditor.document, context);
+    }));
+
     // AutoCompile Feature
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         const toolingType: string = parsers.getToolingType(textDocument);

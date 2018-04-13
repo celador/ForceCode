@@ -11,7 +11,7 @@ export default function open(context: vscode.ExtensionContext) {
     return vscode.window.forceCode.connect(context)
         .then(svc => showFileOptions())
         .then(getArgsAndRun)
-        .then(out => vscode.window.forceCode.outputChannel.appendLine(out.toString()))
+        .then(out => vscode.window.forceCode.outputChannel.appendLine(dx.outputToString(out)))
         .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     function showFileOptions(): Thenable<vscode.QuickPickItem> {
@@ -33,9 +33,7 @@ export default function open(context: vscode.ExtensionContext) {
     }
 
     function getArgsAndRun(opt: vscode.QuickPickItem): Thenable<string[]> {
-        theCmd = alm.commands.filter(c => {
-            return (c.topic + ':' + c.command) === opt.label;
-        })[0];
+        theCmd = dx.getCommand(opt.label);
         
         let options: vscode.InputBoxOptions = {
             ignoreFocusOut: true,
@@ -45,8 +43,15 @@ export default function open(context: vscode.ExtensionContext) {
         };
         // this needs to wait for this input to get done somehow!!!
         return vscode.window.showInputBox(options).then(function (result: string) {
-            if(result != undefined && result != '')
-                return dx.runCommand(theCmd, result);
+            if(result != undefined && result != '') {
+                vscode.window.forceCode.outputChannel.clear();
+                vscode.window.forceCode.outputChannel.show();
+                try{
+                    return dx.runCommand(opt.label, result);
+                } catch(e) {
+                    return ['Error running dx command:' + e];
+                }
+            }
         });
     }
 

@@ -25,15 +25,11 @@ export class CliCommandExecutor {
 
   // this should return something other than 'any'
   public async execute(): Promise<string[]> {
-    var alm: any = require('salesforce-alm');
     var curCmd = this.command.args.shift().replace('force:', '');
-    var theCmd = alm.commands.filter(c => {
-      return (c.topic + ':' + c.command) === curCmd;
-    })[0];
     var theArgs = this.command.args.join(' ');
     vscode.window.forceCode.outputChannel.appendLine('Executing command: ' + curCmd + ' ' + theArgs);
 
-    const retVal = await dx.runCommand(theCmd, theArgs);
+    const retVal = await dx.runCommand(curCmd, theArgs);
     return Promise.resolve(retVal);
   }
 }
