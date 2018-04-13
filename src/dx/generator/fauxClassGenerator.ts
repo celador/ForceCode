@@ -104,7 +104,13 @@ export class FauxClassGenerator {
         nls.localize('no_generate_if_not_in_project', sobjectsFolderPath)
       );
     }
-    this.cleanupSObjectFolders(sobjectsFolderPath);
+    if(type === SObjectCategory.ALL) {
+      this.cleanupSObjectFolders(sobjectsFolderPath);
+    } else if(type ===SObjectCategory.CUSTOM) {
+      this.cleanupSObjectFolders(customSObjectsFolderPath);
+    } else {
+      this.cleanupSObjectFolders(standardSObjectsFolderPath);
+    }
 
     const describe = new SObjectDescribe();
     const standardSObjects: SObject[] = [];
