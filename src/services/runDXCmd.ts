@@ -1,5 +1,6 @@
-import { underline } from "chalk";
-
+import * as vscode from 'vscode';
+import * as fs from 'fs-extra';
+import * as path from 'path';
 var alm: any = require('salesforce-alm');
 
 interface Topic {
@@ -47,16 +48,30 @@ export function getCommand(cmd: string): Command {
     })[0];
 }
 
-export function outputToString(toConvert: any): string {
+export function outputToString(toConvert: any, depth?: number): string {
     if(toConvert === undefined || toConvert === null)
     {
-        return 'No output from command.';
+        return '';
     }
+    var retval: string;
     if(typeof toConvert === 'object') {
-        var retval: string = '';
+        var level: number = depth ? depth : 1;
+        var tabs: string = '';
+        var brTabs: string = '';
+        for(var theTabs = 0; theTabs < level; theTabs++)
+        {
+            tabs += '\t';
+            if(theTabs + 1 < level) {
+                brTabs += '\t';
+            }
+        }
+        retval = brTabs + '{\n';
+        level++;
         Object.keys(toConvert).forEach(key => {
-            retval += key + ': ' + outputToString(toConvert[key]);
+            retval += tabs + key + ': ' + outputToString(toConvert[key], level) + ',\n';
         });
+        level--;
+        retval += brTabs + '}';
     } else {
         retval = toConvert;
     }
@@ -107,6 +122,7 @@ export async function runCommand(cmdString: string, arg: string): Promise<any> {
         });
     }
     var objresult = await cmd.run(cliContext);
-
+    // log command output
+    fs.outputFile(vscode.workspace.rootPath + path.sep + 'dx.log', outputToString(objresult));
     return Promise.resolve(objresult);
 }
