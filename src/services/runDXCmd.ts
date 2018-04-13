@@ -1,11 +1,6 @@
-var alm: any = require('salesforce-alm');
+import { underline } from "chalk";
 
-export interface Arg {
-    name: string;
-    optional: boolean;
-    hidden: boolean;
-    value: string;
-}
+var alm: any = require('salesforce-alm');
 
 interface Topic {
     name: string; // `json:"name"`
@@ -17,27 +12,10 @@ interface Topic {
 interface Context {
     topic: Topic;                 // `json:"topic"`
     command: Command;               // `json:"command"`
-    app?: string;                 // `json:"app"`
-    org?: string;                 // `json:"org,omitempty"`
-    args?: Arg[];            // `json:"args"`
     flags: {}; // `json:"flags"`
-    cwd?: string;                 // `json:"cwd"`
-    herokuDir?: string;                 // `json:"herokuDir"`
-    debug?: boolean;                   // `json:"debug"`
-    debugHeaders?: boolean;                   // `json:"debugHeaders"`
-    dev?: boolean;                   // `json:"dev"`
-    supportsColor?: boolean;                   // `json:"supportsColor"`
-    version?: string;                 // `json:"version"`
-    APIToken?: string;                 // `json:"apiToken"`
-    APIURL?: string;                 // `json:"apiUrl"`
-    gitHost?: string;                 // `json:"gitHost"`
-    HTTPGitHost?: string;                 // `json:"httpGitHost"`
-    auth?: {
-        Password: string; // `json:"password"`
-    };
 }
 
-export interface Flag {
+interface Flag {
     default: string;
     description: string;
     hasValue: boolean;
@@ -56,18 +34,41 @@ export interface Command {
     help: string;
     longDescription: string;
     requiresWorkspace: boolean;
-    run: (ctx: any) => Promise<string[]>;
+    run: (ctx: any) => Promise<any>;
     supportsTargetDevHubUsername: boolean;
     supportsTargetUsername: boolean;
     topic: string;
     usage: string;
 }
 
+export function getCommand(cmd: string): Command {
+    return alm.commands.filter(c => {
+        return (c.topic + ':' + c.command) === cmd;
+    })[0];
+}
+
+export function outputToString(toConvert: any): string {
+    if(toConvert === undefined || toConvert === null)
+    {
+        return 'No output from command.';
+    }
+    if(typeof toConvert === 'object') {
+        var retval: string = '';
+        Object.keys(toConvert).forEach(key => {
+            retval += key + ': ' + outputToString(toConvert[key]);
+        });
+    } else {
+        retval = toConvert;
+    }
+    return retval;
+}
+
 /*
 *   This does all the work. It will run a cli command through the built in dx.
 *   Takes a command as an argument and a string for the command's arguments.
 */
-export async function runCommand(cmd: Command, arg: string): Promise<string[]> {
+export async function runCommand(cmdString: string, arg: string): Promise<any> {
+    var cmd: Command = getCommand(cmdString);
     var topic: Topic = alm.topics.filter(t => {
         return t.name === cmd.topic;
     })[0];
