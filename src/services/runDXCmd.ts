@@ -42,6 +42,14 @@ export interface Command {
     usage: string;
 }
 
+export interface QueryResult {
+    done: boolean; // Flag if the query is fetched all records or not
+    nextRecordsUrl?: string; // URL locator for next record set, (available when done = false)
+    totalSize: number; // Total size for query
+    locator: string; // Total size for query
+    records: Array<any>; // Array of records fetched
+}
+
 export function getCommand(cmd: string): Command {
     return alm.commands.filter(c => {
         return (c.topic + ':' + c.command) === cmd;
@@ -102,8 +110,8 @@ export async function runCommand(cmdString: string, arg: string): Promise<any> {
                 var curCmd = new Array();
                 //console.log(i);
                 curCmd = i.trim().split(' ');
-                var commandName = curCmd[0];
-                if(curCmd[0].length === 1) {
+                var commandName = curCmd.shift();
+                if(commandName.length === 1) {
                     // this means we need to search for the argument name
                     cmd.flags.some(fl => {
                         if(fl.char === commandName)
@@ -114,8 +122,8 @@ export async function runCommand(cmdString: string, arg: string): Promise<any> {
                     });
                 }
                 //console.log(curCmd);
-                if(curCmd.length === 2)
-                    cliContext.flags[commandName] = curCmd[1];
+                if(curCmd.length > 0)
+                    cliContext.flags[commandName] = curCmd.join(' ').trim();
                 else
                     cliContext.flags[commandName] = true;
             }
@@ -132,4 +140,12 @@ export async function runCommand(cmdString: string, arg: string): Promise<any> {
         fs.outputFile(vscode.workspace.rootPath + path.sep + 'dx.log', outputToString(objresult));
     }
     return Promise.resolve(objresult);
+}
+
+export function toqlQuery(query: string): Promise<QueryResult> {
+    return Promise.resolve(soqlQuery(query + ' -t'));
+}
+
+export function soqlQuery(query: string): Promise<QueryResult> {
+    return Promise.resolve(runCommand('data:soql:query', '-q ' + query + ' -r json'));
 }

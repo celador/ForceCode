@@ -16,7 +16,7 @@ export default function soql(context: vscode.ExtensionContext): Promise<any> {
             prompt: `Enter a SOQL query to get the results in a json file in the soql folder`,
         };
         return vscode.window.showInputBox(options).then(query => {
-            return vscode.window.forceCode.conn.query(query).then(res => {
+            return dx.soqlQuery(query).then(res => {
                 let filePath: string = vscode.workspace.rootPath + path.sep + 'soql' + path.sep + Date.now() + '.json';
                 fs.outputFile(vscode.workspace.rootPath + path.sep + 'soql' + path.sep + Date.now() + '.json', dx.outputToString(res.records));
                 return vscode.workspace.openTextDocument(filePath).then(doc => {

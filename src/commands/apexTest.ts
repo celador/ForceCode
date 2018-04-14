@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-// import jsforce = require('jsforce');
-// import Workspace from './../services/workspace';
 import * as error from './../util/error';
 import { configuration } from './../services';
+import * as dx from '../services/runDXCmd';
+import { jsforce } from 'jsforce';
 
-export default function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
+export default async function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
     const toolingType: string = parsers.getToolingType(document);
     const name: string = parsers.getName(document, toolingType);
     if(!name.toLowerCase().includes('test'))
@@ -35,77 +35,68 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
     vscode.window.forceCode.testTimeout = 0;
     return startTest();
 
-    function startTest() {
+    async function startTest() {
         vscode.window.forceCode.isTestRunning = true;
+        return await dx.runCommand('apex:test:run', '-n ' + name + ' -w 3 -y -r json')
+            .then(dxRes => {
+                if(dxRes) {
+                    dx.toqlQuery('SELECT Coverage, ApexClassOrTriggerId, ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered '
+                                + 'FROM ApexCodeCoverageAggregate '
+                                + 'WHERE ApexClassOrTriggerId != NULL '
+                                + 'AND ApexClassOrTrigger.Name != NULL '
+                                + 'AND NumLinesCovered != NULL '
+                                + 'AND NumLinesUncovered != NULL '
+                                + 'AND (NumLinesCovered > 0 OR NumLinesUncovered > 0) '
+                                + 'ORDER BY ApexClassOrTrigger.Name')
+                        .then(res => showResult(res, dxRes))
+                        .then(undefined => endTest)
+                        .catch(tryAgain);
+                } else {
+                    return tryAgain();
+                }
+            })
+            .catch(tryAgain);
+    }
+
+    function tryAgain(err?) {
         vscode.window.forceCode.testTimeout++;
-        if(vscode.window.forceCode.testTimeout < 15)
-        {
-            // will attempt every 2 seconds for up to 30 seconds then give up
-            return vscode.window.forceCode.connect(context)
-                .then(svc => getClassInfo(svc))
-                .then(id => runCurrentTests(id))
-                .then(showResult)
-                .then(showLog)
-                .then(function() {
-                    vscode.window.forceCode.isTestRunning = false;
-                    if(vscode.window.forceCode.queueTest.length > 0)
-                    {
-                        var queue = vscode.window.forceCode.queueTest.pop();
-                        return apexTest(queue[0], queue[1]);
-                    }
-                    return;
-                })
-                .catch(function() {
-                    vscode.window.forceCode.testInterval = setTimeout(function() {
-                        startTest();
-                    }, 2000);
-                });
-        }
-        else
-        {
-            vscode.window.forceCode.isTestRunning = false;
-            vscode.window.forceCode.statusBarItem.text = "Failed to run unit tests, please wait a couple minutes and try again";
-            vscode.window.forceCode.resetMenu();
-            return;
+        console.log(vscode.window.forceCode.testTimeout);
+        if(vscode.window.forceCode.testTimeout < 11) {
+            return setTimeout(function() {
+                console.log(vscode.window.forceCode.testTimeout);
+                return startTest();
+            }, 2000);
+        } else {
+            vscode.window.forceCode.statusBarItem.text = 'ForceCode: Failed to execute tests, wait at least a minute and try again.';
+            return endTest(err);
         }
     }
-
-    function getClassInfo(svc) {
-        return vscode.window.forceCode.conn.tooling.sobject(toolingType)
-            .find({ Name: name}).execute();
+    
+    function endTest(err?) {
+        if(err !== undefined) {
+            error.outputError(err, vscode.window.forceCode.outputChannel);
+        }
+        vscode.window.forceCode.resetMenu();
+            // end
+        vscode.window.forceCode.isTestRunning = false;
+        if(vscode.window.forceCode.queueTest.length > 0)
+        {
+            var queue = vscode.window.forceCode.queueTest.pop();
+            return apexTest(queue[0], queue[1]);
+        }
+        return;
     }
 
-    function runCurrentTests(results) {
-        var info: any = results[0];
-        return vscode.window.forceCode.conn.tooling.runUnitTests(info.Id);
-    }
     // =======================================================================================================================================
-    function showResult(res) {
+    function showResult(res: dx.QueryResult, dxRes) {
         return configuration().then(results => {
             vscode.window.forceCode.outputChannel.clear();
-            if (res.failures.length) {
+            let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Test Failures');
+            if (dxRes.summary.failing && dxRes.summary.failing > 0) {
                 vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   ==========================================================');
                 vscode.window.forceCode.statusBarItem.text = 'ForceCode: Some Tests Failed $(thumbsdown)';
-            } else {
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: All Tests Passed $(thumbsup)';
-            }
-            vscode.window.forceCode.resetMenu();
-            let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Test Failures');
-            res.successes.forEach(function (success) {
-                let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
-                let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
-                    if (prev) { return prev; }
-                    return curr.name === success.name ? curr : undefined;
-                }, undefined);
-                if (member) {
-                    let docUri: vscode.Uri = vscode.Uri.file(member.path);
-                    let diagnostics: vscode.Diagnostic[] = [];
-                    diagnosticCollection.set(docUri, diagnostics);
-                }
-            });
-            res.failures.forEach(function (failure) {
                 let re: RegExp = /^(Class|Trigger)\.\S*\.(\S*)\.(\S*)\:\sline\s(\d*)\,\scolumn\s(\d*)$/ig;
-                let matches: string[] = re.exec(failure.stackTrace);
+                let matches: string[] = re.exec(dxRes.tests[0].StackTrace);
                 if (matches && matches.length && matches.length === 6) {
                     // let typ: string = matches[1];
                     let cls: string = matches[2];
@@ -117,7 +108,7 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                     let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
                     let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
                         if (prev) { return prev; }
-                        return curr.name === cls ? curr : undefined;
+                        return curr.name === name ? curr : undefined;
                     }, undefined);
                     if (member) {
                         let docUri: vscode.Uri = vscode.Uri.file(member.path);
@@ -128,54 +119,46 @@ export default function apexTest(document: vscode.TextDocument, context: vscode.
                             let ds: vscode.Diagnostic[] = diagnosticCollection.get(docUri);
                             diagnostics = diagnostics.concat(ds);
                         }
-                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(failureRange, failure.message, vscode.DiagnosticSeverity.Information);
+                        let diagnostic: vscode.Diagnostic = new vscode.Diagnostic(failureRange, dxRes.tests[0].Message, vscode.DiagnosticSeverity.Information);
                         diagnostics.push(diagnostic);
                         diagnosticCollection.set(docUri, diagnostics);
                     }
                 }
-                let errorMessage: string = 'FAILED: ' + failure.stackTrace + '\n' + failure.message;
+                let errorMessage: string = 'FAILED: ' + dxRes.tests[0].StackTrace + '\n' + dxRes.tests[0].Message;
                 vscode.window.forceCode.outputChannel.appendLine(errorMessage);
-            });
-            if (res.failures.length) { vscode.window.forceCode.outputChannel.appendLine('======================================================================================================================================='); }
-            res.successes.forEach(function (success) {
-                var successMessage: string = 'SUCCESS: ' + success.name + ':' + success.methodName + ' - in ' + success.time + 'ms';
+                vscode.window.forceCode.outputChannel.appendLine('=======================================================================================================================================');
+            } else {
+                vscode.window.forceCode.statusBarItem.text = 'ForceCode: All Tests Passed $(thumbsup)';
+                let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
+                let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
+                    if (prev) { return prev; }
+                    return curr.name === name ? curr : undefined;
+                }, undefined);
+                if (member) {
+                    let docUri: vscode.Uri = vscode.Uri.file(member.path);
+                    let diagnostics: vscode.Diagnostic[] = [];
+                    diagnosticCollection.set(docUri, diagnostics);
+                }
+                var successMessage: string = 'SUCCESS: ' + name + ':' + dxRes.tests[0].MethodName + ' - in ' + dxRes.summary.testExecutionTime;
                 vscode.window.forceCode.outputChannel.appendLine(successMessage);
-            });
+            }
+            vscode.window.forceCode.resetMenu();
             // Add Line Coverage information
-            if (res.codeCoverage.length) {
-                res.codeCoverage.forEach(function (coverage) {
-                    vscode.window.forceCode.codeCoverage[coverage.id] = coverage;
-                });
-            }
-
-            // Add Code Coverage Warnings, maybe as actual Validation Warnings 
-            if (res.codeCoverageWarnings.length && Array.isArray(vscode.window.forceCode.workspaceMembers) && vscode.window.forceCode.workspaceMembers.length) {
-                res.codeCoverageWarnings.forEach(function (warning) {
-
-                    let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers.reduce((prev, curr) => {
-                        let coverage: any = vscode.window.forceCode.codeCoverage[warning.id];
-                        if (curr.name === coverage.name && curr.memberInfo && curr.memberInfo.type && curr.memberInfo.type.indexOf(coverage.type) >= 0) {
+            if (res.records) {
+                res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
+                    let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
+                    let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
+                        if (prev) { return prev; }
+                        if(curr.name === curRes.ApexClassOrTrigger.Name) {
+                            vscode.window.forceCode.codeCoverage[curRes.ApexClassOrTriggerId] = curRes;
                             return curr;
-                        } else if (prev) {
-                            return prev;
                         }
+                        return undefined;
                     }, undefined);
-
-                    if (member) {
-                        let diagnosticCollection2: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(member.memberInfo.type);
-                        let diagnostics: vscode.Diagnostic[] = [];
-                        let warningMessage: string = warning.message;
-                        let docUri: vscode.Uri = vscode.Uri.file(member.path);
-                        let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(0, 0));
-                        diagnostics.push(new vscode.Diagnostic(docLocation.range, warningMessage, 1));
-                        diagnosticCollection2.set(docUri, diagnostics);
-                    } else if (warning.message) {
-                        vscode.window.forceCode.outputChannel.appendLine(warning.message);
-                    }
-
                 });
             }
-            return res;
+
+            return dxRes;
         });
     }
     function showLog(res) {

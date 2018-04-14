@@ -50,19 +50,29 @@ export interface IWorkspaceService {
 }
 
 interface ICodeCoverage {
-    dmlInfo: any[];
-    id: string;
-    locationsNotCovered: ILocationsNotCovered[];
-    methodInfo: any[];
-    name: string;
-    namespace: string;
-    numLocations: Number;
-    numLocationsNotCovered: Number;
-    soqlInfo: any[];
-    soslInfo: any[];
-    type: string;
+    attributes: 
+		{
+			type: string,
+			url: string,
+		},
+		ApexClassOrTriggerId: string,
+		ApexClassOrTrigger: 
+		{
+			attributes: 
+			{
+				type: string,
+				url: string,
+			},
+			Name: string,
+		},
+		NumLinesCovered: number,
+		NumLinesUncovered: number,
+		Coverage: 
+		{
+            coveredLines: number[],
+            uncoveredLines: number[]
+        }
 }
-
 interface ICodeCoverageWarning {
     id: string;
     message: string;

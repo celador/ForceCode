@@ -70,19 +70,19 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
         let fileCoverage: forceCode.ICodeCoverage = vscode.window.forceCode.codeCoverage[id];
         if (fileCoverage) {
             //let namespaceMatch: boolean = (fileCoverage.namespace ? fileCoverage.namespace : '') === vscode.window.forceCode.config.prefix;
-            let nameMatch: boolean = fileCoverage.name.toLowerCase() === parsers.getFileName(document).toLowerCase();
-            let typeMatch: boolean = fileCoverage.type === parsers.getCoverageType(document);
-            if (nameMatch && typeMatch) {
-                fileCoverage.locationsNotCovered.forEach(notCovered => {
-                    let lineNumber: number = notCovered.line.valueOf() - 1;
+            let nameMatch: boolean = fileCoverage.ApexClassOrTrigger.Name.toLowerCase() === parsers.getFileName(document).toLowerCase();
+            //let typeMatch: boolean = fileCoverage.type === parsers.getCoverageType(document);
+            if (nameMatch) {
+                fileCoverage.Coverage.uncoveredLines.forEach(notCovered => {
+                    let lineNumber: number = notCovered - 1;
                     let decorationRange: vscode.DecorationOptions = { range: document.lineAt(Number(lineNumber)).range, hoverMessage: 'Line ' + (lineNumber + 1) + ' not covered by a test' };
                     uncoveredLineDecorations.push(decorationRange);
                     // Add output to output channel
-                    coverageChannel.appendLine(fileCoverage.name + ' line ' + notCovered.line + ' not covered.')
+                    coverageChannel.appendLine(fileCoverage.ApexClassOrTrigger.Name + ' line ' + notCovered + ' not covered.')
                 });
-                var covered: number = fileCoverage.numLocationsNotCovered.valueOf();
-                var total: number = fileCoverage.numLocations.valueOf();
-                vscode.window.forceCode.statusBarItem.text = fileCoverage.name + ' ' + (((total - covered) / total) * 100).toFixed(2) + '% covered';
+                var covered: number = fileCoverage.NumLinesUncovered;
+                var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
+                vscode.window.forceCode.statusBarItem.text = fileCoverage.ApexClassOrTrigger.Name + ' ' + (((total - covered) / total) * 100).toFixed(2) + '% covered';
                 vscode.window.forceCode.resetMenu();
             }
         }
