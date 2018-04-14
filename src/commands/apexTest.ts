@@ -49,6 +49,7 @@ export default async function apexTest(document: vscode.TextDocument, context: v
                                 + 'AND (NumLinesCovered > 0 OR NumLinesUncovered > 0) '
                                 + 'ORDER BY ApexClassOrTrigger.Name')
                         .then(res => showResult(res, dxRes))
+                        .then(showLog)
                         .then(undefined => endTest)
                         .catch(tryAgain);
                 } else {
@@ -161,9 +162,15 @@ export default async function apexTest(document: vscode.TextDocument, context: v
             return dxRes;
         });
     }
-    function showLog(res) {
+    async function showLog(dxRes) {
         if (vscode.window.forceCode.config.showTestLog) {
-            return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${res.apexLogId}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
+            var queryString: string = `SELECT Id FROM ApexLog` +
+                ` WHERE LogUserId IN (SELECT Id FROM User WHERE UserName='${vscode.window.forceCode.config.username}')` +
+                // ` AND Request = 'API' AND Location = 'SystemLog'` +
+                // ` AND Operation like '%executeAnonymous%'`
+                ` ORDER BY StartTime DESC, Id DESC LIMIT 1`;
+            var res: dx.QueryResult = await dx.toqlQuery(queryString);
+            return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${res.records[0].Id}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
                 return vscode.window.showTextDocument(_document, 3, true);
             });
         }
