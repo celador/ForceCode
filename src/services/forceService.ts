@@ -7,10 +7,12 @@ import { configuration } from './../services';
 import * as error from './../util/error';
 import * as commands from './../commands';
 import jsf = require('jsforce');
+import DXService from './dxService';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
 export default class ForceService implements forceCode.IForceService {
+    public dxCommands: any;
     public config: forceCode.Config;
     public conn: any;
     public containerId: string;
@@ -62,6 +64,7 @@ export default class ForceService implements forceCode.IForceService {
                 this.statusBarItem.text = `ForceCode ${pjson.version} is Active`;
                 this.connect();
                 this.statusBarItem.show();
+                this.dxCommands = new DXService();
                 this.resetMenu();
             }
         }).catch(err => {

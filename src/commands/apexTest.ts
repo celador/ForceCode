@@ -3,7 +3,7 @@ import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
 import * as error from './../util/error';
 import { configuration } from './../services';
-import * as dx from '../services/runDXCmd';
+import { QueryResult } from '../services/dxService';
 import { jsforce } from 'jsforce';
 
 export default async function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
@@ -37,10 +37,10 @@ export default async function apexTest(document: vscode.TextDocument, context: v
 
     async function startTest() {
         vscode.window.forceCode.isTestRunning = true;
-        return await dx.runCommand('apex:test:run', '-n ' + name + ' -w 3 -y -r json')
+        return await vscode.window.forceCode.dxCommands.runCommand('apex:test:run', '-n ' + name + ' -w 3 -y -r json')
             .then(dxRes => {
                 if(dxRes) {
-                    dx.toqlQuery('SELECT Coverage, ApexClassOrTriggerId, ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered '
+                    vscode.window.forceCode.dxCommands.toqlQuery('SELECT Coverage, ApexClassOrTriggerId, ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered '
                                 + 'FROM ApexCodeCoverageAggregate '
                                 + 'WHERE ApexClassOrTriggerId != NULL '
                                 + 'AND ApexClassOrTrigger.Name != NULL '
@@ -89,7 +89,7 @@ export default async function apexTest(document: vscode.TextDocument, context: v
     }
 
     // =======================================================================================================================================
-    function showResult(res: dx.QueryResult, dxRes) {
+    function showResult(res: QueryResult, dxRes) {
         return configuration().then(results => {
             vscode.window.forceCode.outputChannel.clear();
             let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Test Failures');
@@ -169,7 +169,7 @@ export default async function apexTest(document: vscode.TextDocument, context: v
                 // ` AND Request = 'API' AND Location = 'SystemLog'` +
                 // ` AND Operation like '%executeAnonymous%'`
                 ` ORDER BY StartTime DESC, Id DESC LIMIT 1`;
-            var res: dx.QueryResult = await dx.toqlQuery(queryString);
+            var res: QueryResult = await vscode.window.forceCode.dxCommands.toqlQuery(queryString);
             return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${res.records[0].Id}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
                 return vscode.window.showTextDocument(_document, 3, true);
             });

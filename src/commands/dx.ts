@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as error from './../util/error';
-import * as dx from '../services/runDXCmd';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 var alm: any = require('salesforce-alm');
@@ -14,7 +13,7 @@ export default function open(context: vscode.ExtensionContext) {
         .then(getArgsAndRun)
         .then(out => {
             if(out !== undefined) {
-                vscode.window.forceCode.outputChannel.appendLine(dx.outputToString(out));
+                vscode.window.forceCode.outputChannel.appendLine(vscode.window.forceCode.dxCommands.outputToString(out));
             } else {
                 return undefined;
             }
@@ -57,7 +56,7 @@ export default function open(context: vscode.ExtensionContext) {
         if(opt === undefined) {
             return undefined;
         }
-        theCmd = dx.getCommand(opt.label);
+        theCmd = vscode.window.forceCode.dxCommands.getCommand(opt.label);
         
         let options: vscode.InputBoxOptions = {
             ignoreFocusOut: true,
@@ -72,7 +71,7 @@ export default function open(context: vscode.ExtensionContext) {
                 vscode.window.forceCode.outputChannel.show();
                 vscode.window.forceCode.statusBarItem.text = 'ForceCode: Running ' + opt.label + ' ' + result;
                 try{
-                    return dx.runCommand(opt.label, result);
+                    return vscode.window.forceCode.dxCommands.runCommand(opt.label, result);
                 } catch(e) {
                     return ['Error running dx command:' + e];
                 }

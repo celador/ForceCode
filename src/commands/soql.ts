@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import * as error from './../util/error';
-import * as dx from '../services/runDXCmd';
 
 export default function soql(context: vscode.ExtensionContext): Promise<any> {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Run SOQL Query';
@@ -16,9 +15,9 @@ export default function soql(context: vscode.ExtensionContext): Promise<any> {
             prompt: `Enter a SOQL query to get the results in a json file in the soql folder`,
         };
         return vscode.window.showInputBox(options).then(query => {
-            return dx.soqlQuery(query).then(res => {
+            return vscode.window.forceCode.dxCommands.soqlQuery(query).then(res => {
                 let filePath: string = vscode.workspace.rootPath + path.sep + 'soql' + path.sep + Date.now() + '.json';
-                fs.outputFile(vscode.workspace.rootPath + path.sep + 'soql' + path.sep + Date.now() + '.json', dx.outputToString(res.records));
+                fs.outputFile(vscode.workspace.rootPath + path.sep + 'soql' + path.sep + Date.now() + '.json', vscode.window.forceCode.dxCommands.outputToString(res.records));
                 return vscode.workspace.openTextDocument(filePath).then(doc => {
                     vscode.window.showTextDocument(doc);
                 });

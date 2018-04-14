@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import * as error from './../util/error';
-import * as dx from '../services/runDXCmd';
 
 export default function toql(context: vscode.ExtensionContext): Promise<any> {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Run TOQL Query';
@@ -16,9 +15,9 @@ export default function toql(context: vscode.ExtensionContext): Promise<any> {
             prompt: `Enter a TOQL query to get the results in a json file in the toql folder`,
         };
         return vscode.window.showInputBox(options).then(query => {
-            return dx.toqlQuery(query).then(res => {
+            return vscode.window.forceCode.dxCommands.toqlQuery(query).then(res => {
                 let filePath: string = vscode.workspace.rootPath + path.sep + 'toql' + path.sep + Date.now() + '.json';
-                fs.outputFile(vscode.workspace.rootPath + path.sep + 'toql' + path.sep + Date.now() + '.json', dx.outputToString(res.records));
+                fs.outputFile(vscode.workspace.rootPath + path.sep + 'toql' + path.sep + Date.now() + '.json', vscode.window.forceCode.dxCommands.outputToString(res.records));
                 return vscode.workspace.openTextDocument(filePath).then(doc => {
                     vscode.window.showTextDocument(doc);
                 });

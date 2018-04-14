@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import jsforce = require('jsforce');
+import { DXCommands} from './services/dxService';
 
 declare module 'vscode' {
     export namespace window {
@@ -108,6 +109,7 @@ export interface IMetadataDescribe {
 }
 
 export interface IForceService {
+    dxCommands: DXCommands;
     operatingSystem?: string;
     config?: Config;
     workspaceRoot: string;
