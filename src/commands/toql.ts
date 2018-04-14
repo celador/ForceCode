@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
-import * as error from './../util/error';
 
 export default function toql(context: vscode.ExtensionContext): Promise<any> {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Run TOQL Query';
@@ -33,7 +32,7 @@ export default function toql(context: vscode.ExtensionContext): Promise<any> {
         // Take the results
         // And write them to a file
         vscode.window.forceCode.resetMenu();
-        error.outputError({ message: err }, vscode.window.forceCode.outputChannel);
+        vscode.window.forceCode.outputError({ message: err }, vscode.window.forceCode.outputChannel);
     }
     // =======================================================================================================================================
 }

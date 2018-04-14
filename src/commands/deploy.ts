@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
-import * as error from './../util/error';
 
 var tools: any = require('cs-jsforce-metadata-tools');
 
@@ -82,7 +81,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         unregisterProxy();
         vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Errors $(thumbsdown)';
         vscode.window.forceCode.resetMenu();
-        return error.outputError(err, vscode.window.forceCode.outputChannel);
+        return vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
     }
     // =======================================================================================================================================
     function registerProxy() {

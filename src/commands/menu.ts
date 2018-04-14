@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as commands from './../commands';
 import model from './../models/commands';
-import * as error from './../util/error';
 
 export default function showMenu(context: vscode.ExtensionContext) {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode Menu';
@@ -10,7 +9,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
         .then(svc => displayMenu())
         .then(res => processResult(res))
         .then(finished)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================

@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import * as error from './../util/error';
 import { configuration } from './../services';
 import { QueryResult } from '../services/dxService';
 import { jsforce } from 'jsforce';
@@ -75,7 +74,7 @@ export default async function apexTest(document: vscode.TextDocument, context: v
     
     function endTest(err?) {
         if(err !== undefined) {
-            error.outputError(err, vscode.window.forceCode.outputChannel);
+            vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
         }
         vscode.window.forceCode.resetMenu();
             // end

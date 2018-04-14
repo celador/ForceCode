@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as error from './../util/error';
 import * as dx from './dx';
 import * as ccr from '../dx/generator';
 import {SObjectCategory} from '../dx/describe';
@@ -49,7 +48,7 @@ export default async function codeCompletionRefresh(context: vscode.ExtensionCon
             vscode.window.forceCode.resetMenu();
             return Promise.resolve();
         } catch(e) {
-            return Promise.reject(error.outputError(e, vscode.window.forceCode.outputChannel));
+            return Promise.reject(vscode.window.forceCode.outputError(e, vscode.window.forceCode.outputChannel));
         }
     });
     // =======================================================================================================================================

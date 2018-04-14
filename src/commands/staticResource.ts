@@ -5,7 +5,6 @@ import jszip = require('jszip');
 // import jsforce = require('jsforce');
 import globule = require('globule');
 import { IForceService } from './../forceCode';
-import * as error from './../util/error';
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
     // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
@@ -15,11 +14,11 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
             if (option.label === 'All Static Resources') {
                 return bundleAndDeployAll()
                     .then(deployAllComplete)
-                    .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+                    .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
             } else {
                 return bundleAndDeploy(option)
                     .then(deployComplete)
-                    .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+                    .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
             }
         });
     // =======================================================================================================================================
@@ -68,7 +67,7 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, 
         .then(getPackageName)
         .then(bundleAndDeploy)
         .then(deployComplete)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     function getPackageName(service: IForceService) {
         let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep;

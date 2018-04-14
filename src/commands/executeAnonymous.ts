@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as error from './../util/error';
 import { configuration } from './../services';
 import * as jsforce from 'jsforce';
 import * as logging from './../providers/LogProvider';
@@ -27,7 +26,7 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
         .then(svc => invokeExecuteAnonymous(text))
         .then(res => runDiagnostics(res, document, selection))
         .then(showResult)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
 
     // =========================================================================================================
     // =====================       USING SOAP API      =========================================================

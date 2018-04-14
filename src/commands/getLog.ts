@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import jsforce = require('jsforce');
 import { IForceService } from './../forceCode';
-import * as error from './../util/error';
 const moment: any = require('moment');
 
 interface LogRecord {
@@ -29,7 +28,7 @@ export default function getLog(context: vscode.ExtensionContext) {
         .then(getLast10Logs)
         .then(displayOptions)
         .then(showLog)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
 
     function setConnection(connection: IForceService): IForceService {
         getLogService.connection = connection.conn;

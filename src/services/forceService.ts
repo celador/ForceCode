@@ -4,7 +4,6 @@ import * as forceCode from './../forceCode';
 import { operatingSystem } from './../services';
 import constants from './../models/constants';
 import { configuration } from './../services';
-import * as error from './../util/error';
 import * as commands from './../commands';
 import jsf = require('jsforce');
 import DXService from './dxService';
@@ -122,6 +121,15 @@ export default class ForceService implements forceCode.IForceService {
         });
     }
 
+    public outputError(error: forceCode.ForceCodeError, outputChannel: vscode.OutputChannel) {
+        this.statusBarItem.text = 'ForceCode: ' + error.message;
+        this.resetMenu();
+        outputChannel.appendLine('================================     ERROR     ================================\n');
+        outputChannel.appendLine(error.message);
+        console.error(error);
+        return false;
+    };
+
     // TODO: Add keychain access so we don't have to use a username or password'
     // var keychain = require('keytar')
     private setupConfig(): Promise<forceCode.Config> {
@@ -165,7 +173,7 @@ export default class ForceService implements forceCode.IForceService {
                 .then(getPublicDeclarations)
                 .then(getPrivateDeclarations)
                 .then(getManagedDeclarations)
-                .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+                .catch(err => self.outputError(err, vscode.window.forceCode.outputChannel));
 
             function refreshApexMetadata(svc) {
                 vscode.window.forceCode.refreshApexMetadata();

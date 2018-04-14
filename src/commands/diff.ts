@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import * as error from './../util/error';
 
 const PROVIDER: string = 'forcecode://salesforce.com';
 
@@ -10,7 +9,7 @@ export default function diff(document: vscode.TextDocument, context: vscode.Exte
     // vscode.window.forceCode.statusBarItem.text = 'ForceCode: Diffing';
     return vscode.window.forceCode.connect(context)
         .then(diffFile)
-        .catch(err => error.outputError({ message: err.toString() }, vscode.window.forceCode.outputChannel));
+        .catch(err => vscode.window.forceCode.outputError({ message: err.toString() }, vscode.window.forceCode.outputChannel));
     // .then(finished)
     // =======================================================================================================================================
     // =======================================================================================================================================

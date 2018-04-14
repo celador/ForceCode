@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
-import * as error from './../util/error';
 import { configuration } from './../services';
 
 export default function createClass(context: vscode.ExtensionContext) {
@@ -29,7 +28,7 @@ export default function createClass(context: vscode.ExtensionContext) {
         } else {
             throw { message: classesPath + ' is not a real folder. Check the src option in your config file.' };
         }
-    }).catch(err => error.outputError);
+    }).catch(err => vscode.window.forceCode.outputError);
 
 
     function userClassSelection() {

@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
-import * as error from './../util/error';
 const ZIP: any = require('zip');
 const fetch: any = require('node-fetch');
 
@@ -17,7 +16,7 @@ export default function open(context: vscode.ExtensionContext) {
         .then(opt => getFile(opt))
         .then(res => writeFiles(res))
         .then(finished)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================

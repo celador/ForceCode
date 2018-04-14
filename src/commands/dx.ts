@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as error from './../util/error';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 var alm: any = require('salesforce-alm');
@@ -32,7 +31,7 @@ export default function open(context: vscode.ExtensionContext) {
             }
             vscode.window.forceCode.resetMenu();
         })
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     function showFileOptions(): Thenable<vscode.QuickPickItem> {
         let options: vscode.QuickPickItem[] = alm.commands.filter(c => {

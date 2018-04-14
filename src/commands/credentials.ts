@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { getIcon } from './../parsers';
-import * as error from './../util/error';
 import { configuration } from './../services';
 
 const quickPickOptions: vscode.QuickPickOptions = {
@@ -14,7 +13,7 @@ export default function enterCredentials() {
         .then(cfg => getUrl(cfg))
         .then(cfg => getAutoCompile(cfg))
         .then(cfg => finished(cfg))
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================

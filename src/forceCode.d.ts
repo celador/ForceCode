@@ -142,6 +142,7 @@ export interface IForceService {
     clearLog(): void;
     resetMenu(): void;
     refreshApexMetadata(): Promise<any>;
+    outputError(error: ForceCodeError, outputChannel: vscode.OutputChannel): any;
 }
 
 

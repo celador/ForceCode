@@ -1,6 +1,5 @@
 import vscode = require('vscode');
 import jsforce = require('jsforce');
-import * as error from './../util/error';
 // import ReferencesDocument from './referencesDocument';
 /**
  * Salesforce Content Provider class.
@@ -30,7 +29,7 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
                 } else {
                     reject('Object not found');
                 }
-            }, error.outputError);
+            }, vscode.window.forceCode.outputError);
         });
     }
 

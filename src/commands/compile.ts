@@ -3,7 +3,6 @@ import * as parsers from './../parsers';
 import sleep from './../util/sleep';
 import { IForceService } from './../forceCode';
 import * as forceCode from './../forceCode';
-import * as error from './../util/error';
 import diff from './diff';
 // import jsforce = require('jsforce');
 const parseString: any = require('xml2js').parseString;
@@ -535,13 +534,13 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         clearInterval(interval);
         if (toolingType === 'AuraDefinition') {
             //return toolingError(err);
-            error.outputError(err, vscode.window.forceCode.outputChannel);
+            vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
         } else if (toolingType === 'CustomObject' || toolingType === 'CustomLabels') {
             // Modify this if statement to check if any metadata type
             return metadataError(err);
         } else {
             //clearInterval(interval);
-            error.outputError(err, vscode.window.forceCode.outputChannel);
+            vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
         }
     }
 
@@ -566,7 +565,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
 
         //error.outputError({ message: statusMessage }, vscode.window.forceCode.outputChannel);
         clearInterval(interval);
-        error.outputError(err, vscode.window.forceCode.outputChannel);
+        vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
         return false;
     }
     function metadataError(err) {
@@ -582,7 +581,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         diagnostics.push(new vscode.Diagnostic(failureRange, (errorInfo[0] || 'unknown error') + (errorInfo[3] || ''), 0));
         diagnosticCollection.set(document.uri, diagnostics);
 
-        error.outputError(err, vscode.window.forceCode.outputChannel);
+        vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
         return false;
 
     }

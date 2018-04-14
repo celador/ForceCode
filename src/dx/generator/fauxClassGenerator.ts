@@ -20,7 +20,6 @@ import {
   SObjectDescribe
 } from '../describe';
 import { nls } from '../messages';
-import * as error from '../../util/error';
 import { messages } from '../messages/i18n';
 
 export interface CancellationToken {
@@ -72,7 +71,7 @@ export class FauxClassGenerator {
     // Take the results
     // And write them to a file
     vscode.window.forceCode.resetMenu();
-    error.outputError({ message: err }, vscode.window.forceCode.outputChannel);
+    vscode.window.forceCode.outputError({ message: err }, vscode.window.forceCode.outputChannel);
     return err;
   }
 

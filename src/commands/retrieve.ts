@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
-import * as error from './../util/error';
 import * as parsers from './../parsers';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
@@ -408,7 +407,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             vscode.window.forceCode.statusBarItem.text = 'Retrieve Errors $(thumbsdown)';
         }, 100);
         vscode.window.forceCode.resetMenu();
-        return error.outputError(err, vscode.window.forceCode.outputChannel);
+        return vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
     }
     // =======================================================================================================================================
     function registerProxy() {
