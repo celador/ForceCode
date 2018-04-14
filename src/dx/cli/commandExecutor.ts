@@ -6,7 +6,6 @@
  */
 
 import * as vscode from 'vscode';
-import * as dx from '../../services/runDXCmd';
 
 import { Command } from './';
 
@@ -29,7 +28,7 @@ export class CliCommandExecutor {
     var theArgs = this.command.args.join(' ');
     vscode.window.forceCode.outputChannel.appendLine('Executing command: ' + curCmd + ' ' + theArgs);
 
-    const retVal = await dx.runCommand(curCmd, theArgs);
+    const retVal = await vscode.window.forceCode.dxCommands.runCommand(curCmd, theArgs);
     return Promise.resolve(retVal);
   }
 }
