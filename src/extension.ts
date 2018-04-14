@@ -96,7 +96,7 @@ export function activate(context: vscode.ExtensionContext): any {
         // clear the code coverage
         var file = parsers.getFileName(event.document);
         Object.keys(vscode.window.forceCode.codeCoverage).forEach(function(id) {
-            if(vscode.window.forceCode.codeCoverage[id].name.toLowerCase() === file.toLowerCase())
+            if(vscode.window.forceCode.codeCoverage[id].ApexClassOrTrigger.Name.toLowerCase() === file.toLowerCase())
             {
                 delete vscode.window.forceCode.codeCoverage[id];
                 updateDecorations();
