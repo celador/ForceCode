@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as error from './../util/error';
 
 export default async function dxLogout(context: vscode.ExtensionContext): Promise<any> {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Logging out of DX';
@@ -9,7 +8,7 @@ export default async function dxLogout(context: vscode.ExtensionContext): Promis
         vscode.window.forceCode.resetMenu();
         return Promise.resolve();
     } catch(e) {
-        return Promise.reject(error.outputError(e, vscode.window.forceCode.outputChannel));
+        return Promise.reject(vscode.window.forceCode.outputError(e, vscode.window.forceCode.outputChannel));
     }
     // =======================================================================================================================================
 }
