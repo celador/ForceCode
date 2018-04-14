@@ -128,6 +128,8 @@ export async function runCommand(cmdString: string, arg: string): Promise<any> {
     } 
     var objresult = await cmd.run(cliContext);
     // log command output
-    fs.outputFile(vscode.workspace.rootPath + path.sep + 'dx.log', outputToString(objresult));
+    if(objresult !== undefined && objresult !== [''] && objresult !== '') {
+        fs.outputFile(vscode.workspace.rootPath + path.sep + 'dx.log', outputToString(objresult));
+    }
     return Promise.resolve(objresult);
 }
