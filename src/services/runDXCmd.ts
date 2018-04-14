@@ -121,6 +121,10 @@ export async function runCommand(cmdString: string, arg: string): Promise<any> {
             }
         });
     }
+    // add in targetusername so we can stay logged in
+    if(cliContext.flags['targetusername'] === undefined && vscode.window.forceCode.config.username !== undefined) {
+        cliContext.flags['targetusername'] = vscode.window.forceCode.config.username;
+    } 
     var objresult = await cmd.run(cliContext);
     // log command output
     fs.outputFile(vscode.workspace.rootPath + path.sep + 'dx.log', outputToString(objresult));
