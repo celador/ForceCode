@@ -32,6 +32,9 @@ export default async function apexTest(document: vscode.TextDocument, context: v
     /* tslint:enable */
     // Start doing stuff
     vscode.window.forceCode.testTimeout = 0;
+    // remove test coverage stuff
+    delete vscode.window.forceCode.codeCoverage;
+    vscode.window.forceCode.codeCoverage = new Array();
     return startTest();
 
     async function startTest() {
@@ -39,17 +42,12 @@ export default async function apexTest(document: vscode.TextDocument, context: v
         return await vscode.window.forceCode.dxCommands.runCommand('apex:test:run', '-n ' + name + ' -w 3 -y -r json')
             .then(dxRes => {
                 if(dxRes) {
-                    vscode.window.forceCode.dxCommands.toqlQuery('SELECT Coverage, ApexClassOrTriggerId, ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered '
-                                + 'FROM ApexCodeCoverageAggregate '
-                                + 'WHERE ApexClassOrTriggerId != NULL '
-                                + 'AND ApexClassOrTrigger.Name != NULL '
-                                + 'AND NumLinesCovered != NULL '
-                                + 'AND NumLinesUncovered != NULL '
-                                + 'AND (NumLinesCovered > 0 OR NumLinesUncovered > 0) '
-                                + 'ORDER BY ApexClassOrTrigger.Name')
+                    // build the query to only include files in the worspace
+
+                    vscode.window.forceCode.dxCommands.toqlQuery(buildQuery())
                         .then(res => showResult(res, dxRes))
                         .then(showLog)
-                        .then(undefined => endTest)
+                        .then(endTest)
                         .catch(tryAgain);
                 } else {
                     return tryAgain();
@@ -86,6 +84,25 @@ export default async function apexTest(document: vscode.TextDocument, context: v
             vscode.window.forceCode.resetMenu();
             return Promise.resolve();
         }
+    }
+
+    // build the test result query
+    function buildQuery(): string {
+        var names: Array<string> = new Array<string>();
+        let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
+        
+        members.forEach(cur => {
+            names.push(cur.name);
+        });
+        var orNamesString: string = "(ApexClassOrTrigger.Name = '" + names.join("' OR ApexClassOrTrigger.Name = '") + "') ";
+        var query = 'SELECT Coverage, ApexClassOrTriggerId, ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered '
+        + 'FROM ApexCodeCoverageAggregate '
+        + 'WHERE ApexClassOrTriggerId != NULL '
+        + 'AND ' + orNamesString
+        + 'AND (NumLinesCovered > 0 OR NumLinesUncovered > 0) '
+        + 'ORDER BY ApexClassOrTrigger.Name';
+        console.log(query);
+        return query;
     }
 
     // =======================================================================================================================================
@@ -150,7 +167,7 @@ export default async function apexTest(document: vscode.TextDocument, context: v
                     let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
                     let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
                         if (prev) { return prev; }
-                        if(curr.name === curRes.ApexClassOrTrigger.Name) {
+                        if(curr.name === curRes.ApexClassOrTrigger.Name && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
                             vscode.window.forceCode.codeCoverage[curRes.ApexClassOrTriggerId] = curRes;
                             return curr;
                         }
@@ -171,10 +188,11 @@ export default async function apexTest(document: vscode.TextDocument, context: v
                 ` ORDER BY StartTime DESC, Id DESC LIMIT 1`;
             var res: QueryResult = await vscode.window.forceCode.dxCommands.toqlQuery(queryString);
             return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${res.records[0].Id}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
-                return vscode.window.showTextDocument(_document, 3, true);
+                vscode.window.showTextDocument(_document, 3, true);
+                return;
             });
         }
-        return res;
+        return;
     }
     // =======================================================================================================================================
 }
