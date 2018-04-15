@@ -29,6 +29,15 @@ export interface ExecuteAnonymousResult {
     logs: string
 }
 
+export interface SFDX {
+    username: string,
+    id: string,
+    connectedStatus: string,
+    accessToken: string,
+    instanceUrl: string,
+    clientId: string
+}
+
 interface Topic {
     name: string;
     description: string;
