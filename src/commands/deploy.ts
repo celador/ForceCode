@@ -31,7 +31,6 @@ export default function deploy(context: vscode.ExtensionContext) {
     } (fs));
     var deployOptions: any = {
         username: vscode.window.forceCode.config.username,
-        password: vscode.window.forceCode.config.password,
         loginUrl: vscode.window.forceCode.config.url || 'https://login.salesforce.com',
         checkOnly: true,
         testLevel: 'RunLocalTests',

@@ -60,7 +60,9 @@ export default class ForceService implements forceCode.IForceService {
                 this.statusBarItem.text = `ForceCode ${pjson.version} is Active`;
                 this.connect();
                 this.statusBarItem.show();
-                this.dxCommands = new DXService();
+                if(this.dxCommands === undefined) {
+                    this.dxCommands = new DXService();
+                }
                 this.resetMenu();
             }
         }).catch(err => {
@@ -136,7 +138,6 @@ export default class ForceService implements forceCode.IForceService {
         if (!self.config || !self.config.username) {
             return commands.credentials().then(credentials => {
                 self.config.username = credentials.username;
-                self.config.password = credentials.password;
                 self.config.autoCompile = credentials.autoCompile;
                 self.config.url = credentials.url;
                 return self.config;
@@ -147,22 +148,35 @@ export default class ForceService implements forceCode.IForceService {
     private login(config): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Lazy-load the connection
-        if (self.userInfo === undefined || self.config.username !== self.username || !self.config.password) {
+        if (self.userInfo === undefined || self.config.username !== self.username) {
             var connectionOptions: any = {
                 loginUrl: self.config.url || 'https://login.salesforce.com'
             };
             if (self.config.proxyUrl) {
                 connectionOptions.proxyUrl = self.config.proxyUrl;
             }
-            self.conn = new jsforce.Connection(connectionOptions);
-
-            if (!config.username || !config.password) {
-                vscode.window.forceCode.outputChannel.appendLine('The force.json file seems to not have a username and/or password. Pease insure you have a properly formatted config file, or submit an issue to the repo @ https"//github.com/celador/forcecode/issues ');
+            if (!config.username) {
+                vscode.window.forceCode.outputChannel.appendLine('The force.json file seems to not have a username. Pease insure you have a properly formatted config file, or submit an issue to the repo @ https"//github.com/celador/forcecode/issues ');
                 throw { message: '$(alert) Missing Credentials $(alert)' };
             }
-            vscode.window.forceCode.statusBarItem_UserInfo.text = `ForceCode: $(plug) Connecting as ${config.username}`;
-            return self.conn
-                .login(config.username, config.password)
+            // get sfdx login info and use oath2
+            
+            
+            // get the current org info
+            return self.dxCommands.getOrgInfo()
+                .then(orgInf => {
+                    vscode.window.forceCode.statusBarItem_UserInfo.text = `ForceCode: $(plug) Connecting as ${config.username}`;
+                    // set the userId in connectionSuccess
+                    self.userInfo = {
+                        id: null,
+                        organizationId: orgInf.id,
+                        url: orgInf.instanceUrl
+                    };
+                    self.conn = new jsforce.Connection({
+                        instanceUrl : orgInf.instanceUrl,
+                        accessToken : orgInf.accessToken,
+                    });
+                })
                 .then(connectionSuccess)
                 .catch(connectionError)
                 .then(getNamespacePrefix)
@@ -170,7 +184,7 @@ export default class ForceService implements forceCode.IForceService {
                 .then(getPublicDeclarations)
                 .then(getPrivateDeclarations)
                 .then(getManagedDeclarations)
-                .catch(err => self.outputError(err, vscode.window.forceCode.outputChannel));
+                .catch(err => self.outputError(err, vscode.window.forceCode.outputChannel));;
 
             function refreshApexMetadata(svc) {
                 vscode.window.forceCode.refreshApexMetadata();
@@ -218,7 +232,7 @@ export default class ForceService implements forceCode.IForceService {
                     }
                 }
             }
-            function connectionSuccess(userInfo) {
+            function connectionSuccess() {
                 vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
                 vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username;
                 
@@ -236,10 +250,15 @@ export default class ForceService implements forceCode.IForceService {
                     }
                 }, 5000);
                 self.statusBarItem_UserInfo.show();
-                self.outputChannel.appendLine(`Connected as ${JSON.stringify(userInfo)}`);
-                self.userInfo = userInfo;
+                self.outputChannel.appendLine(`Connected as ` + self.config.username);
                 self.username = config.username;
-                return self;
+                // query the userid
+                return self.dxCommands.soqlQuery("SELECT Id FROM User WHERE UserName='" + self.config.username + "'")
+                        .then(res => {
+                            self.userInfo.id = res.records[0].Id;
+                            return self;
+                        });
+
             }
             function getNamespacePrefix(svc: forceCode.IForceService) {
                 return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {

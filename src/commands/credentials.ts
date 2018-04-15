@@ -3,16 +3,16 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { getIcon } from './../parsers';
 import { configuration } from './../services';
+import DXService from '../services/dxService';
 
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
 };
 export default function enterCredentials() {
     return getUsername()
-        .then(cfg => getPassword(cfg))
         .then(cfg => getUrl(cfg))
         .then(cfg => getAutoCompile(cfg))
-        .then(cfg => finished(cfg))
+        .then(cfg => writeConfigAndLogin(cfg))
         .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -34,23 +34,9 @@ export default function enterCredentials() {
                 });
             });
         });
-
+    
     }
 
-    function getPassword(config) {
-        let options: vscode.InputBoxOptions = {
-            ignoreFocusOut: true,
-            password: true,
-            value: config.password || '',
-            placeHolder: 'enter your password and token',
-            prompt: 'Please enter your SFDC password and token',
-        };
-        return vscode.window.showInputBox(options).then(function (result: string) {
-            config.password = result || config.password || '';
-            if (!config.password) { throw 'No Password'; };
-            return config;
-        });
-    }
     function getUrl(config) {
         let opts: any = [
             {
@@ -94,7 +80,8 @@ export default function enterCredentials() {
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
-    function finished(config) {
+    function writeConfigAndLogin(config) {
+        const projPath = vscode.workspace.rootPath + path.sep;
         const defaultOptions: {} = {
             autoRefresh: false,
             showTestCoverage: true,
@@ -112,15 +99,22 @@ export default function enterCredentials() {
             },
         };
         // add in a bare sfdx-project.json file for language support from official salesforce extensions
-        const sfdx: {} = {
+        const sfdxProj: {} = {
             namespace: "", 
-            sfdcLoginUrl: "https://test.salesforce.com", 
+            sfdcLoginUrl: config.url, 
             sourceApiVersion: "42.0",
         };
-        fs.outputFile(vscode.workspace.rootPath + path.sep + 'sfdx-project.json', JSON.stringify(sfdx, undefined, 4));
-        fs.outputFile(vscode.workspace.rootPath + path.sep + 'force.json', JSON.stringify(Object.assign(defaultOptions, config), undefined, 4));
-        // show the menu
-        vscode.window.forceCode.statusBarItem.show();
-        return config;
+        
+        fs.outputFile(projPath + 'sfdx-project.json', JSON.stringify(sfdxProj, undefined, 4));
+        fs.outputFile(projPath + 'force.json', JSON.stringify(Object.assign(defaultOptions, config), undefined, 4));
+        // log in with dxLogin
+        if(vscode.window.forceCode.dxCommands === undefined) {
+            vscode.window.forceCode.dxCommands = new DXService();
+        }
+        return vscode.window.forceCode.dxCommands.login()
+            .then(res => {
+                vscode.window.forceCode.statusBarItem.show();
+                return config;
+            });
     }
 }

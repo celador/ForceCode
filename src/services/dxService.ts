@@ -3,6 +3,15 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 var alm: any = require('salesforce-alm');
 
+export interface SFDX {
+    username: string,
+    id: string,
+    connectedStatus: string,
+    accessToken: string,
+    instanceUrl: string,
+    clientId: string
+}
+
 interface Topic {
     name: string; // `json:"name"`
     description: string; // `json:"description"`
@@ -58,6 +67,7 @@ export interface DXCommands {
     soqlQuery(query: string): Promise<QueryResult>;
     login(): Promise<any>;
     logout(): Promise<any>;
+    getOrgInfo(): Promise<SFDX>;
 }
 
 export default class DXService implements DXCommands {
@@ -167,6 +177,10 @@ export default class DXService implements DXCommands {
     }
 
     public logout(): Promise<any> {
-        return Promise.resolve(this.runCommand('auth:logout', '--targetusername ' + vscode.window.forceCode.config.username + ' --noprompt'));
+        return Promise.resolve(this.runCommand('auth:logout', '--noprompt'));
+    }
+
+    public getOrgInfo(): Promise<SFDX> {
+        return Promise.resolve(this.runCommand('org:display', '--json'));
     }
 }

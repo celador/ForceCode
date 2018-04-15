@@ -19,7 +19,6 @@ export interface Config {
         verbose?: boolean,
         checkOnly?: boolean
     };
-    password?: string;
     poll?: number;
     pollTimeout?: number;
     prefix?: string;

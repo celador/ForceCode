@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import sleep from './../util/sleep';
 import { IForceService } from './../forceCode';
 import * as forceCode from './../forceCode';
 import diff from './diff';
@@ -454,7 +453,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                     throw { message: 'Timeout' };
                 } else {
                     // Throttle the ReCheck of the compile status, to use fewer http requests (reduce effects on SFDC limits)
-                    return sleep(vscode.window.forceCode.config.poll || 1000).then(nextStatus);
+                    return new Promise(function (resolve, reject) {
+                        setTimeout(() => resolve(), vscode.window.forceCode.config.poll || 1000);
+                      }).then(nextStatus);
                 }
             });
         }
