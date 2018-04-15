@@ -2,35 +2,30 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 
-export default function soql(context: vscode.ExtensionContext): Promise<any> {
+export default function soql(): any {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Run SOQL Query';
-    return vscode.window.forceCode.connect(context)
-        .then(svc => getSoqlQuery(svc))
-        .then(finished, onError);
 
-    function getSoqlQuery(svc) {
-        let options: vscode.InputBoxOptions = {
-            placeHolder: 'Enter SOQL query',
-            prompt: `Enter a SOQL query to get the results in a json file in the soql folder`,
-        };
-        return vscode.window.showInputBox(options).then(query => {
-            return vscode.window.forceCode.dxCommands.soqlQuery(query).then(res => {
-                let filePath: string = vscode.workspace.rootPath + path.sep + 'soql' + path.sep + Date.now() + '.json';
-                fs.outputFile(vscode.workspace.rootPath + path.sep + 'soql' + path.sep + Date.now() + '.json', vscode.window.forceCode.dxCommands.outputToString(res.records));
-                return vscode.workspace.openTextDocument(filePath).then(doc => {
+    let options: vscode.InputBoxOptions = {
+        placeHolder: 'Enter SOQL query',
+        prompt: `Enter a SOQL query to get the results in a json file in the soql folder`,
+    };
+    return vscode.window.showInputBox(options).then(query => {
+        return vscode.window.forceCode.dxCommands.soqlQuery(query).then(res => {
+            let filePath: string = vscode.workspace.rootPath + path.sep + 'soql' + path.sep + Date.now() + '.json';
+            var data: string = vscode.window.forceCode.dxCommands.outputToString(res.records);
+            return fs.outputFile(filePath, data, function() {
+                return vscode.workspace.openTextDocument(filePath).then(doc => { 
                     vscode.window.showTextDocument(doc);
+                    vscode.window.forceCode.statusBarItem.text = "ForceCode: Successfully executed query!";
+                    vscode.window.forceCode.resetMenu();
                 });
             });
-        });
-    }
-    function finished() {
-        // Take the results
-        // And write them to a file
-        vscode.window.forceCode.resetMenu();
-    }
+        })
+        .catch(onError);
+    });
+
     function onError(err) {
-        // Take the results
-        // And write them to a file
+        vscode.window.forceCode.statusBarItem.text = "ForceCode: Error running query";
         vscode.window.forceCode.resetMenu();
         vscode.window.forceCode.outputError({ message: err }, vscode.window.forceCode.outputChannel);
     }

@@ -3,7 +3,7 @@ import * as dx from './dx';
 import * as ccr from '../dx/generator';
 import {SObjectCategory} from '../dx/describe';
 
-export default async function codeCompletionRefresh(context: vscode.ExtensionContext): Promise<any> {
+export default async function codeCompletionRefresh(): Promise<any> {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Refresh Objects from Org';
     
     let options: vscode.QuickPickItem[] = [{

@@ -30,17 +30,14 @@ export default class ForceService implements forceCode.IForceService {
     public operatingSystem: string;
     public workspaceRoot: string;
     public workspaceMembers: forceCode.IWorkspaceMember[];
-    public queueCompile: any[];
-    public isCompiling: boolean;
+    public commandQueue: any[];
+    public isBusy: boolean;
     public testTimeout: number;
-    public testInterval: any;
-    public isTestRunning: boolean;
-    public queueTest: any[];
     public statusInterval: any; 
 
     constructor() {
-        this.queueCompile = new Array();
-        this.queueTest = new Array();
+        this.commandQueue = new Array();
+        this.isBusy = false;
         // Set the ForceCode configuration
         this.operatingSystem = operatingSystem.getOS();
         // Setup username and outputChannel

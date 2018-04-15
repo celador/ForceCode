@@ -121,13 +121,10 @@ export interface IForceService {
     codeCoverageWarnings?: ICodeCoverageWarning[];
     // symbolTable?: any;
     containerId?: string;
-    queueCompile?: any[];
-    isCompiling?: boolean;
-    testTimeout?: number;
-    testInterval?: any;
-    isTestRunning?: boolean;
-    queueTest?: any[];
-    statusInterval?: any;    
+    commandQueue: any[];
+    isBusy: boolean;
+    testTimeout: number;
+    statusInterval: any;    
     workspaceMembers: IWorkspaceMember[];
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;

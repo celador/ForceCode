@@ -15,9 +15,9 @@ export default async function apexTest(document: vscode.TextDocument, context: v
         return Promise.reject({ message: 'Not a test class' });
     }
 
-    if(vscode.window.forceCode.isTestRunning)
+    if(vscode.window.forceCode.isBusy)
     {
-        vscode.window.forceCode.queueTest.push([document, context]);
+        vscode.window.forceCode.commandQueue.push([apexTest, document, context]);
         return Promise.reject({ message: 'Already compiling or running unit tests' });
     }
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
@@ -35,7 +35,7 @@ export default async function apexTest(document: vscode.TextDocument, context: v
     return startTest();
 
     async function startTest() {
-        vscode.window.forceCode.isTestRunning = true;
+        vscode.window.forceCode.isBusy = true;
         return await vscode.window.forceCode.dxCommands.runCommand('apex:test:run', '-n ' + name + ' -w 3 -y -r json')
             .then(dxRes => {
                 if(dxRes) {
@@ -76,15 +76,16 @@ export default async function apexTest(document: vscode.TextDocument, context: v
         if(err !== undefined) {
             vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
         }
-        vscode.window.forceCode.resetMenu();
-            // end
-        vscode.window.forceCode.isTestRunning = false;
-        if(vscode.window.forceCode.queueTest.length > 0)
+        // end
+        vscode.window.forceCode.isBusy = false;
+        if(vscode.window.forceCode.commandQueue.length > 0)
         {
-            var queue = vscode.window.forceCode.queueTest.pop();
-            return apexTest(queue[0], queue[1]);
+            var queue = vscode.window.forceCode.commandQueue.pop();
+            return Promise.resolve(queue[0](queue[1], queue[2]));
+        } else {
+            vscode.window.forceCode.resetMenu();
+            return Promise.resolve();
         }
-        return;
     }
 
     // =======================================================================================================================================

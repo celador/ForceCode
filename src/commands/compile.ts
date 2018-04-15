@@ -24,8 +24,8 @@ interface ContainerAsyncRequest {
 
 
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
-    if (vscode.window.forceCode.isCompiling || vscode.window.forceCode.isTestRunning) {
-        vscode.window.forceCode.queueCompile.push([document, context]);
+    if (vscode.window.forceCode.isBusy) {
+        vscode.window.forceCode.commandQueue.push([compile, document, context]);
         return Promise.reject({ message: 'Already compiling or running unit tests' });
     }
 
@@ -100,7 +100,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''}` + spinner();
         }, 50);
 
-        vscode.window.forceCode.isCompiling = true;
+        vscode.window.forceCode.isBusy = true;
         return vscode.window.forceCode.connect(context)
             .then(addToContainer)
             .then(requestCompile)
@@ -507,7 +507,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
         diagnosticCollection.set(document.uri, diagnostics);
         clearInterval(interval);
-        vscode.window.forceCode.resetMenu();
         if (diagnostics.length > 0) {
             // FAILURE !!! 
             vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(alert)`;
@@ -521,11 +520,14 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
     function containerFinished(createNewContainer: boolean): any {
         // We got some records in our response
-        vscode.window.forceCode.isCompiling = false;
+        vscode.window.forceCode.isBusy = false;
         return vscode.window.forceCode.newContainer(createNewContainer).then(res => {
-            if (vscode.window.forceCode.queueCompile.length > 0) {
-                var toCompile = vscode.window.forceCode.queueCompile.pop();
-                return compile(toCompile[0], toCompile[1]);
+            if (vscode.window.forceCode.commandQueue.length > 0) {
+                var toCompile = vscode.window.forceCode.commandQueue.pop();
+                return Promise.resolve(toCompile[0](toCompile[1], toCompile[2]));
+            } else {
+                vscode.window.forceCode.resetMenu();
+                return Promise.resolve();
             }
         });
     }

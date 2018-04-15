@@ -3,12 +3,11 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 var alm: any = require('salesforce-alm');
 
-export default function open(context: vscode.ExtensionContext) {
+export default function runDX() {
     var theCmd: any = undefined;
     vscode.window.forceCode.statusBarItem.text = 'DX Menu';
 
-    return vscode.window.forceCode.connect(context)
-        .then(svc => showFileOptions())
+    return showFileOptions()
         .then(getArgsAndRun)
         .then(out => {
             if(out !== undefined) {
@@ -31,7 +30,6 @@ export default function open(context: vscode.ExtensionContext) {
             }
             vscode.window.forceCode.resetMenu();
         })
-        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
     // =======================================================================================================================================
     function showFileOptions(): Thenable<vscode.QuickPickItem> {
         let options: vscode.QuickPickItem[] = alm.commands.filter(c => {

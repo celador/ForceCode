@@ -59,16 +59,16 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.openFile.description: return commands.open(context);
                 case model.resourceBundle.description: return commands.staticResource(context);
                 case model.retrievePackage.description: return commands.retrieve(context);
-                case model.soql.description: return commands.soql(context);
-                case model.toql.description: return commands.toql(context);
+                case model.soql.description: return commands.soql();
+                case model.toql.description: return commands.toql();
                 case model.deployPackage.description: return commands.deploy(context);
                 case model.diff.description: return commands.diff(vscode.window.activeTextEditor.document, context);
                 case model.createClass.description: return commands.createClass(context);
                 case model.runUnitTests.description: return commands.apexTest(vscode.window.activeTextEditor.document, context);
-                case model.dx.description: return commands.dx(context);
-                case model.dxLogin.description: return commands.dxLogin(context);
-                case model.dxLogout.description: return commands.dxLogout(context);
-                case model.codeCompletionRefresh.description: return commands.codeCompletionRefresh(context);
+                case model.dx.description: return commands.dx();
+                case model.dxLogin.description: return commands.dxLogin();
+                case model.dxLogout.description: return commands.dxLogout();
+                case model.codeCompletionRefresh.description: return commands.codeCompletionRefresh();
                 default: break;
             }
         }
