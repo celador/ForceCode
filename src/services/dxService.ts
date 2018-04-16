@@ -168,7 +168,7 @@ export default class DXService implements DXCommands {
         } 
         var objresult = await cmd.run(cliContext);
         // log command output
-        if(objresult !== undefined && objresult !== [''] && objresult !== '') {
+        if(!this.isEmptyUndOrNull(objresult)) {
             fs.outputFile(vscode.workspace.rootPath + path.sep + 'dx.log', this.outputToString(objresult));
         }
         return Promise.resolve(objresult);
