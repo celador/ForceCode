@@ -56,7 +56,7 @@ export default class ForceService implements forceCode.IForceService {
         this.declarations = {};
         configuration(this).then(config => {
             this.username = config.username || '';
-            this.isLoggedInCheck().then(res => {
+            this.dxCommands.getOrgInfo().then(res => {
                 if(res) {
                     this.connect();
                 }
@@ -125,17 +125,11 @@ export default class ForceService implements forceCode.IForceService {
         return false;
     };
 
-    public isLoggedInCheck(): Promise<boolean> {
-        return this.dxCommands.getOrgInfo()
-            .then(val => {
-                this.isLoggedIn = !this.dxCommands.isEmptyUndOrNull(val);
-                return Promise.resolve(this.isLoggedIn);
-            });
-    }
-
     // TODO: Add keychain access so we don't have to use a username or password'
     // var keychain = require('keytar')
     private setupConfig(): Promise<forceCode.Config> {
+
+
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Setup username and outputChannel
         self.username = (self.config && self.config.username) || '';

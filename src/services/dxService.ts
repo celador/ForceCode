@@ -170,8 +170,9 @@ export default class DXService implements DXCommands {
         // log command output
         if(!this.isEmptyUndOrNull(objresult)) {
             fs.outputFile(vscode.workspace.rootPath + path.sep + 'dx.log', this.outputToString(objresult));
+            return Promise.resolve(objresult);
         }
-        return Promise.resolve(objresult);
+        return Promise.reject('Failed to execute command: ' + cmdString + ' ' + arg);
     }
 
     public toqlQuery(query: string): Promise<QueryResult> {
@@ -183,14 +184,10 @@ export default class DXService implements DXCommands {
     }
 
     public login(): Promise<any> {
+        vscode.window.forceCode.isLoggedIn = false;
         return this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url).then(res => {
-            if(this.isEmptyUndOrNull(res)) {
-                vscode.window.forceCode.isLoggedIn = false;
-                Promise.resolve(res);
-            } else {
                 vscode.window.forceCode.isLoggedIn = true;
-                Promise.reject('Failed to log in');
-            }
+            return Promise.resolve(res);
         });
     }
 
@@ -200,6 +197,12 @@ export default class DXService implements DXCommands {
     }
 
     public getOrgInfo(): Promise<SFDX> {
-        return Promise.resolve(this.runCommand('org:display', '--json'));
+        return this.runCommand('org:display', '--json').then(res => {
+            vscode.window.forceCode.isLoggedIn = true;
+            return Promise.resolve(res);
+        }, reason => {
+            vscode.window.forceCode.isLoggedIn = false;
+            return Promise.reject('No info recieved from org. Are you logged in?');
+        });
     }
 }
