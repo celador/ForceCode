@@ -68,6 +68,7 @@ export interface DXCommands {
     login(): Promise<any>;
     logout(): Promise<any>;
     getOrgInfo(): Promise<SFDX>;
+    isEmptyUndOrNull(param: any): boolean;
 }
 
 export default class DXService implements DXCommands {
@@ -106,6 +107,10 @@ export default class DXService implements DXCommands {
             retval = toConvert;
         }
         return retval;
+    }
+
+    public isEmptyUndOrNull(param: any): boolean { 
+        return (param === undefined || param === null || Object.keys(param).length === 0)
     }
 
     /*
@@ -173,10 +178,19 @@ export default class DXService implements DXCommands {
     }
 
     public login(): Promise<any> {
-        return Promise.resolve(this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url + ' --setdefaultusername'));
+        return this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url + ' --setdefaultusername').then(res => {
+            if(this.isEmptyUndOrNull(res)) {
+                vscode.window.forceCode.isLoggedIn = false;
+                Promise.resolve(res);
+            } else {
+                vscode.window.forceCode.isLoggedIn = true;
+                Promise.reject('Failed to log in');
+            }
+        });
     }
 
     public logout(): Promise<any> {
+        vscode.window.forceCode.isLoggedIn = false;
         return Promise.resolve(this.runCommand('auth:logout', '--noprompt'));
     }
 

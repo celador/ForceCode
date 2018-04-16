@@ -16,7 +16,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
 
     function displayMenu() {
         var quickpick: any[] = [];
-        if (vscode.window.forceCode.userInfo !== undefined && vscode.window.forceCode.conn !== undefined) {
+        if (vscode.window.forceCode.isLoggedIn) {
             quickpick.push(model.openFile);
             quickpick.push(model.createClass);
             quickpick.push(model.runUnitTests);

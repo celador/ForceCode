@@ -6,7 +6,7 @@ import { QueryResult } from '../services/dxService';
 import { jsforce } from 'jsforce';
 
 export default async function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
-    if (vscode.window.forceCode.userInfo === undefined || vscode.window.forceCode.conn === undefined) {
+    if (!vscode.window.forceCode.isLoggedIn) {
         return Promise.reject('Not logged in');
     }
     

@@ -5,6 +5,9 @@ import * as path from 'path';
 var tools: any = require('cs-jsforce-metadata-tools');
 
 export default function deploy(context: vscode.ExtensionContext) {
+    if (!vscode.window.forceCode.isLoggedIn) {
+        return Promise.reject('Not logged in');
+    }
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Started';
     vscode.window.forceCode.outputChannel.clear();
     var _consoleInfoReference: any = console.info;

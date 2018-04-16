@@ -133,12 +133,14 @@ export interface IForceService {
     outputChannel: vscode.OutputChannel;
     statusBarItem_UserInfo: vscode.StatusBarItem;
     statusBarItem: vscode.StatusBarItem;
+    isLoggedIn: boolean;
     connect(context: vscode.ExtensionContext): Promise<IForceService>;
     newContainer(force: Boolean): Promise<IForceService>;
     clearLog(): void;
     resetMenu(): void;
     refreshApexMetadata(): Promise<any>;
     outputError(error: ForceCodeError, outputChannel: vscode.OutputChannel): any;
+    isLoggedInCheck(): Promise<boolean>;
 }
 
 

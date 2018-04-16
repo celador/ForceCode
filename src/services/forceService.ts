@@ -11,6 +11,7 @@ const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
 export default class ForceService implements forceCode.IForceService {
+    public isLoggedIn: boolean;
     public dxCommands: any;
     public config: forceCode.Config;
     public conn: any;
@@ -36,6 +37,7 @@ export default class ForceService implements forceCode.IForceService {
     public statusInterval: any; 
 
     constructor() {
+        this.isLoggedIn = false;
         this.commandQueue = new Array();
         this.dxCommands = new DXService();
         this.isBusy = false;
@@ -54,10 +56,11 @@ export default class ForceService implements forceCode.IForceService {
         this.declarations = {};
         configuration(this).then(config => {
             this.username = config.username || '';
-
-            if(this.dxCommands.getOrgInfo() !== undefined) {
-                this.connect();
+            this.isLoggedInCheck().then(res => {
+                if(res) {
+                    this.connect();
                 }
+            });  
         }).catch(err => {
             this.statusBarItem.text = 'ForceCode: Missing Configuration';
         });
@@ -122,13 +125,21 @@ export default class ForceService implements forceCode.IForceService {
         return false;
     };
 
+    public isLoggedInCheck(): Promise<boolean> {
+        return this.dxCommands.getOrgInfo()
+            .then(val => {
+                this.isLoggedIn = !this.dxCommands.isEmptyUndOrNull(val);
+                return Promise.resolve(this.isLoggedIn);
+            });
+    }
+
     // TODO: Add keychain access so we don't have to use a username or password'
     // var keychain = require('keytar')
     private setupConfig(): Promise<forceCode.Config> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Setup username and outputChannel
         self.username = (self.config && self.config.username) || '';
-        if (!self.config || !self.config.username || self.dxCommands.getOrgInfo() === undefined) {
+        if (!self.config || !self.config.username || !self.isLoggedIn) {
             return commands.credentials().then(credentials => {
                 self.config.username = credentials.username;
                 self.config.autoCompile = credentials.autoCompile;

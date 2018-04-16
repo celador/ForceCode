@@ -13,7 +13,7 @@ export interface IExecuteAnonymousService {
 };
 
 export default function executeAnonymous(document: vscode.TextDocument, context: vscode.ExtensionContext): any {
-    if (vscode.window.forceCode.userInfo === undefined || vscode.window.forceCode.conn === undefined) {
+    if (!vscode.window.forceCode.isLoggedIn) {
         return Promise.reject('Not logged in');
     }
     const editor = vscode.window.activeTextEditor;
