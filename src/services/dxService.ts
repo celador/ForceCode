@@ -141,6 +141,10 @@ export default class DXService implements DXCommands {
         }
     }
 
+    public isEmptyUndOrNull(param: any): boolean { 
+        return (param === undefined || param === null || Object.keys(param).length === 0)
+    }
+
     /*
     *   This does all the work. It will run a cli command through the built in dx.
     *   Takes a command as an argument and a string for the command's arguments.
