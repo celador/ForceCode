@@ -157,9 +157,14 @@ export default class DXService implements DXCommands {
             });
         }
         // add in targetusername so we can stay logged in
-        if(cliContext.flags['targetusername'] === undefined && vscode.window.forceCode.config.username !== undefined 
-            && cmd.flags['targetusername'] !== undefined) {
-            cliContext.flags['targetusername'] = vscode.window.forceCode.config.username;
+        if(cliContext.flags['targetusername'] === undefined && vscode.window.forceCode.config.username !== undefined) {
+            cmd.flags.some(fl => {
+                if(fl.name === 'targetusername')
+                {
+                    cliContext.flags['targetusername'] = vscode.window.forceCode.config.username;
+                    return true;
+                }
+            });
         } 
         var objresult = await cmd.run(cliContext);
         // log command output
@@ -178,7 +183,7 @@ export default class DXService implements DXCommands {
     }
 
     public login(): Promise<any> {
-        return this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url + ' --setdefaultusername').then(res => {
+        return this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url).then(res => {
             if(this.isEmptyUndOrNull(res)) {
                 vscode.window.forceCode.isLoggedIn = false;
                 Promise.resolve(res);
