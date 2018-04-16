@@ -8,30 +8,76 @@ import DXService from '../services/dxService';
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
 };
-export default function enterCredentials() {
-    return getUsername()
-        .then(cfg => getUrl(cfg))
-        .then(cfg => getAutoCompile(cfg))
-        .then(cfg => writeConfigAndLogin(cfg))
-        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
+export default function enterCredentials(): Promise<any> {
+    return configuration()
+        .then(cfg => {
+            console.log(vscode.window.forceCode.dxCommands.outputToString(cfg));
+            if(cfg.username !== undefined && cfg.username !== '') {
+                // ask if the user wants to log into a different account
+                let opts: any = [
+                    {
+                        title: 'Yes',
+                        desc: 'You will be asked for your login information for the other org'
+                    }, {
+                        title: 'No',
+                        desc: 'Log into the org saved whose login data is currently in force.json'
+                    },
+                ];
+                let options: vscode.QuickPickItem[] = opts.map(res => {
+                    let icon: string = getIcon(res.icon);
+                    return {
+                        description: `${res.desc}`,
+                        // detail: `${'Detail'}`,
+                        label: `${res.title}`,
+                    };
+                });
+                const theseOptions: vscode.QuickPickOptions = {
+                    ignoreFocusOut: true,
+                    placeHolder: 'Log into a different org?'
+                };
+                return vscode.window.showQuickPick(options, theseOptions).then((res: vscode.QuickPickItem) => {
+                    if(res.label === undefined) {
+                        return cfg;
+                    } else if(res.label === 'Yes') {
+                        return vscode.window.forceCode.dxCommands.logout()
+                            .then(res => {
+                                return setupNewUser(cfg);
+                            });
+                    } else {
+                        return vscode.window.forceCode.dxCommands.login()
+                            .then(res => {
+                                return Promise.resolve(cfg);
+                            });
+                    }
+                });
+            } else {
+                return setupNewUser(cfg);     
+            }
+        });
+    
+    function setupNewUser(cfg) {
+        return getUsername(cfg)
+            .then(cfg => getUrl(cfg))
+            .then(cfg => getAutoCompile(cfg))
+            .then(cfg => writeConfigAndLogin(cfg))
+            .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
+    }
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
 
-    function getUsername() {
+    function getUsername(config) {
         return new Promise(function (resolve, reject) {
-            configuration().then(config => {
-                let options: vscode.InputBoxOptions = {
-                    ignoreFocusOut: true,
-                    placeHolder: 'mark@salesforce.com',
-                    value: config.username || '',
-                    prompt: 'Please enter your SFDC username',
-                };
-                vscode.window.showInputBox(options).then(result => {
-                    config.username = result || config.username || '';
-                    if (!config.username) { reject('No Username'); };
-                    resolve(config);
-                });
+            let options: vscode.InputBoxOptions = {
+                ignoreFocusOut: true,
+                placeHolder: 'mark@salesforce.com',
+                value: config.username || '',
+                prompt: 'Please enter your SFDC username',
+            };
+            vscode.window.showInputBox(options).then(result => {
+                config.username = result || config.username || '';
+                if (!config.username) { reject('No Username'); };
+                resolve(config);
             });
         });
     
@@ -80,7 +126,7 @@ export default function enterCredentials() {
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
-    function writeConfigAndLogin(config) {
+    function writeConfigAndLogin(config): Promise<any> {
         const projPath = vscode.workspace.rootPath + path.sep;
         const defaultOptions: {} = {
             autoRefresh: false,
@@ -108,13 +154,9 @@ export default function enterCredentials() {
         fs.outputFile(projPath + 'sfdx-project.json', JSON.stringify(sfdxProj, undefined, 4));
         fs.outputFile(projPath + 'force.json', JSON.stringify(Object.assign(defaultOptions, config), undefined, 4));
         // log in with dxLogin
-        if(vscode.window.forceCode.dxCommands === undefined) {
-            vscode.window.forceCode.dxCommands = new DXService();
-        }
         return vscode.window.forceCode.dxCommands.login()
             .then(res => {
-                vscode.window.forceCode.statusBarItem.show();
-                return config;
+                return Promise.resolve(config);
             });
     }
 }

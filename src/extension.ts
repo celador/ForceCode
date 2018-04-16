@@ -10,15 +10,15 @@ import { updateDecorations } from './decorators/testCoverageDecorator';
 export function activate(context: vscode.ExtensionContext): any {
     vscode.window.forceCode = new ForceService();
 
+    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.showMenu', () => {
+        commands.showMenu(context);
+    }));
+
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('forcecode', new ForceCodeContentProvider()));
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('sflog', new ForceCodeLogProvider()));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.documentMethod', () => {
         commands.documentMethod(context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.showMenu', () => {
-        commands.showMenu(context);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.executeAnonymous', () => {

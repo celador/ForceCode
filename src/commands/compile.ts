@@ -23,6 +23,9 @@ interface ContainerAsyncRequest {
 
 
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
+    if (vscode.window.forceCode.userInfo === undefined || vscode.window.forceCode.conn === undefined) {
+        return Promise.reject('Not logged in');
+    }
     if (vscode.window.forceCode.isBusy) {
         vscode.window.forceCode.commandQueue.push([compile, document, context]);
         return Promise.reject({ message: 'Already compiling or running unit tests' });

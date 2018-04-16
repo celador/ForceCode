@@ -16,7 +16,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
 
     function displayMenu() {
         var quickpick: any[] = [];
-        if (vscode.window.forceCode.userInfo !== undefined) {
+        if (vscode.window.forceCode.userInfo !== undefined && vscode.window.forceCode.conn !== undefined) {
             quickpick.push(model.openFile);
             quickpick.push(model.createClass);
             quickpick.push(model.runUnitTests);
@@ -29,10 +29,9 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.retrievePackage);
             quickpick.push(model.deployPackage);
             quickpick.push(model.toql);
-            quickpick.push(model.dxLogin);
-            quickpick.push(model.dxLogout);
             quickpick.push(model.dx);
             quickpick.push(model.codeCompletionRefresh);
+            quickpick.push(model.dxLogout);
         }
         quickpick.push(model.enterCredentials);
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
@@ -66,7 +65,6 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.createClass.description: return commands.createClass(context);
                 case model.runUnitTests.description: return commands.apexTest(vscode.window.activeTextEditor.document, context);
                 case model.dx.description: return commands.dx();
-                case model.dxLogin.description: return commands.dxLogin();
                 case model.dxLogout.description: return commands.dxLogout();
                 case model.codeCompletionRefresh.description: return commands.codeCompletionRefresh();
                 default: break;

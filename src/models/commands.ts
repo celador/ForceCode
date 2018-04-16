@@ -1,15 +1,9 @@
 export default {
-    dxLogin : {
-        description: 'Log in to the DX built-in cli',
-        detail: 'You must login to DX first to run DX commands or before refreshing objects from the org.',
-        icon: 'key',
-        label: 'DX Login',
-    },
     dxLogout : {
-        description: 'Log out from the DX built-in cli',
-        detail: 'You must login to DX first or if you receive errors. Allows code completion with custom fields and objects by downloading org data.',
+        description: 'Log out from current org',
+        detail: 'Log out of the current org in this project.',
         icon: 'key',
-        label: 'DX Logout',
+        label: 'Log out of Salesforce',
     },
     codeCompletionRefresh : {
         description: 'Refresh objects from org',
@@ -28,7 +22,7 @@ export default {
         description: 'Enter the credentials you wish to use.',
         detail: 'If you are already logged in, you will be logged out of your previous session.',
         icon: 'key',
-        label: 'Enter Credentials',
+        label: 'Log in to Salesforce',
     },
     // Execute Anonymous 
     // Execute Selected Code

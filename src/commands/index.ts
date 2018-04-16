@@ -7,7 +7,6 @@ import credentials from './credentials';
 import deploy from './deploy';
 import diff from './diff';
 import dx from './dx';
-import dxLogin from './dxLogin';
 import dxLogout from './dxLogout';
 import documentMethod from './documentMethod';
 import executeAnonymous from './executeAnonymous';
@@ -29,7 +28,6 @@ export {
     deploy,
     diff,
     dx,
-    dxLogin,
     dxLogout,
     documentMethod,
     executeAnonymous,

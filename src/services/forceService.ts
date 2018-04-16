@@ -37,6 +37,7 @@ export default class ForceService implements forceCode.IForceService {
 
     constructor() {
         this.commandQueue = new Array();
+        this.dxCommands = new DXService();
         this.isBusy = false;
         // Set the ForceCode configuration
         this.operatingSystem = operatingSystem.getOS();
@@ -53,18 +54,10 @@ export default class ForceService implements forceCode.IForceService {
         this.declarations = {};
         configuration(this).then(config => {
             this.username = config.username || '';
-            this.conn = new jsforce.Connection({
-                loginUrl: config.url || 'https://login.salesforce.com'
-            });
-            if(config.username) {
-                this.statusBarItem.text = `ForceCode ${pjson.version} is Active`;
+
+            if(this.dxCommands.getOrgInfo() !== undefined) {
                 this.connect();
-                this.statusBarItem.show();
-                if(this.dxCommands === undefined) {
-                    this.dxCommands = new DXService();
                 }
-                this.resetMenu();
-            }
         }).catch(err => {
             this.statusBarItem.text = 'ForceCode: Missing Configuration';
         });
@@ -135,7 +128,7 @@ export default class ForceService implements forceCode.IForceService {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Setup username and outputChannel
         self.username = (self.config && self.config.username) || '';
-        if (!self.config || !self.config.username) {
+        if (!self.config || !self.config.username || self.dxCommands.getOrgInfo() === undefined) {
             return commands.credentials().then(credentials => {
                 self.config.username = credentials.username;
                 self.config.autoCompile = credentials.autoCompile;
@@ -148,7 +141,7 @@ export default class ForceService implements forceCode.IForceService {
     private login(config): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Lazy-load the connection
-        if (self.userInfo === undefined || self.config.username !== self.username) {
+        if (self.userInfo === undefined || self.config.username !== self.username || self.conn === undefined) {
             var connectionOptions: any = {
                 loginUrl: self.config.url || 'https://login.salesforce.com'
             };
@@ -250,6 +243,9 @@ export default class ForceService implements forceCode.IForceService {
                     }
                 }, 5000);
                 self.statusBarItem_UserInfo.show();
+                self.statusBarItem.show();
+                self.resetMenu();
+
                 self.outputChannel.appendLine(`Connected as ` + self.config.username);
                 self.username = config.username;
                 // query the userid
@@ -258,7 +254,6 @@ export default class ForceService implements forceCode.IForceService {
                             self.userInfo.id = res.records[0].Id;
                             return self;
                         });
-
             }
             function getNamespacePrefix(svc: forceCode.IForceService) {
                 return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {
