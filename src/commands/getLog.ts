@@ -47,9 +47,7 @@ export default function getLog(context: vscode.ExtensionContext) {
 
     function showLog(res) {
         if (vscode.window.forceCode.config.showTestLog) {
-            return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${res.description}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
-                return vscode.window.showTextDocument(_document, 3, true);
-            });
+            return vscode.window.forceCode.dxCommands.getAndShowLog(res.description);
         }
         return res;
     }

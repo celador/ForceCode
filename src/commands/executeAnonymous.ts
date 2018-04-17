@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { configuration } from './../services';
 import * as jsforce from 'jsforce';
-import * as logging from './../providers/LogProvider';
 
 export interface IExecuteAnonymousService {
     userId?: string;
@@ -101,7 +100,7 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
         vscode.window.forceCode.resetMenu();
         return configuration().then(config => {
             vscode.window.forceCode.outputChannel.clear();
-            vscode.window.forceCode.outputChannel.appendLine(logging.filterLog(res.header.debugLog));
+            vscode.window.forceCode.outputChannel.appendLine(vscode.window.forceCode.dxCommands.filterLog(res.header.debugLog));
             vscode.window.forceCode.outputChannel.show();
             return res;
         });

@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { ForceService } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
-import ForceCodeLogProvider from './providers/LogProvider';
 import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator } from './decorators/testCoverageDecorator';
 import * as commands from './commands';
 import * as parsers from './parsers';
@@ -15,7 +14,6 @@ export function activate(context: vscode.ExtensionContext): any {
     }));
 
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('forcecode', new ForceCodeContentProvider()));
-    context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('sflog', new ForceCodeLogProvider()));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.documentMethod', () => {
         commands.documentMethod(context);

@@ -69,7 +69,10 @@ export interface DXCommands {
     logout(): Promise<any>;
     getOrgInfo(): Promise<SFDX>;
     isEmptyUndOrNull(param: any): boolean;
-    getDebugLogs(amount: number, logid?: string): Promise<string[]>;
+    getDebugLog(logid?: string): Promise<string>;
+    saveToFile(data: any, fileName: string): Promise<string>;
+    filterLog(body: string): string;
+    getAndShowLog(id?: string): Promise<any>;
 }
 
 export default class DXService implements DXCommands {
@@ -112,6 +115,51 @@ export default class DXService implements DXCommands {
 
     public isEmptyUndOrNull(param: any): boolean { 
         return (param === undefined || param === null || Object.keys(param).length === 0)
+    }
+
+    public async saveToFile(data: any, fileName: string): Promise<string> {
+        try{
+            await fs.outputFile(vscode.workspace.rootPath + path.sep + fileName, this.outputToString(data));
+            return Promise.resolve(vscode.workspace.rootPath + path.sep + fileName);
+        } catch(e) {
+            return Promise.reject(undefined);
+        }
+    }
+
+    public filterLog(body: string): string {
+        if (vscode.window.forceCode.config.debugOnly) {
+            var theLog = '';
+            var showOutput = true;
+            var debugLevel = ['USER_DEBUG'];
+            if(vscode.window.forceCode.config.debugFilter)
+            {
+                debugLevel = vscode.window.forceCode.config.debugFilter.split('|');
+            }
+            body.split('\n').forEach(function(l) {
+                var includeIt = false;
+                debugLevel.forEach(function(i) {
+                    if(l.includes(i))
+                    {
+                        includeIt = true;
+                    }
+                });
+                if(l.includes('CUMULATIVE_LIMIT_USAGE_END'))
+                {
+                    showOutput = true;
+                }
+                else if(l.includes('CUMULATIVE_LIMIT_USAGE')) 
+                {
+                    showOutput = false;
+                }            
+                if(((l.indexOf(':') !== 2 && l.indexOf(':', 5) !== 5 && theLog !== '') || includeIt) && showOutput) {
+                    // if it doesn't start with the time then we have a newline from debug logs or limit output
+                    theLog += l + '\n';
+                }
+            });
+            return theLog;
+        } else {
+            return body;
+        }
     }
 
     /*
@@ -208,11 +256,25 @@ export default class DXService implements DXCommands {
         });
     }
 
-    public getDebugLogs(amount: number, logid?: string): Promise<string[]> {
+    public getDebugLog(logid?: string): Promise<string> {
         var theLogId: string = '';
         if(logid) {
             theLogId += ' --logid ' + logid;
         }
-        return Promise.resolve(this.runCommand('apex:log:get', '--number ' + amount + theLogId));
+        return this.runCommand('apex:log:get', theLogId).then(log => {
+            return Promise.resolve(this.filterLog(this.outputToString(log)))
+        });
+    }
+
+    public getAndShowLog(id?: string): Promise<any> {
+        return this.getDebugLog(id ? id : undefined).then(log => {
+            return this.saveToFile(log, (id ? id : 'debugLog') + '.log').then(path => {
+                if(path) {
+                    return vscode.workspace.openTextDocument(vscode.Uri.file(path)).then(function (_document: vscode.TextDocument) {
+                        return vscode.window.showTextDocument(_document, 3, true);
+                    });
+                }
+            })
+        });
     }
 }
