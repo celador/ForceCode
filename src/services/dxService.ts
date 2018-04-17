@@ -69,7 +69,7 @@ export interface DXCommands {
     logout(): Promise<any>;
     getOrgInfo(): Promise<SFDX>;
     isEmptyUndOrNull(param: any): boolean;
-    getDebugLogs(amount: number, logid?: string): Promise<any>;
+    getDebugLogs(amount: number, logid?: string): Promise<string[]>;
 }
 
 export default class DXService implements DXCommands {
@@ -208,7 +208,7 @@ export default class DXService implements DXCommands {
         });
     }
 
-    public getDebugLogs(amount: number, logid?: string): Promise<any> {
+    public getDebugLogs(amount: number, logid?: string): Promise<string[]> {
         var theLogId: string = '';
         if(logid) {
             theLogId += ' --logid ' + logid;
