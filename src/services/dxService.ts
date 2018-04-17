@@ -72,7 +72,7 @@ export interface DXCommands {
     getDebugLog(logid?: string): Promise<string>;
     saveToFile(data: any, fileName: string): Promise<string>;
     filterLog(body: string): string;
-    getAndShowLog(id?: string): Promise<any>;
+    getAndShowLog(id?: string);
 }
 
 export default class DXService implements DXCommands {
@@ -267,12 +267,14 @@ export default class DXService implements DXCommands {
         });
     }
 
-    public getAndShowLog(id?: string): Promise<any> {
+    public getAndShowLog(id?: string): Promise<boolean> {
         return this.getDebugLog(id ? id : undefined).then(log => {
             return this.saveToFile(log, (id ? id : 'debugLog') + '.log').then(path => {
                 if(path) {
                     return vscode.workspace.openTextDocument(vscode.Uri.file(path)).then(function (_document: vscode.TextDocument) {
-                        return vscode.window.showTextDocument(_document, 3, true);
+                        return vscode.window.showTextDocument(_document, 3, true).then(finResult => {
+                            return undefined;
+                        });
                     });
                 }
             })
