@@ -72,7 +72,9 @@ export interface DXCommands {
     getDebugLog(logid?: string): Promise<string>;
     saveToFile(data: any, fileName: string): Promise<string>;
     filterLog(body: string): string;
-    getAndShowLog(id?: string);
+    getAndShowLog(id?: string): Promise<boolean>;
+    execAnon(file: string): Promise<string>;
+    removeFile(fileName: string): Promise<any>;
 }
 
 export default class DXService implements DXCommands {
@@ -121,6 +123,15 @@ export default class DXService implements DXCommands {
         try{
             await fs.outputFile(vscode.workspace.rootPath + path.sep + fileName, this.outputToString(data));
             return Promise.resolve(vscode.workspace.rootPath + path.sep + fileName);
+        } catch(e) {
+            return Promise.reject(undefined);
+        }
+    }
+
+    public async removeFile(fileName: string): Promise<any> {
+        try{
+            await fs.remove(vscode.workspace.rootPath + path.sep + fileName);
+            return Promise.resolve(undefined);
         } catch(e) {
             return Promise.reject(undefined);
         }
@@ -222,6 +233,12 @@ export default class DXService implements DXCommands {
             return Promise.resolve(objresult);
         }
         return Promise.reject('Failed to execute command: ' + cmdString + ' ' + arg);
+    }
+
+    public execAnon(file: string): Promise<string> {
+        return this.runCommand('apex:execute', '--apexcodefile ' + file).then(res => {
+            return Promise.resolve(res.logs);
+        });
     }
 
     public toqlQuery(query: string): Promise<QueryResult> {
