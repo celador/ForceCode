@@ -38,6 +38,17 @@ export interface SFDX {
     clientId: string
 }
 
+export interface ExecuteAnonymousResult {
+    compiled: boolean,
+    compileProblem: string,
+    success: boolean,
+    line: number,
+    column: number,
+    exceptionMessage: string,
+    exceptionStackTrace: string,
+    logs: string
+}
+
 interface Topic {
     name: string;
     description: string;
