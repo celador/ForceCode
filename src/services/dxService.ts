@@ -259,10 +259,11 @@ export default class DXService implements DXCommands {
     public getDebugLog(logid?: string): Promise<string> {
         var theLogId: string = '';
         if(logid) {
-            theLogId += ' --logid ' + logid;
+            console.log(logid)
+            theLogId += '--logid ' + logid;
         }
         return this.runCommand('apex:log:get', theLogId).then(log => {
-            return Promise.resolve(this.filterLog(this.outputToString(log)))
+            return Promise.resolve(this.filterLog(this.outputToString(log.log)));
         });
     }
 
