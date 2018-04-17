@@ -9,9 +9,6 @@ var tools: any = require('cs-jsforce-metadata-tools');
 var elegantSpinner: any = require('elegant-spinner');
 
 export default function retrieve(context: vscode.ExtensionContext, resource?: vscode.Uri) {
-    if (vscode.window.forceCode.userInfo === undefined || vscode.window.forceCode.conn === undefined) {
-        return Promise.reject('Not logged in');
-    }
     vscode.window.forceCode.statusBarItem.text = 'Retrieve Started';
     let option: any;
     const _consoleInfoReference: any = console.info;

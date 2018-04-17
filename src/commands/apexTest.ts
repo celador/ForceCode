@@ -5,11 +5,7 @@ import { configuration } from './../services';
 import { QueryResult } from '../services/dxService';
 import { jsforce } from 'jsforce';
 
-export default async function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
-    if (!vscode.window.forceCode.isLoggedIn) {
-        return Promise.reject('Not logged in');
-    }
-    
+export default async function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {    
     const toolingType: string = parsers.getToolingType(document);
     const name: string = parsers.getName(document, toolingType);
     if(!name.toLowerCase().includes('test'))

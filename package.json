@@ -34,74 +34,61 @@
       {
         "command": "ForceCode.showMenu",
         "title": "ForceCode Menu",
-        "description": "Run ForceCode Commands",
         "category": "ForceCode"
       },
       {
         "command": "ForceCode.apexTest",
         "title": "Run Unit Tests in this Class",
-        "description": "Run Apex unit tests",
         "category": "ForceCode"
       },
       {
         "command": "ForceCode.documentMethod",
         "title": "Document Apex Method",
-        "description": "Document this Apex method with JSDoc syntax",
         "category": "ForceCode"
       },
       {
         "command": "ForceCode.compile",
         "title": "Save/Deploy/Compile",
-        "description": "Compile a Salesforce file",
         "category": "ForceCode"
       },
       {
         "command": "ForceCode.refresh",
         "title": "Refresh from server",
-        "description": "Refresh a Salesforce file",
         "category": "ForceCode"
       },
       {
         "command": "ForceCode.executeAnonymous",
         "title": "Execute Anonymous",
-        "description": "Execute Anonymous Apex and get the debug result",
         "category": "ForceCode"
       },
       {
         "command": "ForceCode.open",
         "title": "Get Class, Page, or Trigger",
-        "description": "Open a Salesforce file",
         "category": "ForceCode"
       },
       {
         "command": "ForceCode.staticResource",
         "title": "Bundle / Deploy Static Resource",
-        "description": "Bundles a Resource Bundle into a Static Resource and optionally deploys",
         "category": "ForceCode"
       },
       {
         "command": "ForceCode.toggleCoverage",
         "title": "Toggle Test Coverage",
-        "description": "Toggle the test coverage for Apex classes and triggers",
-        "icon": {
-          "light": "./images/coverage.svg",
-          "dark": "./images/coverage.svg"
-        },
-        "category": "ForceCode"
+        "category": "ForceCode"       
       }
     ],
     "keybindings": [
       {
         "key": "alt+cmd+t",
         "command": "ForceCode.apexTest",
-        "when": "resourceLangId == apex && editorFocus",
+        "when": "resourceLangId == apex && editorFocus && ForceCodeActive",
         "win": "ctrl+shift+t"
       },
       {
         "command": "ForceCode.documentMethod",
         "key": "alt+cmd+d",
         "win": "ctrl+shift+d",
-        "when": "editorFocus && resourceLangId == apex"
+        "when": "editorFocus && resourceLangId == apex && ForceCodeActive"
       },
       {
         "command": "ForceCode.showMenu",
@@ -113,23 +100,25 @@
         "command": "ForceCode.compile",
         "key": "alt+cmd+s",
         "win": "ctrl+shift+s",
-        "when": "editorFocus"
+        "when": "editorFocus && ForceCodeActive"
       },
       {
         "command": "ForceCode.executeAnonymous",
         "key": "alt+cmd+e",
         "win": "ctrl+shift+e",
-        "when": "editorFocus && resourceLangId == apex"
+        "when": "editorFocus && resourceLangId == apex && ForceCodeActive && editorHasSelection"
       },
       {
         "command": "ForceCode.open",
         "key": "alt+cmd+o",
-        "win": "ctrl:shift+o"
+        "win": "ctrl:shift+o",
+        "when": "ForceCodeActive"
       },
       {
         "command": "ForceCode.staticResource",
         "key": "alt+cmd+b",
-        "win": "ctrl+shift+b"
+        "win": "ctrl+shift+b",
+        "when": "ForceCodeActive"
       }
     ],
     "configuration": {
@@ -260,94 +249,131 @@
     "menus": {
       "editor/title": [
         {
-          "when": "resourceLangId == apex",
+          "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.toggleCoverage",
           "group": "navigation"
         }
       ],
       "editor/context": [
         {
-          "when": "resourceLangId == apex",
+          "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == visualforce",
+          "when": "resourceLangId == visualforce && ForceCodeActive",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == xml",
+          "when": "resourceLangId == xml && ForceCodeActive",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex",
+          "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == visualforce",
+          "when": "resourceLangId == visualforce && ForceCodeActive",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == xml",
+          "when": "resourceLangId == xml && ForceCodeActive",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex",
+          "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.apexTest",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex",
+          "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.documentMethod",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex",
+          "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.toggleCoverage",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && editorHasSelection",
+          "when": "resourceLangId == apex && editorHasSelection && ForceCodeActive",
           "command": "ForceCode.executeAnonymous",
           "group": "ForceCode"
         }
       ],
       "explorer/context": [
         {
-          "when": "resourceLangId == apex",
+          "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == visualforce",
+          "when": "resourceLangId == visualforce && ForceCodeActive",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == xml",
+          "when": "resourceLangId == xml && ForceCodeActive",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex",
+          "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == visualforce",
+          "when": "resourceLangId == visualforce && ForceCodeActive",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == xml",
+          "when": "resourceLangId == xml && ForceCodeActive",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         }
+      ],
+      "commandPalette": [
+      {
+        "command": "ForceCode.showMenu"
+      },
+      {
+        "command": "ForceCode.apexTest",
+        "when": "ForceCodeActive && resourceLangId == apex"
+      },
+      {
+        "command": "ForceCode.documentMethod",
+        "when": "ForceCodeActive && resourceLangId == apex"
+      },
+      {
+        "command": "ForceCode.compile",
+        "when": "ForceCodeActive"
+      },
+      {
+        "command": "ForceCode.refresh",
+        "when": "ForceCodeActive"
+      },
+      {
+        "command": "ForceCode.executeAnonymous",
+        "when": "ForceCodeActive"
+      },
+      {
+        "command": "ForceCode.open",
+        "when": "ForceCodeActive"
+      },
+      {
+        "command": "ForceCode.staticResource",
+        "when": "ForceCodeActive"
+      },
+      {
+        "command": "ForceCode.toggleCoverage",
+        "when": "ForceCodeActive && resourceLangId == apex"
+      }
       ]
     }
   },
