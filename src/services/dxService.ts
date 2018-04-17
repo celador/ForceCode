@@ -12,6 +12,17 @@ export interface SFDX {
     clientId: string
 }
 
+export interface ExecuteAnonymousResult {
+    compiled: boolean,
+    compileProblem: string,
+    success: boolean,
+    line: number,
+    column: number,
+    exceptionMessage: string,
+    exceptionStackTrace: string,
+    logs: string
+}
+
 interface Topic {
     name: string; // `json:"name"`
     description: string; // `json:"description"`
@@ -73,7 +84,7 @@ export interface DXCommands {
     saveToFile(data: any, fileName: string): Promise<string>;
     filterLog(body: string): string;
     getAndShowLog(id?: string): Promise<boolean>;
-    execAnon(file: string): Promise<string>;
+    execAnon(file: string): Promise<ExecuteAnonymousResult>;
     removeFile(fileName: string): Promise<any>;
 }
 
@@ -235,10 +246,8 @@ export default class DXService implements DXCommands {
         return Promise.reject('Failed to execute command: ' + cmdString + ' ' + arg);
     }
 
-    public execAnon(file: string): Promise<string> {
-        return this.runCommand('apex:execute', '--apexcodefile ' + file).then(res => {
-            return Promise.resolve(res.logs);
-        });
+    public execAnon(file: string): Promise<ExecuteAnonymousResult> {
+        return Promise.resolve(this.runCommand('apex:execute', '--apexcodefile ' + file));
     }
 
     public toqlQuery(query: string): Promise<QueryResult> {
