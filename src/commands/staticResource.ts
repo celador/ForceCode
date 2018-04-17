@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
 import jszip = require('jszip');
-// import jsforce = require('jsforce');
 import globule = require('globule');
 import { IForceService } from './../forceCode';
 

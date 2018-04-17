@@ -3,7 +3,6 @@ import * as parsers from './../parsers';
 import { IForceService } from './../forceCode';
 import * as forceCode from './../forceCode';
 import diff from './diff';
-// import jsforce = require('jsforce');
 const parseString: any = require('xml2js').parseString;
 
 // TODO: Refactor some things out of this file.  It's getting too big.

@@ -1,5 +1,5 @@
 import vscode = require('vscode');
-import jsforce = require('jsforce');
+import { QueryResult } from '../services/dxService';
 // import ReferencesDocument from './referencesDocument';
 /**
  * Salesforce Content Provider class.
@@ -23,13 +23,13 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
         }
         return new Promise<string>((resolve, reject) => {
             var query: string = `SELECT ${field} FROM ${toolingType} WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''}' and Name='${toolingName}'`;
-            vscode.window.forceCode.conn.query(query).then((results: jsforce.QueryResult) => {
+            vscode.window.forceCode.dxCommands.soqlQuery(query).then((results: QueryResult) => {
                 if (results && results.totalSize === 1) {
                     resolve(results.records[0][field]);
                 } else {
                     reject('Object not found');
                 }
-            }, vscode.window.forceCode.outputError);
+            }, err => vscode.window.forceCode.outputError);
         });
     }
 

@@ -3,7 +3,6 @@ import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
 import { configuration } from './../services';
 import { QueryResult } from '../services/dxService';
-import { jsforce } from 'jsforce';
 
 export default async function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {    
     const toolingType: string = parsers.getToolingType(document);
