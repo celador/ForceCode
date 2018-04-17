@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "publisher": "BrettWagner",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -74,7 +74,7 @@
       {
         "command": "ForceCode.toggleCoverage",
         "title": "Toggle Test Coverage",
-        "category": "ForceCode"       
+        "category": "ForceCode"
       }
     ],
     "keybindings": [
@@ -339,41 +339,41 @@
         }
       ],
       "commandPalette": [
-      {
-        "command": "ForceCode.showMenu"
-      },
-      {
-        "command": "ForceCode.apexTest",
-        "when": "ForceCodeActive && resourceLangId == apex"
-      },
-      {
-        "command": "ForceCode.documentMethod",
-        "when": "ForceCodeActive && resourceLangId == apex"
-      },
-      {
-        "command": "ForceCode.compile",
-        "when": "ForceCodeActive"
-      },
-      {
-        "command": "ForceCode.refresh",
-        "when": "ForceCodeActive"
-      },
-      {
-        "command": "ForceCode.executeAnonymous",
-        "when": "ForceCodeActive"
-      },
-      {
-        "command": "ForceCode.open",
-        "when": "ForceCodeActive"
-      },
-      {
-        "command": "ForceCode.staticResource",
-        "when": "ForceCodeActive"
-      },
-      {
-        "command": "ForceCode.toggleCoverage",
-        "when": "ForceCodeActive && resourceLangId == apex"
-      }
+        {
+          "command": "ForceCode.showMenu"
+        },
+        {
+          "command": "ForceCode.apexTest",
+          "when": "ForceCodeActive && resourceLangId == apex"
+        },
+        {
+          "command": "ForceCode.documentMethod",
+          "when": "ForceCodeActive && resourceLangId == apex"
+        },
+        {
+          "command": "ForceCode.compile",
+          "when": "ForceCodeActive"
+        },
+        {
+          "command": "ForceCode.refresh",
+          "when": "ForceCodeActive"
+        },
+        {
+          "command": "ForceCode.executeAnonymous",
+          "when": "ForceCodeActive"
+        },
+        {
+          "command": "ForceCode.open",
+          "when": "ForceCodeActive"
+        },
+        {
+          "command": "ForceCode.staticResource",
+          "when": "ForceCodeActive"
+        },
+        {
+          "command": "ForceCode.toggleCoverage",
+          "when": "ForceCodeActive && resourceLangId == apex"
+        }
       ]
     }
   },
