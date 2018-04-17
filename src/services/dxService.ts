@@ -154,6 +154,15 @@ export default class DXService implements DXCommands {
         }
     }
 
+    public async removeFile(fileName: string): Promise<any> {
+        try{
+            await fs.remove(vscode.workspace.rootPath + path.sep + fileName);
+            return Promise.resolve(undefined);
+        } catch(e) {
+            return Promise.reject(undefined);
+        }
+    }
+
     public filterLog(body: string): string {
         if (vscode.window.forceCode.config.debugOnly) {
             var theLog = '';
