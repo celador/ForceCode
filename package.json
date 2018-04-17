@@ -74,6 +74,10 @@
       {
         "command": "ForceCode.toggleCoverage",
         "title": "Toggle Test Coverage",
+        "icon": {
+          "light": "./images/coverage.svg",
+          "dark": "./images/coverage.svg"
+        },
         "category": "ForceCode"
       }
     ],

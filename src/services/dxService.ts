@@ -69,6 +69,7 @@ export interface DXCommands {
     logout(): Promise<any>;
     getOrgInfo(): Promise<SFDX>;
     isEmptyUndOrNull(param: any): boolean;
+    getDebugLogs(amount: number, logid?: string): Promise<any>;
 }
 
 export default class DXService implements DXCommands {
@@ -205,5 +206,13 @@ export default class DXService implements DXCommands {
             vscode.window.forceCode.isLoggedIn = false;
             return Promise.reject('No info recieved from org. Are you logged in?');
         });
+    }
+
+    public getDebugLogs(amount: number, logid?: string): Promise<any> {
+        var theLogId: string = '';
+        if(logid) {
+            theLogId += ' --logid ' + logid;
+        }
+        return Promise.resolve(this.runCommand('apex:log:get', '--number ' + amount + theLogId));
     }
 }
