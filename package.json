@@ -420,41 +420,41 @@
         }
       ],
       "commandPalette": [
-      {
-        "command": "ForceCode.showMenu"
-      },
-      {
-        "command": "ForceCode.apexTest",
-        "when": "ForceCodeActive && resourceLangId == apex"
-      },
-      {
-        "command": "ForceCode.documentMethod",
-        "when": "ForceCodeActive && resourceLangId == apex"
-      },
-      {
-        "command": "ForceCode.compile",
-        "when": "ForceCodeActive"
-      },
-      {
-        "command": "ForceCode.refresh",
-        "when": "ForceCodeActive"
-      },
-      {
-        "command": "ForceCode.executeAnonymous",
-        "when": "ForceCodeActive"
-      },
-      {
-        "command": "ForceCode.open",
-        "when": "ForceCodeActive"
-      },
-      {
-        "command": "ForceCode.staticResource",
-        "when": "ForceCodeActive"
-      },
-      {
-        "command": "ForceCode.toggleCoverage",
-        "when": "ForceCodeActive && resourceLangId == apex"
-      }
+        {
+          "command": "ForceCode.showMenu"
+        },
+        {
+          "command": "ForceCode.apexTest",
+          "when": "ForceCodeActive && resourceLangId == apex"
+        },
+        {
+          "command": "ForceCode.documentMethod",
+          "when": "ForceCodeActive && resourceLangId == apex"
+        },
+        {
+          "command": "ForceCode.compile",
+          "when": "ForceCodeActive"
+        },
+        {
+          "command": "ForceCode.refresh",
+          "when": "ForceCodeActive"
+        },
+        {
+          "command": "ForceCode.executeAnonymous",
+          "when": "ForceCodeActive"
+        },
+        {
+          "command": "ForceCode.open",
+          "when": "ForceCodeActive"
+        },
+        {
+          "command": "ForceCode.staticResource",
+          "when": "ForceCodeActive"
+        },
+        {
+          "command": "ForceCode.toggleCoverage",
+          "when": "ForceCodeActive && resourceLangId == apex"
+        }
       ]
     }
   },
