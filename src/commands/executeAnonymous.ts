@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as logging from './../providers/LogProvider';
 import { ExecuteAnonymousResult } from '../services/dxService';
 
 export default function executeAnonymous(document: vscode.TextDocument, context: vscode.ExtensionContext): any {
@@ -55,7 +56,7 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
     function showResult(res: ExecuteAnonymousResult) {
         vscode.window.forceCode.resetMenu();
         vscode.window.forceCode.outputChannel.clear();
-        vscode.window.forceCode.outputChannel.appendLine(vscode.window.forceCode.dxCommands.filterLog(res.logs));
+        vscode.window.forceCode.outputChannel.appendLine(logging.filterLog(res.logs));
         vscode.window.forceCode.outputChannel.show();
         return res;
     }
