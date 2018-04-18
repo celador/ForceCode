@@ -507,6 +507,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
         diagnosticCollection.set(document.uri, diagnostics);
         clearInterval(interval);
+        vscode.window.forceCode.resetMenu();
         if (diagnostics.length > 0) {
             // FAILURE !!! 
             vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(alert)`;
@@ -526,7 +527,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 var toCompile = vscode.window.forceCode.commandQueue.pop();
                 return Promise.resolve(toCompile[0](toCompile[1], toCompile[2]));
             } else {
-                vscode.window.forceCode.resetMenu();
                 return Promise.resolve();
             }
         });
@@ -534,6 +534,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // =======================================================================================================================================
     function onError(err): any {
         clearInterval(interval);
+        vscode.window.forceCode.resetMenu();
         if (toolingType === 'AuraDefinition') {
             //return toolingError(err);
             vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
