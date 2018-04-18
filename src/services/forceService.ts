@@ -5,7 +5,6 @@ import { operatingSystem } from './../services';
 import constants from './../models/constants';
 import { configuration } from './../services';
 import * as commands from './../commands';
-import jsf = require('jsforce');
 import DXService from './dxService';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
@@ -18,7 +17,7 @@ export default class ForceService implements forceCode.IForceService {
     public containerId: string;
     public containerMembers: forceCode.IContainerMember[];
     public describe: forceCode.IMetadataDescribe;
-    public apexMetadata: jsf.IMetadataFileProperties[];
+    public apexMetadata: forceCode.IMetadataFileProperties[];
     public declarations: forceCode.IDeclarations;
     public codeCoverage: {} = {};
     public codeCoverageWarnings: forceCode.ICodeCoverageWarning[];
@@ -106,7 +105,6 @@ export default class ForceService implements forceCode.IForceService {
                         folder: o.directoryName,
                     };
                 });
-
             return vscode.window.forceCode.conn.metadata.list(apexTypes).then(res => {
                 vscode.window.forceCode.apexMetadata = res;
                 return res;

@@ -8,6 +8,21 @@ declare module 'vscode' {
     }
 }
 
+export interface IMetadataFileProperties {
+    createdById: string;
+    createdByName: string;
+    createdDate: string;
+    fileName: string;
+    fullName: string;
+    id: string;
+    lastModifiedById: string;
+    lastModifiedByName: string;
+    lastModifiedDate: string;
+    manageableState: string;
+    namespacePrefix: string;
+    type: string;
+}
+
 export interface UserInfo {
     userId: string; // User ID
     organizationId: string; // Organization ID
@@ -49,7 +64,7 @@ interface ILocationsNotCovered {
 interface IWorkspaceMember {
     name: string;
     path: string;
-    memberInfo: jsforce.IMetadataFileProperties;
+    memberInfo: IMetadataFileProperties;
 }
 
 export interface IWorkspaceService {
@@ -121,7 +136,7 @@ export interface IForceService {
     workspaceRoot: string;
     completions?: vscode.CompletionItem[];
     describe: IMetadataDescribe;
-    apexMetadata: jsforce.IMetadataFileProperties[];
+    apexMetadata: IMetadataFileProperties[];
     declarations?: IDeclarations;
     codeCoverage?: {};
     codeCoverageWarnings?: ICodeCoverageWarning[];
