@@ -79,6 +79,11 @@
           "dark": "./images/coverage.svg"
         },
         "category": "ForceCode"
+      },
+      {
+        "command": "ForceCode.diff",
+        "title": "Diff Local <> Remote",
+        "category": "ForceCode"
       }
     ],
     "keybindings": [
@@ -339,6 +344,16 @@
         {
           "when": "resourceLangId == xml && ForceCodeActive",
           "command": "ForceCode.refresh",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == visualforce && ForceCodeActive",
+          "command": "ForceCode.diff",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == apex && ForceCodeActive",
+          "command": "ForceCode.diff",
           "group": "ForceCode"
         }
       ],
