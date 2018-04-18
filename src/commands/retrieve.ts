@@ -44,10 +44,10 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     // =======================================================================================================================================
 
     function getPackages(conn) {
-        var requestUrl: string = conn.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
+        var requestUrl: string = vscode.window.forceCode.userInfo.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
         var headers: any = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Cookie': 'sid=' + conn.accessToken,
+            'Cookie': 'sid=' + vscode.window.forceCode.userInfo.accessToken,
         };
         var body: string = 'action=EXTENT&extent=PACKAGES';
         return fetch(requestUrl, { method: 'POST', headers, body }).then(function (response) {
@@ -196,7 +196,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
 
                                 resolve(vscode.window.forceCode.conn.metadata.retrieve({
                                     unpackaged: { types: types },
-                                    apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
+                                    apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
                                 }).stream());
                             }
                             else {
@@ -240,7 +240,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                         singlePackage: true,
                                         specificFiles: files,
                                         unpackaged: { types: retrieveTypes },
-                                        apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
+                                        apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
                                     }).stream());
                                 });
                             }
@@ -272,7 +272,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             showSpinner(name);
             resolve(vscode.window.forceCode.conn.metadata.retrieve({
                 unpackaged: { types: types },
-                apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
+                apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
             }).stream());
         }
 
@@ -302,7 +302,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                     });
                     resolve(vscode.window.forceCode.conn.metadata.retrieve({
                         unpackaged: { types: types },
-                        apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
+                        apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
                     }).stream());
                 });
             }
@@ -317,7 +317,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
 
                     resolve(vscode.window.forceCode.conn.metadata.retrieve({
                         unpackaged: { types: types },
-                        apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
+                        apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
                     }).stream());
                 });
             }
@@ -338,7 +338,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             function packaged() {
                 resolve(vscode.window.forceCode.conn.metadata.retrieve({
                     packageNames: [option.description],
-                    apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
+                    apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
                 }).stream());
             }
 

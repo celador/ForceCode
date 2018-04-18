@@ -26,7 +26,7 @@ export default function getLog(context: vscode.ExtensionContext) {
     function getLast10Logs(force: IForceService): Promise<QueryResult> {
 
         var queryString: string = `SELECT Id, LogLength, Request, Status, DurationMilliseconds, StartTime, Location FROM ApexLog` +
-            ` WHERE LogUserId='${force.userInfo.id}'` +
+            ` WHERE LogUserId='${force.userInfo.userId}'` +
             // ` AND Request = 'API' AND Location = 'SystemLog'` +
             // ` AND Operation like '%executeAnonymous%'`
             ` ORDER BY StartTime DESC, Id DESC LIMIT 10`;

@@ -25,9 +25,9 @@ export default function open(context: vscode.ExtensionContext) {
         var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''}'`;
         var promises: any[] = metadataTypes.map(t => {
             var q: string = `SELECT Id, Name, NamespacePrefix FROM ${t} ${predicate}`;
-            return vscode.window.forceCode.conn.tooling.query(q);
+            return vscode.window.forceCode.dxCommands.toqlQuery(q);
         });
-        promises.push(vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate));
+        promises.push(vscode.window.forceCode.dxCommands.toqlQuery('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate));
         // TODO: Objects
         // TODO: Generic Metadata retrieve
         return Promise.all(promises).then(results => {
@@ -59,7 +59,7 @@ export default function open(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     function getFile(res: any) {
         if (res && res.detail === 'AuraDefinitionBundle') {
-            return vscode.window.forceCode.conn.tooling.query(`SELECT Id, AuraDefinitionBundleId, AuraDefinitionBundle.DeveloperName, DefType, Format FROM AuraDefinition where AuraDefinitionBundleId = '${res.description}'`).then(function (auraDefinitionResults) {
+            return vscode.window.forceCode.dxCommands.toqlQuery(`SELECT Id, AuraDefinitionBundleId, AuraDefinitionBundle.DeveloperName, DefType, Format FROM AuraDefinition where AuraDefinitionBundleId = '${res.description}'`).then(function (auraDefinitionResults) {
                 if (auraDefinitionResults.records && auraDefinitionResults.records.length > 0) {
                     bundleName = auraDefinitionResults.records[0].AuraDefinitionBundle.DeveloperName;
                 } else {
@@ -117,9 +117,9 @@ export default function open(context: vscode.ExtensionContext) {
             } else if (toolingType === 'StaticResource') {
                 var headers: any = {
                     'Accept': 'application/json',
-                    'Authorization': 'OAuth ' + vscode.window.forceCode.conn.accessToken,
+                    'Authorization': 'OAuth ' + vscode.window.forceCode.userInfo.accessToken,
                 };
-                return fetch(vscode.window.forceCode.conn.instanceUrl + res.Body, { method: 'GET', headers }).then(resource => {
+                return fetch(vscode.window.forceCode.userInfo.instanceUrl + res.Body, { method: 'GET', headers }).then(resource => {
                     return new Promise(function (resolve, reject) {
                         var bufs: any = [];
                         resource.body.on('data', function (d) {

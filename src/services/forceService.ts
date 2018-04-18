@@ -166,9 +166,10 @@ export default class ForceService implements forceCode.IForceService {
                     vscode.window.forceCode.statusBarItem_UserInfo.text = `ForceCode: $(plug) Connecting as ${config.username}`;
                     // set the userId in connectionSuccess
                     self.userInfo = {
-                        id: null,
+                        userId: null,
                         organizationId: orgInf.id,
-                        url: orgInf.instanceUrl
+                        instanceUrl: orgInf.instanceUrl,
+                        accessToken: orgInf.accessToken
                     };
                     self.conn = new jsforce.Connection({
                         instanceUrl : orgInf.instanceUrl,
@@ -190,10 +191,10 @@ export default class ForceService implements forceCode.IForceService {
             }
 
             function getPublicDeclarations(svc) {
-                var requestUrl: string = svc.conn.instanceUrl + '/services/data/v42.0/tooling/completions?type=apex';
+                var requestUrl: string = svc.userInfo.instanceUrl + '/services/data/v42.0/tooling/completions?type=apex';
                 var headers: any = {
                     'Accept': 'application/json',
-                    'Authorization': 'OAuth ' + svc.conn.accessToken,
+                    'Authorization': 'OAuth ' + svc.userInfo.accessToken,
                 };
                 require('node-fetch')(requestUrl, { method: 'GET', headers }).then(response => response.json()).then(json => {
                     svc.declarations.public = json.publicDeclarations;
@@ -204,14 +205,14 @@ export default class ForceService implements forceCode.IForceService {
             function getPrivateDeclarations(svc) {
                 var query: string = 'SELECT Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix = \'' + self.config.prefix + '\'';
                 self.declarations.private = [];
-                self.conn.tooling.query(query)
+                self.dxCommands.toqlQuery(query)
                     .then(res => accumulateAllRecords(res, self.declarations.private));
                 return svc;
             }
             function getManagedDeclarations(svc) {
                 var query: string = 'SELECT Id, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix != \'' + self.config.prefix + '\'';
                 self.declarations.managed = [];
-                self.conn.tooling.query(query)
+                self.dxCommands.toqlQuery(query)
                     .then(res => accumulateAllRecords(res, self.declarations.managed));
                 return svc;
             }
@@ -256,12 +257,12 @@ export default class ForceService implements forceCode.IForceService {
                 // query the userid
                 return self.dxCommands.soqlQuery("SELECT Id FROM User WHERE UserName='" + self.config.username + "'")
                         .then(res => {
-                            self.userInfo.id = res.records[0].Id;
+                            self.userInfo.userId = res.records[0].Id;
                             return self;
                         });
             }
             function getNamespacePrefix(svc: forceCode.IForceService) {
-                return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {
+                return svc.dxCommands.soqlQuery('SELECT NamespacePrefix FROM Organization').then(res => {
                     if (res && res.records.length && res.records[0].NamespacePrefix) {
                         svc.config.prefix = res.records[0].NamespacePrefix;
                     }

@@ -4,7 +4,7 @@ export default function dxLogout(): Promise<any> {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Logging out of DX';
     try {
         return vscode.window.forceCode.dxCommands.logout().then(val => {
-            vscode.window.forceCode.conn = undefined;
+            vscode.window.forceCode.conn = undefined;   // this will go away soon
             vscode.window.forceCode.userInfo = undefined;
             vscode.window.forceCode.statusBarItem.hide();
             vscode.window.forceCode.statusBarItem_UserInfo.hide();

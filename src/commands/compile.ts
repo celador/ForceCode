@@ -188,7 +188,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').create({
                 'DeveloperName': name,
                 'MasterLabel': name,
-                'ApiVersion': vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version || '42.0',
+                'ApiVersion': vscode.window.forceCode.config.apiVersion || '42.0',
                 'Description': name.replace('_', ' '),
             }).then(bundle => {
                 results[0] = [bundle];
@@ -459,7 +459,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             });
         }
         function getStatus(): Promise<any> {
-            return vscode.window.forceCode.conn.tooling.query(`SELECT Id, MetadataContainerId, MetadataContainerMemberId, State, IsCheckOnly, ` +
+            return vscode.window.forceCode.dxCommands.toqlQuery(`SELECT Id, MetadataContainerId, MetadataContainerMemberId, State, IsCheckOnly, ` +
                 `DeployDetails, ErrorMsg FROM ContainerAsyncRequest WHERE Id='${vscode.window.forceCode.containerAsyncRequestId}'`);
         }
         function isFinished(res) {

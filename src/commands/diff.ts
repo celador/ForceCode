@@ -7,9 +7,12 @@ export default function diff(document: vscode.TextDocument, context: vscode.Exte
     const toolingType: string = parsers.getToolingType(document);
     const fileName: string = parsers.getWholeFileName(document);
     // vscode.window.forceCode.statusBarItem.text = 'ForceCode: Diffing';
-    return vscode.window.forceCode.connect(context)
-        .then(diffFile)
-        .catch(err => vscode.window.forceCode.outputError({ message: err.toString() }, vscode.window.forceCode.outputChannel));
+    try{
+        diffFile()
+    } catch(err) {
+        vscode.window.forceCode.outputError({ message: err.toString() }, vscode.window.forceCode.outputChannel);
+    } 
+    return;
     // .then(finished)
     // =======================================================================================================================================
     // =======================================================================================================================================

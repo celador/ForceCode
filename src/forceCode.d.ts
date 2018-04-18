@@ -8,6 +8,13 @@ declare module 'vscode' {
     }
 }
 
+export interface UserInfo {
+    userId: string; // User ID
+    organizationId: string; // Organization ID
+    instanceUrl: string; // Identity URL of the user
+    accessToken: string;
+}
+
 export interface Config {
     apiVersion?: string;
     autoCompile?: boolean;
@@ -128,7 +135,7 @@ export interface IForceService {
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
     conn?: jsforce.Connection;
-    userInfo?: jsforce.UserInfo;
+    userInfo?: UserInfo;
     username?: string;
     outputChannel: vscode.OutputChannel;
     statusBarItem_UserInfo: vscode.StatusBarItem;
