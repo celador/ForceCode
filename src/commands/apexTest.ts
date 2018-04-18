@@ -186,7 +186,7 @@ export default async function apexTest(document: vscode.TextDocument, context: v
                 // ` AND Operation like '%executeAnonymous%'`
                 ` ORDER BY StartTime DESC, Id DESC LIMIT 1`;
             var res: QueryResult = await vscode.window.forceCode.dxCommands.toqlQuery(queryString);
-            return vscode.window.forceCode.dxCommands.getAndShowLog(res.records[0].Id);
+            vscode.window.forceCode.dxCommands.getAndShowLog(res.records[0].Id);
         }
         return;
     }
