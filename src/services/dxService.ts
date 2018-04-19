@@ -87,7 +87,8 @@ export interface DXCommands {
     removeFile(fileName: string): Promise<any>;
     findSObject(toolingType: string, where?: string, fields?: string): Promise<any>;
     describeSObject(type: string): Promise<any>;
-    createSObject(type: string, values: string): Promise<any>
+    createSObject(type: string, values: string): Promise<any>;
+    describeAll(): Promise<any>;
 }
 
 export default class DXService implements DXCommands {
@@ -267,6 +268,10 @@ export default class DXService implements DXCommands {
 
     public describeSObject(type: string): Promise<any> {
         return Promise.resolve(this.runCommand('schema:sobject:describe', '--sobjecttype ' + type));
+    }
+
+    public describeAll(): Promise<any> {
+        return Promise.resolve(this.runCommand('schema:sobject:list', '--sobjecttypecategory ALL'));
     }
 
     public async findSObject(toolingType: string, where?: string, fields?: string): Promise<any> {
