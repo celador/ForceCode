@@ -11,7 +11,6 @@ const quickPickOptions: vscode.QuickPickOptions = {
 export default function enterCredentials(): Promise<any> {
     return configuration()
         .then(cfg => {
-            console.log(vscode.window.forceCode.dxCommands.outputToString(cfg));
             if(cfg.username !== undefined && cfg.username !== '') {
                 // ask if the user wants to log into a different account
                 let opts: any = [

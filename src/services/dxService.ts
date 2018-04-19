@@ -85,8 +85,9 @@ export interface DXCommands {
     getAndShowLog(id?: string);
     execAnon(file: string): Promise<ExecuteAnonymousResult>;
     removeFile(fileName: string): Promise<any>;
-    findSObject(toolingType: string, where: string, fields?: string): any;
+    findSObject(toolingType: string, where?: string, fields?: string): Promise<any>;
     describeSObject(type: string): Promise<any>;
+    createSObject(type: string, values: string): Promise<any>
 }
 
 export default class DXService implements DXCommands {
@@ -171,7 +172,6 @@ export default class DXService implements DXCommands {
             theArgsArray.forEach(function(i) {
                 if(i.length > 0) {
                     var curCmd = new Array();
-                    //console.log(i);
                     curCmd = i.trim().split(' ');
                     var commandName = curCmd.shift();
                     if(commandName.length === 1) {
@@ -184,7 +184,6 @@ export default class DXService implements DXCommands {
                             }
                         });
                     }
-                    //console.log(curCmd);
                     if(curCmd.length > 0)
                         cliContext.flags[commandName] = curCmd.join(' ').trim();
                     else
@@ -250,7 +249,6 @@ export default class DXService implements DXCommands {
     public getDebugLog(logid?: string): Promise<string> {
         var theLogId: string = '';
         if(logid) {
-            console.log(logid)
             theLogId += '--logid ' + logid;
         }
         return this.runCommand('apex:log:get', theLogId).then(log => {
@@ -271,7 +269,7 @@ export default class DXService implements DXCommands {
         return Promise.resolve(this.runCommand('schema:sobject:describe', '--sobjecttype ' + type));
     }
 
-    public async findSObject(toolingType: string, where: string, fields?: string): Promise<any> {
+    public async findSObject(toolingType: string, where?: string, fields?: string): Promise<any> {
         // get all fields first
         if(!fields) {
             var names: string[] = new Array<string>();
@@ -281,11 +279,21 @@ export default class DXService implements DXCommands {
                 });
                 fields = names.join(',');
             });
-        }        
+        }
+        
+        if(where) {
+            where = `WHERE ${where}`;
+        } else {
+            where = ''
+        }
 
-        var query = `SELECT ${fields} FROM ${toolingType} WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''}' AND ${where}`;
+        var query = `SELECT ${fields} FROM ${toolingType} ${where}`;
         return this.toqlQuery(query).then(res => {
             return res.records;
         });
+    }
+
+    public createSObject(type: string, values: string): Promise<any> {
+        return Promise.resolve(this.runCommand('data:record:create', '--sobjecttype ' + type + ' --usetoolingapi --values ' + values));
     }
 }

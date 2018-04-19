@@ -66,7 +66,7 @@ export default function open(context: vscode.ExtensionContext) {
                     throw 'No bundle files';
                 }
                 return Promise.all(auraDefinitionResults.records.map(function (auraDefinition) {
-                    return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({ Id: auraDefinition.Id }).execute();
+                    return vscode.window.forceCode.dxCommands.findSObject('AuraDefinition', "Id = '" + auraDefinition.Id + "'");
                 })).then(function (results) {
                     return results.map(function (qr) {
                         return qr.length > 0 ? qr[0] : undefined;
@@ -74,8 +74,7 @@ export default function open(context: vscode.ExtensionContext) {
                 });
             });
         } else if (res !== undefined) {
-            return vscode.window.forceCode.conn.tooling.sobject(res.detail)
-                .find({ Id: res.description }).execute();
+            return vscode.window.forceCode.dxCommands.findSObject(res.detail, "Id = '" + res.description + "'");
         } else {
             throw { message: 'No file selected to open' };
         }

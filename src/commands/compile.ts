@@ -178,9 +178,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // =======================================================================================================================================
     function getAuraBundle(svc) {
         return vscode.window.forceCode.dxCommands.findSObject('AuraDefinitionBundle', "DeveloperName = '" + name + "'");
-        //return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').find({
-        //    'DeveloperName': name, NamespacePrefix: vscode.window.forceCode.config.prefix || ''
-        //});
     }
     function ensureAuraBundle(results) {
         // If the Bundle doesn't exist, create it, else Do nothing
@@ -200,9 +197,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         }
     }
     function getAuraDefinition(svc, bundle) {
-        return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({
-            'AuraDefinitionBundleId': bundle[0].Id
-        });
+        return vscode.window.forceCode.dxCommands.findSObject('AuraDefinition', "AuraDefinitionBundleId = '" + bundle[0].Id + "'");
     }
     function upsertAuraDefinition(definitions, bundle) {
         // If the Definition doesn't exist, create it
@@ -291,8 +286,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return svc.newContainer(true).then(() => {
                 // Then Get the files info from the type, name, and prefix
                 // Then Add the new member, updating the contents.
-                return fc.conn.tooling.sobject(toolingType)
-                    .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' }).execute()
+                return vscode.window.forceCode.dxCommands.findSObject(toolingType, "Name = '" + fileName + "'")
                     .then(records => addMember(records));
             });
         }

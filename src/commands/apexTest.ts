@@ -100,7 +100,6 @@ export default async function apexTest(document: vscode.TextDocument, context: v
         + 'AND ' + orNamesString
         + 'AND (NumLinesCovered > 0 OR NumLinesUncovered > 0) '
         + 'ORDER BY ApexClassOrTrigger.Name';
-        console.log(query);
         return query;
     }
 
