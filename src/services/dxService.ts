@@ -32,6 +32,7 @@ export interface ExecuteAnonymousResult {
 export interface SFDX {
     username: string,
     id: string,
+    userId: string,
     connectedStatus: string,
     accessToken: string,
     instanceUrl: string,
@@ -97,6 +98,8 @@ export interface QueryResult {
 }
 
 export interface DXCommands {
+    isLoggedIn: boolean;
+    orgInfo: SFDX;
     getCommand(cmd: string): Command;
     runCommand(cmdString: string, arg: string): Promise<any>;
     login(url: string): Promise<any>;
