@@ -39,7 +39,6 @@ export default function apexTest(toTest: string, classOrMethod: string) {
         + 'AND ' + orNamesString
         + 'AND (NumLinesCovered > 0 OR NumLinesUncovered > 0) '
         + 'ORDER BY ApexClassOrTrigger.Name';
-        console.log(query);
         return query;
     }
 
