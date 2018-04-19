@@ -6,6 +6,7 @@ var alm: any = require('salesforce-alm');
 export interface SFDX {
     username: string,
     id: string,
+    userId: string,
     connectedStatus: string,
     accessToken: string,
     instanceUrl: string,
@@ -71,12 +72,14 @@ export interface QueryResult {
 }
 
 export interface DXCommands {
+    isLoggedIn: boolean;
+    orgInfo: SFDX;
     getCommand(cmd: string): Command;
     outputToString(toConvert: any, depth?: number): string;
     runCommand(cmdString: string, arg: string): Promise<any>;
     toqlQuery(query: string): Promise<QueryResult>;
     soqlQuery(query: string): Promise<QueryResult>;
-    login(): Promise<any>;
+    login(): Promise<SFDX>;
     logout(): Promise<any>;
     getOrgInfo(): Promise<SFDX>;
     isEmptyUndOrNull(param: any): boolean;
@@ -92,6 +95,8 @@ export interface DXCommands {
 }
 
 export default class DXService implements DXCommands {
+    public isLoggedIn: boolean = false;
+    public orgInfo: SFDX;
 
     public getCommand(cmd: string): Command {
         return alm.commands.filter(c => {
@@ -223,26 +228,29 @@ export default class DXService implements DXCommands {
         return Promise.resolve(this.runCommand('data:soql:query', '-q ' + query + ' -r json'));
     }
 
-    public login(): Promise<any> {
-        vscode.window.forceCode.isLoggedIn = false;
+    public login(): Promise<SFDX> {
         return this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url).then(res => {
-                vscode.window.forceCode.isLoggedIn = true;
-            return Promise.resolve(res);
+                return this.getOrgInfo().then(res => {
+                    return Promise.resolve(res);
+                });
         });
     }
 
     public logout(): Promise<any> {
-        vscode.window.forceCode.isLoggedIn = false;
+        this.isLoggedIn = false;
+        this.orgInfo = undefined;
         vscode.commands.executeCommand('setContext', 'ForceCodeActive', false);
         return Promise.resolve(this.runCommand('auth:logout', '--noprompt'));
     }
 
     public getOrgInfo(): Promise<SFDX> {
         return this.runCommand('org:display', '--json').then(res => {
-            vscode.window.forceCode.isLoggedIn = true;
+            this.isLoggedIn = true;
+            this.orgInfo = res;
             return Promise.resolve(res);
         }, reason => {
-            vscode.window.forceCode.isLoggedIn = false;
+            this.isLoggedIn = false;
+            this.orgInfo = undefined;
             return Promise.reject('No info recieved from org. Are you logged in?');
         });
     }

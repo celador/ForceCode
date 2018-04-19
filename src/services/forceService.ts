@@ -5,12 +5,11 @@ import { operatingSystem } from './../services';
 import constants from './../models/constants';
 import { configuration } from './../services';
 import * as commands from './../commands';
-import DXService from './dxService';
+import DXService, { SFDX } from './dxService';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
 export default class ForceService implements forceCode.IForceService {
-    public isLoggedIn: boolean;
     public dxCommands: any;
     public config: forceCode.Config;
     public conn: any;
@@ -22,7 +21,6 @@ export default class ForceService implements forceCode.IForceService {
     public codeCoverage: {} = {};
     public codeCoverageWarnings: forceCode.ICodeCoverageWarning[];
     public containerAsyncRequestId: string;
-    public userInfo: any;
     public username: string;
     public statusBarItem_UserInfo: vscode.StatusBarItem;
     public statusBarItem: vscode.StatusBarItem;
@@ -36,7 +34,6 @@ export default class ForceService implements forceCode.IForceService {
     public statusInterval: any; 
 
     constructor() {
-        this.isLoggedIn = false;
         this.commandQueue = new Array();
         this.dxCommands = new DXService();
         this.isBusy = false;
@@ -126,12 +123,10 @@ export default class ForceService implements forceCode.IForceService {
     // TODO: Add keychain access so we don't have to use a username or password'
     // var keychain = require('keytar')
     private setupConfig(): Promise<forceCode.Config> {
-        vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
-
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Setup username and outputChannel
         self.username = (self.config && self.config.username) || '';
-        if (!self.config || !self.config.username || !self.isLoggedIn) {
+        if (!self.config || !self.config.username || !self.dxCommands.isLoggedIn) {
             return commands.credentials().then(credentials => {
                 self.config.username = credentials.username;
                 self.config.autoCompile = credentials.autoCompile;
@@ -144,7 +139,7 @@ export default class ForceService implements forceCode.IForceService {
     private login(config): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Lazy-load the connection
-        if (self.userInfo === undefined || self.config.username !== self.username || self.conn === undefined) {
+        if (self.dxCommands.orgInfo === undefined || self.config.username !== self.username || self.conn === undefined) {
             var connectionOptions: any = {
                 loginUrl: self.config.url || 'https://login.salesforce.com'
             };
@@ -159,19 +154,18 @@ export default class ForceService implements forceCode.IForceService {
             
             
             // get the current org info
-            return self.dxCommands.getOrgInfo()
-                .then(orgInf => {
+            return new Promise((resolve, reject) => {
+                if(self.dxCommands.orgInfo) {
+                    resolve(self.dxCommands.orgInfo);
+                } else {
+                    reject();
+                }
+            }).then(orgInf => {
                     vscode.window.forceCode.statusBarItem_UserInfo.text = `ForceCode: $(plug) Connecting as ${config.username}`;
                     // set the userId in connectionSuccess
-                    self.userInfo = {
-                        userId: null,
-                        organizationId: orgInf.id,
-                        instanceUrl: orgInf.instanceUrl,
-                        accessToken: orgInf.accessToken
-                    };
                     self.conn = new jsforce.Connection({
-                        instanceUrl : orgInf.instanceUrl,
-                        accessToken : orgInf.accessToken,
+                        instanceUrl : self.dxCommands.orgInfo.instanceUrl,
+                        accessToken : self.dxCommands.orgInfo.accessToken,
                     });
                 })
                 .then(connectionSuccess)
@@ -189,10 +183,10 @@ export default class ForceService implements forceCode.IForceService {
             }
 
             function getPublicDeclarations(svc) {
-                var requestUrl: string = svc.userInfo.instanceUrl + '/services/data/v42.0/tooling/completions?type=apex';
+                var requestUrl: string = svc.dxCommands.orgInfo.instanceUrl + '/services/data/v42.0/tooling/completions?type=apex';
                 var headers: any = {
                     'Accept': 'application/json',
-                    'Authorization': 'OAuth ' + svc.userInfo.accessToken,
+                    'Authorization': 'OAuth ' + svc.dxCommands.orgInfo.accessToken,
                 };
                 require('node-fetch')(requestUrl, { method: 'GET', headers }).then(response => response.json()).then(json => {
                     svc.declarations.public = json.publicDeclarations;
@@ -230,6 +224,7 @@ export default class ForceService implements forceCode.IForceService {
                 }
             }
             function connectionSuccess() {
+                vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
                 vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
                 vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username;
                 
@@ -255,7 +250,7 @@ export default class ForceService implements forceCode.IForceService {
                 // query the userid
                 return self.dxCommands.soqlQuery("SELECT Id FROM User WHERE UserName='" + self.config.username + "'")
                         .then(res => {
-                            self.userInfo.userId = res.records[0].Id;
+                            self.dxCommands.orgInfo.userId = res.records[0].Id;
                             return self;
                         });
             }

@@ -44,10 +44,10 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     // =======================================================================================================================================
 
     function getPackages(conn) {
-        var requestUrl: string = vscode.window.forceCode.userInfo.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
+        var requestUrl: string = vscode.window.forceCode.dxCommands.orgInfo.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
         var headers: any = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Cookie': 'sid=' + vscode.window.forceCode.userInfo.accessToken,
+            'Cookie': 'sid=' + vscode.window.forceCode.dxCommands.orgInfo.accessToken,
         };
         var body: string = 'action=EXTENT&extent=PACKAGES';
         return fetch(requestUrl, { method: 'POST', headers, body }).then(function (response) {

@@ -116,9 +116,9 @@ export default function open(context: vscode.ExtensionContext) {
             } else if (toolingType === 'StaticResource') {
                 var headers: any = {
                     'Accept': 'application/json',
-                    'Authorization': 'OAuth ' + vscode.window.forceCode.userInfo.accessToken,
+                    'Authorization': 'OAuth ' + vscode.window.forceCode.dxCommands.orgInfo.accessToken,
                 };
-                return fetch(vscode.window.forceCode.userInfo.instanceUrl + res.Body, { method: 'GET', headers }).then(resource => {
+                return fetch(vscode.window.forceCode.dxCommands.orgInfo.instanceUrl + res.Body, { method: 'GET', headers }).then(resource => {
                     return new Promise(function (resolve, reject) {
                         var bufs: any = [];
                         resource.body.on('data', function (d) {
