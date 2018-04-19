@@ -85,6 +85,8 @@ export interface DXCommands {
     getAndShowLog(id?: string);
     execAnon(file: string): Promise<ExecuteAnonymousResult>;
     removeFile(fileName: string): Promise<any>;
+    findSObject(toolingType: string, where: string, fields?: string): any;
+    describeSObject(type: string): Promise<any>;
 }
 
 export default class DXService implements DXCommands {
@@ -262,6 +264,28 @@ export default class DXService implements DXCommands {
         }
         return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${id}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
                 return vscode.window.showTextDocument(_document, 3, true);
+        });
+    }
+
+    public describeSObject(type: string): Promise<any> {
+        return Promise.resolve(this.runCommand('schema:sobject:describe', '--sobjecttype ' + type));
+    }
+
+    public async findSObject(toolingType: string, where: string, fields?: string): Promise<any> {
+        // get all fields first
+        if(!fields) {
+            var names: string[] = new Array<string>();
+            await this.describeSObject(toolingType).then(res => {
+                res.fields.forEach(i => {
+                    names.push(i.name);
+                });
+                fields = names.join(',');
+            });
+        }        
+
+        var query = `SELECT ${fields} FROM ${toolingType} WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''}' AND ${where}`;
+        return this.toqlQuery(query).then(res => {
+            return res.records;
         });
     }
 }

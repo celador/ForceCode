@@ -177,9 +177,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // ================================                Lightning Components               ===========================================
     // =======================================================================================================================================
     function getAuraBundle(svc) {
-        return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').find({
-            'DeveloperName': name, NamespacePrefix: vscode.window.forceCode.config.prefix || ''
-        });
+        return vscode.window.forceCode.dxCommands.findSObject('AuraDefinitionBundle', "DeveloperName = '" + name + "'");
+        //return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').find({
+        //    'DeveloperName': name, NamespacePrefix: vscode.window.forceCode.config.prefix || ''
+        //});
     }
     function ensureAuraBundle(results) {
         // If the Bundle doesn't exist, create it, else Do nothing
