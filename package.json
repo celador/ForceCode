@@ -306,11 +306,6 @@
         },
         {
           "when": "resourceLangId == apex && ForceCodeActive",
-          "command": "ForceCode.apexTest",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.documentMethod",
           "group": "ForceCode"
         },
@@ -422,10 +417,6 @@
       "commandPalette": [
         {
           "command": "ForceCode.showMenu"
-        },
-        {
-          "command": "ForceCode.apexTest",
-          "when": "ForceCodeActive && resourceLangId == apex"
         },
         {
           "command": "ForceCode.documentMethod",
