@@ -5,21 +5,14 @@ import { configuration } from './../services';
 import { QueryResult } from '../services/dxService';
 
 export default async function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {    
-    const toolingType: string = parsers.getToolingType(document);
-    const name: string = parsers.getName(document, toolingType);
-    if(!name.toLowerCase().includes('test'))
-    {
-        vscode.window.forceCode.statusBarItem.text = "ForceCode: Not a test class. Name must contain 'test'";
-        vscode.window.forceCode.resetMenu();
-        return Promise.reject({ message: 'Not a test class' });
-    }
-
     if(vscode.window.forceCode.isBusy)
     {
         vscode.window.forceCode.commandQueue.push([apexTest, document, context]);
         return Promise.reject({ message: 'Already compiling or running unit tests' });
     }
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
+    const toolingType: string = parsers.getToolingType(document);
+    const name: string = parsers.getName(document, toolingType);
     
     /* tslint:disable */
     var DefType: string = undefined;
