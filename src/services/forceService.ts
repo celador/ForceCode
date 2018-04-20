@@ -49,7 +49,6 @@ export default class ForceService implements forceCode.IForceService {
         //this.statusBarItem.text = 'ForceCode: Active';
         this.containerMembers = [];
         this.apexMetadata = [];
-        this.declarations = {};
         configuration(this).then(config => {
             this.username = config.username || '';
             this.dxCommands.getOrgInfo().then(res => {
@@ -172,9 +171,6 @@ export default class ForceService implements forceCode.IForceService {
                 .catch(connectionError)
                 .then(getNamespacePrefix)
                 .then(refreshApexMetadata)
-                .then(getPublicDeclarations)
-                .then(getPrivateDeclarations)
-                .then(getManagedDeclarations)
                 .catch(err => self.outputError(err, vscode.window.forceCode.outputChannel));;
 
             function refreshApexMetadata(svc) {
@@ -182,47 +178,6 @@ export default class ForceService implements forceCode.IForceService {
                 return svc;
             }
 
-            function getPublicDeclarations(svc) {
-                var requestUrl: string = svc.dxCommands.orgInfo.instanceUrl + '/services/data/v42.0/tooling/completions?type=apex';
-                var headers: any = {
-                    'Accept': 'application/json',
-                    'Authorization': 'OAuth ' + svc.dxCommands.orgInfo.accessToken,
-                };
-                require('node-fetch')(requestUrl, { method: 'GET', headers }).then(response => response.json()).then(json => {
-                    svc.declarations.public = json.publicDeclarations;
-                });
-                return svc;
-            }
-
-            function getPrivateDeclarations(svc) {
-                var query: string = 'SELECT Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix = \'' + self.config.prefix + '\'';
-                self.declarations.private = [];
-                self.dxCommands.toqlQuery(query)
-                    .then(res => accumulateAllRecords(res, self.declarations.private));
-                return svc;
-            }
-            function getManagedDeclarations(svc) {
-                var query: string = 'SELECT Id, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix != \'' + self.config.prefix + '\'';
-                self.declarations.managed = [];
-                self.dxCommands.toqlQuery(query)
-                    .then(res => accumulateAllRecords(res, self.declarations.managed));
-                return svc;
-            }
-            function accumulateAllRecords(result, accumulator) {
-                if (result && result.done !== undefined && Array.isArray(result.records)) {
-                    if (result.done) {
-                        result.records.forEach(record => {
-                            accumulator.push(record);
-                        });
-                        return result;
-                    } else {
-                        result.records.forEach(record => {
-                            accumulator.push(record);
-                        });
-                        return self.conn.tooling.queryMore(result.nextRecordsUrl).then(res => accumulateAllRecords(res, accumulator));
-                    }
-                }
-            }
             function connectionSuccess() {
                 vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
                 vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;

@@ -89,14 +89,12 @@ export interface DXCommands {
     execAnon(file: string): Promise<ExecuteAnonymousResult>;
     removeFile(fileName: string): Promise<any>;
     findSObject(toolingType: string, where?: string, fields?: string): Promise<any>;
-    describeSObject(type: string): Promise<any>;
-    createSObject(type: string, values: string): Promise<any>;
-    describeAll(): Promise<any>;
 }
 
 export default class DXService implements DXCommands {
     public isLoggedIn: boolean = false;
     public orgInfo: SFDX;
+    private cache: {} = new Array();
 
     public getCommand(cmd: string): Command {
         return alm.commands.filter(c => {
@@ -230,9 +228,9 @@ export default class DXService implements DXCommands {
 
     public login(): Promise<SFDX> {
         return this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url).then(res => {
-                return this.getOrgInfo().then(res => {
-                    return Promise.resolve(res);
-                });
+            return this.getOrgInfo().then(res => {
+                return Promise.resolve(res);
+            });
         });
     }
 
@@ -274,23 +272,16 @@ export default class DXService implements DXCommands {
         });
     }
 
-    public describeSObject(type: string): Promise<any> {
-        return Promise.resolve(this.runCommand('schema:sobject:describe', '--sobjecttype ' + type));
-    }
-
-    public describeAll(): Promise<any> {
-        return Promise.resolve(this.runCommand('schema:sobject:list', '--sobjecttypecategory ALL'));
-    }
-
     public async findSObject(toolingType: string, where?: string, fields?: string): Promise<any> {
         // get all fields first
-        if(!fields) {
+        if(!fields && !this.cache[toolingType]) {
             var names: string[] = new Array<string>();
-            await this.describeSObject(toolingType).then(res => {
+            await this.runCommand('schema:sobject:describe', '--sobjecttype ' + toolingType).then(res => {
                 res.fields.forEach(i => {
                     names.push(i.name);
                 });
                 fields = names.join(',');
+                this.cache[toolingType] = fields;
             });
         }
         
@@ -300,13 +291,9 @@ export default class DXService implements DXCommands {
             where = ''
         }
 
-        var query = `SELECT ${fields} FROM ${toolingType} ${where}`;
+        var query = `SELECT ${this.cache[toolingType]} FROM ${toolingType} ${where}`;
         return this.toqlQuery(query).then(res => {
             return res.records;
         });
-    }
-
-    public createSObject(type: string, values: string): Promise<any> {
-        return Promise.resolve(this.runCommand('data:record:create', '--sobjecttype ' + type + ' --usetoolingapi --values ' + values));
     }
 }
