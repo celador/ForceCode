@@ -37,11 +37,6 @@
         "category": "ForceCode"
       },
       {
-        "command": "ForceCode.apexTest",
-        "title": "Run Unit Tests in this Class",
-        "category": "ForceCode"
-      },
-      {
         "command": "ForceCode.documentMethod",
         "title": "Document Apex Method",
         "category": "ForceCode"
@@ -87,12 +82,6 @@
       }
     ],
     "keybindings": [
-      {
-        "key": "alt+cmd+t",
-        "command": "ForceCode.apexTest",
-        "when": "resourceLangId == apex && editorFocus && ForceCodeActive",
-        "win": "ctrl+shift+t"
-      },
       {
         "command": "ForceCode.documentMethod",
         "key": "alt+cmd+d",
@@ -296,11 +285,6 @@
         },
         {
           "when": "resourceLangId == apex && ForceCodeActive",
-          "command": "ForceCode.apexTest",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.documentMethod",
           "group": "ForceCode"
         },
@@ -360,10 +344,6 @@
       "commandPalette": [
         {
           "command": "ForceCode.showMenu"
-        },
-        {
-          "command": "ForceCode.apexTest",
-          "when": "ForceCodeActive && resourceLangId == apex"
         },
         {
           "command": "ForceCode.documentMethod",

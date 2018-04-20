@@ -19,7 +19,6 @@ export default function showMenu(context: vscode.ExtensionContext) {
         if (vscode.window.forceCode.dxCommands.isLoggedIn) {
             quickpick.push(model.openFile);
             quickpick.push(model.createClass);
-            quickpick.push(model.runUnitTests);
             quickpick.push(model.executeAnonymous);
             quickpick.push(model.getLogs);
             quickpick.push(model.soql);
@@ -63,7 +62,6 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.deployPackage.description: return commands.deploy(context);
                 case model.diff.description: return commands.diff(vscode.window.activeTextEditor.document, context);
                 case model.createClass.description: return commands.createClass(context);
-                case model.runUnitTests.description: return commands.apexTest(vscode.window.activeTextEditor.document, context);
                 case model.dx.description: return commands.dx();
                 case model.dxLogout.description: return commands.dxLogout();
                 case model.codeCompletionRefresh.description: return commands.codeCompletionRefresh();

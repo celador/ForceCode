@@ -81,13 +81,6 @@ export default {
         icon: 'plus',
         label: 'Create Class',
     },
-    // Run current Unit tests
-    runUnitTests: {
-        description: 'Run the Unit Tests for this Test Class',
-        detail: 'If the Apex class you currently have open contains test methods, it will run the test methods and return the results in the output panel',
-        icon: 'beaker',
-        label: 'Run Unit Tests',
-    },
     // Run SOQL
     soql: {
         description: 'Run a SOQL query',

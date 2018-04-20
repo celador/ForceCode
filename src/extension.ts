@@ -46,10 +46,6 @@ export function activate(context: vscode.ExtensionContext): any {
         commands.staticResource(context);
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.apexTest', () => {
-        commands.apexTest(vscode.window.activeTextEditor.document, context);
-    }));
-
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.refresh', (selectedResource?: vscode.Uri) => {
         commands.retrieve(context, selectedResource);
     }));
