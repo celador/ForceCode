@@ -203,11 +203,7 @@ export default class ForceService implements forceCode.IForceService {
                 self.outputChannel.appendLine(`Connected as ` + self.config.username);
                 self.username = config.username;
                 // query the userid
-                return self.dxCommands.soqlQuery("SELECT Id FROM User WHERE UserName='" + self.config.username + "'")
-                        .then(res => {
-                            self.dxCommands.orgInfo.userId = res.records[0].Id;
-                            return self;
-                        });
+                return self;
             }
             function getNamespacePrefix(svc: forceCode.IForceService) {
                 return svc.dxCommands.soqlQuery('SELECT NamespacePrefix FROM Organization').then(res => {

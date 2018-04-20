@@ -208,7 +208,6 @@ export default class DXService implements DXCommands {
         var objresult = await cmd.run(cliContext);
         // log command output
         if(!this.isEmptyUndOrNull(objresult)) {
-            fs.outputFile(vscode.workspace.rootPath + path.sep + 'dx.log', this.outputToString(objresult));
             return Promise.resolve(objresult);
         }
         return Promise.reject('Failed to execute command: ' + cmdString + ' ' + arg);
@@ -245,7 +244,11 @@ export default class DXService implements DXCommands {
         return this.runCommand('org:display', '--json').then(res => {
             this.isLoggedIn = true;
             this.orgInfo = res;
-            return Promise.resolve(res);
+            return this.soqlQuery("SELECT Id FROM User WHERE UserName='" + this.orgInfo.username + "'")
+                .then(result => {
+                    this.orgInfo.userId = result.records[0].Id;
+                    return Promise.resolve(this.orgInfo);
+                });
         }, reason => {
             this.isLoggedIn = false;
             this.orgInfo = undefined;

@@ -3,7 +3,6 @@ import { Config } from './../forceCode';
 import * as forceCode from './../forceCode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-var _: any = require('lodash');
 
 export default function getSetConfig(service?: forceCode.IForceService): Promise<Config> {
 	return new Promise(function (resolve, reject) {
@@ -12,7 +11,7 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 			throw { message: 'Open a Folder with VSCode' }
 		}
 		try {
-			self.config = _.extend(self.config || {}, fs.readJsonSync(vscode.workspace.rootPath + path.sep + 'force.json'));
+			self.config = Object.assign(self.config || {}, fs.readJsonSync(vscode.workspace.rootPath + path.sep + 'force.json'));
 			if (typeof self.config === 'object' && !self.config.src) {
 				self.config.src = 'src';
 			}
