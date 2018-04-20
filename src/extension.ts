@@ -90,14 +90,19 @@ export function activate(context: vscode.ExtensionContext): any {
 
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(function(event) {
         // clear the code coverage
-        var file = parsers.getFileName(event.document);
-        Object.keys(vscode.window.forceCode.codeCoverage).forEach(function(id) {
-            if(vscode.window.forceCode.codeCoverage[id].ApexClassOrTrigger.Name.toLowerCase() === file.toLowerCase())
-            {
-                delete vscode.window.forceCode.codeCoverage[id];
-                updateDecorations();
+        var file = parsers.getWholeFileName(event.document);
+        // get the id
+        var curFileId: string;
+        vscode.window.forceCode.workspaceMembers.some(cur => {
+            if(cur.memberInfo.fileName.split('/')[1] === file) {
+                curFileId = cur.memberInfo.id;
+                return true;
             }
         });
+        if(curFileId) {
+            delete vscode.window.forceCode.codeCoverage[curFileId];
+            updateDecorations();
+        }
     }));
     
     // Text Coverage Decorators

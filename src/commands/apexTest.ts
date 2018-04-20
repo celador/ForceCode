@@ -155,15 +155,11 @@ export default async function apexTest(document: vscode.TextDocument, context: v
             // Add Line Coverage information
             if (res.records) {
                 res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
-                    let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
-                    let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
-                        if (prev) { return prev; }
+                    vscode.window.forceCode.workspaceMembers.forEach(curr => {
                         if(curr.name === curRes.ApexClassOrTrigger.Name && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
                             vscode.window.forceCode.codeCoverage[curRes.ApexClassOrTriggerId] = curRes;
-                            return curr;
                         }
-                        return undefined;
-                    }, undefined);
+                    });
                 });
             }
 
