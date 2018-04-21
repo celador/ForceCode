@@ -307,4 +307,8 @@ export default class DXService implements DXCommands {
     public openOrgPage(url: string): Promise<any> {
         return this.runCommand('org:open', '-p ' + url);
     }
+
+    public openOrg(): Promise<any> {
+        return Promise.resolve(this.runCommand('org:open', ''));
+    }
 }
