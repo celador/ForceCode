@@ -76,6 +76,10 @@ export function activate(context: vscode.ExtensionContext): any {
         commands.apexTest(vscode.window.activeTextEditor.document, context);
     }));
 
+    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.openOrg', () => {
+        vscode.window.forceCode.dxCommands.openOrg();
+    }));
+
     // AutoCompile Feature
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         const toolingType: string = parsers.getToolingType(textDocument);

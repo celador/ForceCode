@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION } from 'constants';
 var alm: any = require('salesforce-alm');
 
 export interface SFDX {
@@ -89,6 +90,7 @@ export interface DXCommands {
     execAnon(file: string): Promise<ExecuteAnonymousResult>;
     removeFile(fileName: string): Promise<any>;
     findSObject(toolingType: string, where?: string, fields?: string): Promise<any>;
+    openOrg(): any;
 }
 
 export default class DXService implements DXCommands {
@@ -298,5 +300,9 @@ export default class DXService implements DXCommands {
         return this.toqlQuery(query).then(res => {
             return res.records;
         });
+    }
+
+    public openOrg(): Promise<any> {
+        return Promise.resolve(this.runCommand('org:open', ''));
     }
 }

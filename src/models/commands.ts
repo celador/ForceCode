@@ -1,4 +1,10 @@
 export default {
+    openOrg : {
+        description: 'Open project org',
+        detail: 'Open the org this project is associated with in a browser.',
+        icon: 'browser',
+        label: 'Open Org in browser',
+    },
     dxLogout : {
         description: 'Log out from current org',
         detail: 'Log out of the current org in this project.',
