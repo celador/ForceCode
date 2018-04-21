@@ -103,7 +103,7 @@ export function activate(context: vscode.ExtensionContext): any {
                 return true;
             }
         });
-        if(curFileId) {
+        if(curFileId && vscode.window.forceCode.codeCoverage[curFileId]) {
             delete vscode.window.forceCode.codeCoverage[curFileId];
             updateDecorations();
         }
