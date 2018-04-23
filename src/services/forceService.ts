@@ -59,46 +59,6 @@ export default class ForceService implements forceCode.IForceService {
         }, 5000);
     }
 
-    public checkAndRunCommand(...theArgs): Promise<any> {
-        if(this.commandTimeout) {
-            clearTimeout(this.commandTimeout);
-        }
-
-        if(theArgs.length === 0 && this.commandQueue.length === 0) {
-            return Promise.reject('Nothing to run');
-        } else if(theArgs.length > 0) {
-            this.commandQueue.push(theArgs);
-        } 
-
-        if(!this.isBusy && this.commandQueue.length > 0) {
-            var cmd: Array<any> = this.commandQueue.shift();
-            return Promise.resolve(this.runTheCommand(cmd));
-        }
-        
-        // check every second and run when not busy
-        this.commandTimeout = setTimeout(this.checkAndRunCommand(), 1000);
-    }
-
-    private async runTheCommand(cmd: Array<any>): Promise<any> {
-        this.isBusy = true;
-        var res: any;
-        switch(cmd.length) {
-            case 1:
-                res = await cmd[0]();
-                break;
-            case 2:
-                res = await cmd[0](cmd[1]);
-                break;
-            case 3:
-                res = await cmd[0](cmd[1], cmd[2]);
-                break;
-            default:
-                return Promise.reject('Not a valid command');
-        }
-        this.isBusy = false;
-        return Promise.resolve(res);
-    }
-
     public clearLog() {
         this.outputChannel.clear();
     }
