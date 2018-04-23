@@ -153,7 +153,6 @@ export interface IForceService {
     resetMenu(): void;
     refreshApexMetadata(): Promise<any>;
     outputError(error: ForceCodeError, outputChannel: vscode.OutputChannel): any;
-    checkAndRunCommand(...theArgs): Promise<any>;
 }
 
 
