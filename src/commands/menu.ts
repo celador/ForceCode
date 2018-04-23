@@ -51,22 +51,22 @@ export default function showMenu(context: vscode.ExtensionContext) {
     function processResult(result) {
         if (result !== undefined && result.description !== undefined) {
             switch (result.description) {
-                case model.openOrg.description: return vscode.window.forceCode.dxCommands.openOrg();
-                case model.enterCredentials.description: return commands.credentials();
-                case model.compileDeploy.description: return commands.compile(vscode.window.activeTextEditor.document, context);
-                case model.executeAnonymous.description: return commands.executeAnonymous(vscode.window.activeTextEditor.document, context);
-                case model.getLogs.description: return commands.getLog(context);
-                case model.openFile.description: return commands.open(context);
-                case model.resourceBundle.description: return commands.staticResource(context);
-                case model.retrievePackage.description: return commands.retrieve(context);
-                case model.soql.description: return commands.soql();
-                case model.toql.description: return commands.toql();
-                case model.deployPackage.description: return commands.deploy(context);
-                case model.diff.description: return commands.diff(vscode.window.activeTextEditor.document, context);
-                case model.createClass.description: return commands.createClass(context);
-                case model.dx.description: return commands.dx();
-                case model.dxLogout.description: return commands.dxLogout();
-                case model.codeCompletionRefresh.description: return commands.codeCompletionRefresh();
+                case model.openOrg.description: return vscode.window.forceCode.checkAndRunCommand(vscode.window.forceCode.dxCommands.openOrg);
+                case model.enterCredentials.description: return vscode.window.forceCode.checkAndRunCommand(commands.credentials);
+                case model.compileDeploy.description: return vscode.window.forceCode.checkAndRunCommand(commands.compile, vscode.window.activeTextEditor.document, context);
+                case model.executeAnonymous.description: return vscode.window.forceCode.checkAndRunCommand(commands.executeAnonymous, vscode.window.activeTextEditor.document, context);
+                case model.getLogs.description: return vscode.window.forceCode.checkAndRunCommand(commands.getLog, context);
+                case model.openFile.description: return vscode.window.forceCode.checkAndRunCommand(commands.open, context);
+                case model.resourceBundle.description: return vscode.window.forceCode.checkAndRunCommand(commands.staticResource, context);
+                case model.retrievePackage.description: return vscode.window.forceCode.checkAndRunCommand(commands.retrieve, context);
+                case model.soql.description: return vscode.window.forceCode.checkAndRunCommand(commands.soql);
+                case model.toql.description: return vscode.window.forceCode.checkAndRunCommand(commands.toql);
+                case model.deployPackage.description: return vscode.window.forceCode.checkAndRunCommand(commands.deploy, context);
+                case model.diff.description: return vscode.window.forceCode.checkAndRunCommand(commands.diff, vscode.window.activeTextEditor.document, context);
+                case model.createClass.description: return vscode.window.forceCode.checkAndRunCommand(commands.createClass, context);
+                case model.dx.description: return vscode.window.forceCode.checkAndRunCommand(commands.dx);
+                case model.dxLogout.description: return vscode.window.forceCode.checkAndRunCommand(commands.dxLogout);
+                case model.codeCompletionRefresh.description: return vscode.window.forceCode.checkAndRunCommand(commands.codeCompletionRefresh);
                 default: break;
             }
         }

@@ -246,7 +246,7 @@ export default class DXService implements DXCommands {
         return this.runCommand('org:display', '--json').then(res => {
             this.isLoggedIn = true;
             this.orgInfo = res;
-            return this.soqlQuery("SELECT Id FROM User WHERE UserName='" + this.orgInfo.username + "'")
+            return this.toqlQuery("SELECT Id FROM User WHERE UserName='" + this.orgInfo.username + "'")
                 .then(result => {
                     this.orgInfo.userId = result.records[0].Id;
                     return Promise.resolve(this.orgInfo);

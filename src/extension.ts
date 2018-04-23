@@ -22,11 +22,11 @@ export function activate(context: vscode.ExtensionContext): any {
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.executeAnonymous', () => {
-        commands.executeAnonymous(vscode.window.activeTextEditor.document, context);
+        vscode.window.forceCode.checkAndRunCommand(commands.executeAnonymous, vscode.window.activeTextEditor.document, context);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.getLog', () => {
-        commands.getLog(context);
+        vscode.window.forceCode.checkAndRunCommand(commands.getLog, context);
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.open', (selectedResource?: vscode.Uri) => {
