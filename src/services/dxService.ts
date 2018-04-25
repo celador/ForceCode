@@ -89,14 +89,12 @@ export interface DXCommands {
     getAndShowLog(id?: string);
     execAnon(file: string): Promise<ExecuteAnonymousResult>;
     removeFile(fileName: string): Promise<any>;
-    findSObject(toolingType: string, where?: string, fields?: string): Promise<any>;
     openOrg(): any;
 }
 
 export default class DXService implements DXCommands {
     public isLoggedIn: boolean = false;
     public orgInfo: SFDX;
-    private cache: {} = new Array();
 
     public getCommand(cmd: string): Command {
         return alm.commands.filter(c => {
@@ -274,31 +272,6 @@ export default class DXService implements DXCommands {
         }
         return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${id}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
                 return vscode.window.showTextDocument(_document, 3, true);
-        });
-    }
-
-    public async findSObject(toolingType: string, where?: string, fields?: string): Promise<any> {
-        // get all fields first
-        if(!fields && !this.cache[toolingType]) {
-            var names: string[] = new Array<string>();
-            await this.runCommand('schema:sobject:describe', '--sobjecttype ' + toolingType).then(res => {
-                res.fields.forEach(i => {
-                    names.push(i.name);
-                });
-                fields = names.join(',');
-                this.cache[toolingType] = fields;
-            });
-        }
-        
-        if(where) {
-            where = `WHERE ${where}`;
-        } else {
-            where = ''
-        }
-
-        var query = `SELECT ${this.cache[toolingType]} FROM ${toolingType} ${where}`;
-        return this.toqlQuery(query).then(res => {
-            return res.records;
         });
     }
 

@@ -31,7 +31,7 @@ export default function getLog(context: vscode.ExtensionContext) {
             // ` AND Operation like '%executeAnonymous%'`
             ` ORDER BY StartTime DESC, Id DESC LIMIT 10`;
 
-        return force.dxCommands.toqlQuery(queryString);
+        return force.conn.tooling.query(queryString);
     }
 
     function displayOptions(results: QueryResult): Thenable<vscode.QuickPickItem> {

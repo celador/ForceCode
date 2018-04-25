@@ -25,9 +25,9 @@ export default function open(context: vscode.ExtensionContext) {
         var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''}'`;
         var promises: any[] = metadataTypes.map(t => {
             var q: string = `SELECT Id, Name, NamespacePrefix FROM ${t} ${predicate}`;
-            return vscode.window.forceCode.dxCommands.toqlQuery(q);
+            return vscode.window.forceCode.conn.tooling.query(q);
         });
-        promises.push(vscode.window.forceCode.dxCommands.toqlQuery('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate));
+        promises.push(vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate));
         // TODO: Objects
         // TODO: Generic Metadata retrieve
         return Promise.all(promises).then(results => {
@@ -59,14 +59,14 @@ export default function open(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     function getFile(res: any) {
         if (res && res.detail === 'AuraDefinitionBundle') {
-            return vscode.window.forceCode.dxCommands.toqlQuery(`SELECT Id, AuraDefinitionBundleId, AuraDefinitionBundle.DeveloperName, DefType, Format FROM AuraDefinition where AuraDefinitionBundleId = '${res.description}'`).then(function (auraDefinitionResults) {
+            return vscode.window.forceCode.conn.tooling.query(`SELECT Id, AuraDefinitionBundleId, AuraDefinitionBundle.DeveloperName, DefType, Format FROM AuraDefinition where AuraDefinitionBundleId = '${res.description}'`).then(function (auraDefinitionResults) {
                 if (auraDefinitionResults.records && auraDefinitionResults.records.length > 0) {
                     bundleName = auraDefinitionResults.records[0].AuraDefinitionBundle.DeveloperName;
                 } else {
                     throw 'No bundle files';
                 }
                 return Promise.all(auraDefinitionResults.records.map(function (auraDefinition) {
-                    return vscode.window.forceCode.dxCommands.findSObject('AuraDefinition', "Id = '" + auraDefinition.Id + "'");
+                    return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({ Id: auraDefinition.Id }).execute();
                 })).then(function (results) {
                     return results.map(function (qr) {
                         return qr.length > 0 ? qr[0] : undefined;
@@ -74,7 +74,8 @@ export default function open(context: vscode.ExtensionContext) {
                 });
             });
         } else if (res !== undefined) {
-            return vscode.window.forceCode.dxCommands.findSObject(res.detail, "Id = '" + res.description + "'");
+            return vscode.window.forceCode.conn.tooling.sobject(res.detail)
+                .find({ Id: res.description }).execute();
         } else {
             throw { message: 'No file selected to open' };
         }
@@ -141,7 +142,7 @@ export default function open(context: vscode.ExtensionContext) {
                         });
                     });
                 });
-
+                
             }else {
                 filename = `${vscode.window.forceCode.workspaceRoot}${path.sep}${getFolder(toolingType)}${path.sep}${res.Name || res.FullName}.${getExtension(toolingType)}`;
                 let body: string = res.Body || res.Markup;

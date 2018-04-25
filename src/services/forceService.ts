@@ -207,7 +207,7 @@ export default class ForceService implements forceCode.IForceService {
                 return self;
             }
             function getNamespacePrefix(svc: forceCode.IForceService) {
-                return svc.dxCommands.soqlQuery('SELECT NamespacePrefix FROM Organization').then(res => {
+                return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {
                     if (res && res.records.length && res.records[0].NamespacePrefix) {
                         svc.config.prefix = res.records[0].NamespacePrefix;
                     }

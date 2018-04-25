@@ -10,7 +10,7 @@ export default function toql(): any {
         prompt: `Enter a TOQL query to get the results in a json file in the toql folder`,
     };
     return vscode.window.showInputBox(options).then(query => {
-        return vscode.window.forceCode.dxCommands.toqlQuery(query).then(res => {
+        return vscode.window.forceCode.conn.tooling.query(query).then(res => {
             let filePath: string = vscode.workspace.rootPath + path.sep + 'toql' + path.sep + Date.now() + '.json';
             var data: string = vscode.window.forceCode.dxCommands.outputToString(res.records);
             return fs.outputFile(filePath, data, function() {

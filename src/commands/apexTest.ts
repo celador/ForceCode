@@ -36,7 +36,7 @@ export default async function apexTest(document: vscode.TextDocument, context: v
                 if(dxRes) {
                     // build the query to only include files in the worspace
 
-                    vscode.window.forceCode.dxCommands.toqlQuery(buildQuery())
+                    vscode.window.forceCode.conn.tooling.query(buildQuery())
                         .then(res => showResult(res, dxRes))
                         .then(showLog)
                         .then(endTest)
@@ -174,7 +174,7 @@ export default async function apexTest(document: vscode.TextDocument, context: v
                 // ` AND Request = 'API' AND Location = 'SystemLog'` +
                 // ` AND Operation like '%executeAnonymous%'`
                 ` ORDER BY StartTime DESC, Id DESC LIMIT 1`;
-            var res: QueryResult = await vscode.window.forceCode.dxCommands.toqlQuery(queryString);
+            var res: QueryResult = await vscode.window.forceCode.conn.tooling.query(queryString);
             vscode.window.forceCode.dxCommands.getAndShowLog(res.records[0].Id);
         }
         return;
