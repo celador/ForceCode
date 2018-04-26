@@ -536,8 +536,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         clearInterval(interval);
         vscode.window.forceCode.resetMenu();
         if (toolingType === 'AuraDefinition') {
-            //return toolingError(err);
-            vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
+            return toolingError(err);
         } else if (toolingType === 'CustomObject' || toolingType === 'CustomLabels') {
             // Modify this if statement to check if any metadata type
             return metadataError(err);
@@ -563,12 +562,12 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         if (failureColumnNumber > 0) {
             failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));
         }
-        //diagnostics.push(new vscode.Diagnostic(failureRange, errorMessage, 0));
-        //diagnosticCollection.set(document.uri, diagnostics);
+        diagnostics.push(new vscode.Diagnostic(failureRange, errorMessage, 0));
+        diagnosticCollection.set(document.uri, diagnostics);
 
         //error.outputError({ message: statusMessage }, vscode.window.forceCode.outputChannel);
         clearInterval(interval);
-        vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
+        vscode.window.forceCode.outputError({ message: statusMessage }, vscode.window.forceCode.outputChannel);
         return false;
     }
     function metadataError(err) {

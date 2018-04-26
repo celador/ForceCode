@@ -11,18 +11,14 @@ export default function runDX() {
         .then(getArgsAndRun)
         .then(out => {
             if(out !== undefined) {
-                vscode.window.forceCode.outputChannel.appendLine(vscode.window.forceCode.dxCommands.outputToString(out));
-            } else {
-                return undefined;
+                showMessage(out);
             }
             return out;
-        })
-        .then(out => {
-            if(out !== undefined) {
-                showLogFile();
-            } else {
-                return undefined;
+        }, err => {
+            if(err !== undefined) {
+                showMessage(err);
             }
+            return err;
         })
         .then(out => {
             if(out !== undefined) {
@@ -76,12 +72,8 @@ export default function runDX() {
         });
     }
 
-    function showLogFile() {
-        var p: fs.PathLike = vscode.workspace.rootPath + path.sep + 'dx.log';
-        return vscode.workspace.openTextDocument(p).then(doc => {
-            vscode.window.showTextDocument(doc);
-        });
+    function showMessage(message) {
+        vscode.window.forceCode.outputChannel.show();
+        vscode.window.forceCode.outputChannel.appendLine(vscode.window.forceCode.dxCommands.outputToString(message));
     }
-
-    // =======================================================================================================================================
 }
