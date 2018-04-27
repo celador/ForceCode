@@ -60,24 +60,27 @@ export default function open(context: vscode.ExtensionContext) {
 
     // =======================================================================================================================================
     function getFile(res: any) {
-        if (res && res.detail === 'AuraDefinitionBundle') {
-            return vscode.window.forceCode.conn.tooling.query(`SELECT Id, AuraDefinitionBundleId, AuraDefinitionBundle.DeveloperName, DefType, Format FROM AuraDefinition where AuraDefinitionBundleId = '${res.description}'`).then(function (auraDefinitionResults) {
-                if (auraDefinitionResults.records && auraDefinitionResults.records.length > 0) {
-                    bundleName = auraDefinitionResults.records[0].AuraDefinitionBundle.DeveloperName;
-                } else {
-                    throw 'No bundle files';
-                }
-                return Promise.all(auraDefinitionResults.records.map(function (auraDefinition) {
-                    return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({ Id: auraDefinition.Id }).execute();
-                })).then(function (results) {
-                    return results.map(function (qr) {
-                        return qr.length > 0 ? qr[0] : undefined;
+        if(res && res.detail) {
+            var tType: string = res.detail.split(' ')[0];
+            if (tType === 'AuraDefinitionBundle') {
+                return vscode.window.forceCode.conn.tooling.query(`SELECT Id, AuraDefinitionBundleId, AuraDefinitionBundle.DeveloperName, DefType, Format FROM AuraDefinition where AuraDefinitionBundleId = '${res.description}'`).then(function (auraDefinitionResults) {
+                    if (auraDefinitionResults.records && auraDefinitionResults.records.length > 0) {
+                        bundleName = auraDefinitionResults.records[0].AuraDefinitionBundle.DeveloperName;
+                    } else {
+                        throw 'No bundle files';
+                    }
+                    return Promise.all(auraDefinitionResults.records.map(function (auraDefinition) {
+                        return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({ Id: auraDefinition.Id }).execute();
+                    })).then(function (results) {
+                        return results.map(function (qr) {
+                            return qr.length > 0 ? qr[0] : undefined;
+                        });
                     });
                 });
-            });
-        } else if (res !== undefined) {
-            return vscode.window.forceCode.conn.tooling.sobject(res.detail)
-                .find({ Id: res.description }).execute();
+            } else {
+                return vscode.window.forceCode.conn.tooling.sobject(tType)
+                    .find({ Id: res.description }).execute();
+            }
         } else {
             throw { message: 'No file selected to open' };
         }
@@ -143,9 +146,15 @@ export default function open(context: vscode.ExtensionContext) {
                                 });
                             } else {
                                 // this will work for most other things...
-                                var ext = res.ContentType.split('/')[1].replace('x-', '').replace('javascript','js');
+                                var theData: any;
+                                if(res.ContentType.includes('image') || res.ContentType.includes('shockwave-flash')) {
+                                    theData = new Buffer(Buffer.concat(bufs).toString('base64'), 'base64');
+                                } else {
+                                    theData = Buffer.concat(bufs).toString();
+                                }
+                                var ext = res.ContentType.split('/')[1].replace('x-', '').replace('javascript','js').replace('jpeg', 'jpg').replace('plain', 'txt').replace('icon', 'ico').replace('shockwave-flash', 'swf');
                                 var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource${path.sep}${res.Name}.${ext}`;
-                                fs.outputFileSync(filePath, Buffer.concat(bufs).toString());
+                                fs.outputFileSync(filePath, theData);
                             }
                             resolve({ success: true });
                         });
