@@ -70,9 +70,11 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, 
     // =======================================================================================================================================
     function getPackageName(service: IForceService) {
         let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep;
-        var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource')[0];
+        var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource.')[0];
+        var resType: string = textDocument.fileName.split(bundlePath)[1].split('.resource.')[1].split(path.sep)[0].replace('.', '/');
         return {
-            detail: 'resource-bundle',
+            description: textDocument.fileName,
+            detail: resType,
             label: resourceName,
         };
     }
@@ -80,9 +82,15 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, 
 
 function bundleAndDeploy(option) {
     let root: string = getPackagePath(option);
-    let zip: any = zipFiles(getFileList(root), root);
-    bundle(zip, option.label);
-    return deploy(zip, option.label).then(deployComplete);
+    console.log(option);
+    if(option.detail.includes('zip')) {
+        let zip: any = zipFiles(getFileList(root), root);
+        bundle(zip, option.label);
+        return deploy(zip, option.label, option.detail).then(deployComplete);
+    } else {
+        var data = fs.readFileSync(option.description).toString('base64');
+        return vscode.window.forceCode.conn.metadata.upsert('StaticResource', makeResourceMetadata(option.label, data, option.detail));
+    }
 }
 
 function bundleAndDeployAll() {
@@ -152,7 +160,7 @@ function zipFiles(fileList: string[], root: string) {
 function getFileList(root) {
     // Throw if not a directory
     if (!fs.statSync(root).isDirectory()) {
-        throw new Error('');
+        return [root];
     }
 
     // We trap the relative root in a closure then
@@ -208,11 +216,11 @@ function bundle(zip, packageName) {
  * @param none
  * @return undefined
  */
-function deploy(zip, packageName) {
+function deploy(zip, packageName, conType) {
     vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying $(rocket)`;
     // Create the base64 data to send to Salesforce 
     return zip.generateAsync({ type: 'base64', compression: 'DEFLATE' })
-        .then(content => vscode.window.forceCode.conn.metadata.upsert('StaticResource', makeResourceMetadata(packageName, content)));
+        .then(content => vscode.window.forceCode.conn.metadata.upsert('StaticResource', makeResourceMetadata(packageName, content, conType)));
 }
 
 /**
@@ -222,13 +230,12 @@ function deploy(zip, packageName) {
  * @param {ZipBlob} - generated zip blob
  * @return {Metadata[]} - Array with one metadata object
  */
-function makeResourceMetadata(bundleName, content) {
+function makeResourceMetadata(bundleName, cont, contType) {
     return [
         {
             fullName: bundleName,
-            description: 'spa data files',
-            content: content,
-            contentType: 'application/zip',
+            content: cont,
+            contentType: contType,
             cacheControl: 'Private',
         },
     ];
