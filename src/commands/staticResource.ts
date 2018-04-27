@@ -82,7 +82,6 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, 
 
 function bundleAndDeploy(option) {
     let root: string = getPackagePath(option);
-    console.log(option);
     if(option.detail.includes('zip')) {
         let zip: any = zipFiles(getFileList(root), root);
         bundle(zip, option.label);
