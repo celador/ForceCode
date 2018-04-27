@@ -28,8 +28,8 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
         if (fs.existsSync(bundlePath)) {
             bundleDirectories = fs.readdirSync(bundlePath).filter(function (file) {
                 return fs.statSync(path.join(bundlePath, file)).isDirectory();
-            }).map(d => d.split('.resource')[0]).map(d => {
-                return { name: d, type: 'resource-bundle' };
+            }).map(d => {
+                return { name: d.split('.resource')[0], type: d.split('.resource.')[1].replace('.', '/') };
             });
         }
         let spaDirectories: Array<any> = [];
@@ -92,8 +92,8 @@ function bundleAndDeployAll() {
             return fs.statSync(path.join(bundlePath, file)).isDirectory();
         }).map(d => {
             return bundleAndDeploy({
-                detail: 'resource-bundle',
-                label: d.substring(0, d.lastIndexOf('.')),
+                detail: d.split('.resource.')[1].replace('.', '/'),
+                label: d.split('.resource.')[0]//substring(0, d.lastIndexOf('.resource')),
             });
         }));
     }
@@ -102,8 +102,8 @@ function bundleAndDeployAll() {
 function getPackagePath(option) {
     var bundlePath: string = vscode.workspace.rootPath;
     // Get package data
-    if (option.detail === 'resource-bundle') {
-        bundlePath = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep + option.label + '.resource';
+    if (option.detail !== 'SPA') {
+        bundlePath = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep + option.label + '.resource.' + option.detail.replace('/', '.');
     }
     if (option.detail === 'SPA') {
         let dist: string = vscode.window.forceCode.config.spaDist;

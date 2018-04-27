@@ -135,13 +135,14 @@ export default function open(context: vscode.ExtensionContext) {
                             reject(err || {message: 'package not found'});
                         });
                         resource.body.on('end', function () {
+                            var ctFolderName = res.ContentType.split('/').join('.');    // so we can deploy things other than zip files
                             if(res.ContentType.includes('zip')) {
                                 var reader: any[] = ZIP.Reader(Buffer.concat(bufs));
                                 reader.forEach(function (entry) {
                                     if (entry.isFile()) {
                                         var name: string = entry.getName();
                                         var data: NodeBuffer = entry.getData();
-                                        var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource${path.sep}${name}`;
+                                        var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource.${ctFolderName}${path.sep}${name}`;
                                         fs.outputFileSync(filePath, data);
                                     }
                                 });
@@ -151,10 +152,10 @@ export default function open(context: vscode.ExtensionContext) {
                                 if(res.ContentType.includes('image') || res.ContentType.includes('shockwave-flash')) {
                                     theData = new Buffer(Buffer.concat(bufs).toString('base64'), 'base64');
                                 } else {
-                                    theData = Buffer.concat(bufs).toString(mime.charset(res.ContentType));
+                                    theData = Buffer.concat(bufs).toString(mime.charset(res.ContentType) || 'UTF-8');
                                 }
-                                var ext = res.ContentType.split('/')[1].replace('x-', '').replace('javascript','js').replace('jpeg', 'jpg').replace('plain', 'txt').replace('icon', 'ico').replace('shockwave-flash', 'swf');
-                                var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource${path.sep}${res.Name}.${ext}`;
+                                var ext = mime.extension(res.ContentType);
+                                var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource.${ctFolderName}${path.sep}${res.Name}.${ext}`;
                                 fs.outputFileSync(filePath, theData);
                             }
                             resolve({ success: true });
