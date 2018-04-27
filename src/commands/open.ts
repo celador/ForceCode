@@ -3,6 +3,7 @@ import fs = require('fs-extra');
 import * as path from 'path';
 const ZIP: any = require('zip');
 const fetch: any = require('node-fetch');
+const mime = require('mime-types');
 
 import { getIcon, getExtension, getFolder } from './../parsers';
 const TYPEATTRIBUTE: string = 'type';
@@ -150,7 +151,7 @@ export default function open(context: vscode.ExtensionContext) {
                                 if(res.ContentType.includes('image') || res.ContentType.includes('shockwave-flash')) {
                                     theData = new Buffer(Buffer.concat(bufs).toString('base64'), 'base64');
                                 } else {
-                                    theData = Buffer.concat(bufs).toString();
+                                    theData = Buffer.concat(bufs).toString(mime.charset(res.ContentType));
                                 }
                                 var ext = res.ContentType.split('/')[1].replace('x-', '').replace('javascript','js').replace('jpeg', 'jpg').replace('plain', 'txt').replace('icon', 'ico').replace('shockwave-flash', 'swf');
                                 var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource${path.sep}${res.Name}.${ext}`;
