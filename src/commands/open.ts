@@ -24,7 +24,8 @@ export default function open(context: vscode.ExtensionContext) {
         var metadataTypes: string[] = ['ApexClass', 'ApexTrigger', 'ApexPage', 'ApexComponent', 'StaticResource'];
         var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''}'`;
         var promises: any[] = metadataTypes.map(t => {
-            var q: string = `SELECT Id, Name, NamespacePrefix FROM ${t} ${predicate}`;
+            var sResource = t === 'StaticResource' ? ', ContentType' : '';
+            var q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;
             return vscode.window.forceCode.conn.tooling.query(q);
         });
         promises.push(vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate));
@@ -41,9 +42,10 @@ export default function open(context: vscode.ExtensionContext) {
                     let icon: string = getIcon(toolingType);
                     let ext: string = getExtension(toolingType);
                     let name: string = record.Name || record.DeveloperName;
+                    let sr: string = record.ContentType || '';
                     return {
                         description: `${record.Id}`,
-                        detail: `${record.attributes[TYPEATTRIBUTE]}`,
+                        detail: `${record.attributes[TYPEATTRIBUTE]} ${sr}`,
                         label: `$(${icon}) - ${name}.${ext}`,
                     };
                 });
@@ -129,15 +131,22 @@ export default function open(context: vscode.ExtensionContext) {
                             reject(err || {message: 'package not found'});
                         });
                         resource.body.on('end', function () {
-                            var reader: any[] = ZIP.Reader(Buffer.concat(bufs));
-                            reader.forEach(function (entry) {
-                                if (entry.isFile()) {
-                                    var name: string = entry.getName();
-                                    var data: NodeBuffer = entry.getData();
-                                    var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource${path.sep}${name}`;
-                                    fs.outputFileSync(filePath, data);
-                                }
-                            });
+                            if(res.ContentType.includes('zip')) {
+                                var reader: any[] = ZIP.Reader(Buffer.concat(bufs));
+                                reader.forEach(function (entry) {
+                                    if (entry.isFile()) {
+                                        var name: string = entry.getName();
+                                        var data: NodeBuffer = entry.getData();
+                                        var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource${path.sep}${name}`;
+                                        fs.outputFileSync(filePath, data);
+                                    }
+                                });
+                            } else {
+                                // this will work for most other things...
+                                var ext = res.ContentType.split('/')[1].replace('x-', '').replace('javascript','js');
+                                var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource${path.sep}${res.Name}.${ext}`;
+                                fs.outputFileSync(filePath, Buffer.concat(bufs).toString());
+                            }
                             resolve({ success: true });
                         });
                     });
