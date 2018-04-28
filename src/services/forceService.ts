@@ -112,11 +112,11 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     public outputError(error: forceCode.ForceCodeError, outputChannel: vscode.OutputChannel) {
-        this.statusBarItem.text = 'ForceCode: ' + error.message;
+        this.statusBarItem.text = 'ForceCode: Error, see console output for details';
         this.resetMenu();
-        outputChannel.appendLine('================================     ERROR     ================================\n');
-        outputChannel.appendLine(error.message);
-        console.error(error);
+        this.outputChannel.show();
+        this.outputChannel.appendLine('================================     ERROR     ================================\n');
+        this.outputChannel.appendLine(error.message);
         return false;
     };
 

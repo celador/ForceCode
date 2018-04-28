@@ -4,6 +4,7 @@ import path = require('path');
 import jszip = require('jszip');
 import globule = require('globule');
 import { IForceService } from './../forceCode';
+const mime = require('mime-types');
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
     // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
@@ -66,18 +67,26 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, 
         .then(getPackageName)
         .then(bundleAndDeploy)
         .then(deployComplete)
-        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
+        .catch(onError);
     // =======================================================================================================================================
     function getPackageName(service: IForceService) {
         let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep;
-        var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource.')[0];
-        var resType: string = textDocument.fileName.split(bundlePath)[1].split('.resource.')[1].split(path.sep)[0].replace('.', '/');
+        try {
+            var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource.')[0];
+            var resType: string = textDocument.fileName.split(bundlePath)[1].split('.resource.')[1].split(path.sep)[0].replace('.', '/');
+        } catch(e) {
+        }
         return {
-            description: textDocument.fileName,
             detail: resType,
             label: resourceName,
         };
     }
+}
+
+function onError() {
+    var mess = 'Invalid static resource folder or file name. Name must be in the form of ResourceName.resource.type.subtype\nEXAMPLE: '
+    + 'MyResource.resource.aplication.javascript\nThis folder would then contain one file, named MyResource.js';
+    vscode.window.forceCode.outputError({ message: mess }, vscode.window.forceCode.outputChannel);
 }
 
 function bundleAndDeploy(option) {
@@ -87,7 +96,8 @@ function bundleAndDeploy(option) {
         bundle(zip, option.label);
         return deploy(zip, option.label, option.detail).then(deployComplete);
     } else {
-        var data = fs.readFileSync(option.description).toString('base64');
+        var ext = '.' + mime.extension(option.detail);
+        var data = fs.readFileSync(root + path.sep + option.label + ext).toString('base64');
         return vscode.window.forceCode.conn.metadata.upsert('StaticResource', makeResourceMetadata(option.label, data, option.detail));
     }
 }
@@ -111,8 +121,7 @@ function getPackagePath(option) {
     // Get package data
     if (option.detail !== 'SPA') {
         bundlePath = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep + option.label + '.resource.' + option.detail.replace('/', '.');
-    }
-    if (option.detail === 'SPA') {
+    } else {
         let dist: string = vscode.window.forceCode.config.spaDist;
         if (dist) {
             bundlePath = vscode.workspace.rootPath + path.sep + 'spa' + path.sep + option.label + path.sep + dist;
