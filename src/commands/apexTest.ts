@@ -14,6 +14,9 @@ export default async function apexTest(document: vscode.TextDocument, context: v
     const toolingType: string = parsers.getToolingType(document);
     const name: string = parsers.getName(document, toolingType);
     
+    // update workspace members to solve code coverage bug
+    vscode.window.forceCode.updateWorkspaceMembers();
+
     /* tslint:disable */
     var DefType: string = undefined;
     var Format: string = undefined;

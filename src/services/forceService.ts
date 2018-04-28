@@ -91,6 +91,12 @@ export default class ForceService implements forceCode.IForceService {
         }
     }
 
+    public updateWorkspaceMembers() {
+        new Workspace().getWorkspaceMembers().then(members => {
+            this.workspaceMembers = members;
+        });
+    }
+
     public refreshApexMetadata() {
         return vscode.window.forceCode.conn.metadata.describe().then(describe => {
             vscode.window.forceCode.describe = describe;
@@ -105,9 +111,7 @@ export default class ForceService implements forceCode.IForceService {
             return vscode.window.forceCode.conn.metadata.list(apexTypes).then(res => {
                 vscode.window.forceCode.apexMetadata = res;
                 return res;
-            }).then(new Workspace().getWorkspaceMembers).then(members => {
-                this.workspaceMembers = members;
-            });
+            }).then(this.updateWorkspaceMembers);
         });
     }
 

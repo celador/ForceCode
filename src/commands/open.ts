@@ -180,6 +180,8 @@ export default function open(context: vscode.ExtensionContext) {
     }
     // =======================================================================================================================================
     function finished(rsp): boolean {
+        // update workspace members
+        vscode.window.forceCode.updateWorkspaceMembers();
         vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieve Finished';
         vscode.window.forceCode.resetMenu();
         return true;

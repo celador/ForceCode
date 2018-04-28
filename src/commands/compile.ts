@@ -27,6 +27,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         return Promise.reject({ message: 'Already compiling or running unit tests' });
     }
 
+    // update workspace members
+    vscode.window.forceCode.updateWorkspaceMembers();
+
     const body: string = document.getText();
     const ext: string = parsers.getFileExtension(document);
     const toolingType: string = parsers.getToolingType(document);
