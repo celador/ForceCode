@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import Workspace from './workspace';
 import * as forceCode from './../forceCode';
 import { operatingSystem } from './../services';
 import constants from './../models/constants';
 import { configuration } from './../services';
 import * as commands from './../commands';
 import DXService, { SFDX } from './dxService';
+import * as path from 'path';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
@@ -86,20 +86,84 @@ export default class ForceService implements forceCode.IForceService {
                 .then(res => {
                     self.containerId = res.id;
                     self.containerMembers = [];
-                    return self;
+                    return Promise.resolve(self);
                 });
         }
     }
 
-    public updateWorkspaceMembers() {
-        new Workspace().getWorkspaceMembers().then(members => {
-            this.workspaceMembers = members;
+        // Get files in src folder..
+    // Match them up with ContainerMembers
+    public getWorkspaceMembers(metadata?): Promise<forceCode.IWorkspaceMember[]> {
+        return new Promise((resolve, reject) => {
+            var klaw: any = require('klaw');
+            var members: forceCode.IWorkspaceMember[] = []; // files, directories, symlinks, etc
+            klaw(vscode.window.forceCode.workspaceRoot)
+                .on('data', function (item) {
+                    // Check to see if the file represents an actual member... 
+                    if (item.stats.isFile()) {
+                        var metadataFileProperties: forceCode.IMetadataFileProperties[] = getMembersFor(item);
+
+                        if (metadataFileProperties.length) {
+
+                            var workspaceMember: forceCode.IWorkspaceMember = {
+                                name: metadataFileProperties[0].fullName,
+                                path: item.path,
+                                memberInfo: metadataFileProperties[0],
+                            };
+                            members.push(workspaceMember);
+                        }
+                    }
+                })
+                .on('end', function () {
+                    resolve(members);
+                    // console.dir(items) // => [ ... array of files]
+                });
         });
+
+        function getMembersFor(item): forceCode.IMetadataFileProperties[] {
+            var pathParts: string[] = item.path.split(path.sep);
+            var filename: string = pathParts[pathParts.length - 1];
+            var name: string = filename.substring(0, filename.lastIndexOf('.'));
+
+            return vscode.window.forceCode.apexMetadata.filter(member => {
+                return member.fullName === name;
+            });
+        }
+
+    }
+
+    public updateWorkspaceMembers(): Promise<any> {
+        var self: forceCode.IForceService = vscode.window.forceCode;
+        return self.getWorkspaceMembers().then(members => {
+                self.workspaceMembers = members;
+                return Promise.resolve(self.workspaceMembers);
+            });
+    }
+
+    // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
+    public cleanupContainers(): Promise<any> {
+        return new Promise(function (resolve, reject) {
+            vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
+                .find({ Name: {$like : 'ForceCode-%'}})
+                .execute(function(err, records) {
+                    var toDelete: string[] = new Array<string>();
+                    records.forEach(r => {
+                        toDelete.push(r.Id);
+                    })
+                    if(toDelete.length > 0) {
+                        resolve(vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
+                            .del(toDelete));
+                    } else {
+                        resolve();
+                    }
+                });     
+        });          
     }
 
     public refreshApexMetadata() {
-        return vscode.window.forceCode.conn.metadata.describe().then(describe => {
-            vscode.window.forceCode.describe = describe;
+        var self: forceCode.IForceService = vscode.window.forceCode;
+        return self.conn.metadata.describe().then(describe => {
+            self.describe = describe;
             var apexTypes: string[] = describe.metadataObjects
                 .filter(o => o.xmlName.startsWith('ApexClass') || o.xmlName.startsWith('ApexTrigger'))
                 .map(o => {
@@ -108,10 +172,11 @@ export default class ForceService implements forceCode.IForceService {
                         folder: o.directoryName,
                     };
                 });
-            return vscode.window.forceCode.conn.metadata.list(apexTypes).then(res => {
-                vscode.window.forceCode.apexMetadata = res;
+            return self.conn.metadata.list(apexTypes).then(res => {
+                self.apexMetadata = res;
                 return res;
-            }).then(this.updateWorkspaceMembers);
+            }).then(self.updateWorkspaceMembers)
+              .then(self.cleanupContainers);
         });
     }
 

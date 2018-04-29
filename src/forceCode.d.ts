@@ -60,10 +60,6 @@ interface IWorkspaceMember {
     memberInfo: IMetadataFileProperties;
 }
 
-export interface IWorkspaceService {
-    getWorkspaceMembers: () => Promise<IWorkspaceMember[]>;
-}
-
 interface ICodeCoverage {
     attributes: 
 		{
@@ -153,7 +149,9 @@ export interface IForceService {
     resetMenu(): void;
     refreshApexMetadata(): Promise<any>;
     outputError(error: ForceCodeError, outputChannel: vscode.OutputChannel): any;
-    updateWorkspaceMembers(): void;
+    updateWorkspaceMembers(): Promise<any>;
+    getWorkspaceMembers(metadata?): Promise<IWorkspaceMember[]>;
+    cleanupContainers(): Promise<any>;
 }
 
 
