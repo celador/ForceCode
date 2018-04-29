@@ -26,43 +26,23 @@ export default async function apexTest(document: vscode.TextDocument, context: v
     var Id: string = undefined;
     /* tslint:enable */
     // Start doing stuff
-    vscode.window.forceCode.testTimeout = 0;
     // remove test coverage stuff
     delete vscode.window.forceCode.codeCoverage;
     vscode.window.forceCode.codeCoverage = new Array();
-    return startTest();
+    vscode.window.forceCode.isBusy = true;
+    return await vscode.window.forceCode.dxCommands.runCommand('apex:test:run', '-n ' + name + ' -w 3 -y -r json')
+        .then(dxRes => {
+                // build the query to only include files in the worspace
+                vscode.window.forceCode.conn.tooling.query(buildQuery())
+                    .then(res => showResult(res, dxRes))
+                    .then(showLog)
+                    .then(endTest)
+                    .catch(showFail);
+        });
 
-    async function startTest() {
-        vscode.window.forceCode.isBusy = true;
-        return await vscode.window.forceCode.dxCommands.runCommand('apex:test:run', '-n ' + name + ' -w 3 -y -r json')
-            .then(dxRes => {
-                if(dxRes) {
-                    // build the query to only include files in the worspace
-
-                    vscode.window.forceCode.conn.tooling.query(buildQuery())
-                        .then(res => showResult(res, dxRes))
-                        .then(showLog)
-                        .then(endTest)
-                        .catch(tryAgain);
-                } else {
-                    return tryAgain();
-                }
-            })
-            .catch(tryAgain);
-    }
-
-    function tryAgain(err?) {
-        vscode.window.forceCode.testTimeout++;
-        console.log(vscode.window.forceCode.testTimeout);
-        if(vscode.window.forceCode.testTimeout < 11) {
-            return setTimeout(function() {
-                console.log(vscode.window.forceCode.testTimeout);
-                return startTest();
-            }, 2000);
-        } else {
-            vscode.window.forceCode.statusBarItem.text = 'ForceCode: Failed to execute tests, wait at least a minute and try again.';
-            return endTest(err);
-        }
+    function showFail(err?) {
+        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Failed to execute tests, wait at least a minute and try again.';
+        return endTest(err);
     }
     
     function endTest(err?) {

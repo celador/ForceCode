@@ -133,7 +133,6 @@ export interface IForceService {
     containerId?: string;
     commandQueue: any[];
     isBusy: boolean;
-    testTimeout: number;
     statusInterval: any;    
     workspaceMembers: IWorkspaceMember[];
     containerMembers: IContainerMember[];

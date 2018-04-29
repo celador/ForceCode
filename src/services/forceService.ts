@@ -30,7 +30,6 @@ export default class ForceService implements forceCode.IForceService {
     public workspaceMembers: forceCode.IWorkspaceMember[];
     public commandQueue: any[];
     public isBusy: boolean;
-    public testTimeout: number;
     public statusInterval: any; 
     private commandTimeout: any;
 
