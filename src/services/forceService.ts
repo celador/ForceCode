@@ -97,6 +97,45 @@ export default class ForceService implements forceCode.IForceService {
             return this.getWorkspaceMembers()
                 .then(this.parseMembers);
         });
+
+        function getMembersFor(item): forceCode.IMetadataFileProperties[] {
+            var pathParts: string[] = item.path.split(path.sep);
+            var filename: string = pathParts[pathParts.length - 1];
+            var name: string = filename.substring(0, filename.lastIndexOf('.'));
+
+            return vscode.window.forceCode.apexMetadata.filter(member => {
+                return member.fullName === name;
+            });
+        }
+
+    }
+
+    public updateWorkspaceMembers(): Promise<any> {
+        var self: forceCode.IForceService = vscode.window.forceCode;
+        return self.getWorkspaceMembers().then(members => {
+                self.workspaceMembers = members;
+                return Promise.resolve(self.workspaceMembers);
+            });
+    }
+
+    // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
+    public cleanupContainers(): Promise<any> {
+        return new Promise(function (resolve, reject) {
+            vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
+                .find({ Name: {$like : 'ForceCode-%'}})
+                .execute(function(err, records) {
+                    var toDelete: string[] = new Array<string>();
+                    records.forEach(r => {
+                        toDelete.push(r.Id);
+                    })
+                    if(toDelete.length > 0) {
+                        resolve(vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
+                            .del(toDelete));
+                    } else {
+                        resolve();
+                    }
+                });     
+        });          
     }
 
     private parseMembers(mems) {
