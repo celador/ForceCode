@@ -527,7 +527,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         vscode.window.forceCode.isBusy = false;
         return vscode.window.forceCode.newContainer(createNewContainer).then(res => {
             if (vscode.window.forceCode.commandQueue.length > 0) {
-                var toCompile = vscode.window.forceCode.commandQueue.pop();
+                var toCompile = vscode.window.forceCode.commandQueue.shift();
                 return Promise.resolve(toCompile[0](toCompile[1], toCompile[2]));
             } else {
                 return Promise.resolve();

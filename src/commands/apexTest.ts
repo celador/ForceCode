@@ -15,7 +15,7 @@ export function apexTestMethod(testMethod: string): Promise<any> {
 async function apexTest(toTest: string, classOrMethod: string): Promise<any> {    
     if(vscode.window.forceCode.isBusy)
     {
-        vscode.window.forceCode.commandQueue.push([apexTest, document, context]);
+        vscode.window.forceCode.commandQueue.push([apexTest, toTest, classOrMethod]);
         return Promise.reject({ message: 'Already compiling or running unit tests' });
     }
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
@@ -66,7 +66,7 @@ async function apexTest(toTest: string, classOrMethod: string): Promise<any> {
         vscode.window.forceCode.isBusy = false;
         if(vscode.window.forceCode.commandQueue.length > 0)
         {
-            var queue = vscode.window.forceCode.commandQueue.pop();
+            var queue = vscode.window.forceCode.commandQueue.shift();
             return Promise.resolve(queue[0](queue[1], queue[2]));
         } else {
             vscode.window.forceCode.resetMenu();
