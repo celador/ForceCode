@@ -10,10 +10,33 @@ export default class ForceCodeLogProvider implements vscode.TextDocumentContentP
     }
 }
 
-export function filterLog(body: string): string {
-    if (vscode.window.forceCode.config.debugOnly) {
-        return body.split('\n').filter(l => l.match(new RegExp(vscode.window.forceCode.config.debugFilter || 'USER_DEBUG'))).join('\n');
-    } else {
+export function filterLog(body: string) {
+    if (!vscode.window.forceCode.config.debugOnly) {
         return body;
+    } else {
+        var theLog = '';
+        var includeIt = false;
+        var debugLevel = ['USER_DEBUG'];
+        if(vscode.window.forceCode.config.debugFilter)
+        {
+            debugLevel = vscode.window.forceCode.config.debugFilter.split('|');
+        }
+        body.split('\n').forEach(function(l) {
+            var theSplitLine: string[] = l.split(')|');
+            if(theSplitLine.length > 1 && theSplitLine[0].split(':').length === 3 && theSplitLine[0].split('(').length === 2) {
+                includeIt = false;
+                debugLevel.forEach(function(i) {
+                    if(theSplitLine[1].split('|')[0] === i)
+                    {
+                        includeIt = true;
+                    }
+                });
+            }
+                       
+            if(includeIt) {
+                theLog += l + '\n';
+            }
+        });
+        return theLog;
     }
 }
