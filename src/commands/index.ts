@@ -1,5 +1,5 @@
 /* tslint:disable:no-unused-variable */
-import apexTest from './apexTest';
+import { apexTestClass, apexTestMethod } from './apexTest';
 import codeCompletionRefresh from './codeCompletionRefresh'
 import compile from './compile';
 import createClass from './createClass';
@@ -20,7 +20,8 @@ import toql from './toql';
 import {staticResourceDeployFromFile} from './staticResource';
 
 export {
-    apexTest,
+    apexTestClass,
+    apexTestMethod,
     codeCompletionRefresh,
     compile,
     createClass,

@@ -4,15 +4,22 @@ import * as forceCode from './../forceCode';
 import { configuration } from './../services';
 import { QueryResult } from '../services/dxService';
 
-export default async function apexTest(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {    
+export function apexTestClass(testClass: string): Promise<any> {
+    return Promise.resolve(apexTest(testClass, 'class'));
+}
+
+export function apexTestMethod(testMethod: string): Promise<any> {
+    return Promise.resolve(apexTest(testMethod, 'method'));
+}
+
+async function apexTest(toTest: string, classOrMethod: string): Promise<any> {    
     if(vscode.window.forceCode.isBusy)
     {
         vscode.window.forceCode.commandQueue.push([apexTest, document, context]);
         return Promise.reject({ message: 'Already compiling or running unit tests' });
     }
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
-    const toolingType: string = parsers.getToolingType(document);
-    const name: string = parsers.getName(document, toolingType);
+    var name = toTest.split('.')[0];
     
     // update workspace members to solve code coverage bug
     vscode.window.forceCode.updateWorkspaceMembers();
@@ -30,7 +37,13 @@ export default async function apexTest(document: vscode.TextDocument, context: v
     delete vscode.window.forceCode.codeCoverage;
     vscode.window.forceCode.codeCoverage = new Array();
     vscode.window.forceCode.isBusy = true;
-    return await vscode.window.forceCode.dxCommands.runCommand('apex:test:run', '-n ' + name + ' -w 3 -y -r json')
+    var toRun: string;
+    if(classOrMethod === 'class') {
+        toRun = '-n ' + toTest;
+    } else {
+        toRun = '-t ' + toTest;
+    }
+    return await vscode.window.forceCode.dxCommands.runCommand('apex:test:run', toRun + ' -w 3 -y -r json')
         .then(dxRes => {
                 // build the query to only include files in the worspace
                 vscode.window.forceCode.conn.tooling.query(buildQuery())
