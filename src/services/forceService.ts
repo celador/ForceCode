@@ -101,7 +101,7 @@ export default class ForceService implements forceCode.IForceService {
                     // Check to see if the file represents an actual member... 
                     if (item.stats.isFile()) {
                         var metadataFileProperties: forceCode.IMetadataFileProperties[] = getMembersFor(item);
-
+                        
                         if (metadataFileProperties.length) {
 
                             var workspaceMember: forceCode.IWorkspaceMember = {
@@ -122,10 +122,9 @@ export default class ForceService implements forceCode.IForceService {
         function getMembersFor(item): forceCode.IMetadataFileProperties[] {
             var pathParts: string[] = item.path.split(path.sep);
             var filename: string = pathParts[pathParts.length - 1];
-            var name: string = filename.substring(0, filename.lastIndexOf('.'));
 
             return vscode.window.forceCode.apexMetadata.filter(member => {
-                return member.fullName === name;
+                return member.fileName.split('/')[1] === filename;
             });
         }
 

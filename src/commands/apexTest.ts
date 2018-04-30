@@ -21,9 +21,6 @@ async function apexTest(toTest: string, classOrMethod: string): Promise<any> {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
     var name = toTest.split('.')[0];
     
-    // update workspace members to solve code coverage bug
-    vscode.window.forceCode.updateWorkspaceMembers();
-
     /* tslint:disable */
     var DefType: string = undefined;
     var Format: string = undefined;
