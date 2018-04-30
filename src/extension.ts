@@ -29,13 +29,9 @@ export function activate(context: vscode.ExtensionContext): any {
     let sel: vscode.DocumentSelector = { scheme: 'file', language: 'apex' };
     context.subscriptions.push(vscode.languages.registerHoverProvider(sel, new ApexTestLinkProvider()));
 
-    context.subscriptions.push(vscode.commands.registerCommand('sfdx.force.apex.test.class.run.delegate', () => {
-        commands.apexTest(vscode.window.activeTextEditor.document, context);
-    }));
+    context.subscriptions.push(vscode.commands.registerCommand('sfdx.force.apex.test.class.run.delegate', commands.apexTestClass));
 
-    context.subscriptions.push(vscode.commands.registerCommand('sfdx.force.apex.test.method.run.delegate', () => {
-        commands.apexTest(vscode.window.activeTextEditor.document, context);
-    }));
+    context.subscriptions.push(vscode.commands.registerCommand('sfdx.force.apex.test.method.run.delegate', commands.apexTestMethod));
 
     context.subscriptions.push(vscode.commands.registerCommand('ForceCode.openOrg', () => {
         vscode.window.forceCode.dxCommands.openOrg();
