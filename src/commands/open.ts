@@ -37,7 +37,7 @@ export function showFileOptions(promises: any[]) {
     // TODO: Generic Metadata retrieve
     return Promise.all(promises).then(results => {
         let options: vscode.QuickPickItem[] = results
-            .map(res => res.records ? res.records : res.searchRecords)
+            .map(res => res.records)
             .reduce((prev, curr) => {
                 return prev.concat(curr);
             })

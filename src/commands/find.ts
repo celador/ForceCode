@@ -20,7 +20,10 @@ export default function find() {
                     vscode.window.forceCode.outputError({message: err}, vscode.window.forceCode.outputChannel);
                     return;
                 }
-                return showFileOptions(searchResult);
+                var resArray: any[] = new Array();
+                resArray.push({records: searchResult.searchRecords});
+
+                return showFileOptions(resArray);
         });
     });
 }
