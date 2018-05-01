@@ -11,6 +11,7 @@ import dx from './dx';
 import dxLogout from './dxLogout';
 import documentMethod from './documentMethod';
 import executeAnonymous from './executeAnonymous';
+import find from './find';
 import getLog from './getLog';
 import open from './open';
 import retrieve from './retrieve';
@@ -34,6 +35,7 @@ export {
     dxLogout,
     documentMethod,
     executeAnonymous,
+    find,
     getLog,
     open,
     retrieve,

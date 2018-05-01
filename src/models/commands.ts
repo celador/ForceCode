@@ -1,4 +1,10 @@
 export default {
+    find : {
+        description: 'Find in files',
+        detail: 'Search salesforce source files for a string.',
+        icon: 'search',
+        label: 'Find',
+    },
     getCodeCoverage : {
         description: 'Get code coverage',
         detail: 'Retrieve the current code coverage for all files in the src folder.',

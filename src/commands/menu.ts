@@ -18,6 +18,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
         var quickpick: any[] = [];
         if (vscode.window.forceCode.dxCommands.isLoggedIn) {
             quickpick.push(model.openOrg);
+            quickpick.push(model.find);
             quickpick.push(model.openFile);
             quickpick.push(model.createClass);
             quickpick.push(model.executeAnonymous);
@@ -69,6 +70,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.dxLogout.description: return commands.dxLogout();
                 case model.codeCompletionRefresh.description: return commands.codeCompletionRefresh();
                 case model.getCodeCoverage.description: return commands.apexTestResults();
+                case model.find.description: return commands.find();
                 default: break;
             }
         }

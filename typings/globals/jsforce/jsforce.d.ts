@@ -110,6 +110,7 @@ declare module 'jsforce/index' {
             query: any;
             accessToken: string;
             instanceUrl: string;
+            search(searchString: string, callback: (err: any, res: any) => void): any;
             identity(): any;
             login(name: string, password: string): any;
             login(name: string, password: string, callback: (err: any, res: any) => void): any;

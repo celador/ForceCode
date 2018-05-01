@@ -9,19 +9,16 @@ import { getIcon, getExtension, getFolder } from './../parsers';
 const TYPEATTRIBUTE: string = 'type';
 
 export default function open(context: vscode.ExtensionContext) {
-    let bundleName: string = '';
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Open File';
 
     return vscode.window.forceCode.connect(context)
-        .then(svc => showFileOptions())
-        .then(opt => getFile(opt))
-        .then(res => writeFiles(res))
-        .then(finished)
-        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
+        .then(svc => getFileList())
+        .then(proms => showFileOptions(proms));
+        
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
-    function showFileOptions() {
+    function getFileList() {
         var metadataTypes: string[] = ['ApexClass', 'ApexTrigger', 'ApexPage', 'ApexComponent', 'StaticResource'];
         var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''}'`;
         var promises: any[] = metadataTypes.map(t => {
@@ -30,34 +27,43 @@ export default function open(context: vscode.ExtensionContext) {
             return vscode.window.forceCode.conn.tooling.query(q);
         });
         promises.push(vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate));
-        // TODO: Objects
-        // TODO: Generic Metadata retrieve
-        return Promise.all(promises).then(results => {
-            let options: vscode.QuickPickItem[] = results
-                .map(res => res.records)
-                .reduce((prev, curr) => {
-                    return prev.concat(curr);
-                })
-                .map(record => {
-                    let toolingType: string = record.attributes[TYPEATTRIBUTE];
-                    let icon: string = getIcon(toolingType);
-                    let ext: string = getExtension(toolingType);
-                    let name: string = record.Name || record.DeveloperName;
-                    let sr: string = record.ContentType || '';
-                    return {
-                        description: `${record.Id}`,
-                        detail: `${record.attributes[TYPEATTRIBUTE]} ${sr}`,
-                        label: `$(${icon}) - ${name}.${ext}`,
-                    };
-                });
-            let config: {} = {
-                matchOnDescription: true,
-                matchOnDetail: true,
-                placeHolder: 'Retrieve a Salesforce File',
-            };
-            return vscode.window.showQuickPick(options, config);
-        });
+        return promises;
     }
+}
+
+export function showFileOptions(promises: any[]) {
+    let bundleName: string = '';
+    // TODO: Objects
+    // TODO: Generic Metadata retrieve
+    return Promise.all(promises).then(results => {
+        let options: vscode.QuickPickItem[] = results
+            .map(res => res.records ? res.records : res.searchRecords)
+            .reduce((prev, curr) => {
+                return prev.concat(curr);
+            })
+            .map(record => {
+                let toolingType: string = record.attributes[TYPEATTRIBUTE];
+                let icon: string = getIcon(toolingType);
+                let ext: string = getExtension(toolingType);
+                let name: string = record.Name || record.DeveloperName;
+                let sr: string = record.ContentType || '';
+                return {
+                    description: `${record.Id}`,
+                    detail: `${record.attributes[TYPEATTRIBUTE]} ${sr}`,
+                    label: `$(${icon}) - ${name}.${ext}`,
+                };
+            });
+        let config: {} = {
+            matchOnDescription: true,
+            matchOnDetail: true,
+            placeHolder: 'Retrieve a Salesforce File',
+        };
+        return vscode.window.showQuickPick(options, config);
+    }).then(opt => getFile(opt))
+    .then(res => writeFiles(res))
+    .then(finished)
+    .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
+
 
     // =======================================================================================================================================
     function getFile(res: any) {
