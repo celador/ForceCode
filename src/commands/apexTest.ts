@@ -3,6 +3,7 @@ import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
 import { configuration } from './../services';
 import { QueryResult } from '../services/dxService';
+import apexTestResults from '../services/apexTestResults';
 
 export function apexTestClass(testClass: string): Promise<any> {
     return Promise.resolve(apexTest(testClass, 'class'));
@@ -21,14 +22,6 @@ async function apexTest(toTest: string, classOrMethod: string): Promise<any> {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
     var name = toTest.split('.')[0];
     
-    /* tslint:disable */
-    var DefType: string = undefined;
-    var Format: string = undefined;
-    var Source: string = undefined;
-    var currentObjectDefinition: any = undefined;
-    var AuraDefinitionBundleId: string = undefined;
-    var Id: string = undefined;
-    /* tslint:enable */
     // Start doing stuff
     // remove test coverage stuff
     delete vscode.window.forceCode.codeCoverage;
@@ -42,8 +35,13 @@ async function apexTest(toTest: string, classOrMethod: string): Promise<any> {
     }
     return await vscode.window.forceCode.dxCommands.runCommand('apex:test:run', toRun + ' -w 3 -y -r json')
         .then(dxRes => {
-                // build the query to only include files in the worspace
-                vscode.window.forceCode.conn.tooling.query(buildQuery())
+                // get the test class Ids from the result
+                var testClassIds: string[] = new Array<string>();
+                dxRes.tests.forEach(tRes => {
+                    testClassIds.push(tRes.ApexClass.Id);
+                });
+
+                return apexTestResults(testClassIds)
                     .then(res => showResult(res, dxRes))
                     .then(showLog)
                     .then(endTest)
@@ -69,24 +67,6 @@ async function apexTest(toTest: string, classOrMethod: string): Promise<any> {
             vscode.window.forceCode.resetMenu();
             return Promise.resolve();
         }
-    }
-
-    // build the test result query
-    function buildQuery(): string {
-        var names: Array<string> = new Array<string>();
-        let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
-        
-        members.forEach(cur => {
-            names.push(cur.name);
-        });
-        var orNamesString: string = "(ApexClassOrTrigger.Name = '" + names.join("' OR ApexClassOrTrigger.Name = '") + "') ";
-        var query = 'SELECT Coverage, ApexClassOrTriggerId, ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered '
-        + 'FROM ApexCodeCoverageAggregate '
-        + 'WHERE ApexClassOrTriggerId != NULL '
-        + 'AND ' + orNamesString
-        + 'AND (NumLinesCovered > 0 OR NumLinesUncovered > 0) '
-        + 'ORDER BY ApexClassOrTrigger.Name';
-        return query;
     }
 
     // =======================================================================================================================================
@@ -145,17 +125,6 @@ async function apexTest(toTest: string, classOrMethod: string): Promise<any> {
                 vscode.window.forceCode.outputChannel.appendLine(successMessage);
             }
             vscode.window.forceCode.resetMenu();
-            // Add Line Coverage information
-            if (res.records) {
-                res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
-                    vscode.window.forceCode.workspaceMembers.some(curr => {
-                        if(curr.memberInfo.id === curRes.ApexClassOrTriggerId && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
-                            vscode.window.forceCode.codeCoverage[curRes.ApexClassOrTriggerId] = curRes;
-                            return true;
-                        }
-                    });
-                });
-            }
 
             return dxRes;
         });
