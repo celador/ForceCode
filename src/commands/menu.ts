@@ -22,6 +22,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.createClass);
             quickpick.push(model.executeAnonymous);
             quickpick.push(model.getLogs);
+            quickpick.push(model.getCodeCoverage);
             quickpick.push(model.soql);
             quickpick.push(model.diff);
             quickpick.push(model.compileDeploy);
@@ -67,6 +68,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.dx.description: return commands.dx();
                 case model.dxLogout.description: return commands.dxLogout();
                 case model.codeCompletionRefresh.description: return commands.codeCompletionRefresh();
+                case model.getCodeCoverage.description: return commands.apexTestResults();
                 default: break;
             }
         }

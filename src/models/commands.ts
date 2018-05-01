@@ -1,4 +1,10 @@
 export default {
+    getCodeCoverage : {
+        description: 'Get code coverage',
+        detail: 'Retrieve the current code coverage for all files in the src folder.',
+        icon: 'file-text',
+        label: 'Get current code coverage',
+    },
     openOrg : {
         description: 'Open project org',
         detail: 'Open the org this project is associated with in a browser.',
