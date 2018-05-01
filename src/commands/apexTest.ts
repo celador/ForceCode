@@ -24,24 +24,6 @@ export default function apexTest(toTest: string, classOrMethod: string) {
                 .then(showLog);
         });
 
-    // build the test result query
-    function buildQuery(): string {
-        var names: Array<string> = new Array<string>();
-        let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
-        
-        members.forEach(cur => {
-            names.push(cur.name);
-        });
-        var orNamesString: string = "(ApexClassOrTrigger.Name = '" + names.join("' OR ApexClassOrTrigger.Name = '") + "') ";
-        var query = 'SELECT Coverage, ApexClassOrTriggerId, ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered '
-        + 'FROM ApexCodeCoverageAggregate '
-        + 'WHERE ApexClassOrTriggerId != NULL '
-        + 'AND ' + orNamesString
-        + 'AND (NumLinesCovered > 0 OR NumLinesUncovered > 0) '
-        + 'ORDER BY ApexClassOrTrigger.Name';
-        return query;
-    }
-
     // =======================================================================================================================================
     function showResult(dxRes) {
         if (dxRes.summary.failing && dxRes.summary.failing > 0) {
