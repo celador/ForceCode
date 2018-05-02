@@ -9,23 +9,8 @@ export default function runDX() {
 
     return showFileOptions()
         .then(getArgsAndRun)
-        .then(out => {
-            if(out !== undefined) {
-                showMessage(out);
-            }
-            return out;
-        }, err => {
-            if(err !== undefined) {
-                showMessage(err);
-            }
-            return err;
-        })
-        .then(out => {
-            if(out !== undefined) {
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: DX Command execution complete!';
-            }
-            vscode.window.forceCode.resetMenu();
-        })
+        .then(showMessage, showMessage);
+
     // =======================================================================================================================================
     function showFileOptions(): Thenable<vscode.QuickPickItem> {
         let options: vscode.QuickPickItem[] = alm.commands.filter(c => {
@@ -73,7 +58,10 @@ export default function runDX() {
     }
 
     function showMessage(message) {
+        vscode.window.forceCode.dxCommands.saveToFile(vscode.window.forceCode.dxCommands.outputToString(message), 'dx.log');
         vscode.window.forceCode.outputChannel.show();
         vscode.window.forceCode.outputChannel.appendLine(vscode.window.forceCode.dxCommands.outputToString(message));
+        vscode.window.forceCode.statusBarItem.text = 'ForceCode: DX Command execution complete!';
+        vscode.window.forceCode.resetMenu();
     }
 }
