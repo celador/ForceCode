@@ -24,6 +24,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
             quickpick.push(model.executeAnonymous);
             quickpick.push(model.getLogs);
             quickpick.push(model.getCodeCoverage);
+            quickpick.push(model.getOverallCoverage);
             quickpick.push(model.soql);
             quickpick.push(model.diff);
             quickpick.push(model.compileDeploy);
@@ -71,6 +72,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 case model.codeCompletionRefresh.description: return commands.codeCompletionRefresh();
                 case model.getCodeCoverage.description: return commands.apexTestResults();
                 case model.find.description: return commands.find();
+                case model.getOverallCoverage.description: return commands.getOverallCoverage();
                 default: break;
             }
         }

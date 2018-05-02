@@ -14,6 +14,7 @@ import executeAnonymous from './executeAnonymous';
 import find from './find';
 import getLog from './getLog';
 import open from './open';
+import getOverallCoverage from './overallCoverage';
 import retrieve from './retrieve';
 import showMenu from './menu';
 import soql from './soql';
@@ -38,6 +39,7 @@ export {
     find,
     getLog,
     open,
+    getOverallCoverage,
     retrieve,
     showMenu,
     soql,

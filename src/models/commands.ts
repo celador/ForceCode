@@ -1,4 +1,10 @@
 export default {
+    getOverallCoverage : {
+        description: 'Get overall code coverage',
+        detail: 'Retrieve the current code coverage for all files in the org and save in the coverage folder as a txt file.',
+        icon: 'file-text',
+        label: 'Get current overall code coverage',
+    },
     find : {
         description: 'Find in files',
         detail: 'Search salesforce source files for a string.',
