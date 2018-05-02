@@ -62,9 +62,26 @@ export function updateDecorations() {
 }
 
 export function getUncoveredLineOptions(document: vscode.TextDocument) {
-    return Object.keys(vscode.window.forceCode.codeCoverage).reduce((opts, id) => {
-        return opts.concat(getUncoveredLineOptionsFor(id));
-    }, []);
+    coverageChannel.clear();
+    // get the id
+    var file = parsers.getWholeFileName(document);
+    // get the id
+    var curFileId: string;
+    if(!vscode.window.forceCode.workspaceMembers) {
+        return;
+    }
+    vscode.window.forceCode.workspaceMembers.some(cur => {
+        if(cur.memberInfo.fileName.split('/')[1] === file) {
+            curFileId = cur.memberInfo.id;
+            return true;
+        }
+    });
+    var uncoveredLineDec: vscode.DecorationOptions[] = [];
+    if(curFileId && vscode.window.forceCode.codeCoverage[curFileId]) {
+        uncoveredLineDec = getUncoveredLineOptionsFor(curFileId);
+    }
+    return uncoveredLineDec;
+
     function getUncoveredLineOptionsFor(id) {
         var uncoveredLineDecorations: vscode.DecorationOptions[] = [];
         let fileCoverage: forceCode.ICodeCoverage = vscode.window.forceCode.codeCoverage[id];
@@ -74,8 +91,7 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
             //let typeMatch: boolean = fileCoverage.type === parsers.getCoverageType(document);
             if (nameMatch) {
                 fileCoverage.Coverage.uncoveredLines.forEach(notCovered => {
-                    let lineNumber: number = notCovered - 1;
-                    let decorationRange: vscode.DecorationOptions = { range: document.lineAt(Number(lineNumber)).range, hoverMessage: 'Line ' + (lineNumber + 1) + ' not covered by a test' };
+                    let decorationRange: vscode.DecorationOptions = { range: document.lineAt(Number(notCovered - 1)).range, hoverMessage: 'Line ' + notCovered + ' not covered by a test' };
                     uncoveredLineDecorations.push(decorationRange);
                     // Add output to output channel
                     coverageChannel.appendLine(fileCoverage.ApexClassOrTrigger.Name + ' line ' + notCovered + ' not covered.')
