@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
 import { QueryResult } from '../services/dxService';
+import { editorUpdateApexCoverageDecorator } from '../decorators/testCoverageDecorator';
 
 export default function getApexTestResults(testClassIds?: string[]): Promise<QueryResult> {
     if(!testClassIds) {
@@ -48,6 +49,8 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
                     }
                 });
             });
+            // update the current editor
+            editorUpdateApexCoverageDecorator(vscode.window.activeTextEditor);
         }
 
         return res;
