@@ -62,23 +62,23 @@ export function updateDecorations() {
 }
 
 export function getUncoveredLineOptions(document: vscode.TextDocument) {
-    coverageChannel.clear();
-    // get the id
-    var file = parsers.getWholeFileName(document);
-    // get the id
-    var curFileId: string;
-    if(!vscode.window.forceCode.workspaceMembers) {
-        return;
-    }
-    vscode.window.forceCode.workspaceMembers.some(cur => {
-        if(cur.memberInfo.fileName.split('/')[1] === file) {
-            curFileId = cur.memberInfo.id;
-            return true;
-        }
-    });
     var uncoveredLineDec: vscode.DecorationOptions[] = [];
-    if(curFileId && vscode.window.forceCode.codeCoverage[curFileId]) {
-        uncoveredLineDec = getUncoveredLineOptionsFor(curFileId);
+
+    if(vscode.window.forceCode.workspaceMembers) {
+        coverageChannel.clear();
+        // get the id
+        var file = parsers.getWholeFileName(document);
+        // get the id
+        var curFileId: string;
+        vscode.window.forceCode.workspaceMembers.some(cur => {
+            if(cur.memberInfo.fileName.split('/')[1] === file) {
+                curFileId = cur.memberInfo.id;
+                return true;
+            }
+        });
+        if(curFileId && vscode.window.forceCode.codeCoverage[curFileId]) {
+            uncoveredLineDec = getUncoveredLineOptionsFor(curFileId);
+        }
     }
     return uncoveredLineDec;
 
@@ -86,21 +86,16 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
         var uncoveredLineDecorations: vscode.DecorationOptions[] = [];
         let fileCoverage: forceCode.ICodeCoverage = vscode.window.forceCode.codeCoverage[id];
         if (fileCoverage) {
-            //let namespaceMatch: boolean = (fileCoverage.namespace ? fileCoverage.namespace : '') === vscode.window.forceCode.config.prefix;
-            let nameMatch: boolean = fileCoverage.ApexClassOrTrigger.Name.toLowerCase() === parsers.getFileName(document).toLowerCase();
-            //let typeMatch: boolean = fileCoverage.type === parsers.getCoverageType(document);
-            if (nameMatch) {
-                fileCoverage.Coverage.uncoveredLines.forEach(notCovered => {
-                    let decorationRange: vscode.DecorationOptions = { range: document.lineAt(Number(notCovered - 1)).range, hoverMessage: 'Line ' + notCovered + ' not covered by a test' };
-                    uncoveredLineDecorations.push(decorationRange);
-                    // Add output to output channel
-                    coverageChannel.appendLine(fileCoverage.ApexClassOrTrigger.Name + ' line ' + notCovered + ' not covered.')
-                });
-                var covered: number = fileCoverage.NumLinesUncovered;
-                var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
-                vscode.window.forceCode.statusBarItem.text = fileCoverage.ApexClassOrTrigger.Name + ' ' + (((total - covered) / total) * 100).toFixed(2) + '% covered';
-                vscode.window.forceCode.resetMenu();
-            }
+            fileCoverage.Coverage.uncoveredLines.forEach(notCovered => {
+                let decorationRange: vscode.DecorationOptions = { range: document.lineAt(Number(notCovered - 1)).range, hoverMessage: 'Line ' + notCovered + ' not covered by a test' };
+                uncoveredLineDecorations.push(decorationRange);
+                // Add output to output channel
+                coverageChannel.appendLine(fileCoverage.ApexClassOrTrigger.Name + ' line ' + notCovered + ' not covered.')
+            });
+            var covered: number = fileCoverage.NumLinesUncovered;
+            var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
+            vscode.window.forceCode.statusBarItem.text = fileCoverage.ApexClassOrTrigger.Name + ' ' + (((total - covered) / total) * 100).toFixed(2) + '% covered';
+            vscode.window.forceCode.resetMenu();
         }
         return uncoveredLineDecorations;
     }
