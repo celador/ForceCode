@@ -247,6 +247,12 @@
         "extensions": [
           ".html"
         ]
+      },
+      {
+        "id": "apexCodeCoverage",
+        "extensions": [
+          ".acov"
+        ]
       }
     ],
     "menus": {

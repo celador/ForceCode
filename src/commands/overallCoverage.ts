@@ -20,9 +20,9 @@ export default function getOverallCoverage() {
                     var uncovered: number = curRes.NumLinesUncovered;
                     var total: number = curRes.NumLinesCovered + curRes.NumLinesUncovered;
                     var percent = (((total - uncovered) / total) * 100).toFixed(2) + '% covered';
-                    outputString += curRes.ApexClassOrTrigger.Name + spaces.substr(0, spaces.length - curRes.ApexClassOrTrigger.Name.length - 1) + percent + spaces.substr(0, 20 - percent.length) + uncovered + '/' + total + '\n';
+                    outputString += curRes.ApexClassOrTrigger.Name + spaces.substr(0, spaces.length - curRes.ApexClassOrTrigger.Name.length - 1) + percent + spaces.substr(0, 20 - percent.length) + curRes.NumLinesCovered + '/' + total + '\n';
                 });
-                return vscode.window.forceCode.dxCommands.saveToFile(outputString, 'coverage' + path.sep + 'ApexCoverage-' + Date.now() + '.txt').then(filename =>{
+                return vscode.window.forceCode.dxCommands.saveToFile(outputString, 'coverage' + path.sep + 'ApexCoverage-' + Date.now() + '.acov').then(filename =>{
                     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Code coverage retrieval complete!';
                     vscode.window.forceCode.resetMenu();
                     return vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, 3));
