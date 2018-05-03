@@ -228,6 +228,12 @@
         "extensions": [
           ".acov"
         ]
+      },
+      {
+        "id": "apexCodeCoverage",
+        "extensions": [
+          ".acov"
+        ]
       }
     ],
     "menus": {
