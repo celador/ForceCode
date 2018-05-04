@@ -57,11 +57,32 @@ export function showFileOptions(promises: any[]) {
             matchOnDescription: true,
             matchOnDetail: true,
             placeHolder: 'Retrieve a Salesforce File',
+            canPickMany: true,
         };
         return vscode.window.showQuickPick(options, config);
-    }).then(opt => getFile(opt))
-    .then(res => writeFiles(res))
-    .then(finished)
+    }).then(opt => {
+        var opts: any = opt;
+        var files: any[] = opts.map(curOpt => {
+            return getFile(curOpt);
+        });
+        
+        return Promise.all(files);
+    })
+    .then(res => {
+        var count: number = 0;
+        var showFile: boolean = true;
+        var thePromises: any[] = res.map(curRes => { 
+            count++;
+            if(count > 3) {
+                showFile = false;
+            }
+            return writeFiles(curRes, showFile); 
+        });
+        vscode.window.forceCode.updateWorkspaceMembers();
+        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieve Finished';
+        vscode.window.forceCode.resetMenu();
+        return Promise.all(thePromises);
+    })
     .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
 
 
@@ -104,7 +125,7 @@ export function showFileOptions(promises: any[]) {
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
-    function writeFiles(results): Promise<any> {
+    function writeFiles(results, openFile: boolean): Promise<any> {
         return Promise.all(results.map(function (res) {
             var filename: string = '';
             let toolingType: string = res.attributes[TYPEATTRIBUTE];
@@ -120,8 +141,8 @@ export function showFileOptions(promises: any[]) {
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {
                         if (err) { reject(err); }
-                        if (results.length === 1) {
-                            vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, 3));
+                        if (results.length === 1 && openFile) {
+                            vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, { preview: false }));
                         }
                         resolve(true);
                     });
@@ -175,8 +196,8 @@ export function showFileOptions(promises: any[]) {
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {
                         if (err) { reject(err); }
-                        if (results.length === 1) {
-                            vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, 3));
+                        if (results.length === 1 && openFile) {
+                            vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, { preview: false }));
                         }
                     });
                     resolve(true);
@@ -184,13 +205,4 @@ export function showFileOptions(promises: any[]) {
             }
         }));
     }
-    // =======================================================================================================================================
-    function finished(rsp): boolean {
-        // update workspace members
-        vscode.window.forceCode.updateWorkspaceMembers();
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieve Finished';
-        vscode.window.forceCode.resetMenu();
-        return true;
-    }
-    // =======================================================================================================================================
 }
