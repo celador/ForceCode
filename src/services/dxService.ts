@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION } from 'constants';
 var alm: any = require('salesforce-alm');
 
 export interface SFDX {
@@ -79,7 +78,6 @@ export interface DXCommands {
     outputToString(toConvert: any, depth?: number): string;
     runCommand(cmdString: string, arg: string): Promise<any>;
     toqlQuery(query: string): Promise<QueryResult>;
-    soqlQuery(query: string): Promise<QueryResult>;
     login(): Promise<SFDX>;
     logout(): Promise<any>;
     getOrgInfo(): Promise<SFDX>;
@@ -218,11 +216,7 @@ export default class DXService implements DXCommands {
     }
 
     public toqlQuery(query: string): Promise<QueryResult> {
-        return Promise.resolve(this.soqlQuery(query + ' -t'));
-    }
-
-    public soqlQuery(query: string): Promise<QueryResult> {
-        return Promise.resolve(this.runCommand('data:soql:query', '-q ' + query + ' -r json'));
+        return Promise.resolve(this.runCommand('data:soql:query', '-q ' + query + ' -t -r json'));
     }
 
     public login(): Promise<SFDX> {
