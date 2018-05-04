@@ -2,7 +2,7 @@ export default {
     getOverallCoverage : {
         description: 'Get overall code coverage',
         detail: 'Retrieve the current code coverage for all files in the org and save in the coverage folder as a txt file.',
-        icon: 'file-text',
+        icon: 'checklist',
         label: 'Get current overall code coverage',
     },
     find : {
@@ -26,13 +26,13 @@ export default {
     dxLogout : {
         description: 'Log out from current org',
         detail: 'Log out of the current org in this project.',
-        icon: 'key',
+        icon: 'x',
         label: 'Log out of Salesforce',
     },
     codeCompletionRefresh : {
         description: 'Refresh objects from org',
         detail: 'You must login to DX first or if you receive errors. Allows code completion with custom fields and objects by downloading org data.',
-        icon: 'broadcast',
+        icon: 'code',
         label: 'Code Completion Refresh',
     },
     dx : {
