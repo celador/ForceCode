@@ -178,13 +178,7 @@ export default class DXService implements DXCommands {
                     var commandName = curCmd.shift();
                     if(commandName.length === 1) {
                         // this means we need to search for the argument name
-                        cmd.flags.some(fl => {
-                            if(fl.char === commandName)
-                            {
-                                commandName = fl.name;
-                                return true;
-                            }
-                        });
+                        commandName = cmd.flags.find(fl => { return fl.char === commandName; }).name;
                     }
                     if(curCmd.length > 0)
                         cliContext.flags[commandName] = curCmd.join(' ').trim();
@@ -194,14 +188,8 @@ export default class DXService implements DXCommands {
             });
         }
         // add in targetusername so we can stay logged in
-        if(cliContext.flags['targetusername'] === undefined && vscode.window.forceCode.config.username !== undefined) {
-            cmd.flags.some(fl => {
-                if(fl.name === 'targetusername')
-                {
-                    cliContext.flags['targetusername'] = vscode.window.forceCode.config.username;
-                    return true;
-                }
-            });
+        if(cliContext.flags['targetusername'] === undefined && vscode.window.forceCode.config.username !== undefined && cmd.flags.find(fl => { return fl.name === 'targetusername' }) !== undefined) {
+            cliContext.flags['targetusername'] = vscode.window.forceCode.config.username;
         } 
         var objresult = await cmd.run(cliContext);
         // log command output

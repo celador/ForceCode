@@ -42,12 +42,11 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
         // Add Line Coverage information
         if (res.records) {
             res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
-                vscode.window.forceCode.workspaceMembers.some(curr => {
-                    if(curr.memberInfo.id === curRes.ApexClassOrTriggerId && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
-                        vscode.window.forceCode.codeCoverage[curRes.ApexClassOrTriggerId] = curRes;
-                        return true;
-                    }
-                });
+                if(vscode.window.forceCode.workspaceMembers.find(curr => {
+                    return curr.memberInfo.id === curRes.ApexClassOrTriggerId && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length;
+                }) !== undefined) {
+                    vscode.window.forceCode.codeCoverage[curRes.ApexClassOrTriggerId] = curRes;
+                }
             });
             // update the current editor
             editorUpdateApexCoverageDecorator(vscode.window.activeTextEditor);

@@ -71,14 +71,11 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
         coverageChannel.clear();
         // get the id
         var file = parsers.getWholeFileName(document);
-        // get the id
-        var curFileId: string;
-        vscode.window.forceCode.workspaceMembers.some(cur => {
-            if(cur.memberInfo.fileName.split('/')[1] === file) {
-                curFileId = cur.memberInfo.id;
-                return true;
-            }
-        });
+        // get the id    
+        var curFileId: string = vscode.window.forceCode.workspaceMembers.find(cur => {
+            return cur.memberInfo.fileName.split('/')[1] === file;
+        }).memberInfo.id;
+
         if(curFileId && vscode.window.forceCode.codeCoverage[curFileId]) {
             uncoveredLineDec = getUncoveredLineOptionsFor(curFileId);
         }

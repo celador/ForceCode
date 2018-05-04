@@ -24,8 +24,6 @@ async function apexTest(toTest: string, classOrMethod: string): Promise<any> {
     
     // Start doing stuff
     // remove test coverage stuff
-    delete vscode.window.forceCode.codeCoverage;
-    vscode.window.forceCode.codeCoverage = new Array();
     vscode.window.forceCode.isBusy = true;
     var toRun: string;
     if(classOrMethod === 'class') {
