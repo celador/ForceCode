@@ -2,89 +2,29 @@ import * as vscode from 'vscode';
 import { ForceService } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
-import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator } from './decorators/testCoverageDecorator';
-import * as commands from './commands';
+import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator, updateDecorations } from './decorators/testCoverageDecorator';
+import * as commands from './models/commands';
 import * as parsers from './parsers';
-import { updateDecorations } from './decorators/testCoverageDecorator';
 
 export function activate(context: vscode.ExtensionContext): any {
     vscode.window.forceCode = new ForceService();
 
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.showMenu', () => {
-        commands.showMenu(context);
-    }));
-
+    commands.default.forEach(cur => {
+        context.subscriptions.push(vscode.commands.registerCommand(cur.name, cur.command));
+    });
+    
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('sflog', new ForceCodeLogProvider()));
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('forcecode', new ForceCodeContentProvider()));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.documentMethod', () => {
-        commands.documentMethod(context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.executeAnonymous', () => {
-        commands.executeAnonymous(vscode.window.activeTextEditor.document, context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.getLog', () => {
-        commands.getLog(context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.open', (selectedResource?: vscode.Uri) => {
-        if (selectedResource.path) {
-            vscode.workspace.openTextDocument(selectedResource).then(doc => commands.compile(doc, context));
-        } else {
-            commands.compile(vscode.window.activeTextEditor.document, context);
-        }
-        commands.open(context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.retrievePackage', () => {
-        commands.retrieve(context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.staticResource', () => {
-        commands.staticResource(context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.refresh', (selectedResource?: vscode.Uri) => {
-        commands.retrieve(context, selectedResource);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.compile', (selectedResource?: vscode.Uri) => {
-        if (selectedResource.path) {
-            vscode.workspace.openTextDocument(selectedResource)
-                .then(doc => commands.compile(doc, context));
-        } else {
-            commands.compile(vscode.window.activeTextEditor.document, context);
-        }
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.diff', () => {
-        commands.diff(vscode.window.activeTextEditor.document, context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.toggleCoverage', () => {
-        vscode.window.forceCode.config.showTestCoverage = !vscode.window.forceCode.config.showTestCoverage;
-        updateDecorations();
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('sfdx.force.apex.test.class.run.delegate', commands.apexTestClass));
-
-    context.subscriptions.push(vscode.commands.registerCommand('sfdx.force.apex.test.method.run.delegate', commands.apexTestMethod));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.openOrg', () => {
-        vscode.window.forceCode.dxCommands.openOrg();
-    }));
 
     // AutoCompile Feature
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         const toolingType: string = parsers.getToolingType(textDocument);
         if (toolingType && vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
-            commands.compile(textDocument, context);
+            vscode.window.forceCode.runCommand('ForceCode.compile', context);
         }
         var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
         if (isResource.index && vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
-            commands.staticResourceDeployFromFile(textDocument, context);
+            vscode.window.forceCode.runCommand('ForceCode.staticResource', context);
         }
     }));
 

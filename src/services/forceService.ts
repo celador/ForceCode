@@ -3,9 +3,10 @@ import * as forceCode from './../forceCode';
 import { operatingSystem } from './../services';
 import constants from './../models/constants';
 import { configuration } from './../services';
-import * as commands from './../commands';
+import * as commands from '../models/commands';
 import DXService, { SFDX } from './dxService';
 import * as path from 'path';
+import * as creds from './../commands/credentials';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
@@ -73,6 +74,11 @@ export default class ForceService implements forceCode.IForceService {
 
     public clearLog() {
         this.outputChannel.clear();
+    }
+
+    public runCommand(command: string, context: vscode.ExtensionContext, selectedResource?: vscode.Uri) {
+        // add something to keep track of the running command in here
+        return commands.default.find(cur => { return cur.name === command; }).command(context, selectedResource);
     }
 
     public newContainer(force: Boolean): Promise<forceCode.IForceService> {
@@ -194,7 +200,7 @@ export default class ForceService implements forceCode.IForceService {
         // Setup username and outputChannel
         self.username = (self.config && self.config.username) || '';
         if (!self.config || !self.config.username || !self.dxCommands.isLoggedIn) {
-            return commands.credentials().then(credentials => {
+            return creds.default().then(credentials => {
                 self.config.username = credentials.username;
                 self.config.autoCompile = credentials.autoCompile;
                 self.config.url = credentials.url;

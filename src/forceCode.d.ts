@@ -153,6 +153,7 @@ export interface IForceService {
     updateWorkspaceMembers(): Promise<any>;
     getWorkspaceMembers(metadata?): Promise<IWorkspaceMember[]>;
     cleanupContainers(): Promise<any>;
+    runCommand(command: string, context: vscode.ExtensionContext, selectedResource?: vscode.Uri): any;
 }
 
 
