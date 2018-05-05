@@ -46,7 +46,6 @@ export default function runDX() {
             if(result != undefined) {
                 vscode.window.forceCode.outputChannel.clear();
                 vscode.window.forceCode.outputChannel.show();
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: Running ' + opt.label + ' ' + result;
                 try{
                     return dxService.runCommand(opt.label, result);
                 } catch(e) {

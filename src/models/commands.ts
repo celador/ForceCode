@@ -484,4 +484,20 @@ export const fcCommands: FCCommand[] = [
                 });
         }
     },
+    {
+        commandName: 'ForceCode.showFileOptions',
+        name: 'Opening file',
+        hidden: true,
+        command: function (context, selectedResource?: vscode.Uri) {
+            return commands.showFileOptions(context);
+        }
+    },
+    {
+        commandName: 'ForceCode.apexTest',
+        name: 'Running apex test',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commands.apexTest(context, selectedResource);
+        }
+    },
 ]
