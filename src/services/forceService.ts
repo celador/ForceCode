@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { operatingSystem } from './../services';
+import { operatingSystem, configuration, commandViewService } from './../services';
 import constants from './../models/constants';
-import { configuration } from './../services';
 import * as commands from '../models/commands';
 import DXService, { SFDX } from './dxService';
 import * as path from 'path';
@@ -78,7 +77,8 @@ export default class ForceService implements forceCode.IForceService {
 
     public runCommand(command: string, context: vscode.ExtensionContext, selectedResource?: vscode.Uri) {
         // add something to keep track of the running command in here
-        return commands.default.find(cur => { return cur.name === command; }).command(context, selectedResource);
+        const theCommand = commands.default.find(cur => { return cur.name === command; });
+        return commandViewService.addCommandExecution(theCommand, context);
     }
 
     public newContainer(force: Boolean): Promise<forceCode.IForceService> {

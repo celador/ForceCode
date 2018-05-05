@@ -30,6 +30,14 @@
   ],
   "main": "./out/src/extension",
   "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "ForceCode.treeDataProvider",
+          "name": "ForceCode: Running Tasks"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "ForceCode.showMenu",

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ForceService } from './services';
+import { ForceService, commandViewService } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
 import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator, updateDecorations } from './decorators/testCoverageDecorator';
@@ -12,6 +12,8 @@ export function activate(context: vscode.ExtensionContext): any {
     commands.default.forEach(cur => {
         context.subscriptions.push(vscode.commands.registerCommand(cur.name, cur.command));
     });
+
+    context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.treeDataProvider', commandViewService));
     
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('sflog', new ForceCodeLogProvider()));
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('forcecode', new ForceCodeContentProvider()));

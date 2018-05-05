@@ -41,7 +41,8 @@ export default function showMenu(context: vscode.ExtensionContext) {
     }
     function processResult(result) {
         if (result !== undefined && result.description !== undefined) {
-            return quickpick.find(cur => { return result.description === cur.description; }).command(context);
+            return vscode.window.forceCode.runCommand(
+                quickpick.find(cur => { return result.description === cur.description; }).name, context);
         }
     }
     // =======================================================================================================================================

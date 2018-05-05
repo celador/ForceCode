@@ -4,7 +4,7 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-/*
+
 import {
   Event,
   EventEmitter,
@@ -12,6 +12,7 @@ import {
   TreeItem,
   TreeItemCollapsibleState
 } from 'vscode';
+import * as command from '../models/commands';
 
 export class CommandViewService implements TreeDataProvider<Task> {
   private static instance: CommandViewService;
@@ -34,12 +35,12 @@ export class CommandViewService implements TreeDataProvider<Task> {
     return CommandViewService.instance;
   }
 
-  public addCommandExecution(execution: CommandExecution): Task {
-    const task = new Task(this, execution);
-    task.monitor();
+  public addCommandExecution(execution: any, context: any): Task {
+    const task = new Task(this, execution, context);
     this.tasks.push(task);
 
     this._onDidChangeTreeData.fire();
+    task.run();
     return task;
   }
 
@@ -73,25 +74,24 @@ export class Task extends TreeItem {
   public readonly collapsibleState: TreeItemCollapsibleState;
 
   private readonly taskViewProvider: CommandViewService;
-  private readonly execution: CommandExecution;
+  private readonly execution: any;
+  private readonly context: any;
 
-  constructor(taskViewProvider: CommandViewService, execution: CommandExecution) {
+  constructor(taskViewProvider: CommandViewService, execution: any, context: any) {
     super(
-      nls.localize('task_view_running_message', execution.command),
+      execution.name,
       TreeItemCollapsibleState.None
     );
 
     this.taskViewProvider = taskViewProvider;
     this.execution = execution;
+    this.context = context;
   }
 
-  public monitor() {
-    this.execution.processExitSubject.subscribe(data => {
-      this.taskViewProvider.removeTask(this);
-    });
-    this.execution.processErrorSubject.subscribe(data => {
-      this.taskViewProvider.removeTask(this);
+  public run() {
+    return this.execution.command(this.context).then(res => {
+        this.taskViewProvider.removeTask(this);
+        return res;
     });
   }
 }
-*/

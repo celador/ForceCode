@@ -23,7 +23,7 @@ export default function find() {
                 var resArray: any[] = new Array();
                 resArray.push({records: searchResult.searchRecords});
 
-                return showFileOptions(resArray);
+                return showFileOptions(resArray).then(res => { return res; });
         });
     });
 }

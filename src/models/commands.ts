@@ -34,11 +34,7 @@ export default [
         icon: 'desktop-download',
         label: 'Open Salesforce File',
         command: function (context, selectedResource?: vscode.Uri) {
-            if (selectedResource && selectedResource.path) {
-                vscode.workspace.openTextDocument(selectedResource).then(doc => commands.compile(doc, context));
-            } else {
-                commands.compile(vscode.window.activeTextEditor.document, context);
-            }
+            vscode.window.forceCode.runCommand('ForceCode.compile', context, selectedResource);
             return commands.open(context);
         }
     },

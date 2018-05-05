@@ -4,3 +4,6 @@ import * as operatingSystem from './operatingSystem';
 import configuration from './configuration';
 
 export {ForceService, operatingSystem, configuration};
+import { CommandViewService } from './commandView';
+export const commandViewService = CommandViewService.getInstance();
+export { Task } from './commandView';
