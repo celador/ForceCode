@@ -70,8 +70,7 @@ export class FauxClassGenerator {
   public errorExit(err: string) {
     // Take the results
     // And write them to a file
-    vscode.window.forceCode.resetMenu();
-    vscode.window.forceCode.outputError({ message: err }, vscode.window.forceCode.outputChannel);
+    vscode.window.showErrorMessage(err);
     return err;
   }
 

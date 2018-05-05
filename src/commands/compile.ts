@@ -91,7 +91,6 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
     }
 
     function reportMetadataResults(result) {
-        vscode.window.forceCode.resetMenu();
         if (Array.isArray(result) && result.length && !result.some(i => !i.success)) {
             vscode.window.forceCode.showStatus('Successfully deployed ' + result[0].fullName);
             return result;

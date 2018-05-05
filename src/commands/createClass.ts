@@ -110,7 +110,6 @@ export default function createClass() {
                         vscode.window.showErrorMessage(err.code);
                         reject(err);
                     }
-                    vscode.window.forceCode.resetMenu();
                 });
             });
         }
