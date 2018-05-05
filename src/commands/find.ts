@@ -12,9 +12,9 @@ export default function find() {
         return vscode.window.forceCode.conn.search("FIND {*" + searchString + "*} IN ALL FIELDS RETURNING ApexClass(Id, Name, NamespacePrefix), "
             + "ApexTrigger(Id, Name, NamespacePrefix), ApexPage(Id, Name, NamespacePrefix), ApexComponent(Id, Name, NamespacePrefix), "
             + "StaticResource(Id, Name, NamespacePrefix, ContentType)", function(err, searchResult) {
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: Search complete';
+                vscode.window.forceCode.showStatus('ForceCode: Search complete');
                 if(err) {
-                    vscode.window.forceCode.outputError({message: err}, vscode.window.forceCode.outputChannel);
+                    vscode.window.showErrorMessage(err.message);
                     return;
                 }
                 var resArray: any[] = new Array();

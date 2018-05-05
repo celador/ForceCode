@@ -59,7 +59,6 @@ export default function runDX() {
         vscode.window.forceCode.dxCommands.saveToFile(vscode.window.forceCode.dxCommands.outputToString(message), 'dx.log');
         vscode.window.forceCode.outputChannel.show();
         vscode.window.forceCode.outputChannel.appendLine(vscode.window.forceCode.dxCommands.outputToString(message));
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: DX Command execution complete!';
-        vscode.window.forceCode.resetMenu();
+        vscode.window.forceCode.showStatus('ForceCode: DX Command execution complete!');
     }
 }

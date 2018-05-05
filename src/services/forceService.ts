@@ -64,15 +64,29 @@ export default class ForceService implements forceCode.IForceService {
         return this.setupConfig().then(this.login);
     }
 
-    public resetMenu() {
-        setTimeout(function() {
-            vscode.window.forceCode.statusBarItem.color = 'white';
-            vscode.window.forceCode.statusBarItem.text = 'ForceCode Menu';
-        }, 5000);
-    }
-
     public clearLog() {
         this.outputChannel.clear();
+    }
+
+    public showStatus(message: string) {
+        vscode.window.forceCode.statusBarItem_UserInfo.text = message;
+        this.resetStatus();
+    }
+
+    public resetStatus() {
+        // for status bar updates. update every 5 seconds
+        clearInterval(vscode.window.forceCode.statusInterval);
+        vscode.window.forceCode.statusInterval = setInterval(function () {
+            var lim = '';
+            if (vscode.window.forceCode.conn && vscode.window.forceCode.conn.limitInfo && vscode.window.forceCode.conn.limitInfo.apiUsage) {
+                lim = ' - Limits: ' + vscode.window.forceCode.conn.limitInfo.apiUsage.used + '/' + vscode.window.forceCode.conn.limitInfo.apiUsage.limit;
+            }
+            if(vscode.window.forceCode.config.username) {
+                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username + lim;
+            } else {
+                vscode.window.forceCode.statusBarItem_UserInfo.text = '$(alert) ForceCode not connected $(alert)';
+            }
+        }, 5000);
     }
 
     public runCommand(command: string, context: any, selectedResource?: any) {
@@ -184,15 +198,6 @@ export default class ForceService implements forceCode.IForceService {
         });
     }
 
-    public outputError(error: forceCode.ForceCodeError, outputChannel: vscode.OutputChannel) {
-        this.statusBarItem.text = 'ForceCode: Error, see console output for details';
-        this.resetMenu();
-        this.outputChannel.show();
-        this.outputChannel.appendLine('================================     ERROR     ================================\n');
-        this.outputChannel.appendLine(error.message);
-        return false;
-    };
-
     // TODO: Add keychain access so we don't have to use a username or password'
     // var keychain = require('keytar')
     private setupConfig(): Promise<forceCode.Config> {
@@ -220,7 +225,6 @@ export default class ForceService implements forceCode.IForceService {
                 connectionOptions.proxyUrl = self.config.proxyUrl;
             }
             if (!config.username) {
-                vscode.window.forceCode.outputChannel.appendLine('The force.json file seems to not have a username. Pease insure you have a properly formatted config file, or submit an issue to the repo @ https"//github.com/celador/forcecode/issues ');
                 throw { message: '$(alert) Missing Credentials $(alert)' };
             }
             // get sfdx login info and use oath2
@@ -245,7 +249,7 @@ export default class ForceService implements forceCode.IForceService {
                 .catch(connectionError)
                 .then(getNamespacePrefix)
                 .then(refreshApexMetadata)
-                .catch(err => self.outputError(err, vscode.window.forceCode.outputChannel));;
+                .catch(err => vscode.window.showErrorMessage(err.message));
 
             function refreshApexMetadata(svc) {
                 vscode.window.forceCode.refreshApexMetadata();
@@ -257,24 +261,10 @@ export default class ForceService implements forceCode.IForceService {
                 vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
                 vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username;
                 
-                // for status bar updates. update every 5 seconds
-                clearInterval(vscode.window.forceCode.statusInterval);
-                vscode.window.forceCode.statusInterval = setInterval(function () {
-                    var lim = '';
-                    if (vscode.window.forceCode.conn && vscode.window.forceCode.conn.limitInfo && vscode.window.forceCode.conn.limitInfo.apiUsage) {
-                        lim = ' - Limits: ' + vscode.window.forceCode.conn.limitInfo.apiUsage.used + '/' + vscode.window.forceCode.conn.limitInfo.apiUsage.limit;
-                    }
-                    if(vscode.window.forceCode.config.username) {
-                        vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username + lim;
-                    } else {
-                        vscode.window.forceCode.statusBarItem_UserInfo.text = '$(alert) ForceCode not connected $(alert)';
-                    }
-                }, 5000);
+                vscode.window.forceCode.resetStatus();
                 self.statusBarItem_UserInfo.show();
                 self.statusBarItem.show();
-                self.resetMenu();
 
-                self.outputChannel.appendLine(`Connected as ` + self.config.username);
                 self.username = config.username;
                 // query the userid
                 return self;
@@ -289,8 +279,6 @@ export default class ForceService implements forceCode.IForceService {
             }
             function connectionError(err) {
                 vscode.window.showErrorMessage(`ForceCode: $(alert) Connection Error $(alert)`);
-                self.outputChannel.appendLine('================================================================');
-                self.outputChannel.appendLine(err.message);
                 throw err;
             }
         } else {

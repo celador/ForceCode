@@ -21,7 +21,7 @@ export default function getLog(context: vscode.ExtensionContext) {
         .then(getLast10Logs)
         .then(displayOptions)
         .then(showLog)
-        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
+        .catch(err => vscode.window.showErrorMessage(err.message));
 
     function getLast10Logs(force: IForceService): Promise<QueryResult> {
 

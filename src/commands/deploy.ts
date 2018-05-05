@@ -62,7 +62,7 @@ export default function deploy(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     function finished(res): boolean {
         if (res.success) {
-            vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deployed $(thumbsup)';
+            vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
             if (deployOptions.checkOnly) {
                 fs.writeFileSync(validationIdPath, res.id);
             }
@@ -77,24 +77,23 @@ export default function deploy(context: vscode.ExtensionContext) {
     function onError(err) {
         unregisterProxy();
         vscode.window.showErrorMessage('ForceCode: Deploy Errors $(thumbsdown)');
-        return vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
+        return vscode.window.showErrorMessage(err.message);
     }
     // =======================================================================================================================================
     function registerProxy() {
         console.info = function () {
             var msg: string = arguments[0];
             if (msg.match(/Deploy is Pending/)) {
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Pending';
+                vscode.window.forceCode.showStatus('ForceCode: Deploy Pending');
             } else if (msg.match(/Components\:/)) {
                 let cnt: string = msg.match(/\d*\/\d*/) ? msg.match(/\d*\/\d*/)[0] : '...';
                 let icon: string = msg.match(/errors\: [1-9]/) ? 'thumbsdown' : 'thumbsup';
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying ${cnt} $(${icon})`;
+                vscode.window.forceCode.showStatus(`ForceCode: Deploying ${cnt} $(${icon})`);
             } else if (msg.match(/Tests\:/)) {
                 let cnt: string = msg.match(/\d*\/\d*/) ? msg.match(/\d*\/\d*/)[0] : '...';
                 let icon: string = msg.match(/errors\: [1-9]/) ? 'thumbsdown' : 'thumbsup';
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: Testing ${cnt} $(${icon})`;
+                vscode.window.forceCode.showStatus(`ForceCode: Testing ${cnt} $(${icon})`);
             }
-            vscode.window.forceCode.resetMenu();
             vscode.window.forceCode.outputChannel.appendLine(msg);
             return _consoleInfoReference.apply(this, arguments);
         };

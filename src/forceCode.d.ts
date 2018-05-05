@@ -133,8 +133,6 @@ export interface IForceService {
     codeCoverageWarnings?: ICodeCoverageWarning[];
     // symbolTable?: any;
     containerId?: string;
-    commandQueue: any[];
-    isBusy: boolean;
     statusInterval: any;    
     workspaceMembers: IWorkspaceMember[];
     containerMembers: IContainerMember[];
@@ -146,10 +144,11 @@ export interface IForceService {
     statusBarItem: vscode.StatusBarItem;
     connect(context: vscode.ExtensionContext): Promise<IForceService>;
     newContainer(force: Boolean): Promise<IForceService>;
+    showStatus(message: string): void;
     clearLog(): void;
-    resetMenu(): void;
     refreshApexMetadata(): Promise<any>;
-    outputError(error: ForceCodeError, outputChannel: vscode.OutputChannel): any;
+    showStatus(message: string): void;
+    resetStatus(): void;
     updateWorkspaceMembers(): Promise<any>;
     getWorkspaceMembers(metadata?): Promise<IWorkspaceMember[]>;
     cleanupContainers(): Promise<any>;

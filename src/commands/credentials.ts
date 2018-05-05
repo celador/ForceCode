@@ -59,7 +59,7 @@ export default function enterCredentials(): Promise<any> {
             .then(cfg => getUrl(cfg))
             .then(cfg => getAutoCompile(cfg))
             .then(cfg => writeConfigAndLogin(cfg))
-            .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
+            .catch(err => vscode.window.showErrorMessage(err.message));
     }
     // =======================================================================================================================================
     // =======================================================================================================================================

@@ -19,7 +19,7 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
             return res;
         }).then(res => runDiagnostics(res, document, selection))
         .then(showResult)
-        .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));;
+        .catch(err => vscode.window.showErrorMessage(err.message));;
     });
 
     function runDiagnostics(res: ExecuteAnonymousResult, _document: vscode.TextDocument, sel: any) {
@@ -47,13 +47,12 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
             vscode.window.showErrorMessage(`ForceCode: Execute Anonymous Errors $(alert)`);
             diagnostics.forEach(d => vscode.window.forceCode.outputChannel.appendLine(`Line ${Number(res.line)}: ${d.message}`));
         } else {
-            vscode.window.forceCode.statusBarItem.text = `ForceCode: Execute Anonymous Success $(check)`;
+            vscode.window.forceCode.showStatus(`ForceCode: Execute Anonymous Success $(check)`);
         }
         return res;
     }
 
     function showResult(res: ExecuteAnonymousResult) {
-        vscode.window.forceCode.resetMenu();
         vscode.window.forceCode.outputChannel.clear();
         vscode.window.forceCode.outputChannel.appendLine(logging.filterLog(res.logs));
         vscode.window.forceCode.outputChannel.show();

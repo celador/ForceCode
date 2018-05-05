@@ -22,7 +22,6 @@ export default async function codeCompletionRefresh(): Promise<any> {
     var objectsToGet: SObjectCategory;
     await vscode.window.showQuickPick(options, config).then((res: vscode.QuickPickItem) => {
         if(res === undefined) {
-            vscode.window.forceCode.resetMenu();
             return Promise.reject('No choice selected');
         }
         if(res.label === 'All') {
@@ -41,11 +40,10 @@ export default async function codeCompletionRefresh(): Promise<any> {
             await gen.generate(vscode.workspace.rootPath, objectsToGet);
             var endTime = (new Date()).getTime();
             vscode.window.forceCode.outputChannel.appendLine('Refresh took ' + Math.round((endTime - startTime) / (1000 * 60)) + ' minutes.');
-            vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieval of objects complete!!!';
-            vscode.window.forceCode.resetMenu();
+            vscode.window.forceCode.showStatus('ForceCode: Retrieval of objects complete!!!');
             return Promise.resolve();
         } catch(e) {
-            return Promise.reject(vscode.window.forceCode.outputError(e, vscode.window.forceCode.outputChannel));
+            return Promise.reject(vscode.window.showErrorMessage(e.message));
         }
     });
     // =======================================================================================================================================

@@ -27,8 +27,7 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
 
     function finish(res): QueryResult {
         if(res.entityTypeName === 'ApexCodeCoverageAggregate') {
-            vscode.window.forceCode.statusBarItem.text = 'ForceCode: Code coverage retrieval complete!';
-            vscode.window.forceCode.resetMenu();
+            vscode.window.forceCode.showStatus('ForceCode: Code coverage retrieval complete!');
         }
         return res;
     }

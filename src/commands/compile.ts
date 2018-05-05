@@ -22,11 +22,6 @@ interface ContainerAsyncRequest {
 
 
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
-    if (vscode.window.forceCode.isBusy) {
-        vscode.window.forceCode.commandQueue.push([compile, document, context]);
-        return Promise.reject({ message: 'Already compiling or running unit tests' });
-    }
-
     // update workspace members
     vscode.window.forceCode.updateWorkspaceMembers();
 
@@ -77,7 +72,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             ).then(finished, onError);
     } else {
         // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-        vscode.window.forceCode.isBusy = true;
         return vscode.window.forceCode.connect(context)
             .then(addToContainer)
             .then(requestCompile)
@@ -132,16 +126,15 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
 
     function reportMetadataResults(result) {
-        vscode.window.forceCode.resetMenu();
         if (Array.isArray(result) && result.length && !result.some(i => !i.success)) {
-            vscode.window.forceCode.statusBarItem.text = 'Successfully deployed ' + result[0].fullName;
+            vscode.window.forceCode.showStatus('Successfully deployed ' + result[0].fullName);
             return result;
         } else if (Array.isArray(result) && result.length && result.some(i => !i.success)) {
             let error: string = result.filter(i => !i.success).map(i => i.fullName).join(', ') + ' Failed';
             vscode.window.showErrorMessage(error);
             throw { message: error };
         } else if (typeof result === 'object' && result.success) {
-            vscode.window.forceCode.statusBarItem.text = 'Successfully deployed ' + result.fullName;
+            vscode.window.forceCode.showStatus('Successfully deployed ' + result.fullName);
             return result;
         } else {
             var error: any = result.errors ? result.errors[0] : 'Unknown Error';
@@ -479,40 +472,31 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         }
         // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
         diagnosticCollection.set(document.uri, diagnostics);
-        vscode.window.forceCode.resetMenu();
         if (diagnostics.length > 0) {
             // FAILURE !!! 
             vscode.window.showErrorMessage(`${name} ${DefType ? DefType : ''} $(alert)`);
             return false;
         } else {
             // SUCCESS !!! 
-            vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(check)`;
+            vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;
         }
     }
     function containerFinished(createNewContainer: boolean): any {
         // We got some records in our response
-        vscode.window.forceCode.isBusy = false;
         return vscode.window.forceCode.newContainer(createNewContainer).then(res => {
-            if (vscode.window.forceCode.commandQueue.length > 0) {
-                var toCompile = vscode.window.forceCode.commandQueue.shift();
-                return Promise.resolve(toCompile[0](toCompile[1], toCompile[2]));
-            } else {
-                return Promise.resolve();
-            }
+            return Promise.resolve();
         });
     }
     // =======================================================================================================================================
     function onError(err): any {
-        vscode.window.forceCode.resetMenu();
         if (toolingType === 'AuraDefinition') {
             return toolingError(err);
         } else if (toolingType === 'CustomObject' || toolingType === 'CustomLabels') {
             // Modify this if statement to check if any metadata type
             return metadataError(err);
         } else {
-            //clearInterval(interval);
-            vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
+            vscode.window.showErrorMessage(err.message);
         }
     }
 
@@ -535,7 +519,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         diagnostics.push(new vscode.Diagnostic(failureRange, errorMessage, 0));
         diagnosticCollection.set(document.uri, diagnostics);
 
-        vscode.window.forceCode.outputError({ message: statusMessage }, vscode.window.forceCode.outputChannel);
+        vscode.window.showErrorMessage(statusMessage);
         return false;
     }
     function metadataError(err) {
@@ -551,7 +535,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         diagnostics.push(new vscode.Diagnostic(failureRange, (errorInfo[0] || 'unknown error') + (errorInfo[3] || ''), 0));
         diagnosticCollection.set(document.uri, diagnostics);
 
-        vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
+        vscode.window.showErrorMessage(err.message);
         return false;
 
     }

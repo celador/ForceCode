@@ -22,8 +22,7 @@ export default function getOverallCoverage() {
                     outputString += curRes.ApexClassOrTrigger.Name + spaces.substr(0, spaces.length - curRes.ApexClassOrTrigger.Name.length - 1) + percent + spaces.substr(0, 20 - percent.length) + curRes.NumLinesCovered + '/' + total + '\n';
                 });
                 return vscode.window.forceCode.dxCommands.saveToFile(outputString, 'coverage' + path.sep + 'ApexCoverage-' + Date.now() + '.acov').then(filename =>{
-                    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Code coverage retrieval complete!';
-                    vscode.window.forceCode.resetMenu();
+                    vscode.window.forceCode.showStatus('ForceCode: Code coverage retrieval complete!');
                     return vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, 3));
                 });
             }

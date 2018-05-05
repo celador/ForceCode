@@ -14,16 +14,10 @@ export function apexTestMethod(testMethod: string) {
 }
 
 export async function apexTest(toTest: string, classOrMethod: string): Promise<any> {    
-    if(vscode.window.forceCode.isBusy)
-    {
-        vscode.window.forceCode.commandQueue.push([apexTest, toTest, classOrMethod]);
-        return Promise.reject({ message: 'Already compiling or running unit tests' });
-    }
     var name = toTest.split('.')[0];
     
     // Start doing stuff
     // remove test coverage stuff
-    vscode.window.forceCode.isBusy = true;
     var toRun: string;
     if(classOrMethod === 'class') {
         toRun = '-n ' + toTest;
@@ -46,24 +40,16 @@ export async function apexTest(toTest: string, classOrMethod: string): Promise<a
         });
 
     function showFail(err?) {
-        vscode.window.showErrorMessage('ForceCode: Failed to execute tests, wait at least a minute and try again.');
+        err.message = 'ForceCode: Failed to execute tests, wait at least a minute and try again.\n' + err.message;
         return endTest(err);
     }
     
     function endTest(err?) {
         if(err !== undefined) {
-            vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
+            vscode.window.showErrorMessage(err.message);
         }
         // end
-        vscode.window.forceCode.isBusy = false;
-        if(vscode.window.forceCode.commandQueue.length > 0)
-        {
-            var queue = vscode.window.forceCode.commandQueue.shift();
-            return Promise.resolve(queue[0](queue[1], queue[2]));
-        } else {
-            vscode.window.forceCode.resetMenu();
-            return Promise.resolve();
-        }
+        return Promise.resolve();
     }
 
     // =======================================================================================================================================
@@ -107,7 +93,7 @@ export async function apexTest(toTest: string, classOrMethod: string): Promise<a
                 vscode.window.forceCode.outputChannel.appendLine(errorMessage);
                 vscode.window.forceCode.outputChannel.appendLine('=======================================================================================================================================');
             } else {
-                vscode.window.showInformationMessage('ForceCode: All Tests Passed $(thumbsup)');
+                vscode.window.forceCode.showStatus('ForceCode: All Tests Passed $(thumbsup)');
                 let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
                 let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
                     if (prev) { return prev; }
@@ -121,8 +107,6 @@ export async function apexTest(toTest: string, classOrMethod: string): Promise<a
                 var successMessage: string = 'SUCCESS: ' + name + ':' + dxRes.tests[0].MethodName + ' - in ' + dxRes.summary.testExecutionTime;
                 vscode.window.forceCode.outputChannel.appendLine(successMessage);
             }
-            vscode.window.forceCode.resetMenu();
-
             return dxRes;
         });
     }

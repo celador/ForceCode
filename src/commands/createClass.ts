@@ -28,7 +28,7 @@ export default function createClass(context: vscode.ExtensionContext) {
         } else {
             throw { message: classesPath + ' is not a real folder. Check the src option in your config file.' };
         }
-    }).catch(err => vscode.window.forceCode.outputError);
+    }).catch(err => vscode.window.showErrorMessage(err.message));
 
 
     function userClassSelection() {
@@ -101,7 +101,7 @@ export default function createClass(context: vscode.ExtensionContext) {
                                 vscode.window.showErrorMessage(writeErr.message);
                                 reject(writeErr);
                             } else {
-                                vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + classname + ' was sucessfully created $(check)';
+                                vscode.window.forceCode.showStatus('ForceCode: ' + classname + ' was sucessfully created $(check)');
                                 resolve(finalClassName);
                             }
                         });
@@ -109,7 +109,6 @@ export default function createClass(context: vscode.ExtensionContext) {
                         vscode.window.showErrorMessage(err.code);
                         reject(err);
                     }
-                    vscode.window.forceCode.resetMenu();
                 });
             });
         }

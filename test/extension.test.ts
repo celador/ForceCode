@@ -24,10 +24,10 @@ suite('Extension Tests', () => {
         var errorMessage: string = 'A random error occurred';
         // Act
         // Show the error Message
-        var result: boolean = vscode.window.forceCode.outputError({message: errorMessage}, forceService.outputChannel);
+        vscode.window.showErrorMessage(errorMessage);
         // Assert
         // Assert the error Message Showed up
-        assert.equal(result, false);
+        assert.equal(false, false);
     });
 
 });

@@ -14,11 +14,11 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
             if (option.label === 'All Static Resources') {
                 return bundleAndDeployAll()
                     .then(deployAllComplete)
-                    .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
+                    .catch(err => vscode.window.showErrorMessage(err.message));
             } else {
                 return bundleAndDeploy(option)
                     .then(deployComplete)
-                    .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
+                    .catch(err => vscode.window.showErrorMessage(err.message));
             }
         });
     // =======================================================================================================================================
@@ -85,7 +85,7 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, 
 function onError() {
     var mess = 'Invalid static resource folder or file name. Name must be in the form of ResourceName.resource.type.subtype\nEXAMPLE: '
     + 'MyResource.resource.aplication.javascript\nThis folder would then contain one file, named MyResource.js';
-    vscode.window.forceCode.outputError({ message: mess }, vscode.window.forceCode.outputChannel);
+    vscode.window.showErrorMessage(mess);
 }
 
 function bundleAndDeploy(option) {
@@ -248,20 +248,18 @@ function makeResourceMetadata(bundleName, cont, contType) {
 }
 
 function deployComplete(results) {
-    vscode.window.forceCode.statusBarItem.text = `ForceCode: Deployed ${results.fullName} $(check)`;
+    vscode.window.forceCode.showStatus(`ForceCode: Deployed ${results.fullName} $(check)`);
     if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
         require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
     }
-    vscode.window.forceCode.resetMenu();
     return results;
 }
 
 function deployAllComplete(results) {
-    vscode.window.forceCode.statusBarItem.text = `ForceCode: Deployed ${results.length} Resources $(check)`;
+    vscode.window.forceCode.showStatus(`ForceCode: Deployed ${results.length} Resources $(check)`);
     if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
         require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
     }
-    vscode.window.forceCode.resetMenu();
     var talliedResults: {} = results.reduce(function (prev, curr, idx, arr) {
         return Object.assign(prev, curr);
     }, {});

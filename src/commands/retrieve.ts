@@ -368,9 +368,9 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         if (res.success) {
             setTimeout(function () {
                 if (option) {
-                    vscode.window.forceCode.statusBarItem.text = `Retrieve ${option.description} $(thumbsup)`;
+                    vscode.window.forceCode.showStatus(`Retrieve ${option.description} $(thumbsup)`);
                 } else {
-                    vscode.window.forceCode.statusBarItem.text = `Retrieve $(thumbsup)`;
+                    vscode.window.forceCode.showStatus(`Retrieve $(thumbsup)`);
                 }
             }, 100);
         } else {
@@ -378,7 +378,6 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 vscode.window.showErrorMessage('Retrieve Errors $(thumbsdown)');
             }, 100);
         }
-        vscode.window.forceCode.resetMenu();
         tools.reportRetrieveResult(res, logger, vscode.window.forceCode.config.deployOptions.verbose);
         logger.flush();
         unregisterProxy();
@@ -389,8 +388,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         setTimeout(function () {
             vscode.window.showErrorMessage('Retrieve Errors $(thumbsdown)');
         }, 100);
-        vscode.window.forceCode.resetMenu();
-        return vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
+        return vscode.window.showErrorMessage(err.message);
     }
     // =======================================================================================================================================
     function registerProxy() {

@@ -9,7 +9,7 @@ export default function diff(document: vscode.TextDocument, context: vscode.Exte
     try{
         diffFile()
     } catch(err) {
-        vscode.window.forceCode.outputError({ message: err.toString() }, vscode.window.forceCode.outputChannel);
+        vscode.window.showErrorMessage(err.message);
     } 
     return;
     // .then(finished)

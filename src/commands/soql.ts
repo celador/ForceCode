@@ -14,8 +14,7 @@ export default function soql(): any {
             return fs.outputFile(filePath, data, function() {
                 return vscode.workspace.openTextDocument(filePath).then(doc => { 
                     vscode.window.showTextDocument(doc);
-                    vscode.window.forceCode.statusBarItem.text = "ForceCode: Successfully executed query!";
-                    vscode.window.forceCode.resetMenu();
+                    vscode.window.forceCode.showStatus("ForceCode: Successfully executed query!");
                 });
             });
         })
@@ -23,8 +22,8 @@ export default function soql(): any {
     });
 
     function onError(err) {
-        vscode.window.showErrorMessage("ForceCode: Error running query");
-        vscode.window.forceCode.outputError({ message: err }, vscode.window.forceCode.outputChannel);
+        err = "ForceCode: Error running query\n" + err;
+        vscode.window.showErrorMessage(err);
     }
     // =======================================================================================================================================
 }

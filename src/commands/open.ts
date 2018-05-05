@@ -78,11 +78,10 @@ export function showFileOptions(promises: any[]) {
             return writeFiles(curRes, showFile).then(toRet => { return toRet; }); 
         });
         vscode.window.forceCode.updateWorkspaceMembers();
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieve Finished';
-        vscode.window.forceCode.resetMenu();
+        vscode.window.forceCode.showStatus('ForceCode: Retrieve Finished');
         return Promise.all(thePromises);
     })
-    .catch(err => vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel));
+    .catch(err => vscode.window.showErrorMessage(err.message));
 
 
     // =======================================================================================================================================
