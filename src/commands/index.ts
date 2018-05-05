@@ -1,5 +1,5 @@
 /* tslint:disable:no-unused-variable */
-import { apexTestClass, apexTestMethod } from './apexTest';
+import { apexTestClass, apexTestMethod, apexTest } from './apexTest';
 import apexTestResults from '../services/apexTestResults';
 import codeCompletionRefresh from './codeCompletionRefresh'
 import compile from './compile';
@@ -13,7 +13,7 @@ import documentMethod from './documentMethod';
 import executeAnonymous from './executeAnonymous';
 import find from './find';
 import getLog from './getLog';
-import open from './open';
+import { open, showFileOptions } from './open';
 import getOverallCoverage from './overallCoverage';
 import retrieve from './retrieve';
 import showMenu from './menu';
@@ -23,6 +23,7 @@ import toql from './toql';
 import {staticResourceDeployFromFile} from './staticResource';
 
 export {
+    apexTest,
     apexTestClass,
     apexTestMethod,
     apexTestResults,
@@ -41,6 +42,7 @@ export {
     open,
     getOverallCoverage,
     retrieve,
+    showFileOptions,
     showMenu,
     soql,
     staticResource,

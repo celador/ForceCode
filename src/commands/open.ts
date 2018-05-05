@@ -8,9 +8,7 @@ const mime = require('mime-types');
 import { getIcon, getExtension, getFolder } from './../parsers';
 const TYPEATTRIBUTE: string = 'type';
 
-export default function open(context: vscode.ExtensionContext) {
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Open File';
-
+export function open(context: vscode.ExtensionContext) {
     return vscode.window.forceCode.connect(context)
         .then(svc => getFileList())
         .then(proms => showFileOptions(proms));

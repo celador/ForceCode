@@ -8,8 +8,7 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
     var text = editor.document.getText(selection);
     if(text === '')
     {
-        vscode.window.forceCode.statusBarItem.text = 'No text selected to execute, please select code to run...';
-        vscode.window.forceCode.resetMenu();
+        vscode.window.showErrorMessage('No text selected to execute, please select code to run...');
         return;
     }
 
@@ -45,7 +44,7 @@ export default function executeAnonymous(document: vscode.TextDocument, context:
         diagnosticCollection.set(_document.uri, diagnostics);
         // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
         if (diagnostics.length > 0) {
-            vscode.window.forceCode.statusBarItem.text = `ForceCode: Execute Anonymous Errors $(alert)`;
+            vscode.window.showErrorMessage(`ForceCode: Execute Anonymous Errors $(alert)`);
             diagnostics.forEach(d => vscode.window.forceCode.outputChannel.appendLine(`Line ${Number(res.line)}: ${d.message}`));
         } else {
             vscode.window.forceCode.statusBarItem.text = `ForceCode: Execute Anonymous Success $(check)`;

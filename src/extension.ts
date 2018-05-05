@@ -10,7 +10,7 @@ export function activate(context: vscode.ExtensionContext): any {
     vscode.window.forceCode = new ForceService();
 
     commands.default.forEach(cur => {
-        context.subscriptions.push(vscode.commands.registerCommand(cur.name, cur.command));
+        context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
     });
 
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.treeDataProvider', commandViewService));

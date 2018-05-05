@@ -9,13 +9,11 @@ var tools: any = require('cs-jsforce-metadata-tools');
 var elegantSpinner: any = require('elegant-spinner');
 
 export default function retrieve(context: vscode.ExtensionContext, resource?: vscode.Uri) {
-    vscode.window.forceCode.statusBarItem.text = 'Retrieve Started';
     let option: any;
     const _consoleInfoReference: any = console.info;
     const _consoleErrorReference: any = console.error;
     const _consoleLogReference: any = console.log;
     const spinner: any = elegantSpinner();
-    var interval: any = undefined;
     const statsPath: string = `${vscode.workspace.rootPath}${path.sep}RetrieveStatistics.log`;
     var logger: any = (function (fs) {
         var buffer: string = '';
@@ -54,7 +52,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             if (response.status === 200) {
                 return response.text();
             } else {
-                vscode.window.forceCode.statusBarItem.text = response.statusText;
+                vscode.window.showErrorMessage(response.statusText);
                 return JSON.stringify({ PACKAGES: { packages: [] } });
             }
         }).then(function (json: string) {
@@ -150,7 +148,6 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         vscode.window.forceCode.conn.metadata.pollTimeout = (vscode.window.forceCode.config.pollTimeout || 600) * 1000;
 
         if (opt) {
-            showSpinner(option.description);
             return new Promise(pack);
         } else if (resource) {
             return new Promise(function (resolve, reject) {
@@ -192,8 +189,6 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                         return { name: r.xmlName, members: name };
                                     });
 
-                                showSpinner(name);
-
                                 resolve(vscode.window.forceCode.conn.metadata.retrieve({
                                     unpackaged: { types: types },
                                     apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
@@ -233,8 +228,6 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                         files.push(res['fileName']);
                                     }
 
-                                    showSpinner(fileName);
-
                                     // Retrieve the file by it's name
                                     resolve(vscode.window.forceCode.conn.metadata.retrieve({
                                         singlePackage: true,
@@ -261,15 +254,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             return types;
         }
 
-        function showSpinner(name) {
-            clearInterval(interval);
-            interval = setInterval(function () {
-                vscode.window.forceCode.statusBarItem.text = `Retrieve ${name} ` + spinner();
-            }, 50);
-        }
-
         function retrieveComponents(resolve, types, name) {
-            showSpinner(name);
             resolve(vscode.window.forceCode.conn.metadata.retrieve({
                 unpackaged: { types: types },
                 apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
@@ -380,7 +365,6 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     // =======================================================================================================================================
     // =======================================================================================================================================
     function finished(res): boolean {
-        clearInterval(interval);
         if (res.success) {
             setTimeout(function () {
                 if (option) {
@@ -391,7 +375,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             }, 100);
         } else {
             setTimeout(function () {
-                vscode.window.forceCode.statusBarItem.text = 'Retrieve Errors $(thumbsdown)';
+                vscode.window.showErrorMessage('Retrieve Errors $(thumbsdown)');
             }, 100);
         }
         vscode.window.forceCode.resetMenu();
@@ -401,10 +385,9 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         return res;
     }
     function onError(err) {
-        clearInterval(interval);
         unregisterProxy();
         setTimeout(function () {
-            vscode.window.forceCode.statusBarItem.text = 'Retrieve Errors $(thumbsdown)';
+            vscode.window.showErrorMessage('Retrieve Errors $(thumbsdown)');
         }, 100);
         vscode.window.forceCode.resetMenu();
         return vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);

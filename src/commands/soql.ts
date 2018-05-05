@@ -3,8 +3,6 @@ import fs = require('fs-extra');
 import * as path from 'path';
 
 export default function soql(): any {
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Run SOQL Query';
-
     let options: vscode.InputBoxOptions = {
         placeHolder: 'Enter SOQL query',
         prompt: `Enter a SOQL query to get the results in a json file in the soql folder`,
@@ -25,8 +23,7 @@ export default function soql(): any {
     });
 
     function onError(err) {
-        vscode.window.forceCode.statusBarItem.text = "ForceCode: Error running query";
-        vscode.window.forceCode.resetMenu();
+        vscode.window.showErrorMessage("ForceCode: Error running query");
         vscode.window.forceCode.outputError({ message: err }, vscode.window.forceCode.outputChannel);
     }
     // =======================================================================================================================================

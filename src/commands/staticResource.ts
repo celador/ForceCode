@@ -23,7 +23,6 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
         });
     // =======================================================================================================================================
     function getPackageName(service: IForceService): any {
-        vscode.window.forceCode.statusBarItem.text = `ForceCode: Get Packages $(list-unordered)`;
         let bundleDirectories: any[] = [];
         let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles';
         if (fs.existsSync(bundlePath)) {
@@ -225,7 +224,6 @@ function bundle(zip, packageName) {
  * @return undefined
  */
 function deploy(zip, packageName, conType) {
-    vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying $(rocket)`;
     // Create the base64 data to send to Salesforce 
     return zip.generateAsync({ type: 'base64', compression: 'DEFLATE' })
         .then(content => vscode.window.forceCode.conn.metadata.upsert('StaticResource', makeResourceMetadata(packageName, content, conType)));

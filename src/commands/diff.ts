@@ -6,7 +6,6 @@ const PROVIDER: string = 'forcecode://salesforce.com';
 export default function diff(document: vscode.TextDocument, context: vscode.ExtensionContext) {
     const toolingType: string = parsers.getToolingType(document);
     const fileName: string = parsers.getWholeFileName(document);
-    // vscode.window.forceCode.statusBarItem.text = 'ForceCode: Diffing';
     try{
         diffFile()
     } catch(err) {

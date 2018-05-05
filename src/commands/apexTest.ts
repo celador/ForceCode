@@ -5,21 +5,20 @@ import { configuration } from './../services';
 import { QueryResult } from '../services/dxService';
 import apexTestResults from '../services/apexTestResults';
 
-export function apexTestClass(testClass: string): Promise<any> {
-    return Promise.resolve(apexTest(testClass, 'class'));
+export function apexTestClass(testClass: string) {
+    return vscode.window.forceCode.runCommand('ForceCode.apexTest', testClass, 'class');
 }
 
-export function apexTestMethod(testMethod: string): Promise<any> {
-    return Promise.resolve(apexTest(testMethod, 'method'));
+export function apexTestMethod(testMethod: string) {
+    return vscode.window.forceCode.runCommand('ForceCode.apexTest', testMethod, 'method');
 }
 
-async function apexTest(toTest: string, classOrMethod: string): Promise<any> {    
+export async function apexTest(toTest: string, classOrMethod: string): Promise<any> {    
     if(vscode.window.forceCode.isBusy)
     {
         vscode.window.forceCode.commandQueue.push([apexTest, toTest, classOrMethod]);
         return Promise.reject({ message: 'Already compiling or running unit tests' });
     }
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: $(pulse) Running Unit Tests $(pulse)';
     var name = toTest.split('.')[0];
     
     // Start doing stuff
@@ -47,7 +46,7 @@ async function apexTest(toTest: string, classOrMethod: string): Promise<any> {
         });
 
     function showFail(err?) {
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Failed to execute tests, wait at least a minute and try again.';
+        vscode.window.showErrorMessage('ForceCode: Failed to execute tests, wait at least a minute and try again.');
         return endTest(err);
     }
     
@@ -74,7 +73,7 @@ async function apexTest(toTest: string, classOrMethod: string): Promise<any> {
             let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Test Failures');
             if (dxRes.summary.failing && dxRes.summary.failing > 0) {
                 vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   ==========================================================');
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: Some Tests Failed $(thumbsdown)';
+                vscode.window.showErrorMessage('ForceCode: Some Tests Failed $(thumbsdown)');
                 let re: RegExp = /^(Class|Trigger)\.\S*\.(\S*)\.(\S*)\:\sline\s(\d*)\,\scolumn\s(\d*)$/ig;
                 let matches: string[] = re.exec(dxRes.tests[0].StackTrace);
                 if (matches && matches.length && matches.length === 6) {
@@ -108,7 +107,7 @@ async function apexTest(toTest: string, classOrMethod: string): Promise<any> {
                 vscode.window.forceCode.outputChannel.appendLine(errorMessage);
                 vscode.window.forceCode.outputChannel.appendLine('=======================================================================================================================================');
             } else {
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: All Tests Passed $(thumbsup)';
+                vscode.window.showInformationMessage('ForceCode: All Tests Passed $(thumbsup)');
                 let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
                 let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
                     if (prev) { return prev; }

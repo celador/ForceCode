@@ -3,7 +3,6 @@ import * as forceCode from './../forceCode';
 import * as path from 'path';
 
 export default function getOverallCoverage() {
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieving overall code coverage';
     var query = 'SELECT ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered '
     + 'FROM ApexCodeCoverageAggregate '
     + 'WHERE (NumLinesCovered > 0 OR NumLinesUncovered > 0) '

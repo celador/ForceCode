@@ -22,7 +22,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 }
             });
         } else {
-            quickpick.push(model.find(cur => { return cur.name === 'ForceCode.enterCredentials'; }));
+            quickpick.push(model.find(cur => { return cur.commandName === 'ForceCode.enterCredentials'; }));
         }
         
         let options: vscode.QuickPickItem[] = quickpick.map(record => {

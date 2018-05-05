@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
+import * as parsers from './../parsers';
 
 export default [
     {
-        name: 'ForceCode.openOrg',
+        commandName: 'ForceCode.openOrg',
+        name: 'Opening org in browser',
         hidden: false,
         description: 'Open project org',
         detail: 'Open the org this project is associated with in a browser.',
@@ -15,7 +17,8 @@ export default [
         }
     },
     {
-        name: 'ForceCode.find',
+        commandName: 'ForceCode.find',
+        name: 'Finding in files',
         hidden: false,
         description: 'Find in files',
         detail: 'Search salesforce source files for a string.',
@@ -27,7 +30,8 @@ export default [
     },
     // Open File
     {
-        name: 'ForceCode.open',
+        commandName: 'ForceCode.open',
+        name: 'Opening file',
         hidden: false,
         description: 'Open Classes, Pages, Triggers, and Components',
         detail: 'Open a file from the cloud (aka "refresh from org").',
@@ -40,7 +44,8 @@ export default [
     },
     // Create Classes
     {
-        name: 'ForceCode.createClass',
+        commandName: 'ForceCode.createClass',
+        name: 'Creating class',
         hidden: false,
         description: 'Create a Repository, Model, Service, Controller, or Custom class.',
         detail: 'Creates classes based on common separation of concerns patterns',
@@ -53,7 +58,8 @@ export default [
     // Execute Anonymous 
     // Execute Selected Code
     {
-        name: 'ForceCode.executeAnonymous',
+        commandName: 'ForceCode.executeAnonymous',
+        name: 'Executing anonymous code',
         hidden: false,
         description: 'Execute code and get the debug log',
         detail: 'If you have a block of text selected, it will run that, otherwise it will use the text of the active file.',
@@ -65,7 +71,8 @@ export default [
     },
     // Get Log(s)
     {
-        name: 'ForceCode.getLogs',
+        commandName: 'ForceCode.getLogs',
+        name: 'Retrieving logs',
         hidden: false,
         description: 'Display a list of the last ten logs.',
         detail: 'Get recent logs',
@@ -76,7 +83,8 @@ export default [
         }
     },
     {
-        name: 'ForceCode.getCodeCoverage',
+        commandName: 'ForceCode.getCodeCoverage',
+        name: 'Retriving code coverage',
         hidden: false,
         description: 'Get code coverage',
         detail: 'Retrieve the current code coverage for all files in the src folder.',
@@ -87,7 +95,8 @@ export default [
         }
     },
     {
-        name: 'ForceCode.getOverallCoverage',
+        commandName: 'ForceCode.getOverallCoverage',
+        name: 'Retrieving code coverage',
         hidden: false,
         description: 'Get overall code coverage',
         detail: 'Retrieve the current code coverage for all files in the org and save in the coverage folder as a txt file.',
@@ -99,7 +108,8 @@ export default [
     },
     // Run SOQL
     {
-        name: 'ForceCode.soql',
+        commandName: 'ForceCode.soql',
+        name: 'Executing SOQL query',
         hidden: false,
         description: 'Run a SOQL query',
         detail: 'The SOQL query results will be dumped to a json file in the soql directory',
@@ -111,7 +121,8 @@ export default [
     },
     // Diff Files
     {
-        name: 'ForceCode.diff',
+        commandName: 'ForceCode.diff',
+        name: 'Diffing ' + parsers.getFileName(vscode.window.activeTextEditor.document),
         hidden: false,
         description: 'Diff the current file with what is on the server',
         detail: 'Diff the file',
@@ -123,7 +134,8 @@ export default [
     },
     // Compile/Deploy
     {
-        name: 'ForceCode.compile',
+        commandName: 'ForceCode.compile',
+        name: 'Compiling ' + parsers.getFileName(vscode.window.activeTextEditor.document),
         hidden: false,
         description: 'Save the active file to your org.',
         detail: 'If there is an error, you will get notified. To automatically compile Salesforce files on save, set the autoCompile flag to true in your settings file',
@@ -140,7 +152,8 @@ export default [
     },
     // Build/Deploy Resource Bundle(s)
     {
-        name: 'ForceCode.staticResource',
+        commandName: 'ForceCode.staticResource',
+        name: 'Retrieving static resource',
         hidden: false,
         description: 'Build and Deploy a resource bundle.',
         detail: 'Create the Static Resource from the resource-bundle folder and deploy it to your org.',
@@ -152,7 +165,8 @@ export default [
     },
     // Retrieve Package
     {
-        name: 'ForceCode.retrievePackage',
+        commandName: 'ForceCode.retrievePackage',
+        name: 'Retrieving package',
         hidden: false,
         description: 'Retrieve metadata to your src directory.',
         detail: 'You will be prompted for the package name or you can choose to retrieve by your package.xml or to retrieve all metadata',
@@ -164,7 +178,8 @@ export default [
     },
     // Export Package (Deploy via Metadata API, using Package.xml)
     {
-        name: 'ForceCode.deployPackage',
+        commandName: 'ForceCode.deployPackage',
+        name: 'Deploying package',
         hidden: false,
         description: 'Deploy your package.',
         detail: 'If you have a directory with a package.xml, you will get the option to deploy it.',
@@ -176,7 +191,8 @@ export default [
     },
     // Run Tooling Query
     {
-        name: 'ForceCode.toql',
+        commandName: 'ForceCode.toql',
+        name: 'Executing TOQL query',
         hidden: false,
         description: 'Run a Tooling API query',
         detail: 'The Tooling API query (Select SymbolTable From ApexClass) results will be dumped to a json file in the toql directory',
@@ -187,7 +203,8 @@ export default [
         }
     },
     {
-        name: 'ForceCode.dx',
+        commandName: 'ForceCode.dx',
+        name: 'Running DX command',
         hidden: false,
         description: 'Salesforce DX Commands',
         detail: 'Run DX commands, just like on a command line.',
@@ -198,7 +215,8 @@ export default [
         }
     },
     {
-        name: 'ForceCode.codeCompletionRefresh',
+        commandName: 'ForceCode.codeCompletionRefresh',
+        name: 'Refreshing Code Completion',
         hidden: false,
         description: 'Refresh objects from org',
         detail: 'You must login to DX first or if you receive errors. Allows code completion with custom fields and objects by downloading org data.',
@@ -209,7 +227,8 @@ export default [
         }
     },
     {
-        name: 'ForceCode.dxLogout',
+        commandName: 'ForceCode.dxLogout',
+        name: 'Logging out',
         hidden: false,
         description: 'Log out from current org',
         detail: 'Log out of the current org in this project.',
@@ -221,7 +240,8 @@ export default [
     },
     // Enter Salesforce Credentials
     {
-        name: 'ForceCode.enterCredentials',
+        commandName: 'ForceCode.enterCredentials',
+        name: 'Logging in',
         hidden: false,
         description: 'Enter the credentials you wish to use.',
         detail: 'If you are already logged in, you will be logged out of your previous session.',
@@ -232,28 +252,28 @@ export default [
         }
     },
     {
-        name: 'ForceCode.refresh',
+        commandName: 'ForceCode.refresh',
         hidden: true,
         command: function (context, selectedResource?: vscode.Uri) {
             return commands.retrieve(context, selectedResource);
         }
     },
     {
-        name: 'ForceCode.showMenu',
+        commandName: 'ForceCode.showMenu',
         hidden: true,
         command: function (context, selectedResource?: vscode.Uri) {
             return commands.showMenu(context);
         }
     },
     {
-        name: 'ForceCode.documentMethod',
+        commandName: 'ForceCode.documentMethod',
         hidden: true,
         command: function (context, selectedResource?: vscode.Uri) {
             return commands.documentMethod(context);
         }
     },
     {
-        name: 'ForceCode.toggleCoverage',
+        commandName: 'ForceCode.toggleCoverage',
         hidden: true,
         command: function (context, selectedResource?: vscode.Uri) {
             vscode.window.forceCode.config.showTestCoverage = !vscode.window.forceCode.config.showTestCoverage;
@@ -261,17 +281,33 @@ export default [
         }
     },
     {
-        name: 'sfdx.force.apex.test.class.run.delegate',
+        commandName: 'sfdx.force.apex.test.class.run.delegate',
         hidden: true,
         command: function (context, selectedResource?: vscode.Uri) {
             return commands.apexTestClass(context);
         }
     },
     {
-        name: 'sfdx.force.apex.test.method.run.delegate',
+        commandName: 'sfdx.force.apex.test.method.run.delegate',
         hidden: true,
         command: function (context, selectedResource?: vscode.Uri) {
             return commands.apexTestMethod(context);
+        }
+    },
+    {
+        commandName: 'ForceCode.showFileOptions',
+        name: 'Opening file',
+        hidden: true,
+        command: function (context, selectedResource?: vscode.Uri) {
+            return commands.showFileOptions(context);
+        }
+    },
+    {
+        commandName: 'ForceCode.apexTest',
+        name: 'Running apex test',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commands.apexTest(context, selectedResource);
         }
     },
 ]

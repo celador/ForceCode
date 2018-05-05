@@ -3,9 +3,7 @@ import * as dx from './dx';
 import * as ccr from '../dx/generator';
 import {SObjectCategory} from '../dx/describe';
 
-export default async function codeCompletionRefresh(): Promise<any> {
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Refresh Objects from Org';
-    
+export default async function codeCompletionRefresh(): Promise<any> {    
     let options: vscode.QuickPickItem[] = [{
         description: 'Generate faux classes for all objects',
         label: 'All',
@@ -34,7 +32,6 @@ export default async function codeCompletionRefresh(): Promise<any> {
         } else {
             objectsToGet = SObjectCategory.CUSTOM;
         }
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Refreshing ' + res.label + ' Objects from Org, this could take a VERY LONG TIME!!!';
     }).then(async function() {
         vscode.window.forceCode.outputChannel.clear();
         vscode.window.forceCode.outputChannel.show();

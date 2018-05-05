@@ -3,8 +3,6 @@ import fs = require('fs-extra');
 import * as path from 'path';
 
 export default function toql(): any {
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Run TOQL Query';
-
     let options: vscode.InputBoxOptions = {
         placeHolder: 'Enter Tooling Object query',
         prompt: `Enter a TOQL query to get the results in a json file in the toql folder`,
@@ -25,8 +23,7 @@ export default function toql(): any {
     });
 
     function onError(err) {
-        vscode.window.forceCode.statusBarItem.text = "ForceCode: Error running query";
-        vscode.window.forceCode.resetMenu();
+        vscode.window.showErrorMessage("ForceCode: Error running query");
         vscode.window.forceCode.outputError({ message: err }, vscode.window.forceCode.outputChannel);
     }
     // =======================================================================================================================================

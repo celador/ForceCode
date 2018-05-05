@@ -5,7 +5,6 @@ var alm: any = require('salesforce-alm');
 
 export default function runDX() {
     var theCmd: any = undefined;
-    vscode.window.forceCode.statusBarItem.text = 'DX Menu';
 
     return showFileOptions()
         .then(getArgsAndRun)
@@ -47,7 +46,6 @@ export default function runDX() {
             if(result != undefined) {
                 vscode.window.forceCode.outputChannel.clear();
                 vscode.window.forceCode.outputChannel.show();
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: Running ' + opt.label + ' ' + result;
                 try{
                     return vscode.window.forceCode.dxCommands.runCommand(opt.label, result);
                 } catch(e) {

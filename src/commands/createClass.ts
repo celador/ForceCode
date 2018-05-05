@@ -91,7 +91,6 @@ export default function createClass(context: vscode.ExtensionContext) {
                 var finalClassName: string = classesPath + path.sep + classname + '.cls';
                 fs.stat(finalClassName, function (err, stats) {
                     if (!err) {
-                        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Error creating file';
                         vscode.window.showErrorMessage('Cannot create ' + finalClassName + '. A file with that name already exists!');
                     } else if (err.code === 'ENOENT') {
                         var classFile: string = `public with sharing class ${classname} {
@@ -99,7 +98,6 @@ export default function createClass(context: vscode.ExtensionContext) {
 }`;
                         fs.outputFile(finalClassName, classFile, function (writeErr) {
                             if (writeErr) {
-                                vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + writeErr.message;
                                 vscode.window.showErrorMessage(writeErr.message);
                                 reject(writeErr);
                             } else {
@@ -108,7 +106,6 @@ export default function createClass(context: vscode.ExtensionContext) {
                             }
                         });
                     } else {
-                        vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + err.code;
                         vscode.window.showErrorMessage(err.code);
                         reject(err);
                     }

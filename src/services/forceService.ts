@@ -75,9 +75,9 @@ export default class ForceService implements forceCode.IForceService {
         this.outputChannel.clear();
     }
 
-    public runCommand(command: string, context: vscode.ExtensionContext, selectedResource?: vscode.Uri) {
+    public runCommand(command: string, context: any, selectedResource?: any) {
         // add something to keep track of the running command in here
-        const theCommand = commands.default.find(cur => { return cur.name === command; });
+        const theCommand = commands.default.find(cur => { return cur.commandName === command; });
         return commandViewService.addCommandExecution(theCommand, context);
     }
 
@@ -288,7 +288,7 @@ export default class ForceService implements forceCode.IForceService {
                 });
             }
             function connectionError(err) {
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(alert) Connection Error $(alert)`;
+                vscode.window.showErrorMessage(`ForceCode: $(alert) Connection Error $(alert)`);
                 self.outputChannel.appendLine('================================================================');
                 self.outputChannel.appendLine(err.message);
                 throw err;

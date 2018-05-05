@@ -5,7 +5,6 @@ import * as path from 'path';
 var tools: any = require('cs-jsforce-metadata-tools');
 
 export default function deploy(context: vscode.ExtensionContext) {
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Started';
     vscode.window.forceCode.outputChannel.clear();
     var _consoleInfoReference: any = console.info;
     var _consoleErrorReference: any = console.error;
@@ -68,9 +67,8 @@ export default function deploy(context: vscode.ExtensionContext) {
                 fs.writeFileSync(validationIdPath, res.id);
             }
         } else {
-            vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Errors $(thumbsdown)';
+            vscode.window.showErrorMessage('ForceCode: Deploy Errors $(thumbsdown)');
         }
-        vscode.window.forceCode.resetMenu();
         tools.reportDeployResult(res, logger, deployOptions.verbose);
         logger.flush();
         unregisterProxy();
@@ -78,8 +76,7 @@ export default function deploy(context: vscode.ExtensionContext) {
     }
     function onError(err) {
         unregisterProxy();
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Errors $(thumbsdown)';
-        vscode.window.forceCode.resetMenu();
+        vscode.window.showErrorMessage('ForceCode: Deploy Errors $(thumbsdown)');
         return vscode.window.forceCode.outputError(err, vscode.window.forceCode.outputChannel);
     }
     // =======================================================================================================================================

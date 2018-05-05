@@ -3,8 +3,6 @@ import { showFileOptions } from './open';
 
 export default function find() {
     // need to ask for a search string then pass off to open
-    //...get string here....
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Search in files';
 
     let options: vscode.InputBoxOptions = {
         placeHolder: 'Enter Search String',
@@ -15,7 +13,6 @@ export default function find() {
             + "ApexTrigger(Id, Name, NamespacePrefix), ApexPage(Id, Name, NamespacePrefix), ApexComponent(Id, Name, NamespacePrefix), "
             + "StaticResource(Id, Name, NamespacePrefix, ContentType)", function(err, searchResult) {
                 vscode.window.forceCode.statusBarItem.text = 'ForceCode: Search complete';
-                vscode.window.forceCode.resetMenu();
                 if(err) {
                     vscode.window.forceCode.outputError({message: err}, vscode.window.forceCode.outputChannel);
                     return;
@@ -23,7 +20,7 @@ export default function find() {
                 var resArray: any[] = new Array();
                 resArray.push({records: searchResult.searchRecords});
 
-                return showFileOptions(resArray).then(res => { return res; });
+                return vscode.window.forceCode.runCommand('ForceCode.showFileOptions', resArray);
         });
     });
 }

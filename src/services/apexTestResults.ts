@@ -4,10 +4,6 @@ import { QueryResult } from '../services/dxService';
 import { editorUpdateApexCoverageDecorator } from '../decorators/testCoverageDecorator';
 
 export default function getApexTestResults(testClassIds?: string[]): Promise<QueryResult> {
-    if(!testClassIds) {
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieving current code coverage data...';
-    }
-
     let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
     var memberIds: string[] = new Array<string>();
     var fromWhere: string = testClassIds ? ' ApexCodeCoverage ' : ' ApexCodeCoverageAggregate ';
