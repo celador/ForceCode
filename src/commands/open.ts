@@ -70,13 +70,14 @@ export function showFileOptions(promises: any[]) {
     })
     .then(res => {
         var count: number = 0;
-        var showFile: boolean = true;
+        var showFile: boolean = vscode.window.forceCode.config.showFilesOnOpen;
+        var maxToShow: number = vscode.window.forceCode.config.showFilesOnOpenMax ? vscode.window.forceCode.config.showFilesOnOpenMax : 3;
         var thePromises: any[] = res.map(curRes => { 
             count++;
-            if(count > 3) {
+            if(count > maxToShow) {
                 showFile = false;
             }
-            return writeFiles(curRes, showFile); 
+            return writeFiles(curRes, showFile).then(toRet => { return toRet; }); 
         });
         vscode.window.forceCode.updateWorkspaceMembers();
         vscode.window.forceCode.statusBarItem.text = 'ForceCode: Retrieve Finished';

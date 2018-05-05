@@ -38,6 +38,8 @@ export interface Config {
     pollTimeout?: number;
     prefix?: string;
     proxyUrl?: string;
+    showFilesOnOpen?: boolean;
+    showFilesOnOpenMax?: number;
     showTestCoverage? : boolean;
     showTestLog? : boolean;
     spaDist? : string;

@@ -131,6 +131,8 @@ export default function enterCredentials(): Promise<any> {
             autoRefresh: false,
             showTestCoverage: true,
             showTestLog: true,
+            showFilesOnOpen: true,
+            showFilesOnOpenMax: 3,
             browser: 'Google Chrome Canary',
             pollTimeout: 1200,
             debugOnly: true,
