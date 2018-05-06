@@ -149,7 +149,6 @@ export interface IForceService {
     refreshApexMetadata(): Promise<any>;
     showStatus(message: string): void;
     resetStatus(): void;
-    updateWorkspaceMembers(): Promise<any>;
     getWorkspaceMembers(metadata?): Promise<IWorkspaceMember[]>;
     cleanupContainers(): Promise<any>;
     runCommand(command: string, context: any, selectedResource?: any): any;

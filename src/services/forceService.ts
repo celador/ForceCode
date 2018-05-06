@@ -28,15 +28,11 @@ export default class ForceService implements forceCode.IForceService {
     public operatingSystem: string;
     public workspaceRoot: string;
     public workspaceMembers: forceCode.IWorkspaceMember[];
-    public commandQueue: any[];
-    public isBusy: boolean;
     public statusInterval: any; 
     private commandTimeout: any;
 
     constructor() {
-        this.commandQueue = new Array();
         this.dxCommands = new DXService();
-        this.isBusy = false;
         // Set the ForceCode configuration
         this.operatingSystem = operatingSystem.getOS();
         // Setup username and outputChannel
@@ -101,7 +97,7 @@ export default class ForceService implements forceCode.IForceService {
             } else {
                 splitPath = vscode.window.activeTextEditor.document.fileName.split(path.sep);
             }
-            theCommand.name += splitPath[splitPath.length - 1].split('.')[0];
+            theCommand.name = 'Saving ' + splitPath[splitPath.length - 1].split('.')[0];
         }
         
         return commandViewService.addCommandExecution(theCommand, context);
@@ -162,14 +158,6 @@ export default class ForceService implements forceCode.IForceService {
 
     }
 
-    public updateWorkspaceMembers(): Promise<any> {
-        var self: forceCode.IForceService = vscode.window.forceCode;
-        return self.getWorkspaceMembers().then(members => {
-                self.workspaceMembers = members;
-                return Promise.resolve(self.workspaceMembers);
-            });
-    }
-
     // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
     public cleanupContainers(): Promise<any> {
         return new Promise(function (resolve, reject) {
@@ -204,9 +192,11 @@ export default class ForceService implements forceCode.IForceService {
                 });
             return self.conn.metadata.list(apexTypes).then(res => {
                 self.apexMetadata = res;
-                return res;
-            }).then(self.updateWorkspaceMembers)
-              .then(self.cleanupContainers);
+                self.getWorkspaceMembers().then(members => {
+                    self.workspaceMembers = members;
+                    return self;
+                });
+            });
         });
     }
 
@@ -261,10 +251,16 @@ export default class ForceService implements forceCode.IForceService {
                 .catch(connectionError)
                 .then(getNamespacePrefix)
                 .then(refreshApexMetadata)
+                .then(cleanupContainers)
                 .catch(err => vscode.window.showErrorMessage(err.message));
 
             function refreshApexMetadata(svc) {
                 vscode.window.forceCode.refreshApexMetadata();
+                return svc;
+            }
+
+            function cleanupContainers(svc) {
+                vscode.window.forceCode.cleanupContainers();
                 return svc;
             }
 

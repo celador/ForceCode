@@ -62,11 +62,9 @@ export function apexTest(toTest: string, classOrMethod: string) {
                     let _lin: number = lin > 0 ? lin - 1 : 0;
                     let col: number = +matches[5];
                     // get URI of document from class name and workspace path
-                    let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
-                    let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
-                        if (prev) { return prev; }
-                        return curr.name === name ? curr : undefined;
-                    }, undefined);
+                    let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers.find(curr => {
+                        return curr.name === name;
+                    });
                     if (member) {
                         let docUri: vscode.Uri = vscode.Uri.file(member.path);
                         let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(_lin, col));
@@ -86,11 +84,9 @@ export function apexTest(toTest: string, classOrMethod: string) {
                 vscode.window.forceCode.outputChannel.appendLine('=======================================================================================================================================');
             } else {
                 vscode.window.forceCode.showStatus('ForceCode: All Tests Passed $(thumbsup)');
-                let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
-                let member: forceCode.IWorkspaceMember = members && members.reduce((prev, curr) => {
-                    if (prev) { return prev; }
-                    return curr.name === name ? curr : undefined;
-                }, undefined);
+                let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers.find(curr => {
+                    return curr.name === name;
+                });
                 if (member) {
                     let docUri: vscode.Uri = vscode.Uri.file(member.path);
                     let diagnostics: vscode.Diagnostic[] = [];

@@ -7,7 +7,6 @@ const parseString: any = require('xml2js').parseString;
 
 // TODO: Refactor some things out of this file.  It's getting too big.
 
-var elegantSpinner: any = require('elegant-spinner');
 const UPDATE: boolean = true;
 const CREATE: boolean = false;
 
@@ -22,15 +21,11 @@ interface ContainerAsyncRequest {
 
 
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
-    // update workspace members
-    vscode.window.forceCode.updateWorkspaceMembers();
-
     const body: string = document.getText();
     const ext: string = parsers.getFileExtension(document);
     const toolingType: string = parsers.getToolingType(document);
     const fileName: string = parsers.getFileName(document);
     const name: string = parsers.getName(document, toolingType);
-    const spinner: any = elegantSpinner();
     var checkCount: number = 0;
 
     /* tslint:disable */
@@ -298,15 +293,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             SystemModstamp: string;
         }
         function getWorkspaceMemberForMetadataResult(record: MetadataResult) {
-            return fc.workspaceMembers ? fc.workspaceMembers.reduce((acc, member) => {
-                if (acc) { return acc; }
-                let namespaceMatch: boolean = member.memberInfo.namespacePrefix === record.NamespacePrefix;
-                let nameMatch: boolean = member.name.toLowerCase() === record.Name.toLowerCase();
-                let typeMatch: boolean = member.memberInfo.type === record.attributes.type;
-                if (namespaceMatch && nameMatch && typeMatch) {
-                    return member;
-                }
-            }, undefined) : undefined;
+            return fc.workspaceMembers ? fc.workspaceMembers.find(member => {
+                return member.memberInfo.id === record.Id;
+            }) : undefined;
         }
         function shouldCompile(record) {
             let mem: forceCode.IWorkspaceMember = getWorkspaceMemberForMetadataResult(record);
@@ -367,7 +356,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 // Tooling Object does not exist
                 // so we CREATE it
                 return fc.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
-                    return fc;
+                    fc.refreshApexMetadata().then(bar => {
+                        return fc;
+                    });
                 });
             }
         }

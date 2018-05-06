@@ -77,7 +77,6 @@ export function showFileOptions(promises: any[]) {
             }
             return writeFiles(curRes, showFile).then(toRet => { return toRet; }); 
         });
-        vscode.window.forceCode.updateWorkspaceMembers();
         vscode.window.forceCode.showStatus('ForceCode: Retrieve Finished');
         return Promise.all(thePromises);
     })
