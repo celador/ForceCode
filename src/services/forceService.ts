@@ -102,14 +102,6 @@ export default class ForceService implements forceCode.IForceService {
 
     }
 
-    public updateWorkspaceMembers(): Promise<any> {
-        var self: forceCode.IForceService = vscode.window.forceCode;
-        return self.getWorkspaceMembers().then(members => {
-                self.workspaceMembers = members;
-                return Promise.resolve(self.workspaceMembers);
-            });
-    }
-
     // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
     public cleanupContainers(): Promise<any> {
         return new Promise(function (resolve, reject) {
