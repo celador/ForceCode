@@ -139,6 +139,7 @@ export default class ForceService implements forceCode.IForceService {
         return Promise.all(proms).then(rets => {
             return parseRecords(rets);
         });
+    }
 
         function parseRecords(recs: any[]): Promise<any> {
             if(!Array.isArray(recs)) {
@@ -173,6 +174,9 @@ export default class ForceService implements forceCode.IForceService {
                 return Promise.resolve();
             });
         }
+        console.log('Done getting workspace info');
+        self.dxCommands.saveToFile(JSON.stringify(self.workspaceMembers), 'wsMembers.json');
+        return self;
     }
 
         // Get files in src folder..
