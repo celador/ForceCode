@@ -11,13 +11,21 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 			throw { message: 'Open a Folder with VSCode' }
 		}
 		try {
-			self.config = Object.assign(self.config || {}, fs.readJsonSync(vscode.workspace.rootPath + path.sep + 'force.json'));
+			self.config = fs.readJsonSync(vscode.workspace.rootPath + path.sep + 'force.json');
 			if (typeof self.config === 'object' && !self.config.src) {
 				self.config.src = 'src';
 			}
 			self.workspaceRoot = `${vscode.workspace.rootPath}${path.sep}${self.config.src}`;
 			if (!fs.existsSync(self.workspaceRoot)) {
 				fs.mkdirSync(self.workspaceRoot);
+			}
+			try{
+				// read previous metadata
+				if(!self.workspaceMembers) {
+					self.workspaceMembers = fs.readJsonSync(vscode.workspace.rootPath + path.sep + 'wsMembers.json');
+				}
+			} catch (e) {
+				self.workspaceMembers = undefined;
 			}
 			resolve(self.config);
 		} catch (err) {

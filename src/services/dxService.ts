@@ -136,7 +136,7 @@ export default class DXService implements DXCommands {
 
     public async saveToFile(data: any, fileName: string): Promise<string> {
         try{
-            await fs.outputFile(vscode.workspace.rootPath + path.sep + fileName, this.outputToString(data));
+            await fs.outputFile(vscode.workspace.rootPath + path.sep + fileName, data);
             return Promise.resolve(vscode.workspace.rootPath + path.sep + fileName);
         } catch(e) {
             return Promise.reject(undefined);
