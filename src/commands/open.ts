@@ -77,6 +77,8 @@ export function showFileOptions(promises: any[]) {
             }
             return writeFiles(curRes, showFile).then(toRet => { return toRet; }); 
         });
+        // refresh the metadata
+        vscode.window.forceCode.refreshApexMetadata();
         vscode.window.forceCode.showStatus('ForceCode: Retrieve Finished');
         return Promise.all(thePromises);
     })

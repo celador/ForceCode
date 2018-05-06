@@ -38,7 +38,6 @@ export default [
         icon: 'desktop-download',
         label: 'Open Salesforce File',
         command: function (context, selectedResource?) {
-            vscode.window.forceCode.runCommand('ForceCode.compile', context, selectedResource);
             return commands.open(context);
         }
     },

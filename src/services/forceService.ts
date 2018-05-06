@@ -194,35 +194,36 @@ export default class ForceService implements forceCode.IForceService {
             return self.conn.metadata.list(apexTypes).then(res => {
                 self.apexMetadata = res;
                 return self.getWorkspaceMembers().then(members => {
-                    return checkAndSetWorkspaceMembers(members);
+                    return self.checkAndSetWorkspaceMembers(members);
                 });
             });
         });
+    }
 
-        function checkAndSetWorkspaceMembers(newMembers: forceCode.IWorkspaceMember[]) {
-            if(!self.workspaceMembers) {
-                self.workspaceMembers = newMembers;
-            } else {
-                newMembers.forEach(curMem => {
-                    var lastMember: forceCode.IWorkspaceMember = self.workspaceMembers.find(f => { return f.memberInfo.id === curMem.memberInfo.id; });
-                    if(lastMember && curMem.memberInfo.lastModifiedById !== lastMember.memberInfo.lastModifiedById) {
-                        vscode.window.showWarningMessage('Someone else has changed ' + curMem.name, 'Refresh', 'Diff', 'Dismiss').then(s => {
-                            var theDoc = vscode.workspace.textDocuments.find(td => { return td.fileName === curMem.path; });
-                            if (s === 'Refresh') {
-                                retrieve(undefined, theDoc.uri);
-                            } else if(s === 'Diff') {
-                                diff(theDoc, undefined);
-                            }
-                        });
-                    }
-                });
-                // now update the members
-                self.workspaceMembers = newMembers;
-            }
-            console.log('Done getting workspace info');
-            self.dxCommands.saveToFile(JSON.stringify(self.workspaceMembers), 'wsMembers.json');
-            return self;
+    public checkAndSetWorkspaceMembers(newMembers: forceCode.IWorkspaceMember[]) {
+        var self: forceCode.IForceService = vscode.window.forceCode;
+        if(!self.workspaceMembers) {
+            self.workspaceMembers = newMembers;
+        } else {
+            newMembers.forEach(curMem => {
+                var lastMember: forceCode.IWorkspaceMember = self.workspaceMembers.find(f => { return f.memberInfo.id === curMem.memberInfo.id; });
+                if(lastMember && curMem.memberInfo.lastModifiedById !== lastMember.memberInfo.lastModifiedById) {
+                    vscode.window.showWarningMessage('Someone else has changed ' + curMem.name, 'Refresh', 'Diff', 'Dismiss').then(s => {
+                        var theDoc = vscode.workspace.textDocuments.find(td => { return td.fileName === curMem.path; });
+                        if (s === 'Refresh') {
+                            retrieve(undefined, theDoc.uri);
+                        } else if(s === 'Diff') {
+                            diff(theDoc, undefined);
+                        }
+                    });
+                }
+            });
+            // now update the members
+            self.workspaceMembers = newMembers;
         }
+        console.log('Done getting workspace info');
+        self.dxCommands.saveToFile(JSON.stringify(self.workspaceMembers), 'wsMembers.json');
+        return self;
     }
 
     // TODO: Add keychain access so we don't have to use a username or password'

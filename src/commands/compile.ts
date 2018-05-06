@@ -27,6 +27,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     const fileName: string = parsers.getFileName(document);
     const name: string = parsers.getName(document, toolingType);
     var checkCount: number = 0;
+    let mem: forceCode.IWorkspaceMember;
 
     /* tslint:disable */
     var DefType: string = undefined;
@@ -298,7 +299,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             }) : undefined;
         }
         function shouldCompile(record) {
-            let mem: forceCode.IWorkspaceMember = getWorkspaceMemberForMetadataResult(record);
+            mem = getWorkspaceMemberForMetadataResult(record);
             if (mem && record.LastModifiedById !== mem.memberInfo.lastModifiedById) {
                 // throw up an alert
                 return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
@@ -469,6 +470,16 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return false;
         } else {
             // SUCCESS !!! 
+            if(mem) {
+                // update the metadata
+                vscode.window.forceCode.workspaceMembers.some(cur => {
+                    if(cur.memberInfo.id === mem.memberInfo.id) {
+                        cur.memberInfo.lastModifiedById = mem.memberInfo.lastModifiedById;
+                        return true;
+                    }
+                });
+                vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
+            }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;
         }
