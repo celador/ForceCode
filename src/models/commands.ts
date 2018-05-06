@@ -488,7 +488,7 @@ export const fcCommands: FCCommand[] = [
         commandName: 'ForceCode.showFileOptions',
         name: 'Opening file',
         hidden: true,
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.showFileOptions(context);
         }
     },
