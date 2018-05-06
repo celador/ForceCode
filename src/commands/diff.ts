@@ -16,7 +16,7 @@ export default function diff(document: vscode.TextDocument, context: vscode.Exte
     // =======================================================================================================================================
     // =======================================================================================================================================
     function diffFile() {
-        var command: Thenable<{}> = vscode.commands.executeCommand('vscode.diff', buildSalesforceUriFromLocalUri(document.uri), document.uri, `${fileName} (REMOTE) <~> ${fileName} (LOCAL)`);
+        var command: Thenable<{}> = vscode.commands.executeCommand('vscode.diff', buildSalesforceUriFromLocalUri(document.uri), document.uri, `${fileName} (REMOTE) <~> ${fileName} (LOCAL)`, { preview: false });
         return command;
     }
 

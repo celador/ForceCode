@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
-import * as parsers from './../parsers';
+import { getFileName } from './../parsers';
 
 export default [
     {
@@ -12,7 +12,7 @@ export default [
         detail: 'Open the org this project is associated with in a browser.',
         icon: 'browser',
         label: 'Open Org in browser',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return vscode.window.forceCode.dxCommands.openOrg();
         }
     },
@@ -24,7 +24,7 @@ export default [
         detail: 'Search salesforce source files for a string.',
         icon: 'search',
         label: 'Find',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.find();
         }
     },
@@ -37,7 +37,7 @@ export default [
         detail: 'Open a file from the cloud (aka "refresh from org").',
         icon: 'desktop-download',
         label: 'Open Salesforce File',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             vscode.window.forceCode.runCommand('ForceCode.compile', context, selectedResource);
             return commands.open(context);
         }
@@ -51,7 +51,7 @@ export default [
         detail: 'Creates classes based on common separation of concerns patterns',
         icon: 'plus',
         label: 'Create Class',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.createClass(context);
         }
     },
@@ -65,7 +65,7 @@ export default [
         detail: 'If you have a block of text selected, it will run that, otherwise it will use the text of the active file.',
         icon: 'terminal',
         label: 'Execute Anonymous',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.executeAnonymous(vscode.window.activeTextEditor.document, context);
         }
     },
@@ -78,7 +78,7 @@ export default [
         detail: 'Get recent logs',
         icon: 'unfold',
         label: 'Get Logs',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.getLog(context);
         }
     },
@@ -90,7 +90,7 @@ export default [
         detail: 'Retrieve the current code coverage for all files in the src folder.',
         icon: 'file-text',
         label: 'Get current code coverage',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.apexTestResults();
         }
     },
@@ -102,7 +102,7 @@ export default [
         detail: 'Retrieve the current code coverage for all files in the org and save in the coverage folder as a txt file.',
         icon: 'checklist',
         label: 'Get current overall code coverage',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.getOverallCoverage();
         }
     },
@@ -115,33 +115,36 @@ export default [
         detail: 'The SOQL query results will be dumped to a json file in the soql directory',
         icon: 'telescope',
         label: 'SOQL Query',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.soql();
         }
     },
     // Diff Files
     {
         commandName: 'ForceCode.diff',
-        name: 'Diffing ' + parsers.getFileName(vscode.window.activeTextEditor.document),
+        name: 'Diffing ' + getFileName(vscode.window.activeTextEditor.document),
         hidden: false,
         description: 'Diff the current file with what is on the server',
         detail: 'Diff the file',
         icon: 'diff',
         label: 'Diff',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
+            if(selectedResource) {
+                return commands.diff(selectedResource, context);
+            }
             return commands.diff(vscode.window.activeTextEditor.document, context);
         }
     },
     // Compile/Deploy
     {
         commandName: 'ForceCode.compile',
-        name: 'Compiling ' + parsers.getFileName(vscode.window.activeTextEditor.document),
+        name: 'Saving ',
         hidden: false,
         description: 'Save the active file to your org.',
         detail: 'If there is an error, you will get notified. To automatically compile Salesforce files on save, set the autoCompile flag to true in your settings file',
         icon: 'rocket',
         label: 'Compile/Deploy',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             if (selectedResource && selectedResource.path) {
                 return vscode.workspace.openTextDocument(selectedResource)
                     .then(doc => commands.compile(doc, context));
@@ -159,7 +162,7 @@ export default [
         detail: 'Create the Static Resource from the resource-bundle folder and deploy it to your org.',
         icon: 'file-zip',
         label: 'Build Resource Bundle',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.staticResource(context);
         }
     },
@@ -172,7 +175,7 @@ export default [
         detail: 'You will be prompted for the package name or you can choose to retrieve by your package.xml or to retrieve all metadata',
         icon: 'cloud-download',
         label: 'Retrieve Package/Metadata',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.retrieve(context);
         }
     },
@@ -185,7 +188,7 @@ export default [
         detail: 'If you have a directory with a package.xml, you will get the option to deploy it.',
         icon: 'package',
         label: 'Deploy Package',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.deploy(context);
         }
     },
@@ -198,7 +201,7 @@ export default [
         detail: 'The Tooling API query (Select SymbolTable From ApexClass) results will be dumped to a json file in the toql directory',
         icon: 'telescope',
         label: 'Tooling Query',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.toql();
         }
     },
@@ -210,7 +213,7 @@ export default [
         detail: 'Run DX commands, just like on a command line.',
         icon: 'broadcast',
         label: 'Salesforce DX',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.dx();
         }
     },
@@ -222,7 +225,7 @@ export default [
         detail: 'You must login to DX first or if you receive errors. Allows code completion with custom fields and objects by downloading org data.',
         icon: 'code',
         label: 'Code Completion Refresh',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.codeCompletionRefresh();
         }
     },
@@ -234,7 +237,7 @@ export default [
         detail: 'Log out of the current org in this project.',
         icon: 'x',
         label: 'Log out of Salesforce',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.dxLogout();
         }
     },
@@ -247,35 +250,35 @@ export default [
         detail: 'If you are already logged in, you will be logged out of your previous session.',
         icon: 'key',
         label: 'Log in to Salesforce',
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.credentials();
         }
     },
     {
         commandName: 'ForceCode.refresh',
         hidden: true,
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.retrieve(context, selectedResource);
         }
     },
     {
         commandName: 'ForceCode.showMenu',
         hidden: true,
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.showMenu(context);
         }
     },
     {
         commandName: 'ForceCode.documentMethod',
         hidden: true,
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.documentMethod(context);
         }
     },
     {
         commandName: 'ForceCode.toggleCoverage',
         hidden: true,
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             vscode.window.forceCode.config.showTestCoverage = !vscode.window.forceCode.config.showTestCoverage;
             return updateDecorations();
         }
@@ -283,14 +286,14 @@ export default [
     {
         commandName: 'sfdx.force.apex.test.class.run.delegate',
         hidden: true,
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.apexTestClass(context);
         }
     },
     {
         commandName: 'sfdx.force.apex.test.method.run.delegate',
         hidden: true,
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.apexTestMethod(context);
         }
     },
@@ -298,7 +301,7 @@ export default [
         commandName: 'ForceCode.showFileOptions',
         name: 'Opening file',
         hidden: true,
-        command: function (context, selectedResource?: vscode.Uri) {
+        command: function (context, selectedResource?) {
             return commands.showFileOptions(context);
         }
     },

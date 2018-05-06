@@ -29,7 +29,7 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
                 } else {
                     reject('Object not found');
                 }
-            }, err => vscode.window.forceCode.outputError);
+            }, err => vscode.window.showErrorMessage(err.message));
         });
     }
 

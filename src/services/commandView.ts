@@ -35,13 +35,10 @@ export class CommandViewService implements TreeDataProvider<Task> {
     return CommandViewService.instance;
   }
 
-  public addCommandExecution(execution: any, context: any): Task {
-    const task = new Task(this, execution, context);
-    this.tasks.push(task);
+  public addCommandExecution(execution: any, context: any) {
+    this.tasks.push(new Task(this, execution, context));
 
     this._onDidChangeTreeData.fire();
-    task.run();
-    return task;
   }
 
   public removeTask(task: Task): boolean {
@@ -86,6 +83,7 @@ export class Task extends TreeItem {
     this.taskViewProvider = taskViewProvider;
     this.execution = execution;
     this.context = context;
+    this.run();
   }
 
   public run() {

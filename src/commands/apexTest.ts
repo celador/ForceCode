@@ -13,7 +13,7 @@ export function apexTestMethod(testMethod: string) {
     return vscode.window.forceCode.runCommand('ForceCode.apexTest', testMethod, 'method');
 }
 
-export async function apexTest(toTest: string, classOrMethod: string): Promise<any> {    
+export function apexTest(toTest: string, classOrMethod: string) {    
     var name = toTest.split('.')[0];
     
     // Start doing stuff
@@ -24,7 +24,7 @@ export async function apexTest(toTest: string, classOrMethod: string): Promise<a
     } else {
         toRun = '-t ' + toTest;
     }
-    return await vscode.window.forceCode.dxCommands.runCommand('apex:test:run', toRun + ' -w 3 -y -r json')
+    return vscode.window.forceCode.dxCommands.runCommand('apex:test:run', toRun + ' -w 3 -y -r json')
         .then(dxRes => {
                 // get the test class Ids from the result
                 var testClassIds: string[] = new Array<string>();
@@ -35,21 +35,13 @@ export async function apexTest(toTest: string, classOrMethod: string): Promise<a
                 return apexTestResults(testClassIds)
                     .then(res => showResult(res, dxRes))
                     .then(showLog)
-                    .then(endTest)
                     .catch(showFail);
         });
 
     function showFail(err?) {
         err.message = 'ForceCode: Failed to execute tests, wait at least a minute and try again.\n' + err.message;
-        return endTest(err);
-    }
-    
-    function endTest(err?) {
-        if(err !== undefined) {
-            vscode.window.showErrorMessage(err.message);
-        }
-        // end
-        return Promise.resolve();
+        vscode.window.showErrorMessage(err.message);
+        return;
     }
 
     // =======================================================================================================================================
@@ -110,15 +102,16 @@ export async function apexTest(toTest: string, classOrMethod: string): Promise<a
             return dxRes;
         });
     }
-    async function showLog(dxRes) {
+    function showLog(dxRes) {
         if (vscode.window.forceCode.config.showTestLog) {
             var queryString: string = `SELECT Id FROM ApexLog` +
                 ` WHERE LogUserId IN (SELECT Id FROM User WHERE UserName='${vscode.window.forceCode.config.username}')` +
                 // ` AND Request = 'API' AND Location = 'SystemLog'` +
                 // ` AND Operation like '%executeAnonymous%'`
                 ` ORDER BY StartTime DESC, Id DESC LIMIT 1`;
-            var res: QueryResult = await vscode.window.forceCode.conn.tooling.query(queryString);
-            vscode.window.forceCode.dxCommands.getAndShowLog(res.records[0].Id);
+            vscode.window.forceCode.conn.tooling.query(queryString).then(res => {
+                vscode.window.forceCode.dxCommands.getAndShowLog(res.records[0].Id);
+            });
         }
         return;
     }

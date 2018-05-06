@@ -91,7 +91,19 @@ export default class ForceService implements forceCode.IForceService {
 
     public runCommand(command: string, context: any, selectedResource?: any) {
         // add something to keep track of the running command in here
-        const theCommand = commands.default.find(cur => { return cur.commandName === command; });
+        var theCommand = commands.default.find(cur => { return cur.commandName === command; });
+        
+        if(theCommand.commandName === 'ForceCode.compile') {
+            var fileName;
+            var splitPath;
+            if(selectedResource && selectedResource.path) {
+                splitPath = selectedResource.fsPath.split(path.sep); 
+            } else {
+                splitPath = vscode.window.activeTextEditor.document.fileName.split(path.sep);
+            }
+            theCommand.name += splitPath[splitPath.length - 1].split('.')[0];
+        }
+        
         return commandViewService.addCommandExecution(theCommand, context);
     }
 

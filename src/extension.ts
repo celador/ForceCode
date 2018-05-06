@@ -7,13 +7,13 @@ import * as commands from './models/commands';
 import * as parsers from './parsers';
 
 export function activate(context: vscode.ExtensionContext): any {
-    vscode.window.forceCode = new ForceService();
-
     commands.default.forEach(cur => {
         context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
     });
 
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.treeDataProvider', commandViewService));
+
+    vscode.window.forceCode = new ForceService();
     
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('sflog', new ForceCodeLogProvider()));
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('forcecode', new ForceCodeContentProvider()));
