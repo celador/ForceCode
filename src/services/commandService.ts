@@ -31,7 +31,7 @@ export class CommandService {
                 theCommand.commandName = 'Diffing ';
             }
 
-            theCommand.name += splitPath[splitPath.length - 1].split('.')[0];
+            theCommand.commandName += splitPath[splitPath.length - 1].split('.')[0];
         }
         
         return commandViewService.addCommandExecution(theCommand, context, selectedResource);
