@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { IForceService } from './../forceCode';
 import { QueryResult } from '../services/dxService';
 const moment: any = require('moment');
 
@@ -17,21 +16,20 @@ export default function getLog(context: vscode.ExtensionContext) {
     // Login, then get Identity info, 
     //  then get info about the logs and ask the user which one to open, 
     //  then get the log and show it
-    return vscode.window.forceCode.connect(context)
-        .then(getLast10Logs)
+    return getLast10Logs()
         .then(displayOptions)
         .then(showLog)
         .catch(err => vscode.window.showErrorMessage(err.message));
 
-    function getLast10Logs(force: IForceService): Promise<QueryResult> {
+    function getLast10Logs(): Promise<QueryResult> {
 
         var queryString: string = `SELECT Id, LogLength, Request, Status, DurationMilliseconds, StartTime, Location FROM ApexLog` +
-            ` WHERE LogUserId='${force.dxCommands.orgInfo.userId}'` +
+            ` WHERE LogUserId='${vscode.window.forceCode.dxCommands.orgInfo.userId}'` +
             // ` AND Request = 'API' AND Location = 'SystemLog'` +
             // ` AND Operation like '%executeAnonymous%'`
             ` ORDER BY StartTime DESC, Id DESC LIMIT 10`;
 
-        return force.conn.tooling.query(queryString);
+        return vscode.window.forceCode.conn.tooling.query(queryString);
     }
 
     function displayOptions(results: QueryResult): Thenable<vscode.QuickPickItem> {
