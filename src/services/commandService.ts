@@ -38,7 +38,7 @@ export class CommandService {
                 theCommand.name = 'Refreshing ';
             }
 
-            theCommand.commandName += splitPath[splitPath.length - 1].split('.')[0];
+            theCommand.name += splitPath[splitPath.length - 1].split('.')[0];
         }
         
         return commandViewService.addCommandExecution(theCommand, context, selectedResource);
