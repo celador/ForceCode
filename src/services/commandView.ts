@@ -35,8 +35,8 @@ export class CommandViewService implements TreeDataProvider<Task> {
     return CommandViewService.instance;
   }
 
-  public addCommandExecution(execution: any, context: any) {
-    this.tasks.push(new Task(this, execution, context));
+  public addCommandExecution(execution: any, context: any, selectedResource: any) {
+    this.tasks.push(new Task(this, execution, context, selectedResource));
 
     this._onDidChangeTreeData.fire();
   }
@@ -73,8 +73,9 @@ export class Task extends TreeItem {
   private readonly taskViewProvider: CommandViewService;
   private readonly execution: any;
   private readonly context: any;
+  private readonly selectedResource: any;
 
-  constructor(taskViewProvider: CommandViewService, execution: any, context: any) {
+  constructor(taskViewProvider: CommandViewService, execution: any, context: any, selectedResource: any) {
     super(
       execution.name,
       TreeItemCollapsibleState.None
@@ -83,11 +84,12 @@ export class Task extends TreeItem {
     this.taskViewProvider = taskViewProvider;
     this.execution = execution;
     this.context = context;
+    this.selectedResource = selectedResource;
     this.run();
   }
 
   public run() {
-    return this.execution.command(this.context).then(res => {
+    return this.execution.command(this.context, this.selectedResource).then(res => {
         this.taskViewProvider.removeTask(this);
         return res;
     });
