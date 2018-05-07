@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { showFileOptions } from './open';
+import { commandService } from '../services';
 
 export default function find() {
     // need to ask for a search string then pass off to open
@@ -20,7 +21,7 @@ export default function find() {
                 var resArray: any[] = new Array();
                 resArray.push({records: searchResult.searchRecords});
 
-                return vscode.window.forceCode.runCommand('ForceCode.showFileOptions', resArray);
+                return commandService.runCommand('ForceCode.showFileOptions', resArray);
         });
     });
 }
