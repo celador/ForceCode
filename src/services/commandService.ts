@@ -26,12 +26,12 @@ export class CommandService {
                 splitPath = vscode.window.activeTextEditor.document.fileName.split(path.sep);
             }
             if(theCommand.commandName === 'ForceCode.compile') {
-                theCommand.commandName = 'Saving ';
+                theCommand.name = 'Saving ';
             } else {
-                theCommand.commandName = 'Diffing ';
+                theCommand.name = 'Diffing ';
             }
 
-            theCommand.commandName += splitPath[splitPath.length - 1].split('.')[0];
+            theCommand.name += splitPath[splitPath.length - 1].split('.')[0];
         }
         
         return commandViewService.addCommandExecution(theCommand, context, selectedResource);
