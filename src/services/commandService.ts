@@ -28,6 +28,6 @@ export class CommandService {
             theCommand.name = 'Saving ' + splitPath[splitPath.length - 1].split('.')[0];
         }
         
-        return commandViewService.addCommandExecution(theCommand, context);
+        return commandViewService.addCommandExecution(theCommand, context, selectedResource);
     }
 }
