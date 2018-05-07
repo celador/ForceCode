@@ -17,7 +17,7 @@ export class CommandService {
         // add something to keep track of the running command in here
         var theCommand = commands.default.find(cur => { return cur.commandName === command; });
         
-        if(theCommand.commandName === 'ForceCode.compile') {
+        if(theCommand.commandName === 'ForceCode.compile' || theCommand.commandName === 'ForceCode.diff') {
             var fileName;
             var splitPath;
             if(selectedResource && selectedResource.path) {
@@ -25,7 +25,13 @@ export class CommandService {
             } else {
                 splitPath = vscode.window.activeTextEditor.document.fileName.split(path.sep);
             }
-            theCommand.name = 'Saving ' + splitPath[splitPath.length - 1].split('.')[0];
+            if(theCommand.commandName === 'ForceCode.compile') {
+                theCommand.commandName = 'Saving ';
+            } else {
+                theCommand.commandName = 'Diffing ';
+            }
+
+            theCommand.name += splitPath[splitPath.length - 1].split('.')[0];
         }
         
         return commandViewService.addCommandExecution(theCommand, context, selectedResource);

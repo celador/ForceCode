@@ -121,7 +121,7 @@ export default [
     // Diff Files
     {
         commandName: 'ForceCode.diff',
-        name: 'Diffing ' + getFileName(vscode.window.activeTextEditor.document),
+        name: 'Diffing file', //+ getFileName(vscode.window.activeTextEditor.document),
         hidden: false,
         description: 'Diff the current file with what is on the server',
         detail: 'Diff the file',
