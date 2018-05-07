@@ -255,9 +255,10 @@ export default [
     },
     {
         commandName: 'ForceCode.refresh',
+        name: 'Retrieving file',
         hidden: true,
         command: function (context, selectedResource?) {
-            return commands.retrieve(context, selectedResource);
+            return commands.retrieve(context, vscode.window.activeTextEditor.document.uri);
         }
     },
     {
@@ -310,6 +311,22 @@ export default [
         hidden: true,
         command: function (context, selectedResource?) {
             return commands.apexTest(context, selectedResource);
+        }
+    },
+    {
+        commandName: 'ForceCode.fileModified',
+        name: 'Modified file',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return vscode.workspace.openTextDocument(context).then(theDoc => {
+                return vscode.window.showWarningMessage('Someone else has changed ' + getFileName(theDoc), 'Refresh', 'Diff', 'Dismiss').then(s => {
+                    if (s === 'Refresh') {
+                        return commands.retrieve(selectedResource, theDoc.uri);
+                    } else if(s === 'Diff') {
+                        return commands.diff(theDoc, selectedResource);
+                    }
+                });
+            });
         }
     },
 ]

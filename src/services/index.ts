@@ -7,3 +7,5 @@ export {ForceService, operatingSystem, configuration};
 import { CommandViewService } from './commandView';
 export const commandViewService = CommandViewService.getInstance();
 export { Task } from './commandView';
+import { CommandService } from './commandService';
+export const commandService = CommandService.getInstance();

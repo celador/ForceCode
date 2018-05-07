@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import model from './../models/commands';
+import { commandService } from '../services';
 
 export default function showMenu(context: vscode.ExtensionContext) {
     var quickpick: any[] = [];
@@ -39,7 +40,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
     }
     function processResult(result) {
         if (result !== undefined && result.description !== undefined) {
-            return vscode.window.forceCode.runCommand(
+            return commandService.runCommand(
                 quickpick.find(cur => { return result.description === cur.description; }).commandName, context);
         }
     }

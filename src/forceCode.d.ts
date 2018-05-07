@@ -153,7 +153,6 @@ export interface IForceService {
     checkAndSetWorkspaceMembers(newMembers: IWorkspaceMember[]): Promise<any>;
     showDiffWSMembers(changedMembers: IWorkspaceMember[]): any;
     cleanupContainers(): Promise<any>;
-    runCommand(command: string, context: any, selectedResource?: any): any;
 }
 
 

@@ -4,13 +4,14 @@ import * as forceCode from './../forceCode';
 import { configuration } from './../services';
 import { QueryResult } from '../services/dxService';
 import apexTestResults from '../services/apexTestResults';
+import { commandService } from '../services/';
 
 export function apexTestClass(testClass: string) {
-    return vscode.window.forceCode.runCommand('ForceCode.apexTest', testClass, 'class');
+    return commandService.runCommand('ForceCode.apexTest', testClass, 'class');
 }
 
 export function apexTestMethod(testMethod: string) {
-    return vscode.window.forceCode.runCommand('ForceCode.apexTest', testMethod, 'method');
+    return commandService.runCommand('ForceCode.apexTest', testMethod, 'method');
 }
 
 export function apexTest(toTest: string, classOrMethod: string) {    

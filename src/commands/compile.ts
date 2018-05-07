@@ -472,9 +472,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             // SUCCESS !!! 
             if(mem) {
                 // update the metadata
-                vscode.window.forceCode.workspaceMembers.some(cur => {
+                vscode.window.forceCode.workspaceMembers.some(function(cur, index, arr) {
                     if(cur.memberInfo.id === mem.memberInfo.id) {
-                        cur.memberInfo.lastModifiedById = mem.memberInfo.lastModifiedById;
+                        arr[index].memberInfo.lastModifiedById = mem.memberInfo.lastModifiedById;
                         return true;
                     }
                 });

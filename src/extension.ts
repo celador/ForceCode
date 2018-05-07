@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ForceService, commandViewService } from './services';
+import { ForceService, commandViewService, commandService } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
 import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator, updateDecorations } from './decorators/testCoverageDecorator';
@@ -22,11 +22,11 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         const toolingType: string = parsers.getToolingType(textDocument);
         if (toolingType && vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
-            vscode.window.forceCode.runCommand('ForceCode.compile', context);
+            commandService.runCommand('ForceCode.compile', context);
         }
         var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
         if (isResource.index && vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
-            vscode.window.forceCode.runCommand('ForceCode.staticResource', context);
+            commandService.runCommand('ForceCode.staticResource', context);
         }
     }));
 

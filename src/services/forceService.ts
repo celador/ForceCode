@@ -1,12 +1,10 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { operatingSystem, configuration, commandViewService } from './../services';
+import { operatingSystem, configuration, commandService } from './../services';
 import constants from './../models/constants';
-import * as commands from '../models/commands';
 import DXService, { SFDX } from './dxService';
 import * as path from 'path';
 import * as creds from './../commands/credentials';
-import { diff, retrieve } from './../commands';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
@@ -84,24 +82,6 @@ export default class ForceService implements forceCode.IForceService {
                 vscode.window.forceCode.statusBarItem_UserInfo.text = '$(alert) ForceCode not connected $(alert)';
             }
         }, 5000);
-    }
-
-    public runCommand(command: string, context: any, selectedResource?: any) {
-        // add something to keep track of the running command in here
-        var theCommand = commands.default.find(cur => { return cur.commandName === command; });
-        
-        if(theCommand.commandName === 'ForceCode.compile') {
-            var fileName;
-            var splitPath;
-            if(selectedResource && selectedResource.path) {
-                splitPath = selectedResource.fsPath.split(path.sep); 
-            } else {
-                splitPath = vscode.window.activeTextEditor.document.fileName.split(path.sep);
-            }
-            theCommand.name = 'Saving ' + splitPath[splitPath.length - 1].split('.')[0];
-        }
-        
-        return commandViewService.addCommandExecution(theCommand, context);
     }
 
     public newContainer(force: Boolean): Promise<forceCode.IForceService> {
@@ -209,23 +189,20 @@ export default class ForceService implements forceCode.IForceService {
             if(self.workspaceMembers) {
                 const tempMems = self.workspaceMembers;
                 const changedMems = getChangedMems(tempMems);
-                console.log('Done getting workspace info - updated file');
-                console.log(changedMems);
-                self.workspaceMembers = newMembers;
+                console.log('Updated workspace file');
                 if(changedMems && changedMems.length > 0) {
                     console.log(changedMems.length + ' members were changed since last load');
                     return changedMems;
                 }
-            } else {
-                self.workspaceMembers = newMembers;
-                console.log('Done getting workspace info - new file');
-            }
+            } 
+            self.workspaceMembers = newMembers;
+            console.log('Done getting workspace info');
             return;
         });
 
         function getChangedMems(mems: forceCode.IWorkspaceMember[]) {
             return newMembers.filter(curMem => {
-                return (curMem.memberInfo.lastModifiedById !== mems.find(f => { return f.memberInfo.id === curMem.memberInfo.id; }).memberInfo.lastModifiedById);
+                return (mems.find(f => { return f.memberInfo.id === curMem.memberInfo.id; }).memberInfo.lastModifiedById !== curMem.memberInfo.lastModifiedById);
             });
         }
     }
@@ -236,21 +213,15 @@ export default class ForceService implements forceCode.IForceService {
         }
         console.log('Showing changed files');
         changedMembers.forEach(curMem => {
-            showChange(curMem);
+            this.showChange(curMem.path);
         });
 
         return;
+    }
 
-        function showChange(mem: forceCode.IWorkspaceMember) {
-            const theDoc = vscode.workspace.textDocuments.find(td => { console.log(td);return td.fileName === mem.path; });
-            vscode.window.showWarningMessage('Someone else has changed ' + mem.name, 'Refresh', 'Diff', 'Dismiss').then(s => {
-                if (s === 'Refresh') {
-                    retrieve(undefined, theDoc.uri);
-                } else if(s === 'Diff') {
-                    diff(theDoc, undefined);
-                }
-            });
-        }
+    private showChange(mem: string) {
+        console.log('executing command');
+        commandService.runCommand('ForceCode.fileModified', mem, undefined);
     }
 
     // TODO: Add keychain access so we don't have to use a username or password'
