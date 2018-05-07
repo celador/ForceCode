@@ -194,36 +194,63 @@ export default class ForceService implements forceCode.IForceService {
             return self.conn.metadata.list(apexTypes).then(res => {
                 self.apexMetadata = res;
                 return self.getWorkspaceMembers().then(members => {
-                    return self.checkAndSetWorkspaceMembers(members);
+                    return self.checkAndSetWorkspaceMembers(members).then(cMems => {
+                        return self.showDiffWSMembers(cMems);
+                    });
                 });
             });
         });
     }
 
-    public checkAndSetWorkspaceMembers(newMembers: forceCode.IWorkspaceMember[]) {
+    public checkAndSetWorkspaceMembers(newMembers: forceCode.IWorkspaceMember[]): any {
         var self: forceCode.IForceService = vscode.window.forceCode;
-        if(!self.workspaceMembers) {
-            self.workspaceMembers = newMembers;
-        } else {
-            newMembers.forEach(curMem => {
-                var lastMember: forceCode.IWorkspaceMember = self.workspaceMembers.find(f => { return f.memberInfo.id === curMem.memberInfo.id; });
-                if(lastMember && curMem.memberInfo.lastModifiedById !== lastMember.memberInfo.lastModifiedById) {
-                    vscode.window.showWarningMessage('Someone else has changed ' + curMem.name, 'Refresh', 'Diff', 'Dismiss').then(s => {
-                        var theDoc = vscode.workspace.textDocuments.find(td => { return td.fileName === curMem.path; });
-                        if (s === 'Refresh') {
-                            retrieve(undefined, theDoc.uri);
-                        } else if(s === 'Diff') {
-                            diff(theDoc, undefined);
-                        }
-                    });
+           
+        return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(res => {
+            if(self.workspaceMembers) {
+                const tempMems = self.workspaceMembers;
+                const changedMems = getChangedMems(tempMems);
+                console.log('Done getting workspace info - updated file');
+                console.log(changedMems);
+                self.workspaceMembers = newMembers;
+                if(changedMems && changedMems.length > 0) {
+                    console.log(changedMems.length + ' members were changed since last load');
+                    return changedMems;
+                }
+            } else {
+                self.workspaceMembers = newMembers;
+                console.log('Done getting workspace info - new file');
+            }
+            return;
+        });
+
+        function getChangedMems(mems: forceCode.IWorkspaceMember[]) {
+            return newMembers.filter(curMem => {
+                return (curMem.memberInfo.lastModifiedById !== mems.find(f => { return f.memberInfo.id === curMem.memberInfo.id; }).memberInfo.lastModifiedById);
+            });
+        }
+    }
+
+    public showDiffWSMembers(changedMembers: forceCode.IWorkspaceMember[]) {
+        if(!changedMembers || changedMembers.length === 0) {
+            return;
+        }
+        console.log('Showing changed files');
+        changedMembers.forEach(curMem => {
+            showChange(curMem);
+        });
+
+        return;
+
+        function showChange(mem: forceCode.IWorkspaceMember) {
+            const theDoc = vscode.workspace.textDocuments.find(td => { console.log(td);return td.fileName === mem.path; });
+            vscode.window.showWarningMessage('Someone else has changed ' + mem.name, 'Refresh', 'Diff', 'Dismiss').then(s => {
+                if (s === 'Refresh') {
+                    retrieve(undefined, theDoc.uri);
+                } else if(s === 'Diff') {
+                    diff(theDoc, undefined);
                 }
             });
-            // now update the members
-            self.workspaceMembers = newMembers;
         }
-        console.log('Done getting workspace info');
-        self.dxCommands.saveToFile(JSON.stringify(self.workspaceMembers), 'wsMembers.json');
-        return self;
     }
 
     // TODO: Add keychain access so we don't have to use a username or password'
