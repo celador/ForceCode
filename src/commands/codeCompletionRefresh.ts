@@ -21,9 +21,6 @@ export default async function codeCompletionRefresh(): Promise<any> {
     };
     var objectsToGet: SObjectCategory;
     await vscode.window.showQuickPick(options, config).then((res: vscode.QuickPickItem) => {
-        if(res === undefined) {
-            return Promise.reject('No choice selected');
-        }
         if(res.label === 'All') {
             objectsToGet = SObjectCategory.ALL;
         } else if(res.label === 'Standard') {
@@ -32,6 +29,9 @@ export default async function codeCompletionRefresh(): Promise<any> {
             objectsToGet = SObjectCategory.CUSTOM;
         }
     }).then(async function() {
+        if(!objectsToGet) {
+            return Promise.resolve();
+        }
         vscode.window.forceCode.outputChannel.clear();
         vscode.window.forceCode.outputChannel.show();
         var gen = new ccr.FauxClassGenerator();

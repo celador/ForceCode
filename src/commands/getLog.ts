@@ -44,7 +44,7 @@ export default function getLog(context: vscode.ExtensionContext) {
     }
 
     function showLog(res) {
-        if (vscode.window.forceCode.config.showTestLog) {
+        if (res) {
             return vscode.window.forceCode.dxCommands.getAndShowLog(res.description);
         }
         return res;

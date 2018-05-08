@@ -126,6 +126,9 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             };
             return vscode.window.showQuickPick(options, config);
         }).then(function (res) {
+            if(!res) {
+                return;
+            }
             if (res.description === 'manual') {
                 return vscode.window.showInputBox({
                     ignoreFocusOut: true,

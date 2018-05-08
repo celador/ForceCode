@@ -4,6 +4,9 @@ import * as parsers from './../parsers';
 const PROVIDER: string = 'forcecode://salesforce.com';
 
 export default function diff(document: vscode.TextDocument, context: vscode.ExtensionContext) {
+    if(!document) {
+        return;
+    }
     const toolingType: string = parsers.getToolingType(document);
     const fileName: string = parsers.getWholeFileName(document);
     try{

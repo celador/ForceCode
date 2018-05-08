@@ -60,6 +60,9 @@ export function showFileOptions(promises: any[]) {
         return vscode.window.showQuickPick(options, config);
     }).then(opt => {
         var opts: any = opt;
+        if(!opts) {
+            opts = [''];
+        }
         var files: any[] = opts.map(curOpt => {
             return getFile(curOpt);
         });

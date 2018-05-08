@@ -11,6 +11,9 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
     return vscode.window.forceCode.connect(context)
         .then(getPackageName)
         .then(option => {
+            if(!option) {
+                return;
+            }
             if (option.label === 'All Static Resources') {
                 return bundleAndDeployAll()
                     .then(deployAllComplete)

@@ -65,6 +65,9 @@ export default [
         icon: 'terminal',
         label: 'Execute Anonymous',
         command: function (context, selectedResource?) {
+            if(!vscode.window.activeTextEditor) {
+                return;
+            }
             return commands.executeAnonymous(vscode.window.activeTextEditor.document, context);
         }
     },
@@ -131,6 +134,9 @@ export default [
             if(selectedResource) {
                 return commands.diff(selectedResource, context);
             }
+            if(!vscode.window.activeTextEditor) {
+                return;
+            }
             return commands.diff(vscode.window.activeTextEditor.document, context);
         }
     },
@@ -147,6 +153,8 @@ export default [
             if (selectedResource && selectedResource.path) {
                 return vscode.workspace.openTextDocument(selectedResource)
                     .then(doc => commands.compile(doc, context));
+            } else if(!vscode.window.activeTextEditor) {
+                return;
             } else {
                 return commands.compile(vscode.window.activeTextEditor.document, context);
             }
@@ -258,6 +266,9 @@ export default [
         name: 'Retrieving file',
         hidden: true,
         command: function (context, selectedResource?) {
+            if(!vscode.window.activeTextEditor) {
+                return;
+            }
             return commands.retrieve(context, vscode.window.activeTextEditor.document.uri);
         }
     },
@@ -327,6 +338,14 @@ export default [
                     }
                 });
             });
+        }
+    },
+    {
+        commandName: 'ForceCode.staticResourceDeployFromFile',
+        name: 'Saving static resource',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commands.staticResourceDeployFromFile(selectedResource, context);
         }
     },
 ]
