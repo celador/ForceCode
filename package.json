@@ -324,6 +324,16 @@
           "when": "resourceLangId == apex && editorHasSelection && ForceCodeActive",
           "command": "ForceCode.executeAnonymous",
           "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == visualforce && ForceCodeActive",
+          "command": "ForceCode.diff",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == apex && ForceCodeActive",
+          "command": "ForceCode.diff",
+          "group": "ForceCode"
         }
       ],
       "explorer/context": [

@@ -297,6 +297,13 @@ export const fcCommands: FCCommand[] = [
     },
     {
         commandName: 'ForceCode.refresh',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commandService.runCommand('ForceCode.refreshContext', context, selectedResource);
+        }
+    },
+    {
+        commandName: 'ForceCode.refreshContext',
         name: 'Retrieving file',
         hidden: true,
         command: function (context, selectedResource?) {

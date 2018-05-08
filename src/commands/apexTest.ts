@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { fcConnection, dxService } from './../services';
 import apexTestResults from '../services/apexTestResults';
-import { commandService } from '../services/';
 
 export default function apexTest(toTest: string, classOrMethod: string) {
     // Start doing stuff
