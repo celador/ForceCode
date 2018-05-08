@@ -4,17 +4,8 @@ import * as forceCode from './../forceCode';
 import { configuration } from './../services';
 import { QueryResult } from '../services/dxService';
 import apexTestResults from '../services/apexTestResults';
-import { commandService } from '../services/';
 
-export function apexTestClass(testClass: string) {
-    return commandService.runCommand('ForceCode.apexTest', testClass, 'class');
-}
-
-export function apexTestMethod(testMethod: string) {
-    return commandService.runCommand('ForceCode.apexTest', testMethod, 'method');
-}
-
-export function apexTest(toTest: string, classOrMethod: string) {    
+export default function apexTest(toTest: string, classOrMethod: string) { 
     var name = toTest.split('.')[0];
     
     // Start doing stuff

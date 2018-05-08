@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 import { getFileName } from './../parsers';
+import { commandService } from './../services'
 
 export default [
     {
@@ -131,8 +132,9 @@ export default [
         icon: 'diff',
         label: 'Diff',
         command: function (context, selectedResource?) {
-            if(selectedResource) {
-                return commands.diff(selectedResource, context);
+            if(selectedResource && selectedResource.path) {
+                return vscode.workspace.openTextDocument(selectedResource)
+                    .then(doc => commands.diff(doc, context));
             }
             if(!vscode.window.activeTextEditor) {
                 return;
@@ -142,7 +144,7 @@ export default [
     },
     // Compile/Deploy
     {
-        commandName: 'ForceCode.compile',
+        commandName: 'ForceCode.compileMenu',
         name: 'Saving ',
         hidden: false,
         description: 'Save the active file to your org.',
@@ -150,14 +152,21 @@ export default [
         icon: 'rocket',
         label: 'Compile/Deploy',
         command: function (context, selectedResource?) {
-            if (selectedResource && selectedResource.path) {
+            if(selectedResource && selectedResource.path) {
                 return vscode.workspace.openTextDocument(selectedResource)
                     .then(doc => commands.compile(doc, context));
-            } else if(!vscode.window.activeTextEditor) {
-                return;
-            } else {
-                return commands.compile(vscode.window.activeTextEditor.document, context);
             }
+            if(!vscode.window.activeTextEditor) {
+                return;
+            }
+            return commands.compile(vscode.window.activeTextEditor.document, context);
+        }
+    },
+    {
+        commandName: 'ForceCode.compile',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commandService.runCommand('ForceCode.compileMenu', context, selectedResource);
         }
     },
     // Build/Deploy Resource Bundle(s)
@@ -263,9 +272,20 @@ export default [
     },
     {
         commandName: 'ForceCode.refresh',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commandService.runCommand('ForceCode.refreshContext', context, selectedResource);
+        }
+    },
+    {
+        commandName: 'ForceCode.refreshContext',
         name: 'Retrieving file',
         hidden: true,
         command: function (context, selectedResource?) {
+            if(selectedResource && selectedResource.path) {
+                return vscode.workspace.openTextDocument(selectedResource)
+                    .then(doc => commands.retrieve(context, doc.uri));
+            }
             if(!vscode.window.activeTextEditor) {
                 return;
             }
@@ -298,14 +318,14 @@ export default [
         commandName: 'sfdx.force.apex.test.class.run.delegate',
         hidden: true,
         command: function (context, selectedResource?) {
-            return commands.apexTestClass(context);
+            return commandService.runCommand('ForceCode.apexTest', context, 'class');
         }
     },
     {
         commandName: 'sfdx.force.apex.test.method.run.delegate',
         hidden: true,
         command: function (context, selectedResource?) {
-            return commands.apexTestMethod(context);
+            return commandService.runCommand('ForceCode.apexTest', context, 'method');
         }
     },
     {

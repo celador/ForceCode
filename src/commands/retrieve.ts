@@ -384,6 +384,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         tools.reportRetrieveResult(res, logger, vscode.window.forceCode.config.deployOptions.verbose);
         logger.flush();
         unregisterProxy();
+        vscode.window.forceCode.refreshApexMetadata();
         return res;
     }
     function onError(err) {
