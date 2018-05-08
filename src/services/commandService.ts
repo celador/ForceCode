@@ -17,18 +17,20 @@ export class CommandService {
         // add something to keep track of the running command in here
         var theCommand = commands.default.find(cur => { return cur.commandName === command; });
         
-        if(theCommand.commandName === 'ForceCode.compile' || theCommand.commandName === 'ForceCode.diff') {
+        if(['ForceCode.compileMenu', 'ForceCode.refreshContext'].find(c => { return c === theCommand.commandName; })) {
             var fileName;
             var splitPath;
             if(selectedResource && selectedResource.path) {
                 splitPath = selectedResource.fsPath.split(path.sep); 
+            } else if(selectedResource) {
+                splitPath = selectedResource.fileName.split(path.sep);
             } else {
                 splitPath = vscode.window.activeTextEditor.document.fileName.split(path.sep);
             }
             if(theCommand.commandName === 'ForceCode.compile') {
                 theCommand.name = 'Saving ';
             } else {
-                theCommand.name = 'Diffing ';
+                theCommand.name = 'Refreshing ';
             }
 
             theCommand.name += splitPath[splitPath.length - 1].split('.')[0];

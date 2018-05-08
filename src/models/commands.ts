@@ -279,7 +279,7 @@ export default [
     },
     {
         commandName: 'ForceCode.refreshContext',
-        name: 'Retrieving file',
+        name: 'Retrieving ',
         hidden: true,
         command: function (context, selectedResource?) {
             if(selectedResource && selectedResource.path) {
