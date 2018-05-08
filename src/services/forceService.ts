@@ -109,14 +109,14 @@ export default class ForceService implements forceCode.IForceService {
                 .on('data', function (item) {
                     // Check to see if the file represents an actual member... 
                     if (item.stats.isFile()) {
-                        var metadataFileProperties: forceCode.IMetadataFileProperties[] = getMembersFor(item);
+                        var metadataFileProperties: forceCode.IMetadataFileProperties = getMembersFor(item);
                         
-                        if (metadataFileProperties.length) {
+                        if (metadataFileProperties) {
 
                             var workspaceMember: forceCode.IWorkspaceMember = {
-                                name: metadataFileProperties[0].fullName,
+                                name: metadataFileProperties.fullName,
                                 path: item.path,
-                                memberInfo: metadataFileProperties[0],
+                                memberInfo: metadataFileProperties,
                             };
                             members[workspaceMember.memberInfo.id] = workspaceMember;
                         }
@@ -128,11 +128,11 @@ export default class ForceService implements forceCode.IForceService {
                 });
         });
 
-        function getMembersFor(item): forceCode.IMetadataFileProperties[] {
+        function getMembersFor(item): forceCode.IMetadataFileProperties {
             var pathParts: string[] = item.path.split(path.sep);
             var filename: string = pathParts[pathParts.length - 1];
 
-            return vscode.window.forceCode.apexMetadata.filter(member => {
+            return vscode.window.forceCode.apexMetadata.find(member => {
                 return member.fileName.split('/')[1] === filename;
             });
         }
@@ -174,17 +174,18 @@ export default class ForceService implements forceCode.IForceService {
         var self: forceCode.IForceService = vscode.window.forceCode;
            
         return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(res => {
+            console.log('Updated workspace file');
             if(check && self.workspaceMembers) {
                 const changedMems = Object.keys(newMembers).filter(key=> {
-                    return (self.workspaceMembers[key].memberInfo.lastModifiedById !== newMembers[key].memberInfo.lastModifiedById);
+                    return (self.workspaceMembers[key] && (self.workspaceMembers[key].memberInfo.lastModifiedById !== newMembers[key].memberInfo.lastModifiedById));
                 });
-                console.log('Updated workspace file');
                 if(changedMems && changedMems.length > 0) {
                     console.log(changedMems.length + ' members were changed since last load');
                     changedMems.forEach(curMem => {
                         commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, undefined);//.path);
                     });
                 }
+                console.log('Done checking members');
             } 
             self.workspaceMembers = newMembers;
             console.log('Done getting workspace info');
