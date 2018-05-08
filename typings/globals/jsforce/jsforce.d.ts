@@ -92,7 +92,7 @@ declare module 'jsforce/index' {
             describe(): Promise<any>;
             checkDeployStatus(processId: string, {}): Promise<any>;
             checkRetrieveStatus(id: string): Promise<any>;
-            list(queries: string[], version?: string) : Promise<IMetadataFileProperties[]>
+            list(queries: any[], version?: string) : Promise<IMetadataFileProperties[]>
             retrieve({}): { stream(): NodeJS.ReadableStream };
             retrieve({}): Promise<RetrieveResult>;
             deploy({}, {}): Promise<DeployResult>;
