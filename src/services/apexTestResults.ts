@@ -32,7 +32,7 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
         // Add Line Coverage information
         if (res.records) {
             res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
-                if(curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
+                if(vscode.window.forceCode.workspaceMembers[curRes.ApexClassOrTriggerId] && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
                     vscode.window.forceCode.codeCoverage[curRes.ApexClassOrTriggerId] = curRes;
                 }
             });
