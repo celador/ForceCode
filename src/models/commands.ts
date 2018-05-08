@@ -517,4 +517,12 @@ export const fcCommands: FCCommand[] = [
             });
         }
     },
+    {
+        commandName: 'ForceCode.staticResourceDeployFromFile',
+        name: 'Saving static resource',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commands.staticResourceDeployFromFile(selectedResource, context);
+        }
+    },
 ]
