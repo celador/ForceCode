@@ -49,6 +49,28 @@ export interface Config {
     // workspaceRoot?: string;
 }
 
+export interface MetadataResult {
+    ApiVersion: number;
+    attributes: { type: string };
+    Body: string;
+    BodyCrc: number;
+    CreatedById: string;
+    CreatedDate: string;
+    FullName: string;
+    Id: string;
+    IsValid: boolean;
+    LastModifiedById: string;
+    LastModifiedDate: string;
+    LengthWithoutComments: number;
+    ManageableState: string;
+    Metadata: {};
+    Name: string;
+    NamespacePrefix: string;
+    Status: string;
+    SymbolTable: {};
+    SystemModstamp: string;
+}
+
 interface ILocationsNotCovered {
     column: Number;
     line: Number;

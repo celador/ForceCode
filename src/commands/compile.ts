@@ -275,28 +275,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             });
         }
 
-        interface MetadataResult {
-            ApiVersion: number;
-            attributes: { type: string };
-            Body: string;
-            BodyCrc: number;
-            CreatedById: string;
-            CreatedDate: string;
-            FullName: string;
-            Id: string;
-            IsValid: boolean;
-            LastModifiedById: string;
-            LastModifiedDate: string;
-            LengthWithoutComments: number;
-            ManageableState: string;
-            Metadata: {};
-            Name: string;
-            NamespacePrefix: string;
-            Status: string;
-            SymbolTable: {};
-            SystemModstamp: string;
-        }
-        function getWorkspaceMemberForMetadataResult(record: MetadataResult) {
+        function getWorkspaceMemberForMetadataResult(record: forceCode.MetadataResult) {
             return fc.workspaceMembers ? fc.workspaceMembers[record.Id] : undefined;
         }
         function shouldCompile(record) {
@@ -334,7 +313,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             if (records.length > 0) {
                 // Tooling Object already exists
                 //  UPDATE it
-                var record: MetadataResult = records[0];
+                var record: forceCode.MetadataResult = records[0];
                 // Get the modified date of the local file... 
                 var member: {} = {
                     Body: body,
@@ -473,7 +452,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             // SUCCESS !!! 
             if(mem) {
                 // update the metadata
-                vscode.window.forceCode.workspaceMembers[mem.memberInfo.id].memberInfo.lastModifiedById = mem.memberInfo.lastModifiedById;
+                vscode.window.forceCode.workspaceMembers[mem.memberInfo.id].memberInfo.lastModifiedById = vscode.window.forceCode.dxCommands.orgInfo.userId;
                 vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
             }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
