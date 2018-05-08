@@ -161,40 +161,29 @@ export default class ForceService implements forceCode.IForceService {
 
     public refreshApexMetadata() {
         var self: forceCode.IForceService = vscode.window.forceCode;
-        return self.conn.metadata.describe().then(describe => {
-            self.describe = describe;
-            var apexTypes: string[] = describe.metadataObjects
-                .filter(o => o.xmlName.startsWith('ApexClass') || o.xmlName.startsWith('ApexTrigger'))
-                .map(o => {
-                    return {
-                        type: o.xmlName,
-                        folder: o.directoryName,
-                    };
-                });
-            return self.conn.metadata.list(apexTypes).then(res => {
-                self.apexMetadata = res;
-                return self.getWorkspaceMembers().then(members => {
-                    return self.checkAndSetWorkspaceMembers(members).then(cMems => {
-                        return self.showDiffWSMembers(cMems);
-                    });
-                });
+        var apexTypes = [{ type: 'ApexClass' }, { type: 'ApexTrigger' }];
+        return self.conn.metadata.list(apexTypes).then(res => {
+            self.apexMetadata = res;
+            return self.getWorkspaceMembers().then(members => {
+                return self.checkAndSetWorkspaceMembers(members, true);
             });
         });
     }
 
-    public checkAndSetWorkspaceMembers(newMembers){//: forceCode.IWorkspaceMember[]): any {
+    public checkAndSetWorkspaceMembers(newMembers, check?: boolean){//: forceCode.IWorkspaceMember[]): any {
         var self: forceCode.IForceService = vscode.window.forceCode;
            
         return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(res => {
-            if(self.workspaceMembers) {
-                const tempMems = self.workspaceMembers;
+            if(check && self.workspaceMembers) {
                 const changedMems = Object.keys(newMembers).filter(key=> {
-                    return (tempMems[key].memberInfo.lastModifiedById !== newMembers[key].memberInfo.lastModifiedById);
+                    return (self.workspaceMembers[key].memberInfo.lastModifiedById !== newMembers[key].memberInfo.lastModifiedById);
                 });
                 console.log('Updated workspace file');
                 if(changedMems && changedMems.length > 0) {
                     console.log(changedMems.length + ' members were changed since last load');
-                    return changedMems;
+                    changedMems.forEach(curMem => {
+                        commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, undefined);//.path);
+                    });
                 }
             } 
             self.workspaceMembers = newMembers;
@@ -203,20 +192,6 @@ export default class ForceService implements forceCode.IForceService {
         });
     }
 
-    public showDiffWSMembers(changedMembers){//: forceCode.IWorkspaceMember[]) {
-        if(!changedMembers || changedMembers.length === 0) {
-            return;
-        }
-        console.log('Showing changed files');
-        changedMembers.forEach(curMem => {
-            commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, undefined);//.path);
-        });
-
-        return;
-    }
-
-    // TODO: Add keychain access so we don't have to use a username or password'
-    // var keychain = require('keytar')
     private setupConfig(): Promise<forceCode.Config> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Setup username and outputChannel

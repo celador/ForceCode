@@ -172,8 +172,7 @@ export interface IForceService {
     showStatus(message: string): void;
     resetStatus(): void;
     getWorkspaceMembers(metadata?): any;//Promise<IWorkspaceMember[]>;
-    checkAndSetWorkspaceMembers(newMembers): Promise<any>;
-    showDiffWSMembers(changedMembers): any;
+    checkAndSetWorkspaceMembers(newMembers, check?: boolean): Promise<any>;
     cleanupContainers(): Promise<any>;
 }
 
