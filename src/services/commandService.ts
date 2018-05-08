@@ -27,7 +27,7 @@ export class CommandService {
             } else {
                 splitPath = vscode.window.activeTextEditor.document.fileName.split(path.sep);
             }
-            if(theCommand.commandName === 'ForceCode.compile') {
+            if(theCommand.commandName === 'ForceCode.compileMenu') {
                 theCommand.name = 'Saving ';
             } else {
                 theCommand.name = 'Refreshing ';
