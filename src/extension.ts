@@ -34,9 +34,9 @@ export function activate(context: vscode.ExtensionContext): any {
         // clear the code coverage
         var file = parsers.getWholeFileName(event.document);
         // get the id
-        var curFileId: string = vscode.window.forceCode.workspaceMembers.find(cur => {
-            return cur.memberInfo.fileName.split('/')[1] === file;
-        }).memberInfo.id;
+        var curFileId: string = Object.keys(vscode.window.forceCode.workspaceMembers).find(cur => {
+            return vscode.window.forceCode.workspaceMembers[cur].memberInfo.fileName.split('/')[1] === file;
+        });
         
         if(curFileId && vscode.window.forceCode.codeCoverage[curFileId]) {
             delete vscode.window.forceCode.codeCoverage[curFileId];

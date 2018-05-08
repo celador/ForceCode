@@ -26,7 +26,7 @@ export default class ForceService implements forceCode.IForceService {
     public outputChannel: vscode.OutputChannel;
     public operatingSystem: string;
     public workspaceRoot: string;
-    public workspaceMembers: forceCode.IWorkspaceMember[];
+    public workspaceMembers: {};//forceCode.IWorkspaceMember[];
     public statusInterval: any; 
     private commandTimeout: any;
 
@@ -101,10 +101,10 @@ export default class ForceService implements forceCode.IForceService {
 
         // Get files in src folder..
     // Match them up with ContainerMembers
-    public getWorkspaceMembers(metadata?): Promise<forceCode.IWorkspaceMember[]> {
+    public getWorkspaceMembers(metadata?){//: Promise<forceCode.IWorkspaceMember[]> {
         return new Promise((resolve, reject) => {
             var klaw: any = require('klaw');
-            var members: forceCode.IWorkspaceMember[] = []; // files, directories, symlinks, etc
+            var members: {} = {};//: forceCode.IWorkspaceMember[] = []; // files, directories, symlinks, etc
             klaw(vscode.window.forceCode.workspaceRoot)
                 .on('data', function (item) {
                     // Check to see if the file represents an actual member... 
@@ -118,7 +118,7 @@ export default class ForceService implements forceCode.IForceService {
                                 path: item.path,
                                 memberInfo: metadataFileProperties[0],
                             };
-                            members.push(workspaceMember);
+                            members[workspaceMember.memberInfo.id] = workspaceMember;
                         }
                     }
                 })
@@ -182,13 +182,15 @@ export default class ForceService implements forceCode.IForceService {
         });
     }
 
-    public checkAndSetWorkspaceMembers(newMembers: forceCode.IWorkspaceMember[]): any {
+    public checkAndSetWorkspaceMembers(newMembers){//: forceCode.IWorkspaceMember[]): any {
         var self: forceCode.IForceService = vscode.window.forceCode;
            
         return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(res => {
             if(self.workspaceMembers) {
                 const tempMems = self.workspaceMembers;
-                const changedMems = getChangedMems(tempMems);
+                const changedMems = Object.keys(newMembers).filter(key=> {
+                    return (tempMems[key].memberInfo.lastModifiedById !== newMembers[key].memberInfo.lastModifiedById);
+                });
                 console.log('Updated workspace file');
                 if(changedMems && changedMems.length > 0) {
                     console.log(changedMems.length + ' members were changed since last load');
@@ -199,29 +201,18 @@ export default class ForceService implements forceCode.IForceService {
             console.log('Done getting workspace info');
             return;
         });
-
-        function getChangedMems(mems: forceCode.IWorkspaceMember[]) {
-            return newMembers.filter(curMem => {
-                return (mems.find(f => { return f.memberInfo.id === curMem.memberInfo.id; }).memberInfo.lastModifiedById !== curMem.memberInfo.lastModifiedById);
-            });
-        }
     }
 
-    public showDiffWSMembers(changedMembers: forceCode.IWorkspaceMember[]) {
+    public showDiffWSMembers(changedMembers){//: forceCode.IWorkspaceMember[]) {
         if(!changedMembers || changedMembers.length === 0) {
             return;
         }
         console.log('Showing changed files');
         changedMembers.forEach(curMem => {
-            this.showChange(curMem.path);
+            commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, undefined);//.path);
         });
 
         return;
-    }
-
-    private showChange(mem: string) {
-        console.log('executing command');
-        commandService.runCommand('ForceCode.fileModified', mem, undefined);
     }
 
     // TODO: Add keychain access so we don't have to use a username or password'

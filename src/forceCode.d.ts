@@ -134,7 +134,7 @@ export interface IForceService {
     // symbolTable?: any;
     containerId?: string;
     statusInterval: any;    
-    workspaceMembers: IWorkspaceMember[];
+    workspaceMembers: {};//IWorkspaceMember[];
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
     conn?: jsforce.Connection;
@@ -149,9 +149,9 @@ export interface IForceService {
     refreshApexMetadata(): Promise<any>;
     showStatus(message: string): void;
     resetStatus(): void;
-    getWorkspaceMembers(metadata?): Promise<IWorkspaceMember[]>;
-    checkAndSetWorkspaceMembers(newMembers: IWorkspaceMember[]): Promise<any>;
-    showDiffWSMembers(changedMembers: IWorkspaceMember[]): any;
+    getWorkspaceMembers(metadata?): any;//Promise<IWorkspaceMember[]>;
+    checkAndSetWorkspaceMembers(newMembers): Promise<any>;
+    showDiffWSMembers(changedMembers): any;
     cleanupContainers(): Promise<any>;
 }
 

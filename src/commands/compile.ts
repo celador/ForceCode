@@ -297,9 +297,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             SystemModstamp: string;
         }
         function getWorkspaceMemberForMetadataResult(record: MetadataResult) {
-            return fc.workspaceMembers ? fc.workspaceMembers.find(member => {
-                return member.memberInfo.id === record.Id;
-            }) : undefined;
+            return fc.workspaceMembers ? fc.workspaceMembers[record.Id] : undefined;
         }
         function shouldCompile(record) {
             mem = getWorkspaceMemberForMetadataResult(record);
@@ -475,12 +473,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             // SUCCESS !!! 
             if(mem) {
                 // update the metadata
-                vscode.window.forceCode.workspaceMembers.some(function(cur, index, arr) {
-                    if(cur.memberInfo.id === mem.memberInfo.id) {
-                        arr[index].memberInfo.lastModifiedById = mem.memberInfo.lastModifiedById;
-                        return true;
-                    }
-                });
+                vscode.window.forceCode.workspaceMembers[mem.memberInfo.id].memberInfo.lastModifiedById = mem.memberInfo.lastModifiedById;
                 vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
             }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);

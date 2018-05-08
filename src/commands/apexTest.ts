@@ -41,6 +41,10 @@ export default function apexTest(toTest: string, classOrMethod: string) {
         return configuration().then(results => {
             vscode.window.forceCode.outputChannel.clear();
             let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Test Failures');
+            let location = Object.keys(vscode.window.forceCode.workspaceMembers).find(curr => {
+                return vscode.window.forceCode.workspaceMembers[curr].name === name;
+            });
+            let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers[location];
             if (dxRes.summary.failing && dxRes.summary.failing > 0) {
                 vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   ==========================================================');
                 vscode.window.showErrorMessage('ForceCode: Some Tests Failed $(thumbsdown)');
@@ -54,9 +58,7 @@ export default function apexTest(toTest: string, classOrMethod: string) {
                     let _lin: number = lin > 0 ? lin - 1 : 0;
                     let col: number = +matches[5];
                     // get URI of document from class name and workspace path
-                    let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers.find(curr => {
-                        return curr.name === name;
-                    });
+                    
                     if (member) {
                         let docUri: vscode.Uri = vscode.Uri.file(member.path);
                         let docLocation: vscode.Location = new vscode.Location(docUri, new vscode.Position(_lin, col));
@@ -76,9 +78,6 @@ export default function apexTest(toTest: string, classOrMethod: string) {
                 vscode.window.forceCode.outputChannel.appendLine('=======================================================================================================================================');
             } else {
                 vscode.window.forceCode.showStatus('ForceCode: All Tests Passed $(thumbsup)');
-                let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers.find(curr => {
-                    return curr.name === name;
-                });
                 if (member) {
                     let docUri: vscode.Uri = vscode.Uri.file(member.path);
                     let diagnostics: vscode.Diagnostic[] = [];

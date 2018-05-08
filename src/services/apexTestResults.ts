@@ -4,14 +4,9 @@ import { QueryResult } from '../services/dxService';
 import { editorUpdateApexCoverageDecorator } from '../decorators/testCoverageDecorator';
 
 export default function getApexTestResults(testClassIds?: string[]): Promise<QueryResult> {
-    let members: forceCode.IWorkspaceMember[] = vscode.window.forceCode.workspaceMembers;
-    var memberIds: string[] = new Array<string>();
+    var memberIds: string[] = Object.keys(vscode.window.forceCode.workspaceMembers);
     var fromWhere: string = testClassIds ? ' ApexCodeCoverage ' : ' ApexCodeCoverageAggregate ';
     
-    members.forEach(cur => {
-        memberIds.push(cur.memberInfo.id);
-    });
-
     var orMemIds: string = "(ApexClassOrTriggerId = '" + memberIds.join("' OR ApexClassOrTriggerId = '") + "') ";
     var orIds: string = testClassIds && testClassIds.length > 0 ? "AND (ApexTestClassId = '" + testClassIds.join("' OR ApexTestClassId = '") + "') " : '';
     var query = 'SELECT Coverage, ApexClassOrTrigger.Name, ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered '
@@ -37,9 +32,7 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
         // Add Line Coverage information
         if (res.records) {
             res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
-                if(vscode.window.forceCode.workspaceMembers.find(curr => {
-                    return curr.memberInfo.id === curRes.ApexClassOrTriggerId && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length;
-                }) !== undefined) {
+                if(curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
                     vscode.window.forceCode.codeCoverage[curRes.ApexClassOrTriggerId] = curRes;
                 }
             });
