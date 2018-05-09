@@ -454,7 +454,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 // update the metadata
                 vscode.window.forceCode.conn.tooling.sobject(mem.memberInfo.type).find({Id: mem.memberInfo.id}, {LastModifiedDate: 1})
                     .then(res => {
-                        vscode.window.forceCode.workspaceMembers[mem.memberInfo.id].memberInfo.lastModifiedDate = res.LastModifiedDate;
+                        vscode.window.forceCode.workspaceMembers[mem.memberInfo.id].memberInfo.lastModifiedDate = res[0].LastModifiedDate;
                         vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
                     });
                 
