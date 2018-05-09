@@ -26,7 +26,7 @@ declare module 'jsforce/index' {
             success: string; // Flag if the code is executed successfully
         }
         interface SObject {
-            find(config?: {});
+            find(config?: {}, fields?: {});
             create(records: Array<any>, options?: {}): Promise<Array<RecordResult>>;
             create(records: Array<any>, options?: {}, callback?: () => {}): Array<RecordResult>;
             create(record: any): Promise<RecordResult>;

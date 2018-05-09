@@ -280,7 +280,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         }
         function shouldCompile(record) {
             mem = getWorkspaceMemberForMetadataResult(record);
-            if (mem && record.LastModifiedById !== mem.memberInfo.lastModifiedById) {
+            if (mem && record.LastModifiedDate.split('.')[0] !== mem.memberInfo.lastModifiedDate.split('.')[0]) {
                 // throw up an alert
                 return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
                     if (s === 'Diff') {
@@ -452,8 +452,12 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             // SUCCESS !!! 
             if(mem) {
                 // update the metadata
-                vscode.window.forceCode.workspaceMembers[mem.memberInfo.id].memberInfo.lastModifiedById = vscode.window.forceCode.dxCommands.orgInfo.userId;
-                vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
+                vscode.window.forceCode.conn.tooling.sobject(mem.memberInfo.type).find({Id: mem.memberInfo.id}, {LastModifiedDate: 1})
+                    .then(res => {
+                        vscode.window.forceCode.workspaceMembers[mem.memberInfo.id].memberInfo.lastModifiedDate = res.LastModifiedDate;
+                        vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
+                    });
+                
             }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;

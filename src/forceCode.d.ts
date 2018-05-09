@@ -8,6 +8,10 @@ declare module 'vscode' {
     }
 }
 
+export interface FCWorkspaceMembers {
+    [key: string]: IWorkspaceMember;
+}
+
 export interface IMetadataFileProperties {
     createdById: string;
     createdByName: string;
@@ -156,7 +160,7 @@ export interface IForceService {
     // symbolTable?: any;
     containerId?: string;
     statusInterval: any;    
-    workspaceMembers: {};//IWorkspaceMember[];
+    workspaceMembers: FCWorkspaceMembers;
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
     conn?: jsforce.Connection;
