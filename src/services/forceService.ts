@@ -159,6 +159,22 @@ export default class ForceService implements forceCode.IForceService {
         });          
     }
 
+    // sometimes the times on the dates are a half second off, so this checks for within 1 second
+    public compareDates(date1: string, date2: string): boolean {
+        date1 = date1.split('.')[0];
+        date2 = date2.split('.')[0];
+        if(date1 === date2) {
+            return true;
+        }
+
+        var lastD1: number = parseInt(date1.charAt(date1.length - 1));
+        var lastD2: number = parseInt(date2.charAt(date2.length - 1));
+        if((lastD1 > lastD2 && lastD1 - lastD2 === 1) || (lastD2 > lastD1 && lastD2 - lastD1 === 1)) {
+            return true;
+        }
+        return false;
+    }
+
     public refreshApexMetadata() {
         var self: forceCode.IForceService = vscode.window.forceCode;
         var apexTypes = [{ type: 'ApexClass' }, { type: 'ApexTrigger' }];
@@ -175,22 +191,25 @@ export default class ForceService implements forceCode.IForceService {
            
         return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(res => {
             console.log('Updated workspace file');
-            if(check && self.workspaceMembers) {
-                const changedMems = Object.keys(newMembers).filter(key=> {
-                    return (self.workspaceMembers[key] && (self.workspaceMembers[key].memberInfo.lastModifiedDate.split('.')[0] !== newMembers[key].memberInfo.lastModifiedDate.split('.')[0]));
-                });
-                if(changedMems && changedMems.length > 0) {
-                    console.log(changedMems.length + ' members were changed since last load');
-                    changedMems.forEach(curMem => {
-                        console.log(vscode.window.forceCode.workspaceMembers[curMem]);
-                        console.log(newMembers[curMem]);
-                        commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, undefined);
+            if(check) {
+                if(self.workspaceMembers) {
+                    const changedMems = Object.keys(newMembers).filter(key=> {
+                        return (self.workspaceMembers[key] && !this.compareDates(self.workspaceMembers[key].memberInfo.lastModifiedDate, newMembers[key].memberInfo.lastModifiedDate));
                     });
-                }
-                console.log('Done checking members');
-            } 
-            self.workspaceMembers = newMembers;
-            console.log('Done getting workspace info');
+                    if(changedMems && changedMems.length > 0) {
+                        console.log(changedMems.length + ' members were changed since last load');
+                        changedMems.forEach(curMem => {
+                            console.log(vscode.window.forceCode.workspaceMembers[curMem]);
+                            console.log(newMembers[curMem]);
+                            commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, undefined);
+                        });
+                        // maybe we should return here so we're not left with bad data, then we need to update in the retrieve command though...
+                    }
+                    console.log('Done checking members');
+                } 
+                self.workspaceMembers = newMembers;
+                console.log('Done getting workspace info');
+            }
             return;
         });
     }

@@ -178,6 +178,7 @@ export interface IForceService {
     getWorkspaceMembers(metadata?): any;//Promise<IWorkspaceMember[]>;
     checkAndSetWorkspaceMembers(newMembers, check?: boolean): Promise<any>;
     cleanupContainers(): Promise<any>;
+    compareDates(date1: string, date2: string): boolean;
 }
 
 

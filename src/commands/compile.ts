@@ -279,7 +279,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         }
         function shouldCompile(record) {
             let mem: forceCode.IWorkspaceMember = getWorkspaceMemberForMetadataResult(record);
-            if (mem && record.LastModifiedDate.split('.')[0] !== mem.memberInfo.lastModifiedDate.split('.')[0]) {
+            if (mem && !vscode.window.forceCode.compareDates(record.LastModifiedDate, mem.memberInfo.lastModifiedDate)) {
                 // throw up an alert
                 return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
                     if (s === 'Diff') {
