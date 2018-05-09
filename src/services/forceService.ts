@@ -182,6 +182,8 @@ export default class ForceService implements forceCode.IForceService {
                 if(changedMems && changedMems.length > 0) {
                     console.log(changedMems.length + ' members were changed since last load');
                     changedMems.forEach(curMem => {
+                        console.log(vscode.window.forceCode.workspaceMembers[curMem]);
+                        console.log(newMembers[curMem]);
                         commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, undefined);
                     });
                 }
@@ -277,7 +279,7 @@ export default class ForceService implements forceCode.IForceService {
                 });
             }
             function connectionError(err) {
-                vscode.window.showErrorMessage(`ForceCode: $(alert) Connection Error $(alert)`);
+                vscode.window.showErrorMessage(`ForceCode: Connection Error`);
                 throw err;
             }
         } else {

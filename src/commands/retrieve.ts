@@ -378,7 +378,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             }, 100);
         } else {
             setTimeout(function () {
-                vscode.window.showErrorMessage('Retrieve Errors $(thumbsdown)');
+                vscode.window.showErrorMessage('Retrieve Errors');
             }, 100);
         }
         tools.reportRetrieveResult(res, logger, vscode.window.forceCode.config.deployOptions.verbose);
@@ -390,7 +390,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     function onError(err) {
         unregisterProxy();
         setTimeout(function () {
-            vscode.window.showErrorMessage('Retrieve Errors $(thumbsdown)');
+            vscode.window.showErrorMessage('Retrieve Errors');
         }, 100);
         return vscode.window.showErrorMessage(err.message);
     }

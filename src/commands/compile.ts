@@ -437,15 +437,15 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             res.errors.forEach(err => {
                 console.error(err);
             });
-            vscode.window.showErrorMessage(`${name} ${DefType ? DefType : ''} $(alert)`);
+            vscode.window.showErrorMessage(`There was an error while saving ${name}`);
         } else if (res.State === 'Error') {
-            vscode.window.showErrorMessage(`${name} ${DefType ? DefType : ''} $(alert)`);
+            vscode.window.showErrorMessage(`There was an error while saving ${name}. Check for syntax errors.`);
         }
         // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
         diagnosticCollection.set(document.uri, diagnostics);
         if (diagnostics.length > 0) {
             // FAILURE !!! 
-            vscode.window.showErrorMessage(`${name} ${DefType ? DefType : ''} $(alert)`);
+            vscode.window.showErrorMessage(`There was an error while compiling ${name}. Check for syntax errors.`);
             return false;
         } else {
             // SUCCESS !!! 

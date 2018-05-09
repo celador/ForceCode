@@ -67,7 +67,7 @@ export default function deploy(context: vscode.ExtensionContext) {
                 fs.writeFileSync(validationIdPath, res.id);
             }
         } else {
-            vscode.window.showErrorMessage('ForceCode: Deploy Errors $(thumbsdown)');
+            vscode.window.showErrorMessage('ForceCode: Deploy Errors');
         }
         tools.reportDeployResult(res, logger, deployOptions.verbose);
         logger.flush();
@@ -76,7 +76,7 @@ export default function deploy(context: vscode.ExtensionContext) {
     }
     function onError(err) {
         unregisterProxy();
-        vscode.window.showErrorMessage('ForceCode: Deploy Errors $(thumbsdown)');
+        vscode.window.showErrorMessage('ForceCode: Deploy Errors');
         return vscode.window.showErrorMessage(err.message);
     }
     // =======================================================================================================================================

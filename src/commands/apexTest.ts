@@ -47,7 +47,7 @@ export default function apexTest(toTest: string, classOrMethod: string) {
             let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers[location];
             if (dxRes.summary.failing && dxRes.summary.failing > 0) {
                 vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   ==========================================================');
-                vscode.window.showErrorMessage('ForceCode: Some Tests Failed $(thumbsdown)');
+                vscode.window.showErrorMessage('ForceCode: Some Tests Failed');
                 let re: RegExp = /^(Class|Trigger)\.\S*\.(\S*)\.(\S*)\:\sline\s(\d*)\,\scolumn\s(\d*)$/ig;
                 let matches: string[] = re.exec(dxRes.tests[0].StackTrace);
                 if (matches && matches.length && matches.length === 6) {
