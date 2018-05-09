@@ -196,6 +196,7 @@ export default class ForceService implements forceCode.IForceService {
                     const changedMems = Object.keys(newMembers).filter(key=> {
                         return (self.workspaceMembers[key] && !this.compareDates(self.workspaceMembers[key].memberInfo.lastModifiedDate, newMembers[key].memberInfo.lastModifiedDate));
                     });
+                    console.log('Done checking members');
                     if(changedMems && changedMems.length > 0) {
                         console.log(changedMems.length + ' members were changed since last load');
                         changedMems.forEach(curMem => {
@@ -203,9 +204,9 @@ export default class ForceService implements forceCode.IForceService {
                             console.log(newMembers[curMem]);
                             commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, undefined);
                         });
-                        // maybe we should return here so we're not left with bad data, then we need to update in the retrieve command though...
+                        // return here so we're not left with stale metadata
+                        return;
                     }
-                    console.log('Done checking members');
                 } 
                 self.workspaceMembers = newMembers;
                 console.log('Done getting workspace info');

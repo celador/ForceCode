@@ -225,6 +225,11 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                             // let r: string = '\\' + path.sep + '(' + vscode.window.forceCode.config.prefix + ')*' + '(\\\_\\\_)*' + fileName;
                                             // return t.fileName.match(new RegExp(r, 'i'));
                                         }).map(t => {
+                                            // update the metadata here since we're fetching the file. will help make sure the metadata doesn't become stale.
+                                            if(vscode.window.forceCode.workspaceMembers[t.id]) {
+                                                vscode.window.forceCode.workspaceMembers[t.id].memberInfo = t;
+                                                vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
+                                            }
                                             return t.fileName;
                                         });
                                     } else if (typeof res === 'object') {
@@ -384,7 +389,6 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         tools.reportRetrieveResult(res, logger, vscode.window.forceCode.config.deployOptions.verbose);
         logger.flush();
         unregisterProxy();
-        vscode.window.forceCode.refreshApexMetadata();
         return res;
     }
     function onError(err) {
