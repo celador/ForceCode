@@ -30,7 +30,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     const fileName: string = parsers.getFileName(document);
     const name: string = parsers.getName(document, toolingType);
     var checkCount: number = 0;
-    let mem: forceCode.IWorkspaceMember;
 
     /* tslint:disable */
     var DefType: string = undefined;
@@ -279,7 +278,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return fc.workspaceMembers ? fc.workspaceMembers[record.Id] : undefined;
         }
         function shouldCompile(record) {
-            mem = getWorkspaceMemberForMetadataResult(record);
+            let mem: forceCode.IWorkspaceMember = getWorkspaceMemberForMetadataResult(record);
             if (mem && record.LastModifiedDate.split('.')[0] !== mem.memberInfo.lastModifiedDate.split('.')[0]) {
                 // throw up an alert
                 return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
@@ -450,14 +449,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return false;
         } else {
             // SUCCESS !!! 
-            if(mem) {
-                // update the metadata
-                vscode.window.forceCode.conn.tooling.sobject(mem.memberInfo.type).find({Id: mem.memberInfo.id}, {LastModifiedDate: 1})
-                    .then(res => {
-                        vscode.window.forceCode.workspaceMembers[mem.memberInfo.id].memberInfo.lastModifiedDate = res[0].LastModifiedDate;
-                        vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
-                    });
-                
+            if(res.records && vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id]) {
+                vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id].memberInfo.lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
+                vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
             }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;
