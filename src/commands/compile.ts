@@ -333,16 +333,17 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 // Tooling Object does not exist
                 // so we CREATE it
                 return fc.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
-                    console.log(foo);
-                    // retrieve the last modified date here
-                    var workspaceMember: forceCode.IWorkspaceMember = {
-                        name: parsers.getFileName(document),
-                        path: document.fileName,
-                        id: foo.id,
-                        lastModifiedDate: metadataFileProperties.lastModifiedDate,
-                        type: parsers.getToolingType(document),
-                    };
-                    fc.refreshApexMetadata().then(bar => {
+                    return fc.conn.tooling.sobject(toolingType).find({ Id: foo.id }, { LastModifiedDate: 1 }).execute().then(bar => {
+                        // retrieve the last modified date here
+                        var workspaceMember: forceCode.IWorkspaceMember = {
+                            name: fileName,
+                            path: document.fileName,
+                            id: foo.id,
+                            lastModifiedDate: bar[0].LastModifiedDate,
+                            type: toolingType,
+                        };
+                        fc.workspaceMembers[foo.id] = workspaceMember;
+                        fc.checkAndSetWorkspaceMembers(fc.workspaceMembers);
                         return fc;
                     });
                 });
