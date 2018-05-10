@@ -91,15 +91,9 @@ export default class ForceService implements forceCode.IForceService {
                 .then(this.parseMembers);
         });
 
-        function getMembersFor(item): IMetadataFileProperties {
-            var pathParts: string[] = item.path.split(path.sep);
-            var filename: string = pathParts[pathParts.length - 1];
-
-            return vscode.window.forceCode.apexMetadata.find(member => {
-                return member.fileName.split('/')[1] === filename;
-            });
+        function convertToWSMems(toStoreIn: forceCode.FCWorkspaceMembers, toConvert: forceCode.FCWorkspaceMembers) {
+            
         }
-
     }
 
     // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
