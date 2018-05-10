@@ -180,12 +180,16 @@ export default class ForceService implements forceCode.IForceService {
 
     public refreshApexMetadata() {
         var self: forceCode.IForceService = vscode.window.forceCode;
-        var apexTypes = [{ type: 'ApexClass' }, { type: 'ApexTrigger' }];
-        return self.conn.metadata.list(apexTypes).then(res => {
-            self.apexMetadata = res;
-            return self.getWorkspaceMembers().then(members => {
-                return self.checkAndSetWorkspaceMembers(members, true);
-            });
+        var apexTypes1 = [{ type: 'ApexClass' }, { type: 'ApexTrigger' }, { type: 'ApexPage'}];
+        var apexTypes2 = [{ type: 'ApexComponent' }];
+        // there's a limit of 3 so we have to do list twice, unfortunately
+        return self.conn.metadata.list(apexTypes1).then(types1 => {
+            return self.conn.metadata.list(apexTypes2).then(types2 => {
+                self.apexMetadata = types1.concat(types2);
+                return self.getWorkspaceMembers().then(members => {
+                    return self.checkAndSetWorkspaceMembers(members, true);
+                });
+            });            
         });
     }
 
