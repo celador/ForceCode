@@ -73,7 +73,6 @@ interface IWorkspaceMember {
     path: string;
     id: string;
     lastModifiedDate: string;
-    type: string;
 }
 
 interface ICodeCoverage {
@@ -141,7 +140,6 @@ export interface IForceService {
     workspaceRoot: string;
     completions?: vscode.CompletionItem[];
     describe: IMetadataDescribe;
-    apexMetadata: IMetadataFileProperties[];
     declarations?: IDeclarations;
     codeCoverage?: {};
     codeCoverageWarnings?: ICodeCoverageWarning[];
@@ -160,10 +158,9 @@ export interface IForceService {
     newContainer(force: Boolean): Promise<IForceService>;
     showStatus(message: string): void;
     clearLog(): void;
-    refreshApexMetadata(): Promise<any>;
     showStatus(message: string): void;
     resetStatus(): void;
-    getWorkspaceMembers(metadata?): any;//Promise<IWorkspaceMember[]>;
+    getWorkspaceMembers(): any;//Promise<IWorkspaceMember[]>;
     checkAndSetWorkspaceMembers(newMembers, check?: boolean): Promise<any>;
     cleanupContainers(): Promise<any>;
     compareDates(date1: string, date2: string): boolean;

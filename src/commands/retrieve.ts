@@ -236,7 +236,6 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                                     path: resource.fsPath,
                                                     id: t.id, 
                                                     lastModifiedDate: t.lastModifiedDate,
-                                                    type: t.type,
                                                 };
                                                 vscode.window.forceCode.workspaceMembers[t.id] = workspaceMember;
                                             }

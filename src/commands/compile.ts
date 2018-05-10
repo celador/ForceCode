@@ -288,18 +288,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                     }
                     return false;
                 });
-            } else if (!vscode.window.forceCode.apexMetadata) {
-                // We don't have a workspace member for this file yet.  
-                // We just booted and haven't retrieved it yet or something went wrong.
-                return vscode.window.showWarningMessage('org_metadata not found', 'Save', 'Wait').then(s => {
-                    if (s === 'Save') {
-                        return true;
-                    }
-                    if (s === 'Wait') {
-                        return false;
-                    }
-                    return false;
-                });
             } else {
                 return Promise.resolve(true);
             }
@@ -340,7 +328,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                             path: document.fileName,
                             id: foo.id,
                             lastModifiedDate: bar[0].LastModifiedDate,
-                            type: toolingType,
                         };
                         fc.workspaceMembers[foo.id] = workspaceMember;
                         fc.checkAndSetWorkspaceMembers(fc.workspaceMembers);

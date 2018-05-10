@@ -16,7 +16,6 @@ export default class ForceService implements forceCode.IForceService {
     public containerId: string;
     public containerMembers: forceCode.IContainerMember[];
     public describe: forceCode.IMetadataDescribe;
-    public apexMetadata: IMetadataFileProperties[];
     public declarations: forceCode.IDeclarations;
     public codeCoverage: {} = {};
     public codeCoverageWarnings: forceCode.ICodeCoverageWarning[];
@@ -44,7 +43,6 @@ export default class ForceService implements forceCode.IForceService {
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         //this.statusBarItem.text = 'ForceCode: Active';
         this.containerMembers = [];
-        this.apexMetadata = [];
         configuration(this).then(config => {
             this.username = config.username || '';
             this.dxCommands.getOrgInfo().then(res => {
@@ -102,44 +100,76 @@ export default class ForceService implements forceCode.IForceService {
 
         // Get files in src folder..
     // Match them up with ContainerMembers
-    public getWorkspaceMembers(metadata?): Promise<forceCode.FCWorkspaceMembers> {
+    public getWorkspaceMembers(): Promise<forceCode.FCWorkspaceMembers> {
         return new Promise((resolve, reject) => {
             var klaw: any = require('klaw');
             var members: forceCode.FCWorkspaceMembers = {}; 
+            var typesNames: {[key: string]: Array<string>;} = {};
             klaw(vscode.window.forceCode.workspaceRoot)
                 .on('data', function (item) {
                     // Check to see if the file represents an actual member... 
                     if (item.stats.isFile()) {
-                        var metadataFileProperties: IMetadataFileProperties = getMembersFor(item);
+                        //var metadataFileProperties: IMetadataFileProperties = getMembersFor(item);
                         
-                        if (metadataFileProperties) {
+                        //if (metadataFileProperties) {
+                        var type: string = undefined;
+                        if (item.path.endsWith('.cls')) {
+                            type = 'ApexClass';
+                        } else if (item.path.endsWith('.trigger')) {
+                            type = 'ApexTrigger';
+                        } else if (item.path.endsWith('.component')) {
+                            type = 'ApexComponent';
+                        } else if (item.path.endsWith('.page')) {
+                           type = 'ApexPage';
+                        }
 
+                        if(type) {
+                            var pathParts: string[] = item.path.split(path.sep);
+                            var filename: string = pathParts[pathParts.length - 1].split('.')[0];
+                            if(!typesNames[type]) {
+                                typesNames[type] = new Array<string>();
+                            }
+                            typesNames[type].push(filename);
                             var workspaceMember: forceCode.IWorkspaceMember = {
-                                name: metadataFileProperties.fullName,
+                                name: filename,
                                 path: item.path,
-                                id: metadataFileProperties.id,
-                                lastModifiedDate: metadataFileProperties.lastModifiedDate,
-                                type: metadataFileProperties.type,
+                                id: '',//metadataFileProperties.id,
+                                lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
                             };
-                            members[workspaceMember.id] = workspaceMember;
+                            members[filename] = workspaceMember;
                         }
                     }
                 })
                 .on('end', function () {
-                    resolve(members);
+                    var membersToReturn: forceCode.FCWorkspaceMembers = {};
+
+                    let proms = Object.keys(typesNames).map(curType => {
+                            return vscode.window.forceCode.conn.tooling.sobject(curType)
+                                .find({ Name: typesNames[curType] }, { Id: 1, Name: 1, LastModifiedDate: 1 }).execute()
+                                .then(recs => {
+                                    return recs;
+                                });
+                        });
+                    
+                    return Promise.all(proms).then(records => {
+                        records.forEach(curSet => {
+                            Object.keys(curSet).forEach(key => {
+                                membersToReturn[curSet[key].Id] = members[curSet[key].Name];
+                                membersToReturn[curSet[key].Id].id = curSet[key].Id;
+                                membersToReturn[curSet[key].Id].lastModifiedDate = curSet[key].LastModifiedDate; 
+                            });
+                            
+                        });
+
+                        resolve(membersToReturn);
+                    });
                     // console.dir(items) // => [ ... array of files]
                 });
         });
 
-        function getMembersFor(item): IMetadataFileProperties {
-            var pathParts: string[] = item.path.split(path.sep);
-            var filename: string = pathParts[pathParts.length - 1];
-
-            return vscode.window.forceCode.apexMetadata.find(member => {
-                return member.fileName.split('/')[1] === filename;
-            });
+        function convertToWSMems(toStoreIn: forceCode.FCWorkspaceMembers, toConvert: forceCode.FCWorkspaceMembers) {
+            
         }
-
     }
 
     // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
@@ -178,28 +208,13 @@ export default class ForceService implements forceCode.IForceService {
         return false;
     }
 
-    public refreshApexMetadata() {
-        var self: forceCode.IForceService = vscode.window.forceCode;
-        var apexTypes1 = [{ type: 'ApexClass' }, { type: 'ApexTrigger' }, { type: 'ApexPage'}];
-        var apexTypes2 = [{ type: 'ApexComponent' }];
-        // there's a limit of 3 so we have to do list twice, unfortunately
-        return self.conn.metadata.list(apexTypes1).then(types1 => {
-            return self.conn.metadata.list(apexTypes2).then(types2 => {
-                self.apexMetadata = types1.concat(types2);
-                return self.getWorkspaceMembers().then(members => {
-                    return self.checkAndSetWorkspaceMembers(members, true);
-                });
-            });            
-        });
-    }
-
     public checkAndSetWorkspaceMembers(newMembers: forceCode.FCWorkspaceMembers, check?: boolean){
         var self: forceCode.IForceService = vscode.window.forceCode;
            
         return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(res => {
             console.log('Updated workspace file');
             if(check) {
-                if(self.workspaceMembers) {
+                if(!self.dxCommands.isEmptyUndOrNull(self.workspaceMembers)) {
                     const changedMems = Object.keys(newMembers).filter(key=> {
                         return (self.workspaceMembers[key] && !this.compareDates(self.workspaceMembers[key].lastModifiedDate, newMembers[key].lastModifiedDate));
                     });
@@ -268,12 +283,14 @@ export default class ForceService implements forceCode.IForceService {
                 .then(connectionSuccess)
                 .catch(connectionError)
                 .then(getNamespacePrefix)
-                .then(refreshApexMetadata)
+                .then(getWorkspaceMembers)
                 .then(cleanupContainers)
                 .catch(err => vscode.window.showErrorMessage(err.message));
 
-            function refreshApexMetadata(svc) {
-                vscode.window.forceCode.refreshApexMetadata();
+            function getWorkspaceMembers(svc) {
+                vscode.window.forceCode.getWorkspaceMembers().then(mems => {
+                    vscode.window.forceCode.checkAndSetWorkspaceMembers(mems, true);
+                });
                 return svc;
             }
 
