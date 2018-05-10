@@ -91,7 +91,7 @@ export default class ForceService implements forceCode.IForceService {
                 .then(this.parseMembers);
         });
 
-        function getMembersFor(item): forceCode.IMetadataFileProperties {
+        function getMembersFor(item): IMetadataFileProperties {
             var pathParts: string[] = item.path.split(path.sep);
             var filename: string = pathParts[pathParts.length - 1];
 
