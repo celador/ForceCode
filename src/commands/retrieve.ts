@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import * as parsers from './../parsers';
+import { IWorkspaceMember } from '../forceCode';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
@@ -228,8 +229,18 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                             // update the metadata here since we're fetching the file. will help make sure the metadata doesn't become stale.
                                             if(vscode.window.forceCode.workspaceMembers[t.id]) {
                                                 vscode.window.forceCode.workspaceMembers[t.id].lastModifiedDate = t.lastModifiedDate;
-                                                vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
+                                            } else {
+                                                // create it
+                                                var workspaceMember: IWorkspaceMember = {
+                                                    name: t.fullName,
+                                                    path: resource.fsPath,
+                                                    id: t.id, 
+                                                    lastModifiedDate: t.lastModifiedDate,
+                                                    type: t.type,
+                                                };
+                                                vscode.window.forceCode.workspaceMembers[t.id] = workspaceMember;
                                             }
+                                            vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
                                             return t.fileName;
                                         });
                                     } else if (typeof res === 'object') {

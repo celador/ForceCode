@@ -274,11 +274,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             });
         }
 
-        function getWorkspaceMemberForMetadataResult(record: forceCode.MetadataResult) {
-            return fc.workspaceMembers ? fc.workspaceMembers[record.Id] : undefined;
-        }
         function shouldCompile(record) {
-            let mem: forceCode.IWorkspaceMember = getWorkspaceMemberForMetadataResult(record);
+            let mem: forceCode.IWorkspaceMember = fc.workspaceMembers[record.Id];
             if (mem && !vscode.window.forceCode.compareDates(record.LastModifiedDate, mem.lastModifiedDate)) {
                 // throw up an alert
                 return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
@@ -337,6 +334,14 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 // so we CREATE it
                 return fc.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
                     console.log(foo);
+                    // retrieve the last modified date here
+                    var workspaceMember: forceCode.IWorkspaceMember = {
+                        name: parsers.getFileName(document),
+                        path: document.fileName,
+                        id: foo.id,
+                        lastModifiedDate: metadataFileProperties.lastModifiedDate,
+                        type: parsers.getToolingType(document),
+                    };
                     fc.refreshApexMetadata().then(bar => {
                         return fc;
                     });

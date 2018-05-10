@@ -198,6 +198,7 @@ export function showFileOptions(promises: any[]) {
                     path: filename,
                     id: res.Id, 
                     lastModifiedDate: res.LastModifiedDate,
+                    type: toolingType,
                 };
                 vscode.window.forceCode.workspaceMembers[res.Id] = workspaceMember;
                 console.log(vscode.window.forceCode.workspaceMembers[res.Id]);

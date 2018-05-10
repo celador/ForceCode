@@ -119,8 +119,8 @@ export default class ForceService implements forceCode.IForceService {
                                 path: item.path,
                                 id: metadataFileProperties.id,
                                 lastModifiedDate: metadataFileProperties.lastModifiedDate,
+                                type: metadataFileProperties.type,
                             };
-                            console.log(workspaceMember);
                             members[workspaceMember.id] = workspaceMember;
                         }
                     }
