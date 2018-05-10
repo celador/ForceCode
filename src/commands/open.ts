@@ -72,7 +72,7 @@ export function showFileOptions(promises: any[]) {
     })
     .then(res => {
         var count: number = 0;
-        var showFile: boolean = vscode.window.forceCode.config.showFilesOnOpen;
+        var showFile: boolean = vscode.window.forceCode.config.showFilesOnOpen ? true : false;
         var maxToShow: number = vscode.window.forceCode.config.showFilesOnOpenMax ? vscode.window.forceCode.config.showFilesOnOpenMax : 3;
         var thePromises: any[] = res.map(curRes => { 
             count++;
@@ -83,6 +83,9 @@ export function showFileOptions(promises: any[]) {
         });
         vscode.window.forceCode.showStatus('ForceCode: Retrieve Finished');
         return Promise.all(thePromises);
+    })
+    .then(res => {
+        return vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
     })
     .catch(err => vscode.window.showErrorMessage(err.message));
 
@@ -200,13 +203,14 @@ export function showFileOptions(promises: any[]) {
                     lastModifiedDate: res.LastModifiedDate,
                 };
                 vscode.window.forceCode.workspaceMembers[res.Id] = workspaceMember;
-                console.log(vscode.window.forceCode.workspaceMembers[res.Id]);
                 let body: string = res.Body || res.Markup;
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {
                         if (err) { reject(err); }
                         if (results.length === 1 && openFile) {
-                            vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, { preview: false }));
+                            try{
+                                vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, { preview: false }));
+                            } catch (e) {}
                         }
                     });
                     resolve(true);
