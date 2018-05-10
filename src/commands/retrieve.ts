@@ -227,7 +227,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                         }).map(t => {
                                             // update the metadata here since we're fetching the file. will help make sure the metadata doesn't become stale.
                                             if(vscode.window.forceCode.workspaceMembers[t.id]) {
-                                                vscode.window.forceCode.workspaceMembers[t.id].memberInfo = t;
+                                                vscode.window.forceCode.workspaceMembers[t.id].lastModifiedDate = t.lastModifiedDate;
                                                 vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
                                             }
                                             return t.fileName;

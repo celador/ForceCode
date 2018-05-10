@@ -6,6 +6,7 @@ const fetch: any = require('node-fetch');
 const mime = require('mime-types');
 
 import { getIcon, getExtension, getFolder } from './../parsers';
+import { IWorkspaceMember } from '../forceCode';
 const TYPEATTRIBUTE: string = 'type';
 
 export function open(context: vscode.ExtensionContext) {
@@ -80,8 +81,6 @@ export function showFileOptions(promises: any[]) {
             }
             return writeFiles(curRes, showFile).then(toRet => { return toRet; }); 
         });
-        // refresh the metadata, change this later to only update the dates and workspacemembers
-        vscode.window.forceCode.refreshApexMetadata();
         vscode.window.forceCode.showStatus('ForceCode: Retrieve Finished');
         return Promise.all(thePromises);
     })
@@ -194,6 +193,14 @@ export function showFileOptions(promises: any[]) {
                 
             }else {
                 filename = `${vscode.window.forceCode.workspaceRoot}${path.sep}${getFolder(toolingType)}${path.sep}${res.Name || res.FullName}.${getExtension(toolingType)}`;
+                var workspaceMember: IWorkspaceMember = {
+                    name: res.FullName,
+                    path: filename,
+                    id: res.Id, 
+                    lastModifiedDate: res.LastModifiedDate,
+                };
+                vscode.window.forceCode.workspaceMembers[res.Id] = workspaceMember;
+                console.log(vscode.window.forceCode.workspaceMembers[res.Id]);
                 let body: string = res.Body || res.Markup;
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {

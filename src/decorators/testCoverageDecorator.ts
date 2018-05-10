@@ -70,10 +70,10 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
     if(vscode.window.forceCode.workspaceMembers) {
         coverageChannel.clear();
         // get the id
-        var file = parsers.getWholeFileName(document);
+        var fileName = document.fileName;
         // get the id    
         var curFileId: string = Object.keys(vscode.window.forceCode.workspaceMembers).find(cur => {
-            return vscode.window.forceCode.workspaceMembers[cur].memberInfo.fileName.split('/')[1] === file;
+            return vscode.window.forceCode.workspaceMembers[cur].path === fileName;
         });
 
         if(curFileId && vscode.window.forceCode.codeCoverage[curFileId]) {

@@ -5,6 +5,7 @@ import constants from './../models/constants';
 import DXService, { SFDX } from './dxService';
 import * as path from 'path';
 import * as creds from './../commands/credentials';
+import { IMetadataFileProperties } from 'jsforce';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
@@ -15,7 +16,7 @@ export default class ForceService implements forceCode.IForceService {
     public containerId: string;
     public containerMembers: forceCode.IContainerMember[];
     public describe: forceCode.IMetadataDescribe;
-    public apexMetadata: forceCode.IMetadataFileProperties[];
+    public apexMetadata: IMetadataFileProperties[];
     public declarations: forceCode.IDeclarations;
     public codeCoverage: {} = {};
     public codeCoverageWarnings: forceCode.ICodeCoverageWarning[];
@@ -109,16 +110,18 @@ export default class ForceService implements forceCode.IForceService {
                 .on('data', function (item) {
                     // Check to see if the file represents an actual member... 
                     if (item.stats.isFile()) {
-                        var metadataFileProperties: forceCode.IMetadataFileProperties = getMembersFor(item);
+                        var metadataFileProperties: IMetadataFileProperties = getMembersFor(item);
                         
                         if (metadataFileProperties) {
 
                             var workspaceMember: forceCode.IWorkspaceMember = {
                                 name: metadataFileProperties.fullName,
                                 path: item.path,
-                                memberInfo: metadataFileProperties,
+                                id: metadataFileProperties.id,
+                                lastModifiedDate: metadataFileProperties.lastModifiedDate,
                             };
-                            members[workspaceMember.memberInfo.id] = workspaceMember;
+                            console.log(workspaceMember);
+                            members[workspaceMember.id] = workspaceMember;
                         }
                     }
                 })
@@ -128,7 +131,7 @@ export default class ForceService implements forceCode.IForceService {
                 });
         });
 
-        function getMembersFor(item): forceCode.IMetadataFileProperties {
+        function getMembersFor(item): IMetadataFileProperties {
             var pathParts: string[] = item.path.split(path.sep);
             var filename: string = pathParts[pathParts.length - 1];
 
@@ -194,14 +197,12 @@ export default class ForceService implements forceCode.IForceService {
             if(check) {
                 if(self.workspaceMembers) {
                     const changedMems = Object.keys(newMembers).filter(key=> {
-                        return (self.workspaceMembers[key] && !this.compareDates(self.workspaceMembers[key].memberInfo.lastModifiedDate, newMembers[key].memberInfo.lastModifiedDate));
+                        return (self.workspaceMembers[key] && !this.compareDates(self.workspaceMembers[key].lastModifiedDate, newMembers[key].lastModifiedDate));
                     });
                     console.log('Done checking members');
                     if(changedMems && changedMems.length > 0) {
                         console.log(changedMems.length + ' members were changed since last load');
                         changedMems.forEach(curMem => {
-                            console.log(vscode.window.forceCode.workspaceMembers[curMem]);
-                            console.log(newMembers[curMem]);
                             commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, undefined);
                         });
                         // return here so we're not left with stale metadata

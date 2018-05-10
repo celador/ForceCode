@@ -32,10 +32,10 @@ export function activate(context: vscode.ExtensionContext): any {
 
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(function(event) {
         // clear the code coverage
-        var file = parsers.getWholeFileName(event.document);
+        var fileName = event.document.fileName;
         // get the id
         var curFileId: string = Object.keys(vscode.window.forceCode.workspaceMembers).find(cur => {
-            return vscode.window.forceCode.workspaceMembers[cur].memberInfo.fileName.split('/')[1] === file;
+            return vscode.window.forceCode.workspaceMembers[cur].path === fileName;
         });
         
         if(curFileId && vscode.window.forceCode.codeCoverage[curFileId]) {

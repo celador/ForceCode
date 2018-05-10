@@ -279,7 +279,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         }
         function shouldCompile(record) {
             let mem: forceCode.IWorkspaceMember = getWorkspaceMemberForMetadataResult(record);
-            if (mem && !vscode.window.forceCode.compareDates(record.LastModifiedDate, mem.memberInfo.lastModifiedDate)) {
+            if (mem && !vscode.window.forceCode.compareDates(record.LastModifiedDate, mem.lastModifiedDate)) {
                 // throw up an alert
                 return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
                     if (s === 'Diff') {
@@ -336,6 +336,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 // Tooling Object does not exist
                 // so we CREATE it
                 return fc.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
+                    console.log(foo);
                     fc.refreshApexMetadata().then(bar => {
                         return fc;
                     });
@@ -450,7 +451,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         } else {
             // SUCCESS !!! 
             if(res.records && vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id]) {
-                vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id].memberInfo.lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
+                vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id].lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
                 vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
             }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);

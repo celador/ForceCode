@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import jsforce = require('jsforce');
 import { DXCommands} from './services/dxService';
+import { IMetadataFileProperties } from 'jsforce';
 
 declare module 'vscode' {
     export namespace window {
@@ -10,21 +11,6 @@ declare module 'vscode' {
 
 export interface FCWorkspaceMembers {
     [key: string]: IWorkspaceMember;
-}
-
-export interface IMetadataFileProperties {
-    createdById: string;
-    createdByName: string;
-    createdDate: string;
-    fileName: string;
-    fullName: string;
-    id: string;
-    lastModifiedById: string;
-    lastModifiedByName: string;
-    lastModifiedDate: string;
-    manageableState: string;
-    namespacePrefix: string;
-    type: string;
 }
 
 export interface Config {
@@ -85,7 +71,8 @@ interface ILocationsNotCovered {
 interface IWorkspaceMember {
     name: string;
     path: string;
-    memberInfo: IMetadataFileProperties;
+    id: string;
+    lastModifiedDate: string;
 }
 
 interface ICodeCoverage {
