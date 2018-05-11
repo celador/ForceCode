@@ -289,10 +289,17 @@ export default class ForceService implements forceCode.IForceService {
             }
 
             function parseMembers(mems) {
-                let proms = Object.keys(mems[1]).map(curType => {
-                    return vscode.window.forceCode.conn.tooling.sobject(curType)
-                        .find({ Name: mems[1][curType] }, { Id: 1, Name: 1, LastModifiedDate: 1 }).execute()
-                        .then(res => {return res;});
+                var types = {};
+                types['type0'] = Object.keys(mems[1]);
+                if(types['type0'].length > 3) {
+                    for(var i = 1; types['type0'].length < 4; i++) {
+                        types['type' + i] = types['type0'].shift();
+                        types['type' + i] = types['type0'].shift();
+                        types['type' + i] = types['type0'].shift();
+                    }
+                }
+                let proms = Object.keys(types).map(curTypes => {
+                    return vscode.window.forceCode.conn.metadata.list(types[curTypes]);
                 });
                 return Promise.all(proms).then(rets => {
                     const tempMems: forceCode.FCWorkspaceMembers = mems.shift();
