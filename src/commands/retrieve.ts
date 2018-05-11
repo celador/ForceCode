@@ -218,6 +218,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                 return vscode.window.forceCode.conn.metadata.list(listTypes).then(res => {
                                     let fileName: string = resource.fsPath.slice(resource.fsPath.lastIndexOf(path.sep) + 1);
                                     var files: string[] = [];
+                                    var workspaceMember: IWorkspaceMember;
 
                                     // Match the metadata against the filepath
                                     if (Array.isArray(res)) {
@@ -227,22 +228,26 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                             // return t.fileName.match(new RegExp(r, 'i'));
                                         }).map(t => {
                                             // update the metadata here since we're fetching the file. will help make sure the metadata doesn't become stale.
-                                            if(vscode.window.forceCode.workspaceMembers[t.id]) {
-                                                vscode.window.forceCode.workspaceMembers[t.id].lastModifiedDate = t.lastModifiedDate;
-                                            } else {
-                                                // create it
-                                                var workspaceMember: IWorkspaceMember = {
-                                                    name: t.fullName,
-                                                    path: resource.fsPath,
-                                                    id: t.id, 
-                                                    lastModifiedDate: t.lastModifiedDate,
-                                                };
-                                                vscode.window.forceCode.workspaceMembers[t.id] = workspaceMember;
-                                            }
+                                            // if it already exists it will just be overwritten
+                                            workspaceMember = {
+                                                name: t.fullName,
+                                                path: resource.fsPath,
+                                                id: t.id, 
+                                                lastModifiedDate: t.lastModifiedDate,
+                                            };
+                                            vscode.window.forceCode.workspaceMembers[t.id] = workspaceMember;
                                             vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
                                             return t.fileName;
                                         });
                                     } else if (typeof res === 'object') {
+                                        workspaceMember = {
+                                            name: res['fullName'],
+                                            path: resource.fsPath,
+                                            id: res['id'], 
+                                            lastModifiedDate: res['lastModifiedDate'],
+                                        };
+                                        vscode.window.forceCode.workspaceMembers[res['id']] = workspaceMember;
+                                        vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
                                         files.push(res['fileName']);
                                     }
 
