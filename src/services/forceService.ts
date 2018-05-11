@@ -100,7 +100,7 @@ export default class ForceService implements forceCode.IForceService {
 
         // Get files in src folder..
     // Match them up with ContainerMembers
-    public getWorkspaceMembers(): Promise<forceCode.FCWorkspaceMembers> {
+    public getWorkspaceMembers(): Promise<any> {
         return new Promise((resolve, reject) => {
             var klaw: any = require('klaw');
             var members: forceCode.FCWorkspaceMembers = {}; 
@@ -141,35 +141,30 @@ export default class ForceService implements forceCode.IForceService {
                     }
                 })
                 .on('end', function () {
-                    var membersToReturn: forceCode.FCWorkspaceMembers = {};
-
-                    let proms = Object.keys(typesNames).map(curType => {
-                            return vscode.window.forceCode.conn.tooling.sobject(curType)
-                                .find({ Name: typesNames[curType] }, { Id: 1, Name: 1, LastModifiedDate: 1 }).execute()
-                                .then(recs => {
-                                    return recs;
-                                });
-                        });
-                    
-                    return Promise.all(proms).then(records => {
-                        records.forEach(curSet => {
-                            Object.keys(curSet).forEach(key => {
-                                membersToReturn[curSet[key].Id] = members[curSet[key].Name];
-                                membersToReturn[curSet[key].Id].id = curSet[key].Id;
-                                membersToReturn[curSet[key].Id].lastModifiedDate = curSet[key].LastModifiedDate; 
-                            });
-                            
-                        });
-
-                        resolve(membersToReturn);
-                    });
-                    // console.dir(items) // => [ ... array of files]
+                    let retval: any[] = [members, typesNames];
+                    resolve(retval);
                 });
         });
+    }
 
-        function convertToWSMems(toStoreIn: forceCode.FCWorkspaceMembers, toConvert: forceCode.FCWorkspaceMembers) {
-            
-        }
+    public parseRecords(members: forceCode.FCWorkspaceMembers, recs: any[]): forceCode.FCWorkspaceMembers {
+        var membersToReturn: forceCode.FCWorkspaceMembers = {};
+        //return Promise.all(recs).then(records => {
+        console.log('got records');
+        console.log(recs);
+        recs.forEach(curSet => {
+            console.log(curSet);
+            Object.keys(curSet).forEach(key => {
+                membersToReturn[curSet[key].Id] = members[curSet[key].Name];
+                console.log(curSet[key]);
+                membersToReturn[curSet[key].Id].id = curSet[key].Id;
+                membersToReturn[curSet[key].Id].lastModifiedDate = curSet[key].LastModifiedDate; 
+            });
+        });
+
+        return membersToReturn;
+
+        //});
     }
 
     // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
@@ -284,14 +279,32 @@ export default class ForceService implements forceCode.IForceService {
                 .catch(connectionError)
                 .then(getNamespacePrefix)
                 .then(getWorkspaceMembers)
+                .then(parseMembers)
+                .then(checkWSMems)
                 .then(cleanupContainers)
                 .catch(err => vscode.window.showErrorMessage(err.message));
 
             function getWorkspaceMembers(svc) {
-                vscode.window.forceCode.getWorkspaceMembers().then(mems => {
-                    vscode.window.forceCode.checkAndSetWorkspaceMembers(mems, true);
+                return vscode.window.forceCode.getWorkspaceMembers();
+            }
+
+            function parseMembers(mems) {
+                let proms = Object.keys(mems[1]).map(curType => {
+                    return vscode.window.forceCode.conn.tooling.sobject(curType)
+                        .find({ Name: mems[1][curType] }, { Id: 1, Name: 1, LastModifiedDate: 1 }).execute()
+                        .then(res => {return res;});
                 });
-                return svc;
+                return Promise.all(proms).then(rets => {
+                    const tempMems: forceCode.FCWorkspaceMembers = mems.shift();
+                    console.log(tempMems);
+                    console.log(rets)
+                    return vscode.window.forceCode.parseRecords(tempMems, rets);
+                });
+            }
+
+            function checkWSMems(mems) {
+                vscode.window.forceCode.checkAndSetWorkspaceMembers(mems, true);
+                return self
             }
 
             function cleanupContainers(svc) {

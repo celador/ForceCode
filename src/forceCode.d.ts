@@ -164,6 +164,7 @@ export interface IForceService {
     checkAndSetWorkspaceMembers(newMembers, check?: boolean): Promise<any>;
     cleanupContainers(): Promise<any>;
     compareDates(date1: string, date2: string): boolean;
+    parseRecords(members: FCWorkspaceMembers, recs: any[]): FCWorkspaceMembers;
 }
 
 

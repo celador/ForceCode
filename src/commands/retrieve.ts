@@ -215,11 +215,12 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                         };
                                     });
                                 // List the Metadata by that type
+                                console.log(listTypes);
                                 return vscode.window.forceCode.conn.metadata.list(listTypes).then(res => {
                                     let fileName: string = resource.fsPath.slice(resource.fsPath.lastIndexOf(path.sep) + 1);
                                     var files: string[] = [];
                                     var workspaceMember: IWorkspaceMember;
-
+                                    console.log(res);
                                     // Match the metadata against the filepath
                                     if (Array.isArray(res)) {
                                         files = res.filter(t => {
