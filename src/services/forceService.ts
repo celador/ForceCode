@@ -154,11 +154,13 @@ export default class ForceService implements forceCode.IForceService {
         console.log(recs);
         recs.forEach(curSet => {
             console.log(curSet);
-            Object.keys(curSet).forEach(key => {
-                membersToReturn[curSet[key].Id] = members[curSet[key].Name];
-                console.log(curSet[key]);
-                membersToReturn[curSet[key].Id].id = curSet[key].Id;
-                membersToReturn[curSet[key].Id].lastModifiedDate = curSet[key].LastModifiedDate; 
+            curSet.forEach(key => {
+                if(members[curSet[key].fullName]) {
+                    membersToReturn[curSet[key].Id] = members[curSet[key].fullName];
+                    console.log(curSet[key]);
+                    membersToReturn[curSet[key].Id].id = curSet[key].id;
+                    membersToReturn[curSet[key].Id].lastModifiedDate = curSet[key].lastModifiedDate; 
+                }
             });
         });
 
