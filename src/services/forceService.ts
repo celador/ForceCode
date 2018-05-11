@@ -95,16 +95,13 @@ export default class ForceService implements forceCode.IForceService {
     public parseRecords(members: forceCode.FCWorkspaceMembers, recs: any[]): forceCode.FCWorkspaceMembers {
         var membersToReturn: forceCode.FCWorkspaceMembers = {};
         //return Promise.all(recs).then(records => {
-        console.log('got records');
-        console.log(recs);
+        console.log('Retrieved metadata records');
         recs.forEach(curSet => {
-            console.log(curSet);
             curSet.forEach(key => {
-                if(members[curSet[key].fullName]) {
-                    membersToReturn[curSet[key].Id] = members[curSet[key].fullName];
-                    console.log(curSet[key]);
-                    membersToReturn[curSet[key].Id].id = curSet[key].id;
-                    membersToReturn[curSet[key].Id].lastModifiedDate = curSet[key].lastModifiedDate; 
+                if(members[key.fullName] && members[key.fullName].type === key.type) {
+                    membersToReturn[key.id] = members[key.fullName];
+                    membersToReturn[key.id].id = key.id;
+                    membersToReturn[key.id].lastModifiedDate = key.lastModifiedDate; 
                 }
             });
         });
