@@ -73,6 +73,7 @@ interface IWorkspaceMember {
     path: string;
     id: string;
     lastModifiedDate: string;
+    type: string;
 }
 
 interface ICodeCoverage {

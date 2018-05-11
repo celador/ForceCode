@@ -104,7 +104,8 @@ export default class ForceService implements forceCode.IForceService {
         return new Promise((resolve, reject) => {
             var klaw: any = require('klaw');
             var members: forceCode.FCWorkspaceMembers = {}; 
-            var typesNames: {[key: string]: Array<string>;} = {};
+            var types: Array<{}> = [];
+            var typeNames: Array<string> = [];
             klaw(vscode.window.forceCode.workspaceRoot)
                 .on('data', function (item) {
                     // Check to see if the file represents an actual member... 
@@ -126,22 +127,24 @@ export default class ForceService implements forceCode.IForceService {
                         if(type) {
                             var pathParts: string[] = item.path.split(path.sep);
                             var filename: string = pathParts[pathParts.length - 1].split('.')[0];
-                            if(!typesNames[type]) {
-                                typesNames[type] = new Array<string>();
+                            if(!typeNames.includes(type)) {
+                                typeNames.push(type);
+                                types.push({type: type});
                             }
-                            typesNames[type].push(filename);
+
                             var workspaceMember: forceCode.IWorkspaceMember = {
                                 name: filename,
                                 path: item.path,
                                 id: '',//metadataFileProperties.id,
                                 lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
+                                type: type,
                             };
                             members[filename] = workspaceMember;
                         }
                     }
                 })
                 .on('end', function () {
-                    let retval: any[] = [members, typesNames];
+                    let retval: any[] = [members, types];
                     resolve(retval);
                 });
         });
@@ -150,16 +153,13 @@ export default class ForceService implements forceCode.IForceService {
     public parseRecords(members: forceCode.FCWorkspaceMembers, recs: any[]): forceCode.FCWorkspaceMembers {
         var membersToReturn: forceCode.FCWorkspaceMembers = {};
         //return Promise.all(recs).then(records => {
-        console.log('got records');
-        console.log(recs);
+        console.log('Retrieved metadata records');
         recs.forEach(curSet => {
-            console.log(curSet);
             curSet.forEach(key => {
-                if(members[curSet[key].fullName]) {
-                    membersToReturn[curSet[key].Id] = members[curSet[key].fullName];
-                    console.log(curSet[key]);
-                    membersToReturn[curSet[key].Id].id = curSet[key].id;
-                    membersToReturn[curSet[key].Id].lastModifiedDate = curSet[key].lastModifiedDate; 
+                if(members[key.fullName] && members[key.fullName].type === key.type) {
+                    membersToReturn[key.id] = members[key.fullName];
+                    membersToReturn[key.id].id = key.id;
+                    membersToReturn[key.id].lastModifiedDate = key.lastModifiedDate; 
                 }
             });
         });
@@ -291,13 +291,15 @@ export default class ForceService implements forceCode.IForceService {
             }
 
             function parseMembers(mems) {
-                var types = {};
-                types['type0'] = Object.keys(mems[1]);
+                var types: {[key: string]: Array<any>} = {};
+                types['type0'] = mems[1];
                 if(types['type0'].length > 3) {
-                    for(var i = 1; types['type0'].length < 4; i++) {
-                        types['type' + i] = types['type0'].shift();
-                        types['type' + i] = types['type0'].shift();
-                        types['type' + i] = types['type0'].shift();
+                    for(var i = 1; types['type0'].length > 3; i++) {
+                        var newTypes: Array<any> = [];
+                        newTypes.push(types['type0'].shift());
+                        newTypes.push(types['type0'].shift());
+                        newTypes.push(types['type0'].shift());
+                        types['type' + i] = newTypes;
                     }
                 }
                 let proms = Object.keys(types).map(curTypes => {
@@ -305,8 +307,6 @@ export default class ForceService implements forceCode.IForceService {
                 });
                 return Promise.all(proms).then(rets => {
                     const tempMems: forceCode.FCWorkspaceMembers = mems.shift();
-                    console.log(tempMems);
-                    console.log(rets)
                     return vscode.window.forceCode.parseRecords(tempMems, rets);
                 });
             }

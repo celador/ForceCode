@@ -328,6 +328,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                             path: document.fileName,
                             id: foo.id,
                             lastModifiedDate: bar[0].LastModifiedDate,
+                            type: toolingType,
                         };
                         fc.workspaceMembers[foo.id] = workspaceMember;
                         fc.checkAndSetWorkspaceMembers(fc.workspaceMembers);
