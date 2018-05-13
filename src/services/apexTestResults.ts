@@ -4,16 +4,12 @@ import { QueryResult } from '../services/dxService';
 import { editorUpdateApexCoverageDecorator } from '../decorators/testCoverageDecorator';
 
 export default function getApexTestResults(testClassIds?: string[]): Promise<QueryResult> {
-    var memberIds: string[] = Object.keys(vscode.window.forceCode.workspaceMembers);
     var fromWhere: string = testClassIds ? ' ApexCodeCoverage ' : ' ApexCodeCoverageAggregate ';
-    
-    var orMemIds: string = "(ApexClassOrTriggerId = '" + memberIds.join("' OR ApexClassOrTriggerId = '") + "') ";
     var orIds: string = testClassIds && testClassIds.length > 0 ? "AND (ApexTestClassId = '" + testClassIds.join("' OR ApexTestClassId = '") + "') " : '';
     var query = 'SELECT Coverage, ApexClassOrTrigger.Name, ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered '
     + 'FROM' + fromWhere
-    + 'WHERE ' + orMemIds
+    + 'WHERE (NumLinesCovered > 0 OR NumLinesUncovered > 0) '
     + orIds
-    + 'AND (NumLinesCovered > 0 OR NumLinesUncovered > 0) '
     + 'ORDER BY ApexClassOrTrigger.Name ASC';
 
     return vscode.window.forceCode.conn.tooling.query(query)
