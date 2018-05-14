@@ -94,7 +94,7 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
             });
             var uncovered: number = fileCoverage.NumLinesUncovered;
             var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
-            var percent = (((total - uncovered) / total) * 100).toFixed(2) + '% covered';
+            var percent = ((fileCoverage.NumLinesCovered / total) * 100).toFixed(2) + '% covered';
             vscode.window.forceCode.showStatus(fileCoverage.ApexClassOrTrigger.Name + ' ' + percent);
             coverageChannel.appendLine(fileCoverage.ApexClassOrTrigger.Name + '=> Uncovered lines: ' + uncovered + ', Total Line: ' + total + ', ' + percent);
         }
