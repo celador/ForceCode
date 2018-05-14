@@ -170,7 +170,10 @@ export default class DXService implements DXCommands {
         };
 
         if(arg !== undefined && arg !== '') {
-            var theArgsArray = arg.trim().split('-'); 
+            // this helps solve a bug when we have '-' in commands and queries and stuff
+            arg = ' ' + arg;
+            arg = arg.replace(/\s--/gm, '}@${').replace(/\s-/gm, '}@${');
+            var theArgsArray = arg.trim().split('}@${'); 
             theArgsArray.forEach(function(i) {
                 if(i.length > 0) {
                     var curCmd = new Array();
@@ -226,6 +229,7 @@ export default class DXService implements DXCommands {
         return this.runCommand('org:display', '--json').then(res => {
             this.isLoggedIn = true;
             this.orgInfo = res;
+            console.log("SELECT Id FROM User WHERE UserName='" + this.orgInfo.username + "'");
             return this.toqlQuery("SELECT Id FROM User WHERE UserName='" + this.orgInfo.username + "'")
                 .then(result => {
                     this.orgInfo.userId = result.records[0].Id;
