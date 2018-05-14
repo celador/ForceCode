@@ -6,6 +6,7 @@ import DXService, { SFDX } from './dxService';
 import * as path from 'path';
 import * as creds from './../commands/credentials';
 import { IMetadataFileProperties } from 'jsforce';
+import * as fs from 'fs-extra';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
@@ -271,10 +272,16 @@ export default class ForceService implements forceCode.IForceService {
                 }
             }).then(orgInf => {
                     vscode.window.forceCode.statusBarItem_UserInfo.text = `ForceCode: $(plug) Connecting as ${config.username}`;
+                    // get the refresh token
+                    var refreshToken =  fs.readJsonSync(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep + self.dxCommands.orgInfo.username + '.json').refreshToken;
                     // set the userId in connectionSuccess
                     self.conn = new jsforce.Connection({
+                        oauth2: {
+                            clientId: self.dxCommands.orgInfo.clientId,
+                        },
                         instanceUrl : self.dxCommands.orgInfo.instanceUrl,
                         accessToken : self.dxCommands.orgInfo.accessToken,
+                        refreshToken: refreshToken,
                     });
                 })
                 .then(connectionSuccess)
