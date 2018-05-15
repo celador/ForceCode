@@ -298,6 +298,9 @@ export default class ForceService implements forceCode.IForceService {
             }
 
             function parseMembers(mems) {
+                if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems[0])) {
+                    return;
+                }
                 var types: {[key: string]: Array<any>} = {};
                 types['type0'] = mems[1];
                 if(types['type0'].length > 3) {
@@ -319,7 +322,11 @@ export default class ForceService implements forceCode.IForceService {
             }
 
             function checkWSMems(mems) {
+                if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems)) {
+                    return;
+                }
                 vscode.window.forceCode.checkAndSetWorkspaceMembers(mems, true);
+                
                 return self
             }
 
