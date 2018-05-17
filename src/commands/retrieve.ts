@@ -3,6 +3,7 @@ import fs = require('fs-extra');
 import * as path from 'path';
 import * as parsers from './../parsers';
 import { IWorkspaceMember } from '../forceCode';
+import constants from './../models/constants';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
@@ -195,7 +196,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
 
                                 resolve(vscode.window.forceCode.conn.metadata.retrieve({
                                     unpackaged: { types: types },
-                                    apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
+                                    apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                                 }).stream());
                             }
                             else {
@@ -259,7 +260,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                         singlePackage: true,
                                         specificFiles: files,
                                         unpackaged: { types: retrieveTypes },
-                                        apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
+                                        apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                                     }).stream());
                                 });
                             }
@@ -283,7 +284,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         function retrieveComponents(resolve, types, name) {
             resolve(vscode.window.forceCode.conn.metadata.retrieve({
                 unpackaged: { types: types },
-                apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
+                apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
             }).stream());
         }
 
@@ -313,7 +314,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                     });
                     resolve(vscode.window.forceCode.conn.metadata.retrieve({
                         unpackaged: { types: types },
-                        apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
+                        apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                     }).stream());
                 });
             }
@@ -328,7 +329,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
 
                     resolve(vscode.window.forceCode.conn.metadata.retrieve({
                         unpackaged: { types: types },
-                        apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
+                        apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                     }).stream());
                 });
             }
@@ -349,7 +350,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             function packaged() {
                 resolve(vscode.window.forceCode.conn.metadata.retrieve({
                     packageNames: [option.description],
-                    apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
+                    apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                 }).stream());
             }
 

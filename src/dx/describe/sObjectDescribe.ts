@@ -13,6 +13,7 @@ import {
 import * as vscode from 'vscode';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
 import { CLIENT_ID } from '../constants';
+import constants from './../../models/constants';
 import * as dx from '../../commands/dx';
 
 export interface SObject {
@@ -200,7 +201,7 @@ export class SObjectDescribe {
       this.instanceUrl = orgInfo.instanceUrl;
     }
     if (!this.targetVersion) {
-      this.targetVersion = '42.0';
+      this.targetVersion = constants.API_VERSION;
     }
   }
 

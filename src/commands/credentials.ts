@@ -4,6 +4,7 @@ import * as path from 'path';
 import { getIcon } from './../parsers';
 import { configuration } from './../services';
 import DXService from '../services/dxService';
+import constants from './../models/constants';
 
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
@@ -137,7 +138,7 @@ export default function enterCredentials(): Promise<any> {
             pollTimeout: 1200,
             debugOnly: true,
             debugFilter: 'USER_DEBUG|FATAL_ERROR',
-            apiVersion: '42.0',
+            apiVersion: constants.API_VERSION,
             deployOptions: {
                 'checkOnly': false,
                 'testLevel': 'runLocalTests',
@@ -149,7 +150,7 @@ export default function enterCredentials(): Promise<any> {
         const sfdxProj: {} = {
             namespace: "", 
             sfdcLoginUrl: config.url, 
-            sourceApiVersion: "42.0",
+            sourceApiVersion: constants.API_VERSION,
         };
         
         fs.outputFile(projPath + 'sfdx-project.json', JSON.stringify(sfdxProj, undefined, 4));

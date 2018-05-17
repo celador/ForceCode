@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import { IForceService } from './../forceCode';
 import * as forceCode from './../forceCode';
+import constants from './../models/constants';
 import diff from './diff';
 const parseString: any = require('xml2js').parseString;
 
@@ -156,7 +157,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').create({
                 'DeveloperName': name,
                 'MasterLabel': name,
-                'ApiVersion': vscode.window.forceCode.config.apiVersion || '42.0',
+                'ApiVersion': vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                 'Description': name.replace('_', ' '),
             }).then(bundle => {
                 results[0] = [bundle];

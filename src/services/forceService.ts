@@ -282,7 +282,7 @@ export default class ForceService implements forceCode.IForceService {
                         instanceUrl : self.dxCommands.orgInfo.instanceUrl,
                         accessToken : self.dxCommands.orgInfo.accessToken,
                         refreshToken: refreshToken,
-                        version: vscode.window.forceCode.config.apiVersion || '42.0',
+                        version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                     });
                 })
                 .then(connectionSuccess)
