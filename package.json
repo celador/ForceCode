@@ -312,11 +312,6 @@
         },
         {
           "when": "resourceLangId == apex && ForceCodeActive",
-          "command": "ForceCode.documentMethod",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.toggleCoverage",
           "group": "ForceCode"
         },
@@ -433,10 +428,6 @@
       "commandPalette": [
         {
           "command": "ForceCode.showMenu"
-        },
-        {
-          "command": "ForceCode.documentMethod",
-          "when": "ForceCodeActive && resourceLangId == apex"
         },
         {
           "command": "ForceCode.compile",
