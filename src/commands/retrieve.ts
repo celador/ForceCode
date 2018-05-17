@@ -218,7 +218,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
 
                     resolve(vscode.window.forceCode.conn.metadata.retrieve({
                         unpackaged: { types: types },
-                        apiVersion: vscode.window.forceCode.config.apiVersion || '42.0',
+                        apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                     }).stream());
                 });
             }
