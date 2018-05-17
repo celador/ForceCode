@@ -9,7 +9,6 @@ import deploy from './deploy';
 import diff from './diff';
 import dx from './dx';
 import dxLogout from './dxLogout';
-import documentMethod from './documentMethod';
 import executeAnonymous from './executeAnonymous';
 import find from './find';
 import getLog from './getLog';
@@ -33,7 +32,6 @@ export {
     diff,
     dx,
     dxLogout,
-    documentMethod,
     executeAnonymous,
     find,
     getLog,

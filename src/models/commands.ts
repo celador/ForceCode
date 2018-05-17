@@ -300,13 +300,6 @@ export default [
         }
     },
     {
-        commandName: 'ForceCode.documentMethod',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return commands.documentMethod(context);
-        }
-    },
-    {
         commandName: 'ForceCode.toggleCoverage',
         hidden: true,
         command: function (context, selectedResource?) {

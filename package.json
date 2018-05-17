@@ -50,11 +50,6 @@
         "category": "ForceCode"
       },
       {
-        "command": "ForceCode.documentMethod",
-        "title": "Document Apex Method",
-        "category": "ForceCode"
-      },
-      {
         "command": "ForceCode.compile",
         "title": "Save/Deploy/Compile",
         "category": "ForceCode"
@@ -95,12 +90,6 @@
       }
     ],
     "keybindings": [
-      {
-        "command": "ForceCode.documentMethod",
-        "key": "alt+cmd+d",
-        "win": "ctrl+shift+d",
-        "when": "editorFocus && resourceLangId == apex && ForceCodeActive"
-      },
       {
         "command": "ForceCode.showMenu",
         "key": "alt+cmd+c",
@@ -309,11 +298,6 @@
         },
         {
           "when": "resourceLangId == apex && ForceCodeActive",
-          "command": "ForceCode.documentMethod",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.toggleCoverage",
           "group": "ForceCode"
         },
@@ -378,10 +362,6 @@
       "commandPalette": [
         {
           "command": "ForceCode.showMenu"
-        },
-        {
-          "command": "ForceCode.documentMethod",
-          "when": "ForceCodeActive && resourceLangId == apex"
         },
         {
           "command": "ForceCode.compile",
