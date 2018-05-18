@@ -176,7 +176,6 @@ export default class DXService implements DXCommands {
             do {
                 replaceString = '}@FC$' + Date.now() + '$FC@{';
             } while(arg.includes(replaceString));
-            console.log(replaceString)
             arg = arg.replace(/\s--/gm, replaceString).replace(/\s-/gm, replaceString);
             var theArgsArray = arg.trim().split(replaceString); 
             theArgsArray.forEach(function(i) {

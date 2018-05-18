@@ -172,7 +172,7 @@ export function showFileOptions(promises: any[]) {
                                 reader.forEach(function (entry) {
                                     if (entry.isFile()) {
                                         var name: string = entry.getName();
-                                        var data: NodeBuffer = entry.getData();
+                                        var data: Buffer = entry.getData();
                                         var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource.${ctFolderName}${path.sep}${name}`;
                                         fs.outputFileSync(filePath, data);
                                     }

@@ -8,14 +8,12 @@ const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
 var tools: any = require('cs-jsforce-metadata-tools');
-var elegantSpinner: any = require('elegant-spinner');
 
 export default function retrieve(context: vscode.ExtensionContext, resource?: vscode.Uri) {
     let option: any;
     const _consoleInfoReference: any = console.info;
     const _consoleErrorReference: any = console.error;
     const _consoleLogReference: any = console.log;
-    const spinner: any = elegantSpinner();
     const statsPath: string = `${vscode.workspace.rootPath}${path.sep}RetrieveStatistics.log`;
     var logger: any = (function (fs) {
         var buffer: string = '';
@@ -216,12 +214,10 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                         };
                                     });
                                 // List the Metadata by that type
-                                console.log(listTypes);
                                 return vscode.window.forceCode.conn.metadata.list(listTypes).then(res => {
                                     let fileName: string = resource.fsPath.slice(resource.fsPath.lastIndexOf(path.sep) + 1);
                                     var files: string[] = [];
                                     var workspaceMember: IWorkspaceMember;
-                                    console.log(res);
                                     // Match the metadata against the filepath
                                     if (Array.isArray(res)) {
                                         files = res.filter(t => {
@@ -371,7 +367,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 reader.forEach(function (entry) {
                     if (entry.isFile()) {
                         var name: string = entry.getName();
-                        var data: NodeBuffer = entry.getData();
+                        var data: Buffer = entry.getData();
                         if (option && option.description === 'packaged') {
                             option.description = 'unpackaged';
                         }
