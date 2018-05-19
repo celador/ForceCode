@@ -7,7 +7,6 @@
 import * as vscode from 'vscode';
 import { SFDX_PROJECT_FILE } from '../constants';
 //import { LocalCommandExecution } from '../cli';
-import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import { EOL } from 'os';
 import * as path from 'path';
@@ -20,7 +19,6 @@ import {
   SObjectDescribe
 } from '../describe';
 import { nls } from '../messages';
-import { messages } from '../messages/i18n';
 
 export interface CancellationToken {
   isCancellationRequested: boolean;
@@ -116,7 +114,7 @@ export class FauxClassGenerator {
     let fetchedSObjects: SObject[] = [];
     let sobjects: string[] = [];
     try {
-      sobjects = await describe.describeGlobal(projectPath, type);
+      sobjects = await describe.describeGlobal(type);
     } catch (e) {
       return this.errorExit(
         nls.localize('failure_fetching_sobjects_list_text', e)
@@ -126,7 +124,7 @@ export class FauxClassGenerator {
     while (j < sobjects.length) {
       try {
         fetchedSObjects = fetchedSObjects.concat(
-          await describe.describeSObjectBatch(projectPath, sobjects, j)
+          await describe.describeSObjectBatch(sobjects, j)
         );
         j = fetchedSObjects.length;
       } catch (e) {

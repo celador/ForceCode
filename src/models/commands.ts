@@ -154,7 +154,7 @@ export const fcCommands: FCCommand[] = [
                     .then(doc => { return commands.compile(doc); });
             }
             if(!vscode.window.activeTextEditor) {
-                return;
+                return undefined;
             }
             return commands.compile(vscode.window.activeTextEditor.document);
         }
@@ -518,7 +518,7 @@ export const fcCommands: FCCommand[] = [
                     if (s === 'Refresh') {
                         return commands.retrieve(selectedResource, theDoc.uri);
                     } else if(s === 'Diff') {
-                        return commands.diff(theDoc, selectedResource);
+                        return commands.diff(theDoc);
                     }
                 });
             });

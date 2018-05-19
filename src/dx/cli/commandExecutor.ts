@@ -15,11 +15,9 @@ export interface CancellationToken {
 
 export class CliCommandExecutor {
   private readonly command: Command;
-  private readonly options: {};
 
-  public constructor(command: Command, options: {}) {
+  public constructor(command: Command) {
     this.command = command;
-    this.options = options;
   }
 
   // this should return something other than 'any'

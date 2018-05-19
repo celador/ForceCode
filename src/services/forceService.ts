@@ -113,7 +113,7 @@ export default class ForceService implements forceCode.IForceService {
 
     // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
     public cleanupContainers(): Promise<any> {
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
             vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
                 .find({ Name: {$like : 'ForceCode-%'}})
                 .execute(function(err, records) {

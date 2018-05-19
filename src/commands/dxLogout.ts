@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 export default function dxLogout(): Promise<any> {
     try {
-        return vscode.window.forceCode.dxCommands.logout().then(val => {
+        return vscode.window.forceCode.dxCommands.logout().then(() => {
             vscode.window.forceCode.conn = undefined;   // this will go away soon
             vscode.window.forceCode.statusBarItem.hide();
             vscode.window.forceCode.statusBarItem_UserInfo.hide();

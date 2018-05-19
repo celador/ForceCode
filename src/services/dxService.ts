@@ -161,8 +161,8 @@ export default class DXService implements DXCommands {
 
     public async saveToFile(data: any, fileName: string): Promise<string> {
         try{
-            await fs.outputFile(vscode.workspace.rootPath + path.sep + fileName, data);
-            return Promise.resolve(vscode.workspace.rootPath + path.sep + fileName);
+            await fs.outputFile(vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + fileName, data);
+            return Promise.resolve(vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + fileName);
         } catch(e) {
             return Promise.reject(undefined);
         }
@@ -170,7 +170,7 @@ export default class DXService implements DXCommands {
 
     public async removeFile(fileName: string): Promise<any> {
         try{
-            await fs.remove(vscode.workspace.rootPath + path.sep + fileName);
+            await fs.remove(vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + fileName);
             return Promise.resolve(undefined);
         } catch(e) {
             return Promise.reject(undefined);
