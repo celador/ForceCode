@@ -136,8 +136,8 @@ export default class DXService implements DXCommands {
 
     public async saveToFile(data: any, fileName: string): Promise<string> {
         try{
-            await fs.outputFile(vscode.workspace.rootPath + path.sep + fileName, data);
-            return Promise.resolve(vscode.workspace.rootPath + path.sep + fileName);
+            await fs.outputFile(vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + fileName, data);
+            return Promise.resolve(vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + fileName);
         } catch(e) {
             return Promise.reject(undefined);
         }
@@ -145,7 +145,7 @@ export default class DXService implements DXCommands {
 
     public async removeFile(fileName: string): Promise<any> {
         try{
-            await fs.remove(vscode.workspace.rootPath + path.sep + fileName);
+            await fs.remove(vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + fileName);
             return Promise.resolve(undefined);
         } catch(e) {
             return Promise.reject(undefined);
@@ -161,7 +161,6 @@ export default class DXService implements DXCommands {
         var topic: Topic = alm.topics.filter(t => {
             return t.name === cmd.topic;
         })[0];
-        var flags: {} = {};
 
         var cliContext: Context = {
             command: cmd,
@@ -215,7 +214,7 @@ export default class DXService implements DXCommands {
     }
 
     public login(): Promise<SFDX> {
-        return this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url).then(res => {
+        return this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url).then(() => {
             return this.getOrgInfo().then(res => {
                 return Promise.resolve(res);
             });
@@ -238,7 +237,7 @@ export default class DXService implements DXCommands {
                     this.orgInfo.userId = result.records[0].Id;
                     return Promise.resolve(this.orgInfo);
                 });
-        }, reason => {
+        }, () => {
             this.isLoggedIn = false;
             this.orgInfo = undefined;
             return Promise.reject('No info recieved from org. Are you logged in?');

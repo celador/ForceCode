@@ -1,6 +1,4 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs-extra';
-import * as path from 'path';
 var alm: any = require('salesforce-alm');
 
 export default function runDX() {
@@ -52,6 +50,7 @@ export default function runDX() {
                     return ['Error running dx command:' + e];
                 }
             }
+            return result;
         });
     }
 

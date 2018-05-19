@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { showFileOptions } from './open';
 import { commandService } from '../services';
 
 export default function find() {

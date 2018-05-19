@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import * as parsers from './../parsers';
 
 // create a decorator type that we use to decorate small numbers
 const coverageChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Apex Test Coverage');
@@ -24,7 +23,6 @@ const uncoveredLineStyle: vscode.TextEditorDecorationType = vscode.window.create
 const acovLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(72,54,36,1)', isWholeLine: true });
 
 // When this subscription is created (when the extension/Code boots), try to decorate the document
-let timeout: any = undefined;
 let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
 if (activeEditor) {
     updateDecorations();

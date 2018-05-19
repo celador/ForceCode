@@ -14,7 +14,6 @@ import * as vscode from 'vscode';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
 import { CLIENT_ID } from '../constants';
 import constants from './../../models/constants';
-import * as dx from '../../commands/dx';
 
 export interface SObject {
   actionOverrides: any[];
@@ -185,7 +184,7 @@ export class SObjectDescribe {
 
   // get the token and url by calling the org - short term, should really be able to get it from the sfdx project
   // also set the proper target apiVersion
-  private async setupConnection(projectPath: string, username?: string) {
+  private async setupConnection(username?: string) {
     if (this.accessToken === '') {
       let orgInfo: any;
       const builder = new CommandBuilder().withArg('force:org:display');
@@ -193,9 +192,7 @@ export class SObjectDescribe {
         builder.args.push('--targetusername', username);
       }
       const command = builder.withJson().build();
-      const execution = new CliCommandExecutor(command, {
-        cwd: projectPath
-      });
+      const execution = new CliCommandExecutor(command);
       orgInfo = await execution.execute();
       this.accessToken = orgInfo.accessToken;
       this.instanceUrl = orgInfo.instanceUrl;
@@ -210,7 +207,6 @@ export class SObjectDescribe {
   }
 
   public async describeGlobal(
-    projectPath: string,
     type: SObjectCategory,
     username?: string
   ): Promise<string[]> {
@@ -222,9 +218,7 @@ export class SObjectDescribe {
       builder.args.push('--targetusername', username);
     }
     const command = builder.withJson().build();
-    const execution = new CliCommandExecutor(command, {
-      cwd: projectPath
-    });
+    const execution = new CliCommandExecutor(command);
 
     let result: string[];
     try {
@@ -236,14 +230,13 @@ export class SObjectDescribe {
   }
 
   public async describeSObjectBatch(
-    projectPath: string,
     types: string[],
     nextToProcess: number,
     username?: string
   ): Promise<SObject[]> {
     const batchSize = 25;
 
-    await this.setupConnection(projectPath, username);
+    await this.setupConnection(username);
 
     const batchRequest: BatchRequest = { batchRequests: [] };
 

@@ -14,7 +14,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     const _consoleInfoReference: any = console.info;
     const _consoleErrorReference: any = console.error;
     const _consoleLogReference: any = console.log;
-    const statsPath: string = `${vscode.workspace.rootPath}${path.sep}RetrieveStatistics.log`;
+    const statsPath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}RetrieveStatistics.log`;
     var logger: any = (function (fs) {
         var buffer: string = '';
         return {
@@ -32,7 +32,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         }
     }(fs));
     return vscode.window.forceCode.connect(context)
-        .then(svc => showPackageOptions(svc.conn))
+        .then(showPackageOptions)
         .then(getPackage)
         .then(processResult)
         .then(finished)
@@ -41,7 +41,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     // =======================================================================================================================================
     // =======================================================================================================================================
 
-    function getPackages(conn) {
+    function getPackages() {
         var requestUrl: string = vscode.window.forceCode.dxCommands.orgInfo.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
         var headers: any = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -66,9 +66,9 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         });
     }
 
-    function showPackageOptions(conn) {
+    function showPackageOptions() {
         if (resource !== undefined) { return undefined; }
-        return getPackages(conn).then(packages => {
+        return getPackages().then(packages => {
             let options: vscode.QuickPickItem[] = packages
                 .map(pkg => {
                     return {
@@ -153,7 +153,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         if (opt) {
             return new Promise(pack);
         } else if (resource) {
-            return new Promise(function (resolve, reject) {
+            return new Promise(function (resolve) {
                 vscode.window.forceCode.conn.metadata.describe().then(describe => {
                     // Get the Metadata Object type
                     // let extension: string = resource.fsPath.slice(resource.fsPath.lastIndexOf('.')).replace('.', '');
@@ -167,11 +167,11 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                             });
 
                         if (types.length <= 0) {
-                            types = getAuraBundle(resource.fsPath, describe, resolve);
+                            types = getAuraBundle(describe);
                         }
 
                         if (types.length > 0) {
-                            retrieveComponents(resolve, types, types[0].name);
+                            retrieveComponents(resolve, types);
                         }
                     }
                     else {
@@ -265,8 +265,9 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 });
             });
         }
+        return undefined;
 
-        function getAuraBundle(fsPath, describe, resolve): any[] {
+        function getAuraBundle(describe): any[] {
             // if nothing was found, then check if this is an AURA componet...
             var baseDirectoryName: string = parsers.getAuraNameFromFileName(resource.fsPath);
             var types: any[] = describe.metadataObjects
@@ -277,7 +278,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             return types;
         }
 
-        function retrieveComponents(resolve, types, name) {
+        function retrieveComponents(resolve, types) {
             resolve(vscode.window.forceCode.conn.metadata.retrieve({
                 unpackaged: { types: types },
                 apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,

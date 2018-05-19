@@ -5,9 +5,8 @@ import { commandService } from '../services';
 export default function showMenu(context: vscode.ExtensionContext) {
     var quickpick: any[] = [];
     return vscode.window.forceCode.connect(context)
-        .then(svc => displayMenu())
+        .then(displayMenu)
         .then(res => processResult(res))
-        .then(finished)
         .catch(err => vscode.window.showErrorMessage(err.message));
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -44,11 +43,4 @@ export default function showMenu(context: vscode.ExtensionContext) {
                 quickpick.find(cur => { return result.description === cur.description; }).commandName, context);
         }
     }
-    // =======================================================================================================================================
-    // =======================================================================================================================================
-    // =======================================================================================================================================
-    function finished(res): boolean {
-        return true;
-    }
-    // =======================================================================================================================================
 }

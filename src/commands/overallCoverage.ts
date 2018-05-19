@@ -31,5 +31,6 @@ export default function getOverallCoverage() {
                     return vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, 3));
                 });
             }
+            return undefined;
         });
 }

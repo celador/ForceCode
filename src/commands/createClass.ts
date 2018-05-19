@@ -3,18 +3,18 @@ import fs = require('fs-extra');
 import path = require('path');
 import { configuration } from './../services';
 
-export default function createClass(context: vscode.ExtensionContext) {
+export default function createClass() {
     const CUSTOM_CLASS: string = 'Custom';
     var classesPath: string;
     // Here is replaceSrc possiblity
-    return configuration().then(config => {
+    return configuration().then(() => {
         classesPath = `${vscode.window.forceCode.workspaceRoot}${path.sep}classes`;
         if (fs.statSync(classesPath).isDirectory()) {
             return userClassSelection().then(selectedOption => {
                 if (selectedOption) {
                     return userFileNameSelection(selectedOption.label).then(filename => {
                         if (filename) {
-                            return generateFile(filename, config).then(res => {
+                            return generateFile(filename).then(res => {
                                 let fp: string = res[0].toString();
                                 return vscode.workspace.openTextDocument(fp).then(document => {
                                     return vscode.window.showTextDocument(document, vscode.ViewColumn.One);
@@ -22,8 +22,10 @@ export default function createClass(context: vscode.ExtensionContext) {
                             });
 
                         }
+                        return undefined;
                     });
                 }
+                return undefined;
             });
         } else {
             throw { message: classesPath + ' is not a real folder. Check the src option in your config file.' };
@@ -82,7 +84,7 @@ export default function createClass(context: vscode.ExtensionContext) {
         });
     }
 
-    function generateFile(classname, config) {
+    function generateFile(classname) {
         //return Promise.all([writeFile(), writeMetaFile()]);
         return Promise.all([writeFile()]);
         function writeFile() {

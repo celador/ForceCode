@@ -11,19 +11,9 @@ const parseString: any = require('xml2js').parseString;
 const UPDATE: boolean = true;
 const CREATE: boolean = false;
 
-interface ContainerAsyncRequest {
-    done: boolean;
-    size: Number;
-    totalSize: Number;
-    records?: any[];
-    errors?: any[];
-    State?: string;
-}
-
-
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
     if(!document) {
-        return;
+        return undefined;
     }
     const body: string = document.getText();
     const ext: string = parsers.getFileExtension(document);
@@ -56,15 +46,15 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             .reject({ message: 'Metadata Describe Error. Please try again.' })
             .catch(onError);
     } else if (toolingType === 'AuraDefinition') {
-        DefType = getAuraDefTypeFromDocument(document);
-        Format = getAuraFormatFromDocument(document);
+        DefType = getAuraDefTypeFromDocument();
+        Format = getAuraFormatFromDocument();
         Source = document.getText();
         // Aura Bundles are a special case, since they can be upserted with the Tooling API
         // Instead of needing to be compiled, like Classes and Pages..
         return vscode.window.forceCode.connect(context)
-            .then(svc => getAuraBundle(svc)
+            .then(getAuraBundle()
                 .then(ensureAuraBundle)
-                .then(bundle => getAuraDefinition(svc, bundle)
+                .then(bundle => getAuraDefinition(bundle)
                     .then(definitions => upsertAuraDefinition(definitions, bundle)
                     )
                 )
@@ -100,7 +90,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         }
     }
 
-    function createMetaData(svc) {
+    function createMetaData() {
         let text: string = document.getText();
 
         return new Promise(function (resolve, reject) {
@@ -145,7 +135,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // =======================================================================================================================================
     // ================================                Lightning Components               ===========================================
     // =======================================================================================================================================
-    function getAuraBundle(svc) {
+    function getAuraBundle() {
         return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').find({
             'DeveloperName': name, NamespacePrefix: vscode.window.forceCode.config.prefix || ''
         });
@@ -167,7 +157,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return results;
         }
     }
-    function getAuraDefinition(svc, bundle) {
+    function getAuraDefinition(bundle) {
         return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({
             'AuraDefinitionBundleId': bundle[0].Id
         });
@@ -183,8 +173,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         } else if (bundle[0]) {
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle[0].Id, DefType, Format, Source });
         }
+        return undefined;
     }
-    function getAuraDefTypeFromDocument(doc: vscode.TextDocument) {
+    function getAuraDefTypeFromDocument() {
         var extension: string = ext.toLowerCase();
         switch (extension) {
             case 'app':
@@ -231,7 +222,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         // TESTSUITE — reserved for future use
         // MODEL — deprecated, do not use
     }
-    function getAuraFormatFromDocument(doc: vscode.TextDocument) {
+    function getAuraFormatFromDocument() {
         // is 'js', 'css', or 'xml'
         switch (ext) {
             case 'js':
@@ -270,7 +261,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 Body: body,
                 Id: records.id,
             };
-            return fc.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).update(member).then(res => {
+            return fc.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).update(member).then(() => {
                 return fc;
             });
         }
@@ -281,7 +272,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 // throw up an alert
                 return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
                     if (s === 'Diff') {
-                        diff(document, context);
+                        diff(document);
                         return false;
                     }
                     if (s === 'Overwrite') {
@@ -385,7 +376,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                     throw { message: 'Timeout' };
                 } else {
                     // Throttle the ReCheck of the compile status, to use fewer http requests (reduce effects on SFDC limits)
-                    return new Promise(function (resolve, reject) {
+                    return new Promise(function (resolve) {
                         setTimeout(() => resolve(), vscode.window.forceCode.config.poll || 1000);
                       }).then(nextStatus);
                 }
@@ -455,7 +446,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
     function containerFinished(createNewContainer: boolean): any {
         // We got some records in our response
-        return vscode.window.forceCode.newContainer(createNewContainer).then(res => {
+        return vscode.window.forceCode.newContainer(createNewContainer).then(() => {
             return Promise.resolve();
         });
     }

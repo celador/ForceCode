@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
-import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
 import { configuration } from './../services';
-import { QueryResult } from '../services/dxService';
 import apexTestResults from '../services/apexTestResults';
 
 export default function apexTest(toTest: string, classOrMethod: string) { 
@@ -25,7 +23,7 @@ export default function apexTest(toTest: string, classOrMethod: string) {
                 });
 
                 return apexTestResults(testClassIds)
-                    .then(res => showResult(res, dxRes))
+                    .then(() => showResult(dxRes))
                     .then(showLog)
                     .catch(showFail);
         });
@@ -37,8 +35,8 @@ export default function apexTest(toTest: string, classOrMethod: string) {
     }
 
     // =======================================================================================================================================
-    function showResult(res: QueryResult, dxRes) {
-        return configuration().then(results => {
+    function showResult(dxRes) {
+        return configuration().then(() => {
             vscode.window.forceCode.outputChannel.clear();
             let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Test Failures');
             let location = Object.keys(vscode.window.forceCode.workspaceMembers).find(curr => {
@@ -52,7 +50,6 @@ export default function apexTest(toTest: string, classOrMethod: string) {
                 let matches: string[] = re.exec(dxRes.tests[0].StackTrace);
                 if (matches && matches.length && matches.length === 6) {
                     // let typ: string = matches[1];
-                    let cls: string = matches[2];
                     // let method: string = matches[3];
                     let lin: number = +matches[4];
                     let _lin: number = lin > 0 ? lin - 1 : 0;
@@ -89,7 +86,7 @@ export default function apexTest(toTest: string, classOrMethod: string) {
             return dxRes;
         });
     }
-    function showLog(dxRes) {
+    function showLog() {
         if (vscode.window.forceCode.config.showTestLog) {
             var queryString: string = `SELECT Id FROM ApexLog` +
                 ` WHERE LogUserId IN (SELECT Id FROM User WHERE UserName='${vscode.window.forceCode.config.username}')` +

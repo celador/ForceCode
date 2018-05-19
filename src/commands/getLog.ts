@@ -12,7 +12,7 @@ interface LogRecord {
     Location: string;
 }
 
-export default function getLog(context: vscode.ExtensionContext) {
+export default function getLog() {
     // Login, then get Identity info, 
     //  then get info about the logs and ask the user which one to open, 
     //  then get the log and show it

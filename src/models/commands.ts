@@ -52,7 +52,7 @@ export default [
         icon: 'plus',
         label: 'Create Class',
         command: function (context, selectedResource?) {
-            return commands.createClass(context);
+            return commands.createClass();
         }
     },
     // Execute Anonymous 
@@ -69,7 +69,7 @@ export default [
             if(!vscode.window.activeTextEditor) {
                 return;
             }
-            return commands.executeAnonymous(vscode.window.activeTextEditor.document, context);
+            return commands.executeAnonymous(vscode.window.activeTextEditor.document);
         }
     },
     // Get Log(s)
@@ -82,7 +82,7 @@ export default [
         icon: 'unfold',
         label: 'Get Logs',
         command: function (context, selectedResource?) {
-            return commands.getLog(context);
+            return commands.getLog();
         }
     },
     {
@@ -134,12 +134,12 @@ export default [
         command: function (context, selectedResource?) {
             if(selectedResource && selectedResource.path) {
                 return vscode.workspace.openTextDocument(selectedResource)
-                    .then(doc => commands.diff(doc, context));
+                    .then(doc => commands.diff(doc));
             }
             if(!vscode.window.activeTextEditor) {
                 return;
             }
-            return commands.diff(vscode.window.activeTextEditor.document, context);
+            return commands.diff(vscode.window.activeTextEditor.document);
         }
     },
     // Compile/Deploy
@@ -157,7 +157,7 @@ export default [
                     .then(doc => commands.compile(doc, context));
             }
             if(!vscode.window.activeTextEditor) {
-                return;
+                return undefined;
             }
             return commands.compile(vscode.window.activeTextEditor.document, context);
         }
@@ -287,7 +287,7 @@ export default [
                     .then(doc => commands.retrieve(context, doc.uri));
             }
             if(!vscode.window.activeTextEditor) {
-                return;
+                return undefined;
             }
             return commands.retrieve(context, vscode.window.activeTextEditor.document.uri);
         }
@@ -347,7 +347,7 @@ export default [
                     if (s === 'Refresh') {
                         return commands.retrieve(selectedResource, theDoc.uri);
                     } else if(s === 'Diff') {
-                        return commands.diff(theDoc, selectedResource);
+                        return commands.diff(theDoc);
                     }
                 });
             });

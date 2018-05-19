@@ -3,7 +3,6 @@ import fs = require('fs-extra');
 import path = require('path');
 import jszip = require('jszip');
 import globule = require('globule');
-import { IForceService } from './../forceCode';
 const mime = require('mime-types');
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
@@ -25,9 +24,9 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
             }
         });
     // =======================================================================================================================================
-    function getPackageName(service: IForceService): any {
+    function getPackageName(): any {
         let bundleDirectories: any[] = [];
-        let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles';
+        let bundlePath: string = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'resource-bundles';
         if (fs.existsSync(bundlePath)) {
             bundleDirectories = fs.readdirSync(bundlePath).filter(function (file) {
                 return fs.statSync(path.join(bundlePath, file)).isDirectory();
@@ -36,7 +35,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
             });
         }
         let spaDirectories: Array<any> = [];
-        let spaPath: string = vscode.workspace.rootPath + path.sep + 'spa';
+        let spaPath: string = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'spa';
         if (fs.existsSync(spaPath)) {
             spaDirectories = fs.readdirSync(spaPath).filter(function (file) {
                 return fs.statSync(path.join(spaPath, file)).isDirectory();
@@ -71,8 +70,8 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, 
         .then(deployComplete)
         .catch(onError);
     // =======================================================================================================================================
-    function getPackageName(service: IForceService) {
-        let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep;
+    function getPackageName() {
+        let bundlePath: string = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'resource-bundles' + path.sep;
         try {
             var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource.')[0];
             var resType: string = textDocument.fileName.split(bundlePath)[1].split('.resource.')[1].split(path.sep)[0].replace('.', '/');
@@ -105,7 +104,7 @@ function bundleAndDeploy(option) {
 }
 
 function bundleAndDeployAll() {
-    let bundlePath: string = vscode.workspace.rootPath + path.sep + 'resource-bundles';
+    let bundlePath: string = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'resource-bundles';
     if (fs.existsSync(bundlePath)) {
         return Promise.all(fs.readdirSync(bundlePath).filter(function (file) {
             return fs.statSync(path.join(bundlePath, file)).isDirectory();
@@ -116,19 +115,20 @@ function bundleAndDeployAll() {
             });
         }));
     }
+    return undefined;
 }
 
 function getPackagePath(option) {
-    var bundlePath: string = vscode.workspace.rootPath;
+    var bundlePath: string = vscode.workspace.workspaceFolders[0].uri.fsPath;
     // Get package data
     if (option.detail !== 'SPA') {
-        bundlePath = vscode.workspace.rootPath + path.sep + 'resource-bundles' + path.sep + option.label + '.resource.' + option.detail.replace('/', '.');
+        bundlePath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'resource-bundles' + path.sep + option.label + '.resource.' + option.detail.replace('/', '.');
     } else {
         let dist: string = vscode.window.forceCode.config.spaDist;
         if (dist) {
-            bundlePath = vscode.workspace.rootPath + path.sep + 'spa' + path.sep + option.label + path.sep + dist;
+            bundlePath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'spa' + path.sep + option.label + path.sep + dist;
         } else {
-            bundlePath = vscode.workspace.rootPath + path.sep + 'spa' + path.sep + option.label;
+            bundlePath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'spa' + path.sep + option.label;
         }
     }
     return bundlePath;
@@ -263,7 +263,7 @@ function deployAllComplete(results) {
     if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
         require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
     }
-    var talliedResults: {} = results.reduce(function (prev, curr, idx, arr) {
+    var talliedResults: {} = results.reduce(function (prev, curr) {
         return Object.assign(prev, curr);
     }, {});
     return talliedResults;

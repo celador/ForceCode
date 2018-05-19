@@ -3,7 +3,6 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { getIcon } from './../parsers';
 import { configuration } from './../services';
-import DXService from '../services/dxService';
 import constants from './../models/constants';
 
 const quickPickOptions: vscode.QuickPickOptions = {
@@ -24,7 +23,6 @@ export default function enterCredentials(): Promise<any> {
                     },
                 ];
                 let options: vscode.QuickPickItem[] = opts.map(res => {
-                    let icon: string = getIcon(res.icon);
                     return {
                         description: `${res.desc}`,
                         // detail: `${'Detail'}`,
@@ -40,12 +38,12 @@ export default function enterCredentials(): Promise<any> {
                         return cfg;
                     } else if(res.label === 'Yes') {
                         return vscode.window.forceCode.dxCommands.logout()
-                            .then(res => {
+                            .then(() => {
                                 return setupNewUser(cfg);
                             });
                     } else {
                         return vscode.window.forceCode.dxCommands.login()
-                            .then(res => {
+                            .then(() => {
                                 return Promise.resolve(cfg);
                             });
                     }
@@ -127,7 +125,7 @@ export default function enterCredentials(): Promise<any> {
     // =======================================================================================================================================
     // =======================================================================================================================================
     function writeConfigAndLogin(config): Promise<any> {
-        const projPath = vscode.workspace.rootPath + path.sep;
+        const projPath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep;
         const defaultOptions: {} = {
             autoRefresh: false,
             showTestCoverage: true,
@@ -157,7 +155,7 @@ export default function enterCredentials(): Promise<any> {
         fs.outputFile(projPath + 'force.json', JSON.stringify(Object.assign(defaultOptions, config), undefined, 4));
         // log in with dxLogin
         return vscode.window.forceCode.dxCommands.login()
-            .then(res => {
+            .then(() => {
                 if(!vscode.window.forceCode.workspaceMembers) {
                     vscode.window.forceCode.workspaceMembers = {};
                 }

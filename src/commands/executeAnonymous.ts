@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as logging from './../providers/LogProvider';
 import { ExecuteAnonymousResult } from '../services/dxService';
 
-export default function executeAnonymous(document: vscode.TextDocument, context: vscode.ExtensionContext): any {
+export default function executeAnonymous(document: vscode.TextDocument): any {
     const editor = vscode.window.activeTextEditor;
     var selection = editor.selection;
     var text = editor.document.getText(selection);

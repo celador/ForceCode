@@ -18,7 +18,6 @@ export class CommandService {
         var theCommand = commands.default.find(cur => { return cur.commandName === command; });
         
         if(['ForceCode.compileMenu', 'ForceCode.refreshContext'].find(c => { return c === theCommand.commandName; })) {
-            var fileName;
             var splitPath;
             if(selectedResource && selectedResource.path) {
                 splitPath = selectedResource.fsPath.split(path.sep); 

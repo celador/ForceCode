@@ -11,7 +11,7 @@ const TYPEATTRIBUTE: string = 'type';
 
 export function open(context: vscode.ExtensionContext) {
     return vscode.window.forceCode.connect(context)
-        .then(svc => getFileList())
+        .then(getFileList)
         .then(proms => showFileOptions(proms));
         
     // =======================================================================================================================================
@@ -84,7 +84,7 @@ export function showFileOptions(promises: any[]) {
         vscode.window.forceCode.showStatus('ForceCode: Retrieve Finished');
         return Promise.all(thePromises);
     })
-    .then(res => {
+    .then(() => {
         return vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
     })
     .catch(err => vscode.window.showErrorMessage(err.message));
@@ -173,7 +173,7 @@ export function showFileOptions(promises: any[]) {
                                     if (entry.isFile()) {
                                         var name: string = entry.getName();
                                         var data: Buffer = entry.getData();
-                                        var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource.${ctFolderName}${path.sep}${name}`;
+                                        var filePath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource.${ctFolderName}${path.sep}${name}`;
                                         fs.outputFileSync(filePath, data);
                                     }
                                 });
@@ -186,7 +186,7 @@ export function showFileOptions(promises: any[]) {
                                     theData = Buffer.concat(bufs).toString(mime.charset(res.ContentType) || 'UTF-8');
                                 }
                                 var ext = mime.extension(res.ContentType);
-                                var filePath: string = `${vscode.workspace.rootPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource.${ctFolderName}${path.sep}${res.Name}.${ext}`;
+                                var filePath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}resource-bundles${path.sep}${res.Name}.resource.${ctFolderName}${path.sep}${res.Name}.${ext}`;
                                 fs.outputFileSync(filePath, theData);
                             }
                             resolve({ success: true });

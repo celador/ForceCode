@@ -2,10 +2,9 @@ import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
 import { operatingSystem, configuration, commandService } from './../services';
 import constants from './../models/constants';
-import DXService, { SFDX } from './dxService';
+import DXService from './dxService';
 import * as path from 'path';
 import * as creds from './../commands/credentials';
-import { IMetadataFileProperties } from 'jsforce';
 import * as fs from 'fs-extra';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
@@ -29,7 +28,6 @@ export default class ForceService implements forceCode.IForceService {
     public workspaceRoot: string;
     public workspaceMembers: {};//forceCode.IWorkspaceMember[];
     public statusInterval: any; 
-    private commandTimeout: any;
 
     constructor() {
         this.dxCommands = new DXService();
@@ -51,7 +49,7 @@ export default class ForceService implements forceCode.IForceService {
                     this.connect();
                 }
             });  
-        }).catch(err => {
+        }).catch(() => {
             this.statusBarItem.text = 'ForceCode: Missing Configuration';
         });
     }
@@ -102,7 +100,7 @@ export default class ForceService implements forceCode.IForceService {
         // Get files in src folder..
     // Match them up with ContainerMembers
     public getWorkspaceMembers(): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             var klaw: any = require('klaw');
             var members: forceCode.FCWorkspaceMembers = {}; 
             var types: Array<{}> = [];
@@ -172,7 +170,7 @@ export default class ForceService implements forceCode.IForceService {
 
     // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
     public cleanupContainers(): Promise<any> {
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
             vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
                 .find({ Name: {$like : 'ForceCode-%'}})
                 .execute(function(err, records) {
@@ -209,7 +207,7 @@ export default class ForceService implements forceCode.IForceService {
     public checkAndSetWorkspaceMembers(newMembers: forceCode.FCWorkspaceMembers, check?: boolean){
         var self: forceCode.IForceService = vscode.window.forceCode;
            
-        return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(res => {
+        return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(() => {
             console.log('Updated workspace file');
             if(check) {
                 if(!self.dxCommands.isEmptyUndOrNull(self.workspaceMembers)) {
@@ -270,7 +268,7 @@ export default class ForceService implements forceCode.IForceService {
                 } else {
                     reject();
                 }
-            }).then(orgInf => {
+            }).then(() => {
                     vscode.window.forceCode.statusBarItem_UserInfo.text = `ForceCode: $(plug) Connecting as ${config.username}`;
                     // get the refresh token
                     var refreshToken =  fs.readJsonSync(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep + self.dxCommands.orgInfo.username + '.json').refreshToken;
@@ -294,13 +292,13 @@ export default class ForceService implements forceCode.IForceService {
                 .then(cleanupContainers)
                 .catch(err => vscode.window.showErrorMessage(err.message));
 
-            function getWorkspaceMembers(svc) {
+            function getWorkspaceMembers() {
                 return vscode.window.forceCode.getWorkspaceMembers();
             }
 
             function parseMembers(mems) {
                 if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems[0])) {
-                    return;
+                    return undefined;
                 }
                 var types: {[key: string]: Array<any>} = {};
                 types['type0'] = mems[1];
@@ -324,7 +322,7 @@ export default class ForceService implements forceCode.IForceService {
 
             function checkWSMems(mems) {
                 if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems)) {
-                    return;
+                    return undefined;
                 }
                 vscode.window.forceCode.checkAndSetWorkspaceMembers(mems, true);
                 

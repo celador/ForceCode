@@ -1,35 +1,35 @@
-// Available variables which can be used inside of strings.
-// ${workspaceRoot}: the root folder of the team
-// ${file}: the current opened file
-// ${fileBasename}: the current opened file's basename
-// ${fileDirname}: the current opened file's dirname
-// ${fileExtname}: the current opened file's extension
-// ${cwd}: the current working directory of the spawned process
-
-// A task runner that calls a custom npm script that compiles the extension.
 {
-	"version": "2.0.0",
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "identifier": "npm",
+            "label": "build",
+            "type": "shell",
+            "windows": {
+                "command": "npm",
+                "args": [
+                    "run", "compile"
+                ]
+            },
+            "linux": {
+                "command": "$HOME/.nvm/versions/node/v8.11.2/bin/node",
+                "args": [
+                    "${workspaceRoot}/node_modules/typescript/bin/tsc", "-watch", "-p", "./"
+                ],
+            },
 
-	"label": "build",
-
-	// we want to run npm
-	"command": "npm",
-
-	// the command is a shell script
-	"type": "shell",
-
-	// show the output window only if unrecognized errors occur.
-	"presentation": {
-		"reveal": "always",
-		"panel": "new"
-	},
-
-	// we run the custom script "compile" as defined in package.json
-	"args": ["run", "compile", "--loglevel", "silent"],
-
-	// The tsc compiler is started in watching mode
-	"isBackground": true,
-
-	// use the standard tsc in watch mode problem matcher to find compile problems in the output.
-	"problemMatcher": "$tsc-watch"
+            // show the output window only if unrecognized errors occur.
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            
+            "problemMatcher": [
+                "$tsc-watch"
+            ],
+            "isBackground": true
+        }
+    ]
 }

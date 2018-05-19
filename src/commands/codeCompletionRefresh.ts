@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as dx from './dx';
 import * as ccr from '../dx/generator';
 import {SObjectCategory} from '../dx/describe';
 
@@ -37,7 +36,7 @@ export default async function codeCompletionRefresh(): Promise<any> {
         var gen = new ccr.FauxClassGenerator();
         try {
             var startTime = (new Date()).getTime();
-            await gen.generate(vscode.workspace.rootPath, objectsToGet);
+            await gen.generate(vscode.workspace.workspaceFolders[0].uri.fsPath, objectsToGet);
             var endTime = (new Date()).getTime();
             vscode.window.forceCode.outputChannel.appendLine('Refresh took ' + Math.round((endTime - startTime) / (1000 * 60)) + ' minutes.');
             vscode.window.forceCode.showStatus('ForceCode: Retrieval of objects complete!!!');

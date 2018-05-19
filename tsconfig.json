@@ -3,6 +3,7 @@
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"noResolve": false,
+		"removeComments": true,
 		"target": "es6",
 		"outDir": "out",
 		"lib": [

@@ -12,7 +12,6 @@ import {
   TreeItem,
   TreeItemCollapsibleState
 } from 'vscode';
-import * as command from '../models/commands';
 
 export class CommandViewService implements TreeDataProvider<Task> {
   private static instance: CommandViewService;
