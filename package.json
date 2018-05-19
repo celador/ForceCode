@@ -385,6 +385,7 @@
     "@types/sinon": "^4.3.3",
     "chai": "^4.1.2",
     "cross-env": "5.1.5",
+    "csprng": "^0.1.2",
     "decache": "^4.4.0",
     "electron-rebuild": "^1.7.3",
     "glob": "^7.1.2",
@@ -398,6 +399,8 @@
     "rimraf": "^2.6.2",
     "sinon": "^5.0.7",
     "source-map-support": "^0.5.6",
+    "tough-cookie": "^2.3.4",
+    "tunnel-agent": "^0.6.0",
     "typescript": "^2.8.3",
     "vsce": "^1.40.0"
   }
