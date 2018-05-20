@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import jsforce = require('jsforce');
+import jsforce = require('salesforce-alm/node_modules/jsforce');
 import { DXCommands} from './services/dxService';
 import { IMetadataFileProperties } from 'jsforce';
 

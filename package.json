@@ -359,7 +359,6 @@
     "cs-jsforce-metadata-tools": "^1.2.10",
     "fs-extra": "^6.0.1",
     "globule": "^1.2.0",
-    "jsforce": "^1.8.4",
     "jszip": "^3.1.5",
     "klaw": "^2.1.1",
     "mime-types": "^2.1.18",
