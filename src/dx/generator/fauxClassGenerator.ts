@@ -7,10 +7,9 @@
 import * as vscode from 'vscode';
 import { SFDX_PROJECT_FILE } from '../constants';
 //import { LocalCommandExecution } from '../cli';
-import * as fs from 'fs';
 import { EOL } from 'os';
 import * as path from 'path';
-import { mkdir, rm } from 'shelljs';
+import * as fs from 'fs-extra';
 import {
   ChildRelationship,
   Field,
@@ -321,7 +320,7 @@ export class FauxClassGenerator {
   private createIfNeededOutputFolder(folderPath: string): boolean {
     if (!fs.existsSync(folderPath)) {
       vscode.window.forceCode.outputChannel.appendLine('Creating output folder in ' + folderPath);
-      mkdir('-p', folderPath);
+      fs.mkdirpSync(folderPath);
       return fs.existsSync(folderPath);
     }
     return true;
@@ -330,7 +329,7 @@ export class FauxClassGenerator {
   private cleanupSObjectFolders(baseSObjectsFolder: string) {
     if (fs.existsSync(baseSObjectsFolder)) {
       vscode.window.forceCode.outputChannel.appendLine('Cleaning previously downloaded objects in ' + baseSObjectsFolder);
-      rm('-rf', baseSObjectsFolder);
+      fs.removeSync(baseSObjectsFolder);
     }
   }
 
