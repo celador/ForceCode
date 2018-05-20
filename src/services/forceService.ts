@@ -6,7 +6,7 @@ import DXService from './dxService';
 import * as path from 'path';
 import * as creds from './../commands/credentials';
 import * as fs from 'fs-extra';
-const jsforce: any = require('salesforce-alm/node_modules/jsforce');
+const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
 export default class ForceService implements forceCode.IForceService {

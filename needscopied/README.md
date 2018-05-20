@@ -1,1 +1,1 @@
-keyChainImpl.js needs copied into node_modules/salesforce-alm/dist/lib and connection.js needs copied into node_modules/salesforce-alm/node_modules/jsforce/lib/ otherwise there are errors!!
+This file in this folder needs copied into salesforce-alm/dist/lib otherwise there are errors!!

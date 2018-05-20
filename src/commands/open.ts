@@ -103,7 +103,7 @@ export function showFileOptions(promises: any[]) {
                     }
                     return Promise.all(auraDefinitionResults.records.map(function (auraDefinition) {
                         return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({ Id: auraDefinition.Id }).execute();
-                    })).then(function (results: any[]) {
+                    })).then(function (results) {
                         return results.map(function (qr) {
                             return qr.length > 0 ? qr[0] : undefined;
                         });
