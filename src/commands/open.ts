@@ -5,10 +5,16 @@ import * as path from 'path';
 import { dxService } from '../services';
 const TYPEATTRIBUTE: string = 'type';
 
+export function openAura(context: vscode.ExtensionContext) {
+    var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''}'`;
+    return vscode.window.forceCode.connect(context)
+        .then(() => showFileOptions([vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate)], false));
+}
+
 export function open(context: vscode.ExtensionContext) {
     return Promise.resolve(vscode.window.forceCode)
         .then(getFileList)
-        .then(proms => showFileOptions(proms));
+        .then(proms => showFileOptions(proms, true));
         
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -21,7 +27,6 @@ export function open(context: vscode.ExtensionContext) {
             var q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;
             return vscode.window.forceCode.conn.tooling.query(q);
         });
-        promises.push(vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate));
         return promises;
     }
 }
@@ -51,7 +56,7 @@ export function showFileOptions(promises: any[]) {
             matchOnDescription: true,
             matchOnDetail: true,
             placeHolder: 'Retrieve a Salesforce File',
-            canPickMany: true,
+            canPickMany: pickMany,
         };
         return vscode.window.showQuickPick(options, config);
     }).then(opt => {

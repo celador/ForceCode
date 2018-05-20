@@ -47,6 +47,18 @@ export const fcCommands: FCCommand[] = [
             return commands.open(context);
         }
     },
+    {
+        commandName: 'ForceCode.openAura',
+        name: 'Opening Aura Bundle',
+        hidden: false,
+        description: 'Open an Aura Bundle',
+        detail: 'Open an Aura Bundle from the cloud (aka "refresh from org").',
+        icon: 'database',
+        label: 'Open Aura Bundle',
+        command: function (context, selectedResource?) {
+            return commands.openAura(context);
+        }
+    },
     // Create Classes
     {
         commandName: 'ForceCode.createClass',
@@ -497,7 +509,7 @@ export const fcCommands: FCCommand[] = [
         name: 'Opening file',
         hidden: true,
         command: function (context, selectedResource?) {
-            return commands.showFileOptions(context);
+            return commands.showFileOptions(context, true);
         }
     },
     {
