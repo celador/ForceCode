@@ -4,7 +4,7 @@
 // Project: https://github.com/jsforce/jsforce
 // Definitions by: JohnAaronNelson <https://github.com/celador>
 
-declare module 'jsforce/index' {
+declare module 'salesforce-alm/node_modules/jsforce/index' {
     namespace jsforce {
 
         interface jsforce extends NodeJS.EventEmitter {
@@ -194,6 +194,6 @@ declare module 'jsforce/index' {
     export = jsforce;
 }
 declare module 'jsforce' {
-    import * as main from 'jsforce/index';
+    import * as main from 'salesforce-alm/node_modules/jsforce/index';
     export = main;
 }
