@@ -52,7 +52,7 @@ export const fcCommands: FCCommand[] = [
         name: 'Opening Aura Bundle',
         hidden: false,
         description: 'Open an Aura Bundle',
-        detail: 'Open an Aura Bundle from the cloud (aka "refresh from org").',
+        detail: 'Retrieve an Aura Bundle from Salesforce.',
         icon: 'database',
         label: 'Open Aura Bundle',
         command: function (context, selectedResource?) {
