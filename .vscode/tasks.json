@@ -14,9 +14,10 @@
                 ]
             },
             "linux": {
+                // need to run "npm config set scripts-prepend-node-path true" for debug to work
                 "command": "$HOME/.nvm/versions/node/v8.11.2/bin/node",
                 "args": [
-                    "${workspaceRoot}/node_modules/typescript/bin/tsc", "-watch", "-p", "./"
+                    "$HOME/.nvm/versions/node/v8.11.2/bin/npm", "run", "compile"
                 ],
             },
 
