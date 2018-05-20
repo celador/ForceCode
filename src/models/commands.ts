@@ -35,7 +35,7 @@ export default [
         name: 'Opening file',
         hidden: false,
         description: 'Open Classes, Pages, Triggers, Components, and Static Resources',
-        detail: 'Open a file from the cloud (aka "refresh from org").',
+        detail: 'Retrieve a file from Salesforce.',
         icon: 'desktop-download',
         label: 'Open Salesforce File',
         command: function (context, selectedResource?) {
@@ -47,7 +47,7 @@ export default [
         name: 'Opening Aura Bundle',
         hidden: false,
         description: 'Open an Aura Bundle',
-        detail: 'Open an Aura Bundle from the cloud (aka "refresh from org").',
+        detail: 'Retrieve an Aura Bundle from Salesforce.',
         icon: 'database',
         label: 'Open Aura Bundle',
         command: function (context, selectedResource?) {
