@@ -9,10 +9,16 @@ import { getIcon, getExtension, getFolder } from './../parsers';
 import { IWorkspaceMember } from '../forceCode';
 const TYPEATTRIBUTE: string = 'type';
 
+export function openAura(context: vscode.ExtensionContext) {
+    var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''}'`;
+    return vscode.window.forceCode.connect(context)
+        .then(() => showFileOptions([vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate)], false));
+}
+
 export function open(context: vscode.ExtensionContext) {
     return vscode.window.forceCode.connect(context)
         .then(getFileList)
-        .then(proms => showFileOptions(proms));
+        .then(proms => showFileOptions(proms, true));
         
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -25,12 +31,11 @@ export function open(context: vscode.ExtensionContext) {
             var q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;
             return vscode.window.forceCode.conn.tooling.query(q);
         });
-        promises.push(vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate));
         return promises;
     }
 }
 
-export function showFileOptions(promises: any[]) {
+export function showFileOptions(promises: any[], pickMany: boolean) {
     let bundleName: string = '';
     // TODO: Objects
     // TODO: Generic Metadata retrieve
@@ -56,7 +61,7 @@ export function showFileOptions(promises: any[]) {
             matchOnDescription: true,
             matchOnDetail: true,
             placeHolder: 'Retrieve a Salesforce File',
-            canPickMany: true,
+            canPickMany: pickMany,
         };
         return vscode.window.showQuickPick(options, config);
     }).then(opt => {
@@ -64,9 +69,14 @@ export function showFileOptions(promises: any[]) {
         if(!opts) {
             opts = [''];
         }
-        var files: any[] = opts.map(curOpt => {
-            return getFile(curOpt);
-        });
+        var files: any[];
+        if(opts instanceof Array) {
+            files = opts.map(curOpt => {
+                return getFile(curOpt);
+            });
+        } else {
+            files = [getFile(opts)];
+        }
         
         return Promise.all(files);
     })
@@ -145,9 +155,9 @@ export function showFileOptions(promises: any[]) {
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {
                         if (err) { reject(err); }
-                        if (results.length === 1 && openFile) {
-                            vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, { preview: false }));
-                        }
+                        //if (results.length === 1 && openFile) {
+                        //    vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, { preview: false }));
+                        //}
                         resolve(true);
                     });
                 });
