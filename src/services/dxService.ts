@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { commandService } from '.';
 var alm: any = require('salesforce-alm');
 
 export interface SFDX {
@@ -240,7 +241,12 @@ export default class DXService implements DXCommands {
         }, () => {
             this.isLoggedIn = false;
             this.orgInfo = undefined;
-            return Promise.reject('No info recieved from org. Are you logged in?');
+            return vscode.window.showWarningMessage('ForceCode: You are not logged in. Login now?', 'Yes', 'No').then(s => {
+                if (s === 'Yes') {
+                    return commandService.runCommand('ForceCode.enterCredentials', undefined);
+                } 
+                return undefined;
+            });
         });
     }
 
