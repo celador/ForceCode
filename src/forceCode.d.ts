@@ -159,7 +159,6 @@ export interface IForceService {
     newContainer(force: Boolean): Promise<IForceService>;
     showStatus(message: string): void;
     clearLog(): void;
-    showStatus(message: string): void;
     resetStatus(): void;
     checkForFileChanges(): any;
     updateFileMetadata(newMembers, check?: boolean): Promise<any>;

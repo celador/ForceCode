@@ -226,7 +226,7 @@ export default class ForceService implements forceCode.IForceService {
             if(check) {
                 if(!self.dxCommands.isEmptyUndOrNull(self.workspaceMembers)) {
                     const changedMems = Object.keys(newMembers).filter(key=> {
-                        return (self.workspaceMembers[key] && !this.compareDates(self.workspaceMembers[key].lastModifiedDate, newMembers[key].lastModifiedDate));
+                        return (self.workspaceMembers[key] && !self.compareDates(self.workspaceMembers[key].lastModifiedDate, newMembers[key].lastModifiedDate));
                     });
                     console.log('Done checking members');
                     if(changedMems && changedMems.length > 0) {
