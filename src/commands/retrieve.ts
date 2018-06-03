@@ -32,7 +32,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             buffer = '';
         }
     }(fs));
-    return vscode.window.forceCode.connect(context)
+    return commandService.runCommand('ForceCode.connect', context)
         .then(showPackageOptions)
         .then(getPackage)
         .then(processResult)

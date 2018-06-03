@@ -3,11 +3,12 @@ import fs = require('fs-extra');
 import path = require('path');
 import jszip = require('jszip');
 import globule = require('globule');
+import { commandService } from './../services';
 const mime = require('mime-types');
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
     // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
-    return vscode.window.forceCode.connect(context)
+    return commandService.runCommand('ForceCode.connect', context)
         .then(getPackageName)
         .then(option => {
             if(!option) {
@@ -64,7 +65,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
 
 export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, context: vscode.ExtensionContext): any {
     // This command is run when working in a file, and it's saved... It will auto bundle/deploy that static resource 
-    return vscode.window.forceCode.connect(context)
+    return commandService.runCommand('ForceCode.connect', context)
         .then(getPackageName)
         .then(bundleAndDeploy)
         .then(deployComplete)

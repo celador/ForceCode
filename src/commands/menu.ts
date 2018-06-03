@@ -4,7 +4,7 @@ import { commandService } from '../services';
 
 export default function showMenu(context: vscode.ExtensionContext) {
     var quickpick: any[] = [];
-    return vscode.window.forceCode.connect(context)
+    return commandService.runCommand('ForceCode.connect', context)
         .then(displayMenu)
         .then(res => processResult(res))
         .catch(err => vscode.window.showErrorMessage(err.message));

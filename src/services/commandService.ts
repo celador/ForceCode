@@ -13,7 +13,7 @@ export class CommandService {
         return CommandService.instance;
       }
 
-    public runCommand(command: string, context: any, selectedResource?: any) {
+    public runCommand(command: string, context: any, selectedResource?: any): Promise<any> {
         // add something to keep track of the running command in here
         var theCommand = commands.default.find(cur => { return cur.commandName === command; });
         

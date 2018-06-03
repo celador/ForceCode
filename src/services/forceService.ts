@@ -45,9 +45,9 @@ export default class ForceService implements forceCode.IForceService {
         this.containerMembers = [];
         configuration(this).then(config => {
             this.username = config.username || '';
-            this.dxCommands.getOrgInfo().then(res => {
+            commandService.runCommand('ForceCode.getOrgInfo', undefined).then(res => {
                 if(res) {
-                    this.connect();
+                    commandService.runCommand('ForceCode.connect', undefined);;
                 }
             });  
         }).catch(() => {

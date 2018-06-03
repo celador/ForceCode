@@ -389,4 +389,20 @@ export default [
             return vscode.window.forceCode.checkForFileChanges();
         }
     },
+    {
+        commandName: 'ForceCode.getOrgInfo',
+        name: 'Getting org info',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return vscode.window.forceCode.dxCommands.getOrgInfo();
+        }
+    },
+    {
+        commandName: 'ForceCode.connect',
+        name: 'Connecting',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return vscode.window.forceCode.connect(context);
+        }
+    },
 ]

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
+import { commandService } from './../services';
 
 var tools: any = require('cs-jsforce-metadata-tools');
 
@@ -40,7 +41,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         pollTimeout: vscode.window.forceCode.config.pollTimeout ? (vscode.window.forceCode.config.pollTimeout * 1000) : 600000,
     };
 
-    return vscode.window.forceCode.connect(context)
+    return commandService.runCommand('ForceCode.connect', context)
         .then(deployPackage)
         .then(finished)
         .catch(onError);
