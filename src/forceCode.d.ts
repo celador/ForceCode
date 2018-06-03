@@ -161,11 +161,9 @@ export interface IForceService {
     clearLog(): void;
     showStatus(message: string): void;
     resetStatus(): void;
-    getWorkspaceMembers(): any;//Promise<IWorkspaceMember[]>;
-    checkAndSetWorkspaceMembers(newMembers, check?: boolean): Promise<any>;
-    cleanupContainers(): Promise<any>;
+    checkForFileChanges(): any;
+    updateFileMetadata(newMembers, check?: boolean): Promise<any>;
     compareDates(date1: string, date2: string): boolean;
-    parseRecords(members: FCWorkspaceMembers, recs: any[]): FCWorkspaceMembers;
 }
 
 

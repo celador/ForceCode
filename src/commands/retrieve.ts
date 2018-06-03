@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as parsers from './../parsers';
 import { IWorkspaceMember } from '../forceCode';
 import constants from './../models/constants';
+import { commandService } from './../services';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
@@ -235,7 +236,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                                 type: t.type,
                                             };
                                             vscode.window.forceCode.workspaceMembers[t.id] = workspaceMember;
-                                            vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
+                                            commandService.runCommand('ForceCode.updateFileMetadata', vscode.window.forceCode.workspaceMembers);
                                             return t.fileName;
                                         });
                                     } else if (typeof res === 'object') {
@@ -247,7 +248,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                             type: res['type'],
                                         };
                                         vscode.window.forceCode.workspaceMembers[res['id']] = workspaceMember;
-                                        vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
+                                        commandService.runCommand('ForceCode.updateFileMetadata', vscode.window.forceCode.workspaceMembers);
                                         files.push(res['fileName']);
                                     }
 

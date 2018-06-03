@@ -10,7 +10,8 @@ import {
   EventEmitter,
   TreeDataProvider,
   TreeItem,
-  TreeItemCollapsibleState
+  TreeItemCollapsibleState,
+  window
 } from 'vscode';
 
 export class CommandViewService implements TreeDataProvider<Task> {
@@ -89,7 +90,11 @@ export class Task extends TreeItem {
 
   public run() {
     return Promise.resolve(this.execution.command(this.context, this.selectedResource))
-      .then(res => Promise.resolve(res), reason => Promise.resolve(reason))
+      .then(res => Promise.resolve(res), 
+      reason => {
+        window.showErrorMessage(reason.message ? reason.message : reason);
+        Promise.resolve(reason);
+      })
       .then(done => {
           this.taskViewProvider.removeTask(this);
           return done;

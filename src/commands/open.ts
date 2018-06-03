@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
+import { commandService } from './../services';
 const ZIP: any = require('zip');
 const fetch: any = require('node-fetch');
 const mime = require('mime-types');
@@ -95,7 +96,7 @@ export function showFileOptions(promises: any[], pickMany: boolean) {
         return Promise.all(thePromises);
     })
     .then(() => {
-        return vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
+        return commandService.runCommand('ForceCode.updateFileMetadata', vscode.window.forceCode.workspaceMembers);
     })
     .catch(err => vscode.window.showErrorMessage(err.message));
 

@@ -373,4 +373,20 @@ export default [
             return commands.staticResourceDeployFromFile(selectedResource, context);
         }
     },
+    {
+        commandName: 'ForceCode.updateFileMetadata',
+        name: 'Updating metadata',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return vscode.window.forceCode.updateFileMetadata(context, selectedResource);
+        }
+    },
+    {
+        commandName: 'ForceCode.checkForFileChanges',
+        name: 'Checking for file changes',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return vscode.window.forceCode.checkForFileChanges();
+        }
+    },
 ]

@@ -6,6 +6,7 @@ import DXService from './dxService';
 import * as path from 'path';
 import * as creds from './../commands/credentials';
 import * as fs from 'fs-extra';
+import { unwatchFile } from 'fs-extra';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
@@ -97,9 +98,74 @@ export default class ForceService implements forceCode.IForceService {
         }
     }
 
+    public checkForFileChanges() {
+        return this.getWorkspaceMembers()
+            .then(this.parseMembers)
+            .then(res => commandService.runCommand('ForceCode.updateFileMetadata', res, true));
+    }
+
+    public updateFileMetadata(newMembers: forceCode.FCWorkspaceMembers, check?: boolean): Promise<any> {
+        return this.checkAndSetWorkspaceMembers(newMembers, check);
+    }
+
+    // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
+    public compareDates(date1: string, date2: string): boolean {
+        date1 = date1.split('.')[0];
+        date2 = date2.split('.')[0];
+        var lastD1: number = parseInt(date1.slice(-1));
+        var lastD2: number = parseInt(date2.slice(-1));
+        if((date1.slice(0, date1.length - 2) === date2.slice(0, date2.length - 2)) && (Math.abs(lastD2 - lastD1) <= 2)) {
+            return true;
+        }
+        return false;
+    }
+
+    private parseMembers(mems) {
+        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems[0])) {
+            return undefined;
+        }
+        var types: {[key: string]: Array<any>} = {};
+        types['type0'] = mems[1];
+        if(types['type0'].length > 3) {
+            for(var i = 1; types['type0'].length > 3; i++) {
+                var newTypes: Array<any> = [];
+                newTypes.push(types['type0'].shift());
+                newTypes.push(types['type0'].shift());
+                newTypes.push(types['type0'].shift());
+                types['type' + i] = newTypes;
+            }
+        }
+        let proms = Object.keys(types).map(curTypes => {
+            return vscode.window.forceCode.conn.metadata.list(types[curTypes]);
+        });
+        return Promise.all(proms).then(rets => {
+            const tempMems: forceCode.FCWorkspaceMembers = mems.shift();
+            return parseRecords(tempMems, rets);
+        });
+
+        function parseRecords(members: forceCode.FCWorkspaceMembers, recs: any[]): forceCode.FCWorkspaceMembers {
+            var membersToReturn: forceCode.FCWorkspaceMembers = {};
+            //return Promise.all(recs).then(records => {
+            console.log('Retrieved metadata records');
+            recs.forEach(curSet => {
+                curSet.forEach(key => {
+                    if(members[key.fullName] && members[key.fullName].type === key.type) {
+                        membersToReturn[key.id] = members[key.fullName];
+                        membersToReturn[key.id].id = key.id;
+                        membersToReturn[key.id].lastModifiedDate = key.lastModifiedDate; 
+                    }
+                });
+            });
+    
+            return membersToReturn;
+    
+            //});
+        }
+    }
+
         // Get files in src folder..
     // Match them up with ContainerMembers
-    public getWorkspaceMembers(): Promise<any> {
+    private getWorkspaceMembers(): Promise<any> {
         return new Promise((resolve) => {
             var klaw: any = require('klaw');
             var members: forceCode.FCWorkspaceMembers = {}; 
@@ -149,58 +215,7 @@ export default class ForceService implements forceCode.IForceService {
         });
     }
 
-    public parseRecords(members: forceCode.FCWorkspaceMembers, recs: any[]): forceCode.FCWorkspaceMembers {
-        var membersToReturn: forceCode.FCWorkspaceMembers = {};
-        //return Promise.all(recs).then(records => {
-        console.log('Retrieved metadata records');
-        recs.forEach(curSet => {
-            curSet.forEach(key => {
-                if(members[key.fullName] && members[key.fullName].type === key.type) {
-                    membersToReturn[key.id] = members[key.fullName];
-                    membersToReturn[key.id].id = key.id;
-                    membersToReturn[key.id].lastModifiedDate = key.lastModifiedDate; 
-                }
-            });
-        });
-
-        return membersToReturn;
-
-        //});
-    }
-
-    // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
-    public cleanupContainers(): Promise<any> {
-        return new Promise(function (resolve) {
-            vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
-                .find({ Name: {$like : 'ForceCode-%'}})
-                .execute(function(err, records) {
-                    var toDelete: string[] = new Array<string>();
-                    records.forEach(r => {
-                        toDelete.push(r.Id);
-                    })
-                    if(toDelete.length > 0) {
-                        resolve(vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
-                            .del(toDelete));
-                    } else {
-                        resolve();
-                    }
-                });     
-        });          
-    }
-
-    // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
-    public compareDates(date1: string, date2: string): boolean {
-        date1 = date1.split('.')[0];
-        date2 = date2.split('.')[0];
-        var lastD1: number = parseInt(date1.slice(-1));
-        var lastD2: number = parseInt(date2.slice(-1));
-        if((date1.slice(0, date1.length - 2) === date2.slice(0, date2.length - 2)) && (Math.abs(lastD2 - lastD1) <= 2)) {
-            return true;
-        }
-        return false;
-    }
-
-    public checkAndSetWorkspaceMembers(newMembers: forceCode.FCWorkspaceMembers, check?: boolean){
+    private checkAndSetWorkspaceMembers(newMembers: forceCode.FCWorkspaceMembers, check?: boolean){
         var self: forceCode.IForceService = vscode.window.forceCode;
         if(self.dxCommands.isEmptyUndOrNull(newMembers)) {
             return undefined;
@@ -285,48 +300,32 @@ export default class ForceService implements forceCode.IForceService {
                 .then(connectionSuccess)
                 .catch(connectionError)
                 .then(getNamespacePrefix)
-                .then(getWorkspaceMembers)
-                .then(parseMembers)
-                .then(checkWSMems)
+                .then(checkForChanges)
                 .then(cleanupContainers)
                 .catch(err => vscode.window.showErrorMessage(err.message));
 
-            function getWorkspaceMembers() {
-                return vscode.window.forceCode.getWorkspaceMembers();
+                // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
+            function cleanupContainers(): Promise<any> {
+                return new Promise(function (resolve) {
+                    vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
+                        .find({ Name: {$like : 'ForceCode-%'}})
+                        .execute(function(err, records) {
+                            var toDelete: string[] = new Array<string>();
+                            records.forEach(r => {
+                                toDelete.push(r.Id);
+                            })
+                            if(toDelete.length > 0) {
+                                resolve(vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
+                                    .del(toDelete));
+                            } else {
+                                resolve();
+                            }
+                        });     
+                });          
             }
 
-            function parseMembers(mems) {
-                if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems[0])) {
-                    return undefined;
-                }
-                var types: {[key: string]: Array<any>} = {};
-                types['type0'] = mems[1];
-                if(types['type0'].length > 3) {
-                    for(var i = 1; types['type0'].length > 3; i++) {
-                        var newTypes: Array<any> = [];
-                        newTypes.push(types['type0'].shift());
-                        newTypes.push(types['type0'].shift());
-                        newTypes.push(types['type0'].shift());
-                        types['type' + i] = newTypes;
-                    }
-                }
-                let proms = Object.keys(types).map(curTypes => {
-                    return vscode.window.forceCode.conn.metadata.list(types[curTypes]);
-                });
-                return Promise.all(proms).then(rets => {
-                    const tempMems: forceCode.FCWorkspaceMembers = mems.shift();
-                    return vscode.window.forceCode.parseRecords(tempMems, rets);
-                });
-            }
-
-            function checkWSMems(mems) {
-                vscode.window.forceCode.checkAndSetWorkspaceMembers(mems, true);
-                
-                return self
-            }
-
-            function cleanupContainers(svc) {
-                vscode.window.forceCode.cleanupContainers();
+            function checkForChanges(svc) {
+                commandService.runCommand('ForceCode.checkForFileChanges', undefined, undefined);
                 return svc;
             }
 

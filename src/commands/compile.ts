@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import { IForceService } from './../forceCode';
+import { commandService } from './../services';
 import * as forceCode from './../forceCode';
 import constants from './../models/constants';
 import diff from './diff';
@@ -323,7 +324,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                             type: toolingType,
                         };
                         fc.workspaceMembers[foo.id] = workspaceMember;
-                        fc.checkAndSetWorkspaceMembers(fc.workspaceMembers);
+                        commandService.runCommand('ForceCode.updateFileMetadata', fc.workspaceMembers);
                         return fc;
                     });
                 });
@@ -438,7 +439,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             // SUCCESS !!! 
             if(res.records && vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id]) {
                 vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id].lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
-                vscode.window.forceCode.checkAndSetWorkspaceMembers(vscode.window.forceCode.workspaceMembers);
+                commandService.runCommand('ForceCode.updateFileMetadata', vscode.window.forceCode.workspaceMembers);
             }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;
