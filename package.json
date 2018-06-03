@@ -335,6 +335,14 @@
         {
           "command": "ForceCode.toggleCoverage",
           "when": "ForceCodeActive && resourceLangId == apex"
+        },
+        {
+          "command": "ForceCode.diff",
+          "when": "ForceCodeActive && (resourceLangId == apex || resourceLangId == visualforce)"
+        },
+        {
+          "command": "ForceCode.openOrg",
+          "when": "ForceCodeActive"
         }
       ]
     }
