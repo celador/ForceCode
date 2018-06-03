@@ -188,17 +188,13 @@ export default class ForceService implements forceCode.IForceService {
         });          
     }
 
-    // sometimes the times on the dates are a half second off, so this checks for within 1 second
+    // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
     public compareDates(date1: string, date2: string): boolean {
         date1 = date1.split('.')[0];
         date2 = date2.split('.')[0];
-        if(date1 === date2) {
-            return true;
-        }
-
-        var lastD1: number = parseInt(date1.charAt(date1.length - 1));
-        var lastD2: number = parseInt(date2.charAt(date2.length - 1));
-        if((lastD1 > lastD2 && lastD1 - lastD2 === 1) || (lastD2 > lastD1 && lastD2 - lastD1 === 1)) {
+        var lastD1: number = parseInt(date1.slice(-1));
+        var lastD2: number = parseInt(date2.slice(-1));
+        if((date1.slice(0, date1.length - 2) === date2.slice(0, date2.length - 2)) && (Math.abs(lastD2 - lastD1) <= 2)) {
             return true;
         }
         return false;
@@ -206,6 +202,9 @@ export default class ForceService implements forceCode.IForceService {
 
     public checkAndSetWorkspaceMembers(newMembers: forceCode.FCWorkspaceMembers, check?: boolean){
         var self: forceCode.IForceService = vscode.window.forceCode;
+        if(self.dxCommands.isEmptyUndOrNull(newMembers)) {
+            return undefined;
+        }
            
         return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(() => {
             console.log('Updated workspace file');
@@ -221,13 +220,13 @@ export default class ForceService implements forceCode.IForceService {
                             commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, undefined);
                         });
                         // return here so we're not left with stale metadata
-                        return;
+                        return undefined;
                     }
                 } 
                 self.workspaceMembers = newMembers;
                 console.log('Done getting workspace info');
             }
-            return;
+            return undefined;
         });
     }
 
@@ -321,9 +320,6 @@ export default class ForceService implements forceCode.IForceService {
             }
 
             function checkWSMems(mems) {
-                if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems)) {
-                    return undefined;
-                }
                 vscode.window.forceCode.checkAndSetWorkspaceMembers(mems, true);
                 
                 return self
