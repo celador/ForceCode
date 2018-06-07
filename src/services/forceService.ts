@@ -109,11 +109,13 @@ export default class ForceService implements forceCode.IForceService {
 
     // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
     public compareDates(date1: string, date2: string): boolean {
-        date1 = date1.split('.')[0];
-        date2 = date2.split('.')[0];
-        var lastD1: number = parseInt(date1.slice(-1));
-        var lastD2: number = parseInt(date2.slice(-1));
-        if((date1.slice(0, date1.length - 2) === date2.slice(0, date2.length - 2)) && (Math.abs(lastD2 - lastD1) <= 2)) {
+        var date1parts: string[] = date1.split('.')[0].split(':');
+        var date2parts: string[] = date2.split('.')[0].split(':');
+        var min1: number = parseInt(date1parts[1]);
+        var min2: number = parseInt(date2parts[1]);
+        var sec1: number = parseInt(date1parts[2]);
+        var sec2: number = parseInt(date2parts[2]);
+        if((date1parts[0] === date2parts[0]) && ((Math.abs(sec2 - sec1) <= 2 && min1 - min2 === 0) || (Math.abs(sec2 - sec1) >= 58 && Math.abs(min2 - min1) === 1))) {
             return true;
         }
         return false;
