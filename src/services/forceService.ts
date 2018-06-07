@@ -151,7 +151,6 @@ export default class ForceService implements forceCode.IForceService {
                         membersToReturn[key.id] = members[key.fullName];
                         membersToReturn[key.id].id = key.id;
                         membersToReturn[key.id].lastModifiedDate = key.lastModifiedDate;
-                        membersToReturn[key.id].lastModifiedById = key.lastModifiedById;
                         membersToReturn[key.id].lastModifiedByName = key.lastModifiedByName; 
                     }
                 });
@@ -202,7 +201,6 @@ export default class ForceService implements forceCode.IForceService {
                                 path: item.path,
                                 id: '',//metadataFileProperties.id,
                                 lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
-                                lastModifiedById: '',
                                 lastModifiedByName: '',
                                 type: type,
                             };
@@ -228,17 +226,13 @@ export default class ForceService implements forceCode.IForceService {
             if(check) {
                 if(!self.dxCommands.isEmptyUndOrNull(self.workspaceMembers)) {
                     const changedMems = Object.keys(newMembers).filter(key=> {
-                        return (self.workspaceMembers[key] 
-                            && (!self.compareDates(self.workspaceMembers[key].lastModifiedDate, newMembers[key].lastModifiedDate) 
-                            || self.workspaceMembers[key].lastModifiedById !== newMembers[key].lastModifiedById));
+                        return (self.workspaceMembers[key] && !self.compareDates(self.workspaceMembers[key].lastModifiedDate, newMembers[key].lastModifiedDate));
                     });
                     console.log('Done checking members');
                     if(changedMems && changedMems.length > 0) {
                         console.log(changedMems.length + ' members were changed since last load');
                         changedMems.forEach(curMem => {
-                            commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, 
-                            vscode.window.forceCode.workspaceMembers[curMem].lastModifiedById === newMembers[curMem].lastModifiedById 
-                            ? undefined : newMembers[curMem].lastModifiedByName);
+                            commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, newMembers[curMem].lastModifiedByName);
                         });
                         // return here so we're not left with stale metadata
                         return undefined;

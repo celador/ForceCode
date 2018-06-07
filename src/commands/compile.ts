@@ -314,14 +314,13 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 // Tooling Object does not exist
                 // so we CREATE it
                 return fc.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
-                    return fc.conn.tooling.sobject(toolingType).find({ Id: foo.id }, { LastModifiedDate: 1, LastModifiedById: 1, LastModifiedByName: 1 }).execute().then(bar => {
+                    return fc.conn.tooling.sobject(toolingType).find({ Id: foo.id }, { LastModifiedDate: 1, LastModifiedByName: 1 }).execute().then(bar => {
                         // retrieve the last modified date here
                         var workspaceMember: forceCode.IWorkspaceMember = {
                             name: fileName,
                             path: document.fileName,
                             id: foo.id,
                             lastModifiedDate: bar[0].LastModifiedDate,
-                            lastModifiedById: bar[0].LastModifiedById,
                             lastModifiedByName: bar[0].LastModifiedByName,
                             type: toolingType,
                         };

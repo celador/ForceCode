@@ -212,7 +212,6 @@ export function showFileOptions(promises: any[], pickMany: boolean) {
                     path: filename,
                     id: res.Id, 
                     lastModifiedDate: res.LastModifiedDate,
-                    lastModifiedById: res.LastModifiedById,
                     lastModifiedByName: res.LastModifiedByName,
                     type: toolingType,
                 };
