@@ -51,6 +51,7 @@ export interface MetadataResult {
     IsValid: boolean;
     LastModifiedById: string;
     LastModifiedDate: string;
+    LastModifiedByName: string;
     LengthWithoutComments: number;
     ManageableState: string;
     Metadata: {};
@@ -73,6 +74,8 @@ interface IWorkspaceMember {
     path: string;
     id: string;
     lastModifiedDate: string;
+    lastModifiedById: string;
+    lastModifiedByName: string;
     type: string;
 }
 
