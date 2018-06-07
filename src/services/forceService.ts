@@ -100,7 +100,7 @@ export default class ForceService implements forceCode.IForceService {
     public checkForFileChanges() {
         return this.getWorkspaceMembers()
             .then(this.parseMembers)
-            .then(res => commandService.runCommand('ForceCode.updateFileMetadata', res, true));
+            .then(res => this.updateFileMetadata(res, true));
     }
 
     public updateFileMetadata(newMembers: forceCode.FCWorkspaceMembers, check?: boolean): Promise<any> {

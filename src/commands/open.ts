@@ -96,7 +96,7 @@ export function showFileOptions(promises: any[], pickMany: boolean) {
         return Promise.all(thePromises);
     })
     .then(() => {
-        return commandService.runCommand('ForceCode.updateFileMetadata', vscode.window.forceCode.workspaceMembers);
+        return vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
     })
     .catch(err => vscode.window.showErrorMessage(err.message));
 

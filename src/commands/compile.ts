@@ -324,7 +324,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                             type: toolingType,
                         };
                         fc.workspaceMembers[foo.id] = workspaceMember;
-                        commandService.runCommand('ForceCode.updateFileMetadata', fc.workspaceMembers);
+                        vscode.window.forceCode.updateFileMetadata(fc.workspaceMembers);
                         return fc;
                     });
                 });
@@ -439,7 +439,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             // SUCCESS !!! 
             if(res.records && vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id]) {
                 vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id].lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
-                commandService.runCommand('ForceCode.updateFileMetadata', vscode.window.forceCode.workspaceMembers);
+                vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
             }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;

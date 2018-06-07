@@ -236,7 +236,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                                 type: t.type,
                                             };
                                             vscode.window.forceCode.workspaceMembers[t.id] = workspaceMember;
-                                            commandService.runCommand('ForceCode.updateFileMetadata', vscode.window.forceCode.workspaceMembers);
+                                            vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
                                             return t.fileName;
                                         });
                                     } else if (typeof res === 'object') {
@@ -248,7 +248,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                             type: res['type'],
                                         };
                                         vscode.window.forceCode.workspaceMembers[res['id']] = workspaceMember;
-                                        commandService.runCommand('ForceCode.updateFileMetadata', vscode.window.forceCode.workspaceMembers);
+                                        vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
                                         files.push(res['fileName']);
                                     }
 
