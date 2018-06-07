@@ -526,7 +526,7 @@ export const fcCommands: FCCommand[] = [
         hidden: true,
         command: function (context, selectedResource?) {
             return vscode.workspace.openTextDocument(context).then(theDoc => {
-                return vscode.window.showWarningMessage((selectedResource ? selectedResource : 'Someone else') +  ' has changed ' + getFileName(theDoc), 'Refresh', 'Diff', 'Dismiss').then(s => {
+                return vscode.window.showWarningMessage(selectedResource + ' has changed ' + getFileName(theDoc), 'Refresh', 'Diff', 'Dismiss').then(s => {
                     if (s === 'Refresh') {
                         return commands.retrieve(undefined, theDoc.uri);
                     } else if(s === 'Diff') {
