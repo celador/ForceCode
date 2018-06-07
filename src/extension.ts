@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         const toolingType: string = parsers.getToolingType(textDocument);
         if (toolingType && vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
-            commandService.runCommand('ForceCode.compile', context, textDocument);
+            commandService.runCommand('ForceCode.compileMenu', context, textDocument);
         }
         var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
         if (isResource.index && vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
@@ -49,6 +49,5 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator));
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(documentUpdateApexCoverageDecorator));
 
-    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => {
-        vscode.window.forceCode.connect(context);console.log(vscode.window.forceCode.config)}));
+    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => vscode.window.forceCode.connect(context)));
 }

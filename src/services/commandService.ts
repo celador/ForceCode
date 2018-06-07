@@ -16,7 +16,10 @@ export class CommandService {
     public runCommand(command: string, context: any, selectedResource?: any): Promise<any> {
         // add something to keep track of the running command in here
         var theCommand = commands.default.find(cur => { return cur.commandName === command; });
-        
+
+        if(!theCommand) {
+            return Promise.reject('Invalid command');
+        }
         if(['ForceCode.compileMenu', 'ForceCode.refreshContext'].find(c => { return c === theCommand.commandName; })) {
             var splitPath;
             if(selectedResource && selectedResource.path) {
