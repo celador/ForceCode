@@ -88,6 +88,7 @@ export interface MetadataResult {
     IsValid: boolean;
     LastModifiedById: string;
     LastModifiedDate: string;
+    LastModifiedByName: string;
     LengthWithoutComments: number;
     ManageableState: string;
     Metadata: {};
