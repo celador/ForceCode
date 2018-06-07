@@ -4,8 +4,8 @@ import { QueryResult } from '../services/dxService';
 import { editorUpdateApexCoverageDecorator } from '../decorators/testCoverageDecorator';
 
 export default function getApexTestResults(testClassIds?: string[]): Promise<QueryResult> {
-    var fromWhere: string = testClassIds ? ' ApexCodeCoverage ' : ' ApexCodeCoverageAggregate ';
-    var orIds: string = testClassIds && testClassIds.length > 0 ? "AND (ApexTestClassId = '" + testClassIds.join("' OR ApexTestClassId = '") + "') " : '';
+    var fromWhere: string = testClassIds && testClassIds.length === 1 ? ' ApexCodeCoverage ' : ' ApexCodeCoverageAggregate ';
+    var orIds: string = testClassIds && testClassIds.length === 1 ? "AND ApexTestClassId = '" + testClassIds[0] + "' " : '';
     var query = 'SELECT Coverage, ApexClassOrTrigger.Name, ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered '
     + 'FROM' + fromWhere
     + 'WHERE (NumLinesCovered > 0 OR NumLinesUncovered > 0) '
@@ -13,15 +13,7 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
     + 'ORDER BY ApexClassOrTrigger.Name ASC';
 
     return vscode.window.forceCode.conn.tooling.query(query)
-        .then(res => updateCoverage(res))
-        .then(finish);
-
-    function finish(res): QueryResult {
-        if(res.entityTypeName === 'ApexCodeCoverageAggregate') {
-            vscode.window.forceCode.showStatus('ForceCode: Code coverage retrieval complete!');
-        }
-        return res;
-    }
+        .then(res => updateCoverage(res));
 
     // =======================================================================================================================================
     function updateCoverage(res: QueryResult): QueryResult {
