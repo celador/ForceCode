@@ -6,7 +6,6 @@ import DXService from './dxService';
 import * as path from 'path';
 import * as creds from './../commands/credentials';
 import * as fs from 'fs-extra';
-import { unwatchFile } from 'fs-extra';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
@@ -47,7 +46,7 @@ export default class ForceService implements forceCode.IForceService {
             this.username = config.username || '';
             commandService.runCommand('ForceCode.getOrgInfo', undefined).then(res => {
                 if(res) {
-                    commandService.runCommand('ForceCode.connect', undefined);;
+                    commandService.runCommand('ForceCode.connect', undefined);
                 }
             });  
         }).catch(() => {

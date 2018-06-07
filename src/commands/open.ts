@@ -12,12 +12,12 @@ const TYPEATTRIBUTE: string = 'type';
 
 export function openAura(context: vscode.ExtensionContext) {
     var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''}'`;
-    return commandService.runCommand('ForceCode.connect', context)
+    return Promise.resolve(vscode.window.forceCode)
         .then(() => showFileOptions([vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate)], false));
 }
 
 export function open(context: vscode.ExtensionContext) {
-    return commandService.runCommand('ForceCode.connect', context)
+    return Promise.resolve(vscode.window.forceCode)
         .then(getFileList)
         .then(proms => showFileOptions(proms, true));
         

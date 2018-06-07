@@ -5,6 +5,7 @@ import ForceCodeLogProvider from './providers/LogProvider';
 import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator, updateDecorations } from './decorators/testCoverageDecorator';
 import * as commands from './models/commands';
 import * as parsers from './parsers';
+import * as path from 'path';
 
 export function activate(context: vscode.ExtensionContext): any {
     commands.default.forEach(cur => {
@@ -47,4 +48,7 @@ export function activate(context: vscode.ExtensionContext): any {
     // Text Coverage Decorators
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator));
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(documentUpdateApexCoverageDecorator));
+
+    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => {
+        vscode.window.forceCode.connect(context);console.log(vscode.window.forceCode.config)}));
 }

@@ -41,7 +41,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         pollTimeout: vscode.window.forceCode.config.pollTimeout ? (vscode.window.forceCode.config.pollTimeout * 1000) : 600000,
     };
 
-    return commandService.runCommand('ForceCode.connect', context)
+    return Promise.resolve(vscode.window.forceCode)
         .then(deployPackage)
         .then(finished)
         .catch(onError);

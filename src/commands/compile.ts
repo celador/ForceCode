@@ -36,7 +36,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         // This process uses the Metadata API to deploy specific files
         // This is where we extend it to create any kind of metadata
         // Currently only Objects and Permission sets ...
-        return commandService.runCommand('ForceCode.connect', context)
+        return Promise.resolve(vscode.window.forceCode)
             .then(createMetaData)
             .then(compileMetadata)
             .then(reportMetadataResults)
@@ -52,7 +52,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         Source = document.getText();
         // Aura Bundles are a special case, since they can be upserted with the Tooling API
         // Instead of needing to be compiled, like Classes and Pages..
-        return commandService.runCommand('ForceCode.connect', context)
+        return Promise.resolve(vscode.window.forceCode)
             .then(getAuraBundle()
                 .then(ensureAuraBundle)
                 .then(bundle => getAuraDefinition(bundle)
@@ -62,7 +62,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             ).then(finished, onError);
     } else {
         // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-        return commandService.runCommand('ForceCode.connect', context)
+        return Promise.resolve(vscode.window.forceCode)
             .then(addToContainer)
             .then(requestCompile)
             .then(getCompileStatus)
