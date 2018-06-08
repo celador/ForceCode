@@ -52,6 +52,7 @@ export function activate(context: vscode.ExtensionContext): any {
     // watch for config file changes
     context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => vscode.window.forceCode.connect(context)));
     
+    var timeO;
     // watch for deleted files and update workspaceMembers
     context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'src', '**/*.{cls,trigger,page,component}')).onDidDelete(uri => {
         var theMember = Object.keys(vscode.window.forceCode.workspaceMembers).find(mem => {
@@ -60,7 +61,12 @@ export function activate(context: vscode.ExtensionContext): any {
 
         if(theMember) {
             delete vscode.window.forceCode.workspaceMembers[theMember];
-            vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
+            // use a timeout to handle multiple file deletions, this way it only gets called after all files are deleted
+            if(timeO) {
+                clearTimeout(timeO);
+            }
+            timeO = setTimeout(() => { vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers); }, 1000);
+            
         }
     }));
 
