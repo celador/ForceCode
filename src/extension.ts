@@ -76,6 +76,7 @@ export function activate(context: vscode.ExtensionContext): any {
     // watch for config file changes
     context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.window.forceCode.workspaceRoot, 'force.json')).onDidChange(uri => { configuration() }));
     
+    var timeO;
     // watch for deleted files and update workspaceMembers
     context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.window.forceCode.projectRoot, '**', '*.{cls,trigger,page,component,cmp}')).onDidDelete(uri => {
         const fcfile: FCFile = codeCovViewService.findByPath(uri.fsPath);
