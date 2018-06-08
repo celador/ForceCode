@@ -49,5 +49,19 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator));
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(documentUpdateApexCoverageDecorator));
 
+    // watch for config file changes
     context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => vscode.window.forceCode.connect(context)));
+    
+    // watch for deleted files and update workspaceMembers
+    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'src', '**/*.{cls,trigger,page,component}')).onDidDelete(uri => {
+        var theMember = Object.keys(vscode.window.forceCode.workspaceMembers).find(mem => {
+            return vscode.window.forceCode.workspaceMembers[mem].path === uri.fsPath;
+        })
+
+        if(theMember) {
+            delete vscode.window.forceCode.workspaceMembers[theMember];
+            vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
+        }
+    }));
+
 }
