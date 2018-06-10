@@ -314,14 +314,14 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 // Tooling Object does not exist
                 // so we CREATE it
                 return fc.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
-                    return fc.conn.tooling.sobject(toolingType).find({ Id: foo.id }, { LastModifiedDate: 1, LastModifiedByName: 1 }).execute().then(bar => {
+                    return fc.conn.tooling.sobject(toolingType).find({ Id: foo.id }, { Id: 1, CreatedDate: 1 }).execute().then(bar => {
                         // retrieve the last modified date here
                         var workspaceMember: forceCode.IWorkspaceMember = {
                             name: fileName,
                             path: document.fileName,
                             id: foo.id,
-                            lastModifiedDate: bar[0].LastModifiedDate,
-                            lastModifiedByName: bar[0].LastModifiedByName,
+                            lastModifiedDate: bar[0].CreatedDate,
+                            lastModifiedByName: '',
                             type: toolingType,
                         };
                         fc.workspaceMembers[foo.id] = workspaceMember;
@@ -438,7 +438,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return false;
         } else {
             // SUCCESS !!! 
-            if(res.records && vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id]) {
+            if(res.records && res.records[0].DeployDetails.componentSuccesses.length > 0 
+                && vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id]) {
                 vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id].lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
                 vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
             }

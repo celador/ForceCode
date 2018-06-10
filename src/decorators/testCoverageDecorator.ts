@@ -34,12 +34,6 @@ export function editorUpdateApexCoverageDecorator(editor) {
         updateDecorations();
     }
 };
-// Export Function used when the Document changes
-export function documentUpdateApexCoverageDecorator(event) {
-    if (activeEditor && event.document === activeEditor.document) {
-        updateDecorations();
-    }
-};
 
 export function updateDecorations() {
     if (!activeEditor) {
