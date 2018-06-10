@@ -34,7 +34,8 @@
       "explorer": [
         {
           "id": "ForceCode.treeDataProvider",
-          "name": "ForceCode: Running Tasks"
+          "name": "ForceCode: Running Tasks",
+          "when": "ForceCodeActive"
         }
       ]
     },
