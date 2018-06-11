@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "publisher": "BrettWagner",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -376,7 +376,7 @@
     "node-fetch": "^2.1.2",
     "os": "^0.1.1",
     "request-light": "^0.2.3",
-    "salesforce-alm": "^42.16.0",
+    "salesforce-alm": "^43.1.0",
     "util.promisify": "^1.0.0",
     "vscode": "^1.1.18",
     "xml2js": "^0.4.19",

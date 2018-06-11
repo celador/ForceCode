@@ -26,6 +26,6 @@ const constants: Constants = {
     OUTPUT_CHANNEL_NAME: 'ForceCode',
     DEBUG_LEVEL_NAME: 'Execute_Anonymous_Debug',
     LOG_TYPE: 'DEVELOPER_LOG',
-    API_VERSION: '42.0',
+    API_VERSION: '43.0',
 };
 export default constants;
