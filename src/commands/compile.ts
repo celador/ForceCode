@@ -354,6 +354,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
     // =======================================================================================================================================
     function requestCompile() {
+        if(vscode.window.forceCode.containerMembers.length === 0) {
+            return undefined;        // we don't need new container stuff on new file creation
+        }
         return vscode.window.forceCode.conn.tooling.sobject('ContainerAsyncRequest').create({
             IsCheckOnly: false,
             IsRunTests: false,
@@ -365,6 +368,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
     // =======================================================================================================================================
     function getCompileStatus(): Promise<any> {
+        if(vscode.window.forceCode.containerMembers.length === 0) {
+            return Promise.resolve({});        // we don't need new container stuff on new file creation
+        }
         return nextStatus();
         function nextStatus() {
             checkCount += 1;

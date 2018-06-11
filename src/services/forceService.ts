@@ -84,7 +84,7 @@ export default class ForceService implements forceCode.IForceService {
 
     public newContainer(force: Boolean): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
-        if (self.containerId && !force) {
+        if ((self.containerId && !force) || (self.containerId && self.containerMembers.length === 0)) {
             return Promise.resolve(self);
         } else {
             return self.conn.tooling.sobject('MetadataContainer')
