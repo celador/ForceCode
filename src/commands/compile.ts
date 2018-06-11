@@ -271,7 +271,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             let mem: forceCode.IWorkspaceMember = fc.workspaceMembers[record.Id];
             if (mem && !vscode.window.forceCode.compareDates(record.LastModifiedDate, mem.lastModifiedDate)) {
                 // throw up an alert
-                return vscode.window.showWarningMessage(record.LastModifiedByName + ' has changed this file!', 'Diff', 'Overwrite').then(s => {
+                return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
                     if (s === 'Diff') {
                         diff(document);
                         return false;
