@@ -199,11 +199,11 @@ export default class DXService implements DXCommands {
             cliContext.flags['targetusername'] = vscode.window.forceCode.config.username;
         } 
         var objresult = await cmd.run(cliContext);
-        // log command output
+        
         if(!this.isEmptyUndOrNull(objresult)) {
             return Promise.resolve(objresult);
         }
-        return Promise.reject('Failed to execute command: ' + cmdString + ' ' + arg);
+        return Promise.reject('Failed to execute command: ' + this.outputToString(cliContext));
     }
 
     public execAnon(file: string): Promise<ExecuteAnonymousResult> {
