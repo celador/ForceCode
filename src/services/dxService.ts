@@ -203,7 +203,7 @@ export default class DXService implements DXCommands {
         if(!this.isEmptyUndOrNull(objresult)) {
             return Promise.resolve(objresult);
         }
-        return Promise.reject('Failed to execute command: ' + this.outputToString(cliContext));
+        return Promise.reject('Failed to execute command: ' + cmdString + this.outputToString(theArgsArray));
     }
 
     public execAnon(file: string): Promise<ExecuteAnonymousResult> {

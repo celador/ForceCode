@@ -366,6 +366,7 @@
   ],
   "dependencies": {
     "cs-jsforce-metadata-tools": "^1.2.10",
+    "crypto-browserify": "3.12.0",
     "fs-extra": "^6.0.1",
     "globule": "^1.2.1",
     "jsforce": "^1.8.4",
@@ -376,7 +377,7 @@
     "node-fetch": "^2.1.2",
     "os": "^0.1.1",
     "request-light": "^0.2.3",
-    "salesforce-alm": "^42.16.0",
+    "salesforce-alm": "^43.2.0",
     "util.promisify": "^1.0.0",
     "vscode": "^1.1.18",
     "xml2js": "^0.4.19",
