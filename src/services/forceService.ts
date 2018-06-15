@@ -111,10 +111,12 @@ export default class ForceService implements forceCode.IForceService {
     public compareDates(date1: string, date2: string): boolean {
         var date1MS: number = (new Date(date1.split('.')[0])).getTime();
         var date2MS: number = (new Date(date2.split('.')[0])).getTime();
-
-        if(Math.abs(date1MS - date2MS) <= 2000) {
+        var difference = Math.abs(date1MS - date2MS);
+        if(difference <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
             return true;
         }
+        
+        console.log("Time difference between file changes: " + difference);
         return false;
     }
 

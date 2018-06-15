@@ -8,6 +8,7 @@ interface Constants {
     DEBUG_LEVEL_NAME: string;
     LOG_TYPE: string;
     API_VERSION: string;
+    MAX_TIME_BETWEEN_FILE_CHANGES: number;
 }
 const apexFilter: vscode.DocumentFilter[] = [
     {
@@ -27,5 +28,6 @@ const constants: Constants = {
     DEBUG_LEVEL_NAME: 'Execute_Anonymous_Debug',
     LOG_TYPE: 'DEVELOPER_LOG',
     API_VERSION: '43.0',
+    MAX_TIME_BETWEEN_FILE_CHANGES: 3000,
 };
 export default constants;
