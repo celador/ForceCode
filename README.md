@@ -32,6 +32,8 @@ Please note that the following permissions are required to develop on the Force.
 
 * Requires Java 8. Either the JDK or the JRE will work. (For Apex code completion)
     * Windows needs the java path configured in the vscode settings. (Will update with details later)
+* Open Classes, Triggers, Visualforce pages, and Visualforce components by right clicking and selecting open
+    file in org.
 * Open org in the browser. No more need to open a browser and login to salesforce.
 * Preview Visualforce pages/Lightning apps.
     * Either right click and select preview or click the icon that appears in the upper right.
@@ -318,5 +320,7 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.2.8
+    * Added right-click to open files in Salesforce org
 * 3.2.7
     * Added preview command for Visualforce pages/Lightning apps

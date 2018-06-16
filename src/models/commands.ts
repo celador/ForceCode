@@ -333,9 +333,21 @@ export default [
         commandName: 'ForceCode.previewApp',
         hidden: true,
         command: function(context, selectedResource?) {
-            var vfFileNameSplit = context.fsPath.split(path.sep);
-            var vfFileName = vfFileNameSplit[vfFileNameSplit.length - 1];
-            return vscode.window.forceCode.dxCommands.openOrgPage('/c/' + vfFileName);
+            var appFileNameSplit = context.fsPath.split(path.sep);
+            var appFileName = appFileNameSplit[appFileNameSplit.length - 1];
+            return vscode.window.forceCode.dxCommands.openOrgPage('/c/' + appFileName);
+        }
+    },
+    {
+        commandName: 'ForceCode.openFileInOrg',
+        hidden: true,
+        command: function(context, selectedResource?) {
+            var filePath = context.fsPath;
+            var curFileId: string = Object.keys(vscode.window.forceCode.workspaceMembers).find(cur => {
+                return vscode.window.forceCode.workspaceMembers[cur].path === filePath;
+            });
+            
+            return vscode.window.forceCode.dxCommands.openOrgPage('/' + curFileId);
         }
     },
     {
