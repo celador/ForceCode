@@ -374,18 +374,18 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         return nextStatus();
         function nextStatus() {
             checkCount += 1;
-            // Set a timeout to auto fail the compile after 30 seconds
+            // Set a timeout to auto fail the compile after 60 seconds
             return getStatus().then(res => {
                 if (isFinished(res)) {
                     checkCount = 0;
                     return res;
                 } else if (checkCount > 30) {
                     checkCount = 0;
-                    throw { message: 'Timeout' };
+                    throw { message: fileName + ' timed out while saving. It might not be saved on the server.' };
                 } else {
                     // Throttle the ReCheck of the compile status, to use fewer http requests (reduce effects on SFDC limits)
                     return new Promise(function (resolve) {
-                        setTimeout(() => resolve(), vscode.window.forceCode.config.poll || 1000);
+                        setTimeout(() => resolve(), vscode.window.forceCode.config.poll || 2000);
                       }).then(nextStatus);
                 }
             });
