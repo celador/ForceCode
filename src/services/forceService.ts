@@ -222,27 +222,28 @@ export default class ForceService implements forceCode.IForceService {
         if(self.dxCommands.isEmptyUndOrNull(newMembers)) {
             return undefined;
         }
+
+        if(check) {
+            if(!self.dxCommands.isEmptyUndOrNull(self.workspaceMembers)) {
+                const changedMems = Object.keys(newMembers).filter(key=> {
+                    return (self.workspaceMembers[key] && !self.compareDates(self.workspaceMembers[key].lastModifiedDate, newMembers[key].lastModifiedDate));
+                });
+                console.log('Done checking members');
+                if(changedMems && changedMems.length > 0) {
+                    console.log(changedMems.length + ' members were changed since last load');
+                    changedMems.forEach(curMem => {
+                        commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, newMembers[curMem].lastModifiedByName);
+                    });
+                    // return here so we're not left with stale metadata
+                    return undefined;
+                }
+            } 
+            self.workspaceMembers = newMembers;
+            console.log('Done getting workspace info');
+        }
            
         return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(() => {
             console.log('Updated workspace file');
-            if(check) {
-                if(!self.dxCommands.isEmptyUndOrNull(self.workspaceMembers)) {
-                    const changedMems = Object.keys(newMembers).filter(key=> {
-                        return (self.workspaceMembers[key] && !self.compareDates(self.workspaceMembers[key].lastModifiedDate, newMembers[key].lastModifiedDate));
-                    });
-                    console.log('Done checking members');
-                    if(changedMems && changedMems.length > 0) {
-                        console.log(changedMems.length + ' members were changed since last load');
-                        changedMems.forEach(curMem => {
-                            commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, newMembers[curMem].lastModifiedByName);
-                        });
-                        // return here so we're not left with stale metadata
-                        return undefined;
-                    }
-                } 
-                self.workspaceMembers = newMembers;
-                console.log('Done getting workspace info');
-            }
             return undefined;
         });
     }
