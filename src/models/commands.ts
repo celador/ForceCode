@@ -326,7 +326,7 @@ export default [
         command: function(context, selectedResource?) {
             var vfFileNameSplit = context.fsPath.split(path.sep);
             var vfFileName = vfFileNameSplit[vfFileNameSplit.length - 1].split('.')[0];
-            return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(vscode.window.forceCode.dxCommands.orgInfo.instanceUrl + '/apex/' + vfFileName));
+            return vscode.window.forceCode.dxCommands.openOrgPage('/apex/' + vfFileName);
         }
     },
     {
@@ -335,7 +335,7 @@ export default [
         command: function(context, selectedResource?) {
             var vfFileNameSplit = context.fsPath.split(path.sep);
             var vfFileName = vfFileNameSplit[vfFileNameSplit.length - 1];
-            return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(vscode.window.forceCode.dxCommands.orgInfo.instanceUrl + '/c/' + vfFileName));
+            return vscode.window.forceCode.dxCommands.openOrgPage('/c/' + vfFileName);
         }
     },
     {

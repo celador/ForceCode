@@ -88,7 +88,8 @@ export interface DXCommands {
     getAndShowLog(id?: string);
     execAnon(file: string): Promise<ExecuteAnonymousResult>;
     removeFile(fileName: string): Promise<any>;
-    openOrg(): any;
+    openOrg(): Promise<any>;
+    openOrgPage(url: string): Promise<any>;
 }
 
 export default class DXService implements DXCommands {
@@ -271,5 +272,9 @@ export default class DXService implements DXCommands {
 
     public openOrg(): Promise<any> {
         return Promise.resolve(this.runCommand('org:open', ''));
+    }
+
+    public openOrgPage(url: string): Promise<any> {
+        return Promise.resolve(this.runCommand('org:open', '-p ' + url));
     }
 }
