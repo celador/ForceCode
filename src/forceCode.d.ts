@@ -164,7 +164,7 @@ export interface IForceService {
     resetStatus(): void;
     checkForFileChanges(): any;
     updateFileMetadata(newMembers, check?: boolean): Promise<any>;
-    compareDates(date1: string, date2: string): boolean;
+    compareDates(serverDate: string, localDate: string): boolean;
 }
 
 

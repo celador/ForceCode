@@ -108,15 +108,17 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
-    public compareDates(date1: string, date2: string): boolean {
-        var date1MS: number = (new Date(date1.split('.')[0])).getTime();
-        var date2MS: number = (new Date(date2.split('.')[0])).getTime();
-        var difference = Math.abs(date1MS - date2MS);
-        if(difference <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
+    public compareDates(serverDate: string, localDate: string): boolean {
+        var serverSplit: string[] = serverDate.split('.');
+        var localSplit: string[] = localDate.split('.');
+        var serverMS: number = (new Date(serverSplit[0])).getTime() + parseInt(serverSplit[1].substring(0, 3));
+        var localMS: number = (new Date(localSplit[0])).getTime() + parseInt(localSplit[1].substring(0, 3));
+
+        if(serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
             return true;
         }
         
-        console.log("Time difference between file changes: " + difference);
+        console.log("Time difference between file changes: " + (serverMS - localMS));
         return false;
     }
 
@@ -226,7 +228,7 @@ export default class ForceService implements forceCode.IForceService {
         if(check) {
             if(!self.dxCommands.isEmptyUndOrNull(self.workspaceMembers)) {
                 const changedMems = Object.keys(newMembers).filter(key=> {
-                    return (self.workspaceMembers[key] && !self.compareDates(self.workspaceMembers[key].lastModifiedDate, newMembers[key].lastModifiedDate));
+                    return (self.workspaceMembers[key] && !self.compareDates(newMembers[key].lastModifiedDate, self.workspaceMembers[key].lastModifiedDate));
                 });
                 console.log('Done checking members');
                 if(changedMems && changedMems.length > 0) {
