@@ -94,6 +94,15 @@
         "category": "ForceCode"
       },
       {
+        "command": "ForceCode.previewApp",
+        "title": "Preview Lightning App",
+        "icon":{
+          "light": "./images/logo.svg",
+          "dark": "./images/logo.svg"
+        },
+        "category": "ForceCode"
+      },
+      {
         "command": "ForceCode.diff",
         "title": "Diff Local <> Remote",
         "category": "ForceCode"
@@ -185,12 +194,10 @@
         "id": "xml",
         "extensions": [
           ".xml",
-          ".object",
           ".layout",
           ".resource",
           ".remoteSite",
           ".labels",
-          ".app",
           ".dashboard",
           ".permissionset",
           ".workflow",
@@ -219,13 +226,13 @@
           ".customApplicationComponent",
           ".quickAction",
           ".approvalProcess",
-          ".app",
           ".auradoc",
           ".cmp",
           ".evt",
           ".tokens",
           ".design",
-          ".object"
+          ".object",
+          ".app"
         ]
       },
       {
@@ -263,6 +270,11 @@
         {
           "when": "resourceLangId == visualforce && ForceCodeActive",
           "command": "ForceCode.previewVF",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceExtname == .app && ForceCodeActive",
+          "command": "ForceCode.previewApp",
           "group": "navigation"
         }
       ],

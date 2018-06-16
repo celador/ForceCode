@@ -330,6 +330,15 @@ export default [
         }
     },
     {
+        commandName: 'ForceCode.previewApp',
+        hidden: true,
+        command: function(context, selectedResource?) {
+            var vfFileNameSplit = context.fsPath.split(path.sep);
+            var vfFileName = vfFileNameSplit[vfFileNameSplit.length - 1];
+            return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(vscode.window.forceCode.dxCommands.orgInfo.instanceUrl + '/c/' + vfFileName));
+        }
+    },
+    {
         commandName: 'sfdx.force.apex.test.class.run.delegate',
         hidden: true,
         command: function (context, selectedResource?) {
