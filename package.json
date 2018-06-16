@@ -329,6 +329,16 @@
           "group": "ForceCode"
         },
         {
+          "when": "resourceLangId == visualforce && ForceCodeActive",
+          "command": "ForceCode.previewVF",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceExtname == .app && ForceCodeActive",
+          "command": "ForceCode.previewApp",
+          "group": "ForceCode"
+        },
+        {
           "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.toggleCoverage",
           "group": "ForceCode"
