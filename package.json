@@ -118,7 +118,7 @@
       {
         "command": "ForceCode.previewVF",
         "title": "Preview Visualforce page",
-        "icon":{
+        "icon": {
           "light": "./images/logo.svg",
           "dark": "./images/logo.svg"
         },
@@ -127,7 +127,7 @@
       {
         "command": "ForceCode.previewApp",
         "title": "Preview Lightning App",
-        "icon":{
+        "icon": {
           "light": "./images/logo.svg",
           "dark": "./images/logo.svg"
         },
