@@ -85,6 +85,15 @@
         "category": "ForceCode"
       },
       {
+        "command": "ForceCode.previewVF",
+        "title": "Preview Visualforce page",
+        "icon":{
+          "light": "./images/logo.svg",
+          "dark": "./images/logo.svg"
+        },
+        "category": "ForceCode"
+      },
+      {
         "command": "ForceCode.diff",
         "title": "Diff Local <> Remote",
         "category": "ForceCode"
@@ -249,6 +258,11 @@
         {
           "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.toggleCoverage",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceLangId == visualforce && ForceCodeActive",
+          "command": "ForceCode.previewVF",
           "group": "navigation"
         }
       ],

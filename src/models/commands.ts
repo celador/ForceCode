@@ -2,7 +2,8 @@ import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 import { getFileName } from './../parsers';
-import { commandService } from './../services'
+import { commandService } from './../services';
+import * as path from 'path';
 
 export default [
     {
@@ -317,6 +318,15 @@ export default [
         command: function (context, selectedResource?) {
             vscode.window.forceCode.config.showTestCoverage = !vscode.window.forceCode.config.showTestCoverage;
             return updateDecorations();
+        }
+    },
+    {
+        commandName: 'ForceCode.previewVF',
+        hidden: true,
+        command: function(context, selectedResource?) {
+            var vfFileNameSplit = context.fsPath.split(path.sep);
+            var vfFileName = vfFileNameSplit[vfFileNameSplit.length - 1].split('.')[0];
+            return vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(vscode.window.forceCode.dxCommands.orgInfo.instanceUrl + '/apex/' + vfFileName));
         }
     },
     {
