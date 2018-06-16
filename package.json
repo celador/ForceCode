@@ -125,6 +125,15 @@
         "category": "ForceCode"
       },
       {
+        "command": "ForceCode.previewApp",
+        "title": "Preview Lightning App",
+        "icon":{
+          "light": "./images/logo.svg",
+          "dark": "./images/logo.svg"
+        },
+        "category": "ForceCode"
+      },
+      {
         "command": "ForceCode.diff",
         "title": "ForceCode: Diff Local <> Remote"
       },
