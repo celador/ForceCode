@@ -116,6 +116,15 @@
         }
       },
       {
+        "command": "ForceCode.previewVF",
+        "title": "Preview Visualforce page",
+        "icon":{
+          "light": "./images/logo.svg",
+          "dark": "./images/logo.svg"
+        },
+        "category": "ForceCode"
+      },
+      {
         "command": "ForceCode.diff",
         "title": "ForceCode: Diff Local <> Remote"
       },
