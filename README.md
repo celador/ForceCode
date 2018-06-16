@@ -2,6 +2,7 @@
 
 # ForceCode for Visual Studio Code
 
+These will eventually be replaced. They are based on the original extension.
 [![Version](https://vsmarketplacebadge.apphb.com/version/JohnAaronNelson.ForceCode.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 [![Installs](https://vsmarketplacebadge.apphb.com/installs/JohnAaronNelson.ForceCode.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 [![Ratings](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.png)](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.svg)
@@ -19,6 +20,13 @@ First or all, you don't need the wsMembers.json file anymore! ForceCode now uses
 5. If you don't mind refreshing sObjects for code completion over again for each org then you are done. Skip this step and read on. If you don't want to refresh your code completion sobjects then go back to the project root of each project (the folder containing the force.json) and copy the .sfdx from the old project into the .forceCode/(USERNAME HERE)/.sfdx folder. You're all set now, read on for more info!
 
 ## Overview
+
+I am continuing development of this extension and make updates to it pretty regularly. The original 
+plugin source can be found [here](https://github.com/celador/ForceCode). I have added a ton of extra
+functionality, by implementing almost all of the features that the developer console has and a lot of
+functionality that surpasses the developer console. This readme is nowhere near complete from what all
+I've added to the sourcecode, but I will work on updating it here and there. My main focus has been on
+creating functionality, as I use this plugin every day at work.
 
 This extension is a companion for SFDC (Salesforce.com) development with Visual Studio Code.  
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.  
@@ -131,6 +139,8 @@ The configuration file should look something like... (THIS IS AN EXAMPLE WITH EV
     "showFilesOnOpenMax": 3,
     "showTestCoverage": true,
     "showTestLog": false,
+    "showFilesOnOpen": true,
+    "showFilesOnOpenMax": 3,
     "spaDist": "dist",
     "src": "src",
     "srcDefault": "src",
