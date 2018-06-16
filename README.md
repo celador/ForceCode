@@ -2,19 +2,19 @@
 
 # ForceCode for Visual Studio Code
 
+These will eventually be replaced. They are based on the original extension.
 [![Version](https://vsmarketplacebadge.apphb.com/version/JohnAaronNelson.ForceCode.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 [![Installs](https://vsmarketplacebadge.apphb.com/installs/JohnAaronNelson.ForceCode.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 [![Ratings](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.png)](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.svg)
 
-## Deprecation
-
-This extension has been deprecated in favor of [Salesforce DX](https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode) 
-
-This extension will no longer receive any updates.  You may continue to use this extension for as long as you want.  
-
-If you would like to see this project continue, please let me know.
-
 ## Overview
+
+I am continuing development of this extension and make updates to it pretty regularly. The original 
+plugin source can be found [here](https://github.com/celador/ForceCode). I have added a ton of extra
+functionality, by implementing almost all of the features that the developer console has and a lot of
+functionality that surpasses the developer console. This readme is nowhere near complete from what all
+I've added to the sourcecode, but I will work on updating it here and there. My main focus has been on
+creating functionality, as I use this plugin every day at work.
 
 This extension is a companion for SFDC (Salesforce.com) development with Visual Studio Code.  
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.  
@@ -30,21 +30,41 @@ Please note that the following permissions are required to develop on the Force.
 
 ## Features
 
+* Requires Java 8. Either the JDK or the JRE will work. (For Apex code completion)
+    * Windows needs the java path configured in the vscode settings. (Will update with details later)
+* Open org in the browser. No more need to open a browser and login to salesforce.
+* Preview Visualforce pages/Lightning apps.
+    * Either right click and select preview or click the icon that appears in the upper right.
+* Run Salesforce CLI commands (DX in the menu)
+* Task view. See what ForceCode is up to and execute multiple commands at the same time.
+* Search in files. Works just like the developer console search in files feature.
+* Retrieve code coverage for files in the workspace.
+    * This will show up as highlighted lines in the files. If a file in the workspace doesn't have coverage
+    after running this command, then the test needs to be run again.
+* Retrieve org-wide code coverage. This will show up in a file with all apex classes and their coverage listed.
+* Auto comparison of file changes on load/save. Will also show the last person's name that changed the file.
+    * Will generate a file named wsMembers.json, DO NOT DELETE THIS FILE OR THIS FEATURE WON'T WORK!!
+* NO MORE PASSWORDS SAVED IN THE CONFIG FILE!!!
+    * Login through the browser and you will be auto logged in through ForceCode every time until you log out.
 * Save / Compile / Deploy a file
   * Works with Classes, Triggers, Components, Pages, Permission Sets, Objects, Custom Labels, and Lightning Components
   * Provides line errors in the editor
   * Works great with autosave
 * Run Unit Tests
+    * Uses Salesforce DX plugin style links to run tests!!!
     * Code coverage highlighting in the editor
     * Coverage warnings and percents
     * Errors in the editor on test failures
     * Auto-open test log
     * Easy to run a single tests, multiple tests, or all tests in a Class
-* Intellisense / Code Completion for Apex (in progress)
+* Intellisense / Code Completion for Apex/Visualforce/Lightning components
+    * For apex code completion, select code completion refresh from the ForceCode menu
 * Execute Anonymous
 * View / Save Debug Logs
 * Open / Retrieve a file
   * Works with Classes, Triggers, Components, Pages, Static Resources, and Lightning Components
+  * When opening anything other that Aura files (Lightning components) multiple files can be selected to open
+  from the server.
 * Deploy Package
     * Replaces need for CumulusCI w/ Ant
     * Retrieve detailed deploy information
@@ -74,7 +94,7 @@ Please note that the following permissions are required to develop on the Force.
 
 ## Issues
 
-Please submit any issues or feature requests to [https://github.com/celador/ForceCode/issues](https://github.com/celador/ForceCode/issues)  
+Please submit any issues or feature requests to [https://github.com/daishi4u/ForceCode/issues](https://github.com/daishi4u/ForceCode/issues)  
 
 ## Configuration
 
@@ -86,7 +106,6 @@ The configuration file should look something like...
 ```json
 {
     "username": "MonsterMike@Salesforce.com",
-    "password": "YourPasswordHere",
     "url": "https://login.salesforce.com",
     "autoCompile": true,
     "apiVersion": "38.0",
@@ -99,6 +118,8 @@ The configuration file should look something like...
     "prefix": "",
     "showTestCoverage": true,
     "showTestLog": false,
+    "showFilesOnOpen": true,
+    "showFilesOnOpenMax": 3,
     "spaDist": "dist",
     "src": "src",
     "deployOptions": {
@@ -117,7 +138,6 @@ Note: the password is in the format "passwordtoken".  Do not try to use any deli
 ### Options
 
 * username: The username for the org you want to connect to.
-* password: The password, with security token, for your user.
 * url: This is the login url for Salesforce.  It's either login.salesforce.com for Developer and Professional editions or test.salesforce.com for sandboxes.
 * autoCompile: When a supported file is saved \(works with VSCode's autosave feature\) the file is saved/compiled on the server.  Otherwise, use `cmd + opt + s` to save the file to the server.
 * apiVersion: This is the default api version that all your files will be saved with.  If this is not set, this will default to the version of the org in use.  ForceCode will not change the version of an existing file.  This is also the version used for package retrieval and deploy.
@@ -130,6 +150,8 @@ Note: the password is in the format "passwordtoken".  Do not try to use any deli
 * prefix: This is the namespce prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise ForceCode will attempt to infer a prefix from your Salesforce Org.  If you have a namespaced org and do not set this setting, you may have problems, especially if working on an out of date Org.  This should be automatic as of Salesforce 38
 * showTestCoverage: This flag determines if Apex code coverage highlighting should be shown or hidden in the editor.  This can be toggled for the open editor by clicking the colorful icon in the editor bar.
 * showTestLog: This flag determines if the Log file for the last test run should show up after the tests are complete.  This is nice for debugging tests.  Use this in conjunction with the other debug flags to keep your output tidy.
+* showFilesOnOpen: If set to true, will open files in the editor when opened from Salesforce
+* showFilesOnOpenMax: The maximum number of files to open in the editor. More than 3 usually causes problems.
 * spaDist: When working with SPAs we usually have a "distribution" folder where we build our files to.  If this string is set, and a SPA is bundled and deployed, this folder will be used as the distribution folder, otherwise the spa project will be deployed.
 * src: This is the src folder that contains your project files.  Normally this is not needed, but if you want to have a non-standard folder structure, you can designate an arbitrary folder as your Salesforce metadata directory.
 * deployOptions: Deploy your package based on your configured deploy options and the package.xml in your src folder.
@@ -183,30 +205,14 @@ If a compile is in process, ForceCode will queue a compile, so you won't waste A
 
 ### Run Apex Unit Tests
 
-Menu: &gt;ForceCode Menu... Run Unit Tests  
-Mac: alt + cmd + t  
-Win: ctrl + shift + t  
-Run tests in the currently open file.  
-
-You can run all tests in the current file or any individual tests in the current file.
-To run all tests in the current file, make sure you have no text selected and use the hotkey.
-If you have any text selected that contains a corresponding test method name, it will run only those tests.  So, to run a single test, simply highlight the method name and execute the "Run Apex Tests" command
-
-For easy and fun TDD, keep the class you're working on open in one pane, and your tests in the other.
-Use the keyboard shortcut and the tests will execute.  The results of your tests will display below, along with errors.
-Code coverage will also be generated and display in your Class file.
+Simply click the run tests links in the test class and watch the magic happen!!
 
 ### Execute Anonymous
 
 Manu: &gt;Force: Execute Anonymous  
 Mac: alt + cmd + e  
 Win: ctrl + shift + e  
-Open any file, untitled or otherwise, and use the key combo to run the code and get back the results in the output pane. I usually name my file something like anonymous.apex and put it in a .apex folder in my root, and add that folder to my .gitignore, retaining all your scratch code in nice, tidy. and safe way.
-I've applied the .apex extension to the Apex languge syntax. I also typically create a `.apex` directory in my project where I store these scratch files. 
-Doing this allows you to more easily differentiate between your anonymous scratch files and actual apex classes, but you get syntax highlighting and code completion and do not deploy the code by mistake.  
-To only show the User Debug lines, you can set the `debugOnly` setting to `true`.  
-
-Also, take note of the debugFilter property.  This is where you can set a regular expression filter to use with the debugOnly flag, removing all the noise from debugging.
+Simply select the code that you want to run, then right click and select Execute Anonymous!
 
 ### Open
 
@@ -221,7 +227,7 @@ Mac: alt + cmd + b
 Win: ctrl + shift + b
 
 ForceCode looks for Static Resources in two places.  The first is `resource-bundles`, the second is `spa`.  Typically, static resources go in the resource-bundles folder, and the resource is named something like `foo.resource` where foo is the name of the static resource.
-So, to create a new Static Resource, ensure the resource-bundles folder exists in the root of your project folder.  Then create a new folder named how you want your static resource to be named with `.resource` at the end of the name.  You can now Bundle and Deploy this Static Resource.
+So, to create a new Static Resource, ensure the resource-bundles folder exists in the root of your project folder.  Then create a new folder named how you want your static resource to be named with `.resource.RESOURCETYPE` at the end of the name(E.G. bootstrap.resource.application.x-zip-compressed).  You can now Bundle and Deploy this Static Resource.
 Whenever you save a file that lives in a resource bundles folder, the resource will automatically bundle and deploy to your org.  Use this in conjunction with autoRefresh flag and browser property to get a browsersync-like experience
 
 If you build SPAs, typically you will have a `spa` folder, then another folder named for your static resource, like `spa/foo`.
@@ -289,6 +295,8 @@ Step 2.  Open the folder you just created when you cloned the repo in VSCode.
 ### Install the dependencies
 
 Step 3.  Open the terminal by pressing `ctrl` + `~` and install the dependencies by running `npm install`
+        After everything is installed read the Readme file in the needscopied file and place the files in that
+        folder where they need to be, replacing the existing files.
 
 ### Run the extension
 
@@ -304,11 +312,11 @@ Step 6.  Have Fun!
 
 ## Future goals
 
-* Intellisense code completion (in progress)
-* Implement checkpoints in the editor
+* Use the Salesforce CLI way of creating files instead of templates.
+* Add snippets, such as documentation snippets
+* Lots more, when I think of it.
 
 ## Change Log
 
-* 0.5.23 
-  - Reorder "Create Class" command options to make Custom the default option
-  - Change "Get Logs" behavior to not create an "untitled" log file
+* 3.2.7
+    * Added preview command for Visualforce pages/Lightning apps
