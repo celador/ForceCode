@@ -92,6 +92,11 @@
         "title": "ForceCode: Open this file in the Org"
       },
       {
+        "command": "ForceCode.openFileInOrg",
+        "title": "Open this file in the Org",
+        "category": "ForceCode"
+      },
+      {
         "command": "ForceCode.toggleCoverage",
         "title": "ForceCode: Toggle Test Coverage",
         "icon": {
@@ -341,6 +346,16 @@
         {
           "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.toggleCoverage",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == visualforce && ForceCodeActive",
+          "command": "ForceCode.openFileInOrg",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == apex && ForceCodeActive",
+          "command": "ForceCode.openFileInOrg",
           "group": "ForceCode"
         },
         {
