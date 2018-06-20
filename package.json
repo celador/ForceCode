@@ -334,7 +334,7 @@
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == visualforce && ForceCodeActive",
+          "when": "resourceExtname == .page && ForceCodeActive",
           "command": "ForceCode.previewVF",
           "group": "ForceCode"
         },
