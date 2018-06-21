@@ -7,6 +7,11 @@ These will eventually be replaced. They are based on the original extension.
 [![Installs](https://vsmarketplacebadge.apphb.com/installs/JohnAaronNelson.ForceCode.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 [![Ratings](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.png)](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.svg)
 
+## Download
+
+I am in the process of getting permission to publish this on the marketplace, but until then you can download
+this plugin by finding forcecode-X.X.X.vsix in the top level of this repository, click on it, then click Download.
+
 ## Overview
 
 I am continuing development of this extension and make updates to it pretty regularly. The original 
