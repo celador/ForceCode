@@ -320,6 +320,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.2.9
+    * Fixed bug with being able to 'preview' visualforce components
 * 3.2.8
     * Added right-click to open files in Salesforce org
 * 3.2.7
