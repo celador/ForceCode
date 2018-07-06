@@ -3,7 +3,7 @@ import fs = require('fs-extra');
 import * as path from 'path';
 import * as error from './../util/error';
 
-var tools: any = require('cs-jsforce-metadata-tools');
+var tools: any = require('jsforce-metadata-tools');
 
 export default function deploy(context: vscode.ExtensionContext) {
     vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Started';

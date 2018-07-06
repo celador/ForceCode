@@ -5,7 +5,7 @@ import * as error from './../util/error';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
-var tools: any = require('cs-jsforce-metadata-tools');
+var tools: any = require('jsforce-metadata-tools');
 var elegantSpinner: any = require('elegant-spinner');
 
 export default function retrieve(context: vscode.ExtensionContext, resource?: vscode.Uri) {
@@ -240,7 +240,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 reader.forEach(function (entry) {
                     if (entry.isFile()) {
                         var name: string = entry.getName();
-                        var data: NodeBuffer = entry.getData();
+                        var data: Buffer = entry.getData();
                         if (option && option.description === 'packaged') {
                             option.description = 'unpackaged';
                         }
