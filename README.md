@@ -325,6 +325,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.3.0
+    * Fixed login issues (And hopefully others with this release)
 * 3.2.9
     * Fixed bug with being able to 'preview' visualforce components
 * 3.2.8
