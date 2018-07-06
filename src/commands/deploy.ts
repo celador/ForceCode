@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
-import { commandService } from './../services';
 
-var tools: any = require('cs-jsforce-metadata-tools');
+var tools: any = require('jsforce-metadata-tools');
 
 export default function deploy(context: vscode.ExtensionContext) {
     vscode.window.forceCode.outputChannel.clear();
@@ -52,13 +51,13 @@ export default function deploy(context: vscode.ExtensionContext) {
         registerProxy();
         Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
         // vscode.window.forceCode.outputChannel.show();
-        if (fs.existsSync(validationIdPath) && !deployOptions.checkOnly) {
+        /*if (fs.existsSync(validationIdPath) && !deployOptions.checkOnly) {
             var validationId: string = fs.readFileSync(validationIdPath, 'utf-8');
             fs.unlinkSync(validationIdPath);
             return tools.deployRecentValidation(validationId, deployOptions);
-        } else {
+        } else {*/
             return tools.deployFromDirectory(deployPath, deployOptions);
-        }
+        //}
     }
     // =======================================================================================================================================
     function finished(res): boolean {

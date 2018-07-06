@@ -8,7 +8,7 @@ import { commandService } from './../services';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
-var tools: any = require('cs-jsforce-metadata-tools');
+var tools: any = require('jsforce-metadata-tools');
 
 export default function retrieve(context: vscode.ExtensionContext, resource?: vscode.Uri) {
     let option: any;
