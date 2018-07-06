@@ -4,7 +4,6 @@ import * as path from 'path';
 import * as parsers from './../parsers';
 import { IWorkspaceMember } from '../forceCode';
 import constants from './../models/constants';
-import { commandService } from './../services';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;

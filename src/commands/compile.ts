@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import { IForceService } from './../forceCode';
-import { commandService } from './../services';
 import * as forceCode from './../forceCode';
 import constants from './../models/constants';
 import diff from './diff';

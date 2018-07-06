@@ -3,7 +3,6 @@ import fs = require('fs-extra');
 import path = require('path');
 import jszip = require('jszip');
 import globule = require('globule');
-import { commandService } from './../services';
 const mime = require('mime-types');
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {

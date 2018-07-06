@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
-import { commandService } from './../services';
 const ZIP: any = require('zip');
 const fetch: any = require('node-fetch');
 const mime = require('mime-types');
