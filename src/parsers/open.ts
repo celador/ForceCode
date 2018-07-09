@@ -58,6 +58,12 @@ export function getExtension(toolingType: string) {
             return 'resource';
         case 'AuraDefinitionBundle':
             return 'aura';
+        case 'Event':
+            return 'evt';
+        case 'Interface':
+            return 'intf';
+        case 'Tokens':
+            return 'tokens';
         default:
             throw toolingType + ' extension not defined';
     }
