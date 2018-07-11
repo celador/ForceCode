@@ -225,6 +225,12 @@ export default class ForceService implements forceCode.IForceService {
             return undefined;
         }
 
+        if(!self.config.checkForFileChanges) {
+            self.workspaceMembers = newMembers;
+            console.log('Done getting workspace info');
+            return undefined;
+        }
+
         if(check) {
             if(!self.dxCommands.isEmptyUndOrNull(self.workspaceMembers)) {
                 const changedMems = Object.keys(newMembers).filter(key=> {

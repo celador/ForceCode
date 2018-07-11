@@ -325,6 +325,9 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.3.2
+    * Added option to config file to turn off checking for file changes on start.
+    * Increased max time difference for file change check to 10 seconds (To resolve issues with false positives on file changes)
 * 3.3.1
     * Add new Aura file types
 * 3.3.0

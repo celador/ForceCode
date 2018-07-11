@@ -18,6 +18,7 @@ export interface Config {
     autoCompile?: boolean;
     autoRefresh?: boolean;
     browser?: string;
+    checkForFileChanges?: boolean;
     debugOnly?: boolean;
     debugFilter?: string;
     deployOptions?: {

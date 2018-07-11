@@ -406,7 +406,7 @@ export default [
     },
     {
         commandName: 'ForceCode.checkForFileChanges',
-        name: 'Checking for file changes',
+        name: 'Getting workspace information',
         hidden: true,
         command: function (context, selectedResource?) {
             return vscode.window.forceCode.checkForFileChanges();
