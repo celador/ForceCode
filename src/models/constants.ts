@@ -28,6 +28,6 @@ const constants: Constants = {
     DEBUG_LEVEL_NAME: 'Execute_Anonymous_Debug',
     LOG_TYPE: 'DEVELOPER_LOG',
     API_VERSION: '43.0',
-    MAX_TIME_BETWEEN_FILE_CHANGES: 3000,
+    MAX_TIME_BETWEEN_FILE_CHANGES: 10000,
 };
 export default constants;
