@@ -26,7 +26,7 @@ declare module 'jsforce/index' {
             success: string; // Flag if the code is executed successfully
         }
         interface SObject {
-            find(config?: {});
+            find(config?: {}, fields?: {});
             create(records: Array<any>, options?: {}): Promise<Array<RecordResult>>;
             create(records: Array<any>, options?: {}, callback?: () => {}): Array<RecordResult>;
             create(record: any): Promise<RecordResult>;
@@ -46,7 +46,7 @@ declare module 'jsforce/index' {
             executeAnonymous(apexBody: string): Promise<ExecuteAnonymousResult>;
             runTestsAsynchronous(classIds: string[]): Promise<any>;
             runTestsSynchronous(classNames: string[]): Promise<any>;
-            runUnitTests(classId: string, testMethods: string[]): Promise<any>;
+            runUnitTests(classId: string): Promise<any>;
             query(query: string): Promise<QueryResult>;
             queryMore(locator: string): Promise<QueryResult>;
             describeGlobal(): Promise<ToolingDescribeResult>
@@ -92,7 +92,7 @@ declare module 'jsforce/index' {
             describe(): Promise<any>;
             checkDeployStatus(processId: string, {}): Promise<any>;
             checkRetrieveStatus(id: string): Promise<any>;
-            list(queries: string[], version?: string) : Promise<IMetadataFileProperties[]>
+            list(queries: any[], version?: string) : Promise<IMetadataFileProperties[]>
             retrieve({}): { stream(): NodeJS.ReadableStream };
             retrieve({}): Promise<RetrieveResult>;
             deploy({}, {}): Promise<DeployResult>;
@@ -110,6 +110,7 @@ declare module 'jsforce/index' {
             query: any;
             accessToken: string;
             instanceUrl: string;
+            search(searchString: string, callback: (err: any, res: any) => void): any;
             identity(): any;
             login(name: string, password: string): any;
             login(name: string, password: string, callback: (err: any, res: any) => void): any;

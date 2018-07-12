@@ -1,18 +1,16 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
-import * as error from './../util/error';
 
-var tools: any = require('cs-jsforce-metadata-tools');
+var tools: any = require('jsforce-metadata-tools');
 
 export default function deploy(context: vscode.ExtensionContext) {
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Started';
     vscode.window.forceCode.outputChannel.clear();
     var _consoleInfoReference: any = console.info;
     var _consoleErrorReference: any = console.error;
     var _consoleLogReference: any = console.log;
-    const validationIdPath: string = `${vscode.workspace.rootPath}${path.sep}.validationId`;
-    const statsPath: string = `${vscode.workspace.rootPath}${path.sep}DeployStatistics.log`;
+    const validationIdPath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}.validationId`;
+    const statsPath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}DeployStatistics.log`;
     const deployPath: string = vscode.window.forceCode.workspaceRoot;
     var logger: any = (function (fs) {
         var buffer: string = '';
@@ -32,7 +30,6 @@ export default function deploy(context: vscode.ExtensionContext) {
     } (fs));
     var deployOptions: any = {
         username: vscode.window.forceCode.config.username,
-        password: vscode.window.forceCode.config.password,
         loginUrl: vscode.window.forceCode.config.url || 'https://login.salesforce.com',
         checkOnly: true,
         testLevel: 'RunLocalTests',
@@ -43,34 +40,34 @@ export default function deploy(context: vscode.ExtensionContext) {
         pollTimeout: vscode.window.forceCode.config.pollTimeout ? (vscode.window.forceCode.config.pollTimeout * 1000) : 600000,
     };
 
-    return vscode.window.forceCode.connect(context)
+    return Promise.resolve(vscode.window.forceCode)
         .then(deployPackage)
         .then(finished)
         .catch(onError);
     // =======================================================================================================================================
     // =======================================================================================================================================
-    function deployPackage(conn) {
+    function deployPackage() {
         // Proxy Console.info to capture the status output from metadata tools
         registerProxy();
         Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
         // vscode.window.forceCode.outputChannel.show();
-        if (fs.existsSync(validationIdPath) && !deployOptions.checkOnly) {
+        /*if (fs.existsSync(validationIdPath) && !deployOptions.checkOnly) {
             var validationId: string = fs.readFileSync(validationIdPath, 'utf-8');
             fs.unlinkSync(validationIdPath);
             return tools.deployRecentValidation(validationId, deployOptions);
-        } else {
+        } else {*/
             return tools.deployFromDirectory(deployPath, deployOptions);
-        }
+        //}
     }
     // =======================================================================================================================================
     function finished(res): boolean {
         if (res.success) {
-            vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deployed $(thumbsup)';
+            vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
             if (deployOptions.checkOnly) {
                 fs.writeFileSync(validationIdPath, res.id);
             }
         } else {
-            vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Errors $(thumbsdown)';
+            vscode.window.showErrorMessage('ForceCode: Deploy Errors');
         }
         tools.reportDeployResult(res, logger, deployOptions.verbose);
         logger.flush();
@@ -79,23 +76,23 @@ export default function deploy(context: vscode.ExtensionContext) {
     }
     function onError(err) {
         unregisterProxy();
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Errors $(thumbsdown)';
-        return error.outputError(err, vscode.window.forceCode.outputChannel);
+        vscode.window.showErrorMessage('ForceCode: Deploy Errors');
+        return vscode.window.showErrorMessage(err.message);
     }
     // =======================================================================================================================================
     function registerProxy() {
         console.info = function () {
             var msg: string = arguments[0];
             if (msg.match(/Deploy is Pending/)) {
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Pending';
+                vscode.window.forceCode.showStatus('ForceCode: Deploy Pending');
             } else if (msg.match(/Components\:/)) {
                 let cnt: string = msg.match(/\d*\/\d*/) ? msg.match(/\d*\/\d*/)[0] : '...';
                 let icon: string = msg.match(/errors\: [1-9]/) ? 'thumbsdown' : 'thumbsup';
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying ${cnt} $(${icon})`;
+                vscode.window.forceCode.showStatus(`ForceCode: Deploying ${cnt} $(${icon})`);
             } else if (msg.match(/Tests\:/)) {
                 let cnt: string = msg.match(/\d*\/\d*/) ? msg.match(/\d*\/\d*/)[0] : '...';
                 let icon: string = msg.match(/errors\: [1-9]/) ? 'thumbsdown' : 'thumbsup';
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: Testing ${cnt} $(${icon})`;
+                vscode.window.forceCode.showStatus(`ForceCode: Testing ${cnt} $(${icon})`);
             }
             vscode.window.forceCode.outputChannel.appendLine(msg);
             return _consoleInfoReference.apply(this, arguments);

@@ -1,38 +1,26 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import sleep from './../util/sleep';
 import { IForceService } from './../forceCode';
 import * as forceCode from './../forceCode';
-import * as error from './../util/error';
+import constants from './../models/constants';
 import diff from './diff';
-// import jsforce = require('jsforce');
 const parseString: any = require('xml2js').parseString;
 
 // TODO: Refactor some things out of this file.  It's getting too big.
 
-var elegantSpinner: any = require('elegant-spinner');
 const UPDATE: boolean = true;
 const CREATE: boolean = false;
 
-interface ContainerAsyncRequest {
-    done: boolean;
-    size: Number;
-    totalSize: Number;
-    records?: any[];
-    errors?: any[];
-    State?: string;
-}
-
-
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
+    if(!document) {
+        return undefined;
+    }
     const body: string = document.getText();
     const ext: string = parsers.getFileExtension(document);
     const toolingType: string = parsers.getToolingType(document);
     const fileName: string = parsers.getFileName(document);
     const name: string = parsers.getName(document, toolingType);
-    const spinner: any = elegantSpinner();
     var checkCount: number = 0;
-    var interval: any = undefined;
 
     /* tslint:disable */
     var DefType: string = undefined;
@@ -43,12 +31,11 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     var Id: string = undefined;
     /* tslint:enable */
     // Start doing stuff
-    vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''}` + spinner();
     if (isMetadata(document) && toolingType === undefined) {
         // This process uses the Metadata API to deploy specific files
         // This is where we extend it to create any kind of metadata
         // Currently only Objects and Permission sets ...
-        return vscode.window.forceCode.connect(context)
+        return Promise.resolve(vscode.window.forceCode)
             .then(createMetaData)
             .then(compileMetadata)
             .then(reportMetadataResults)
@@ -59,46 +46,22 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             .reject({ message: 'Metadata Describe Error. Please try again.' })
             .catch(onError);
     } else if (toolingType === 'AuraDefinition') {
-        DefType = getAuraDefTypeFromDocument(document);
-        Format = getAuraFormatFromDocument(document);
+        DefType = getAuraDefTypeFromDocument();
+        Format = getAuraFormatFromDocument();
         Source = document.getText();
         // Aura Bundles are a special case, since they can be upserted with the Tooling API
         // Instead of needing to be compiled, like Classes and Pages..
-        return vscode.window.forceCode.connect(context)
-            .then(svc => getAuraBundle(svc)
+        return Promise.resolve(vscode.window.forceCode)
+            .then(getAuraBundle()
                 .then(ensureAuraBundle)
-                .then(bundle => getAuraDefinition(svc, bundle)
+                .then(bundle => getAuraDefinition(bundle)
                     .then(definitions => upsertAuraDefinition(definitions, bundle)
                     )
                 )
             ).then(finished, onError);
     } else {
         // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-        if (vscode.window.forceCode.isCompiling) {
-            vscode.window.forceCode.queueCompile = true;
-            return Promise.reject({ message: 'Already compiling' });
-        }
-        clearInterval(interval);
-        interval = setInterval(function () {
-            if (checkCount <= 10) {
-                vscode.window.forceCode.statusBarItem.color = 'white';
-            }
-            if (checkCount > 10) {
-                vscode.window.forceCode.statusBarItem.color = 'orange';
-            }
-            if (checkCount > 20) {
-                vscode.window.forceCode.statusBarItem.color = 'red';
-            }
-            if (checkCount > 30) {
-                clearInterval(interval);
-                checkCount = 0;
-                vscode.window.forceCode.statusBarItem.color = 'red';
-            }
-            vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''}` + spinner();
-        }, 50);
-
-        vscode.window.forceCode.isCompiling = true;
-        return vscode.window.forceCode.connect(context)
+        return Promise.resolve(vscode.window.forceCode)
             .then(addToContainer)
             .then(requestCompile)
             .then(getCompileStatus)
@@ -127,8 +90,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         }
     }
 
-    function createMetaData(svc) {
-        vscode.window.forceCode.statusBarItem.text = 'Create Metadata';
+    function createMetaData() {
         let text: string = document.getText();
 
         return new Promise(function (resolve, reject) {
@@ -149,24 +111,23 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
 
     function compileMetadata(metadata) {
-        vscode.window.forceCode.statusBarItem.text = 'Deploying...';
         return vscode.window.forceCode.conn.metadata.upsert(getMetaType(document), [metadata]);
     }
 
     function reportMetadataResults(result) {
         if (Array.isArray(result) && result.length && !result.some(i => !i.success)) {
-            vscode.window.forceCode.statusBarItem.text = 'Successfully deployed ' + result[0].fullName;
+            vscode.window.forceCode.showStatus('Successfully deployed ' + result[0].fullName);
             return result;
         } else if (Array.isArray(result) && result.length && result.some(i => !i.success)) {
             let error: string = result.filter(i => !i.success).map(i => i.fullName).join(', ') + ' Failed';
-            vscode.window.forceCode.statusBarItem.text = '' + error;
+            vscode.window.showErrorMessage(error);
             throw { message: error };
         } else if (typeof result === 'object' && result.success) {
-            vscode.window.forceCode.statusBarItem.text = 'Successfully deployed ' + result.fullName;
+            vscode.window.forceCode.showStatus('Successfully deployed ' + result.fullName);
             return result;
         } else {
             var error: any = result.errors ? result.errors[0] : 'Unknown Error';
-            vscode.window.forceCode.statusBarItem.text = '' + error;
+            vscode.window.showErrorMessage(error);
             throw { message: error };
         }
     }
@@ -174,7 +135,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     // =======================================================================================================================================
     // ================================                Lightning Components               ===========================================
     // =======================================================================================================================================
-    function getAuraBundle(svc) {
+    function getAuraBundle() {
         return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').find({
             'DeveloperName': name, NamespacePrefix: vscode.window.forceCode.config.prefix || ''
         });
@@ -186,7 +147,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').create({
                 'DeveloperName': name,
                 'MasterLabel': name,
-                'ApiVersion': vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version || '37.0',
+                'ApiVersion': vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                 'Description': name.replace('_', ' '),
             }).then(bundle => {
                 results[0] = [bundle];
@@ -196,7 +157,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return results;
         }
     }
-    function getAuraDefinition(svc, bundle) {
+    function getAuraDefinition(bundle) {
         return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({
             'AuraDefinitionBundleId': bundle[0].Id
         });
@@ -212,8 +173,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         } else if (bundle[0]) {
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle[0].Id, DefType, Format, Source });
         }
+        return undefined;
     }
-    function getAuraDefTypeFromDocument(doc: vscode.TextDocument) {
+    function getAuraDefTypeFromDocument() {
         var extension: string = ext.toLowerCase();
         switch (extension) {
             case 'app':
@@ -260,7 +222,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         // TESTSUITE — reserved for future use
         // MODEL — deprecated, do not use
     }
-    function getAuraFormatFromDocument(doc: vscode.TextDocument) {
+    function getAuraFormatFromDocument() {
         // is 'js', 'css', or 'xml'
         switch (ext) {
             case 'js':
@@ -299,66 +261,22 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 Body: body,
                 Id: records.id,
             };
-            return fc.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).update(member).then(res => {
+            return fc.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).update(member).then(() => {
                 return fc;
             });
         }
 
-        interface MetadataResult {
-            ApiVersion: number;
-            attributes: { type: string };
-            Body: string;
-            BodyCrc: number;
-            CreatedById: string;
-            CreatedDate: string;
-            FullName: string;
-            Id: string;
-            IsValid: boolean;
-            LastModifiedById: string;
-            LastModifiedDate: string;
-            LengthWithoutComments: number;
-            ManageableState: string;
-            Metadata: {};
-            Name: string;
-            NamespacePrefix: string;
-            Status: string;
-            SymbolTable: {};
-            SystemModstamp: string;
-        }
-        function getWorkspaceMemberForMetadataResult(record: MetadataResult) {
-            return fc.workspaceMembers ? fc.workspaceMembers.reduce((acc, member) => {
-                if (acc) { return acc; }
-                let namespaceMatch: boolean = member.memberInfo.namespacePrefix === record.NamespacePrefix;
-                let nameMatch: boolean = member.name.toLowerCase() === record.Name.toLowerCase();
-                let typeMatch: boolean = member.memberInfo.type === record.attributes.type;
-                if (namespaceMatch && nameMatch && typeMatch) {
-                    return member;
-                }
-            }, undefined) : undefined;
-        }
         function shouldCompile(record) {
-            let mem: forceCode.IWorkspaceMember = getWorkspaceMemberForMetadataResult(record);
-            if (mem && record.LastModifiedById !== mem.memberInfo.lastModifiedById) {
+            let mem: forceCode.IWorkspaceMember = fc.workspaceMembers[record.Id];
+            if (mem && (!vscode.window.forceCode.compareDates(record.LastModifiedDate, mem.lastModifiedDate) || record.LastModifiedById !== mem.lastModifiedById)) {
                 // throw up an alert
                 return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
                     if (s === 'Diff') {
-                        diff(document, context);
+                        diff(document);
                         return false;
                     }
                     if (s === 'Overwrite') {
                         return true;
-                    }
-                    return false;
-                });
-            } else if (!vscode.window.forceCode.apexMetadata) {
-                // We don't have a workspace member for this file yet.  
-                // We just booted and haven't retrieved it yet or something went wrong.
-                return vscode.window.showWarningMessage('org_metadata not found', 'Save', 'Wait').then(s => {
-                    if (s === 'Save') {
-                        return true;
-                    }
-                    if (s === 'Wait') {
-                        return false;
                     }
                     return false;
                 });
@@ -371,7 +289,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             if (records.length > 0) {
                 // Tooling Object already exists
                 //  UPDATE it
-                var record: MetadataResult = records[0];
+                var record: forceCode.MetadataResult = records[0];
                 // Get the modified date of the local file... 
                 var member: {} = {
                     Body: body,
@@ -394,9 +312,22 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 // Results was 0, meaning...
                 // Tooling Object does not exist
                 // so we CREATE it
-                fc.statusBarItem.text = 'Creating ' + name;
                 return fc.conn.tooling.sobject(parsers.getToolingType(document, CREATE)).create(createObject(body)).then(foo => {
-                    return fc;
+                    return fc.conn.tooling.sobject(toolingType).find({ Id: foo.id }, { Id: 1, CreatedDate: 1 }).execute().then(bar => {
+                        // retrieve the last modified date here
+                        var workspaceMember: forceCode.IWorkspaceMember = {
+                            name: fileName,
+                            path: document.fileName,
+                            id: foo.id,
+                            lastModifiedDate: bar[0].CreatedDate,
+                            lastModifiedByName: '',
+                            lastModifiedById: fc.dxCommands.orgInfo.userId,
+                            type: toolingType,
+                        };
+                        fc.workspaceMembers[foo.id] = workspaceMember;
+                        vscode.window.forceCode.updateFileMetadata(fc.workspaceMembers);
+                        return fc;
+                    });
                 });
             }
         }
@@ -423,6 +354,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
     // =======================================================================================================================================
     function requestCompile() {
+        if(vscode.window.forceCode.containerMembers.length === 0) {
+            return undefined;        // we don't need new container stuff on new file creation
+        }
         return vscode.window.forceCode.conn.tooling.sobject('ContainerAsyncRequest').create({
             IsCheckOnly: false,
             IsRunTests: false,
@@ -434,23 +368,25 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
     // =======================================================================================================================================
     function getCompileStatus(): Promise<any> {
-        vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''}` + spinner();
+        if(vscode.window.forceCode.containerMembers.length === 0) {
+            return Promise.resolve({});        // we don't need new container stuff on new file creation
+        }
         return nextStatus();
         function nextStatus() {
             checkCount += 1;
-            // Set a timeout to auto fail the compile after 30 seconds
+            // Set a timeout to auto fail the compile after 60 seconds
             return getStatus().then(res => {
                 if (isFinished(res)) {
                     checkCount = 0;
-                    clearInterval(interval);
                     return res;
                 } else if (checkCount > 30) {
                     checkCount = 0;
-                    clearInterval(interval);
-                    throw { message: 'Timeout' };
+                    throw { message: fileName + ' timed out while saving. It might not be saved on the server.' };
                 } else {
                     // Throttle the ReCheck of the compile status, to use fewer http requests (reduce effects on SFDC limits)
-                    return sleep(vscode.window.forceCode.config.poll || 1000).then(nextStatus);
+                    return new Promise(function (resolve) {
+                        setTimeout(() => resolve(), vscode.window.forceCode.config.poll || 2000);
+                      }).then(nextStatus);
                 }
             });
         }
@@ -496,30 +432,32 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             res.errors.forEach(err => {
                 console.error(err);
             });
-            vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(alert)`;
+            vscode.window.showErrorMessage(`There was an error while saving ${name}`);
         } else if (res.State === 'Error') {
-            vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(alert)`;
+            vscode.window.showErrorMessage(`There was an error while saving ${name}. Check for syntax errors.`);
         }
         // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
         diagnosticCollection.set(document.uri, diagnostics);
         if (diagnostics.length > 0) {
             // FAILURE !!! 
-            vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(alert)`;
+            vscode.window.showErrorMessage(`There was an error while compiling ${name}. Check for syntax errors.`);
             return false;
         } else {
             // SUCCESS !!! 
-            vscode.window.forceCode.statusBarItem.text = `${name} ${DefType ? DefType : ''} $(check)`;
+            if(res.records && res.records[0].DeployDetails.componentSuccesses.length > 0 
+                && vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id]) {
+                vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id].lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
+                vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id].lastModifiedById = vscode.window.forceCode.dxCommands.orgInfo.userId;
+                vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
+            }
+            vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;
         }
     }
     function containerFinished(createNewContainer: boolean): any {
         // We got some records in our response
-        vscode.window.forceCode.isCompiling = false;
-        return vscode.window.forceCode.newContainer(createNewContainer).then(res => {
-            if (vscode.window.forceCode.queueCompile) {
-                vscode.window.forceCode.queueCompile = false;
-                return compile(document, context);
-            }
+        return vscode.window.forceCode.newContainer(createNewContainer).then(() => {
+            return Promise.resolve();
         });
     }
     // =======================================================================================================================================
@@ -530,8 +468,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             // Modify this if statement to check if any metadata type
             return metadataError(err);
         } else {
-            clearInterval(interval);
-            error.outputError(err, vscode.window.forceCode.outputChannel);
+            vscode.window.showErrorMessage(err.message);
         }
     }
 
@@ -554,7 +491,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         diagnostics.push(new vscode.Diagnostic(failureRange, errorMessage, 0));
         diagnosticCollection.set(document.uri, diagnostics);
 
-        error.outputError({ message: statusMessage }, vscode.window.forceCode.outputChannel);
+        vscode.window.showErrorMessage(statusMessage);
         return false;
     }
     function metadataError(err) {
@@ -570,7 +507,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         diagnostics.push(new vscode.Diagnostic(failureRange, (errorInfo[0] || 'unknown error') + (errorInfo[3] || ''), 0));
         diagnosticCollection.set(document.uri, diagnostics);
 
-        error.outputError(err, vscode.window.forceCode.outputChannel);
+        vscode.window.showErrorMessage(err.message);
         return false;
 
     }

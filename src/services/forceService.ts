@@ -1,56 +1,57 @@
 import * as vscode from 'vscode';
-import Workspace from './workspace';
 import * as forceCode from './../forceCode';
-import { operatingSystem } from './../services';
+import { operatingSystem, configuration, commandService } from './../services';
 import constants from './../models/constants';
-import { configuration } from './../services';
-import * as error from './../util/error';
-import * as commands from './../commands';
-import jsf = require('jsforce');
+import DXService from './dxService';
+import * as path from 'path';
+import * as creds from './../commands/credentials';
+import * as fs from 'fs-extra';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
 export default class ForceService implements forceCode.IForceService {
+    public dxCommands: any;
     public config: forceCode.Config;
     public conn: any;
     public containerId: string;
     public containerMembers: forceCode.IContainerMember[];
     public describe: forceCode.IMetadataDescribe;
-    public apexMetadata: jsf.IMetadataFileProperties[];
     public declarations: forceCode.IDeclarations;
     public codeCoverage: {} = {};
     public codeCoverageWarnings: forceCode.ICodeCoverageWarning[];
     public containerAsyncRequestId: string;
-    public userInfo: any;
     public username: string;
+    public statusBarItem_UserInfo: vscode.StatusBarItem;
     public statusBarItem: vscode.StatusBarItem;
     public outputChannel: vscode.OutputChannel;
     public operatingSystem: string;
     public workspaceRoot: string;
-    public workspaceMembers: forceCode.IWorkspaceMember[];
+    public workspaceMembers: {};//forceCode.IWorkspaceMember[];
+    public statusInterval: any; 
 
     constructor() {
+        this.dxCommands = new DXService();
         // Set the ForceCode configuration
         this.operatingSystem = operatingSystem.getOS();
         // Setup username and outputChannel
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
+        //this.outputChannel.show();
         this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
+        this.statusBarItem_UserInfo = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 5);
         this.statusBarItem.command = 'ForceCode.showMenu';
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
-        this.statusBarItem.text = 'ForceCode: Active';
+        //this.statusBarItem.text = 'ForceCode: Active';
         this.containerMembers = [];
-        this.apexMetadata = [];
-        this.declarations = {};
         configuration(this).then(config => {
             this.username = config.username || '';
-            this.conn = new jsforce.Connection({
-                loginUrl: config.url || 'https://login.salesforce.com'
-            });
-            this.statusBarItem.text = `ForceCode ${pjson.version} is Active`;
-        }).catch(err => {
+            commandService.runCommand('ForceCode.getOrgInfo', undefined).then(res => {
+                if(res) {
+                    commandService.runCommand('ForceCode.connect', undefined);
+                }
+            });  
+        }).catch(() => {
             this.statusBarItem.text = 'ForceCode: Missing Configuration';
         });
-        this.statusBarItem.show();
     }
     public connect(): Promise<forceCode.IForceService> {
         return this.setupConfig().then(this.login);
@@ -58,11 +59,32 @@ export default class ForceService implements forceCode.IForceService {
 
     public clearLog() {
         this.outputChannel.clear();
-    };
+    }
+
+    public showStatus(message: string) {
+        vscode.window.forceCode.statusBarItem_UserInfo.text = message;
+        this.resetStatus();
+    }
+
+    public resetStatus() {
+        // for status bar updates. update every 5 seconds
+        clearInterval(vscode.window.forceCode.statusInterval);
+        vscode.window.forceCode.statusInterval = setInterval(function () {
+            var lim = '';
+            if (vscode.window.forceCode.conn && vscode.window.forceCode.conn.limitInfo && vscode.window.forceCode.conn.limitInfo.apiUsage) {
+                lim = ' - Limits: ' + vscode.window.forceCode.conn.limitInfo.apiUsage.used + '/' + vscode.window.forceCode.conn.limitInfo.apiUsage.limit;
+            }
+            if(vscode.window.forceCode.config.username) {
+                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username + lim;
+            } else {
+                vscode.window.forceCode.statusBarItem_UserInfo.text = '$(alert) ForceCode not connected $(alert)';
+            }
+        }, 5000);
+    }
 
     public newContainer(force: Boolean): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
-        if (self.containerId && !force) {
+        if ((self.containerId && !force) || (self.containerId && self.containerMembers.length === 0)) {
             return Promise.resolve(self);
         } else {
             return self.conn.tooling.sobject('MetadataContainer')
@@ -70,42 +92,179 @@ export default class ForceService implements forceCode.IForceService {
                 .then(res => {
                     self.containerId = res.id;
                     self.containerMembers = [];
-                    return self;
+                    return Promise.resolve(self);
                 });
         }
     }
 
-    public refreshApexMetadata() {
-        return vscode.window.forceCode.conn.metadata.describe().then(describe => {
-            vscode.window.forceCode.describe = describe;
-            var apexTypes: string[] = describe.metadataObjects
-                .filter(o => o.xmlName.startsWith('ApexClass') || o.xmlName.startsWith('ApexTrigger'))
-                .map(o => {
-                    return {
-                        type: o.xmlName,
-                        folder: o.directoryName,
-                    };
-                });
+    public checkForFileChanges() {
+        return this.getWorkspaceMembers()
+            .then(this.parseMembers)
+            .then(res => this.updateFileMetadata(res, true));
+    }
 
-            return vscode.window.forceCode.conn.metadata.list(apexTypes).then(res => {
-                vscode.window.forceCode.apexMetadata = res;
-                return res;
-            }).then(new Workspace().getWorkspaceMembers).then(members => {
-                this.workspaceMembers = members;
+    public updateFileMetadata(newMembers: forceCode.FCWorkspaceMembers, check?: boolean): Promise<any> {
+        return this.checkAndSetWorkspaceMembers(newMembers, check);
+    }
+
+    // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
+    public compareDates(serverDate: string, localDate: string): boolean {
+        var serverSplit: string[] = serverDate.split('.');
+        var localSplit: string[] = localDate.split('.');
+        var serverMS: number = (new Date(serverSplit[0])).getTime() + parseInt(serverSplit[1].substring(0, 3));
+        var localMS: number = (new Date(localSplit[0])).getTime() + parseInt(localSplit[1].substring(0, 3));
+
+        if(serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
+            return true;
+        }
+        
+        console.log("Time difference between file changes: " + (serverMS - localMS));
+        return false;
+    }
+
+    private parseMembers(mems) {
+        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems[0])) {
+            return undefined;
+        }
+        var types: {[key: string]: Array<any>} = {};
+        types['type0'] = mems[1];
+        if(types['type0'].length > 3) {
+            for(var i = 1; types['type0'].length > 3; i++) {
+                var newTypes: Array<any> = [];
+                newTypes.push(types['type0'].shift());
+                newTypes.push(types['type0'].shift());
+                newTypes.push(types['type0'].shift());
+                types['type' + i] = newTypes;
+            }
+        }
+        let proms = Object.keys(types).map(curTypes => {
+            return vscode.window.forceCode.conn.metadata.list(types[curTypes]);
+        });
+        return Promise.all(proms).then(rets => {
+            const tempMems: forceCode.FCWorkspaceMembers = mems.shift();
+            return parseRecords(tempMems, rets);
+        });
+
+        function parseRecords(members: forceCode.FCWorkspaceMembers, recs: any[]): forceCode.FCWorkspaceMembers {
+            var membersToReturn: forceCode.FCWorkspaceMembers = {};
+            //return Promise.all(recs).then(records => {
+            console.log('Retrieved metadata records');
+            recs.forEach(curSet => {
+                curSet.forEach(key => {
+                    if(members[key.fullName] && members[key.fullName].type === key.type) {
+                        membersToReturn[key.id] = members[key.fullName];
+                        membersToReturn[key.id].id = key.id;
+                        membersToReturn[key.id].lastModifiedDate = key.lastModifiedDate;
+                        membersToReturn[key.id].lastModifiedByName = key.lastModifiedByName; 
+                        membersToReturn[key.id].lastModifiedById = key.lastModifiedById;
+                    }
+                });
             });
+    
+            return membersToReturn;
+    
+            //});
+        }
+    }
+
+        // Get files in src folder..
+    // Match them up with ContainerMembers
+    private getWorkspaceMembers(): Promise<any> {
+        return new Promise((resolve) => {
+            var klaw: any = require('klaw');
+            var members: forceCode.FCWorkspaceMembers = {}; 
+            var types: Array<{}> = [];
+            var typeNames: Array<string> = [];
+            klaw(vscode.window.forceCode.workspaceRoot)
+                .on('data', function (item) {
+                    // Check to see if the file represents an actual member... 
+                    if (item.stats.isFile()) {
+                        //var metadataFileProperties: IMetadataFileProperties = getMembersFor(item);
+                        
+                        //if (metadataFileProperties) {
+                        var type: string = undefined;
+                        if (item.path.endsWith('.cls')) {
+                            type = 'ApexClass';
+                        } else if (item.path.endsWith('.trigger')) {
+                            type = 'ApexTrigger';
+                        } else if (item.path.endsWith('.component')) {
+                            type = 'ApexComponent';
+                        } else if (item.path.endsWith('.page')) {
+                           type = 'ApexPage';
+                        }
+
+                        if(type) {
+                            var pathParts: string[] = item.path.split(path.sep);
+                            var filename: string = pathParts[pathParts.length - 1].split('.')[0];
+                            if(!typeNames.includes(type)) {
+                                typeNames.push(type);
+                                types.push({type: type});
+                            }
+
+                            var workspaceMember: forceCode.IWorkspaceMember = {
+                                name: filename,
+                                path: item.path,
+                                id: '',//metadataFileProperties.id,
+                                lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
+                                lastModifiedByName: '',
+                                lastModifiedById: '',
+                                type: type,
+                            };
+                            members[filename] = workspaceMember;
+                        }
+                    }
+                })
+                .on('end', function () {
+                    let retval: any[] = [members, types];
+                    resolve(retval);
+                });
         });
     }
 
-    // TODO: Add keychain access so we don't have to use a username or password'
-    // var keychain = require('keytar')
+    private checkAndSetWorkspaceMembers(newMembers: forceCode.FCWorkspaceMembers, check?: boolean){
+        var self: forceCode.IForceService = vscode.window.forceCode;
+        if(self.dxCommands.isEmptyUndOrNull(newMembers)) {
+            return undefined;
+        }
+
+        if(!self.config.checkForFileChanges) {
+            self.workspaceMembers = newMembers;
+            console.log('Done getting workspace info');
+            return undefined;
+        }
+
+        if(check) {
+            if(!self.dxCommands.isEmptyUndOrNull(self.workspaceMembers)) {
+                const changedMems = Object.keys(newMembers).filter(key=> {
+                    return (self.workspaceMembers[key] && (!self.compareDates(newMembers[key].lastModifiedDate, self.workspaceMembers[key].lastModifiedDate)) || newMembers[key].lastModifiedById !== self.workspaceMembers[key].lastModifiedById);
+                });
+                console.log('Done checking members');
+                if(changedMems && changedMems.length > 0) {
+                    console.log(changedMems.length + ' members were changed since last load');
+                    changedMems.forEach(curMem => {
+                        commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, newMembers[curMem].lastModifiedByName);
+                    });
+                    // return here so we're not left with stale metadata
+                    return undefined;
+                }
+            } 
+            self.workspaceMembers = newMembers;
+            console.log('Done getting workspace info');
+        }
+           
+        return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(() => {
+            console.log('Updated workspace file');
+            return undefined;
+        });
+    }
+
     private setupConfig(): Promise<forceCode.Config> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Setup username and outputChannel
         self.username = (self.config && self.config.username) || '';
-        if (!self.config || !self.config.username) {
-            return commands.credentials().then(credentials => {
+        if (!self.config || !self.config.username || !self.dxCommands.isLoggedIn) {
+            return creds.default().then(credentials => {
                 self.config.username = credentials.username;
-                self.config.password = credentials.password;
                 self.config.autoCompile = credentials.autoCompile;
                 self.config.url = credentials.url;
                 return self.config;
@@ -116,82 +275,84 @@ export default class ForceService implements forceCode.IForceService {
     private login(config): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Lazy-load the connection
-        if (self.userInfo === undefined || self.config.username !== self.username || !self.config.password) {
+        if (self.dxCommands.orgInfo === undefined || self.config.username !== self.username || self.conn === undefined) {
             var connectionOptions: any = {
                 loginUrl: self.config.url || 'https://login.salesforce.com'
             };
             if (self.config.proxyUrl) {
                 connectionOptions.proxyUrl = self.config.proxyUrl;
             }
-            self.conn = new jsforce.Connection(connectionOptions);
-
-            if (!config.username || !config.password) {
-                vscode.window.forceCode.outputChannel.appendLine('The force.json file seems to not have a username and/or password. Pease insure you have a properly formatted config file, or submit an issue to the repo @ https"//github.com/celador/forcecode/issues ');
-                throw { message: 'ForceCode: $(alert) Missing Credentials $(alert)' };
+            if (!config.username) {
+                throw { message: '$(alert) Missing Credentials $(alert)' };
             }
-            vscode.window.forceCode.statusBarItem.text = `ForceCode: $(plug) Connecting as ${config.username}`;
-            return self.conn
-                .login(config.username, config.password)
+            // get sfdx login info and use oath2
+            
+            
+            // get the current org info
+            return new Promise((resolve, reject) => {
+                if(self.dxCommands.orgInfo) {
+                    resolve(self.dxCommands.orgInfo);
+                } else {
+                    reject();
+                }
+            }).then(() => {
+                    vscode.window.forceCode.statusBarItem_UserInfo.text = `ForceCode: $(plug) Connecting as ${config.username}`;
+                    // get the refresh token
+                    var refreshToken =  fs.readJsonSync(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep + self.dxCommands.orgInfo.username + '.json').refreshToken;
+                    // set the userId in connectionSuccess
+                    self.conn = new jsforce.Connection({
+                        oauth2: {
+                            clientId: self.dxCommands.orgInfo.clientId,
+                        },
+                        instanceUrl : self.dxCommands.orgInfo.instanceUrl,
+                        accessToken : self.dxCommands.orgInfo.accessToken,
+                        refreshToken: refreshToken,
+                        version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
+                    });
+                })
                 .then(connectionSuccess)
                 .catch(connectionError)
                 .then(getNamespacePrefix)
-                .then(refreshApexMetadata)
-                .then(getPublicDeclarations)
-                .then(getPrivateDeclarations)
-                .then(getManagedDeclarations)
-                .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+                .then(checkForChanges)
+                .then(cleanupContainers)
+                .catch(err => vscode.window.showErrorMessage(err.message));
 
-            function refreshApexMetadata(svc) {
-                vscode.window.forceCode.refreshApexMetadata();
+                // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
+            function cleanupContainers(): Promise<any> {
+                return new Promise(function (resolve) {
+                    vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
+                        .find({ Name: {$like : 'ForceCode-%'}})
+                        .execute(function(err, records) {
+                            var toDelete: string[] = new Array<string>();
+                            records.forEach(r => {
+                                toDelete.push(r.Id);
+                            })
+                            if(toDelete.length > 0) {
+                                resolve(vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
+                                    .del(toDelete));
+                            } else {
+                                resolve();
+                            }
+                        });     
+                });          
+            }
+
+            function checkForChanges(svc) {
+                commandService.runCommand('ForceCode.checkForFileChanges', undefined, undefined);
                 return svc;
             }
 
-            function getPublicDeclarations(svc) {
-                var requestUrl: string = svc.conn.instanceUrl + '/services/data/v38.0/tooling/completions?type=apex';
-                var headers: any = {
-                    'Accept': 'application/json',
-                    'Authorization': 'OAuth ' + svc.conn.accessToken,
-                };
-                require('node-fetch')(requestUrl, { method: 'GET', headers }).then(response => response.json()).then(json => {
-                    svc.declarations.public = json.publicDeclarations;
-                });
-                return svc;
-            }
+            function connectionSuccess() {
+                vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
+                vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
+                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username;
+                
+                vscode.window.forceCode.resetStatus();
+                self.statusBarItem_UserInfo.show();
+                self.statusBarItem.show();
 
-            function getPrivateDeclarations(svc) {
-                var query: string = 'SELECT Id, ApiVersion, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix = \'' + self.config.prefix + '\'';
-                self.declarations.private = [];
-                self.conn.tooling.query(query)
-                    .then(res => accumulateAllRecords(res, self.declarations.private));
-                return svc;
-            }
-            function getManagedDeclarations(svc) {
-                var query: string = 'SELECT Id, Name, NamespacePrefix, SymbolTable, LastModifiedDate FROM ApexClass WHERE NamespacePrefix != \'' + self.config.prefix + '\'';
-                self.declarations.managed = [];
-                self.conn.tooling.query(query)
-                    .then(res => accumulateAllRecords(res, self.declarations.managed));
-                return svc;
-            }
-            function accumulateAllRecords(result, accumulator) {
-                if (result && result.done !== undefined && Array.isArray(result.records)) {
-                    if (result.done) {
-                        result.records.forEach(record => {
-                            accumulator.push(record);
-                        });
-                        return result;
-                    } else {
-                        result.records.forEach(record => {
-                            accumulator.push(record);
-                        });
-                        return self.conn.tooling.queryMore(result.nextRecordsUrl).then(res => accumulateAllRecords(res, accumulator));
-                    }
-                }
-            }
-            function connectionSuccess(userInfo) {
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(zap) Connected as ${self.config.username} $(zap)`;
-                self.outputChannel.appendLine(`Connected as ${JSON.stringify(userInfo)}`);
-                self.userInfo = userInfo;
                 self.username = config.username;
+                // query the userid
                 return self;
             }
             function getNamespacePrefix(svc: forceCode.IForceService) {
@@ -203,9 +364,7 @@ export default class ForceService implements forceCode.IForceService {
                 });
             }
             function connectionError(err) {
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: $(alert) Connection Error $(alert)`;
-                self.outputChannel.appendLine('================================================================');
-                self.outputChannel.appendLine(err.message);
+                vscode.window.showErrorMessage(`ForceCode: Connection Error`);
                 throw err;
             }
         } else {

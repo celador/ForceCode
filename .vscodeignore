@@ -11,3 +11,4 @@ out/test/**
 *.vsix
 out/
 .vscode-test/**
+needscopied/**
