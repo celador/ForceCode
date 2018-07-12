@@ -76,6 +76,7 @@ interface IWorkspaceMember {
     id: string;
     lastModifiedDate: string;
     lastModifiedByName: string;
+    lastModifiedById: string;
     type: string;
 }
 

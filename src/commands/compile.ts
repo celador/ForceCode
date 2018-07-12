@@ -268,7 +268,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
 
         function shouldCompile(record) {
             let mem: forceCode.IWorkspaceMember = fc.workspaceMembers[record.Id];
-            if (mem && !vscode.window.forceCode.compareDates(record.LastModifiedDate, mem.lastModifiedDate)) {
+            if (mem && (!vscode.window.forceCode.compareDates(record.LastModifiedDate, mem.lastModifiedDate) || record.LastModifiedById !== mem.lastModifiedById)) {
                 // throw up an alert
                 return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
                     if (s === 'Diff') {
@@ -321,6 +321,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                             id: foo.id,
                             lastModifiedDate: bar[0].CreatedDate,
                             lastModifiedByName: '',
+                            lastModifiedById: fc.dxCommands.orgInfo.userId,
                             type: toolingType,
                         };
                         fc.workspaceMembers[foo.id] = workspaceMember;
@@ -446,6 +447,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             if(res.records && res.records[0].DeployDetails.componentSuccesses.length > 0 
                 && vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id]) {
                 vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id].lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
+                vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id].lastModifiedById = vscode.window.forceCode.dxCommands.orgInfo.userId;
                 vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
             }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);

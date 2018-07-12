@@ -327,6 +327,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.3.3
+    * Check for file changes now includes lastModifiedById as a safety precaution (YOU MUST DELETE THE wsMembers.json FILE BEFORE STARTING VSCODE AFTER THIS UPDATE!!!!!!)
 * 3.3.2
     * Added option to config file to turn off checking for file changes on start.
     * Increased max time difference for file change check to 10 seconds (To resolve issues with false positives on file changes)

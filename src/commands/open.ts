@@ -212,6 +212,7 @@ export function showFileOptions(promises: any[], pickMany: boolean) {
                     id: res.Id, 
                     lastModifiedDate: res.LastModifiedDate,
                     lastModifiedByName: res.LastModifiedByName,
+                    lastModifiedById: res.LastModifiedById,
                     type: toolingType,
                 };
                 vscode.window.forceCode.workspaceMembers[res.Id] = workspaceMember;

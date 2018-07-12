@@ -156,6 +156,7 @@ export default class ForceService implements forceCode.IForceService {
                         membersToReturn[key.id].id = key.id;
                         membersToReturn[key.id].lastModifiedDate = key.lastModifiedDate;
                         membersToReturn[key.id].lastModifiedByName = key.lastModifiedByName; 
+                        membersToReturn[key.id].lastModifiedById = key.lastModifiedById;
                     }
                 });
             });
@@ -206,6 +207,7 @@ export default class ForceService implements forceCode.IForceService {
                                 id: '',//metadataFileProperties.id,
                                 lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
                                 lastModifiedByName: '',
+                                lastModifiedById: '',
                                 type: type,
                             };
                             members[filename] = workspaceMember;
@@ -234,7 +236,7 @@ export default class ForceService implements forceCode.IForceService {
         if(check) {
             if(!self.dxCommands.isEmptyUndOrNull(self.workspaceMembers)) {
                 const changedMems = Object.keys(newMembers).filter(key=> {
-                    return (self.workspaceMembers[key] && !self.compareDates(newMembers[key].lastModifiedDate, self.workspaceMembers[key].lastModifiedDate));
+                    return (self.workspaceMembers[key] && (!self.compareDates(newMembers[key].lastModifiedDate, self.workspaceMembers[key].lastModifiedDate)) || newMembers[key].lastModifiedById !== self.workspaceMembers[key].lastModifiedById);
                 });
                 console.log('Done checking members');
                 if(changedMems && changedMems.length > 0) {
