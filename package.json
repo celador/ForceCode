@@ -429,7 +429,7 @@
     "crypto-browserify": "3.12.0",
     "fs-extra": "^6.0.1",
     "globule": "^1.2.1",
-    "jsforce": "^1.8.4",
+    "jsforce": "^1.8.5",
     "jszip": "^3.1.5",
     "klaw": "^2.1.1",
     "mime-types": "^2.1.18",
@@ -437,7 +437,7 @@
     "node-fetch": "^2.1.2",
     "os": "^0.1.1",
     "request-light": "^0.2.3",
-    "salesforce-alm": "^43.5.0",
+    "salesforce-alm": "^43.6.0",
     "util.promisify": "^1.0.0",
     "vscode": "^1.1.18",
     "xml2js": "^0.4.19",
@@ -463,9 +463,9 @@
     "nyc": "^12.0.2",
     "remap-istanbul": "^0.11.1",
     "rimraf": "^2.6.2",
-    "sinon": "^6.1.2",
+    "sinon": "^6.1.3",
     "source-map-support": "^0.5.6",
     "typescript": "^2.9.2",
-    "vsce": "^1.43.0"
+    "vsce": "^1.44.0"
   }
 }
