@@ -327,6 +327,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.4.0
+    * Add new view for ForceCode (Shows on the left bar) and new StatusBarItem that shows the number of running tasks. If you click on the running tasks status bar item it will take you to the ForceCode view. The ForceCode view will also be used in the future to show Salesforce and ForceCode related items.
 * 3.3.3
     * Check for file changes now includes lastModifiedById as a safety precaution (YOU MUST DELETE THE wsMembers.json FILE BEFORE STARTING VSCODE AFTER THIS UPDATE!!!!!!)
 * 3.3.2
