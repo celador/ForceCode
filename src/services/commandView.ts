@@ -8,13 +8,17 @@
 import {
   Event,
   EventEmitter,
+  StatusBarItem,
   TreeDataProvider,
   TreeItem,
   TreeItemCollapsibleState,
   window
 } from 'vscode';
 
+import * as vscode from 'vscode';
+
 export class CommandViewService implements TreeDataProvider<Task> {
+  private runningTasksStatus: StatusBarItem;
   private static instance: CommandViewService;
   private readonly tasks: Task[];
   private _onDidChangeTreeData: EventEmitter<
@@ -26,6 +30,7 @@ export class CommandViewService implements TreeDataProvider<Task> {
 
   public constructor() {
     this.tasks = [];
+    this.runningTasksStatus = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
   }
 
   public static getInstance() {
@@ -38,6 +43,9 @@ export class CommandViewService implements TreeDataProvider<Task> {
   public addCommandExecution(execution: any, context: any, selectedResource?: any) {
     var theTask: Task = new Task(this, execution, context, selectedResource);
     this.tasks.push(theTask);
+    this.runningTasksStatus.text = 'ForceCode: Executing ' + this.tasks.length + ' Task(s)';
+    this.runningTasksStatus.show();
+    this.runningTasksStatus.command = 'ForceCode.showTasks';
 
     this._onDidChangeTreeData.fire();
     return theTask.run();
@@ -47,6 +55,12 @@ export class CommandViewService implements TreeDataProvider<Task> {
     const index = this.tasks.indexOf(task);
     if (index !== -1) {
       this.tasks.splice(index, 1);
+
+      if(this.tasks.length > 0) {
+        this.runningTasksStatus.text = 'ForceCode: Executing ' + this.tasks.length + ' Tasks';
+      } else {
+        this.runningTasksStatus.hide();
+      }
 
       this._onDidChangeTreeData.fire();
       return true;
@@ -66,10 +80,13 @@ export class CommandViewService implements TreeDataProvider<Task> {
 
     return [];
   }
+
+  public getParent(element: Task): any {
+    return null;    // this is the parent
+  }
 }
 
 export class Task extends TreeItem {
-  public readonly label: string;
   public readonly collapsibleState: TreeItemCollapsibleState;
 
   private readonly taskViewProvider: CommandViewService;

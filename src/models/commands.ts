@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 import { getFileName } from './../parsers';
-import { commandService } from './../services';
+import { commandService, commandViewService } from './../services';
 import * as path from 'path';
 
 export default [
@@ -428,4 +428,13 @@ export default [
             return vscode.window.forceCode.connect(context);
         }
     },
+    {
+        commandName: 'ForceCode.showTasks',
+        name: 'Show tasks',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            var treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {treeDataProvider: commandViewService});
+            return treePro.reveal(commandViewService.getChildren()[0]);
+        }
+    }
 ]

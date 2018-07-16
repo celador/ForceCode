@@ -31,11 +31,20 @@
   "main": "./out/src/extension",
   "contributes": {
     "views": {
-      "explorer": [
+      "fcView": [
         {
           "id": "ForceCode.treeDataProvider",
-          "name": "ForceCode: Running Tasks",
+          "name": "Running Tasks",
           "when": "ForceCodeActive"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "fcView",
+          "icon": "./images/logo.svg",
+          "title": "ForceCode"
         }
       ]
     },
