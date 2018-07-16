@@ -568,4 +568,13 @@ export const fcCommands: FCCommand[] = [
             return vscode.window.forceCode.connect(context);
         }
     },
+    {
+        commandName: 'ForceCode.showTasks',
+        name: 'Show tasks',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            var treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {treeDataProvider: commandViewService});
+            return treePro.reveal(commandViewService.getChildren()[0]);
+        }
+    }
 ]
