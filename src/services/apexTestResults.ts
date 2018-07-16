@@ -39,6 +39,7 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
                     fcfile.updateWsMember(wsMem);
                 }
             });
+            vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
             // update the current editor
             editorUpdateApexCoverageDecorator(vscode.window.activeTextEditor);
 

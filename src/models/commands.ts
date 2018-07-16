@@ -576,5 +576,13 @@ export const fcCommands: FCCommand[] = [
             var treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {treeDataProvider: commandViewService});
             return treePro.reveal(commandViewService.getChildren()[0]);
         }
+    },
+    {
+        commandName: 'ForceCode.openOnClick',
+        name: 'Open From TestCov view',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return vscode.workspace.openTextDocument(context).then(doc => vscode.window.showTextDocument(doc, { preview: false }));
+        }
     }
 ]
