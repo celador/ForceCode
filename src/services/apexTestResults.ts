@@ -24,6 +24,7 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
                     vscode.window.forceCode.codeCoverage[curRes.ApexClassOrTriggerId] = curRes;
                 }
             });
+            vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
             // update the current editor
             editorUpdateApexCoverageDecorator(vscode.window.activeTextEditor);
         }

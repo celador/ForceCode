@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { operatingSystem, configuration, commandService } from './../services';
+import { operatingSystem, configuration, commandService, codeCovViewService } from './../services';
 import constants from './../models/constants';
 import DXService from './dxService';
 import * as path from 'path';
@@ -104,7 +104,9 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     public updateFileMetadata(newMembers: forceCode.FCWorkspaceMembers, check?: boolean): Promise<any> {
-        return this.checkAndSetWorkspaceMembers(newMembers, check);
+        return this.checkAndSetWorkspaceMembers(newMembers, check).then(res => {
+            return codeCovViewService.addClasses(newMembers);
+        });
     }
 
     // sometimes the times on the dates are a half second off, so this checks for within 2 seconds

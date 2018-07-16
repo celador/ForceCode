@@ -33,6 +33,11 @@
     "views": {
       "fcView": [
         {
+          "id": "ForceCode.codeCovDataProvider",
+          "name": "Code Coverage",
+          "when": "ForceCodeActive"
+        },
+        {
           "id": "ForceCode.treeDataProvider",
           "name": "Running Tasks",
           "when": "ForceCodeActive"
