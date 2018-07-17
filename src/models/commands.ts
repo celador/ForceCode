@@ -268,7 +268,7 @@ export default [
         icon: 'key',
         label: 'Log in to Salesforce',
         command: function (context, selectedResource?) {
-            return vscode.window.forceCode.connect(undefined);
+            return vscode.window.forceCode.connect(context);
         }
     },
     {

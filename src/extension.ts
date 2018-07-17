@@ -52,7 +52,7 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator));
 
     // watch for config file changes
-    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => vscode.window.forceCode.connect(context)));
+    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => { if(vscode.window.forceCode.dxCommands.isLoggedIn) { vscode.window.forceCode.connect(context) }}));
     
     var timeO;
     // watch for deleted files and update workspaceMembers
