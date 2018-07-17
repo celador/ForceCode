@@ -75,7 +75,7 @@ export default class Logger {
 
 
     getLog(logId: string): any {
-        var url: string = `${vscode.window.forceCode.conn._baseUrl()}/sobjects/ApexLog/${logId}/Body`;
+        var url: string = `${vscode.window.forceCode.conn.instanceUrl}/sobjects/ApexLog/${logId}/Body`;
         return new Promise((resolve, reject) => {
             vscode.window.forceCode.conn.request(url, function (err, res) {
                 resolve(res);

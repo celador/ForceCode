@@ -240,7 +240,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 reader.forEach(function (entry) {
                     if (entry.isFile()) {
                         var name: string = entry.getName();
-                        var data: NodeBuffer = entry.getData();
+                        var data: Buffer = entry.getData();
                         if (option && option.description === 'packaged') {
                             option.description = 'unpackaged';
                         }

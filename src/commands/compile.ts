@@ -81,7 +81,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         clearInterval(interval);
         interval = setInterval(function () {
             if (checkCount <= 10) {
-                vscode.window.forceCode.statusBarItem.color = 'white';
+                vscode.window.forceCode.statusBarItem.color = new vscode.ThemeColor('statusBar.foreground');
             }
             if (checkCount > 10) {
                 vscode.window.forceCode.statusBarItem.color = 'orange';

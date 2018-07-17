@@ -1,10 +1,11 @@
 {
   "name": "forcecode",
-  "version": "1.0.0",
+  "displayName": "ForceCode",
+  "version": "1.0.0-rc1",
   "publisher": "JohnAaronNelson",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
   "author": {
-    "name": "CodeScience"
+    "name": "celador"
   },
   "license": "MIT",
   "engines": {

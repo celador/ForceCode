@@ -90,6 +90,22 @@ interface IMetadataObject {
     childXmlNames?: string[];
 }
 
+export class ConnectionOptions {
+    oauth2?: any; // 	OAuth2 | Object	<optional> // OAuth2 instance or options to be passed to OAuth2 constructor
+    logLevel?: string; // 	String	<optional> // Output logging level (DEBUG|INFO|WARN|ERROR|FATAL)
+    version?: string; // 	String	<optional> // Salesforce API Version (without "v" prefix)
+    maxRequest?: number; // 	Number	<optional> // Max number of requests allowed in parallel call
+    loginUrl?: string; // 	String	<optional> // Salesforce Login Server URL (e.g. https://login.salesforce.com/)
+    instanceUrl?: string; // 	String	<optional> // Salesforce Instance URL (e.g. https://na1.salesforce.com/)
+    serverUrl?: string; // 	String	<optional> // Salesforce SOAP service endpoint URL (e.g. https://na1.salesforce.com/services/Soap/u/28.0)
+    accessToken?: string; // 	String	<optional> // Salesforce OAuth2 access token
+    sessionId?: string; // 	String	<optional> // Salesforce session ID
+    refreshToken?: string; // 	String	<optional> // Salesforce OAuth2 refresh token
+    signedRequest?: string; // 	String | Object	<optional> // Salesforce Canvas signed request (Raw Base64 string, JSON string, or deserialized JSON)
+    proxyUrl?: string; // 	String	<optional> // Cross-domain proxy server URL, used in browser client, non Visualforce app.
+    callOptions?: any; // 	Object	<optional> // Call options used in each SOAP/REST API request. See manual.
+  }
+
 export interface IMetadataDescribe {
     metadataObjects: IMetadataObject[];
     organizationNamespace: string;
@@ -123,6 +139,7 @@ export interface IForceService {
     newContainer(force: Boolean): Promise<IForceService>;
     clearLog(): void;
     refreshApexMetadata(): Promise<any>;
+    restUrl(): string;
 }
 
 
