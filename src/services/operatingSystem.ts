@@ -11,3 +11,7 @@ export function isMac() {
 export function getOS() {
     return os.platform();
 }
+
+export function getHomeDir() {
+    return os.homedir();
+}

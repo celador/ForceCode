@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
-import jsforce = require('jsforce');
-import { IForceService } from './../forceCode';
-import * as error from './../util/error';
+import { QueryResult } from '../services/dxService';
 const moment: any = require('moment');
 
 interface LogRecord {
@@ -13,42 +11,28 @@ interface LogRecord {
     StartTime: string;
     Location: string;
 }
-export interface IGetLogService {
-    userId?: string;
-    connection?: jsforce.Connection;
-    logId?: string;
-};
-const getLogService: IGetLogService = {};
 
-export default function getLog(context: vscode.ExtensionContext) {
+export default function getLog() {
     // Login, then get Identity info, 
     //  then get info about the logs and ask the user which one to open, 
     //  then get the log and show it
-    return vscode.window.forceCode.connect(context)
-        .then(setConnection)
-        .then(getLast10Logs)
+    return getLast10Logs()
         .then(displayOptions)
         .then(showLog)
-        .catch(err => error.outputError(err, vscode.window.forceCode.outputChannel));
+        .catch(err => vscode.window.showErrorMessage(err.message));
 
-    function setConnection(connection: IForceService): IForceService {
-        getLogService.connection = connection.conn;
-        getLogService.userId = connection.userInfo.id;
-        return connection;
-    }
-
-    function getLast10Logs(force: IForceService): Promise<jsforce.QueryResult> {
+    function getLast10Logs(): Promise<QueryResult> {
 
         var queryString: string = `SELECT Id, LogLength, Request, Status, DurationMilliseconds, StartTime, Location FROM ApexLog` +
-            ` WHERE LogUserId='${getLogService.userId}'` +
+            ` WHERE LogUserId='${vscode.window.forceCode.dxCommands.orgInfo.userId}'` +
             // ` AND Request = 'API' AND Location = 'SystemLog'` +
             // ` AND Operation like '%executeAnonymous%'`
             ` ORDER BY StartTime DESC, Id DESC LIMIT 10`;
 
-        return force.conn.query(queryString);
+        return vscode.window.forceCode.conn.tooling.query(queryString);
     }
 
-    function displayOptions(results: jsforce.QueryResult): Thenable<vscode.QuickPickItem> {
+    function displayOptions(results: QueryResult): Thenable<vscode.QuickPickItem> {
         var options: vscode.QuickPickItem[] = results.records.map((record: LogRecord) => {
             return {
                 label: `Status: ${record.Status}`,
@@ -60,10 +44,8 @@ export default function getLog(context: vscode.ExtensionContext) {
     }
 
     function showLog(res) {
-        if (vscode.window.forceCode.config.showTestLog) {
-            return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${res.description}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
-                return vscode.window.showTextDocument(_document, 3, true);
-            });
+        if (res) {
+            return vscode.window.forceCode.dxCommands.getAndShowLog(res.description);
         }
         return res;
     }
