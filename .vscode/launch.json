@@ -7,9 +7,7 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}"
-      ],
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "stopOnEntry": false,
       "sourceMaps": true,
       "outFiles": ["${workspaceFolder}/out/src/**/*.js"],
@@ -37,10 +35,7 @@
       "stopOnEntry": false,
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": null,
-      "args": [
-        "test/open.spec.js",
-        "--colors"
-      ],
+      "args": ["test/open.spec.js", "--colors"],
       "env": {}
     }
   ]
