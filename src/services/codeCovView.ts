@@ -136,7 +136,9 @@ import {
     }
 
     private sortFunc(a: FCFile, b: FCFile): number {
-        return a.name.toUpperCase().localeCompare(b.name.toUpperCase());
+        var aStr = a.name.split('% ').pop().toUpperCase();
+        var bStr = b.name.split('% ').pop().toUpperCase();
+        return aStr.localeCompare(bStr);
     }
   }
   
