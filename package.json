@@ -431,9 +431,7 @@
   ],
   "dependencies": {
     "archiver": "^2.1.1",
-    "cs-jsforce-metadata-tools": "^1.2.10",
     "elegant-spinner": "^1.0.1",
-    "jsforce": "github:celador/jsforce",
     "lodash": "^4.17.10",
     "node-zip": "^1.1.1",
     "os": "^0.1.1",
