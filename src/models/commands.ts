@@ -588,7 +588,7 @@ export const fcCommands: FCCommand[] = [
     {
         commandName: 'ForceCode.getCodeCoverage',
         name: 'Retriving code coverage',
-        hidden: false,
+        hidden: true,
         command: function (context, selectedResource?) {
             return commands.apexTestResults();
         }
