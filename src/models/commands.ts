@@ -75,7 +75,7 @@ export default [
         name: 'Executing anonymous code',
         hidden: false,
         description: 'Execute code and get the debug log',
-        detail: 'If you have a block of text selected, it will run that, otherwise it will use the text of the active file.',
+        detail: 'Select some code to run before using this option. You can also right-click after selecting the code.',
         icon: 'terminal',
         label: 'Execute Anonymous',
         command: function (context, selectedResource?) {
