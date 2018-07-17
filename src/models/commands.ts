@@ -268,7 +268,7 @@ export default [
         icon: 'key',
         label: 'Log in to Salesforce',
         command: function (context, selectedResource?) {
-            return commands.credentials();
+            return vscode.window.forceCode.connect(undefined);
         }
     },
     {
@@ -436,7 +436,7 @@ export default [
     {
         commandName: 'ForceCode.getCodeCoverage',
         name: 'Retriving code coverage',
-        hidden: false,
+        hidden: true,
         command: function (context, selectedResource?) {
             return commands.apexTestResults();
         }

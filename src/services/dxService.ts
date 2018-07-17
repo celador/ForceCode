@@ -79,7 +79,7 @@ export interface DXCommands {
     outputToString(toConvert: any, depth?: number): string;
     runCommand(cmdString: string, arg: string): Promise<any>;
     toqlQuery(query: string): Promise<QueryResult>;
-    login(): Promise<SFDX>;
+    login(): Promise<any>;
     logout(): Promise<any>;
     getOrgInfo(): Promise<SFDX>;
     isEmptyUndOrNull(param: any): boolean;
@@ -215,19 +215,27 @@ export default class DXService implements DXCommands {
         return Promise.resolve(this.runCommand('data:soql:query', '-q ' + query + ' -t -r json'));
     }
 
-    public login(): Promise<SFDX> {
-        return this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url).then(() => {
-            return this.getOrgInfo().then(res => {
-                return Promise.resolve(res);
+    public login(): Promise<any> {
+        if(!this.isLoggedIn) {
+            return this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url).then(() => {
+                return this.getOrgInfo().then(res => {
+                    return Promise.resolve(res);
+                });
             });
-        });
+        } else {
+            return Promise.resolve();
+        }
     }
 
     public logout(): Promise<any> {
-        this.isLoggedIn = false;
-        this.orgInfo = undefined;
-        vscode.commands.executeCommand('setContext', 'ForceCodeActive', false);
-        return Promise.resolve(this.runCommand('auth:logout', '--noprompt'));
+        if(this.isLoggedIn) {
+            this.isLoggedIn = false;
+            this.orgInfo = undefined;
+            vscode.commands.executeCommand('setContext', 'ForceCodeActive', false);
+            return Promise.resolve(this.runCommand('auth:logout', '--noprompt'));
+        } else {
+            return Promise.resolve();
+        }
     }
 
     public getOrgInfo(): Promise<SFDX> {
