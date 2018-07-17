@@ -172,6 +172,7 @@ export interface IForceService {
     containerAsyncRequestId?: string;
     conn?: jsforce.Connection;
     username?: string;
+    userInfo?: {id: string};
     outputChannel: vscode.OutputChannel;
     statusBarItem_UserInfo: vscode.StatusBarItem;
     statusBarItem: vscode.StatusBarItem;
@@ -179,8 +180,6 @@ export interface IForceService {
     newContainer(force: Boolean): Promise<IForceService>;
     showStatus(message: string): void;
     clearLog(): void;
-    refreshApexMetadata(): Promise<any>;
-    restUrl(): string;
     resetStatus(): void;
     checkForFileChanges(): any;
     updateFileMetadata(newMembers, check?: boolean): Promise<any>;
