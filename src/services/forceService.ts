@@ -240,7 +240,7 @@ export default class ForceService implements forceCode.IForceService {
                 const changedMems = Object.keys(newMembers).filter(key=> {
                     return (self.workspaceMembers[key] && (!self.compareDates(newMembers[key].lastModifiedDate, self.workspaceMembers[key].lastModifiedDate)) || newMembers[key].lastModifiedById !== self.workspaceMembers[key].lastModifiedById);
                 });
-                commandService.runCommand('ForceCode.ForceCode.getCodeCoverage', undefined, undefined);
+                commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
                 console.log('Done checking members');
                 if(changedMems && changedMems.length > 0) {
                     console.log(changedMems.length + ' members were changed since last load');
