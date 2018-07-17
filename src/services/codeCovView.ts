@@ -109,6 +109,7 @@ import {
         Object.keys(this.classes).forEach(val => {
             fcFiles.push(new FCFile(this, val, TreeItemCollapsibleState.Collapsed, val));
         });
+        fcFiles.sort(this.sortFunc);
 
         return fcFiles;
       } else if(!element.wsMember) {
@@ -135,12 +136,13 @@ import {
     }
 
     private sortFunc(a: FCFile, b: FCFile): number {
-        return a.wsMember.name.toUpperCase().localeCompare(b.wsMember.name.toUpperCase());
+        return a.name.toUpperCase().localeCompare(b.name.toUpperCase());
     }
   }
   
   export class FCFile extends TreeItem {
     public readonly collapsibleState: TreeItemCollapsibleState;
+    public readonly name: string;
     public readonly wsMember: IWorkspaceMember;
     public readonly type: string;
     public readonly command: Command;
@@ -157,6 +159,7 @@ import {
       this.taskViewProvider = taskViewProvider;
       this.wsMember = wsMember;
       this.type = type;
+      this.name = name;
 
       if(wsMember) {
           this.command = {
