@@ -5,7 +5,7 @@ import * as error from './../util/error';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
-var tools: any = require('cs-jsforce-metadata-tools');
+var tools: any = require('jsforce-metadata-tools');
 var elegantSpinner: any = require('elegant-spinner');
 
 export default function retrieve(context: vscode.ExtensionContext, resource?: vscode.Uri) {
@@ -169,12 +169,12 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                             files.push(res['fileName']);
                         }
                         // Retrieve the file by it's name
-                        resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                        vscode.window.forceCode.conn.metadata.retrieve({
                             singlePackage: true,
                             specificFiles: files,
                             unpackaged: { types: retrieveTypes },
                             apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
-                        }).stream());
+                        }, resolve);
                     });
 
                 });
@@ -196,10 +196,10 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                     var types: any[] = res.metadataObjects.map(r => {
                         return { name: r.xmlName, members: '*' };
                     });
-                    resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                    vscode.window.forceCode.conn.metadata.retrieve({
                         unpackaged: { types: types },
                         apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
-                    }).stream());
+                    }, resolve);
                 });
             }
 
@@ -209,18 +209,18 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 parseString(data, { explicitArray: false }, function (err, dom) {
                     if (err) { reject(err); } else {
                         delete dom.Package.$;
-                        resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                        vscode.window.forceCode.conn.metadata.retrieve({
                             unpackaged: dom.Package
-                        }).stream());
+                        }, resolve);
                     }
                 });
             }
 
             function packaged() {
-                resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                vscode.window.forceCode.conn.metadata.retrieve({
                     packageNames: [option.description],
                     apiVersion: vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version,
-                }).stream());
+                }, resolve);
             }
 
         }

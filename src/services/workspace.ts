@@ -14,7 +14,7 @@ export default class Workspace implements forceCode.IWorkspaceService {
                 .on('data', function (item) {
                     // Check to see if the file represents an actual member... 
                     if (item.stats.isFile()) {
-                        var metadataFileProperties: jsforce.IMetadataFileProperties[] = getMembersFor(item);
+                        var metadataFileProperties: jsforce.FileProperties[] = getMembersFor(item);
 
                         if (metadataFileProperties.length) {
 
@@ -33,7 +33,7 @@ export default class Workspace implements forceCode.IWorkspaceService {
                 });
         });
 
-        function getMembersFor(item): jsforce.IMetadataFileProperties[] {
+        function getMembersFor(item): jsforce.FileProperties[] {
             var pathParts: string[] = item.path.split(path.sep);
             var filename: string = pathParts[pathParts.length - 1];
             var name: string = filename.substring(0, filename.lastIndexOf('.'));

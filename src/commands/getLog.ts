@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import jsforce = require('jsforce');
 import { IForceService } from './../forceCode';
 import * as error from './../util/error';
+import { Connection, QueryResult } from 'jsforce';
 const moment: any = require('moment');
 
 interface LogRecord {
@@ -15,7 +16,7 @@ interface LogRecord {
 }
 export interface IGetLogService {
     userId?: string;
-    connection?: jsforce.Connection;
+    connection?: Connection;
     logId?: string;
 };
 const getLogService: IGetLogService = {};
@@ -37,7 +38,7 @@ export default function getLog(context: vscode.ExtensionContext) {
         return connection;
     }
 
-    function getLast10Logs(force: IForceService): Promise<jsforce.QueryResult> {
+    function getLast10Logs(force: IForceService): Promise<QueryResult<any>> {
 
         var queryString: string = `SELECT Id, LogLength, Request, Status, DurationMilliseconds, StartTime, Location FROM ApexLog` +
             ` WHERE LogUserId='${getLogService.userId}'` +
@@ -48,7 +49,7 @@ export default function getLog(context: vscode.ExtensionContext) {
         return force.conn.query(queryString);
     }
 
-    function displayOptions(results: jsforce.QueryResult): Thenable<vscode.QuickPickItem> {
+    function displayOptions(results: QueryResult<any>): Thenable<vscode.QuickPickItem> {
         var options: vscode.QuickPickItem[] = results.records.map((record: LogRecord) => {
             return {
                 label: `Status: ${record.Status}`,

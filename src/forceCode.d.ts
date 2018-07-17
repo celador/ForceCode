@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
-import jsforce = require('jsforce');
+// import jsforce = require('jsforce');
+import * as jsforce from 'jsforce';
+import { FileProperties, Connection, UserInfo } from 'jsforce';
 
 declare module 'vscode' {
     export namespace window {
@@ -42,7 +44,7 @@ interface ILocationsNotCovered {
 interface IWorkspaceMember {
     name: string;
     path: string;
-    memberInfo: jsforce.IMetadataFileProperties;
+    memberInfo: FileProperties;
 }
 
 export interface IWorkspaceService {
@@ -90,21 +92,21 @@ interface IMetadataObject {
     childXmlNames?: string[];
 }
 
-export class ConnectionOptions {
-    oauth2?: any; // 	OAuth2 | Object	<optional> // OAuth2 instance or options to be passed to OAuth2 constructor
-    logLevel?: string; // 	String	<optional> // Output logging level (DEBUG|INFO|WARN|ERROR|FATAL)
-    version?: string; // 	String	<optional> // Salesforce API Version (without "v" prefix)
-    maxRequest?: number; // 	Number	<optional> // Max number of requests allowed in parallel call
-    loginUrl?: string; // 	String	<optional> // Salesforce Login Server URL (e.g. https://login.salesforce.com/)
-    instanceUrl?: string; // 	String	<optional> // Salesforce Instance URL (e.g. https://na1.salesforce.com/)
-    serverUrl?: string; // 	String	<optional> // Salesforce SOAP service endpoint URL (e.g. https://na1.salesforce.com/services/Soap/u/28.0)
-    accessToken?: string; // 	String	<optional> // Salesforce OAuth2 access token
-    sessionId?: string; // 	String	<optional> // Salesforce session ID
-    refreshToken?: string; // 	String	<optional> // Salesforce OAuth2 refresh token
-    signedRequest?: string; // 	String | Object	<optional> // Salesforce Canvas signed request (Raw Base64 string, JSON string, or deserialized JSON)
-    proxyUrl?: string; // 	String	<optional> // Cross-domain proxy server URL, used in browser client, non Visualforce app.
-    callOptions?: any; // 	Object	<optional> // Call options used in each SOAP/REST API request. See manual.
-  }
+// export class ConnectionOptions {
+//     oauth2?: any; // 	OAuth2 | Object	<optional> // OAuth2 instance or options to be passed to OAuth2 constructor
+//     logLevel?: string; // 	String	<optional> // Output logging level (DEBUG|INFO|WARN|ERROR|FATAL)
+//     version?: string; // 	String	<optional> // Salesforce API Version (without "v" prefix)
+//     maxRequest?: number; // 	Number	<optional> // Max number of requests allowed in parallel call
+//     loginUrl?: string; // 	String	<optional> // Salesforce Login Server URL (e.g. https://login.salesforce.com/)
+//     instanceUrl?: string; // 	String	<optional> // Salesforce Instance URL (e.g. https://na1.salesforce.com/)
+//     serverUrl?: string; // 	String	<optional> // Salesforce SOAP service endpoint URL (e.g. https://na1.salesforce.com/services/Soap/u/28.0)
+//     accessToken?: string; // 	String	<optional> // Salesforce OAuth2 access token
+//     sessionId?: string; // 	String	<optional> // Salesforce session ID
+//     refreshToken?: string; // 	String	<optional> // Salesforce OAuth2 refresh token
+//     signedRequest?: string; // 	String | Object	<optional> // Salesforce Canvas signed request (Raw Base64 string, JSON string, or deserialized JSON)
+//     proxyUrl?: string; // 	String	<optional> // Cross-domain proxy server URL, used in browser client, non Visualforce app.
+//     callOptions?: any; // 	Object	<optional> // Call options used in each SOAP/REST API request. See manual.
+//   }
 
 export interface IMetadataDescribe {
     metadataObjects: IMetadataObject[];
@@ -119,7 +121,7 @@ export interface IForceService {
     workspaceRoot: string;
     completions?: vscode.CompletionItem[];
     describe: IMetadataDescribe;
-    apexMetadata: jsforce.IMetadataFileProperties[];
+    apexMetadata: FileProperties[];
     declarations?: IDeclarations;
     codeCoverage?: {};
     codeCoverageWarnings?: ICodeCoverageWarning[];
@@ -130,8 +132,8 @@ export interface IForceService {
     workspaceMembers: IWorkspaceMember[];
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
-    conn?: jsforce.Connection;
-    userInfo?: jsforce.UserInfo;
+    conn?: Connection;
+    userInfo?: UserInfo;
     username?: string;
     outputChannel: vscode.OutputChannel;
     statusBarItem: vscode.StatusBarItem;

@@ -14,8 +14,8 @@ export default class Logger {
     // =========================================================================================================
     // =====================       USING REST API      =========================================================
     // =========================================================================================================
-    createDebugLevel(debugLevel: jsforce.DebugLevel): Promise<string> {
-        const options: jsforce.DebugLevel = debugLevel || {
+    createDebugLevel(debugLevel): Promise<string> {
+        const options = debugLevel || {
             ApexCode: 'DEBUG',
             ApexProfiling: 'DEBUG',
             Callout: 'DEBUG',
@@ -30,17 +30,17 @@ export default class Logger {
         const query: string = `Select Id, DeveloperName from debugLevel where DeveloperName = '${DEBUG_LEVEL_NAME}'`;
         return vscode.window.forceCode.conn.tooling.query(query).then(res => {
             if (res.records.length > 0) {
-                return res.records[0].Id;
+                return res.records[0]['Id'];
             } else {
                 return vscode.window.forceCode.conn.tooling.sobject('debugLevel').create(options).then(record => {
-                    return record.id;
+                    return record['id'];
                 });
             }
         });
     }
     enableLogging(debugLevelId: string): any {
         const expirationDate: string = moment().add(6, 'hours').format();
-        const options: jsforce.TraceFlagOptions = {
+        const options = {
             DebugLevelId: debugLevelId,
             ExpirationDate: expirationDate,
             LogType: LOG_TYPE,
@@ -51,11 +51,11 @@ export default class Logger {
         return vscode.window.forceCode.conn.tooling.query(query).then(res => {
             if (res.records.length > 0) {
                 // Trace Flag already exists
-                this.cleanupLogging(res.records[0].Id);
+                this.cleanupLogging(res.records[0]['Id']);
                 return 'true';
             } else {
                 return vscode.window.forceCode.conn.tooling.sobject('debugLevel').create(options).then(record => {
-                    return record.id;
+                    return record['id'];
                 });
             }
         });

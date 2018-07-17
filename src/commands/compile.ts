@@ -383,7 +383,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 return shouldCompile(record).then(should => {
                     if (should) {
                         return fc.conn.tooling.sobject(parsers.getToolingType(document, UPDATE)).create(member).then(res => {
-                            fc.containerMembers.push({ name, id: res.id });
+                            fc.containerMembers.push({ name, id: res['id'] });
                             return fc;
                         });
                     } else {
@@ -428,7 +428,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             IsRunTests: false,
             MetadataContainerId: vscode.window.forceCode.containerId,
         }).then(res => {
-            vscode.window.forceCode.containerAsyncRequestId = res.id;
+            vscode.window.forceCode.containerAsyncRequestId = res['id'];
             return vscode.window.forceCode;
         });
     }
