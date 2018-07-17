@@ -4,3 +4,10 @@ import * as operatingSystem from './operatingSystem';
 import configuration from './configuration';
 
 export {ForceService, operatingSystem, configuration};
+import { CommandViewService } from './commandView';
+export const commandViewService = CommandViewService.getInstance();
+export { Task } from './commandView';
+import { CommandService } from './commandService';
+export const commandService = CommandService.getInstance();
+import { CodeCovViewService } from './codeCovView';
+export const codeCovViewService = CodeCovViewService.getInstance();

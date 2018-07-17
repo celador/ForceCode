@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import jsforce = require('jsforce');
+import { DXCommands} from './services/dxService';
+import { IMetadataFileProperties } from 'jsforce';
 
 declare module 'vscode' {
     export namespace window {
@@ -7,22 +9,28 @@ declare module 'vscode' {
     }
 }
 
+export interface FCWorkspaceMembers {
+    [key: string]: IWorkspaceMember;
+}
+
 export interface Config {
     apiVersion?: string;
     autoCompile?: boolean;
     autoRefresh?: boolean;
     browser?: string;
+    checkForFileChanges?: boolean;
     debugOnly?: boolean;
     debugFilter?: string;
     deployOptions?: {
         verbose?: boolean,
         checkOnly?: boolean
     };
-    password?: string;
     poll?: number;
     pollTimeout?: number;
     prefix?: string;
     proxyUrl?: string;
+    showFilesOnOpen?: boolean;
+    showFilesOnOpenMax?: number;
     showTestCoverage? : boolean;
     showTestLog? : boolean;
     spaDist? : string;
@@ -30,6 +38,29 @@ export interface Config {
     url?: string;
     username?: string;
     // workspaceRoot?: string;
+}
+
+export interface MetadataResult {
+    ApiVersion: number;
+    attributes: { type: string };
+    Body: string;
+    BodyCrc: number;
+    CreatedById: string;
+    CreatedDate: string;
+    FullName: string;
+    Id: string;
+    IsValid: boolean;
+    LastModifiedById: string;
+    LastModifiedDate: string;
+    LastModifiedByName: string;
+    LengthWithoutComments: number;
+    ManageableState: string;
+    Metadata: {};
+    Name: string;
+    NamespacePrefix: string;
+    Status: string;
+    SymbolTable: {};
+    SystemModstamp: string;
 }
 
 interface ILocationsNotCovered {
@@ -42,27 +73,37 @@ interface ILocationsNotCovered {
 interface IWorkspaceMember {
     name: string;
     path: string;
-    memberInfo: jsforce.IMetadataFileProperties;
-}
-
-export interface IWorkspaceService {
-    getWorkspaceMembers: () => Promise<IWorkspaceMember[]>;
-}
-
-interface ICodeCoverage {
-    dmlInfo: any[];
     id: string;
-    locationsNotCovered: ILocationsNotCovered[];
-    methodInfo: any[];
-    name: string;
-    namespace: string;
-    numLocations: Number;
-    numLocationsNotCovered: Number;
-    soqlInfo: any[];
-    soslInfo: any[];
+    lastModifiedDate: string;
+    lastModifiedByName: string;
+    lastModifiedById: string;
     type: string;
 }
 
+interface ICodeCoverage {
+    attributes: 
+		{
+			type: string,
+			url: string,
+		},
+		ApexClassOrTriggerId: string,
+		ApexClassOrTrigger: 
+		{
+			attributes: 
+			{
+				type: string,
+				url: string,
+			},
+			Name: string,
+		},
+		NumLinesCovered: number,
+		NumLinesUncovered: number,
+		Coverage: 
+		{
+            coveredLines: number[],
+            uncoveredLines: number[]
+        }
+}
 interface ICodeCoverageWarning {
     id: string;
     message: string;
@@ -114,32 +155,36 @@ export interface IMetadataDescribe {
 }
 
 export interface IForceService {
+    dxCommands: DXCommands;
     operatingSystem?: string;
     config?: Config;
     workspaceRoot: string;
     completions?: vscode.CompletionItem[];
     describe: IMetadataDescribe;
-    apexMetadata: jsforce.IMetadataFileProperties[];
     declarations?: IDeclarations;
     codeCoverage?: {};
     codeCoverageWarnings?: ICodeCoverageWarning[];
     // symbolTable?: any;
     containerId?: string;
-    queueCompile?: boolean;
-    isCompiling?: boolean;
-    workspaceMembers: IWorkspaceMember[];
+    statusInterval: any;    
+    workspaceMembers: FCWorkspaceMembers;
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
     conn?: jsforce.Connection;
-    userInfo?: jsforce.UserInfo;
     username?: string;
     outputChannel: vscode.OutputChannel;
+    statusBarItem_UserInfo: vscode.StatusBarItem;
     statusBarItem: vscode.StatusBarItem;
     connect(context: vscode.ExtensionContext): Promise<IForceService>;
     newContainer(force: Boolean): Promise<IForceService>;
+    showStatus(message: string): void;
     clearLog(): void;
     refreshApexMetadata(): Promise<any>;
     restUrl(): string;
+    resetStatus(): void;
+    checkForFileChanges(): any;
+    updateFileMetadata(newMembers, check?: boolean): Promise<any>;
+    compareDates(serverDate: string, localDate: string): boolean;
 }
 
 

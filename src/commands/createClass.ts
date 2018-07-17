@@ -1,21 +1,20 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
-import * as error from './../util/error';
 import { configuration } from './../services';
 
-export default function createClass(context: vscode.ExtensionContext) {
+export default function createClass() {
     const CUSTOM_CLASS: string = 'Custom';
     var classesPath: string;
     // Here is replaceSrc possiblity
-    return configuration().then(config => {
+    return configuration().then(() => {
         classesPath = `${vscode.window.forceCode.workspaceRoot}${path.sep}classes`;
         if (fs.statSync(classesPath).isDirectory()) {
             return userClassSelection().then(selectedOption => {
                 if (selectedOption) {
                     return userFileNameSelection(selectedOption.label).then(filename => {
                         if (filename) {
-                            return generateFile(filename, config).then(res => {
+                            return generateFile(filename).then(res => {
                                 let fp: string = res[0].toString();
                                 return vscode.workspace.openTextDocument(fp).then(document => {
                                     return vscode.window.showTextDocument(document, vscode.ViewColumn.One);
@@ -23,13 +22,15 @@ export default function createClass(context: vscode.ExtensionContext) {
                             });
 
                         }
+                        return undefined;
                     });
                 }
+                return undefined;
             });
         } else {
             throw { message: classesPath + ' is not a real folder. Check the src option in your config file.' };
         }
-    }).catch(err => error.outputError);
+    }).catch(err => vscode.window.showErrorMessage(err.message));
 
 
     function userClassSelection() {
@@ -83,15 +84,15 @@ export default function createClass(context: vscode.ExtensionContext) {
         });
     }
 
-    function generateFile(classname, config) {
-        return Promise.all([writeFile(), writeMetaFile()]);
+    function generateFile(classname) {
+        //return Promise.all([writeFile(), writeMetaFile()]);
+        return Promise.all([writeFile()]);
         function writeFile() {
             return new Promise(function (resolve, reject) {
                 // Write Class file
                 var finalClassName: string = classesPath + path.sep + classname + '.cls';
                 fs.stat(finalClassName, function (err, stats) {
                     if (!err) {
-                        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Error creating file';
                         vscode.window.showErrorMessage('Cannot create ' + finalClassName + '. A file with that name already exists!');
                     } else if (err.code === 'ENOENT') {
                         var classFile: string = `public with sharing class ${classname} {
@@ -99,22 +100,21 @@ export default function createClass(context: vscode.ExtensionContext) {
 }`;
                         fs.outputFile(finalClassName, classFile, function (writeErr) {
                             if (writeErr) {
-                                vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + writeErr.message;
                                 vscode.window.showErrorMessage(writeErr.message);
                                 reject(writeErr);
                             } else {
-                                vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + classname + ' was sucessfully created $(check)';
+                                vscode.window.forceCode.showStatus('ForceCode: ' + classname + ' was sucessfully created $(check)');
                                 resolve(finalClassName);
                             }
                         });
                     } else {
-                        vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + err.code;
                         vscode.window.showErrorMessage(err.code);
                         reject(err);
                     }
                 });
             });
         }
+        /*
         // Write Metadata file
         function writeMetaFile() {
             var finalMetadataName: string = classesPath + path.sep + classname + '.cls-meta.xml';
@@ -143,11 +143,12 @@ export default function createClass(context: vscode.ExtensionContext) {
                         vscode.window.forceCode.statusBarItem.text = 'ForceCode: ' + err.code;
                         reject(err);
                     }
+                    vscode.window.forceCode.resetMenu();
                 });
 
             });
         }
-
+        */
 
 
     }

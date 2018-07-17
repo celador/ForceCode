@@ -12,6 +12,8 @@ export function getIcon(toolingType: string) {
             return 'gist';
         case 'ApexLog':
             return 'bug';
+        case 'StandardObject':
+            return 'gist';
         case 'CustomObject':
             return 'gist';
         default:
@@ -56,6 +58,12 @@ export function getExtension(toolingType: string) {
             return 'resource';
         case 'AuraDefinitionBundle':
             return 'aura';
+        case 'Event':
+            return 'evt';
+        case 'Interface':
+            return 'intf';
+        case 'Tokens':
+            return 'tokens';
         default:
             throw toolingType + ' extension not defined';
     }
