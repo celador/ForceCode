@@ -99,18 +99,6 @@ export default [
         }
     },
     {
-        commandName: 'ForceCode.getCodeCoverage',
-        name: 'Retriving code coverage',
-        hidden: false,
-        description: 'Get code coverage',
-        detail: 'Retrieve the current code coverage for all files in the src folder.',
-        icon: 'file-text',
-        label: 'Get current code coverage',
-        command: function (context, selectedResource?) {
-            return commands.apexTestResults();
-        }
-    },
-    {
         commandName: 'ForceCode.getOverallCoverage',
         name: 'Retrieving code coverage',
         hidden: false,
@@ -444,5 +432,13 @@ export default [
         command: function (context, selectedResource?) {
             return vscode.workspace.openTextDocument(context).then(doc => vscode.window.showTextDocument(doc, { preview: false }));
         }
-    }
+    },
+    {
+        commandName: 'ForceCode.getCodeCoverage',
+        name: 'Retriving code coverage',
+        hidden: false,
+        command: function (context, selectedResource?) {
+            return commands.apexTestResults();
+        }
+    },
 ]

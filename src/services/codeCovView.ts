@@ -43,8 +43,8 @@ import {
     }
 
     public addClasses(wsMembers: FCWorkspaceMembers) {
-        Object.keys(window.forceCode.workspaceMembers).forEach(curId => {
-            this.addClass(window.forceCode.workspaceMembers[curId]);
+        Object.keys(wsMembers).forEach(curId => {
+            this.addClass(wsMembers[curId]);
         });
     }
   
