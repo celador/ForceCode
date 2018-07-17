@@ -327,6 +327,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.5.2
+    * Fix startup issue 'Cannot read property then of undefined'
 * 3.5.1
     * Fix login/out bug.
     * Fix classes with coverage being out of order.
