@@ -327,6 +327,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.5.0
+    * Add test coverage view in the ForceCode view. This will show Covered/Uncovered/Test classes and will get the covereage upon start. Also got rid of menu item to fetch the coverage for the files in the source folder as this will be no longer needed.
 * 3.4.0
     * Add new view for ForceCode (Shows on the left bar) and new StatusBarItem that shows the number of running tasks. If you click on the running tasks status bar item it will take you to the ForceCode view. The ForceCode view will also be used in the future to show Salesforce and ForceCode related items.
 * 3.3.3
