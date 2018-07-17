@@ -327,6 +327,10 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.5.1
+    * Fix login/out bug.
+    * Fix classes with coverage being out of order.
+    * Startup bug fixed(???) - Let me know of any issues with this.
 * 3.5.0
     * Add test coverage view in the ForceCode view. This will show Covered/Uncovered/Test classes and will get the covereage upon start. Also got rid of menu item to fetch the coverage for the files in the source folder as this will be no longer needed.
 * 3.4.0
