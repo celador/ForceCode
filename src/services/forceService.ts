@@ -226,13 +226,13 @@ export default class ForceService implements forceCode.IForceService {
     private checkAndSetWorkspaceMembers(newMembers: forceCode.FCWorkspaceMembers, check?: boolean){
         var self: forceCode.IForceService = vscode.window.forceCode;
         if(self.dxCommands.isEmptyUndOrNull(newMembers)) {
-            return undefined;
+            return Promise.reject();
         }
 
         if(!self.config.checkForFileChanges) {
             self.workspaceMembers = newMembers;
             console.log('Done getting workspace info');
-            return undefined;
+            return Promise.resolve();
         }
 
         if(check) {
@@ -248,7 +248,7 @@ export default class ForceService implements forceCode.IForceService {
                         commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, newMembers[curMem].lastModifiedByName);
                     });
                     // return here so we're not left with stale metadata
-                    return undefined;
+                    return Promise.resolve();
                 }
             } 
             self.workspaceMembers = newMembers;
@@ -257,7 +257,7 @@ export default class ForceService implements forceCode.IForceService {
            
         return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(() => {
             console.log('Updated workspace file');
-            return undefined;
+            return Promise.resolve();
         });
     }
 
