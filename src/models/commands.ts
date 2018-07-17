@@ -584,5 +584,13 @@ export const fcCommands: FCCommand[] = [
         command: function (context, selectedResource?) {
             return vscode.workspace.openTextDocument(context).then(doc => vscode.window.showTextDocument(doc, { preview: false }));
         }
-    }
+    },
+    {
+        commandName: 'ForceCode.getCodeCoverage',
+        name: 'Retriving code coverage',
+        hidden: false,
+        command: function (context, selectedResource?) {
+            return commands.apexTestResults();
+        }
+    },
 ]
