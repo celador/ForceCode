@@ -12,9 +12,9 @@ import {
   import * as path from 'path';
 
   var ClassType = {
-      CoveredClass : 'Covered Classes',
+      CoveredClass : 'Sufficient Coverage',
       TestClass : 'Test Classes',
-      UncoveredClass : 'Uncovered Classes',
+      UncoveredClass : 'Insufficient Coverage',
   }
 
   interface FCClasses {
@@ -49,32 +49,29 @@ import {
     }
   
     public addClass(wsMember: IWorkspaceMember) {
-      var type: string;
+      var type: string = ClassType.UncoveredClass;
       // we only want classes and triggers
       if(wsMember.type !== 'ApexClass' && wsMember.type !== 'ApexTrigger') {
           return undefined;
       }
 
-      var pathParts = wsMember.path.split(path.sep);
-      var name = pathParts[pathParts.length - 1];
+      var name = wsMember.path.split(path.sep).pop();
       if(window.forceCode.codeCoverage && window.forceCode.codeCoverage[wsMember.id]) {
         var fileCoverage: ICodeCoverage = window.forceCode.codeCoverage[wsMember.id];
-        type = ClassType.CoveredClass;
         var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
-        var percent = ((fileCoverage.NumLinesCovered / total) * 100)
-        if(percent > 0) {
-            name = Math.floor(percent) + '% ' + name;
-        } else {
-            type = ClassType.UncoveredClass;
-        }
+        var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
+        name = percent + '% ' + name;
+        if(percent >= 75) {
+            type = ClassType.CoveredClass;
+        } 
         // this next check needs changed to something different, as there are problems reading the file
       } else if(fs.readFileSync(wsMember.path).toString().toLowerCase().includes('@istest')) {
         type = ClassType.TestClass;
       } else {
-        type = ClassType.UncoveredClass;
+        name = '0% ' + name;
       }
 
-      var theClass: FCFile = new FCFile(this, type, TreeItemCollapsibleState.None, name, wsMember);
+      var theClass: FCFile = new FCFile(name, TreeItemCollapsibleState.None, type, wsMember);
       if(!this.classes[type]) {
         this.classes[type] = new Array<FCFile>();
       } 
@@ -107,7 +104,7 @@ import {
         var fcFiles: FCFile[] = [];
         // This is the root node
         Object.keys(this.classes).forEach(val => {
-            fcFiles.push(new FCFile(this, val, TreeItemCollapsibleState.Collapsed, val));
+            fcFiles.push(new FCFile(val, TreeItemCollapsibleState.Collapsed, val));
         });
         fcFiles.sort(this.sortFunc);
 
@@ -148,17 +145,14 @@ import {
     public readonly wsMember: IWorkspaceMember;
     public readonly type: string;
     public readonly command: Command;
-
-    private readonly taskViewProvider: CodeCovViewService;
   
-    constructor(taskViewProvider: CodeCovViewService, type: string, collapsibleState: TreeItemCollapsibleState, name: string, wsMember?: IWorkspaceMember) {
+    constructor(name: string, collapsibleState: TreeItemCollapsibleState, type: string, wsMember?: IWorkspaceMember) {
       super(
         name,
         collapsibleState
       );
   
       this.collapsibleState = collapsibleState;
-      this.taskViewProvider = taskViewProvider;
       this.wsMember = wsMember;
       this.type = type;
       this.name = name;

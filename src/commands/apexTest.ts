@@ -40,7 +40,7 @@ export default function apexTest(toTest: string, classOrMethod: string) {
             vscode.window.forceCode.outputChannel.clear();
             let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Test Failures');
             let location = Object.keys(vscode.window.forceCode.workspaceMembers).find(curr => {
-                return vscode.window.forceCode.workspaceMembers[curr].name === name;
+                return vscode.window.forceCode.workspaceMembers[curr].name === name && vscode.window.forceCode.workspaceMembers[curr].type === 'ApexClass';
             });
             let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers[location];
             if (dxRes.summary.failing && dxRes.summary.failing > 0) {
