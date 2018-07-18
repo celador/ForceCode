@@ -75,9 +75,10 @@ export default class ForceService implements forceCode.IForceService {
                 lim = ' - Limits: ' + vscode.window.forceCode.conn.limitInfo.apiUsage.used + '/' + vscode.window.forceCode.conn.limitInfo.apiUsage.limit;
             }
             if(vscode.window.forceCode.config.username) {
-                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username + lim;
+                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected' + lim;
             } else {
                 vscode.window.forceCode.statusBarItem_UserInfo.text = '$(alert) ForceCode not connected $(alert)';
+                vscode.window.forceCode.statusBarItem_UserInfo.tooltip = '';
             }
         }, 5000);
     }
@@ -348,7 +349,8 @@ export default class ForceService implements forceCode.IForceService {
             function connectionSuccess() {
                 vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
                 vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
-                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected as ' + vscode.window.forceCode.config.username;
+                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected';
+                vscode.window.forceCode.statusBarItem_UserInfo.tooltip = 'Connected as ' + vscode.window.forceCode.config.username;
                 
                 vscode.window.forceCode.resetStatus();
                 self.statusBarItem_UserInfo.show();
