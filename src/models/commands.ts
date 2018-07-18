@@ -365,7 +365,11 @@ export const fcCommands: FCCommand[] = [
         commandName: 'ForceCode.showMenu',
         hidden: true,
         command: function (context, selectedResource?) {
-            return commands.showMenu(context);
+            if(vscode.window.forceCode.dxCommands.isLoggedIn) {
+                return commands.showMenu(context);
+            } else {
+                return Promise.resolve();
+            }
         }
     },
     {
