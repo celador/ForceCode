@@ -7,14 +7,16 @@ import * as path from 'path';
 export default function getSetConfig(service?: forceCode.IForceService): Promise<Config> {
 	return new Promise(function (resolve) {
 		var self: forceCode.IForceService = service || vscode.window.forceCode;
-		if (!vscode.workspace.workspaceFolders[0].uri.fsPath) {
-			throw { message: 'Open a Folder with VSCode' }
+		if (!vscode.workspace.workspaceFolders) {
+			throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
 		}
 		try {
+			console.log('here');
 			self.config = fs.readJsonSync(vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'force.json');
-			if (typeof self.config === 'object' && !self.config.src) {
+			if (typeof self.config === 'object' && !self.config.src || self.config.src === '') {
 				self.config.src = 'src';
 			}
+			console.log('and here');
 			self.workspaceRoot = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}${self.config.src}`;
 			if (!fs.existsSync(self.workspaceRoot)) {
 				fs.mkdirSync(self.workspaceRoot);
