@@ -126,7 +126,7 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     private parseMembers(mems) {
-        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems)) {
+        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems[0])) {
             return Promise.resolve({});
         }
         var types: {[key: string]: Array<any>} = {};
