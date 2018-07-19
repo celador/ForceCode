@@ -140,7 +140,7 @@ export default function enterCredentials(): Promise<any> {
             apiVersion: constants.API_VERSION,
             deployOptions: {
                 'checkOnly': false,
-                'testLevel': 'runLocalTests',
+                'runAllTests': false,
                 'verbose': false,
                 'ignoreWarnings': true,
             },

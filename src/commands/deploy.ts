@@ -29,10 +29,10 @@ export default function deploy(context: vscode.ExtensionContext) {
         }
     } (fs));
     var deployOptions: any = {
-        username: vscode.window.forceCode.config.username,
+        connection: vscode.window.forceCode.config.username,
         loginUrl: vscode.window.forceCode.config.url || 'https://login.salesforce.com',
         checkOnly: true,
-        testLevel: 'RunLocalTests',
+        // testLevel: 'RunLocalTests',  // it's now either runTests or runAllTests
         verbose: false,
         ignoreWarnings: false,
         rollbackOnError: true,
@@ -50,14 +50,14 @@ export default function deploy(context: vscode.ExtensionContext) {
         // Proxy Console.info to capture the status output from metadata tools
         registerProxy();
         Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
-        // vscode.window.forceCode.outputChannel.show();
-        /*if (fs.existsSync(validationIdPath) && !deployOptions.checkOnly) {
+        vscode.window.forceCode.outputChannel.show();
+        if (fs.existsSync(validationIdPath) && !deployOptions.checkOnly) {
             var validationId: string = fs.readFileSync(validationIdPath, 'utf-8');
             fs.unlinkSync(validationIdPath);
             return tools.deployRecentValidation(validationId, deployOptions);
-        } else {*/
+        } else {
             return tools.deployFromDirectory(deployPath, deployOptions);
-        //}
+        }
     }
     // =======================================================================================================================================
     function finished(res): boolean {
@@ -101,9 +101,9 @@ export default function deploy(context: vscode.ExtensionContext) {
             return _consoleLogReference.apply(this, arguments);
         };
         console.error = function () {
-            if (!arguments[0].match(/DeprecationWarning\:/)) {
+            //if (!arguments[0].match(/DeprecationWarning\:/)) {
                 vscode.window.forceCode.outputChannel.appendLine(arguments[0]);
-            }
+            //}
             // vscode.window.forceCode.outputChannel.appendLine(arguments[0]);
             return _consoleErrorReference.apply(this, arguments);
         };

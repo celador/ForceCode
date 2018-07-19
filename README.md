@@ -140,8 +140,8 @@ The configuration file should look something like...
 }
 ```
 
-It's probably best to go ahead and create your config file `force.json` in the root of your workspace.  Copy the above configuration and fill in the values.  
-Note: the password is in the format "passwordtoken".  Do not try to use any delimiters.
+ForceCode will create this file for you upon first start!  
+
 
 ### Options
 
@@ -256,7 +256,8 @@ Deploy your package based on your configured deploy options and the package.xml 
 * checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.  This will generate a `.validationId` file.
 * ignoreWarnings:  Indicates whether a warning should allow a deployment to complete successfully \(true\) or not \(false\).
 * rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
-* testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
+* runAllTests:     Runn all tests in org
+* runTests:        An array of test names to be run [TestClass1, TestClass2,...]
 * runTests:        A list of Apex tests to run during deployment \(commma separated list\)
 * verbose:         Output execution detail log to a `DeployStatistics.log` file
 
