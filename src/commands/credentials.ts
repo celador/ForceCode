@@ -160,7 +160,7 @@ export default function enterCredentials(): Promise<any> {
                 if(!vscode.window.forceCode.workspaceMembers) {
                     vscode.window.forceCode.workspaceMembers = {};
                 }
-                return Promise.resolve(config);
+                return Promise.resolve(configuration());
             });
     }
 }

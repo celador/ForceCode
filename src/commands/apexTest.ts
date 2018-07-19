@@ -45,7 +45,7 @@ export default function apexTest(toTest: string, classOrMethod: string) {
             let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers[location];
             if (dxRes.summary.failing && dxRes.summary.failing > 0) {
                 vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   ==========================================================');
-                vscode.window.showErrorMessage('ForceCode: Some Tests Failed');
+                vscode.window.showErrorMessage('ForceCode: Some Tests Failed','Ok');
                 let re: RegExp = /^(Class|Trigger)\.\S*\.(\S*)\.(\S*)\:\sline\s(\d*)\,\scolumn\s(\d*)$/ig;
                 let matches: string[] = re.exec(dxRes.tests[0].StackTrace);
                 if (matches && matches.length && matches.length === 6) {
@@ -74,7 +74,7 @@ export default function apexTest(toTest: string, classOrMethod: string) {
                 vscode.window.forceCode.outputChannel.appendLine(errorMessage);
                 vscode.window.forceCode.outputChannel.appendLine('=======================================================================================================================================');
             } else {
-                vscode.window.forceCode.showStatus('ForceCode: All Tests Passed $(thumbsup)');
+                vscode.window.showInformationMessage('ForceCode: All Tests Passed! Show coverage?', 'Ok');
                 if (member) {
                     let docUri: vscode.Uri = vscode.Uri.file(member.path);
                     let diagnostics: vscode.Diagnostic[] = [];

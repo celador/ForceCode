@@ -126,8 +126,8 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     private parseMembers(mems) {
-        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems[0])) {
-            return undefined;
+        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems)) {
+            return Promise.resolve({});
         }
         var types: {[key: string]: Array<any>} = {};
         types['type0'] = mems[1];
@@ -227,7 +227,7 @@ export default class ForceService implements forceCode.IForceService {
     private checkAndSetWorkspaceMembers(newMembers: forceCode.FCWorkspaceMembers, check?: boolean){
         var self: forceCode.IForceService = vscode.window.forceCode;
         if(self.dxCommands.isEmptyUndOrNull(newMembers)) {
-            return Promise.reject();
+            return Promise.resolve();
         }
 
         if(!self.config.checkForFileChanges) {

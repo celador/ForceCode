@@ -11,12 +11,10 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 			throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
 		}
 		try {
-			console.log('here');
 			self.config = fs.readJsonSync(vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'force.json');
-			if (typeof self.config === 'object' && !self.config.src || self.config.src === '') {
+			if (self.config && self.config !== null && typeof self.config === 'object' && !self.config.src) {
 				self.config.src = 'src';
 			}
-			console.log('and here');
 			self.workspaceRoot = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}${self.config.src}`;
 			if (!fs.existsSync(self.workspaceRoot)) {
 				fs.mkdirSync(self.workspaceRoot);
@@ -27,7 +25,7 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 					self.workspaceMembers = fs.readJsonSync(vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'wsMembers.json');
 				}
 			} catch (e) {
-				self.workspaceMembers = undefined;
+				self.workspaceMembers = {};
 			}
 			resolve(self.config);
 		} catch (err) {
