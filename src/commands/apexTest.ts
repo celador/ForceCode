@@ -74,7 +74,7 @@ export default function apexTest(toTest: string, classOrMethod: string) {
                 vscode.window.forceCode.outputChannel.appendLine(errorMessage);
                 vscode.window.forceCode.outputChannel.appendLine('=======================================================================================================================================');
             } else {
-                vscode.window.showInformationMessage('ForceCode: All Tests Passed! Show coverage?', 'Ok');
+                vscode.window.showInformationMessage('ForceCode: All Tests Passed!', 'Ok');
                 if (member) {
                     let docUri: vscode.Uri = vscode.Uri.file(member.path);
                     let diagnostics: vscode.Diagnostic[] = [];

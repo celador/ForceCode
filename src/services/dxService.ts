@@ -279,7 +279,10 @@ export default class DXService implements DXCommands {
             id = 'debugLog';
         }
         return vscode.workspace.openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${id}.log?q=${new Date()}`)).then(function (_document: vscode.TextDocument) {
+            if(_document.getText() !== '') {  
                 return vscode.window.showTextDocument(_document, 3, true);
+            }
+            return undefined;
         });
     }
 
