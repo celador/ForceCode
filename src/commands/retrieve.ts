@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as parsers from './../parsers';
 import { IWorkspaceMember } from '../forceCode';
 import constants from './../models/constants';
+import { commandService } from '../services';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
@@ -238,6 +239,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                             };
                                             vscode.window.forceCode.workspaceMembers[t.id] = workspaceMember;
                                             vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
+                                            commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
                                             return t.fileName;
                                         });
                                     } else if (typeof res === 'object') {
@@ -252,6 +254,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                         };
                                         vscode.window.forceCode.workspaceMembers[res['id']] = workspaceMember;
                                         vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
+                                        commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
                                         files.push(res['fileName']);
                                     }
 

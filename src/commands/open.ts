@@ -7,6 +7,7 @@ const mime = require('mime-types');
 
 import { getIcon, getExtension, getFolder } from './../parsers';
 import { IWorkspaceMember } from '../forceCode';
+import { commandService } from '../services';
 const TYPEATTRIBUTE: string = 'type';
 
 export function openAura(context: vscode.ExtensionContext) {
@@ -95,7 +96,9 @@ export function showFileOptions(promises: any[], pickMany: boolean) {
         return Promise.all(thePromises);
     })
     .then(() => {
-        return vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
+        return vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers).then(res => {
+            return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
+        });
     })
     .catch(err => vscode.window.showErrorMessage(err.message));
 
