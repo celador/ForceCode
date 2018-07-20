@@ -442,7 +442,7 @@
     "node-fetch": "^2.1.2",
     "os": "^0.1.1",
     "request-light": "^0.2.3",
-    "salesforce-alm": "^43.6.0",
+    "salesforce-alm": "^43.7.0",
     "util.promisify": "^1.0.0",
     "vscode": "^1.1.18",
     "xml2js": "^0.4.19",
