@@ -328,6 +328,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.5.4
+    * Fix a startup bug (Invalid type:null)
 * 3.5.3
     * Fix fresh project startup and login bugs. 
     * Add notification when an apex test passes.
