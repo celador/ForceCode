@@ -42,8 +42,8 @@ export function activate(context: vscode.ExtensionContext): any {
             return vscode.window.forceCode.workspaceMembers[cur].path === fileName;
         });
         
-        if(curFileId && vscode.window.forceCode.codeCoverage[curFileId]) {
-            delete vscode.window.forceCode.codeCoverage[curFileId];
+        if(curFileId && vscode.window.forceCode.workspaceMembers[curFileId].coverage) {
+            delete vscode.window.forceCode.workspaceMembers[curFileId].coverage;
             updateDecorations();
         }
     }));

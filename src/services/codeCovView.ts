@@ -56,8 +56,8 @@ import {
       }
 
       var name = wsMember.path.split(path.sep).pop();
-      if(window.forceCode.codeCoverage && window.forceCode.codeCoverage[wsMember.id]) {
-        var fileCoverage: ICodeCoverage = window.forceCode.codeCoverage[wsMember.id];
+      if(wsMember.coverage) {
+        var fileCoverage: ICodeCoverage = wsMember.coverage;
         var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
         var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
         name = percent + '% ' + name;

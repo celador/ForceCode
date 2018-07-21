@@ -78,6 +78,7 @@ interface IWorkspaceMember {
     lastModifiedByName: string;
     lastModifiedById: string;
     type: string;
+    coverage?: ICodeCoverage;
 }
 
 interface ICodeCoverage {
@@ -143,11 +144,11 @@ export interface IForceService {
     operatingSystem?: string;
     config?: Config;
     workspaceRoot: string;
-    completions?: vscode.CompletionItem[];
+    // completions?: vscode.CompletionItem[];
     describe: IMetadataDescribe;
     declarations?: IDeclarations;
-    codeCoverage?: {};
-    codeCoverageWarnings?: ICodeCoverageWarning[];
+    // codeCoverage?: {};
+    // codeCoverageWarnings?: ICodeCoverageWarning[];
     // symbolTable?: any;
     containerId?: string;
     statusInterval: any;    

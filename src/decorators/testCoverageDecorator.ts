@@ -68,7 +68,7 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
             return vscode.window.forceCode.workspaceMembers[cur].path === fileName;
         });
 
-        if(curFileId && vscode.window.forceCode.codeCoverage[curFileId]) {
+        if(curFileId && vscode.window.forceCode.workspaceMembers[curFileId].coverage) {
             uncoveredLineDec = getUncoveredLineOptionsFor(curFileId);
         }
     }
@@ -76,7 +76,7 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
 
     function getUncoveredLineOptionsFor(id) {
         var uncoveredLineDecorations: vscode.DecorationOptions[] = [];
-        let fileCoverage: forceCode.ICodeCoverage = vscode.window.forceCode.codeCoverage[id];
+        let fileCoverage: forceCode.ICodeCoverage = vscode.window.forceCode.workspaceMembers[id].coverage;
         if (fileCoverage) {
             fileCoverage.Coverage.uncoveredLines.forEach(notCovered => {
                 let decorationRange: vscode.DecorationOptions = { range: document.lineAt(Number(notCovered - 1)).range, hoverMessage: 'Line ' + notCovered + ' not covered by a test' };

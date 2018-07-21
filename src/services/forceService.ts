@@ -17,8 +17,8 @@ export default class ForceService implements forceCode.IForceService {
     public containerMembers: forceCode.IContainerMember[];
     public describe: forceCode.IMetadataDescribe;
     public declarations: forceCode.IDeclarations;
-    public codeCoverage: {} = {};
-    public codeCoverageWarnings: forceCode.ICodeCoverageWarning[];
+    //public codeCoverage: {} = {};
+    //public codeCoverageWarnings: forceCode.ICodeCoverageWarning[];
     public containerAsyncRequestId: string;
     public username: string;
     public statusBarItem_UserInfo: vscode.StatusBarItem;

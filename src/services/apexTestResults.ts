@@ -21,7 +21,7 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
         if (res.records) {
             res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
                 if(vscode.window.forceCode.workspaceMembers[curRes.ApexClassOrTriggerId] && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
-                    vscode.window.forceCode.codeCoverage[curRes.ApexClassOrTriggerId] = curRes;
+                    vscode.window.forceCode.workspaceMembers[curRes.ApexClassOrTriggerId].coverage = curRes;
                 }
             });
             vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
