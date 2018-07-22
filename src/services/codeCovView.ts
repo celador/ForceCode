@@ -13,6 +13,7 @@ import {
 
   var ClassType = {
       CoveredClass : 'Sufficient Coverage',
+      NoCoverageData : 'No Coverage Data',
       TestClass : 'Test Classes',
       UncoveredClass : 'Insufficient Coverage',
   }
@@ -68,7 +69,7 @@ import {
       } else if(fs.readFileSync(wsMember.path).toString().toLowerCase().includes('@istest')) {
         type = ClassType.TestClass;
       } else {
-        name = '0% ' + name;
+        type = ClassType.NoCoverageData;
       }
 
       var theClass: FCFile = new FCFile(name, TreeItemCollapsibleState.None, type, wsMember);

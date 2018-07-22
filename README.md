@@ -328,6 +328,9 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.5.5
+    * Added a new code coverage view for 'No Coverage Data' What this means is that the class has been updated without running the test class after updating. When you do this, it removes the coverage data so 0% wasn't an accurate category, therefore we needed a new one.
+    
 * 3.5.4
     * Fix a startup bug (Invalid type:null)
 * 3.5.3
