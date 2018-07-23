@@ -97,9 +97,7 @@ export function showFileOptions(promises: any[], pickMany: boolean) {
         return Promise.all(thePromises);
     })
     .then(() => {
-        return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined).then(() => {
-            codeCovViewService.saveClasses();
-        });
+        return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
     })
     .catch(err => vscode.window.showErrorMessage(err.message));
 

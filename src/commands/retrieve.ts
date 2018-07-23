@@ -241,7 +241,6 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                             const fcfile: FCFile = codeCovViewService.findById(t.id);
                                             codeCovViewService.addOrUpdateClass(workspaceMember);
                                             commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
-                                            codeCovViewService.saveClasses();
                                             return t.fileName;
                                         });
                                     } else if (typeof res === 'object') {
@@ -257,7 +256,6 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                         const fcfile: FCFile = codeCovViewService.findById(res['id']);
                                         codeCovViewService.addOrUpdateClass(workspaceMember);
                                         commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
-                                        codeCovViewService.saveClasses();
                                         files.push(res['fileName']);
                                     }
 

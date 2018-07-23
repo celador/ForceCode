@@ -18,8 +18,6 @@ export default class ForceService implements forceCode.IForceService {
     public containerMembers: forceCode.IContainerMember[];
     public describe: forceCode.IMetadataDescribe;
     public declarations: forceCode.IDeclarations;
-    //public codeCoverage: {} = {};
-    //public codeCoverageWarnings: forceCode.ICodeCoverageWarning[];
     public containerAsyncRequestId: string;
     public username: string;
     public statusBarItem_UserInfo: vscode.StatusBarItem;
@@ -35,12 +33,10 @@ export default class ForceService implements forceCode.IForceService {
         this.operatingSystem = operatingSystem.getOS();
         // Setup username and outputChannel
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
-        //this.outputChannel.show();
         this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
         this.statusBarItem_UserInfo = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 5);
         this.statusBarItem.command = 'ForceCode.showMenu';
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
-        //this.statusBarItem.text = 'ForceCode: Active';
         this.containerMembers = [];
         configuration(this).then(config => {
             this.username = config.username || '';
@@ -77,7 +73,7 @@ export default class ForceService implements forceCode.IForceService {
             if(vscode.window.forceCode.config.username) {
                 vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected' + lim;
             } else {
-                vscode.window.forceCode.statusBarItem_UserInfo.text = '$(alert) ForceCode not connected $(alert)';
+                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode not connected';
                 vscode.window.forceCode.statusBarItem_UserInfo.tooltip = '';
             }
         }, 5000);
@@ -147,9 +143,7 @@ export default class ForceService implements forceCode.IForceService {
             });
             console.log('Done getting workspace info');
             return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined).then(() => {
-                return codeCovViewService.saveClasses().then(() => {
-                    return Promise.resolve();
-                });
+                return Promise.resolve();
             });
             
             
