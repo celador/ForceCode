@@ -32,11 +32,23 @@ import {
       ._onDidChangeTreeData.event;
   
     public constructor() {
-      this.loadClasses();
+      try{
+				// read previous metadata
+				if(this.classes.length === 0) {
+          const tempClasses: any[] = fs.readJsonSync(workspace.workspaceFolders[0].uri.fsPath + path.sep + 'wsMembers.json');
+          tempClasses.forEach(cur => {
+            this.classes.push(new FCFile(TreeItemCollapsibleState.None, cur.wsMember));
+          });
+          console.log('Done loading wsMember data.');
+				}
+			} catch (e) {
+        console.log('Class data failed to load or no data found');
+			}
     }
   
     public static getInstance() {
       if (!CodeCovViewService.instance) {
+        console.log('Starting Code Coverage Service...');
         CodeCovViewService.instance = new CodeCovViewService();
       }
       return CodeCovViewService.instance;
@@ -46,20 +58,8 @@ import {
       this._onDidChangeTreeData.fire();
     }
 
-    private loadClasses() {
-      try{
-				// read previous metadata
-				if(!this.classes) {
-					this.classes = fs.readJsonSync(workspace.workspaceFolders[0].uri.fsPath + path.sep + 'wsMembers.json');
-				}
-			} catch (e) {
-        console.log('Class data failed to load or no data found');
-			}
-    }
-
     public saveClasses() {
       return window.forceCode.dxCommands.saveToFile(JSON.stringify(this.classes), 'wsMembers.json').then(() => {
-        console.log('Updated workspace file');
         return Promise.resolve();
       });
     }
@@ -73,22 +73,30 @@ import {
       if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
         return undefined;
       }
-      var element: FCFile = this.classes.find(cur => {
+      return this.classes.find(cur => {
         const wsMem: IWorkspaceMember = cur.getWsMember();
         return wsMem && wsMem.name === name && wsMem.type === type;
       });
-      return element;
     }
 
     public findByPath(pa: string): FCFile {
       if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
         return undefined;
       }
-      var element: FCFile = this.classes.find(cur => {
+      return this.classes.find(cur => {
         const wsMem: IWorkspaceMember = cur.getWsMember();
         return wsMem && wsMem.path === pa;
       });
-      return element;
+    }
+
+    public findById(id: string): FCFile {
+      if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
+        return undefined;
+      }
+      return this.classes.find(cur => {
+        const wsMem: IWorkspaceMember = cur.getWsMember();
+        return wsMem && wsMem.id === id;
+      });
     }
   
     public removeClass(fcfile: FCFile): boolean {
@@ -150,17 +158,6 @@ import {
       }
       this.classes.push(newClass);
       this.refresh();
-    }
-
-    public findById(id: string): FCFile {
-      if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
-        return undefined;
-      }
-      var element: FCFile = this.classes.find(cur => {
-        const wsMem: IWorkspaceMember = cur.getWsMember();
-        return wsMem && wsMem.id === id;
-      });
-      return element;
     }
 
     private sortFunc(a: FCFile, b: FCFile): number {
