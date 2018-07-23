@@ -338,7 +338,7 @@ Step 6.  Have Fun!
     * Fix fresh project startup and login bugs. 
     * Add notification when an apex test passes.
     * Fix typo in execute anonymous menu item.
-    * Update cove coverage view wording into Sufficient and Insufficient Coverage.
+    * Update code coverage view wording into Sufficient and Insufficient Coverage.
     * Show connected username as tooltip on user status bar item (ForceCode x.x.x connected....)
     * Only show the log if there is info to show. So it's not a bug when the logfile doesn't show, it just means there's no debug data to show because it was all filtered out by the debug level you have it set to in the force.json file (e.g. "debugFilter": 'USER_DEBUG|FATAL_ERROR',)
 * 3.5.2
