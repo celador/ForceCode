@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
 import { QueryResult } from '../services/dxService';
 import { editorUpdateApexCoverageDecorator } from '../decorators/testCoverageDecorator';
+import { FCFile } from './codeCovView';
+import { codeCovViewService } from '.';
 
 export default function getApexTestResults(testClassIds?: string[]): Promise<QueryResult> {
     var fromWhere: string = testClassIds && testClassIds.length === 1 ? ' ApexCodeCoverage ' : ' ApexCodeCoverageAggregate ';
@@ -20,11 +22,14 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
         // Add Line Coverage information
         if (res.records) {
             res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
-                if(vscode.window.forceCode.workspaceMembers[curRes.ApexClassOrTriggerId] && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
-                    vscode.window.forceCode.workspaceMembers[curRes.ApexClassOrTriggerId].coverage = curRes;
+                const fcfile: FCFile = codeCovViewService.findById(curRes.ApexClassOrTriggerId);
+                if(fcfile && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
+                    var wsMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
+                    wsMem.coverage = curRes;
+                    codeCovViewService.addOrUpdateClass(wsMem);
                 }
             });
-            vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
+            codeCovViewService.saveClasses();
             // update the current editor
             editorUpdateApexCoverageDecorator(vscode.window.activeTextEditor);
         }

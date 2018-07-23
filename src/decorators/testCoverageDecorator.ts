@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
+import { FCFile } from '../services/codeCovView';
+import { codeCovViewService } from '../services';
 
 // create a decorator type that we use to decorate small numbers
 const coverageChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Apex Test Coverage');
@@ -58,25 +60,20 @@ export function updateDecorations() {
 
 export function getUncoveredLineOptions(document: vscode.TextDocument) {
     var uncoveredLineDec: vscode.DecorationOptions[] = [];
-
-    if(vscode.window.forceCode.workspaceMembers) {
+    const fcfile: FCFile = codeCovViewService.findByPath(document.fileName);
+    if(fcfile) {
         coverageChannel.clear();
-        // get the id
-        var fileName = document.fileName;
-        // get the id    
-        var curFileId: string = Object.keys(vscode.window.forceCode.workspaceMembers).find(cur => {
-            return vscode.window.forceCode.workspaceMembers[cur].path === fileName;
-        });
+        const wsMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
 
-        if(curFileId && vscode.window.forceCode.workspaceMembers[curFileId].coverage) {
-            uncoveredLineDec = getUncoveredLineOptionsFor(curFileId);
+        if(wsMem.id && wsMem.coverage) {
+            uncoveredLineDec = getUncoveredLineOptionsFor(wsMem);
         }
     }
     return uncoveredLineDec;
 
-    function getUncoveredLineOptionsFor(id) {
+    function getUncoveredLineOptionsFor(workspaceMember: forceCode.IWorkspaceMember) {
         var uncoveredLineDecorations: vscode.DecorationOptions[] = [];
-        let fileCoverage: forceCode.ICodeCoverage = vscode.window.forceCode.workspaceMembers[id].coverage;
+        let fileCoverage: forceCode.ICodeCoverage = workspaceMember.coverage;
         if (fileCoverage) {
             fileCoverage.Coverage.uncoveredLines.forEach(notCovered => {
                 let decorationRange: vscode.DecorationOptions = { range: document.lineAt(Number(notCovered - 1)).range, hoverMessage: 'Line ' + notCovered + ' not covered by a test' };

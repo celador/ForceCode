@@ -19,14 +19,6 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 			if (!fs.existsSync(self.workspaceRoot)) {
 				fs.mkdirSync(self.workspaceRoot);
 			}
-			try{
-				// read previous metadata
-				if(!self.workspaceMembers) {
-					self.workspaceMembers = fs.readJsonSync(vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'wsMembers.json');
-				}
-			} catch (e) {
-				self.workspaceMembers = {};
-			}
 			resolve(self.config);
 		} catch (err) {
 			self.config = {};

@@ -4,7 +4,8 @@ import * as path from 'path';
 import * as parsers from './../parsers';
 import { IWorkspaceMember } from '../forceCode';
 import constants from './../models/constants';
-import { commandService } from '../services';
+import { commandService, codeCovViewService } from '../services';
+import { FCFile } from '../services/codeCovView';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
@@ -237,9 +238,10 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                                 lastModifiedById: t.lastModifiedById,
                                                 type: t.type,
                                             };
-                                            vscode.window.forceCode.workspaceMembers[t.id] = workspaceMember;
-                                            vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
+                                            const fcfile: FCFile = codeCovViewService.findById(t.id);
+                                            codeCovViewService.addOrUpdateClass(workspaceMember);
                                             commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
+                                            codeCovViewService.saveClasses();
                                             return t.fileName;
                                         });
                                     } else if (typeof res === 'object') {
@@ -252,9 +254,10 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                             lastModifiedById: res['lastModifiedById'],
                                             type: res['type'],
                                         };
-                                        vscode.window.forceCode.workspaceMembers[res['id']] = workspaceMember;
-                                        vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
+                                        const fcfile: FCFile = codeCovViewService.findById(res['id']);
+                                        codeCovViewService.addOrUpdateClass(workspaceMember);
                                         commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
+                                        codeCovViewService.saveClasses();
                                         files.push(res['fileName']);
                                     }
 

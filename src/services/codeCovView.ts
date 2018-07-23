@@ -5,26 +5,25 @@ import {
     TreeDataProvider,
     TreeItem,
     TreeItemCollapsibleState,
-    window
+    window,
+    workspace
   } from 'vscode';
-  import * as fs from 'fs';
   import { IWorkspaceMember, ICodeCoverage, FCWorkspaceMembers } from '../forceCode';
   import * as path from 'path';
+  import * as fs from 'fs-extra';
+  import constants from './../models/constants';
 
-  var ClassType = {
+  const ClassType = {
       CoveredClass : 'Sufficient Coverage',
       NoCoverageData : 'No Coverage Data',
       TestClass : 'Test Classes',
       UncoveredClass : 'Insufficient Coverage',
+      NoShow: 'NoShow',
   }
 
-  interface FCClasses {
-    [key: string]: FCFile[];
-  }
-  
   export class CodeCovViewService implements TreeDataProvider<FCFile> {
     private static instance: CodeCovViewService;
-    private readonly classes: FCClasses;
+    private classes: Array<FCFile> = new Array<FCFile>();
     private _onDidChangeTreeData: EventEmitter<
      FCFile | undefined
     > = new EventEmitter <FCFile | undefined>();
@@ -33,7 +32,7 @@ import {
       ._onDidChangeTreeData.event;
   
     public constructor() {
-      this.classes = {};
+      this.loadClasses();
     }
   
     public static getInstance() {
@@ -43,54 +42,61 @@ import {
       return CodeCovViewService.instance;
     }
 
-    public addClasses(wsMembers: FCWorkspaceMembers) {
-        Object.keys(wsMembers).forEach(curId => {
-            this.addClass(wsMembers[curId]);
-        });
-    }
-  
-    public addClass(wsMember: IWorkspaceMember) {
-      var type: string = ClassType.UncoveredClass;
-      // we only want classes and triggers
-      if(wsMember.type !== 'ApexClass' && wsMember.type !== 'ApexTrigger') {
-          return undefined;
-      }
-
-      var name = wsMember.path.split(path.sep).pop();
-      if(wsMember.coverage) {
-        var fileCoverage: ICodeCoverage = wsMember.coverage;
-        var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
-        var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
-        name = percent + '% ' + name;
-        if(percent >= 75) {
-            type = ClassType.CoveredClass;
-        } 
-        // this next check needs changed to something different, as there are problems reading the file
-      } else if(fs.readFileSync(wsMember.path).toString().toLowerCase().includes('@istest')) {
-        type = ClassType.TestClass;
-      } else {
-        type = ClassType.NoCoverageData;
-      }
-
-      var theClass: FCFile = new FCFile(name, TreeItemCollapsibleState.None, type, wsMember);
-      if(!this.classes[type]) {
-        this.classes[type] = new Array<FCFile>();
-      } 
-      var exMem = this.findById(wsMember.id);
-      if(exMem) {
-        this.removeClass(exMem);
-      }
-      this.classes[type].push(theClass);
-  
+    public refresh() {
       this._onDidChangeTreeData.fire();
     }
+
+    private loadClasses() {
+      try{
+				// read previous metadata
+				if(!this.classes) {
+					this.classes = fs.readJsonSync(workspace.workspaceFolders[0].uri.fsPath + path.sep + 'wsMembers.json');
+				}
+			} catch (e) {
+        console.log('Class data failed to load or no data found');
+			}
+    }
+
+    public saveClasses() {
+      return window.forceCode.dxCommands.saveToFile(JSON.stringify(this.classes), 'wsMembers.json').then(() => {
+        console.log('Updated workspace file');
+        return Promise.resolve();
+      });
+    }
   
-    public removeClass(task: FCFile): boolean {
-      const index = this.classes[task.type].indexOf(task);
+    public addOrUpdateClass(wsMember: IWorkspaceMember) {
+      var theClass: FCFile = new FCFile(TreeItemCollapsibleState.None, wsMember); 
+      this.updateClass(theClass);
+    }
+
+    public findByNameAndType(name: string, type: string): FCFile {
+      if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
+        return undefined;
+      }
+      var element: FCFile = this.classes.find(cur => {
+        const wsMem: IWorkspaceMember = cur.getWsMember();
+        return wsMem && wsMem.name === name && wsMem.type === type;
+      });
+      return element;
+    }
+
+    public findByPath(pa: string): FCFile {
+      if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
+        return undefined;
+      }
+      var element: FCFile = this.classes.find(cur => {
+        const wsMem: IWorkspaceMember = cur.getWsMember();
+        return wsMem && wsMem.path === pa;
+      });
+      return element;
+    }
+  
+    public removeClass(fcfile: FCFile): boolean {
+      const index = this.classes.indexOf(fcfile);
       if (index !== -1) {
-        this.classes[task.type].splice(index, 1);
+        this.classes.splice(index, 1);
   
-        this._onDidChangeTreeData.fire();
+        this.refresh();
         return true;
       } 
       return false;
@@ -104,15 +110,30 @@ import {
       if (!element) {
         var fcFiles: FCFile[] = [];
         // This is the root node
-        Object.keys(this.classes).forEach(val => {
-            fcFiles.push(new FCFile(val, TreeItemCollapsibleState.Collapsed, val));
+        Object.keys(ClassType).forEach(val => {
+          if(val !== ClassType.NoShow) {
+            var tempMem: IWorkspaceMember = {
+              path: path.sep + ClassType[val],
+              id: undefined,
+              name: undefined,
+              lastModifiedById: undefined,
+              lastModifiedByName: undefined,
+              lastModifiedDate: undefined,
+              type: undefined,
+            }
+            var newFCFile: FCFile = new FCFile(TreeItemCollapsibleState.Collapsed, tempMem);
+            newFCFile.setType(ClassType[val]);
+            fcFiles.push(newFCFile);
+          }
         });
         fcFiles.sort(this.sortFunc);
 
         return fcFiles;
-      } else if(!element.wsMember) {
-        this.classes[element.type].sort(this.sortFunc);
-        return this.classes[element.type];
+      } else if(!element.getWsMember().id) {
+        this.classes.sort(this.sortFunc);
+        return this.classes.filter(res => {
+          return res.getType() === element.getType();
+        });
       }
   
       return [];
@@ -122,48 +143,112 @@ import {
       return null;    // this is the parent
     }
 
-    private findById(id: string): FCFile {
-      var element: FCFile;
-      Object.keys(this.classes).some(cur => {
-        element = this.classes[cur].find(curFind => {
-            return curFind.wsMember.id === id;
-        });
-        return element !== undefined;
+    private updateClass(newClass: FCFile) {
+      const oldFCFile: FCFile = this.findByPath(newClass.getWsMember().path);
+      if(oldFCFile) {
+        this.removeClass(oldFCFile);
+      }
+      this.classes.push(newClass);
+      this.refresh();
+    }
+
+    public findById(id: string): FCFile {
+      if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
+        return undefined;
+      }
+      var element: FCFile = this.classes.find(cur => {
+        const wsMem: IWorkspaceMember = cur.getWsMember();
+        return wsMem && wsMem.id === id;
       });
       return element;
     }
 
     private sortFunc(a: FCFile, b: FCFile): number {
-        var aStr = a.name.split('% ').pop().toUpperCase();
-        var bStr = b.name.split('% ').pop().toUpperCase();
+        var aStr = a.label.split('% ').pop().toUpperCase();
+        var bStr = b.label.split('% ').pop().toUpperCase();
         return aStr.localeCompare(bStr);
     }
   }
   
   export class FCFile extends TreeItem {
     public readonly collapsibleState: TreeItemCollapsibleState;
-    public readonly name: string;
-    public readonly wsMember: IWorkspaceMember;
-    public readonly type: string;
-    public readonly command: Command;
+    public label: string;
+    public command: Command;
+
+    private wsMember: IWorkspaceMember;
+    private type: string;
   
-    constructor(name: string, collapsibleState: TreeItemCollapsibleState, type: string, wsMember?: IWorkspaceMember) {
+    constructor(collapsibleState: TreeItemCollapsibleState, wsMember: IWorkspaceMember) {
       super(
-        name,
+        wsMember.name,
         collapsibleState
       );
   
       this.collapsibleState = collapsibleState;
-      this.wsMember = wsMember;
-      this.type = type;
-      this.name = name;
+      this.setWsMember(wsMember);
+    }
 
-      if(wsMember) {
-          this.command = {
-              command: 'ForceCode.openOnClick',
-              title: '',
-              arguments: [wsMember.path]
-          }
+    private setWsMember(newMem: IWorkspaceMember) {
+      this.wsMember = newMem;
+      this.label = this.wsMember.path.split(path.sep).pop();
+      super.label = this.label;
+
+      // we only want classes and triggers
+      if(!this.wsMember || (this.wsMember.type !== 'ApexClass' && this.wsMember.type !== 'ApexTrigger')) {
+        this.type = ClassType.NoShow;
+        return undefined;
       }
+
+      this.command = {
+          command: 'ForceCode.openOnClick',
+          title: '',
+          arguments: [this.wsMember.path]
+      }
+
+      this.type = ClassType.UncoveredClass;
+      if(this.wsMember.coverage) {
+        var fileCoverage: ICodeCoverage = this.wsMember.coverage;
+        var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
+        var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
+        this.label = percent + '% ' + this.label;
+        if(percent >= 75) {
+            this.type = ClassType.CoveredClass;
+        } 
+        // this next check needs changed to something different, as there are problems reading the file
+      } else if(fs.readFileSync(this.wsMember.path).toString().toLowerCase().includes('@istest')) {
+        this.type = ClassType.TestClass;
+      } else {
+        this.type = ClassType.NoCoverageData;
+      }
+    }
+
+    public getWsMember(): IWorkspaceMember {
+      return this.wsMember;
+    }
+
+    public getType(): string {
+      return this.type;
+    }
+
+    public setType(newType: string) {
+      this.type = newType;
+    }
+
+    // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
+    public compareDates(serverDate: string): boolean {
+      if(!this.wsMember.lastModifiedDate) {
+        return true;
+      }
+      var serverSplit: string[] = serverDate.split('.');
+      var localSplit: string[] = this.wsMember.lastModifiedDate.split('.');
+      var serverMS: number = (new Date(serverSplit[0])).getTime() + parseInt(serverSplit[1].substring(0, 3));
+      var localMS: number = (new Date(localSplit[0])).getTime() + parseInt(localSplit[1].substring(0, 3));
+
+      if(serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
+          return true;
+      }
+      
+      console.log("Time difference between file changes: " + (serverMS - localMS));
+      return false;
     }
   }

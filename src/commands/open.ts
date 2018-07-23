@@ -7,7 +7,8 @@ const mime = require('mime-types');
 
 import { getIcon, getExtension, getFolder } from './../parsers';
 import { IWorkspaceMember } from '../forceCode';
-import { commandService } from '../services';
+import { commandService, codeCovViewService } from '../services';
+import { FCFile } from '../services/codeCovView';
 const TYPEATTRIBUTE: string = 'type';
 
 export function openAura(context: vscode.ExtensionContext) {
@@ -96,8 +97,8 @@ export function showFileOptions(promises: any[], pickMany: boolean) {
         return Promise.all(thePromises);
     })
     .then(() => {
-        return vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers).then(res => {
-            return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
+        return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined).then(() => {
+            codeCovViewService.saveClasses();
         });
     })
     .catch(err => vscode.window.showErrorMessage(err.message));
@@ -218,11 +219,12 @@ export function showFileOptions(promises: any[], pickMany: boolean) {
                     lastModifiedById: res.LastModifiedById,
                     type: toolingType,
                 };
-                vscode.window.forceCode.workspaceMembers[res.Id] = workspaceMember;
+                
                 let body: string = res.Body || res.Markup;
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {
                         if (err) { reject(err); }
+                        codeCovViewService.addOrUpdateClass(workspaceMember);
                         if (results.length === 1 && openFile) {
                             try{
                                 vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, { preview: false }));

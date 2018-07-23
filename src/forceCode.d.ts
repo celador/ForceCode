@@ -144,15 +144,10 @@ export interface IForceService {
     operatingSystem?: string;
     config?: Config;
     workspaceRoot: string;
-    // completions?: vscode.CompletionItem[];
     describe: IMetadataDescribe;
     declarations?: IDeclarations;
-    // codeCoverage?: {};
-    // codeCoverageWarnings?: ICodeCoverageWarning[];
-    // symbolTable?: any;
     containerId?: string;
     statusInterval: any;    
-    workspaceMembers: FCWorkspaceMembers;
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
     conn?: jsforce.Connection;
@@ -166,8 +161,6 @@ export interface IForceService {
     clearLog(): void;
     resetStatus(): void;
     checkForFileChanges(): any;
-    updateFileMetadata(newMembers, check?: boolean): Promise<any>;
-    compareDates(serverDate: string, localDate: string): boolean;
 }
 
 

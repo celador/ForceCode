@@ -4,6 +4,8 @@ import { IForceService } from './../forceCode';
 import * as forceCode from './../forceCode';
 import constants from './../models/constants';
 import diff from './diff';
+import { FCFile } from '../services/codeCovView';
+import { codeCovViewService } from '../services';
 const parseString: any = require('xml2js').parseString;
 
 // TODO: Refactor some things out of this file.  It's getting too big.
@@ -267,8 +269,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         }
 
         function shouldCompile(record) {
-            let mem: forceCode.IWorkspaceMember = fc.workspaceMembers[record.Id];
-            if (mem && (!vscode.window.forceCode.compareDates(record.LastModifiedDate, mem.lastModifiedDate) || record.LastModifiedById !== mem.lastModifiedById)) {
+            const fcfile: FCFile = codeCovViewService.findById(record.Id);
+            let mem: forceCode.IWorkspaceMember = fcfile ? fcfile.getWsMember() : undefined;
+            if (mem && (!fcfile.compareDates(record.LastModifiedDate) || record.LastModifiedById !== mem.lastModifiedById)) {
                 // throw up an alert
                 return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
                     if (s === 'Diff') {
@@ -324,8 +327,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                             lastModifiedById: fc.dxCommands.orgInfo.userId,
                             type: toolingType,
                         };
-                        fc.workspaceMembers[foo.id] = workspaceMember;
-                        vscode.window.forceCode.updateFileMetadata(fc.workspaceMembers);
+                        codeCovViewService.addOrUpdateClass(workspaceMember);
+                        codeCovViewService.saveClasses();
                         return fc;
                     });
                 });
@@ -444,11 +447,15 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return false;
         } else {
             // SUCCESS !!! 
-            if(res.records && res.records[0].DeployDetails.componentSuccesses.length > 0 
-                && vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id]) {
-                vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id].lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
-                vscode.window.forceCode.workspaceMembers[res.records[0].DeployDetails.componentSuccesses[0].id].lastModifiedById = vscode.window.forceCode.dxCommands.orgInfo.userId;
-                vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers);
+            if(res.records && res.records[0].DeployDetails.componentSuccesses.length > 0) {
+                const fcfile = codeCovViewService.findById(res.records[0].DeployDetails.componentSuccesses[0].id); 
+                if(fcfile) {
+                    var fcMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
+                    fcMem.lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
+                    fcMem.lastModifiedById = vscode.window.forceCode.dxCommands.orgInfo.userId;
+                    codeCovViewService.addOrUpdateClass(fcMem);
+                    codeCovViewService.saveClasses();
+                }
             }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;

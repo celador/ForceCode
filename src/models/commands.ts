@@ -2,8 +2,9 @@ import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 import { getFileName } from './../parsers';
-import { commandService, commandViewService } from './../services';
+import { commandService, commandViewService, codeCovViewService } from './../services';
 import * as path from 'path';
+import { FCFile } from '../services/codeCovView';
 
 export default [
     {
@@ -335,11 +336,9 @@ export default [
         hidden: true,
         command: function(context, selectedResource?) {
             var filePath = context.fsPath;
-            var curFileId: string = Object.keys(vscode.window.forceCode.workspaceMembers).find(cur => {
-                return vscode.window.forceCode.workspaceMembers[cur].path === filePath;
-            });
+            const fcfile: FCFile = codeCovViewService.findByPath(filePath);
             
-            return vscode.window.forceCode.dxCommands.openOrgPage('/' + curFileId);
+            return vscode.window.forceCode.dxCommands.openOrgPage('/' + fcfile.getWsMember().id);
         }
     },
     {

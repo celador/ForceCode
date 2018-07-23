@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { configuration } from './../services';
+import { configuration, codeCovViewService } from './../services';
 import apexTestResults from '../services/apexTestResults';
+import { FCFile } from '../services/codeCovView';
 
 export default function apexTest(toTest: string, classOrMethod: string) { 
     var name = toTest.split('.')[0];
@@ -39,11 +40,9 @@ export default function apexTest(toTest: string, classOrMethod: string) {
         return configuration().then(() => {
             vscode.window.forceCode.outputChannel.clear();
             let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('Test Failures');
-            let location = Object.keys(vscode.window.forceCode.workspaceMembers).find(curr => {
-                return vscode.window.forceCode.workspaceMembers[curr].name === name && vscode.window.forceCode.workspaceMembers[curr].type === 'ApexClass';
-            });
-            let member: forceCode.IWorkspaceMember = vscode.window.forceCode.workspaceMembers[location];
-            if (dxRes.summary.failing && dxRes.summary.failing > 0) {
+            var fcfile: FCFile = codeCovViewService.findByNameAndType(name, 'ApexClass');
+            let member: forceCode.IWorkspaceMember = fcfile ? fcfile.getWsMember() : undefined;
+            if(dxRes.summary.failing && dxRes.summary.failing > 0) {
                 vscode.window.forceCode.outputChannel.appendLine('=========================================================   TEST FAILURES   ==========================================================');
                 vscode.window.showErrorMessage('ForceCode: Some Tests Failed','Ok');
                 let re: RegExp = /^(Class|Trigger)\.\S*\.(\S*)\.(\S*)\:\sline\s(\d*)\,\scolumn\s(\d*)$/ig;

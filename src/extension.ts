@@ -6,6 +6,8 @@ import { editorUpdateApexCoverageDecorator, updateDecorations } from './decorato
 import * as commands from './models/commands';
 import * as parsers from './parsers';
 import * as path from 'path';
+import { FCFile } from './services/codeCovView';
+import { IWorkspaceMember } from './forceCode';
 
 export function activate(context: vscode.ExtensionContext): any {
     commands.default.forEach(cur => {
@@ -38,12 +40,13 @@ export function activate(context: vscode.ExtensionContext): any {
         // clear the code coverage
         var fileName = event.document.fileName;
         // get the id
-        var curFileId: string = Object.keys(vscode.window.forceCode.workspaceMembers).find(cur => {
-            return vscode.window.forceCode.workspaceMembers[cur].path === fileName;
-        });
+        const fcfile: FCFile = codeCovViewService.findByPath(fileName);
+        var wsMem: IWorkspaceMember = fcfile.getWsMember();
         
-        if(curFileId && vscode.window.forceCode.workspaceMembers[curFileId].coverage) {
-            delete vscode.window.forceCode.workspaceMembers[curFileId].coverage;
+        if(fcfile && wsMem.coverage) {
+            delete wsMem.coverage;
+            codeCovViewService.addOrUpdateClass(wsMem);
+            codeCovViewService.saveClasses();
             updateDecorations();
         }
     }));
@@ -61,17 +64,15 @@ export function activate(context: vscode.ExtensionContext): any {
     var timeO;
     // watch for deleted files and update workspaceMembers
     context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, vscode.window.forceCode.config.src ? vscode.window.forceCode.config.src : 'src', '**/*.{cls,trigger,page,component}')).onDidDelete(uri => {
-        var theMember = Object.keys(vscode.window.forceCode.workspaceMembers).find(mem => {
-            return vscode.window.forceCode.workspaceMembers[mem].path === uri.fsPath;
-        })
+        const fcfile: FCFile = codeCovViewService.findByPath(uri.path);
 
-        if(theMember) {
-            delete vscode.window.forceCode.workspaceMembers[theMember];
+        if(fcfile) {
+            codeCovViewService.removeClass(fcfile);
             // use a timeout to handle multiple file deletions, this way it only gets called after all files are deleted
             if(timeO) {
                 clearTimeout(timeO);
             }
-            timeO = setTimeout(() => { vscode.window.forceCode.updateFileMetadata(vscode.window.forceCode.workspaceMembers); }, 1000);
+            timeO = setTimeout(() => { codeCovViewService.saveClasses(); }, 1000);
             
         }
     }));

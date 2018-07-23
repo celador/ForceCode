@@ -6,6 +6,7 @@ import DXService from './dxService';
 import * as path from 'path';
 import * as creds from './../commands/credentials';
 import * as fs from 'fs-extra';
+import { FCFile } from './codeCovView';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
@@ -26,7 +27,6 @@ export default class ForceService implements forceCode.IForceService {
     public outputChannel: vscode.OutputChannel;
     public operatingSystem: string;
     public workspaceRoot: string;
-    public workspaceMembers: {};//forceCode.IWorkspaceMember[];
     public statusInterval: any; 
 
     constructor() {
@@ -100,37 +100,15 @@ export default class ForceService implements forceCode.IForceService {
 
     public checkForFileChanges() {
         return this.getWorkspaceMembers()
-            .then(this.parseMembers)
-            .then(res => this.updateFileMetadata(res, true));
-    }
-
-    public updateFileMetadata(newMembers: forceCode.FCWorkspaceMembers, check?: boolean): Promise<any> {
-        return this.checkAndSetWorkspaceMembers(newMembers, check).then(res => {
-            return codeCovViewService.addClasses(newMembers);
-        });
-    }
-
-    // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
-    public compareDates(serverDate: string, localDate: string): boolean {
-        var serverSplit: string[] = serverDate.split('.');
-        var localSplit: string[] = localDate.split('.');
-        var serverMS: number = (new Date(serverSplit[0])).getTime() + parseInt(serverSplit[1].substring(0, 3));
-        var localMS: number = (new Date(localSplit[0])).getTime() + parseInt(localSplit[1].substring(0, 3));
-
-        if(serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
-            return true;
-        }
-        
-        console.log("Time difference between file changes: " + (serverMS - localMS));
-        return false;
+            .then(this.parseMembers);
     }
 
     private parseMembers(mems) {
-        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems[0])) {
+        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems)) {
             return Promise.resolve({});
         }
         var types: {[key: string]: Array<any>} = {};
-        types['type0'] = mems[1];
+        types['type0'] = mems;
         if(types['type0'].length > 3) {
             for(var i = 1; types['type0'].length > 3; i++) {
                 var newTypes: Array<any> = [];
@@ -144,29 +122,37 @@ export default class ForceService implements forceCode.IForceService {
             return vscode.window.forceCode.conn.metadata.list(types[curTypes]);
         });
         return Promise.all(proms).then(rets => {
-            const tempMems: forceCode.FCWorkspaceMembers = mems.shift();
-            return parseRecords(tempMems, rets);
+            return parseRecords(rets);
         });
 
-        function parseRecords(members: forceCode.FCWorkspaceMembers, recs: any[]): forceCode.FCWorkspaceMembers {
-            var membersToReturn: forceCode.FCWorkspaceMembers = {};
+        function parseRecords(recs: any[]): Promise<any> {
             //return Promise.all(recs).then(records => {
             console.log('Retrieved metadata records');
             recs.forEach(curSet => {
                 curSet.forEach(key => {
-                    if(members[key.fullName] && members[key.fullName].type === key.type) {
-                        membersToReturn[key.id] = members[key.fullName];
-                        membersToReturn[key.id].id = key.id;
-                        membersToReturn[key.id].lastModifiedDate = key.lastModifiedDate;
-                        membersToReturn[key.id].lastModifiedByName = key.lastModifiedByName; 
-                        membersToReturn[key.id].lastModifiedById = key.lastModifiedById;
+                    var curFCFile: FCFile = codeCovViewService.findByNameAndType(key.fullName, key.type);
+                    if(curFCFile) {
+                        if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges) {
+                            var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
+                            curMem.id = key.id;
+                            curMem.lastModifiedDate = key.lastModifiedDate;
+                            curMem.lastModifiedByName = key.lastModifiedByName; 
+                            curMem.lastModifiedById = key.lastModifiedById;
+                            codeCovViewService.addOrUpdateClass(curMem);
+                        } else {
+                            commandService.runCommand('ForceCode.fileModified', curMem.path, key.lastModifiedByName);
+                        }
                     }
                 });
             });
-    
-            return membersToReturn;
-    
-            //});
+            console.log('Done getting workspace info');
+            return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined).then(() => {
+                return codeCovViewService.saveClasses().then(() => {
+                    return Promise.resolve();
+                });
+            });
+            
+            
         }
     }
 
@@ -175,7 +161,6 @@ export default class ForceService implements forceCode.IForceService {
     private getWorkspaceMembers(): Promise<any> {
         return new Promise((resolve) => {
             var klaw: any = require('klaw');
-            var members: forceCode.FCWorkspaceMembers = {}; 
             var types: Array<{}> = [];
             var typeNames: Array<string> = [];
             klaw(vscode.window.forceCode.workspaceRoot)
@@ -193,7 +178,7 @@ export default class ForceService implements forceCode.IForceService {
                         } else if (item.path.endsWith('.component')) {
                             type = 'ApexComponent';
                         } else if (item.path.endsWith('.page')) {
-                           type = 'ApexPage';
+                        type = 'ApexPage';
                         }
 
                         if(type) {
@@ -204,61 +189,24 @@ export default class ForceService implements forceCode.IForceService {
                                 types.push({type: type});
                             }
 
-                            var workspaceMember: forceCode.IWorkspaceMember = {
-                                name: filename,
-                                path: item.path,
-                                id: '',//metadataFileProperties.id,
-                                lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
-                                lastModifiedByName: '',
-                                lastModifiedById: '',
-                                type: type,
-                            };
-                            members[filename] = workspaceMember;
+                            if(!codeCovViewService.findByPath(item.path)) {
+                                var workspaceMember: forceCode.IWorkspaceMember = {
+                                    name: filename,
+                                    path: item.path,
+                                    id: '',//metadataFileProperties.id,
+                                    lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
+                                    lastModifiedByName: '',
+                                    lastModifiedById: '',
+                                    type: type,
+                                };
+                                codeCovViewService.addOrUpdateClass(workspaceMember);
+                            }
                         }
                     }
                 })
                 .on('end', function () {
-                    let retval: any[] = [members, types];
-                    resolve(retval);
+                    resolve(types);
                 });
-        });
-    }
-
-    private checkAndSetWorkspaceMembers(newMembers: forceCode.FCWorkspaceMembers, check?: boolean){
-        var self: forceCode.IForceService = vscode.window.forceCode;
-        if(self.dxCommands.isEmptyUndOrNull(newMembers)) {
-            return Promise.resolve();
-        }
-
-        if(!self.config.checkForFileChanges) {
-            self.workspaceMembers = newMembers;
-            console.log('Done getting workspace info');
-            return Promise.resolve();
-        }
-
-        if(check) {
-            if(!self.dxCommands.isEmptyUndOrNull(self.workspaceMembers)) {
-                const changedMems = Object.keys(newMembers).filter(key=> {
-                    return (self.workspaceMembers[key] && (!self.compareDates(newMembers[key].lastModifiedDate, self.workspaceMembers[key].lastModifiedDate)) || newMembers[key].lastModifiedById !== self.workspaceMembers[key].lastModifiedById);
-                });
-                commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
-                console.log('Done checking members');
-                if(changedMems && changedMems.length > 0) {
-                    console.log(changedMems.length + ' members were changed since last load');
-                    changedMems.forEach(curMem => {
-                        commandService.runCommand('ForceCode.fileModified', vscode.window.forceCode.workspaceMembers[curMem].path, newMembers[curMem].lastModifiedByName);
-                    });
-                    // return here so we're not left with stale metadata
-                    return Promise.resolve();
-                }
-            } 
-            self.workspaceMembers = newMembers;
-            console.log('Done getting workspace info');
-        }
-           
-        return self.dxCommands.saveToFile(JSON.stringify(newMembers), 'wsMembers.json').then(() => {
-            console.log('Updated workspace file');
-            return Promise.resolve();
         });
     }
 

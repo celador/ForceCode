@@ -157,9 +157,6 @@ export default function enterCredentials(): Promise<any> {
         // log in with dxLogin
         return vscode.window.forceCode.dxCommands.login()
             .then(() => {
-                if(!vscode.window.forceCode.workspaceMembers) {
-                    vscode.window.forceCode.workspaceMembers = {};
-                }
                 return Promise.resolve(configuration());
             });
     }
