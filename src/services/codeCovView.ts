@@ -37,7 +37,7 @@ import {
 				if(this.classes.length === 0) {
           const tempClasses: any[] = fs.readJsonSync(workspace.workspaceFolders[0].uri.fsPath + path.sep + 'wsMembers.json');
           tempClasses.forEach(cur => {
-            this.classes.push(new FCFile(TreeItemCollapsibleState.None, cur.wsMember));
+            this.classes.push(new FCFile(TreeItemCollapsibleState.None, cur));
           });
           console.log('Done loading wsMember data.');
 				}
@@ -59,7 +59,8 @@ import {
     }
 
     public saveClasses() {
-      return window.forceCode.dxCommands.saveToFile(JSON.stringify(this.classes), 'wsMembers.json').then(() => {
+      return window.forceCode.dxCommands.saveToFile(JSON.stringify(this.getWsMembers()), 'wsMembers.json').then(() => {
+        console.log('Updated wsMembers.json file');
         return Promise.resolve();
       });
     }
@@ -164,6 +165,24 @@ import {
         var aStr = a.label.split('% ').pop().toUpperCase();
         var bStr = b.label.split('% ').pop().toUpperCase();
         return aStr.localeCompare(bStr);
+    }
+
+    private getWsMembers(): IWorkspaceMember[] {
+      var wsMembers: IWorkspaceMember[] = new Array<IWorkspaceMember>();
+      this.classes.forEach(cur => {
+        const curWsMem: IWorkspaceMember = cur.getWsMember();
+        const withoutCoverage: IWorkspaceMember = {
+          name: curWsMem.name,
+          path: curWsMem.path,
+          id: curWsMem.id,
+          lastModifiedDate: curWsMem.lastModifiedDate,
+          lastModifiedByName: curWsMem.lastModifiedByName,
+          lastModifiedById: curWsMem.lastModifiedById,
+          type: curWsMem.type
+        }
+        wsMembers.push(withoutCoverage);
+      });
+      return wsMembers;
     }
   }
   

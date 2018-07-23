@@ -329,9 +329,8 @@ Step 6.  Have Fun!
 ## Change Log
 
 * 3.5.5
-    * PLEASE REMOVE YOUR wsMembers.json FILE BEFORE UPGRADING TO THIS VERSION!!!
     * Added a new code coverage view for 'No Coverage Data' What this means is that the class has been updated without running the test class after updating. When you do this, it removes the coverage data so 0% wasn't an accurate category, therefore we needed a new one.
-    * Code covereage is update upon opening a file (From the Salesforce org) or refreshing a file
+    * Code covereage is updated upon opening a file (From the Salesforce org) or refreshing a file
     * Underhood changes to improve memory consumption
 * 3.5.4
     * Fix a startup bug (Invalid type:null)

@@ -46,7 +46,6 @@ export function activate(context: vscode.ExtensionContext): any {
         if(fcfile && wsMem.coverage) {
             wsMem.coverage = undefined;
             codeCovViewService.addOrUpdateClass(wsMem);
-            codeCovViewService.saveClasses();
             updateDecorations();
         }
     }));

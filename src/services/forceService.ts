@@ -123,7 +123,7 @@ export default class ForceService implements forceCode.IForceService {
 
         function parseRecords(recs: any[]): Promise<any> {
             //return Promise.all(recs).then(records => {
-            console.log('Retrieved metadata records');
+            console.log('Done retrieving metadata records');
             recs.forEach(curSet => {
                 curSet.forEach(key => {
                     var curFCFile: FCFile = codeCovViewService.findByNameAndType(key.fullName, key.type);
@@ -143,10 +143,9 @@ export default class ForceService implements forceCode.IForceService {
             });
             console.log('Done getting workspace info');
             return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined).then(() => {
+                console.log('Done retrieving code coverage');
                 return Promise.resolve();
             });
-            
-            
         }
     }
 
