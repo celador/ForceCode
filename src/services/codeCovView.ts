@@ -265,6 +265,58 @@ export class FCFile extends TreeItem {
       } else {
         this.type = ClassType.NoCoverageData;
       }
+
+      this.command = {
+          command: 'ForceCode.openOnClick',
+          title: '',
+          arguments: [this.wsMember.path]
+      }
+
+      this.type = ClassType.UncoveredClass;
+      if(this.wsMember.coverage) {
+        var fileCoverage: ICodeCoverage = this.wsMember.coverage;
+        var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
+        var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
+        this.label = percent + '% ' + this.label;
+        if(percent >= 75) {
+            this.type = ClassType.CoveredClass;
+        } 
+        // this next check needs changed to something different, as there are problems reading the file
+      } else if(fs.readFileSync(this.wsMember.path).toString().toLowerCase().includes('@istest')) {
+        this.type = ClassType.TestClass;
+      } else {
+        this.type = ClassType.NoCoverageData;
+      }
+    }
+
+    public getWsMember(): IWorkspaceMember {
+      return this.wsMember;
+    }
+
+    public getType(): string {
+      return this.type;
+    }
+
+    public setType(newType: string) {
+      this.type = newType;
+    }
+
+    // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
+    public compareDates(serverDate: string): boolean {
+      if(!this.wsMember.lastModifiedDate) {
+        return true;
+      }
+      var serverSplit: string[] = serverDate.split('.');
+      var localSplit: string[] = this.wsMember.lastModifiedDate.split('.');
+      var serverMS: number = (new Date(serverSplit[0])).getTime() + parseInt(serverSplit[1].substring(0, 3));
+      var localMS: number = (new Date(localSplit[0])).getTime() + parseInt(localSplit[1].substring(0, 3));
+
+      if(serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
+          return true;
+      }
+      
+      console.log("Time difference between file changes: " + (serverMS - localMS));
+      return false;
     }
   }
 
