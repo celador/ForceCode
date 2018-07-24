@@ -139,7 +139,6 @@ export default function createClass() {
                     } else {
                         reject(err);
                     }
-                    vscode.window.forceCode.resetMenu();
                 });
 
             });
