@@ -301,7 +301,7 @@ export default [
             if(vscode.window.forceCode.dxCommands.isLoggedIn) {
                 return commands.showMenu(context);
             } else {
-                return Promise.resolve();
+                return vscode.window.forceCode.dxCommands.getOrgInfo();
             }
         }
     },
@@ -339,20 +339,6 @@ export default [
             const fcfile: FCFile = codeCovViewService.findByPath(filePath);
             
             return vscode.window.forceCode.dxCommands.openOrgPage('/' + fcfile.getWsMember().id);
-        }
-    },
-    {
-        commandName: 'sfdx.force.apex.test.class.run.delegate',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return commandService.runCommand('ForceCode.apexTest', context, 'class');
-        }
-    },
-    {
-        commandName: 'sfdx.force.apex.test.method.run.delegate',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return commandService.runCommand('ForceCode.apexTest', context, 'method');
         }
     },
     {

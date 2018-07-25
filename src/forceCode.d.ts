@@ -38,7 +38,6 @@ export interface Config {
     url?: string;
     username?: string;
     handleMetaFile?: boolean;
-    // workspaceRoot?: string;
 }
 
 export interface MetadataResult {

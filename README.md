@@ -112,6 +112,7 @@ The configuration file should look something like...
 
 ```json
 {
+    "sfdxCompatibility": false,
     "username": "MonsterMike@Salesforce.com",
     "url": "https://login.salesforce.com",
     "checkForFileChanges": true,
@@ -145,6 +146,7 @@ ForceCode will create this file for you upon first start!
 
 ### Options
 
+* sfdxCompatibility: If set to true, you will be able to use this extension with the Salesforce Apex replay extension and others that have compatibility issues. If set to false or not included then you will be able to run apex test classes by clicking the "Run Test" links in the test classes.
 * username: The username for the org you want to connect to.
 * url: This is the login url for Salesforce.  It's either login.salesforce.com for Developer and Professional editions or test.salesforce.com for sandboxes.
 * checkForFileChanges: This option, when set to true, will allow ForceCode to check for file changes against the server on startup of ForceCode.
@@ -328,6 +330,10 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.5.7
+    * Fixed compatibility issue with other SFDX extensions by adding sfdxCompatibility option to force.json config (See configuration section above for details)
+* 3.5.6
+    * Fixed login bug where when you logged out then tried to run the ForceCode menu command nothing would happen.
 * 3.5.5
     * Added a new code coverage view for 'No Coverage Data' What this means is that the class has been updated without running the test class after updating. When you do this, it removes the coverage data so 0% wasn't an accurate category, therefore we needed a new one.
     * Code covereage is updated upon opening a file (From the Salesforce org) or refreshing a file
