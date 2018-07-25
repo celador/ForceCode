@@ -77,9 +77,11 @@ export function activate(context: vscode.ExtensionContext): any {
         }
     }));
 
-    if(!vscode.window.forceCode.config.sfdxCompatibility) {
-        sfdxCommands.default.forEach(cur => {
-            context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
-        });
-    }
+    vscode.commands.getCommands(true).then(coms => {
+        if(!coms.find(curCom => { return curCom === 'sfdx.force.apex.test.class.run.delegate' || curCom === 'sfdx.force.apex.test.method.run.delegate' })) {
+            sfdxCommands.default.forEach(cur => {
+                context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
+            });
+        }
+    });
 }

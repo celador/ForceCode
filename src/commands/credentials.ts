@@ -127,7 +127,6 @@ export default function enterCredentials(): Promise<any> {
     function writeConfigAndLogin(config): Promise<any> {
         const projPath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep;
         const defaultOptions: {} = {
-            sfdxCompatibility: false,
             checkForFileChanges: true,
             autoRefresh: false,
             showTestCoverage: true,

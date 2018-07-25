@@ -37,8 +37,6 @@ export interface Config {
     src?: string;
     url?: string;
     username?: string;
-    sfdxCompatibility?: boolean;
-    // workspaceRoot?: string;
 }
 
 export interface MetadataResult {
