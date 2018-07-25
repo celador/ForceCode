@@ -4,6 +4,7 @@ import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
 import { editorUpdateApexCoverageDecorator, updateDecorations } from './decorators/testCoverageDecorator';
 import * as commands from './models/commands';
+import * as sfdxCommands from './models/sfdxCommands';
 import * as parsers from './parsers';
 import * as path from 'path';
 import { FCFile } from './services/codeCovView';
@@ -76,4 +77,9 @@ export function activate(context: vscode.ExtensionContext): any {
         }
     }));
 
+    if(!vscode.window.forceCode.config.sfdxCompatibility) {
+        sfdxCommands.default.forEach(cur => {
+            context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
+        });
+    }
 }
