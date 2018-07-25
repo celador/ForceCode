@@ -2,6 +2,8 @@
 
 # ForceCode for Visual Studio Code
 
+For now, this extension isn't compatible with the Salesforce apex replay debugger extension!!! I have plans to implement a config option for compatibility in the future.
+
 These will eventually be replaced. They are based on the original extension.
 [![Version](https://vsmarketplacebadge.apphb.com/version/JohnAaronNelson.ForceCode.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 [![Installs](https://vsmarketplacebadge.apphb.com/installs/JohnAaronNelson.ForceCode.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
