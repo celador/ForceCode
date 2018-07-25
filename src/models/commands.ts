@@ -368,7 +368,7 @@ export const fcCommands: FCCommand[] = [
             if(vscode.window.forceCode.dxCommands.isLoggedIn) {
                 return commands.showMenu(context);
             } else {
-                return Promise.resolve();
+                return vscode.window.forceCode.dxCommands.getOrgInfo();
             }
         }
     },
