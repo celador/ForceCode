@@ -66,8 +66,14 @@ import {
     }
   
     public addOrUpdateClass(wsMember: IWorkspaceMember) {
-      var theClass: FCFile = new FCFile(TreeItemCollapsibleState.None, wsMember); 
-      this.updateClass(theClass);
+      const index: number = this.classes.findIndex(curClass => { return curClass.getWsMember().path === wsMember.path });
+      if(index !== -1) {
+        this.classes[index].setWsMember(wsMember);
+      } else {
+        var newClass: FCFile = new FCFile(TreeItemCollapsibleState.None, wsMember);
+        this.classes.push(newClass);
+      }
+      this.refresh();
     }
 
     public findByNameAndType(name: string, type: string): FCFile {
@@ -152,15 +158,6 @@ import {
       return null;    // this is the parent
     }
 
-    private updateClass(newClass: FCFile) {
-      const oldFCFile: FCFile = this.findByPath(newClass.getWsMember().path);
-      if(oldFCFile) {
-        this.removeClass(oldFCFile);
-      }
-      this.classes.push(newClass);
-      this.refresh();
-    }
-
     private sortFunc(a: FCFile, b: FCFile): number {
         var aStr = a.label.split('% ').pop().toUpperCase();
         var bStr = b.label.split('% ').pop().toUpperCase();
@@ -204,7 +201,7 @@ import {
       this.setWsMember(wsMember);
     }
 
-    private setWsMember(newMem: IWorkspaceMember) {
+    public setWsMember(newMem: IWorkspaceMember) {
       this.wsMember = newMem;
       this.label = this.wsMember.path.split(path.sep).pop();
       super.label = this.label;
