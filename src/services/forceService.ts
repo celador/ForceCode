@@ -95,8 +95,11 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     public checkForFileChanges() {
-        return this.getWorkspaceMembers()
-            .then(this.parseMembers);
+        return vscode.window.forceCode.conn.metadata.describe().then(res => {
+            vscode.window.forceCode.describe = res;
+            return this.getWorkspaceMembers()
+                .then(this.parseMembers);
+        });
     }
 
     private parseMembers(mems) {

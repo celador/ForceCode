@@ -8,7 +8,6 @@ const mime = require('mime-types');
 import { getIcon, getExtension, getFolder } from './../parsers';
 import { IWorkspaceMember } from '../forceCode';
 import { commandService, codeCovViewService } from '../services';
-import { FCFile } from '../services/codeCovView';
 const TYPEATTRIBUTE: string = 'type';
 
 export function openAura(context: vscode.ExtensionContext) {

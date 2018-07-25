@@ -84,4 +84,11 @@ export function activate(context: vscode.ExtensionContext): any {
             });
         }
     });
+
+    if(!vscode.window.forceCode.config.handleMetaFiles) {
+        var index: number = commands.default.findIndex(cur => { return cur.commandName === 'ForceCode.retrievePackage'});
+        commands.default[index].hidden = true;
+        index = commands.default.findIndex(cur => { return cur.commandName === 'ForceCode.deployPackage'});
+        commands.default[index].hidden = true;
+    }
 }
