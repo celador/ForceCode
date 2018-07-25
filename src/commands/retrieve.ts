@@ -384,7 +384,13 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                             name = path.normalize(name).replace(option.description + path.sep, '');
                         }
                         name = path.normalize(name).replace('unpackaged' + path.sep, '');
-                        if (name != 'package.xml' && name.search('meta.xml') < 0) {
+                        if (
+							name != 'package.xml'
+							&& (
+								name.search('meta.xml') < 0
+								|| vscode.window.forceCode.config.handleMetaFiles
+							)
+						) {
                             fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
                         }
                     }
