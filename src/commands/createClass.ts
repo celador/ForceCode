@@ -132,7 +132,7 @@ export default function createClass() {
 
                         var metaFile: string = `<?xml version="1.0" encoding="UTF-8"?>
 <ApexClass xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>${config.apiVersion || vscode.window.forceCode.conn.version || constants.API_VERSION}</apiVersion>
+    <apiVersion>${vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version || constants.API_VERSION}</apiVersion>
     <status>Active</status>
 </ApexClass>`;
 
