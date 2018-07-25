@@ -163,6 +163,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     retrieveComponents(resolve, resource);
                 }
             });
+
         }
         throw new Error();
 
@@ -209,18 +210,16 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             }
 
             function getSpecificTypeMetadata(metadataType: string) {
-                vscode.window.forceCode.conn.metadata.describe().then(res => {
-                    var types: any[] = res.metadataObjects
-                        .filter(o => o.xmlName === metadataType)
-                        .map(r => {
-                            return { name: r.xmlName, members: '*' };
-                        });
+                var types: any[] = vscode.window.forceCode.describe.metadataObjects
+                    .filter(o => o.xmlName === metadataType)
+                    .map(r => {
+                        return { name: r.xmlName, members: '*' };
+                    });
 
-                    resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                        unpackaged: { types: types },
-                        apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-                    }).stream());
-                });
+                Promise.resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                    unpackaged: { types: types },
+                    apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
+                }).stream());
             }
 
             function unpackaged() {
