@@ -72,7 +72,7 @@ Please note that the following permissions are required to develop on the Force.
   * Works with Classes, Triggers, Components, Pages, Static Resources, and Lightning Components
   * When opening anything other that Aura files (Lightning components) multiple files can be selected to open
   from the server.
-* Deploy Package
+* Deploy Package - CURRENTLY BROKEN!!!
     * Replaces need for CumulusCI w/ Ant
     * Retrieve detailed deploy information
     * Runs Validation deploys
@@ -112,7 +112,6 @@ The configuration file should look something like...
 
 ```json
 {
-    "sfdxCompatibility": false,
     "username": "MonsterMike@Salesforce.com",
     "url": "https://login.salesforce.com",
     "checkForFileChanges": true,
@@ -137,7 +136,8 @@ The configuration file should look something like...
       "rollbackOnError": true,
       "testLevel": "runLocalTests",
       "verbose": true,
-    }
+    },
+    "handleMetaFiles": false,
 }
 ```
 
@@ -146,7 +146,7 @@ ForceCode will create this file for you upon first start!
 
 ### Options
 
-* sfdxCompatibility: If set to true, you will be able to use this extension with the Salesforce Apex replay extension and others that have compatibility issues. If set to false or not included then you will be able to run apex test classes by clicking the "Run Test" links in the test classes.
+* handleMetaFiles: option to retrieve metadata for files (Only working with packages and with the retrieve/refresh command for now. Currently the metadata will not save to the org. Add the handleMetaFiles: true option to enable) Also, when handleMetaFiles is false, the deploy and package retrieval options won't be in the menu, as they rely on metadata.
 * username: The username for the org you want to connect to.
 * url: This is the login url for Salesforce.  It's either login.salesforce.com for Developer and Professional editions or test.salesforce.com for sandboxes.
 * checkForFileChanges: This option, when set to true, will allow ForceCode to check for file changes against the server on startup of ForceCode.
@@ -247,7 +247,7 @@ You will build your distribution files to a 'dist' folder or another folder dete
 
 SPA folders do not automatically deploy.  We typically run these offline with `jsr-mocks` and webpack and only deploy when we want to publish.
 
-### Deploy Package
+### Deploy Package - CURRENTLY BROKEN!!!!!!!!!!
 
 Menu: &gt;ForceCode Menu ... Deploy Package
 
@@ -332,7 +332,7 @@ Step 6.  Have Fun!
 
 * 3.5.8
     * Detection of other SFDX extensions is handled automatically now. No more need to have the sfdxCompatibility option in the force.json.
-    * Added option to retrieve metadata for files (Only working with packages and with the retrieve/refresh command for now. Currently the metadata will not save to the org. Add the handleMetaFiles: true option to enable) Also, when handleMetaFiles is false, the deploy and package retrieval options won't be in the menu, as they rely on metadat. The deploy function is currently broke, feel free to try and help fix it. I currently get "invalid uri /services/soap/m/39.0" as an error message...any ideas???
+    * Added option to retrieve metadata for files (Only working with packages and with the retrieve/refresh command for now. Currently the metadata will not save to the org. Add the handleMetaFiles: true option to enable) Also, when handleMetaFiles is false, the deploy and package retrieval options won't be in the menu, as they rely on metadata. The deploy function is currently broke, feel free to try and help fix it. I currently get "invalid uri /services/soap/m/39.0" as an error message...any ideas???
 * 3.5.7
     * Fixed compatibility issue with other SFDX extensions by adding sfdxCompatibility option to force.json config (See configuration section above for details)
 * 3.5.6
