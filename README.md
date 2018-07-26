@@ -330,6 +330,9 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.5.8
+    * Detection of other SFDX extensions is handled automatically now. No more need to have the sfdxCompatibility option in the force.json.
+    * Added option to retrieve metadata for files (Only working with packages and with the retrieve/refresh command for now. Currently the metadata will not save to the org. Add the handleMetaFiles: true option to enable) Also, when handleMetaFiles is false, the deploy and package retrieval options won't be in the menu, as they rely on metadat. The deploy function is currently broke, feel free to try and help fix it. I currently get "invalid uri /services/soap/m/39.0" as an error message...any ideas???
 * 3.5.7
     * Fixed compatibility issue with other SFDX extensions by adding sfdxCompatibility option to force.json config (See configuration section above for details)
 * 3.5.6
