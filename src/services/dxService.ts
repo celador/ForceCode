@@ -235,6 +235,9 @@ export default class DXService implements DXCommands {
             vscode.commands.executeCommand('setContext', 'ForceCodeActive', false);
             return Promise.resolve(this.runCommand('auth:logout', '--noprompt')).then(() => {
                 vscode.window.forceCode.config = undefined;
+                vscode.window.forceCode.conn = undefined;   // this will go away soon
+                vscode.window.forceCode.statusBarItem.hide();
+                vscode.window.forceCode.statusBarItem_UserInfo.hide();
                 return Promise.resolve();  
             });
         } else {

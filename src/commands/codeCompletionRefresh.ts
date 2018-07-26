@@ -39,7 +39,7 @@ export default async function codeCompletionRefresh(): Promise<any> {
             await gen.generate(vscode.workspace.workspaceFolders[0].uri.fsPath, objectsToGet);
             var endTime = (new Date()).getTime();
             vscode.window.forceCode.outputChannel.appendLine('Refresh took ' + Math.round((endTime - startTime) / (1000 * 60)) + ' minutes.');
-            vscode.window.forceCode.showStatus('ForceCode: Retrieval of objects complete!!!');
+            vscode.window.showInformationMessage('ForceCode: Retrieval of objects complete!!!', 'OK');
             return Promise.resolve();
         } catch(e) {
             return Promise.reject(vscode.window.showErrorMessage(e.message));

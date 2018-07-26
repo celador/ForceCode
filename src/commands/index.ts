@@ -8,7 +8,6 @@ import credentials from './credentials';
 import deploy from './deploy';
 import diff from './diff';
 import dx from './dx';
-import dxLogout from './dxLogout';
 import executeAnonymous from './executeAnonymous';
 import find from './find';
 import getLog from './getLog';
@@ -31,7 +30,6 @@ export {
     deploy,
     diff,
     dx,
-    dxLogout,
     executeAnonymous,
     find,
     getLog,

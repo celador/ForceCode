@@ -434,7 +434,7 @@
     "crypto-browserify": "3.12.0",
     "fs-extra": "^7.0.0",
     "globule": "^1.2.1",
-    "jsforce": "^1.9.0",
+    "jsforce": "1.8.5",
     "jszip": "^3.1.5",
     "klaw": "^2.1.1",
     "mime-types": "^2.1.19",

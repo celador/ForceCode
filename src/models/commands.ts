@@ -256,7 +256,7 @@ export default [
         icon: 'x',
         label: 'Log out of Salesforce',
         command: function (context, selectedResource?) {
-            return commands.dxLogout();
+            return vscode.window.forceCode.dxCommands.logout();
         }
     },
     // Enter Salesforce Credentials
