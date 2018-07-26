@@ -8,7 +8,7 @@ import {
     window,
     workspace
   } from 'vscode';
-  import { IWorkspaceMember, ICodeCoverage, FCWorkspaceMembers } from '../forceCode';
+  import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
   import * as path from 'path';
   import * as fs from 'fs-extra';
   import constants from './../models/constants';

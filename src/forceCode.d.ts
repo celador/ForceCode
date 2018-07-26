@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import jsforce = require('jsforce');
 import { DXCommands} from './services/dxService';
-import { IMetadataFileProperties } from 'jsforce';
 
 declare module 'vscode' {
     export namespace window {

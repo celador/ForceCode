@@ -4,7 +4,6 @@ import { FCFile } from '../services/codeCovView';
 import { codeCovViewService } from '../services';
 
 // create a decorator type that we use to decorate small numbers
-const coverageChannel: vscode.OutputChannel = vscode.window.createOutputChannel('Apex Test Coverage');
 const uncoveredLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
     backgroundColor: 'rgba(247,98,34,0.3)',
     // borderWidth: '1px',
@@ -55,14 +54,12 @@ export function updateDecorations() {
         }
     }
     activeEditor.setDecorations(lineOpts, uncoveredLineOptions);
-    // activeEditor.setDecorations(coveredDecorationType, coveredLines);
 }
 
 export function getUncoveredLineOptions(document: vscode.TextDocument) {
     var uncoveredLineDec: vscode.DecorationOptions[] = [];
     const fcfile: FCFile = codeCovViewService.findByPath(document.fileName);
     if(fcfile) {
-        coverageChannel.clear();
         const wsMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
 
         if(wsMem.id && wsMem.coverage) {
@@ -79,13 +76,10 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
                 let decorationRange: vscode.DecorationOptions = { range: document.lineAt(Number(notCovered - 1)).range, hoverMessage: 'Line ' + notCovered + ' not covered by a test' };
                 uncoveredLineDecorations.push(decorationRange);
                 // Add output to output channel
-                coverageChannel.appendLine(fileCoverage.ApexClassOrTrigger.Name + ' line ' + notCovered + ' not covered.')
             });
-            var uncovered: number = fileCoverage.NumLinesUncovered;
             var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
             var percent = ((fileCoverage.NumLinesCovered / total) * 100).toFixed(2) + '% covered';
             vscode.window.forceCode.showStatus(fileCoverage.ApexClassOrTrigger.Name + ' ' + percent);
-            coverageChannel.appendLine(fileCoverage.ApexClassOrTrigger.Name + '=> Uncovered lines: ' + uncovered + ', Total Line: ' + total + ', ' + percent);
         }
         return uncoveredLineDecorations;
     }
