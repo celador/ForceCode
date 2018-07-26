@@ -240,7 +240,7 @@ export default [
         name: 'Refreshing Code Completion',
         hidden: false,
         description: 'Refresh objects from org',
-        detail: 'You must login to DX first or if you receive errors. Allows code completion with custom fields and objects by downloading org data.',
+        detail: 'Generate faux sObject classes for apex code completion using the Salesforce apex plugin.',
         icon: 'code',
         label: 'Code Completion Refresh',
         command: function (context, selectedResource?) {
