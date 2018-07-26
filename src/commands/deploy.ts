@@ -29,15 +29,15 @@ export default function deploy(context: vscode.ExtensionContext) {
         }
     } (fs));
     var deployOptions: any = {
-        connection: vscode.window.forceCode.config.username,
-        loginUrl: vscode.window.forceCode.config.url || 'https://login.salesforce.com',
+        //connection: vscode.window.forceCode.config.username,
+        //loginUrl: vscode.window.forceCode.config.url || 'https://login.salesforce.com',
         checkOnly: true,
         // testLevel: 'RunLocalTests',  // it's now either runTests or runAllTests
-        verbose: false,
+        //verbose: false,
         ignoreWarnings: false,
         rollbackOnError: true,
-        pollInterval: vscode.window.forceCode.config.poll || 5000,
-        pollTimeout: vscode.window.forceCode.config.pollTimeout ? (vscode.window.forceCode.config.pollTimeout * 1000) : 600000,
+        //pollInterval: vscode.window.forceCode.config.poll || 5000,
+        //pollTimeout: vscode.window.forceCode.config.pollTimeout ? (vscode.window.forceCode.config.pollTimeout * 1000) : 600000,
     };
 
     return Promise.resolve(vscode.window.forceCode)
@@ -56,12 +56,23 @@ export default function deploy(context: vscode.ExtensionContext) {
             fs.unlinkSync(validationIdPath);
             return tools.deployRecentValidation(validationId, deployOptions);
         } else {
-            return tools.deployFromDirectory(deployPath, deployOptions);
+            //return tools.deployFromDirectory(deployPath, deployOptions);
+            // will replace this with a function that zips everything in the package.xml...for testing purposes
+            // return zipPackage(deployPath).then(zip => {
+            var zipStream = fs.createReadStream(deployPath + path.sep + 'package.zip');
+            return vscode.window.forceCode.conn.metadata.deploy(zipStream, deployOptions)
+                .complete(function(err, result) {
+                    if (err) { 
+                        return err; 
+                    } else {
+                        return result;
+                    }
+            });
         }
     }
     // =======================================================================================================================================
-    function finished(res): boolean {
-        if (res.success) {
+    function finished(res) /*Promise<any>*/ {
+        if (res.status !== 'Failed') {
             vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
             if (deployOptions.checkOnly) {
                 fs.writeFileSync(validationIdPath, res.id);
@@ -69,6 +80,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         } else {
             vscode.window.showErrorMessage('ForceCode: Deploy Errors');
         }
+
         tools.reportDeployResult(res, logger, deployOptions.verbose);
         logger.flush();
         unregisterProxy();

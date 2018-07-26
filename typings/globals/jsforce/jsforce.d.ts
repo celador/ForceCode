@@ -58,12 +58,14 @@ declare module 'jsforce/index' {
             publicDeclarations: {}
         }
         interface DeployResult {
+            id: string;
             done: boolean;
             true: boolean;
             state: string;  
             numberComponentErrors: number;
             numberComponentsDeployed: number;
-            numberTestsCompleted: number
+            numberTestsCompleted: number;
+            complete(callback: (err, result) => any): any;
         }
         interface RetrieveResult {
             id: string;
@@ -90,12 +92,12 @@ declare module 'jsforce/index' {
             pollTimeout: number;
             pollInterval: number;
             describe(): Promise<any>;
-            checkDeployStatus(processId: string, {}): Promise<any>;
+            checkDeployStatus(processId: string, {}?): Promise<any>;
             checkRetrieveStatus(id: string): Promise<any>;
             list(queries: any[], version?: string) : Promise<IMetadataFileProperties[]>
             retrieve({}): { stream(): NodeJS.ReadableStream };
             retrieve({}): Promise<RetrieveResult>;
-            deploy({}, {}): Promise<DeployResult>;
+            deploy({}, {}): DeployResult;
             upsert(foo: string, bar: any): Promise<any>;
         }
         // Connection
