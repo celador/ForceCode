@@ -238,7 +238,7 @@ Mac: alt + cmd + b
 Win: ctrl + shift + b
 
 ForceCode looks for Static Resources in two places.  The first is `resource-bundles`, the second is `spa`.  Typically, static resources go in the resource-bundles folder, and the resource is named something like `foo.resource` where foo is the name of the static resource.
-So, to create a new Static Resource, ensure the resource-bundles folder exists in the root of your project folder.  Then create a new folder named how you want your static resource to be named with `.resource.RESOURCETYPE` at the end of the name(E.G. bootstrap.resource.application.x-zip-compressed).  You can now Bundle and Deploy this Static Resource.
+So, to create a new Static Resource, ensure the resource-bundles folder exists in the root of your project folder.  Then create a new folder named how you want your static resource to be named with `.resource.RESOURCETYPE` at the end of the name(E.G. bootstrap.resource.application.x-zip-compressed).  IF YOU ARE DEPLOYING A SINGLE FILE, SUCH AS A JAVASCRIPT FILE, THEN THE FOLDER NAME NEEDS TO BE EXACTLY THE SAME AS THE JAVASCRIPT FILE (E.G. myResource.resource.application.javascript will be the folder name and myResource.js will be the only file that can live in this folder!!!!!!!!!!!!!!!!!!!!!!!!!!) If you do it any differently then simply put, it won't work!! You can now Bundle and Deploy this Static Resource.
 Whenever you save a file that lives in a resource bundles folder, the resource will automatically bundle and deploy to your org.  Use this in conjunction with autoRefresh flag and browser property to get a browsersync-like experience
 
 If you build SPAs, typically you will have a `spa` folder, then another folder named for your static resource, like `spa/foo`.
@@ -260,7 +260,6 @@ Deploy your package based on your configured deploy options and the package.xml 
 * rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
 * runAllTests:     Runn all tests in org
 * runTests:        An array of test names to be run [TestClass1, TestClass2,...]
-* runTests:        A list of Apex tests to run during deployment \(commma separated list\)
 * verbose:         Output execution detail log to a `DeployStatistics.log` file
 
 If you want destructive changes as part of the deploy, put a `destructiveChanges.xml` file in your src folder
