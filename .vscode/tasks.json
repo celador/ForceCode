@@ -24,7 +24,7 @@
             // show the output window only if unrecognized errors occur.
             "presentation": {
                 "reveal": "always",
-                "panel": "new"
+                "panel": "shared"
             },
             
             "problemMatcher": [
