@@ -268,7 +268,7 @@ You will build your distribution files to a 'dist' folder or another folder dete
 
 SPA folders do not automatically deploy.  We typically run these offline with `jsr-mocks` and webpack and only deploy when we want to publish.
 
-### Deploy Package - CURRENTLY BROKEN!!!!!!!!!!
+### Deploy Package
 
 Menu: &gt;ForceCode Menu ... Deploy Package
 
