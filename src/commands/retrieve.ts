@@ -9,30 +9,10 @@ import { FCFile } from '../services/codeCovView';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
-var tools: any = require('jsforce-metadata-tools');
 
 export default function retrieve(context: vscode.ExtensionContext, resource?: vscode.Uri) {
     let option: any;
-    const _consoleInfoReference: any = console.info;
-    const _consoleErrorReference: any = console.error;
-    const _consoleLogReference: any = console.log;
-    const statsPath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}RetrieveStatistics.log`;
-    var logger: any = (function (fs) {
-        var buffer: string = '';
-        return {
-            log: log,
-            flush: flush,
-        };
-        function log(val) {
-            buffer += (val + '\n');
-            vscode.window.forceCode.outputChannel.appendLine(val);
-        }
-        function flush() {
-            var logFile: any = path.resolve(statsPath);
-            fs.writeFileSync(logFile, buffer);//, 'utf8');
-            buffer = '';
-        }
-    }(fs));
+
     return Promise.resolve(vscode.window.forceCode)
         .then(showPackageOptions)
         .then(getPackage)
@@ -149,7 +129,6 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     function getPackage(opt: vscode.QuickPickItem) {
         option = opt;
         // Proxy Console.info to capture the status output from metadata tools
-        registerProxy();
         vscode.window.forceCode.conn.metadata.pollTimeout = (vscode.window.forceCode.config.pollTimeout || 600) * 1000;
 
         if (opt) {
@@ -406,38 +385,13 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 vscode.window.showErrorMessage('Retrieve Errors');
             }, 100);
         }
-        tools.reportRetrieveResult(res, logger, vscode.window.forceCode.config.deployOptions.verbose);
-        logger.flush();
-        unregisterProxy();
+        vscode.window.forceCode.outputChannel.append(vscode.window.forceCode.dxCommands.outputToString(res).replace(/{/g, '').replace(/}/g, ''));
         return res;
     }
     function onError(err) {
-        unregisterProxy();
         setTimeout(function () {
-            vscode.window.showErrorMessage('Retrieve Errors');
+            vscode.window.showErrorMessage('Retrieve Errors\n' + err.message);
         }, 100);
-        return vscode.window.showErrorMessage(err.message);
     }
     // =======================================================================================================================================
-    function registerProxy() {
-        console.info = function () {
-            var msg: string = arguments[0];
-            vscode.window.forceCode.outputChannel.appendLine(msg);
-            return _consoleInfoReference.apply(this, arguments);
-        };
-        console.log = function () {
-            return _consoleLogReference.apply(this, arguments);
-        };
-        console.error = function () {
-            if (!arguments[0].match(/DeprecationWarning\:/)) {
-                vscode.window.forceCode.outputChannel.appendLine(arguments[0]);
-            }
-            return _consoleErrorReference.apply(this, arguments);
-        };
-    }
-    function unregisterProxy() {
-        console.info = _consoleInfoReference;
-        console.log = _consoleLogReference;
-        console.error = _consoleErrorReference;
-    }
 }

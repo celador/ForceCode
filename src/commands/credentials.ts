@@ -142,7 +142,6 @@ export default function enterCredentials(): Promise<any> {
             deployOptions: {
                 'checkOnly': false,
                 'runAllTests': false,
-                'verbose': false,
                 'ignoreWarnings': true,
             },
         };

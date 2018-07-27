@@ -72,7 +72,7 @@ Please note that the following permissions are required to develop on the Force.
   * Works with Classes, Triggers, Components, Pages, Static Resources, and Lightning Components
   * When opening anything other that Aura files (Lightning components) multiple files can be selected to open
   from the server.
-* Deploy Package - CURRENTLY BROKEN!!!
+* Deploy Package
     * Replaces need for CumulusCI w/ Ant
     * Retrieve detailed deploy information
     * Runs Validation deploys
@@ -135,7 +135,6 @@ The configuration file should look something like...
       "ignoreWarnings": true,
       "rollbackOnError": true,
       "testLevel": "runLocalTests",
-      "verbose": true,
     },
     "handleMetaFiles": false,
 }
@@ -247,7 +246,7 @@ You will build your distribution files to a 'dist' folder or another folder dete
 
 SPA folders do not automatically deploy.  We typically run these offline with `jsr-mocks` and webpack and only deploy when we want to publish.
 
-### Deploy Package - CURRENTLY BROKEN!!!!!!!!!!
+### Deploy Package
 
 Menu: &gt;ForceCode Menu ... Deploy Package
 
@@ -260,7 +259,6 @@ Deploy your package based on your configured deploy options and the package.xml 
 * rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
 * runAllTests:     Runn all tests in org
 * runTests:        An array of test names to be run [TestClass1, TestClass2,...]
-* verbose:         Output execution detail log to a `DeployStatistics.log` file
 
 If you want destructive changes as part of the deploy, put a `destructiveChanges.xml` file in your src folder
 
@@ -329,6 +327,10 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.5.9
+    * Fix deploy package functionality, also verbose is removed from deploy options. If you don't remove it from force.json it will cause errors!!
+    * Remove unneeded code - optimization
+    * Test result errors now show up as an error message instead of in the console
 * 3.5.8
     * Detection of other SFDX extensions is handled automatically now. No more need to have the sfdxCompatibility option in the force.json.
     * Added option to retrieve metadata for files (Only working with packages and with the retrieve/refresh command for now. Currently the metadata will not save to the org. Add the handleMetaFiles: true option to enable) Also, when handleMetaFiles is false, the deploy and package retrieval options won't be in the menu, as they rely on metadata. The deploy function is currently broke, feel free to try and help fix it. I currently get "invalid uri /services/soap/m/39.0" as an error message...any ideas???
