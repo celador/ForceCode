@@ -54,13 +54,13 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         // Aura Bundles are a special case, since they can be upserted with the Tooling API
         // Instead of needing to be compiled, like Classes and Pages..
         return Promise.resolve(vscode.window.forceCode)
-            .then(getAuraBundle()
+            .then(getAuraBundle)
                 .then(ensureAuraBundle)
-                .then(bundle => getAuraDefinition(bundle)
-                    .then(definitions => upsertAuraDefinition(definitions, bundle)
-                    )
-                )
-            ).then(finished, onError);
+            .then(bundle => {
+                return getAuraDefinition(bundle)
+                    .then(definitions => upsertAuraDefinition(definitions, bundle));
+            })
+            .then(finished, onError);
     } else {
         // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
         return Promise.resolve(vscode.window.forceCode)
@@ -144,13 +144,13 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
     function ensureAuraBundle(results) {
         // If the Bundle doesn't exist, create it, else Do nothing
-        if (!results[0] || results[0].length === 0) {
+        if (results.length === 0 || !results[0]) {
             // Create Aura Definition Bundle
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').create({
-                'DeveloperName': name,
-                'MasterLabel': name,
-                'ApiVersion': vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-                'Description': name.replace('_', ' '),
+                DeveloperName: name,
+                MasterLabel: name,
+                ApiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
+                Description: name.replace('_', ' '),
             }).then(bundle => {
                 results[0] = [bundle];
                 return results;
@@ -475,7 +475,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             // Modify this if statement to check if any metadata type
             return metadataError(err);
         } else {
-            vscode.window.showErrorMessage(err.message);
+            vscode.window.showErrorMessage(err);
         }
     }
 
@@ -487,8 +487,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         var idx: number = partTwo.indexOf(':');
         var rangeArray: any[] = partTwo.substring(0, idx).split(',');
         var errorMessage: string = partTwo.substring(idx);
-        var statusIdx: string = 'Message: ';
-        var statusMessage: string = partTwo.substring(partTwo.indexOf(statusIdx) + statusIdx.length);
         var failureLineNumber: number = rangeArray[0];
         var failureColumnNumber: number = rangeArray[1];
         var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
@@ -498,7 +496,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         diagnostics.push(new vscode.Diagnostic(failureRange, errorMessage, 0));
         diagnosticCollection.set(document.uri, diagnostics);
 
-        vscode.window.showErrorMessage(statusMessage);
+        vscode.window.showErrorMessage(err.message);
         return false;
     }
     function metadataError(err) {
