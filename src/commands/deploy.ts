@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import fs = require('fs-extra');
 import * as path from 'path';
 
 var archiver = require('archiver');

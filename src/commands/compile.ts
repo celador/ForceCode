@@ -29,8 +29,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     var Format: string = undefined;
     var Source: string = undefined;
     var currentObjectDefinition: any = undefined;
-    var AuraDefinitionBundleId: string = undefined;
-    var Id: string = undefined;
     /* tslint:enable */
     // Start doing stuff
     if (isMetadata(document) && toolingType === undefined) {
@@ -55,7 +53,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         // Instead of needing to be compiled, like Classes and Pages..
         return Promise.resolve(vscode.window.forceCode)
             .then(getAuraBundle)
-                .then(ensureAuraBundle)
+            .then(ensureAuraBundle)
             .then(bundle => {
                 return getAuraDefinition(bundle)
                     .then(definitions => upsertAuraDefinition(definitions, bundle));
@@ -169,8 +167,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         var def: any[] = definitions.filter(result => result.DefType === DefType);
         currentObjectDefinition = def.length > 0 ? def[0] : undefined;
         if (currentObjectDefinition !== undefined) {
-            AuraDefinitionBundleId = currentObjectDefinition.AuraDefinitionBundleId;
-            Id = currentObjectDefinition.Id;
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').update({ Id: currentObjectDefinition.Id, Source });
         } else if (bundle[0]) {
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle[0].Id, DefType, Format, Source });

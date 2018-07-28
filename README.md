@@ -327,6 +327,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.5.10
+    * Fix 'Creating Aura components in a folder doesn't save properly' on server
 * 3.5.9
     * Fix deploy package functionality, also verbose is removed from deploy options. If you don't remove it from force.json it will cause errors!!
     * Remove unneeded code - optimization

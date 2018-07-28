@@ -21,17 +21,31 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
     function updateCoverage(res: QueryResult): QueryResult {
         // Add Line Coverage information
         if (res.records) {
+            //var highestCov: number = 0;
+            //var highestClass: string;
             res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
                 const fcfile: FCFile = codeCovViewService.findById(curRes.ApexClassOrTriggerId);
                 if(fcfile && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
                     var wsMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
                     wsMem.coverage = curRes;
+                    //var total: number = curRes.NumLinesCovered + curRes.NumLinesUncovered;
+                    //var percent = Math.floor((curRes.NumLinesCovered / total) * 100);
+                    //if(percent > highestCov) {
+                    //    highestCov = percent;
+                    //    highestClass = wsMem.id;
+                    //}
                     codeCovViewService.addOrUpdateClass(wsMem);
                 }
             });
             codeCovViewService.saveClasses();
             // update the current editor
             editorUpdateApexCoverageDecorator(vscode.window.activeTextEditor);
+
+            // there's a bug in vscode, so for future use
+            //if(testClassIds && highestClass) {
+            //    var treePro = vscode.window.createTreeView('ForceCode.codeCovDataProvider', {treeDataProvider: codeCovViewService});
+            //    treePro.reveal(codeCovViewService.findById(highestClass));
+            //}
         }
 
         return res;

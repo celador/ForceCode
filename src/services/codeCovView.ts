@@ -155,6 +155,9 @@ import {
     }
   
     public getParent(element: FCFile): any {
+      //if(element.getWsMember().id) {  // there's a bug in vscode, so for future use
+      //  return this.findByPath(path.sep + element.getType());
+      //}
       return null;    // this is the parent
     }
 
