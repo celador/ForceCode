@@ -266,6 +266,8 @@ export class FCFile extends TreeItem {
         this.type = ClassType.NoCoverageData;
       }
 
+      super.label = this.wsMember.path.split(path.sep).pop();
+
       this.command = {
           command: 'ForceCode.openOnClick',
           title: '',
