@@ -37,7 +37,7 @@ import {
 				if(this.classes.length === 0) {
           const tempClasses: any[] = fs.readJsonSync(workspace.workspaceFolders[0].uri.fsPath + path.sep + 'wsMembers.json');
           tempClasses.forEach(cur => {
-            this.classes.push(new FCFile(TreeItemCollapsibleState.None, cur));
+            this.classes.push(new FCFile(cur.name, TreeItemCollapsibleState.None, cur));
           });
           console.log('Done loading wsMember data.');
 				}
@@ -70,7 +70,7 @@ import {
       if(index !== -1) {
         this.classes[index].setWsMember(wsMember);
       } else {
-        var newClass: FCFile = new FCFile(TreeItemCollapsibleState.None, wsMember);
+        var newClass: FCFile = new FCFile(wsMember.name, TreeItemCollapsibleState.None, wsMember);
         this.classes.push(newClass);
       }
       this.refresh();
@@ -127,16 +127,7 @@ import {
         // This is the root node
         Object.keys(ClassType).forEach(val => {
           if(val !== ClassType.NoShow) {
-            var tempMem: IWorkspaceMember = {
-              path: path.sep + ClassType[val],
-              id: undefined,
-              name: undefined,
-              lastModifiedById: undefined,
-              lastModifiedByName: undefined,
-              lastModifiedDate: undefined,
-              type: undefined,
-            }
-            var newFCFile: FCFile = new FCFile(TreeItemCollapsibleState.Collapsed, tempMem);
+            var newFCFile: FCFile = new FCFile(ClassType[val], TreeItemCollapsibleState.Collapsed);
             newFCFile.setType(ClassType[val]);
             fcFiles.push(newFCFile);
           }
@@ -144,7 +135,7 @@ import {
         fcFiles.sort(this.sortFunc);
 
         return fcFiles;
-      } else if(!element.getWsMember().id) {
+      } else if(!element.getWsMember()) {
         this.classes.sort(this.sortFunc);
         return this.classes.filter(res => {
           return res.getType() === element.getType();
@@ -188,15 +179,14 @@ import {
   
   export class FCFile extends TreeItem {
     public readonly collapsibleState: TreeItemCollapsibleState;
-    public label: string;
     public command: Command;
 
     private wsMember: IWorkspaceMember;
     private type: string;
   
-    constructor(collapsibleState: TreeItemCollapsibleState, wsMember: IWorkspaceMember) {
+    constructor(name: string, collapsibleState: TreeItemCollapsibleState, wsMember?: IWorkspaceMember) {
       super(
-        wsMember.name,
+        name,
         collapsibleState
       );
   
@@ -206,14 +196,14 @@ import {
 
     public setWsMember(newMem: IWorkspaceMember) {
       this.wsMember = newMem;
-      this.label = this.wsMember.path.split(path.sep).pop();
-      super.label = this.label;
 
       // we only want classes and triggers
       if(!this.wsMember || (this.wsMember.type !== 'ApexClass' && this.wsMember.type !== 'ApexTrigger')) {
         this.type = ClassType.NoShow;
         return undefined;
       }
+
+      super.label = this.wsMember.path.split(path.sep).pop();
 
       this.command = {
           command: 'ForceCode.openOnClick',
