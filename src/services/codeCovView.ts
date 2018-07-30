@@ -161,16 +161,7 @@ import {
     private getWsMembers(): IWorkspaceMember[] {
       var wsMembers: IWorkspaceMember[] = new Array<IWorkspaceMember>();
       this.classes.forEach(cur => {
-        const curWsMem: IWorkspaceMember = cur.getWsMember();
-        const withoutCoverage: IWorkspaceMember = {
-          name: curWsMem.name,
-          path: curWsMem.path,
-          id: curWsMem.id,
-          lastModifiedDate: curWsMem.lastModifiedDate,
-          lastModifiedByName: curWsMem.lastModifiedByName,
-          lastModifiedById: curWsMem.lastModifiedById,
-          type: curWsMem.type
-        }
+        const withoutCoverage: IWorkspaceMember = Object.assign({}, cur.getWsMember(), {coverage: undefined});
         wsMembers.push(withoutCoverage);
       });
       return wsMembers;

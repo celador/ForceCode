@@ -35,7 +35,6 @@ export default function apexTest(toTest: string, classOrMethod: string) {
     function showResult(dxRes) {
         return configuration().then(() => {
             if(dxRes.summary.failing && dxRes.summary.failing > 0) {
-                console.log(dxRes.tests);
                 let errorMessage: string = 'FAILED: ';
                 dxRes.tests.forEach(curTest => {
                     if(curTest.StackTrace && curTest.Message) {

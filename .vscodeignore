@@ -12,3 +12,4 @@ out/test/**
 out/
 .vscode-test/**
 needscopied/**
+.sfdx/**
