@@ -327,6 +327,10 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.5.11
+    * Fix issue saving files to the server (No information being shown, not even an error)
+    * Start making error messages more informative. They're not the prettiest at the moment, but better than they were. I mostly allow the salesforce linters to give errors now.
+    * Small optimizations
 * 3.5.10
     * Fix 'Creating Aura components in a folder doesn't save properly' on server
 * 3.5.9

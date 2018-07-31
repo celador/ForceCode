@@ -459,20 +459,26 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
     
     function onError(err) {
+        var errorMessage: string;
         if(err.message) {
-            var errmess: string = err.message.split('Message:')[1].split(':')[0];
-            vscode.window.showErrorMessage(errmess);
-            var linCol: string[] = err.message.split(':')[1].split(',');
-            var failureLineNumber: number = Number.parseInt(linCol[0]);
-            var failureColumnNumber: number = Number.parseInt(linCol[1]);
-            var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
-            if (failureColumnNumber > 0) {
-                failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));
-            }
-            diagnostics.push(new vscode.Diagnostic(failureRange, errmess, 0));
-            diagnosticCollection.set(document.uri, diagnostics);
+            errorMessage = err.message;
+            try {
+                var errmess: string = err.message.split('Message:')[1].split(':')[0];
+                vscode.window.showErrorMessage(errmess);
+                var linCol: string[] = err.message.split(':')[1].split(',');
+                var failureLineNumber: number = Number.parseInt(linCol[0]);
+                var failureColumnNumber: number = Number.parseInt(linCol[1]);
+                var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
+                if (failureColumnNumber > 0) {
+                    failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));
+                }
+                diagnostics.push(new vscode.Diagnostic(failureRange, errmess, 0));
+                diagnosticCollection.set(document.uri, diagnostics);
+                errorMessage = errmess;
+            } catch (e) {}
         } else {
-            vscode.window.showErrorMessage(err);
+            errorMessage = err;
         }
+        vscode.window.showErrorMessage(errorMessage);
     }
 }
