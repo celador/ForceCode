@@ -162,6 +162,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
     }
     
     function onError(err) {
+        var errorMessage: string;
         if(err.message) {
             try {
                 var errmess: string = err.message.split('Message:')[1].split(': Source')[0];
