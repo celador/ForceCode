@@ -17,6 +17,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     if(!document) {
         return undefined;
     }
+    var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
+    var diagnostics: vscode.Diagnostic[] = [];
     const body: string = document.getText();
     const ext: string = parsers.getFileExtension(document);
     const toolingType: string = parsers.getToolingType(document);
@@ -42,9 +44,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             .then(finished)
             .catch(onError);
     } else if (toolingType === undefined) {
-        return Promise
-            .reject({ message: 'Metadata Describe Error. Please try again.' })
-            .catch(onError);
+        return Promise.reject({ message: 'Metadata Describe Error. Please try again.' })
     } else if (toolingType === 'AuraDefinition') {
         DefType = getAuraDefTypeFromDocument();
         Format = getAuraFormatFromDocument();
@@ -58,15 +58,17 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 return getAuraDefinition(bundle)
                     .then(definitions => upsertAuraDefinition(definitions, bundle));
             })
-            .then(finished, onError);
+            .then(finished)
+            .catch(onError);
     } else {
         // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
         return Promise.resolve(vscode.window.forceCode)
             .then(addToContainer)
             .then(requestCompile)
             .then(getCompileStatus)
-            .then(finished, onError)
-            .then(containerFinished);
+            .then(finished)
+            .then(containerFinished)
+            .catch(onError);
     }
 
     // =======================================================================================================================================
@@ -409,20 +411,13 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
     // =======================================================================================================================================
     function finished(res: any): boolean {
-        // Create a diagnostic Collection for the current file.  Overwriting the last...
-        var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
-        var diagnostics: vscode.Diagnostic[] = [];
+        diagnosticCollection.set(document.uri, diagnostics);
+        var failures: number = 0;
         if (res.records && res.records.length > 0) {
             res.records.filter(r => r.State !== 'Error').forEach(containerAsyncRequest => {
                 containerAsyncRequest.DeployDetails.componentFailures.forEach(failure => {
-                    // Create Red squiggly lines under the errors that came back
                     if (failure.problemType === 'Error') {
-                        var failureLineNumber: number = Math.abs(failure.lineNumber || failure.LineNumber || 1);
-                        var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
-                        if (failure.columnNumber > 0) {
-                            failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failure.columnNumber));
-                        }
-                        diagnostics.push(new vscode.Diagnostic(failureRange, failure.problem, failure.problemType));
+                        failures++;
                     }
                 });
             });
@@ -435,9 +430,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         } else if (res.State === 'Error') {
             vscode.window.showErrorMessage(`There was an error while saving ${name}. Check for syntax errors.`);
         }
-        // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
-        diagnosticCollection.set(document.uri, diagnostics);
-        if (diagnostics.length > 0) {
+
+        if (failures > 0) {
             // FAILURE !!! 
             vscode.window.showErrorMessage(`There was an error while compiling ${name}. Check for syntax errors.`);
             return false;
@@ -463,55 +457,22 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return Promise.resolve();
         });
     }
-    // =======================================================================================================================================
-    function onError(err): any {
-        if (toolingType === 'AuraDefinition') {
-            return toolingError(err);
-        } else if (toolingType === 'CustomObject' || toolingType === 'CustomLabels') {
-            // Modify this if statement to check if any metadata type
-            return metadataError(err);
+    
+    function onError(err) {
+        if(err.message) {
+            var errmess: string = err.message.split('Message:')[1].split(':')[0];
+            vscode.window.showErrorMessage(errmess);
+            var linCol: string[] = err.message.split(':')[1].split(',');
+            var failureLineNumber: number = Number.parseInt(linCol[0]);
+            var failureColumnNumber: number = Number.parseInt(linCol[1]);
+            var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
+            if (failureColumnNumber > 0) {
+                failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));
+            }
+            diagnostics.push(new vscode.Diagnostic(failureRange, errmess, 0));
+            diagnosticCollection.set(document.uri, diagnostics);
         } else {
             vscode.window.showErrorMessage(err);
         }
     }
-
-    function toolingError(err) {
-        var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
-        var diagnostics: vscode.Diagnostic[] = [];
-        var splitString: string[] = err.message.split(fileName + ':');
-        var partTwo: string = splitString.length > 1 ? splitString[1] : '1,1:Unknown error';
-        var idx: number = partTwo.indexOf(':');
-        var rangeArray: any[] = partTwo.substring(0, idx).split(',');
-        var errorMessage: string = partTwo.substring(idx);
-        var failureLineNumber: number = rangeArray[0];
-        var failureColumnNumber: number = rangeArray[1];
-        var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
-        if (failureColumnNumber > 0) {
-            failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));
-        }
-        diagnostics.push(new vscode.Diagnostic(failureRange, errorMessage, 0));
-        diagnosticCollection.set(document.uri, diagnostics);
-
-        vscode.window.showErrorMessage(err.message);
-        return false;
-    }
-    function metadataError(err) {
-        var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
-        var diagnostics: vscode.Diagnostic[] = [];
-        var errorInfo: string[] = err.message.split('\n');
-        var line: number = errorInfo[1] ? Number(errorInfo[1].split('Line: ')[1]) : 1;
-        var col: number = errorInfo[2] ? Number(errorInfo[2].split('Column: ')[1]) : 0;
-        var failureRange: vscode.Range = document.lineAt(line).range;
-        if (col > 0) {
-            failureRange = failureRange.with(new vscode.Position((line), col));
-        }
-        diagnostics.push(new vscode.Diagnostic(failureRange, (errorInfo[0] || 'unknown error') + (errorInfo[3] || ''), 0));
-        diagnosticCollection.set(document.uri, diagnostics);
-
-        vscode.window.showErrorMessage(err.message);
-        return false;
-
-    }
-
-    // =======================================================================================================================================
 }

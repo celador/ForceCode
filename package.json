@@ -210,66 +210,12 @@
         ]
       },
       {
-        "id": "xml",
-        "extensions": [
-          ".xml",
-          ".layout",
-          ".resource",
-          ".remoteSite",
-          ".labels",
-          ".dashboard",
-          ".permissionset",
-          ".workflow",
-          ".email",
-          ".profile",
-          ".scf",
-          ".queue",
-          ".reportType",
-          ".report",
-          ".weblink",
-          ".tab",
-          ".letter",
-          ".role",
-          ".homePageComponent",
-          ".homePageLayout",
-          ".objectTranslation",
-          ".flow",
-          ".datacategorygroup",
-          ".snapshot",
-          ".site",
-          ".sharingRules",
-          ".settings",
-          ".callCenter",
-          ".community",
-          ".authProvider",
-          ".customApplicationComponent",
-          ".quickAction",
-          ".approvalProcess",
-          ".auradoc",
-          ".cmp",
-          ".evt",
-          ".tokens",
-          ".design",
-          ".object",
-          ".app"
-        ]
-      },
-      {
         "id": "apex",
         "aliases": [
           "Apex"
         ],
         "extensions": [
           ".apex"
-        ]
-      },
-      {
-        "id": "html",
-        "aliases": [
-          "HTML"
-        ],
-        "extensions": [
-          ".html"
         ]
       },
       {
@@ -314,22 +260,12 @@
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == xml && ForceCodeActive",
-          "command": "ForceCode.compile",
-          "group": "ForceCode"
-        },
-        {
           "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
           "when": "resourceLangId == visualforce && ForceCodeActive",
-          "command": "ForceCode.refresh",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == xml && ForceCodeActive",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
