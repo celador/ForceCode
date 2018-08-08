@@ -335,10 +335,14 @@ export default [
         commandName: 'ForceCode.openFileInOrg',
         hidden: true,
         command: function(context, selectedResource?) {
-            var filePath = context.fsPath;
-            const fcfile: FCFile = codeCovViewService.findByPath(filePath);
-            
-            return vscode.window.forceCode.dxCommands.openOrgPage('/' + fcfile.getWsMember().id);
+            if(context) {
+                var filePath = context.fsPath;
+                const fcfile: FCFile = codeCovViewService.findByPath(filePath);
+                
+                return vscode.window.forceCode.dxCommands.openOrgPage('/' + fcfile.getWsMember().id);
+            } else {
+                return Promise.resolve();
+            }
         }
     },
     {
