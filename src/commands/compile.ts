@@ -417,6 +417,13 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             res.records.filter(r => r.State !== 'Error').forEach(containerAsyncRequest => {
                 containerAsyncRequest.DeployDetails.componentFailures.forEach(failure => {
                     if (failure.problemType === 'Error') {
+                        vscode.window.showErrorMessage(failure.problem);
+                        var failureRange: vscode.Range = document.lineAt(failure.lineNumber - 1).range;
+                        if (failure.columnNumber - 1 >= 0) {
+                            failureRange = failureRange.with(new vscode.Position((failure.lineNumber - 1), failure.columnNumber - 1));
+                        }
+                        diagnostics.push(new vscode.Diagnostic(failureRange, failure.problem, 0));
+                        diagnosticCollection.set(document.uri, diagnostics);
                         failures++;
                     }
                 });
@@ -428,14 +435,11 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             });
             vscode.window.showErrorMessage(`There was an error while saving ${name}`);
         } else if (res.State === 'Error') {
+            onError(res);
             vscode.window.showErrorMessage(`There was an error while saving ${name}. Check for syntax errors.`);
         }
 
-        if (failures > 0) {
-            // FAILURE !!! 
-            vscode.window.showErrorMessage(`There was an error while compiling ${name}. Check for syntax errors.`);
-            return false;
-        } else {
+        if(failures === 0) {
             // SUCCESS !!! 
             if(res.records && res.records[0].DeployDetails.componentSuccesses.length > 0) {
                 const fcfile = codeCovViewService.findById(res.records[0].DeployDetails.componentSuccesses[0].id); 
@@ -450,6 +454,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;
         }
+        return false;
     }
     function containerFinished(createNewContainer: boolean): any {
         // We got some records in our response
@@ -463,13 +468,12 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         if(err.message) {
             errorMessage = err.message;
             try {
-                var errmess: string = err.message.split('Message:')[1].split(':')[0];
-                vscode.window.showErrorMessage(errmess);
+                var errmess: string = err.message.split('Message:')[1].split(': Source')[0];
                 var linCol: string[] = err.message.split(':')[1].split(',');
                 var failureLineNumber: number = Number.parseInt(linCol[0]);
                 var failureColumnNumber: number = Number.parseInt(linCol[1]);
                 var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
-                if (failureColumnNumber > 0) {
+                if (failureColumnNumber - 1 >= 0) {
                     failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));
                 }
                 diagnostics.push(new vscode.Diagnostic(failureRange, errmess, 0));

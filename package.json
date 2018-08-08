@@ -372,7 +372,7 @@
     "globule": "^1.2.1",
     "jsforce": "1.8.5",
     "jszip": "^3.1.5",
-    "klaw": "^2.1.1",
+    "klaw": "^3.0.0",
     "mime-types": "^2.1.19",
     "moment": "^2.22.2",
     "node-fetch": "^2.2.0",
@@ -388,13 +388,13 @@
     "@types/chai": "^4.1.4",
     "@types/glob": "^5.0.35",
     "@types/mocha": "^5.2.5",
-    "@types/node": "10.5.4",
+    "@types/node": "10.5.7",
     "@types/rimraf": "^2.0.2",
     "@types/sinon": "^5.0.1",
     "chai": "^4.1.2",
     "cross-env": "5.2.0",
     "decache": "^4.4.0",
-    "electron-rebuild": "^1.8.1",
+    "electron-rebuild": "^1.8.2",
     "glob": "^7.1.2",
     "istanbul": "^0.4.5",
     "mocha": "^5.2.0",
@@ -407,6 +407,6 @@
     "sinon": "^6.1.4",
     "source-map-support": "^0.5.6",
     "typescript": "^3.0.1",
-    "vsce": "^1.44.0"
+    "vsce": "^1.45.1"
   }
 }
