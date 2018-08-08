@@ -44,7 +44,7 @@ export function activate(context: vscode.ExtensionContext): any {
         const fcfile: FCFile = codeCovViewService.findByPath(fileName);
         var wsMem: IWorkspaceMember = fcfile ? fcfile.getWsMember() : undefined;
         
-        if(fcfile && wsMem.coverage) {
+        if(fcfile && wsMem && wsMem.coverage) {
             wsMem.coverage = undefined;
             codeCovViewService.addOrUpdateClass(wsMem);
             updateDecorations();
