@@ -42,7 +42,7 @@ export function activate(context: vscode.ExtensionContext): any {
         var fileName = event.document.fileName;
         // get the id
         const fcfile: FCFile = codeCovViewService.findByPath(fileName);
-        var wsMem: IWorkspaceMember = fcfile.getWsMember();
+        var wsMem: IWorkspaceMember = fcfile ? fcfile.getWsMember() : undefined;
         
         if(fcfile && wsMem.coverage) {
             wsMem.coverage = undefined;
