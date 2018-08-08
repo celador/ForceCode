@@ -25,6 +25,11 @@ This extension is a companion for SFDC (Salesforce.com) development with Visual 
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.  
 There's no complicated setup process or project configurations, no external apps to keep open, and no jarring errors knocking you out of your flow.
 
+## FAQ
+
+Q. I receive a ForceCode.showMenu command not found error, what do I do?
+A. Please refer to https://github.com/daishi4u/ForceCode/issues/10#issuecomment-405047787 for Mac, https://github.com/daishi4u/ForceCode/issues/10#issuecomment-405627887 for Windows, and for Linux you shouldn't have this error if you've installed Java 8!
+
 ### Documentation
 
 Documentation site can be found at [https://codescience.com/forcecode/](https://johnaaronnelson.gitbooks.io/forcecode/content/)  
