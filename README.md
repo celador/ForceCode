@@ -327,6 +327,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.5.14
+    * Fix vsix package leaving out the ForceCode source. 3.5.12 and 3.5.13 have been removed because they were completely non-functional.
 * 3.5.13
     * Fix startup bug that would crash ForceCode
 * 3.5.12
