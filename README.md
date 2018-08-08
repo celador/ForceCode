@@ -327,6 +327,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.5.13
+    * Fix startup bug that would crash ForceCode
 * 3.5.12
     * Fix generic error message when saving apex classes.
 * 3.5.11
