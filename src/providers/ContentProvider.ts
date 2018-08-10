@@ -25,6 +25,12 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
      * @return {Thenable<string>} TODO: give a description
      */
     provideTextDocumentContent(uri: vscode.Uri): Thenable<string> {
+        if(this.auraSource) {
+            return Promise.resolve(this.auraSource).then(res => { 
+                this.auraSource = undefined;
+                return res;
+            });
+        }
         var uriParts: string[] = uri.path.split('/');
         let toolingType: string = uriParts[1];
         var name: string = uriParts[2];
