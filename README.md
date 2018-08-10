@@ -332,6 +332,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.6.0
+    * Not a huge release, just added checking for file changes with Lightning components (Aura). This feature only checks when you save a component file and doesn't check on start, because I can't query the proper object without using a lot of queries. So, for now this is the way it will work.
 * 3.5.14
     * Fix vsix package leaving out the ForceCode source. 3.5.12 and 3.5.13 have been removed because they were completely non-functional.
 * 3.5.13
