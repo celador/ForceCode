@@ -132,7 +132,7 @@ export default class ForceService implements forceCode.IForceService {
                     var curFCFile: FCFile = codeCovViewService.findByNameAndType(key.fullName, key.type);
                     if(curFCFile) {
                         var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
-                        if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges) {
+                        if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges || curMem.type === 'AuraDefinitionBundle') {
                             curMem.id = key.id;
                             curMem.lastModifiedDate = key.lastModifiedDate;
                             curMem.lastModifiedByName = key.lastModifiedByName; 
@@ -174,7 +174,9 @@ export default class ForceService implements forceCode.IForceService {
                         } else if (item.path.endsWith('.component')) {
                             type = 'ApexComponent';
                         } else if (item.path.endsWith('.page')) {
-                        type = 'ApexPage';
+                            type = 'ApexPage';
+                        } else if (item.path.endsWith('.cmp')) {
+                            type = 'AuraDefinitionBundle';
                         }
 
                         if(type) {

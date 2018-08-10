@@ -67,7 +67,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             .then(requestCompile)
             .then(getCompileStatus)
             .then(finished)
-            .then(containerFinished)
+            .then(vscode.window.forceCode.newContainer)
             .catch(onError);
     }
 
@@ -169,7 +169,33 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         var def: any[] = definitions.filter(result => result.DefType === DefType);
         currentObjectDefinition = def.length > 0 ? def[0] : undefined;
         if (currentObjectDefinition !== undefined) {
-            return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').update({ Id: currentObjectDefinition.Id, Source });
+            var curFCFile: FCFile = codeCovViewService.findByPath(document.fileName);
+            if(curFCFile.compareDates(currentObjectDefinition.LastModifiedDate)) {
+                return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').update({ Id: currentObjectDefinition.Id, Source }).then(res => {
+                    var tempWSMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
+                    tempWSMem.lastModifiedDate = (new Date()).toISOString();
+                    codeCovViewService.addOrUpdateClass(tempWSMem);
+                    codeCovViewService.saveClasses();
+                    return res;
+                });
+            } else {
+                return vscode.window.showWarningMessage(currentObjectDefinition.LastModifiedByName + ' has changed this file!', 'Diff', 'Overwrite').then(s => {
+                    if (s === 'Diff') {
+                        diff(document, currentObjectDefinition.Source);
+                        return {};
+                    }
+                    if (s === 'Overwrite') {
+                        return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').update({ Id: currentObjectDefinition.Id, Source }).then(res => {
+                            var tempWSMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
+                            tempWSMem.lastModifiedDate = (new Date()).toISOString();
+                            codeCovViewService.addOrUpdateClass(tempWSMem);
+                            codeCovViewService.saveClasses();
+                            return res;
+                        });
+                    }
+                    return {};
+                });
+            }
         } else if (bundle[0]) {
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle[0].Id, DefType, Format, Source });
         }
@@ -439,7 +465,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             vscode.window.showErrorMessage(`There was an error while saving ${name}. Check for syntax errors.`);
         }
 
-        if(failures === 0) {
+        if(failures === 0 && !vscode.window.forceCode.dxCommands.isEmptyUndOrNull(res)) {
             // SUCCESS !!! 
             if(res.records && res.records[0].DeployDetails.componentSuccesses.length > 0) {
                 const fcfile = codeCovViewService.findById(res.records[0].DeployDetails.componentSuccesses[0].id); 
@@ -455,12 +481,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             return true;
         }
         return false;
-    }
-    function containerFinished(createNewContainer: boolean): any {
-        // We got some records in our response
-        return vscode.window.forceCode.newContainer(createNewContainer).then(() => {
-            return Promise.resolve();
-        });
     }
     
     function onError(err) {

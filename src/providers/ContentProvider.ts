@@ -6,6 +6,15 @@ import { QueryResult } from '../services/dxService';
  * This class provides an easy way to retrieve files as a native VSCode.Uri
  */
 export default class ForceCodeContentProvider implements vscode.TextDocumentContentProvider {
+    public auraSource: string;
+    private static instance: ForceCodeContentProvider;
+
+    public static getInstance() {
+        if(!ForceCodeContentProvider.instance) {
+            this.instance = new ForceCodeContentProvider();
+        }
+        return this.instance;
+    }
 
     /**
      * @param {vscode.Uri} uri file
@@ -13,6 +22,12 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
      * @return {Thenable<string>} TODO: give a description
      */
     provideTextDocumentContent(uri: vscode.Uri): Thenable<string> {
+        if(this.auraSource) {
+            return Promise.resolve(this.auraSource).then(res => { 
+                this.auraSource = undefined;
+                return res;
+            });
+        }
         var uriParts: string[] = uri.path.split('/');
         let toolingType: string = uriParts[1];
         var name: string = uriParts[2];
