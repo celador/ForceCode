@@ -179,7 +179,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                     return res;
                 });
             } else {
-                return vscode.window.showWarningMessage(currentObjectDefinition.LastModifiedByName + ' has changed this file!', 'Diff', 'Overwrite').then(s => {
+                return vscode.window.showWarningMessage('Someone has changed this file!', 'Diff', 'Overwrite').then(s => {
                     if (s === 'Diff') {
                         diff(document, currentObjectDefinition.Source);
                         return {};
