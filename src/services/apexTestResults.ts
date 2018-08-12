@@ -39,7 +39,6 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
                     fcfile.updateWsMember(wsMem);
                 }
             });
-            codeCovViewService.saveClasses();
             // update the current editor
             editorUpdateApexCoverageDecorator(vscode.window.activeTextEditor);
 

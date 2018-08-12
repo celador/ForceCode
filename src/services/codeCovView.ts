@@ -291,6 +291,10 @@ export class FCFile extends TreeItem {
       }
     }
 
+    public updateWsMember(newMem: IWorkspaceMember) {
+      this.parent.addClass(newMem);
+    }
+
     public getWsMember(): IWorkspaceMember {
       return this.wsMember;
     }
