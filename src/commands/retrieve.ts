@@ -216,8 +216,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                             lastModifiedById: t.lastModifiedById,
                                             type: t.type,
                                         };
-                                        const fcfile: FCFile = codeCovViewService.findById(t.id);
-                                        codeCovViewService.addOrUpdateClass(workspaceMember);
+                                        codeCovViewService.addClass(workspaceMember);
                                         commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
                                         return t.fileName;
                                     });
@@ -231,8 +230,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                                         lastModifiedById: res['lastModifiedById'],
                                         type: res['type'],
                                     };
-                                    const fcfile: FCFile = codeCovViewService.findById(res['id']);
-                                    codeCovViewService.addOrUpdateClass(workspaceMember);
+                                    codeCovViewService.addClass(workspaceMember);
                                     commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
                                     files.push(res['fileName']);
                                 }

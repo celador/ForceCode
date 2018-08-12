@@ -46,7 +46,7 @@ export function activate(context: vscode.ExtensionContext): any {
         
         if(fcfile && wsMem && wsMem.coverage) {
             wsMem.coverage = undefined;
-            codeCovViewService.addOrUpdateClass(wsMem);
+            fcfile.updateWsMember(wsMem);
             updateDecorations();
         }
     }));
@@ -68,12 +68,6 @@ export function activate(context: vscode.ExtensionContext): any {
 
         if(fcfile) {
             codeCovViewService.removeClass(fcfile);
-            // use a timeout to handle multiple file deletions, this way it only gets called after all files are deleted
-            if(timeO) {
-                clearTimeout(timeO);
-            }
-            timeO = setTimeout(() => { codeCovViewService.saveClasses(); }, 1000);
-            
         }
     }));
 

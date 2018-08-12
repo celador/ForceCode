@@ -34,10 +34,9 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
                     //    highestCov = percent;
                     //    highestClass = wsMem.id;
                     //}
-                    codeCovViewService.addOrUpdateClass(wsMem);
+                    fcfile.updateWsMember(wsMem);
                 }
             });
-            codeCovViewService.saveClasses();
             // update the current editor
             editorUpdateApexCoverageDecorator(vscode.window.activeTextEditor);
 

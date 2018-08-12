@@ -137,7 +137,7 @@ export default class ForceService implements forceCode.IForceService {
                             curMem.lastModifiedDate = key.lastModifiedDate;
                             curMem.lastModifiedByName = key.lastModifiedByName; 
                             curMem.lastModifiedById = key.lastModifiedById;
-                            codeCovViewService.addOrUpdateClass(curMem);
+                            curFCFile.updateWsMember(curMem);
                         } else {
                             commandService.runCommand('ForceCode.fileModified', curMem.path, key.lastModifiedByName);
                         }
@@ -197,7 +197,7 @@ export default class ForceService implements forceCode.IForceService {
                                     lastModifiedById: '',
                                     type: type,
                                 };
-                                codeCovViewService.addOrUpdateClass(workspaceMember);
+                                codeCovViewService.addClass(workspaceMember);
                             }
                         }
                     }

@@ -221,7 +221,7 @@ export function showFileOptions(promises: any[], pickMany: boolean) {
                 return new Promise((resolve, reject) => {
                     fs.outputFile(filename, body, function (err) {
                         if (err) { reject(err); }
-                        codeCovViewService.addOrUpdateClass(workspaceMember);
+                        codeCovViewService.addClass(workspaceMember);
                         if (results.length === 1 && openFile) {
                             try{
                                 vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, { preview: false }));

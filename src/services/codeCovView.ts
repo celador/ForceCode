@@ -22,6 +22,7 @@ import {
   }
 
   export class CodeCovViewService implements TreeDataProvider<FCFile> {
+    private timeO: NodeJS.Timer;
     private static instance: CodeCovViewService;
     private classes: Array<FCFile> = new Array<FCFile>();
     private _onDidChangeTreeData: EventEmitter<
@@ -37,7 +38,7 @@ import {
 				if(this.classes.length === 0) {
           const tempClasses: any[] = fs.readJsonSync(workspace.workspaceFolders[0].uri.fsPath + path.sep + 'wsMembers.json');
           tempClasses.forEach(cur => {
-            this.classes.push(new FCFile(cur.name, TreeItemCollapsibleState.None, cur));
+            this.classes.push(new FCFile(cur.name, TreeItemCollapsibleState.None, this, cur));
           });
           console.log('Done loading wsMember data.');
 				}
@@ -58,22 +59,30 @@ import {
       this._onDidChangeTreeData.fire();
     }
 
-    public saveClasses() {
+    private saveClasses() {
+      if(this.timeO) {
+        clearTimeout(this.timeO);
+      }
+      this.timeO = setTimeout(() => { this.doSaveClasses(); }, 1000);
+    }
+
+    private doSaveClasses() {
       return window.forceCode.dxCommands.saveToFile(JSON.stringify(this.getWsMembers()), 'wsMembers.json').then(() => {
         console.log('Updated wsMembers.json file');
         return Promise.resolve();
       });
     }
   
-    public addOrUpdateClass(wsMember: IWorkspaceMember) {
+    public addClass(wsMember: IWorkspaceMember) {
       const index: number = this.classes.findIndex(curClass => { return curClass.getWsMember().path === wsMember.path });
       if(index !== -1) {
         this.classes[index].setWsMember(wsMember);
       } else {
-        var newClass: FCFile = new FCFile(wsMember.name, TreeItemCollapsibleState.None, wsMember);
+        var newClass: FCFile = new FCFile(wsMember.name, TreeItemCollapsibleState.None, this, wsMember);
         this.classes.push(newClass);
       }
       this.refresh();
+      this.saveClasses();
     }
 
     public findByNameAndType(name: string, type: string): FCFile {
@@ -110,8 +119,8 @@ import {
       const index = this.classes.indexOf(fcfile);
       if (index !== -1) {
         this.classes.splice(index, 1);
-  
         this.refresh();
+        this.saveClasses();
         return true;
       } 
       return false;
@@ -127,7 +136,7 @@ import {
         // This is the root node
         Object.keys(ClassType).forEach(val => {
           if(val !== ClassType.NoShow) {
-            var newFCFile: FCFile = new FCFile(ClassType[val], TreeItemCollapsibleState.Collapsed);
+            var newFCFile: FCFile = new FCFile(ClassType[val], TreeItemCollapsibleState.Collapsed, this);
             newFCFile.setType(ClassType[val]);
             fcFiles.push(newFCFile);
           }
@@ -172,16 +181,18 @@ import {
     public readonly collapsibleState: TreeItemCollapsibleState;
     public command: Command;
 
+    private parent: CodeCovViewService;
     private wsMember: IWorkspaceMember;
     private type: string;
   
-    constructor(name: string, collapsibleState: TreeItemCollapsibleState, wsMember?: IWorkspaceMember) {
+    constructor(name: string, collapsibleState: TreeItemCollapsibleState, parent: CodeCovViewService, wsMember?: IWorkspaceMember) {
       super(
         name,
         collapsibleState
       );
   
       this.collapsibleState = collapsibleState;
+      this.parent = parent;
       this.setWsMember(wsMember);
     }
 
@@ -217,6 +228,10 @@ import {
       } else {
         this.type = ClassType.NoCoverageData;
       }
+    }
+
+    public updateWsMember(newMem: IWorkspaceMember) {
+      this.parent.addClass(newMem);
     }
 
     public getWsMember(): IWorkspaceMember {
