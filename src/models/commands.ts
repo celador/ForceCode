@@ -434,4 +434,23 @@ export default [
             return commands.apexTestResults();
         }
     },
+    {
+        commandName: 'ForceCode.runAllTests', //'sfdx.force.apex.test.class.run.delegate',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            console.log(context);
+            var fileNameParts = context.fsPath.split(path.sep);
+            console.log(fileNameParts);
+            var fileName = fileNameParts[fileNameParts.length - 1].split('.')[0];
+            console.log(fileName);
+            return commandService.runCommand('ForceCode.apexTest', fileName, 'class');
+        }
+    },
+    {
+        commandName: 'ForceCode.runTestMethod', //'sfdx.force.apex.test.method.run.delegate',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commandService.runCommand('ForceCode.apexTest', context, 'method');
+        }
+    },
 ]

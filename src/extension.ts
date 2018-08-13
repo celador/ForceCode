@@ -4,11 +4,11 @@ import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
 import { editorUpdateApexCoverageDecorator, updateDecorations } from './decorators/testCoverageDecorator';
 import * as commands from './models/commands';
-import * as sfdxCommands from './models/sfdxCommands';
 import * as parsers from './parsers';
 import * as path from 'path';
 import { FCFile } from './services/codeCovView';
 import { IWorkspaceMember } from './forceCode';
+import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
 
 export function activate(context: vscode.ExtensionContext): any {
     commands.default.forEach(cur => {
@@ -22,6 +22,9 @@ export function activate(context: vscode.ExtensionContext): any {
     
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('sflog', new ForceCodeLogProvider()));
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('forcecode', ForceCodeContentProvider.getInstance()));
+
+    let sel: vscode.DocumentSelector = { scheme: 'file', language: 'apex' };
+    context.subscriptions.push(vscode.languages.registerDocumentLinkProvider(sel, new ApexTestLinkProvider()));
 
     // AutoCompile Feature
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
@@ -70,14 +73,6 @@ export function activate(context: vscode.ExtensionContext): any {
             codeCovViewService.removeClass(fcfile);
         }
     }));
-
-    vscode.commands.getCommands(true).then(coms => {
-        if(!coms.find(curCom => { return curCom === 'sfdx.force.apex.test.class.run.delegate' || curCom === 'sfdx.force.apex.test.method.run.delegate' })) {
-            sfdxCommands.default.forEach(cur => {
-                context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
-            });
-        }
-    });
 
     if(!vscode.window.forceCode.config.handleMetaFiles) {
         var index: number = commands.default.findIndex(cur => { return cur.commandName === 'ForceCode.retrievePackage'});
