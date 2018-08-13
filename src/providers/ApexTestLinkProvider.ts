@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { getFileName } from '../parsers';
 
 const PROVIDER: string = 'command:';
 
@@ -10,11 +9,11 @@ export class ApexTestLinkProvider implements vscode.DocumentLinkProvider {
 
     public provideDocumentLinks(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.DocumentLink[]> {
         var links: vscode.DocumentLink[] = [];
-        var name: string = getFileName(document);
         //var locations: vscode.Location[] = [];
     
         if(document.fileName.endsWith('.cls')) {
             var fileContents: string = document.getText().toLowerCase();
+            var fileLength: number = fileContents.length;
             if(fileContents.includes('@istest')) {
                 var curIndex: number = -1;
                 var curIndex2: number = -1;
@@ -31,6 +30,7 @@ export class ApexTestLinkProvider implements vscode.DocumentLinkProvider {
                             curIndex2 = -1;
                             theIndex = curIndex;
                         } else {
+                            curIndex = fileLength - 2;  // so we don't search again
                             addLength = 'testmethod'.length;
                             theIndex = curIndex2;
                         }
