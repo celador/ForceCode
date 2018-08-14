@@ -4,10 +4,17 @@ import { getFileName } from '../parsers';
 const COMMAND: string = 'command:ForceCode.runTests';
 
 export class ApexTestLinkProvider implements vscode.DocumentLinkProvider {
-    //provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Location[]> {
-        //throw new Error("Method not implemented.");
-    //}
-
+    /*public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {
+        const wordPosition = document.getWordRangeAtPosition(position);
+        if (!wordPosition) return new Promise((resolve) => resolve());
+        const word = document.getText(wordPosition);
+        console.log(word);
+        if(word.toLowerCase() === 'istest') {
+            var fileName = getFileName(document);
+            var args = { name: fileName, type: 'class' }
+            return new vscode.Hover(['Run test', new vscode.MarkdownString('[Click to run](' + encodeURI(`${COMMAND}?` + JSON.stringify(args)) + ')')]);
+        }
+*/
     public provideDocumentLinks(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.ProviderResult<vscode.DocumentLink[]> {
         var links: vscode.DocumentLink[] = [];
         //var locations: vscode.Location[] = [];
