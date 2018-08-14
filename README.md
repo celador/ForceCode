@@ -332,6 +332,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.6.1
+    * Fix ForceCode execution of apex test classes since v43.11.0 of the Salesforce extensions broke it. Now, in order to run apex test with forcecode you need to CTRL + click on @isTest or testMethod! Clicking on Run tests will throw an erro without the CLI installed so I had to make my own, enjoy!!
 * 3.6.0
     * Not a huge release, just added checking for file changes with Lightning components (Aura). This feature only checks when you save a component file and doesn't check on start, because I can't query the proper object without using a lot of queries. So, for now this is the way it will work.
 * 3.5.14
