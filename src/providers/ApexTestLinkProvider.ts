@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
+import { getFileName } from '../parsers';
 
-const PROVIDER: string = 'command:';
+const COMMAND: string = 'command:ForceCode.runTests';
 
 export class ApexTestLinkProvider implements vscode.DocumentLinkProvider {
     //provideReferences(document: vscode.TextDocument, position: vscode.Position, context: vscode.ReferenceContext, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Location[]> {
@@ -14,6 +15,7 @@ export class ApexTestLinkProvider implements vscode.DocumentLinkProvider {
         if(document.fileName.endsWith('.cls')) {
             var fileContents: string = document.getText().toLowerCase();
             var fileLength: number = fileContents.length;
+            var fileName = getFileName(document);
             if(fileContents.includes('@istest')) {
                 var curIndex: number = -1;
                 var curIndex2: number = -1;
@@ -36,14 +38,22 @@ export class ApexTestLinkProvider implements vscode.DocumentLinkProvider {
                         }
                         var startpos: vscode.Position = document.positionAt(theIndex);
                         var endpos: vscode.Position = document.positionAt(theIndex + addLength);
-                        var uri: string;
-                        if(links.length === 0) {
-                            uri = `${PROVIDER}ForceCode.runAllTests?` + JSON.stringify(document.uri);
-                        } else {
-                            // need to figure out a way to get the method names here. call runTestMethod with filename,methodname
-                            uri = `${PROVIDER}ForceCode.runAllTests?`  + JSON.stringify(document.uri);
+                        var args = { name: fileName, type: 'class' }
+                        if(links.length > 0) {
+                            // attempt to get the method name
+                            var endMethodNameIdx = fileContents.indexOf('(', theIndex);
+                            // check just in case
+                            if(endMethodNameIdx >= 0) {
+                                var methodParts = fileContents.substring(theIndex, endMethodNameIdx).split(' ');
+                                var methodName = methodParts[methodParts.length - 1];
+
+                                if(!vscode.window.forceCode.dxCommands.isEmptyUndOrNull(methodName)) {
+                                    args.name += '.' + methodName;
+                                    args.type = 'method';
+                                }
+                            }
                         }
-                        console.log(uri);
+                        var uri: string = `${COMMAND}?` + JSON.stringify(args);
 
                         var docLink: vscode.DocumentLink = new vscode.DocumentLink(new vscode.Range(startpos, endpos), 
                             vscode.Uri.parse(uri));
