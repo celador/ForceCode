@@ -63,7 +63,7 @@ import {
       if(this.timeO) {
         clearTimeout(this.timeO);
       }
-      this.timeO = setTimeout(() => { this.doSaveClasses(); }, 1000);
+      this.timeO = setTimeout(() => { this.doSaveClasses(); }, 1500);
     }
 
     private doSaveClasses() {

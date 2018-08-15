@@ -169,7 +169,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         var def: any[] = definitions.filter(result => result.DefType === DefType);
         currentObjectDefinition = def.length > 0 ? def[0] : undefined;
         if (currentObjectDefinition !== undefined) {
-            var curFCFile: FCFile = codeCovViewService.findByPath(document.fileName);
+            var curFCFile: FCFile = codeCovViewService.findById(bundle[0].Id);
             if(curFCFile.compareDates(currentObjectDefinition.LastModifiedDate)) {
                 return updateAura(curFCFile);
             } else {

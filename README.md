@@ -332,6 +332,9 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.6.2
+    * Test methods can now be ran by hovering over @isTest and testMethod, then clicking the link that it gives in the hover to run the test! Sorry for the changes, but this is the way tests will be run from now on.
+    * Fix saving lightning component parts (basically any part(javascript, css, etc..) that wasn't the component itself)
 * 3.6.1
     * Fix ForceCode execution of apex test classes since v43.11.0 of the Salesforce extensions broke it. Now, in order to run apex test with forcecode you need to CTRL + click on @isTest or testMethod! Clicking on Run tests will throw an erro without the CLI installed so I had to make my own, enjoy!!
 * 3.6.0

@@ -24,7 +24,7 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('forcecode', ForceCodeContentProvider.getInstance()));
 
     let sel: vscode.DocumentSelector = { scheme: 'file', language: 'apex' };
-    context.subscriptions.push(vscode.languages.registerDocumentLinkProvider(sel, new ApexTestLinkProvider()));
+    context.subscriptions.push(vscode.languages.registerHoverProvider(sel, new ApexTestLinkProvider()));
 
     // AutoCompile Feature
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
