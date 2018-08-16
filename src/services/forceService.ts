@@ -11,6 +11,7 @@ const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
 export default class ForceService implements forceCode.IForceService {
+    public fcDiagnosticCollection: vscode.DiagnosticCollection;
     public dxCommands: any;
     public config: forceCode.Config;
     public conn: any;
@@ -29,6 +30,7 @@ export default class ForceService implements forceCode.IForceService {
 
     constructor() {
         this.dxCommands = new DXService();
+        this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
         // Set the ForceCode configuration
         this.operatingSystem = operatingSystem.getOS();
         // Setup username and outputChannel

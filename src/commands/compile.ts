@@ -17,8 +17,11 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     if(!document) {
         return undefined;
     }
-    var diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(document.fileName);
+    var diagnosticCollection: vscode.DiagnosticCollection = vscode.window.forceCode.fcDiagnosticCollection;
+    diagnosticCollection.delete(document.uri);
     var diagnostics: vscode.Diagnostic[] = [];
+    var exDiagnostics: vscode.Diagnostic[] = vscode.languages.getDiagnostics(document.uri);
+    
     const body: string = document.getText();
     const ext: string = parsers.getFileExtension(document);
     const toolingType: string = parsers.getToolingType(document);
@@ -434,7 +437,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
     }
     // =======================================================================================================================================
     function finished(res: any): boolean {
-        diagnosticCollection.set(document.uri, diagnostics);
         var failures: number = 0;
         if (res.records && res.records.length > 0) {
             res.records.filter(r => r.State !== 'Error').forEach(containerAsyncRequest => {
@@ -445,8 +447,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                         if (failure.columnNumber - 1 >= 0) {
                             failureRange = failureRange.with(new vscode.Position((failure.lineNumber - 1), failure.columnNumber - 1));
                         }
-                        diagnostics.push(new vscode.Diagnostic(failureRange, failure.problem, 0));
-                        diagnosticCollection.set(document.uri, diagnostics);
+                        if(!exDiagnostics.find(exDia => { return exDia.message === failure.problem;})) {
+                            diagnostics.push(new vscode.Diagnostic(failureRange, failure.problem, 0));
+                            diagnosticCollection.set(document.uri, diagnostics);
+                        }
                         failures++;
                     }
                 });
@@ -492,8 +496,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 if (failureColumnNumber - 1 >= 0) {
                     failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));
                 }
-                diagnostics.push(new vscode.Diagnostic(failureRange, errmess, 0));
-                diagnosticCollection.set(document.uri, diagnostics);
+                if(!exDiagnostics.find(exDia => { return exDia.message === errmess;})) {
+                    diagnostics.push(new vscode.Diagnostic(failureRange, errmess, 0));
+                    diagnosticCollection.set(document.uri, diagnostics);
+                }
                 errorMessage = errmess;
             } catch (e) {}
         } else {
