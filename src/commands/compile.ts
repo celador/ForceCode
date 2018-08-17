@@ -442,7 +442,6 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             res.records.filter(r => r.State !== 'Error').forEach(containerAsyncRequest => {
                 containerAsyncRequest.DeployDetails.componentFailures.forEach(failure => {
                     if (failure.problemType === 'Error') {
-                        vscode.window.showErrorMessage(failure.problem);
                         var failureRange: vscode.Range = document.lineAt(failure.lineNumber - 1).range;
                         if (failure.columnNumber - 1 >= 0) {
                             failureRange = failureRange.with(new vscode.Position((failure.lineNumber - 1), failure.columnNumber - 1));
@@ -479,6 +478,8 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;
+        } else {
+            vscode.window.showErrorMessage(`There was an error while compiling ${name}. Please check the problems panel for details.`);
         }
         return false;
     }

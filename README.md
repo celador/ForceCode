@@ -332,6 +332,9 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.6.3
+    * Fix duplicate error messages from ForceCode in problems panel
+    * Don't show notification for every error in Apex, instead tell them to look at the problems panel
 * 3.6.2
     * Test methods can now be ran by hovering over @isTest and testMethod, then clicking the link that it gives in the hover to run the test! Sorry for the changes, but this is the way tests will be run from now on.
     * Fix saving lightning component parts (basically any part(javascript, css, etc..) that wasn't the component itself)
