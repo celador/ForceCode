@@ -216,7 +216,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                         return { name: r.xmlName, members: '*' };
                     });
 
-                Promise.resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                resolve(vscode.window.forceCode.conn.metadata.retrieve({
                     unpackaged: { types: types },
                     apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                 }).stream());
