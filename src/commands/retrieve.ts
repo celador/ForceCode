@@ -5,7 +5,6 @@ import * as parsers from './../parsers';
 import { IWorkspaceMember } from '../forceCode';
 import constants from './../models/constants';
 import { commandService, codeCovViewService } from '../services';
-import { FCFile } from '../services/codeCovView';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
@@ -49,7 +48,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
     }
 
     function showPackageOptions() {
-        if (resource !== undefined) { return undefined; }
+        if (resource !== undefined) { return Promise.resolve(); }
         return getPackages().then(packages => {
             let options: vscode.QuickPickItem[] = packages
                 .map(pkg => {
@@ -109,7 +108,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             return vscode.window.showQuickPick(options, config);
         }).then(function (res) {
             if(!res) {
-                return;
+                return Promise.reject();
             }
             if (res.description === 'manual') {
                 return vscode.window.showInputBox({
@@ -249,7 +248,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
             });
 
         }
-        return undefined;
+        return Promise.resolve({});
 
         function getAuraBundle(describe): any[] {
             // if nothing was found, then check if this is an AURA componet...
@@ -292,7 +291,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                 var types: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
                     return { name: r.xmlName, members: '*' };
                 });
-                Promise.resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                resolve(vscode.window.forceCode.conn.metadata.retrieve({
                     unpackaged: { types: types },
                     apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                 }).stream());
@@ -305,7 +304,7 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
                         return { name: r.xmlName, members: '*' };
                     });
 
-                Promise.resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                resolve(vscode.window.forceCode.conn.metadata.retrieve({
                     unpackaged: { types: types },
                     apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                 }).stream());
@@ -387,9 +386,9 @@ export default function retrieve(context: vscode.ExtensionContext, resource?: vs
         return res;
     }
     function onError(err) {
-        setTimeout(function () {
+        if(err) {
             vscode.window.showErrorMessage('Retrieve Errors\n' + err.message);
-        }, 100);
+        }
     }
     // =======================================================================================================================================
 }
