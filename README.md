@@ -332,6 +332,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.6.4
+    * Fix retrieve getting stuck and a few other errors with it. Retrieving by package.xml works now too.
 * 3.6.3
     * Fix duplicate error messages from ForceCode in problems panel
     * Don't show notification for every error in Apex, instead tell them to look at the problems panel
