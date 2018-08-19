@@ -13,7 +13,7 @@ export function getFileName(document: vscode.TextDocument) {
     var fileName: string = document.fileName.substring(0, document.fileName.lastIndexOf('.'));
     var fileNameArray: string[] = fileName.split(path.sep);
     // give me the last one, giving me just the fileName
-    fileName = fileNameArray[fileNameArray.length - 1];
+    fileName = fileNameArray[fileNameArray.length - 1].split('.')[0];
     return fileName;
 }
 export function getWholeFileName(document: vscode.TextDocument) {
@@ -23,8 +23,7 @@ export function getWholeFileName(document: vscode.TextDocument) {
     return fileName;
 }
 function getNameFromClassBody(document: vscode.TextDocument): string {
-    var fileNameArray: string[] = getFileName(document).split(path.sep);
-    var fileName: string = fileNameArray[fileNameArray.length - 1];
+    var fileName: string = getFileName(document);
     var bodyParts: string[] = document.getText().split(/(extends|implements|\{)/);
     var firstLine: string = bodyParts.length && bodyParts[0];
     var words: string[] = firstLine.trim().split(' ');
