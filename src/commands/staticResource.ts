@@ -92,7 +92,7 @@ function onError() {
 
 function bundleAndDeploy(option) {
     let root: string = getPackagePath(option);
-    if(option.detail.includes('zip')) {
+    if(option.detail.includes('zip') || option.detail === 'SPA') {
         let zip: any = zipFiles(getFileList(root), root);
         bundle(zip, option.label);
         return deploy(zip, option.label, option.detail).then(deployComplete);

@@ -247,7 +247,7 @@ Whenever you save a file that lives in a resource bundles folder, the resource w
 
 If you build SPAs, typically you will have a `spa` folder, then another folder named for your static resource, like `spa/foo`.
 This folder is your Javascript project, where your package.json lives.
-You will build your distribution files to a 'dist' folder or another folder determined by the `spaDist` config property.
+You will build your distribution files to a 'dist' folder or another folder determined by the `spaDist` config property. This folder will live inside `spa/foo` directory, so you will end up with `spa/foo/dist` folder structure. One last note, the spa folder NEEDS to be in your project base directory (not in the `src` folder, but alongside of it!).
 
 SPA folders do not automatically deploy.  We typically run these offline with `jsr-mocks` and webpack and only deploy when we want to publish.
 
@@ -332,6 +332,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.6.5
+    * Fix spaDist way of uploading SPA static resources
 * 3.6.4
     * Fix retrieve getting stuck and a few other errors with it. Retrieving by package.xml works now too.
 * 3.6.3
