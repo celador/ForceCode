@@ -11,13 +11,19 @@ import * as forceCode from './../forceCode';
 // =======================================================================================================================================
 export function saveAura(document: vscode.TextDocument, toolingType: string, Metadata?: {}): Promise<any> {
     const name: string = parsers.getName(document, toolingType);
+    const ext: string = parsers.getFileExtension(document);
     var DefType: string = getAuraDefTypeFromDocument(document);
     var Format: string = getAuraFormatFromDocument();
     var Source: string = document.getText();
-    const ext: string = parsers.getFileExtension(document);
     var currentObjectDefinition: any = undefined;
     // Aura Bundles are a special case, since they can be upserted with the Tooling API
     // Instead of needing to be compiled, like Classes and Pages..
+    if(Metadata) {
+        return Promise.resolve(vscode.window.forceCode)
+            .then(getAuraBundle)
+            .then(ensureAuraBundle)
+            .then(updateMetaData);
+    }
     return Promise.resolve(vscode.window.forceCode)
         .then(getAuraBundle)
         .then(ensureAuraBundle)
@@ -34,6 +40,9 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
     function ensureAuraBundle(results) {
         // If the Bundle doesn't exist, create it, else Do nothing
         if (results.length === 0 || !results[0]) {
+            if(Metadata) {
+                throw {message: 'File must exist before updating its metadata file. Save the file first, then the metadata file.'};
+            }
             // Create Aura Definition Bundle
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').create({
                 DeveloperName: name,
@@ -48,6 +57,18 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
             return results;
         }
     }
+
+    function updateMetaData(bundle) {
+        return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').update({
+            Metadata: Metadata,
+            Id: bundle[0].Id
+        }).then(res => {
+            return res;
+        }, err => {
+            return err;
+        });
+    }
+
     function getAuraDefinition(bundle) {
         return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({
             'AuraDefinitionBundleId': bundle[0].Id
@@ -139,6 +160,8 @@ export function getAuraDefTypeFromDocument(document: vscode.TextDocument) {
                 return 'RENDERER';
             };
             break;
+        case 'xml':
+            return 'Metadata';
         default:
             throw `Unknown extension: ${extension} .`;
     }
