@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { IForceService } from './../forceCode';
 import * as parsers from './../parsers';
 import { FCFile } from '../services/codeCovView';
 import * as forceCode from './../forceCode';
@@ -22,9 +21,9 @@ export function saveApex(document: vscode.TextDocument, toolingType: string, Met
     // =======================================================================================================================================
     // =================================  Tooling Objects (Class, Page, Component, Trigger)  =================================================
     // =======================================================================================================================================
-    function addToContainer(svc: IForceService) {
+    function addToContainer(svc: forceCode.IForceService) {
         // We will push the filename on to the members array to make sure that the next time we compile, 
-        var fc: IForceService = vscode.window.forceCode;
+        var fc: forceCode.IForceService = vscode.window.forceCode;
         var hasActiveContainer: Boolean = svc.containerId !== undefined;
         var fileIsOnlyMember: Boolean = (fc.containerMembers.length === 1) && fc.containerMembers.every(m => m.name === name);
         if (hasActiveContainer && fileIsOnlyMember) {
@@ -44,6 +43,7 @@ export function saveApex(document: vscode.TextDocument, toolingType: string, Met
 
         function updateMember(records) {
             var member: {} = Metadata ? {
+                Body: records.body,
                 Metadata: Metadata,
                 Id: records.id,
             } : {
@@ -79,13 +79,20 @@ export function saveApex(document: vscode.TextDocument, toolingType: string, Met
             if (records.length > 0) {
                 // Tooling Object already exists
                 //  UPDATE it
-                var record: forceCode.MetadataResult = records[0];
+                var record = records[0];
                 // Get the modified date of the local file... 
+                if(Metadata && Metadata['packageVersions']) {
+                    // this is an ApexPage...so we might need to edit packageVersions
+                    if(!Array.isArray(Metadata['packageVersions'])) {
+                        Metadata['packageVersions'] = [Metadata['packageVersions']];
+                    }
+                }
+
                 var member: {} = {
-                    Body: Metadata ? record.Body : body,
+                    Body: Metadata ? (record.Body ? record.Body : record.Markup) : body,
                     ContentEntityId: record.Id,
                     Id: fc.containerId,
-                    Metadata: Metadata ? Metadata : record.Metadata,
+                    Metadata: Metadata ? Object.assign({}, record.Metadata, Metadata) : record.Metadata,
                     MetadataContainerId: fc.containerId,
                 };
                 return shouldCompile(record).then(should => {
