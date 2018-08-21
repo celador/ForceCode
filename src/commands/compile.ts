@@ -6,8 +6,6 @@ import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 const parseString: any = require('xml2js').parseString;
 
-// TODO: Refactor some things out of this file.  It's getting too big.
-
 export default function compile(document: vscode.TextDocument, context: vscode.ExtensionContext): Promise<any> {
     if(!document) {
         return Promise.resolve();

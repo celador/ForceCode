@@ -9,7 +9,7 @@ const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
 
-export default function retrieve(context: vscode.ExtensionContext, resource?: vscode.Uri) {
+export default function retrieve(resource?: vscode.Uri) {
     let option: any;
 
     return Promise.resolve(vscode.window.forceCode)

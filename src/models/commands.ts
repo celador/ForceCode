@@ -286,12 +286,12 @@ export default [
         command: function (context, selectedResource?) {
             if(selectedResource && selectedResource.path) {
                 return vscode.workspace.openTextDocument(selectedResource)
-                    .then(doc => commands.retrieve(context, doc.uri));
+                    .then(doc => commands.retrieve(doc.uri));
             }
             if(!vscode.window.activeTextEditor) {
                 return undefined;
             }
-            return commands.retrieve(context, vscode.window.activeTextEditor.document.uri);
+            return commands.retrieve(vscode.window.activeTextEditor.document.uri);
         }
     },
     {
@@ -369,7 +369,7 @@ export default [
             return vscode.workspace.openTextDocument(context).then(theDoc => {
                 return vscode.window.showWarningMessage(selectedResource + ' has changed ' + getFileName(theDoc), 'Refresh', 'Diff', 'Dismiss').then(s => {
                     if (s === 'Refresh') {
-                        return commands.retrieve(undefined, theDoc.uri);
+                        return commands.retrieve(theDoc.uri);
                     } else if(s === 'Diff') {
                         return commands.diff(theDoc);
                     }
