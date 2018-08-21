@@ -2,14 +2,13 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import * as parsers from './../parsers';
-import { IWorkspaceMember } from '../forceCode';
 import constants from './../models/constants';
-import { commandService, codeCovViewService } from '../services';
+import { getFileStream } from './retrieveAny';
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
 
-export default function retrieve(resource?: vscode.Uri) {
+export default function retrieve(resource?: any) {
     let option: any;
 
     return Promise.resolve(vscode.window.forceCode)
@@ -132,7 +131,7 @@ export default function retrieve(resource?: vscode.Uri) {
 
         if (opt) {
             return new Promise(pack);
-        } else if (resource) {
+        } else if (resource && resource.fsPath) {
             return new Promise(function (resolve) {
                 // Get the Metadata Object type
                 var describe = vscode.window.forceCode.describe;
@@ -152,101 +151,16 @@ export default function retrieve(resource?: vscode.Uri) {
                     if (types.length > 0) {
                         retrieveComponents(resolve, types);
                     }
-                }
-                else {
-
-                    let extension: string = path.extname(resource.fsPath).replace('.', '');
-                    var metadataTypes: any[] = describe.metadataObjects
-                        .filter(o => o.suffix === extension);
-
-                    // var 
-
+                } else {
                     vscode.workspace.openTextDocument(resource).then(doc => {
-                        var toolingType = parsers.getToolingType(doc)
+                        var toolingType = parsers.getToolingType(doc);
                         const name: string = parsers.getName(doc, toolingType);
-                        if (toolingType === 'AuraDefinition') {
-                            var types: any[] = describe.metadataObjects
-                                .filter(o => o.xmlName === 'AuraDefinitionBundle')
-                                .map(r => {
-                                    return { name: r.xmlName, members: name };
-                                });
-
-                            resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                                unpackaged: { types: types },
-                                apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-                            }).stream());
-                        }
-                        else {
-                            var listTypes: any[] = metadataTypes
-                                .map(o => {
-                                    return {
-                                        type: o.xmlName,
-                                        folder: o.directoryName,
-                                    };
-                                });
-
-                            var retrieveTypes: any[] = metadataTypes
-                                .map(o => {
-                                    return {
-                                        name: o.xmlName,
-                                        members: '*',
-                                    };
-                                });
-                            // List the Metadata by that type
-                            return vscode.window.forceCode.conn.metadata.list(listTypes).then(res => {
-                                let fileName: string = resource.fsPath.slice(resource.fsPath.lastIndexOf(path.sep) + 1);
-                                var files: string[] = [];
-                                var workspaceMember: IWorkspaceMember;
-                                // Match the metadata against the filepath
-                                if (Array.isArray(res)) {
-                                    files = res.filter(t => {
-                                        return t.fileName.match(fileName);
-                                        // let r: string = '\\' + path.sep + '(' + vscode.window.forceCode.config.prefix + ')*' + '(\\\_\\\_)*' + fileName;
-                                        // return t.fileName.match(new RegExp(r, 'i'));
-                                    }).map(t => {
-                                        // update the metadata here since we're fetching the file. will help make sure the metadata doesn't become stale.
-                                        // if it already exists it will just be overwritten
-                                        workspaceMember = {
-                                            name: t.fullName,
-                                            path: resource.fsPath,
-                                            id: t.id, 
-                                            lastModifiedDate: t.lastModifiedDate,
-                                            lastModifiedByName: t.lastModifiedByName,
-                                            lastModifiedById: t.lastModifiedById,
-                                            type: t.type,
-                                        };
-                                        codeCovViewService.addClass(workspaceMember);
-                                        commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
-                                        return t.fileName;
-                                    });
-                                } else if (typeof res === 'object') {
-                                    workspaceMember = {
-                                        name: res['fullName'],
-                                        path: resource.fsPath,
-                                        id: res['id'], 
-                                        lastModifiedDate: res['lastModifiedDate'],
-                                        lastModifiedByName: res['lastModifiedByName'],
-                                        lastModifiedById: res['lastModifiedById'],
-                                        type: res['type'],
-                                    };
-                                    codeCovViewService.addClass(workspaceMember);
-                                    commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined);
-                                    files.push(res['fileName']);
-                                }
-
-                                // Retrieve the file by it's name
-                                resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                                    singlePackage: true,
-                                    specificFiles: files,
-                                    unpackaged: { types: retrieveTypes },
-                                    apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-                                }).stream());
-                            });
-                        }
+                        resolve(getFileStream(name, toolingType));
                     });
                 }
             });
-
+        } else if(resource && resource.name) {
+            return getFileStream(resource.name, resource.toolingType);
         }
         return Promise.resolve({});
 

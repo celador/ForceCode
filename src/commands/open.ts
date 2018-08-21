@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
+import * as retrieve from './retrieve';
 const ZIP: any = require('zip');
 const fetch: any = require('node-fetch');
 const mime = require('mime-types');
@@ -73,14 +74,19 @@ export function showFileOptions(promises: any[], pickMany: boolean) {
         var files: any[];
         if(opts instanceof Array) {
             files = opts.map(curOpt => {
-                return getFile(curOpt);
+                //return getFile(curOpt);
+                var tType: string = curOpt.detail.split(' ')[0];
+                var fName: string = curOpt.label.slice(curOpt.label.lastIndexOf(' ') + 1).split('.')[0];
+                return retrieve.default({name: fName, toolingType: tType});
             });
         } else {
-            files = [getFile(opts)];
+            var tType: string = opts.detail.split(' ')[0];
+            var fName: string = opts.label.slice(opts.label.lastIndexOf(' ') + 1);
+            files = [retrieve.default({name: fName, toolingType: tType})];
         }
         
         return Promise.all(files);
-    })
+    });/*
     .then(res => {
         var count: number = 0;
         var showFile: boolean = vscode.window.forceCode.config.showFilesOnOpen ? true : false;
@@ -232,5 +238,5 @@ export function showFileOptions(promises: any[], pickMany: boolean) {
                 });
             }
         }));
-    }
+    }*/
 }
