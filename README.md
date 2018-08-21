@@ -40,7 +40,7 @@ Please note that the following permissions are required to develop on the Force.
 
 ## Features
 
-* Requires Java 8. Either the JDK or the JRE will work. (For Apex code completion)
+* For code completion and highlighting I highly reccomend downloading the various Salesforce language server extension. This will require Java 8. Either the JDK or the JRE will work. (For Apex code completion)
     * Windows needs the java path configured in the vscode settings. (Will update with details later)
 * Open Classes, Triggers, Visualforce pages, and Visualforce components by right clicking and selecting open
     file in org.
@@ -332,6 +332,10 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.6.6
+    * Don't depend on Salesforce extensions for activation anymore, but if you have them then code completion will still work. This makes ForceCode start a LOT faster.
+    * Saving meta.xml files now works (Only for classes, triggers, pages, components, and lightning components)
+        * You will only get meta.xml files when handleMetaFiles is set to true in force.json
 * 3.6.5
     * Fix spaDist way of uploading SPA static resources
 * 3.6.4
