@@ -284,10 +284,16 @@ export class FCFile extends TreeItem {
             this.type = ClassType.CoveredClass;
         } 
         // this next check needs changed to something different, as there are problems reading the file
-      } else if(fs.readFileSync(this.wsMember.path).toString().toLowerCase().includes('@istest')) {
-        this.type = ClassType.TestClass;
       } else {
-        this.type = ClassType.NoCoverageData;
+        var testFile: boolean = false;
+        try {
+          testFile = fs.readFileSync(this.wsMember.path).toString().toLowerCase().includes('@istest');
+        } catch(e) {}
+        if(testFile) {
+          this.type = ClassType.TestClass;
+        } else {
+          this.type = ClassType.NoCoverageData;
+        }
       }
     }
 

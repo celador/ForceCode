@@ -133,7 +133,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
 
         if (opt) {
             return new Promise(pack);
-        } else if (resource) {
+        } else if (resource && resource.fsPath) {
             return new Promise(function (resolve) {
                 // Get the Metadata Object type
                 if (resource instanceof vscode.Uri && fs.lstatSync(resource.fsPath).isDirectory()) {
@@ -163,7 +163,8 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     retrieveComponents(resolve, resource);
                 }
             });
-
+        } else if(resource && resource.name) {
+            return getFileStream(resource.name, resource.toolingType);
         }
         throw new Error();
 
