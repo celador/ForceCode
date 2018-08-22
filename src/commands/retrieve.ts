@@ -3,12 +3,22 @@ import fs = require('fs-extra');
 import * as path from 'path';
 import * as parsers from './../parsers';
 import constants from './../models/constants';
-import { getFileStream } from './retrieveAny';
+import { commandService } from '../services';
+const mime = require('mime-types');
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
 
-export default function retrieve(resource?: any) {
+export interface ToolingType {
+    name: string;
+    members: string[];
+}
+
+export interface ToolingTypes {
+    types: ToolingType[];
+}
+
+export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
     let option: any;
 
     return Promise.resolve(vscode.window.forceCode)
@@ -131,12 +141,11 @@ export default function retrieve(resource?: any) {
 
         if (opt) {
             return new Promise(pack);
-        } else if (resource && resource.fsPath) {
+        } else if (resource) {
             return new Promise(function (resolve) {
                 // Get the Metadata Object type
                 var describe = vscode.window.forceCode.describe;
-                var isDirectory: Boolean = fs.lstatSync(resource.fsPath).isDirectory();
-                if (isDirectory) {
+                if (resource instanceof vscode.Uri && fs.lstatSync(resource.fsPath).isDirectory()) {
                     var baseDirectoryName: string = path.parse(resource.fsPath).name;
                     var types: any[] = describe.metadataObjects
                         .filter(o => o.directoryName === baseDirectoryName)
@@ -145,39 +154,32 @@ export default function retrieve(resource?: any) {
                         });
 
                     if (types.length <= 0) {
-                        types = getAuraBundle(describe);
+                        types = describe.metadataObjects
+                            .filter(o => o.xmlName === 'AuraDefinitionBundle')
+                            .map(r => {
+                                return { name: r.xmlName, members: baseDirectoryName };
+                            });
                     }
 
                     if (types.length > 0) {
-                        retrieveComponents(resolve, types);
+                        retrieveComponents(resolve, {types: types});
                     }
-                } else {
+                } else if(resource instanceof vscode.Uri){
                     vscode.workspace.openTextDocument(resource).then(doc => {
                         var toolingType = parsers.getToolingType(doc);
                         const name: string = parsers.getName(doc, toolingType);
-                        resolve(getFileStream(name, toolingType));
+                        retrieveComponents(resolve, {types: [{name: toolingType, members: [name]}]});
                     });
+                } else {
+                    retrieveComponents(resolve, resource);
                 }
             });
-        } else if(resource && resource.name) {
-            return getFileStream(resource.name, resource.toolingType);
         }
         return Promise.resolve({});
 
-        function getAuraBundle(describe): any[] {
-            // if nothing was found, then check if this is an AURA componet...
-            var baseDirectoryName: string = parsers.getAuraNameFromFileName(resource.fsPath);
-            var types: any[] = describe.metadataObjects
-                .filter(o => o.xmlName === 'AuraDefinitionBundle')
-                .map(r => {
-                    return { name: r.xmlName, members: baseDirectoryName };
-                });
-            return types;
-        }
-
-        function retrieveComponents(resolve, types) {
+        function retrieveComponents(resolve, retrieveTypes: ToolingTypes) {
             resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                unpackaged: { types: types },
+                unpackaged: retrieveTypes,
                 apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
             }).stream());
         }
@@ -205,10 +207,7 @@ export default function retrieve(resource?: any) {
                 var types: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
                     return { name: r.xmlName, members: '*' };
                 });
-                resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                    unpackaged: { types: types },
-                    apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-                }).stream());
+                retrieveComponents(resolve, {types: types});
             }
 
             function getSpecificTypeMetadata(metadataType: string) {
@@ -217,11 +216,7 @@ export default function retrieve(resource?: any) {
                     .map(r => {
                         return { name: r.xmlName, members: '*' };
                     });
-
-                resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                    unpackaged: { types: types },
-                    apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-                }).stream());
+                retrieveComponents(resolve, {types: types});
             }
 
             function unpackaged() {
@@ -272,6 +267,39 @@ export default function retrieve(resource?: any) {
                         if ((name != 'package.xml' && name.search('meta.xml') < 0)
 								|| vscode.window.forceCode.config.handleMetaFiles) {
                             fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
+                            if(name.endsWith('.resource-meta.xml')) {
+                                // unzip the resource
+                                parseString(data, { explicitArray: false }, function (err, dom) {
+                                    if (!err) {
+                                        var actualResData = fs.readFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`.split('-meta.xml')[0]);
+                                        var ContentType: string = dom.StaticResource.contentType;
+                                        var ctFolderName = ContentType.split('/').join('.');
+                                        const resFN: string = name.slice(name.indexOf(path.sep) + 1).split('.')[0];
+                                        if(ContentType.includes('zip')) {
+                                            var zipReader: any[] = ZIP.Reader(new Buffer(actualResData));
+                                            zipReader.forEach(function (zipEntry) {
+                                                if (zipEntry.isFile()) {
+                                                    var zipFName: string = zipEntry.getName();
+                                                    var zipFData: Buffer = zipEntry.getData();
+                                                    var filePath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${zipFName}`;
+                                                    fs.outputFileSync(filePath, zipFData);
+                                                }
+                                            });
+                                        } else {
+                                            // this will work for most other things...
+                                            var theData: any;
+                                            if(ContentType.includes('image') || ContentType.includes('shockwave-flash')) {
+                                                theData = new Buffer(actualResData.toString('base64'), 'base64');
+                                            } else {
+                                                theData = actualResData.toString(mime.charset(ContentType) || 'UTF-8');
+                                            }
+                                            var ext = mime.extension(ContentType);
+                                            var filePath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${resFN}.${ext}`;
+                                            fs.outputFileSync(filePath, theData);
+                                        }
+                                    }
+                                });
+                            }
                         }
                     }
                 });
@@ -297,6 +325,7 @@ export default function retrieve(resource?: any) {
             }, 100);
         }
         vscode.window.forceCode.outputChannel.append(vscode.window.forceCode.dxCommands.outputToString(res).replace(/{/g, '').replace(/}/g, ''));
+        commandService.runCommand('ForceCode.checkForFileChanges', undefined);
         return res;
     }
     function onError(err) {

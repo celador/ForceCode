@@ -1,14 +1,6 @@
 import * as vscode from 'vscode';
-import fs = require('fs-extra');
-import * as path from 'path';
 import * as retrieve from './retrieve';
-const ZIP: any = require('zip');
-const fetch: any = require('node-fetch');
-const mime = require('mime-types');
-
 import { getIcon, getExtension, getFolder } from './../parsers';
-import { IWorkspaceMember } from '../forceCode';
-import { commandService, codeCovViewService } from '../services';
 const TYPEATTRIBUTE: string = 'type';
 
 export function openAura(context: vscode.ExtensionContext) {
@@ -71,22 +63,35 @@ export function showFileOptions(promises: any[], pickMany: boolean) {
         if(!opts) {
             opts = [''];
         }
-        var files: any[];
+        var files: retrieve.ToolingType[] = [];
         if(opts instanceof Array) {
-            files = opts.map(curOpt => {
+            opts.forEach(curOpt => {
                 //return getFile(curOpt);
                 var tType: string = curOpt.detail.split(' ')[0];
                 var fName: string = curOpt.label.slice(curOpt.label.lastIndexOf(' ') + 1).split('.')[0];
-                return retrieve.default({name: fName, toolingType: tType});
+                var index: number = getTTIndex(tType, files);
+                if(index >= 0) {
+                    files[index].members.push(fName);
+                } else {
+                    files.push({name: tType, members: [fName]});
+                }
             });
         } else {
-            var tType: string = opts.detail.split(' ')[0];
-            var fName: string = opts.label.slice(opts.label.lastIndexOf(' ') + 1);
-            files = [retrieve.default({name: fName, toolingType: tType})];
+            var tType: string = opt.detail.split(' ')[0];
+            var fName: string = opt.label.slice(opt.label.lastIndexOf(' ') + 1).split('.')[0];
+            files.push({name: tType, members: [fName]});
         }
         
-        return Promise.all(files);
-    });/*
+        return retrieve.default({types: files});
+    });
+    
+    function getTTIndex(toolType: string, arr: retrieve.ToolingType[]): number {
+        return arr.findIndex(cur => {
+            return cur.name === toolType;
+        });
+    }
+
+    /*
     .then(res => {
         var count: number = 0;
         var showFile: boolean = vscode.window.forceCode.config.showFilesOnOpen ? true : false;
