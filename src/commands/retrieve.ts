@@ -133,7 +133,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
 
         if (opt) {
             return new Promise(pack);
-        } else if (resource && resource.fsPath) {
+        } else if (resource) {
             return new Promise(function (resolve) {
                 // Get the Metadata Object type
                 if (resource instanceof vscode.Uri && fs.lstatSync(resource.fsPath).isDirectory()) {
@@ -163,8 +163,6 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     retrieveComponents(resolve, resource);
                 }
             });
-        } else if(resource && resource.name) {
-            return getFileStream(resource.name, resource.toolingType);
         }
         throw new Error();
 
@@ -216,11 +214,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     .map(r => {
                         return { name: r.xmlName, members: '*' };
                     });
-
-                resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                    unpackaged: { types: types },
-                    apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-                }).stream());
+                retrieveComponents(resolve, {types: types});
             }
 
             function unpackaged() {
