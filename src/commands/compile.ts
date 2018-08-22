@@ -146,12 +146,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
         } else if (res.errors && res.errors.length > 0) {
             // We got an error with the container
             res.errors.forEach(err => {
-                console.error(err);
+                onError(err);
             });
-            vscode.window.showErrorMessage(`There was an error while saving ${name}`);
         } else if (res.State === 'Error') {
             onError(res);
-            vscode.window.showErrorMessage(`There was an error while saving ${name}. Check for syntax errors.`);
         }
 
         if(failures === 0 && !vscode.window.forceCode.dxCommands.isEmptyUndOrNull(res)) {
@@ -188,11 +186,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                     diagnostics.push(new vscode.Diagnostic(failureRange, errmess, 0));
                     diagnosticCollection.set(document.uri, diagnostics);
                 }
-                errorMessage = errmess;
             } catch (e) {}
         } else {
             errorMessage = err;
+            vscode.window.showErrorMessage(errorMessage);
         }
-        vscode.window.showErrorMessage(errorMessage);
     }
 }
