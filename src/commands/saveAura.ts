@@ -123,6 +123,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
 }
 
 export function getAuraDefTypeFromDocument(document: vscode.TextDocument) {
+    const fname: string = parsers.getName(document, 'AuraDefinition');
     const extension: string = parsers.getFileExtension(document);
     const fileName: string = parsers.getFileName(document);
     switch (extension) {
@@ -148,7 +149,7 @@ export function getAuraDefTypeFromDocument(document: vscode.TextDocument) {
             // SVG — SVG graphic resource
             return 'SVG';
         case 'js':
-            var fileNameEndsWith: string = fileName.replace(name, '').toLowerCase();
+            var fileNameEndsWith: string = fileName.replace(fname, '').toLowerCase();
             if (fileNameEndsWith === 'controller') {
                 // CONTROLLER — client-side controller
                 return 'CONTROLLER';
