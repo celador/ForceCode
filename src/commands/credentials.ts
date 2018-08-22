@@ -143,6 +143,7 @@ export default function enterCredentials(): Promise<any> {
                 'runAllTests': false,
                 'ignoreWarnings': true,
             },
+            overwritePackageXML: false,
         };
         // add in a bare sfdx-project.json file for language support from official salesforce extensions
         const sfdxProj: {} = {

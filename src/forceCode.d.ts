@@ -36,6 +36,7 @@ export interface Config {
     src?: string;
     url?: string;
     username?: string;
+    overwritePackageXML?: string;
 }
 
 export interface MetadataResult {

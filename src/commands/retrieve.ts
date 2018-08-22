@@ -264,7 +264,9 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                             name = path.normalize(name).replace(option.description + path.sep, '');
                         }
                         name = path.normalize(name).replace('unpackaged' + path.sep, '');
-                        fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
+                        if(name !== 'package.xml' || vscode.window.forceCode.config.overwritePackageXML) {
+                            fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
+                        }
                         if(name.endsWith('.resource-meta.xml')) {
                             // unzip the resource
                             parseString(data, { explicitArray: false }, function (err, dom) {

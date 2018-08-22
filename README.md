@@ -141,6 +141,7 @@ The configuration file should look something like...
       "rollbackOnError": true,
       "testLevel": "runLocalTests",
     },
+    "overwritePackageXML": false,
 }
 ```
 
@@ -174,6 +175,7 @@ ForceCode will create this file for you upon first start!
   * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
   * runTests:        A list of Apex tests to run during deployment \(commma separated list\)
   * verbose:         Output execution detail log to a `DeployStatistics.log` file
+* overwritePackageXML: if set to true, will overwrite package.xml file upon opening or retrieving files
 
 There's also one special configuration option that's not included in the force.json, but rather in your vscode settings.json file. This reasoning for separating the files is for portability reasons; to make it easier to share this configuration with others and yourself across projects.  
 If you open up your settings.json file, or go to Code &gt; Preferences &gt; Workspace Settings and create a new preference, starting with `force` you should see the filesExclude preference.  
@@ -330,6 +332,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.7.1
+    * Add option (overwritePackageXML) to force.json to control overwriting package.xml
 * 3.7.0
     * handleMetaFiles option removed. Handling metafiles is now required because of the new way I have implemented opening files (Especially static resources)
     * Errors only reported in problems panel now for apex files, no more notifications
