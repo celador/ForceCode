@@ -264,42 +264,39 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                             name = path.normalize(name).replace(option.description + path.sep, '');
                         }
                         name = path.normalize(name).replace('unpackaged' + path.sep, '');
-                        if ((name != 'package.xml' && name.search('meta.xml') < 0)
-								|| vscode.window.forceCode.config.handleMetaFiles) {
-                            fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
-                            if(name.endsWith('.resource-meta.xml')) {
-                                // unzip the resource
-                                parseString(data, { explicitArray: false }, function (err, dom) {
-                                    if (!err) {
-                                        var actualResData = fs.readFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`.split('-meta.xml')[0]);
-                                        var ContentType: string = dom.StaticResource.contentType;
-                                        var ctFolderName = ContentType.split('/').join('.');
-                                        const resFN: string = name.slice(name.indexOf(path.sep) + 1).split('.')[0];
-                                        if(ContentType.includes('zip')) {
-                                            var zipReader: any[] = ZIP.Reader(new Buffer(actualResData));
-                                            zipReader.forEach(function (zipEntry) {
-                                                if (zipEntry.isFile()) {
-                                                    var zipFName: string = zipEntry.getName();
-                                                    var zipFData: Buffer = zipEntry.getData();
-                                                    var filePath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${zipFName}`;
-                                                    fs.outputFileSync(filePath, zipFData);
-                                                }
-                                            });
-                                        } else {
-                                            // this will work for most other things...
-                                            var theData: any;
-                                            if(ContentType.includes('image') || ContentType.includes('shockwave-flash')) {
-                                                theData = new Buffer(actualResData.toString('base64'), 'base64');
-                                            } else {
-                                                theData = actualResData.toString(mime.charset(ContentType) || 'UTF-8');
+                        fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
+                        if(name.endsWith('.resource-meta.xml')) {
+                            // unzip the resource
+                            parseString(data, { explicitArray: false }, function (err, dom) {
+                                if (!err) {
+                                    var actualResData = fs.readFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`.split('-meta.xml')[0]);
+                                    var ContentType: string = dom.StaticResource.contentType;
+                                    var ctFolderName = ContentType.split('/').join('.');
+                                    const resFN: string = name.slice(name.indexOf(path.sep) + 1).split('.')[0];
+                                    if(ContentType.includes('zip')) {
+                                        var zipReader: any[] = ZIP.Reader(new Buffer(actualResData));
+                                        zipReader.forEach(function (zipEntry) {
+                                            if (zipEntry.isFile()) {
+                                                var zipFName: string = zipEntry.getName();
+                                                var zipFData: Buffer = zipEntry.getData();
+                                                var filePath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${zipFName}`;
+                                                fs.outputFileSync(filePath, zipFData);
                                             }
-                                            var ext = mime.extension(ContentType);
-                                            var filePath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${resFN}.${ext}`;
-                                            fs.outputFileSync(filePath, theData);
+                                        });
+                                    } else {
+                                        // this will work for most other things...
+                                        var theData: any;
+                                        if(ContentType.includes('image') || ContentType.includes('shockwave-flash')) {
+                                            theData = new Buffer(actualResData.toString('base64'), 'base64');
+                                        } else {
+                                            theData = actualResData.toString(mime.charset(ContentType) || 'UTF-8');
                                         }
+                                        var ext = mime.extension(ContentType);
+                                        var filePath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${resFN}.${ext}`;
+                                        fs.outputFileSync(filePath, theData);
                                     }
-                                });
-                            }
+                                }
+                            });
                         }
                     }
                 });

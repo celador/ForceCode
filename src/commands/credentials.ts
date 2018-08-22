@@ -138,7 +138,6 @@ export default function enterCredentials(): Promise<any> {
             debugOnly: true,
             debugFilter: 'USER_DEBUG|FATAL_ERROR',
             apiVersion: constants.API_VERSION,
-            handleMetaFiles: false,
             deployOptions: {
                 'checkOnly': false,
                 'runAllTests': false,

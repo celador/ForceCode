@@ -87,11 +87,7 @@ export default function createClass() {
 
     function generateFile(classname) {
 		
-		if (vscode.window.forceCode.config.handleMetaFiles) {
-			return Promise.all([writeFile(), writeMetaFile()]);
-		} else {
-			return Promise.all([writeFile()]);
-		}
+		return Promise.all([writeFile(), writeMetaFile()]);
 		
         function writeFile() {
             return new Promise(function (resolve, reject) {

@@ -36,7 +36,6 @@ export interface Config {
     src?: string;
     url?: string;
     username?: string;
-    handleMetaFiles?: boolean;
 }
 
 export interface MetadataResult {
