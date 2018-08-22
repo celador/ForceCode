@@ -36,24 +36,12 @@ export default [
         commandName: 'ForceCode.open',
         name: 'Opening file',
         hidden: false,
-        description: 'Open Classes, Pages, Triggers, Components, and Static Resources',
+        description: 'Open Classes, Pages, Triggers, Components, Lightning Components, and Static Resources',
         detail: 'Retrieve a file from Salesforce.',
         icon: 'desktop-download',
         label: 'Open Salesforce File',
         command: function (context, selectedResource?) {
             return commands.open(context);
-        }
-    },
-    {
-        commandName: 'ForceCode.openAura',
-        name: 'Opening Aura Bundle',
-        hidden: false,
-        description: 'Open an Aura Bundle',
-        detail: 'Retrieve an Aura Bundle from Salesforce.',
-        icon: 'database',
-        label: 'Open Aura Bundle',
-        command: function (context, selectedResource?) {
-            return commands.openAura(context);
         }
     },
     // Create Classes
@@ -350,7 +338,7 @@ export default [
         name: 'Opening file',
         hidden: true,
         command: function (context, selectedResource?) {
-            return commands.showFileOptions(context, true);
+            return commands.showFileOptions(context);
         }
     },
     {

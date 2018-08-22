@@ -11,7 +11,7 @@ import dx from './dx';
 import executeAnonymous from './executeAnonymous';
 import find from './find';
 import getLog from './getLog';
-import { open, openAura, showFileOptions } from './open';
+import { open, showFileOptions } from './open';
 import getOverallCoverage from './overallCoverage';
 import retrieve from './retrieve';
 import showMenu from './menu';
@@ -34,7 +34,6 @@ export {
     find,
     getLog,
     open,
-    openAura,
     getOverallCoverage,
     retrieve,
     showFileOptions,
