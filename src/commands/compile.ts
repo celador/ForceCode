@@ -157,8 +157,6 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
             }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;
-        } else {
-            vscode.window.showErrorMessage(`There was an error while compiling ${name}. Please check the problems panel for details.`);
         }
         return false;
     }
