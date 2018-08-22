@@ -47,18 +47,6 @@ export const fcCommands: FCCommand[] = [
             return commands.open(context);
         }
     },
-    {
-        commandName: 'ForceCode.openAura',
-        name: 'Opening Aura Bundle',
-        hidden: false,
-        description: 'Open an Aura Bundle',
-        detail: 'Retrieve an Aura Bundle from Salesforce.',
-        icon: 'database',
-        label: 'Open Aura Bundle',
-        command: function (context, selectedResource?) {
-            return commands.openAura(context);
-        }
-    },
     // Create Classes
     {
         commandName: 'ForceCode.createClass',
