@@ -141,7 +141,6 @@ The configuration file should look something like...
       "rollbackOnError": true,
       "testLevel": "runLocalTests",
     },
-    "handleMetaFiles": false,
 }
 ```
 
@@ -150,7 +149,6 @@ ForceCode will create this file for you upon first start!
 
 ### Options
 
-* handleMetaFiles: option to retrieve metadata for files (Only working with packages and with the retrieve/refresh command for now. Currently the metadata will not save to the org. Add the handleMetaFiles: true option to enable) Also, when handleMetaFiles is false, the deploy and package retrieval options won't be in the menu, as they rely on metadata.
 * username: The username for the org you want to connect to.
 * url: This is the login url for Salesforce.  It's either login.salesforce.com for Developer and Professional editions or test.salesforce.com for sandboxes.
 * checkForFileChanges: This option, when set to true, will allow ForceCode to check for file changes against the server on startup of ForceCode.
@@ -332,6 +330,12 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.7.0
+    * handleMetaFiles option removed. Handling metafiles is now required because of the new way I have implemented opening files (Especially static resources)
+    * Errors only reported in problems panel now for apex files, no more notifications
+    * Open aura files from salesforce open file menu, even multiple ones.
+    * FOR NOW, files no longer open in  the editor when retrieving from the org. Can fix in the future.
+    * Opening a large number of files should use less limits now because I use the 'retrieve' way of opening now.
 * 3.6.6
     * Don't depend on Salesforce extensions for activation anymore, but if you have them then code completion will still work. This makes ForceCode start a LOT faster.
     * Saving meta.xml files now works (Only for classes, triggers, pages, components, and lightning components)
