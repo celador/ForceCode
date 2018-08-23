@@ -334,6 +334,7 @@ Step 6.  Have Fun!
 
 * 3.7.1
     * Add option (overwritePackageXML) to force.json to control overwriting package.xml
+    * Fix 'running an entire test class throws error' issue
 * 3.7.0
     * handleMetaFiles option removed. Handling metafiles is now required because of the new way I have implemented opening files (Especially static resources)
     * Errors only reported in problems panel now for apex files, no more notifications
