@@ -36,3 +36,18 @@ export function getCoverageType(document: vscode.TextDocument): string {
     return undefined;
 }
 
+export function getToolingTypeFromExt(path: string) {
+    if (path.endsWith('.cls')) {
+        return 'ApexClass';
+    } else if (path.endsWith('.trigger')) {
+        return 'ApexTrigger';
+    } else if (path.endsWith('.component')) {
+        return 'ApexComponent';
+    } else if (path.endsWith('.page')) {
+        return 'ApexPage';
+    } else if (path.endsWith('.cmp')) {
+        return 'AuraDefinitionBundle';
+    }
+    return undefined;
+}
+

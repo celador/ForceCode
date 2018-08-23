@@ -333,8 +333,9 @@ Step 6.  Have Fun!
 ## Change Log
 
 * 3.7.1
-    * Add option (overwritePackageXML) to force.json to control overwriting package.xml
+    * Add option (overwritePackageXML) to force.json to control overwriting package.xml. Set it to true to overwrite or false to not.
     * Fix 'running an entire test class throws error' issue
+    * Fix 'ForceCode 3.7.0 Changed file notifications never go away' issue
 * 3.7.0
     * handleMetaFiles option removed. Handling metafiles is now required because of the new way I have implemented opening files (Especially static resources)
     * Errors only reported in problems panel now for apex files, no more notifications

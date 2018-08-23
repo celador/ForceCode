@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as creds from './../commands/credentials';
 import * as fs from 'fs-extra';
 import { FCFile } from './codeCovView';
+import { getToolingTypeFromExt } from '../parsers/getToolingType';
 const jsforce: any = require('jsforce');
 const pjson: any = require('./../../../package.json');
 
@@ -112,11 +113,7 @@ export default class ForceService implements forceCode.IForceService {
         types['type0'] = mems;
         if(types['type0'].length > 3) {
             for(var i = 1; types['type0'].length > 3; i++) {
-                var newTypes: Array<any> = [];
-                newTypes.push(types['type0'].shift());
-                newTypes.push(types['type0'].shift());
-                newTypes.push(types['type0'].shift());
-                types['type' + i] = newTypes;
+                types['type' + i] = types['type0'].splice(0, 3);
             }
         }
         let proms = Object.keys(types).map(curTypes => {
@@ -168,18 +165,7 @@ export default class ForceService implements forceCode.IForceService {
                         //var metadataFileProperties: IMetadataFileProperties = getMembersFor(item);
                         
                         //if (metadataFileProperties) {
-                        var type: string = undefined;
-                        if (item.path.endsWith('.cls')) {
-                            type = 'ApexClass';
-                        } else if (item.path.endsWith('.trigger')) {
-                            type = 'ApexTrigger';
-                        } else if (item.path.endsWith('.component')) {
-                            type = 'ApexComponent';
-                        } else if (item.path.endsWith('.page')) {
-                            type = 'ApexPage';
-                        } else if (item.path.endsWith('.cmp')) {
-                            type = 'AuraDefinitionBundle';
-                        }
+                        var type: string = getToolingTypeFromExt(item.path);
 
                         if(type) {
                             var pathParts: string[] = item.path.split(path.sep);
