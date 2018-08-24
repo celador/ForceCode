@@ -12,6 +12,7 @@ import {
   import * as path from 'path';
   import * as fs from 'fs-extra';
   import constants from './../models/constants';
+  var Utimes = require('@ronomon/utimes');
 
   const ClassType = {
       CoveredClass : 'Sufficient Coverage',
@@ -32,21 +33,6 @@ import {
     public readonly onDidChangeTreeData: Event <FCFile | undefined> = this
       ._onDidChangeTreeData.event;
   
-    public constructor() {
-      try{
-				// read previous metadata
-				if(this.classes.length === 0) {
-          const tempClasses: any[] = fs.readJsonSync(workspace.workspaceFolders[0].uri.fsPath + path.sep + 'wsMembers.json');
-          tempClasses.forEach(cur => {
-            this.classes.push(new FCFile(cur.name, TreeItemCollapsibleState.None, this, cur));
-          });
-          console.log('Done loading wsMember data.');
-				}
-			} catch (e) {
-        console.log('Class data failed to load or no data found');
-			}
-    }
-  
     public static getInstance() {
       if (!CodeCovViewService.instance) {
         console.log('Starting Code Coverage Service...');
@@ -60,17 +46,6 @@ import {
     }
 
     private saveClasses() {
-      if(this.timeO) {
-        clearTimeout(this.timeO);
-      }
-      this.timeO = setTimeout(() => { this.doSaveClasses(); }, 1500);
-    }
-
-    private doSaveClasses() {
-      return window.forceCode.dxCommands.saveToFile(JSON.stringify(this.getWsMembers()), 'wsMembers.json').then(() => {
-        console.log('Updated wsMembers.json file');
-        return Promise.resolve();
-      });
     }
   
     public addClass(wsMember: IWorkspaceMember) {
@@ -211,6 +186,12 @@ import {
           command: 'ForceCode.openOnClick',
           title: '',
           arguments: [this.wsMember.path]
+      }
+      
+      if(this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
+        var mTimeString: string[] = this.wsMember.lastModifiedDate.split('.');
+        var mTime: number = (new Date(mTimeString[0])).getTime() + parseInt(mTimeString[1].substring(0, 3));
+        Utimes.utimes(this.wsMember.path, undefined, mTime, undefined, function(res) {});
       }
 
       this.type = ClassType.UncoveredClass;

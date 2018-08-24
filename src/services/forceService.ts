@@ -161,10 +161,7 @@ export default class ForceService implements forceCode.IForceService {
             klaw(vscode.window.forceCode.workspaceRoot)
                 .on('data', function (item) {
                     // Check to see if the file represents an actual member... 
-                    if (item.stats.isFile()) {
-                        //var metadataFileProperties: IMetadataFileProperties = getMembersFor(item);
-                        
-                        //if (metadataFileProperties) {
+                    if (item.stats.isFile()) {                        
                         var type: string = getToolingTypeFromExt(item.path);
 
                         if(type) {
@@ -180,7 +177,7 @@ export default class ForceService implements forceCode.IForceService {
                                     name: filename,
                                     path: item.path,
                                     id: '',//metadataFileProperties.id,
-                                    lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
+                                    lastModifiedDate: item.stats.mTime,
                                     lastModifiedByName: '',
                                     lastModifiedById: '',
                                     type: type,
