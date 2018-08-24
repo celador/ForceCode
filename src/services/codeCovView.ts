@@ -6,7 +6,6 @@ import {
     TreeItem,
     TreeItemCollapsibleState,
     window,
-    workspace
   } from 'vscode';
   import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
   import * as path from 'path';
@@ -23,7 +22,6 @@ import {
   }
 
   export class CodeCovViewService implements TreeDataProvider<FCFile> {
-    private timeO: NodeJS.Timer;
     private static instance: CodeCovViewService;
     private classes: Array<FCFile> = new Array<FCFile>();
     private _onDidChangeTreeData: EventEmitter<
@@ -44,9 +42,6 @@ import {
     public refresh() {
       this._onDidChangeTreeData.fire();
     }
-
-    private saveClasses() {
-    }
   
     public addClass(wsMember: IWorkspaceMember) {
       const index: number = this.classes.findIndex(curClass => { return curClass.getWsMember().path === wsMember.path });
@@ -57,7 +52,6 @@ import {
         this.classes.push(newClass);
       }
       this.refresh();
-      this.saveClasses();
     }
 
     public findByNameAndType(name: string, type: string): FCFile {
@@ -95,7 +89,6 @@ import {
       if (index !== -1) {
         this.classes.splice(index, 1);
         this.refresh();
-        this.saveClasses();
         return true;
       } 
       return false;
@@ -140,15 +133,6 @@ import {
         var aStr = a.label.split('% ').pop().toUpperCase();
         var bStr = b.label.split('% ').pop().toUpperCase();
         return aStr.localeCompare(bStr);
-    }
-
-    private getWsMembers(): IWorkspaceMember[] {
-      var wsMembers: IWorkspaceMember[] = new Array<IWorkspaceMember>();
-      this.classes.forEach(cur => {
-        const withoutCoverage: IWorkspaceMember = Object.assign({}, cur.getWsMember(), {coverage: undefined});
-        wsMembers.push(withoutCoverage);
-      });
-      return wsMembers;
     }
   }
   
