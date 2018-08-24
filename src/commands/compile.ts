@@ -126,6 +126,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
 
     // =======================================================================================================================================
     function finished(res: any): boolean {
+        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(res)) {
+            vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
+            return true;
+        }
         var failures: number = 0;
         if (res.records && res.records.length > 0) {
             res.records.filter(r => r.State !== 'Error').forEach(containerAsyncRequest => {
