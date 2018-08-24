@@ -273,6 +273,12 @@ export class FCFile extends TreeItem {
           title: '',
           arguments: [this.wsMember.path]
       }
+      
+      if(this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
+        var mTimeString: string[] = this.wsMember.lastModifiedDate.split('.');
+        var mTime: number = (new Date(mTimeString[0])).getTime() + parseInt(mTimeString[1].substring(0, 3));
+        Utimes.utimes(this.wsMember.path, undefined, mTime, undefined, function(res) {});
+      }
 
       this.type = ClassType.UncoveredClass;
       if(this.wsMember.coverage) {
