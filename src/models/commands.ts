@@ -429,4 +429,29 @@ export default [
             return commandService.runCommand('ForceCode.apexTest', context.name, context.type);
         }
     },
+    {
+        commandName: 'ForceCode.switchUser',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commandService.runCommand('ForceCode.switchUserText', context, selectedResource).then(res => {
+                if(res) {
+                    commandService.runCommand('ForceCode.connect', undefined);
+                }   
+            });
+        }
+    },
+    {
+        commandName: 'ForceCode.switchUserText',
+        name: 'Switching user',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            vscode.window.forceCode.config.username = context.username;
+            vscode.window.forceCode.config.url = context.url;
+            if(context.src) {
+                vscode.window.forceCode.config.src = context.src;
+            }
+            vscode.window.forceCode.conn = undefined;
+            return vscode.window.forceCode.dxCommands.getOrgInfo();
+        }
+    },
 ]

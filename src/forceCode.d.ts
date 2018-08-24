@@ -12,6 +12,12 @@ export interface FCWorkspaceMembers {
     [key: string]: IWorkspaceMember;
 }
 
+export interface FCOrg {
+    username: string;
+    url: string;
+    src?: string;
+}
+
 export interface Config {
     apiVersion?: string;
     autoCompile?: boolean;
@@ -36,6 +42,7 @@ export interface Config {
     src?: string;
     url?: string;
     username?: string;
+    usernames?: FCOrg[];
     overwritePackageXML?: string;
 }
 

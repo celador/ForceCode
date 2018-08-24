@@ -124,24 +124,29 @@ export default class ForceService implements forceCode.IForceService {
         });
 
         function parseRecords(recs: any[]): Promise<any> {
+            if(!Array.isArray(recs)) {
+                Promise.resolve();
+            }
             //return Promise.all(recs).then(records => {
             console.log('Done retrieving metadata records');
             recs.forEach(curSet => {
-                curSet.forEach(key => {
-                    var curFCFile: FCFile = codeCovViewService.findByNameAndType(key.fullName, key.type);
-                    if(curFCFile) {
-                        var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
-                        if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges || curMem.type === 'AuraDefinitionBundle') {
-                            curMem.id = key.id;
-                            curMem.lastModifiedDate = key.lastModifiedDate;
-                            curMem.lastModifiedByName = key.lastModifiedByName; 
-                            curMem.lastModifiedById = key.lastModifiedById;
-                            curFCFile.updateWsMember(curMem);
-                        } else {
-                            commandService.runCommand('ForceCode.fileModified', curMem.path, key.lastModifiedByName);
+                if(Array.isArray(curSet)) {
+                    curSet.forEach(key => {
+                        var curFCFile: FCFile = codeCovViewService.findByNameAndType(key.fullName, key.type);
+                        if(curFCFile) {
+                            var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
+                            if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges || curMem.type === 'AuraDefinitionBundle') {
+                                curMem.id = key.id;
+                                curMem.lastModifiedDate = key.lastModifiedDate;
+                                curMem.lastModifiedByName = key.lastModifiedByName; 
+                                curMem.lastModifiedById = key.lastModifiedById;
+                                curFCFile.updateWsMember(curMem);
+                            } else {
+                                commandService.runCommand('ForceCode.fileModified', curMem.path, key.lastModifiedByName);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             });
             console.log('Done getting workspace info');
             return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined).then(() => {
@@ -259,9 +264,9 @@ export default class ForceService implements forceCode.IForceService {
                         .find({ Name: {$like : 'ForceCode-%'}})
                         .execute(function(err, records) {
                             var toDelete: string[] = new Array<string>();
-                            records.forEach(r => {
-                                toDelete.push(r.Id);
-                            })
+                            if(!records) {
+                                resolve();
+                            }
                             if(toDelete.length > 0) {
                                 resolve(vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
                                     .del(toDelete));

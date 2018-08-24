@@ -54,13 +54,12 @@ export function showFileOptions(promises: any[]) {
         return vscode.window.showQuickPick(options, config);
     }).then(opt => {
         var opts: any = opt;
-        if(!opts) {
-            opts = [''];
+        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(opts)) {
+            return Promise.resolve();
         }
         var files: retrieve.ToolingType[] = [];
         if(opts instanceof Array) {
             opts.forEach(curOpt => {
-                //return getFile(curOpt);
                 var tType: string = curOpt.detail.split(' ')[0];
                 var fName: string = curOpt.label.slice(curOpt.label.lastIndexOf(' ') + 1).split('.')[0];
                 var index: number = getTTIndex(tType, files);

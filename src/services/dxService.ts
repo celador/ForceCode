@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { commandService } from '.';
+import { commandService, switchUserViewService} from '.';
 var alm: any = require('salesforce-alm');
 
 export interface SFDX {
@@ -247,6 +247,13 @@ export default class DXService implements DXCommands {
 
     public getOrgInfo(): Promise<SFDX> {
         return this.runCommand('org:display', '--json').then(res => {
+            var config = vscode.window.forceCode.config;
+            // set up multiple usernames
+			if(config.usernames && config.usernames.length > 0) {
+				switchUserViewService.addOrgs(config.usernames);
+			} else {
+				switchUserViewService.addOrg(config.username, config.url, config.src);
+			}
             this.isLoggedIn = true;
             this.orgInfo = res;
             return this.toqlQuery("SELECT Id FROM User WHERE UserName='" + this.orgInfo.username + "'")
