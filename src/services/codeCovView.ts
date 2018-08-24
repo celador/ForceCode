@@ -218,7 +218,7 @@ import {
     }
 
     // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
-    public compareDates(serverDate: string): boolean {
+    /*public compareDates(serverDate: string): boolean {
       if(!this.wsMember.lastModifiedDate) {
         return true;
       }
@@ -233,5 +233,5 @@ import {
       
       console.log("Time difference between file changes: " + (serverMS - localMS));
       return false;
-    }
+    }*/
   }

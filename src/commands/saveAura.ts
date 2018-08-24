@@ -80,7 +80,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
         currentObjectDefinition = def.length > 0 ? def[0] : undefined;
         if (currentObjectDefinition !== undefined) {
             var curFCFile: FCFile = codeCovViewService.findById(bundle[0].Id);
-            if(curFCFile ? curFCFile.compareDates(currentObjectDefinition.LastModifiedDate) : false) {
+            if(curFCFile ? currentObjectDefinition.LastModifiedById !== curFCFile.getWsMember().lastModifiedById : false) {
                 return updateAura(curFCFile);
             } else {
                 return vscode.window.showWarningMessage('Someone has changed this file!', 'Diff', 'Overwrite').then(s => {

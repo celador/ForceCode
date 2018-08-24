@@ -135,15 +135,15 @@ export default class ForceService implements forceCode.IForceService {
                         var curFCFile: FCFile = codeCovViewService.findByNameAndType(key.fullName, key.type);
                         if(curFCFile) {
                             var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
-                            if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges || curMem.type === 'AuraDefinitionBundle') {
+                            //if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges || curMem.type === 'AuraDefinitionBundle') {
                                 curMem.id = key.id;
                                 curMem.lastModifiedDate = key.lastModifiedDate;
                                 curMem.lastModifiedByName = key.lastModifiedByName; 
                                 curMem.lastModifiedById = key.lastModifiedById;
                                 curFCFile.updateWsMember(curMem);
-                            } else {
-                                commandService.runCommand('ForceCode.fileModified', curMem.path, key.lastModifiedByName);
-                            }
+                            //} else {
+                            //    commandService.runCommand('ForceCode.fileModified', curMem.path, key.lastModifiedByName);
+                            //}
                         }
                     });
                 }
