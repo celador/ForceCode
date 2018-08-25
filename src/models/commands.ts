@@ -353,7 +353,7 @@ export const fcCommands: FCCommand[] = [
         commandName: 'ForceCode.showMenu',
         hidden: true,
         command: function (context, selectedResource?) {
-            if(vscode.window.forceCode.dxCommands.isLoggedIn) {
+            if(switchUserViewService.isLoggedIn()) {
                 return commands.showMenu(context);
             } else {
                 return vscode.window.forceCode.dxCommands.getOrgInfo();
@@ -608,12 +608,11 @@ export const fcCommands: FCCommand[] = [
         name: 'Switching user',
         hidden: true,
         command: function (context, selectedResource?) {
-            vscode.window.forceCode.config.username = context.username;
-            vscode.window.forceCode.config.url = context.url;
-            if(context.src) {
-                vscode.window.forceCode.config.src = context.src;
-            }
+            switchUserViewService.orgInfo.username = context.username;
+            switchUserViewService.refreshOrgs(switchUserViewService);
+            vscode.window.forceCode.config.url = context.loginUrl;
             vscode.window.forceCode.conn = undefined;
+            codeCovViewService.clear();
             return vscode.window.forceCode.dxCommands.getOrgInfo();
         }
     },
