@@ -126,7 +126,7 @@ export function saveApex(document: vscode.TextDocument, toolingType: string, Met
                             type: toolingType,
                             saveTime: true
                         };
-                        codeCovViewService.addClass(workspaceMember);
+                        codeCovViewService.addClass(workspaceMember, true);
                         return fc;
                     });
                 }, err => {
