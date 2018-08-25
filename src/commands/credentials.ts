@@ -144,7 +144,6 @@ export default function enterCredentials(): Promise<any> {
                 'ignoreWarnings': true,
             },
             overwritePackageXML: false,
-            usernames: [{username: config.username, url: config.url}],
         };
         // add in a bare sfdx-project.json file for language support from official salesforce extensions
         const sfdxProj: {} = {

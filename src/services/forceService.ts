@@ -136,7 +136,6 @@ export default class ForceService implements forceCode.IForceService {
                             var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
                             if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges || curMem.type === 'AuraDefinitionBundle') {
                                 curMem.id = key.id;
-                                //curMem.lastModifiedDate = key.lastModifiedDate;
                                 curMem.lastModifiedByName = key.lastModifiedByName; 
                                 curMem.lastModifiedById = key.lastModifiedById;
                                 curFCFile.updateWsMember(curMem);

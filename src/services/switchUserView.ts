@@ -45,17 +45,6 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
     this._onDidChangeTreeData.fire();
   }
 
-  public removeOrg(org: Org): boolean {
-    const index = this.orgs.indexOf(org);
-    if (index !== -1) {
-      this.orgs.splice(index, 1);
-
-      this._onDidChangeTreeData.fire();
-      return true;
-    }
-    return false;
-  }
-
   public getTreeItem(element: Org): TreeItem {
     return element;
   }
@@ -73,9 +62,8 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
     return null;    // this is the parent
   }
 
-  public refreshOrgs(service: SwitchUserViewService): number {
+  public refreshOrgs(service: SwitchUserViewService): boolean {
     this.orgs = [];
-    var numOrgs: number = 0;
     return klaw(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep)
       .on('data', function(file) {
         if(file.stats.isFile()) {
@@ -83,18 +71,15 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
           if(fileName.indexOf('@') > 0) {
             const orgInfo: SFDX = fs.readJsonSync(file.path);
             service.addOrg(orgInfo);
-            numOrgs++;
           }
         }
       })
-      .on('end', function() {return numOrgs})
+      .on('end', function() {return true})
   }
 }
 
 export class Org extends TreeItem {
-  private readonly switchUserView: SwitchUserViewService;
-  public readonly userName: string;
-  public readonly url: string;
+  public readonly orgInfo: SFDX;
 
   constructor(switchUserView: SwitchUserViewService, orgInfo: SFDX) {
     super(
@@ -102,9 +87,7 @@ export class Org extends TreeItem {
       TreeItemCollapsibleState.None
     );
 
-    this.switchUserView = switchUserView;
-    this.userName = orgInfo.username;
-    this.url = orgInfo.instanceUrl;
+    this.orgInfo = orgInfo;
 
     if(switchUserView.orgInfo.username === orgInfo.username) {
       this.iconPath = {
