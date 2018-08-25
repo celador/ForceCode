@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext): any {
                 commandService.runCommand('ForceCode.compileMenu', context, textDocument);
             }
             var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
-            if (isResource.index) {
+            if (isResource && isResource.index) {
                 commandService.runCommand('ForceCode.staticResourceDeployFromFile', context, textDocument);
             }
         }
