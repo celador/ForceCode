@@ -58,7 +58,7 @@ export function saveApex(document: vscode.TextDocument, toolingType: string, Met
         function shouldCompile(record) {
             const fcfile: FCFile = codeCovViewService.findById(record.Id);
             let mem: forceCode.IWorkspaceMember = fcfile ? fcfile.getWsMember() : undefined;
-            if (mem && record.LastModifiedById !== mem.lastModifiedById) {
+            if (mem && (!fcfile.compareDates(record.LastModifiedDate) || record.LastModifiedById !== mem.lastModifiedById)) {
                 // throw up an alert
                 return vscode.window.showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite').then(s => {
                     if (s === 'Diff') {
