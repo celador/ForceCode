@@ -608,12 +608,19 @@ export const fcCommands: FCCommand[] = [
         name: 'Switching user',
         hidden: true,
         command: function (context, selectedResource?) {
-            switchUserViewService.orgInfo.username = context.username;
+            switchUserViewService.orgInfo = context;
             switchUserViewService.refreshOrgs(switchUserViewService);
             vscode.window.forceCode.config.url = context.loginUrl;
+            vscode.window.forceCode.config.username = context.username;
             vscode.window.forceCode.conn = undefined;
             codeCovViewService.clear();
-            return vscode.window.forceCode.dxCommands.getOrgInfo();
+            return vscode.window.forceCode.dxCommands.getOrgInfo().then(res => {
+                const projPath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep;
+                return fs.outputFile(projPath + 'force.json', JSON.stringify(vscode.window.forceCode.config, undefined, 4), function() {
+                    return Promise.resolve(res);
+                });
+                
+            });
         }
     },
 ]
