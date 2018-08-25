@@ -7,6 +7,7 @@ import {
   window,
 } from 'vscode';
 import { FCOrg } from '../forceCode';
+import * as path from 'path';
 
 export class SwitchUserViewService implements TreeDataProvider<Org> {
   private static instance: SwitchUserViewService;
@@ -69,7 +70,7 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
     return [];
   }
 
-  public getParent(element: Org): any {
+  public getParent(element: Org): any { 
     return null;    // this is the parent
   }
 }
@@ -82,7 +83,7 @@ export class Org extends TreeItem {
 
   constructor(switchUserView: SwitchUserViewService, userName: string, url: string, src?: string) {
     super(
-      window.forceCode.config.username === userName ? '> ' + userName + ' <' : userName,
+      userName,
       TreeItemCollapsibleState.None
     );
 
@@ -91,10 +92,17 @@ export class Org extends TreeItem {
     this.url = url;
     this.src = src ? src : 'src';
 
-    this.command = {
-      command: 'ForceCode.switchUser',
-      title: '',
-      arguments: [{username: this.userName, url: this.url, src: this.src}]
+    if(window.forceCode.config.username === userName) {
+      this.iconPath = {
+        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'currentOrg.svg'),
+        light: path.join(__filename, '..', '..', '..', '..', 'images', 'currentOrg.svg'),
+      }
+    } else {
+      this.command = {
+        command: 'ForceCode.switchUser',
+        title: '',
+        arguments: [{username: this.userName, url: this.url, src: this.src}]
+      }
     }
     this.tooltip = window.forceCode.config.username === userName ? 'Current username' : 'Click to switch to this username';
   }

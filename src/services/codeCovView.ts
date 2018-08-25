@@ -186,7 +186,16 @@ import {
         this.label = percent + '% ' + this.label;
         if(percent >= 75) {
             this.type = ClassType.CoveredClass;
-        } 
+            this.iconPath = {
+              dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
+              light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
+            }
+        } else {
+          this.iconPath = {
+            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
+            light: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
+          }
+        }
         // this next check needs changed to something different, as there are problems reading the file
       } else {
         var testFile: boolean = false;
