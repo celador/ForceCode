@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { operatingSystem, configuration, commandService, codeCovViewService } from './../services';
+import { operatingSystem, configuration, commandService, codeCovViewService, switchUserViewService } from './../services';
 import constants from './../models/constants';
 import DXService from './dxService';
 import * as path from 'path';
@@ -21,7 +21,6 @@ export default class ForceService implements forceCode.IForceService {
     public describe: forceCode.IMetadataDescribe;
     public declarations: forceCode.IDeclarations;
     public containerAsyncRequestId: string;
-    public username: string;
     public statusBarItem_UserInfo: vscode.StatusBarItem;
     public statusBarItem: vscode.StatusBarItem;
     public outputChannel: vscode.OutputChannel;
@@ -42,7 +41,7 @@ export default class ForceService implements forceCode.IForceService {
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         this.containerMembers = [];
         configuration(this).then(config => {
-            this.username = config.username || '';
+            switchUserViewService.orgInfo.username = config.username || '';
             commandService.runCommand('ForceCode.getOrgInfo', undefined).then(res => {
                 if(res) {
                     commandService.runCommand('ForceCode.connect', undefined);
@@ -201,8 +200,9 @@ export default class ForceService implements forceCode.IForceService {
     private setupConfig(): Promise<forceCode.Config> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Setup username and outputChannel
-        self.username = (self.config && self.config.username) || '';
-        if (!self.config || !self.config.username || !self.dxCommands.isLoggedIn) {
+        var uname: string = switchUserViewService.orgInfo.username;
+        switchUserViewService.orgInfo.username = uname ? uname : (self.config && self.config.username) || '';
+        if (!self.config || !self.config.username || !switchUserViewService.isLoggedIn()) {
             return creds.default().then(credentials => {
                 self.config.username = credentials.username;
                 self.config.autoCompile = credentials.autoCompile;
@@ -215,13 +215,7 @@ export default class ForceService implements forceCode.IForceService {
     private login(config): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Lazy-load the connection
-        if (self.dxCommands.orgInfo === undefined || self.config.username !== self.username || self.conn === undefined) {
-            var connectionOptions: any = {
-                loginUrl: self.config.url || 'https://login.salesforce.com'
-            };
-            if (self.config.proxyUrl) {
-                connectionOptions.proxyUrl = self.config.proxyUrl;
-            }
+        if (self.conn === undefined) {
             if (!config.username) {
                 throw { message: '$(alert) Missing Credentials $(alert)' };
             }
@@ -230,32 +224,40 @@ export default class ForceService implements forceCode.IForceService {
             
             // get the current org info
             return new Promise((resolve, reject) => {
-                if(self.dxCommands.orgInfo) {
-                    resolve(self.dxCommands.orgInfo);
+                if(switchUserViewService.isLoggedIn()) {
+                    resolve(self.dxCommands.getOrgInfo());
                 } else {
                     reject();
                 }
             }).then(() => {
                     vscode.window.forceCode.statusBarItem_UserInfo.text = `ForceCode: $(plug) Connecting as ${config.username}`;
                     // get the refresh token
-                    var refreshToken =  fs.readJsonSync(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep + self.dxCommands.orgInfo.username + '.json').refreshToken;
+                    var refreshToken =  fs.readJsonSync(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep + switchUserViewService.orgInfo.username + '.json').refreshToken;
                     // set the userId in connectionSuccess
                     self.conn = new jsforce.Connection({
                         oauth2: {
-                            clientId: self.dxCommands.orgInfo.clientId,
+                            clientId: constants.CLIENT_ID
                         },
-                        instanceUrl : self.dxCommands.orgInfo.instanceUrl,
-                        accessToken : self.dxCommands.orgInfo.accessToken,
+                        instanceUrl : switchUserViewService.orgInfo.instanceUrl,
+                        accessToken : switchUserViewService.orgInfo.accessToken,
                         refreshToken: refreshToken,
                         version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                     });
+
+                    // query the userid
+                    return self.conn.tooling.sobject('User')
+                        .find({UserName: switchUserViewService.orgInfo.username})
+                        .execute(function(err, result) {
+                            if(err) { return Promise.reject(err) }
+                            switchUserViewService.orgInfo.userId = result[0].Id;
+                            return self
+                        });
                 })
                 .then(connectionSuccess)
-                .catch(connectionError)
                 .then(getNamespacePrefix)
                 .then(checkForChanges)
                 .then(cleanupContainers)
-                .catch(err => vscode.window.showErrorMessage(err.message));
+                .catch(connectionError);
 
                 // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
             function cleanupContainers(): Promise<any> {
@@ -286,14 +288,12 @@ export default class ForceService implements forceCode.IForceService {
                 vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
                 vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
                 vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected';
-                vscode.window.forceCode.statusBarItem_UserInfo.tooltip = 'Connected as ' + vscode.window.forceCode.config.username;
+                vscode.window.forceCode.statusBarItem_UserInfo.tooltip = 'Connected as ' + switchUserViewService.orgInfo.username;
                 
                 vscode.window.forceCode.resetStatus();
                 self.statusBarItem_UserInfo.show();
                 self.statusBarItem.show();
 
-                self.username = config.username;
-                // query the userid
                 return self;
             }
             function getNamespacePrefix(svc: forceCode.IForceService) {

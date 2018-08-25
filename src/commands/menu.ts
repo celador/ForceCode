@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import model from './../models/commands';
-import { commandService } from '../services';
+import { commandService, switchUserViewService } from '../services';
 
 export default function showMenu(context: vscode.ExtensionContext) {
     var quickpick: any[] = [];
@@ -13,7 +13,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
 
     function displayMenu() {
-        if (vscode.window.forceCode.dxCommands.isLoggedIn) {
+        if (switchUserViewService.isLoggedIn()) {
             model.forEach(cur => {
                 if(!cur.hidden) {
                     quickpick.push(cur);

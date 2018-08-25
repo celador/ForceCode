@@ -63,7 +63,7 @@ export function activate(context: vscode.ExtensionContext): any {
     }
 
     // watch for config file changes
-    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => { if(vscode.window.forceCode.dxCommands.isLoggedIn) { vscode.window.forceCode.connect(context) }}));
+    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => { if(switchUserViewService.isLoggedIn()) { vscode.window.forceCode.connect(context) }}));
     
     // watch for deleted files and update workspaceMembers
     context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, vscode.window.forceCode.config.src ? vscode.window.forceCode.config.src : 'src', '**/*.{cls,trigger,page,component}')).onDidDelete(uri => {

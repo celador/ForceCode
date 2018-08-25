@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 import { getFileName } from './../parsers';
-import { commandService, commandViewService, codeCovViewService } from './../services';
+import { commandService, commandViewService, codeCovViewService, switchUserViewService } from './../services';
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
 
@@ -286,7 +286,7 @@ export default [
         commandName: 'ForceCode.showMenu',
         hidden: true,
         command: function (context, selectedResource?) {
-            if(vscode.window.forceCode.dxCommands.isLoggedIn) {
+            if(switchUserViewService.isLoggedIn()) {
                 return commands.showMenu(context);
             } else {
                 return vscode.window.forceCode.dxCommands.getOrgInfo();
@@ -445,12 +445,11 @@ export default [
         name: 'Switching user',
         hidden: true,
         command: function (context, selectedResource?) {
-            vscode.window.forceCode.config.username = context.username;
-            vscode.window.forceCode.config.url = context.url;
-            if(context.src) {
-                vscode.window.forceCode.config.src = context.src;
-            }
+            switchUserViewService.orgInfo.username = context.username;
+            switchUserViewService.refreshOrgs(switchUserViewService);
+            vscode.window.forceCode.config.url = context.loginUrl;
             vscode.window.forceCode.conn = undefined;
+            codeCovViewService.clear();
             return vscode.window.forceCode.dxCommands.getOrgInfo();
         }
     },

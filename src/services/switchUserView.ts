@@ -4,10 +4,12 @@ import {
   TreeDataProvider,
   TreeItem,
   TreeItemCollapsibleState,
-  window,
 } from 'vscode';
-import { FCOrg } from '../forceCode';
 import * as path from 'path';
+import * as fs from 'fs-extra';
+import { operatingSystem } from '.';
+import { SFDX } from './dxService';
+var klaw: any = require('klaw');
 
 export class SwitchUserViewService implements TreeDataProvider<Org> {
   private static instance: SwitchUserViewService;
@@ -15,12 +17,15 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
   private _onDidChangeTreeData: EventEmitter<
     Org | undefined
   > = new EventEmitter<Org | undefined>();
+  public orgInfo: SFDX = {};
 
   public readonly onDidChangeTreeData: Event<Org | undefined> = this
     ._onDidChangeTreeData.event;
 
   public constructor() {
+    console.log('Strating user service...');
     this.orgs = [];
+    this.refreshOrgs(this);
   }
 
   public static getInstance() {
@@ -30,18 +35,12 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
     return SwitchUserViewService.instance;
   }
 
-  public addOrgs(orgs: FCOrg[]) {
-    if(orgs) {
-      this.orgs = [];
-      orgs.forEach(org => {
-        this.addOrg(org.username, org.url, org.src);
-      });
-      this._onDidChangeTreeData.fire();
-    }
+  public isLoggedIn(): boolean {
+    return fs.existsSync(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep + this.orgInfo.username + '.json');
   }
 
-  public addOrg(userName: string, url: string, src: string) {
-    var theOrg: Org = new Org(this, userName, url, src);
+  public addOrg(orgInfo: SFDX) {
+    var theOrg: Org = new Org(this, orgInfo);
     this.orgs.push(theOrg);
     this._onDidChangeTreeData.fire();
   }
@@ -73,26 +72,41 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
   public getParent(element: Org): any { 
     return null;    // this is the parent
   }
+
+  public refreshOrgs(service: SwitchUserViewService): number {
+    this.orgs = [];
+    var numOrgs: number = 0;
+    return klaw(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep)
+      .on('data', function(file) {
+        if(file.stats.isFile()) {
+          var fileName: string = file.path.split(path.sep).pop().split('.')[0];
+          if(fileName.indexOf('@') > 0) {
+            const orgInfo: SFDX = fs.readJsonSync(file.path);
+            service.addOrg(orgInfo);
+            numOrgs++;
+          }
+        }
+      })
+      .on('end', function() {return numOrgs})
+  }
 }
 
 export class Org extends TreeItem {
   private readonly switchUserView: SwitchUserViewService;
   public readonly userName: string;
   public readonly url: string;
-  public readonly src: string;
 
-  constructor(switchUserView: SwitchUserViewService, userName: string, url: string, src?: string) {
+  constructor(switchUserView: SwitchUserViewService, orgInfo: SFDX) {
     super(
-      userName,
+      orgInfo.username,
       TreeItemCollapsibleState.None
     );
 
     this.switchUserView = switchUserView;
-    this.userName = userName;
-    this.url = url;
-    this.src = src ? src : 'src';
+    this.userName = orgInfo.username;
+    this.url = orgInfo.instanceUrl;
 
-    if(window.forceCode.config.username === userName) {
+    if(switchUserView.orgInfo.username === orgInfo.username) {
       this.iconPath = {
         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'currentOrg.svg'),
         light: path.join(__filename, '..', '..', '..', '..', 'images', 'currentOrg.svg'),
@@ -101,9 +115,9 @@ export class Org extends TreeItem {
       this.command = {
         command: 'ForceCode.switchUser',
         title: '',
-        arguments: [{username: this.userName, url: this.url, src: this.src}]
+        arguments: [orgInfo]
       }
     }
-    this.tooltip = window.forceCode.config.username === userName ? 'Current username' : 'Click to switch to this username';
+    this.tooltip = switchUserView.orgInfo.username === orgInfo.username ? 'Current username' : 'Click to switch to this username';
   }
 }

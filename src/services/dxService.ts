@@ -1,17 +1,17 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { commandService, switchUserViewService} from '.';
+import { switchUserViewService, commandService} from '.';
 var alm: any = require('salesforce-alm');
 
 export interface SFDX {
-    username: string,
-    id: string,
-    userId: string,
-    connectedStatus: string,
-    accessToken: string,
-    instanceUrl: string,
-    clientId: string
+    username?: string,
+    id?: string,
+    userId?: string,
+    connectedStatus?: string,
+    accessToken?: string,
+    instanceUrl?: string,
+    clientId?: string
 }
 
 export interface ExecuteAnonymousResult {
@@ -73,8 +73,6 @@ export interface QueryResult {
 }
 
 export interface DXCommands {
-    isLoggedIn: boolean;
-    orgInfo: SFDX;
     getCommand(cmd: string): Command;
     outputToString(toConvert: any, depth?: number): string;
     runCommand(cmdString: string, arg: string): Promise<any>;
@@ -93,7 +91,6 @@ export interface DXCommands {
 }
 
 export default class DXService implements DXCommands {
-    public isLoggedIn: boolean = false;
     public orgInfo: SFDX;
 
     public getCommand(cmd: string): Command {
@@ -196,8 +193,8 @@ export default class DXService implements DXCommands {
             });
         }
         // add in targetusername so we can stay logged in
-        if(cliContext.flags['targetusername'] === undefined && vscode.window.forceCode.config.username !== undefined && cmd.flags.find(fl => { return fl.name === 'targetusername' }) !== undefined) {
-            cliContext.flags['targetusername'] = vscode.window.forceCode.config.username;
+        if(cliContext.flags['targetusername'] === undefined && switchUserViewService.orgInfo.username !== undefined && cmd.flags.find(fl => { return fl.name === 'targetusername' }) !== undefined) {
+            cliContext.flags['targetusername'] = switchUserViewService.orgInfo.username;
         } 
         var objresult = await cmd.run(cliContext);
         
@@ -216,7 +213,8 @@ export default class DXService implements DXCommands {
     }
 
     public login(): Promise<any> {
-        if(!this.isLoggedIn) {
+        if(!switchUserViewService.isLoggedIn()) {
+            // will need to change to accommadate for the current org url
             return this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url).then(() => {
                 return this.getOrgInfo().then(res => {
                     return Promise.resolve(res);
@@ -228,9 +226,7 @@ export default class DXService implements DXCommands {
     }
 
     public logout(): Promise<any> {
-        if(this.isLoggedIn) {
-            this.isLoggedIn = false;
-            this.orgInfo = undefined;
+        if(switchUserViewService.isLoggedIn()) {
             clearInterval(vscode.window.forceCode.statusInterval);
             vscode.commands.executeCommand('setContext', 'ForceCodeActive', false);
             return Promise.resolve(this.runCommand('auth:logout', '--noprompt')).then(() => {
@@ -247,23 +243,9 @@ export default class DXService implements DXCommands {
 
     public getOrgInfo(): Promise<SFDX> {
         return this.runCommand('org:display', '--json').then(res => {
-            var config = vscode.window.forceCode.config;
-            // set up multiple usernames
-			if(config.usernames && config.usernames.length > 0) {
-				switchUserViewService.addOrgs(config.usernames);
-			} else {
-				switchUserViewService.addOrg(config.username, config.url, config.src);
-			}
-            this.isLoggedIn = true;
-            this.orgInfo = res;
-            return this.toqlQuery("SELECT Id FROM User WHERE UserName='" + this.orgInfo.username + "'")
-                .then(result => {
-                    this.orgInfo.userId = result.records[0].Id;
-                    return Promise.resolve(this.orgInfo);
-                });
+            switchUserViewService.orgInfo = res;
+            return Promise.resolve(res);
         }, () => {
-            this.isLoggedIn = false;
-            this.orgInfo = undefined;
             return vscode.window.showWarningMessage('ForceCode: You are not logged in. Login now?', 'Yes', 'No').then(s => {
                 if (s === 'Yes') {
                     return commandService.runCommand('ForceCode.enterCredentials', undefined);

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { getIcon } from './../parsers';
-import { configuration } from './../services';
+import { configuration, switchUserViewService } from './../services';
 import constants from './../models/constants';
 
 const quickPickOptions: vscode.QuickPickOptions = {
@@ -19,7 +19,7 @@ export default function enterCredentials(): Promise<any> {
                         desc: 'You will be asked for your login information for the other org'
                     }, {
                         title: 'No',
-                        desc: 'Log into the org saved whose login data is currently in force.json'
+                        desc: 'Log in as ' + switchUserViewService.orgInfo.username
                     },
                 ];
                 let options: vscode.QuickPickItem[] = opts.map(res => {

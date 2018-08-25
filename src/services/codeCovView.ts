@@ -18,6 +18,7 @@ import {
       NoCoverageData : 'No Coverage Data',
       TestClass : 'Test Classes',
       UncoveredClass : 'Insufficient Coverage',
+      NotInOrg: 'Not In Current Org',
       NoShow: 'NoShow',
   }
 
@@ -92,6 +93,12 @@ import {
         return true;
       } 
       return false;
+    }
+
+    public clear() {
+      delete this.classes;
+      this.classes = [];
+      this.refresh();
     }
   
     public getTreeItem(element: FCFile): TreeItem {
@@ -176,6 +183,11 @@ import {
         var mTimeString: string[] = this.wsMember.lastModifiedDate.split('.');
         var mTime: number = (new Date(mTimeString[0])).getTime() + parseInt(mTimeString[1].substring(0, 3));
         Utimes.utimes(this.wsMember.path, undefined, mTime, undefined, function(res) {});
+      }
+      this.iconPath = undefined;
+      if(!this.wsMember.id || this.wsMember.id === '') {
+        this.type = ClassType.NotInOrg;
+        return undefined;
       }
 
       this.type = ClassType.UncoveredClass;

@@ -157,7 +157,6 @@ export interface IForceService {
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
     conn?: jsforce.Connection;
-    username?: string;
     outputChannel: vscode.OutputChannel;
     statusBarItem_UserInfo: vscode.StatusBarItem;
     statusBarItem: vscode.StatusBarItem;
