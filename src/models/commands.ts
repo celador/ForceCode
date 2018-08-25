@@ -450,6 +450,14 @@ export default [
             switchUserViewService.refreshOrgs(switchUserViewService);
             vscode.window.forceCode.config.url = context.loginUrl;
             vscode.window.forceCode.config.username = context.username;
+            const srcs: {[key: string]: string} = vscode.window.forceCode.config.srcs;
+            if(srcs && srcs[context.username]) {
+                vscode.window.forceCode.config.src = srcs[context.username];
+                vscode.window.forceCode.workspaceRoot = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}${srcs[context.username]}`;
+                if (!fs.existsSync(vscode.window.forceCode.workspaceRoot)) {
+                    fs.mkdirSync(vscode.window.forceCode.workspaceRoot);
+                }
+            }
             vscode.window.forceCode.conn = undefined;
             codeCovViewService.clear();
             return vscode.window.forceCode.dxCommands.getOrgInfo().then(res => {
