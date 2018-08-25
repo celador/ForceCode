@@ -136,7 +136,7 @@ export default class ForceService implements forceCode.IForceService {
                             var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
                             if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges || curMem.type === 'AuraDefinitionBundle') {
                                 curMem.id = key.id;
-                                curMem.lastModifiedDate = key.lastModifiedDate;
+                                //curMem.lastModifiedDate = key.lastModifiedDate;
                                 curMem.lastModifiedByName = key.lastModifiedByName; 
                                 curMem.lastModifiedById = key.lastModifiedById;
                                 curFCFile.updateWsMember(curMem);
@@ -181,12 +181,12 @@ export default class ForceService implements forceCode.IForceService {
                                     name: filename,
                                     path: item.path,
                                     id: '',//metadataFileProperties.id,
-                                    lastModifiedDate: item.stats.mTime,
+                                    lastModifiedDate: item.stats.mtime,
                                     lastModifiedByName: '',
                                     lastModifiedById: '',
                                     type: type,
                                 };
-                                codeCovViewService.addClass(workspaceMember);
+                                codeCovViewService.addClass(workspaceMember, false);
                             }
                         }
                     }
@@ -225,7 +225,7 @@ export default class ForceService implements forceCode.IForceService {
             // get the current org info
             return new Promise((resolve, reject) => {
                 if(switchUserViewService.isLoggedIn()) {
-                    resolve(self.dxCommands.getOrgInfo());
+                    resolve();
                 } else {
                     reject();
                 }

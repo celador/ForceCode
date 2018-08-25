@@ -44,10 +44,10 @@ import {
       this._onDidChangeTreeData.fire();
     }
   
-    public addClass(wsMember: IWorkspaceMember) {
+    public addClass(wsMember: IWorkspaceMember, saveTime: boolean) {
       const index: number = this.classes.findIndex(curClass => { return curClass.getWsMember().path === wsMember.path });
       if(index !== -1) {
-        this.classes[index].setWsMember(wsMember);
+        this.classes[index].setWsMember(wsMember, saveTime);
       } else {
         var newClass: FCFile = new FCFile(wsMember.name, TreeItemCollapsibleState.None, this, wsMember);
         this.classes.push(newClass);
@@ -159,10 +159,10 @@ import {
   
       this.collapsibleState = collapsibleState;
       this.parent = parent;
-      this.setWsMember(wsMember);
+      this.setWsMember(wsMember, false);
     }
 
-    public setWsMember(newMem: IWorkspaceMember) {
+    public setWsMember(newMem: IWorkspaceMember, saveTime: boolean) {
       this.wsMember = newMem;
 
       // we only want classes and triggers
@@ -179,9 +179,10 @@ import {
           arguments: [this.wsMember.path]
       }
       
-      if(this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
-        var mTimeString: string[] = this.wsMember.lastModifiedDate.split('.');
-        var mTime: number = (new Date(mTimeString[0])).getTime() + parseInt(mTimeString[1].substring(0, 3));
+      if(saveTime && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
+        var mTime: number = new Date(this.wsMember.lastModifiedDate).getTime();
+        //var mTime: number = (new Date(mTimeString[0])).getTime() + parseInt(mTimeString[1].substring(0, 3));
+        console.log('Setting time on ' + this.wsMember.path);
         Utimes.utimes(this.wsMember.path, undefined, mTime, undefined, function(res) {});
       }
       this.iconPath = undefined;
@@ -223,7 +224,7 @@ import {
     }
 
     public updateWsMember(newMem: IWorkspaceMember) {
-      this.parent.addClass(newMem);
+      this.parent.addClass(newMem, true);
     }
 
     public getWsMember(): IWorkspaceMember {
@@ -243,12 +244,10 @@ import {
       if(!this.wsMember.lastModifiedDate) {
         return true;
       }
-      var serverSplit: string[] = serverDate.split('.');
-      var localSplit: string[] = this.wsMember.lastModifiedDate.split('.');
-      var serverMS: number = (new Date(serverSplit[0])).getTime() + parseInt(serverSplit[1].substring(0, 3));
-      var localMS: number = (new Date(localSplit[0])).getTime() + parseInt(localSplit[1].substring(0, 3));
+      var localMS: number = fs.statSync(this.wsMember.path).mtimeMs;
+      var serverMS: number = (new Date(serverDate)).getTime();
 
-      if(serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
+      if(localMS > serverMS || serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
           return true;
       }
       
