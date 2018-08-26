@@ -4,6 +4,7 @@ import * as forceCode from './../forceCode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import constants from './../models/constants';
+import { switchUserViewService } from '.';
 
 export default function getSetConfig(service?: forceCode.IForceService): Promise<Config> {
 	return new Promise(function (resolve) {
@@ -31,7 +32,10 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 			if (!fs.existsSync(self.workspaceRoot)) {
 				fs.mkdirSync(self.workspaceRoot);
 			}
-			resolve(self.config);
+			switchUserViewService.refreshOrgs().then(() => {
+				resolve(self.config);
+			});
+			
 		} catch (err) {
 			self.config =  {
 				checkForFileChanges: true,

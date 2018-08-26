@@ -139,11 +139,25 @@ export class Org extends TreeItem {
         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'currentOrg.svg'),
         light: path.join(__filename, '..', '..', '..', '..', 'images', 'currentOrg.svg'),
       }
-    } else {
+    } else if(orgInfo.accessToken) {
       this.command = {
         command: 'ForceCode.switchUser',
         title: '',
         arguments: [orgInfo]
+      }
+      this.iconPath = {
+        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
+        light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
+      }
+    } else {
+      this.command = {
+        command: 'ForceCode.login',
+        title: '',
+        arguments: [orgInfo]
+      }
+      this.iconPath = {
+        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
+        light: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
       }
     }
     this.tooltip = switchUserView.orgInfo.username === orgInfo.username ? 'Current username' : 'Click to switch to this username';

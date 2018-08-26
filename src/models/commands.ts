@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 import { getFileName } from './../parsers';
-import { commandService, commandViewService, codeCovViewService, switchUserViewService } from './../services';
+import { commandService, commandViewService, codeCovViewService, configuration, switchUserViewService } from './../services';
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
 import * as fs from 'fs-extra';
@@ -458,6 +458,16 @@ export default [
             }, err => {
                 console.log('Not logged into this org');
             });
+        }
+    },
+    {
+        commandName: 'ForceCode.login',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return vscode.window.forceCode.dxCommands.login(context.loginUrl, true)
+                .then(res => {
+                    return Promise.resolve(configuration());
+                });
         }
     },
 ]
