@@ -35,9 +35,13 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
   public readonly onDidChangeTreeData: Event<Org | undefined> = this
     ._onDidChangeTreeData.event;
 
+  private limInterval;
+  private prevLimits: number = 0;
+
   public constructor() {
     console.log('Starting user service...');
     this.orgs = [];
+    this.showLimitsService();
   }
 
   public static getInstance() {
@@ -111,6 +115,30 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
     return undefined;
   }
 
+  private showLimitsService() {
+    if(this.limInterval) {
+      clearInterval(this.limInterval);
+    }
+    this.limInterval = setInterval(function(service) { 
+      if (service.orgInfo
+        && service.orgInfo.accessToken
+        && window.forceCode.conn 
+        && window.forceCode.conn.limitInfo 
+        && window.forceCode.conn.limitInfo.apiUsage
+        && service.prevLimits !== window.forceCode.conn.limitInfo.apiUsage.used) {
+        console.log(service.prevLimits);
+        console.log('yep');
+        service.prevLimits = window.forceCode.conn.limitInfo.apiUsage.used;
+        const curOrgIndex: number = service.findOrgIndexByUsername(service.orgInfo.username);
+        if(curOrgIndex !== -1) {
+          service.orgs[curOrgIndex].tooltip = 'Current username - Limits: ' 
+            + service.prevLimits + '/' + window.forceCode.conn.limitInfo.apiUsage.limit;
+          service._onDidChangeTreeData.fire();
+        }
+      }
+    }, 5000, this);
+  }
+
   private sortFunc(a: Org, b: Org): number {
     var aStr = a.label.toUpperCase();
     var bStr = b.label.toUpperCase();
@@ -119,6 +147,10 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
 
   private findOrgIndex(org: Org): number {
     return this.orgs.findIndex(curOrg => { return curOrg.orgInfo.username === org.orgInfo.username });
+  }
+
+  private findOrgIndexByUsername(username: string): number {
+    return this.orgs.findIndex(curOrg => { return curOrg.orgInfo.username === username });
   }
 
   private addOrg(orgInfo: FCOauth) {
