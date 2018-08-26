@@ -33,7 +33,7 @@ export default class ForceService implements forceCode.IForceService {
         this.operatingSystem = operatingSystem.getOS();
         // Setup username and outputChannel
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
-        this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
+        this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 6);
         this.statusBarItem.command = 'ForceCode.showMenu';
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         this.containerMembers = [];
@@ -55,7 +55,7 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     public resetStatus() {
-        // for status bar updates. update every 5 seconds
+        // for status bar updates. resets after 5 seconds
         clearTimeout(vscode.window.forceCode.statusTimeout);
         vscode.window.forceCode.statusTimeout = setTimeout(function () {
             vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;

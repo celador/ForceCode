@@ -104,7 +104,7 @@ export default function enterCredentials(): Promise<any> {
         });
     }
     function getAutoCompile(config) {
-        if(!config.username) {
+        if(config.autoCompile === undefined) {
             let options: vscode.QuickPickItem[] = [{
                 description: 'Automatically deploy/compile files on save',
                 label: 'Yes',
