@@ -40,7 +40,7 @@ export interface Config {
     showTestLog? : boolean;
     spaDist? : string;
     src?: string;
-    srcs?: {[key: string]: string};
+    srcs?: {[key: string]: {src: string, url: string}};
     url?: string;
     username?: string;
     overwritePackageXML?: string;

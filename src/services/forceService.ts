@@ -5,7 +5,6 @@ import constants from './../models/constants';
 import DXService from './dxService';
 import * as path from 'path';
 import * as creds from './../commands/credentials';
-import * as fs from 'fs-extra';
 import { FCFile } from './codeCovView';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 const jsforce: any = require('jsforce');
@@ -41,12 +40,7 @@ export default class ForceService implements forceCode.IForceService {
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         this.containerMembers = [];
         configuration(this).then(config => {
-            switchUserViewService.orgInfo.username = config.username || '';
-            commandService.runCommand('ForceCode.getOrgInfo', undefined).then(res => {
-                if(res) {
-                    commandService.runCommand('ForceCode.connect', undefined);
-                }
-            });  
+            commandService.runCommand('ForceCode.switchUserText', { username: config.username || '', loginUrl: config.url});
         }).catch(() => {
             this.statusBarItem.text = 'ForceCode: Missing Configuration';
         });
@@ -72,7 +66,7 @@ export default class ForceService implements forceCode.IForceService {
             if (vscode.window.forceCode.conn && vscode.window.forceCode.conn.limitInfo && vscode.window.forceCode.conn.limitInfo.apiUsage) {
                 lim = ' - Limits: ' + vscode.window.forceCode.conn.limitInfo.apiUsage.used + '/' + vscode.window.forceCode.conn.limitInfo.apiUsage.limit;
             }
-            if(vscode.window.forceCode.config.username) {
+            if(switchUserViewService.orgInfo.username) {
                 vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected' + lim;
             } else {
                 vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode not connected';
@@ -229,17 +223,14 @@ export default class ForceService implements forceCode.IForceService {
                     reject();
                 }
             }).then(() => {
-                    vscode.window.forceCode.statusBarItem_UserInfo.text = `ForceCode: $(plug) Connecting as ${config.username}`;
-                    // get the refresh token
-                    var refreshToken =  fs.readJsonSync(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep + switchUserViewService.orgInfo.username + '.json').refreshToken;
-                    // set the userId in connectionSuccess
+                    vscode.window.forceCode.statusBarItem_UserInfo.text = `ForceCode: $(plug) Connecting as ${switchUserViewService.orgInfo.username}`;
                     self.conn = new jsforce.Connection({
                         oauth2: {
-                            clientId: constants.CLIENT_ID
+                            clientId: switchUserViewService.orgInfo.clientId
                         },
                         instanceUrl : switchUserViewService.orgInfo.instanceUrl,
                         accessToken : switchUserViewService.orgInfo.accessToken,
-                        refreshToken: refreshToken,
+                        refreshToken: switchUserViewService.orgInfo.refreshToken,
                         version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                     });
 
@@ -308,8 +299,6 @@ export default class ForceService implements forceCode.IForceService {
                 throw err;
             }
         } else {
-            // self.outputChannel.appendLine(`Connected as ` + self.config.username);
-            // vscode.window.forceCode.statusBarItem.text = `ForceCode: $(history) ${self.config.username}`;
             return Promise.resolve(self);
         }
     }

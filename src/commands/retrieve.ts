@@ -6,7 +6,7 @@ import constants from './../models/constants';
 import { commandService, codeCovViewService, switchUserViewService } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
-import { SFDX } from '../services/dxService';
+import { FCOauth } from '../services/switchUserView';
 const mime = require('mime-types');
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
@@ -38,7 +38,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
     // =======================================================================================================================================
 
     function getPackages() {
-        var orgInfo: SFDX = switchUserViewService.orgInfo;
+        var orgInfo: FCOauth = switchUserViewService.orgInfo;
         var requestUrl: string = orgInfo.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
         var headers: any = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',

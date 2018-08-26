@@ -5,13 +5,12 @@ import { switchUserViewService, commandService} from '.';
 var alm: any = require('salesforce-alm');
 
 export interface SFDX {
-    username?: string,
-    id?: string,
-    userId?: string,
-    connectedStatus?: string,
-    accessToken?: string,
-    instanceUrl?: string,
-    clientId?: string
+    username: string,
+    id: string,
+    connectedStatus: string,
+    accessToken: string,
+    instanceUrl: string,
+    clientId: string,
 }
 
 export interface ExecuteAnonymousResult {
@@ -77,7 +76,7 @@ export interface DXCommands {
     outputToString(toConvert: any, depth?: number): string;
     runCommand(cmdString: string, arg: string): Promise<any>;
     toqlQuery(query: string): Promise<QueryResult>;
-    login(): Promise<any>;
+    login(url: string): Promise<any>;
     logout(): Promise<any>;
     getOrgInfo(): Promise<SFDX>;
     isEmptyUndOrNull(param: any): boolean;
@@ -91,8 +90,6 @@ export interface DXCommands {
 }
 
 export default class DXService implements DXCommands {
-    public orgInfo: SFDX;
-
     public getCommand(cmd: string): Command {
         return alm.commands.filter(c => {
             return (c.topic + ':' + c.command) === cmd;
@@ -212,11 +209,12 @@ export default class DXService implements DXCommands {
         return Promise.resolve(this.runCommand('data:soql:query', '-q ' + query + ' -t -r json'));
     }
 
-    public login(): Promise<any> {
-        if(!switchUserViewService.isLoggedIn()) {
+    public login(url: string): Promise<any> {
+        if(!switchUserViewService.isLoggedIn() || switchUserViewService.orgInfo.loginUrl !== url) {
             // will need to change to accommadate for the current org url
-            return this.runCommand('auth:web:login', '--instanceurl ' + vscode.window.forceCode.config.url).then(() => {
-                return this.getOrgInfo().then(res => {
+            return this.runCommand('auth:web:login', '--instanceurl ' + url).then(loginRes => {
+                switchUserViewService.orgInfo = loginRes;
+                return commandService.runCommand('ForceCode.switchUserText', loginRes).then(res => {
                     return Promise.resolve(res);
                 });
             });
@@ -227,13 +225,10 @@ export default class DXService implements DXCommands {
 
     public logout(): Promise<any> {
         if(switchUserViewService.isLoggedIn()) {
-            clearInterval(vscode.window.forceCode.statusInterval);
-            vscode.commands.executeCommand('setContext', 'ForceCodeActive', false);
             return Promise.resolve(this.runCommand('auth:logout', '--noprompt')).then(() => {
-                vscode.window.forceCode.config = undefined;
                 vscode.window.forceCode.conn = undefined;   // this will go away soon
-                vscode.window.forceCode.statusBarItem.hide();
-                vscode.window.forceCode.statusBarItem_UserInfo.hide();
+                switchUserViewService.orgInfo = {};
+                switchUserViewService.refreshOrgs();
                 return Promise.resolve();  
             });
         } else {

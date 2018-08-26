@@ -254,11 +254,11 @@ export default [
         name: 'Logging in',
         hidden: false,
         description: 'Enter the credentials you wish to use.',
-        detail: 'If you are already logged in, you will be logged out of your previous session.',
+        detail: 'Log into an org not in the saved usernames list.',
         icon: 'key',
         label: 'Log in to Salesforce',
         command: function (context, selectedResource?) {
-            return vscode.window.forceCode.connect(context);
+            return commands.credentials();
         }
     },
     {
@@ -287,11 +287,7 @@ export default [
         commandName: 'ForceCode.showMenu',
         hidden: true,
         command: function (context, selectedResource?) {
-            if(switchUserViewService.isLoggedIn()) {
-                return commands.showMenu(context);
-            } else {
-                return vscode.window.forceCode.dxCommands.getOrgInfo();
-            }
+            return commands.showMenu(context);
         }
     },
     {
@@ -434,11 +430,7 @@ export default [
         commandName: 'ForceCode.switchUser',
         hidden: true,
         command: function (context, selectedResource?) {
-            return commandService.runCommand('ForceCode.switchUserText', context, selectedResource).then(res => {
-                if(res) {
-                    commandService.runCommand('ForceCode.connect', undefined);
-                }   
-            });
+            return commandService.runCommand('ForceCode.switchUserText', context, selectedResource);
         }
     },
     {
@@ -447,13 +439,13 @@ export default [
         hidden: true,
         command: function (context, selectedResource?) {
             switchUserViewService.orgInfo = context;
-            switchUserViewService.refreshOrgs(switchUserViewService);
+            switchUserViewService.refreshOrgs();
             vscode.window.forceCode.config.url = context.loginUrl;
             vscode.window.forceCode.config.username = context.username;
-            const srcs: {[key: string]: string} = vscode.window.forceCode.config.srcs;
+            const srcs: {[key: string]: {src: string, url: string}} = vscode.window.forceCode.config.srcs;
             if(srcs && srcs[context.username]) {
-                vscode.window.forceCode.config.src = srcs[context.username];
-                vscode.window.forceCode.workspaceRoot = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}${srcs[context.username]}`;
+                vscode.window.forceCode.config.src = srcs[context.username].src;
+                vscode.window.forceCode.workspaceRoot = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}${srcs[context.username].src}`;
                 if (!fs.existsSync(vscode.window.forceCode.workspaceRoot)) {
                     fs.mkdirSync(vscode.window.forceCode.workspaceRoot);
                 }
@@ -463,6 +455,9 @@ export default [
             return vscode.window.forceCode.dxCommands.getOrgInfo().then(res => {
                 const projPath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep;
                 return fs.outputFile(projPath + 'force.json', JSON.stringify(vscode.window.forceCode.config, undefined, 4), function() {
+                    if(res) {
+                        return commandService.runCommand('ForceCode.connect', undefined);
+                    } 
                     return Promise.resolve(res);
                 });
                 

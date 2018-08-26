@@ -2,8 +2,9 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { getIcon } from './../parsers';
-import { configuration, switchUserViewService } from './../services';
+import { configuration, switchUserViewService, commandService } from './../services';
 import constants from './../models/constants';
+import { Org } from '../services/switchUserView';
 
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
@@ -11,46 +12,56 @@ const quickPickOptions: vscode.QuickPickOptions = {
 export default function enterCredentials(): Promise<any> {
     return configuration()
         .then(cfg => {
-            if(cfg.username !== undefined && cfg.username !== '') {
-                // ask if the user wants to log into a different account
-                let opts: any = [
-                    {
-                        title: 'Yes',
-                        desc: 'You will be asked for your login information for the other org'
-                    }, {
-                        title: 'No',
-                        desc: 'Log in as ' + switchUserViewService.orgInfo.username
-                    },
-                ];
-                let options: vscode.QuickPickItem[] = opts.map(res => {
-                    return {
-                        description: `${res.desc}`,
-                        // detail: `${'Detail'}`,
-                        label: `${res.title}`,
-                    };
-                });
-                const theseOptions: vscode.QuickPickOptions = {
-                    ignoreFocusOut: true,
-                    placeHolder: 'Log into a different org?'
-                };
-                return vscode.window.showQuickPick(options, theseOptions).then((res: vscode.QuickPickItem) => {
-                    if(res.label === undefined) {
-                        return cfg;
-                    } else if(res.label === 'Yes') {
-                        return vscode.window.forceCode.dxCommands.logout()
-                            .then(() => {
-                                return setupNewUser(cfg);
-                            });
-                    } else {
-                        return vscode.window.forceCode.dxCommands.login()
-                            .then(() => {
-                                return Promise.resolve(cfg);
-                            });
+            // ask if the user wants to log into a different account
+            let opts: any[] = [
+                {
+                    title: 'New Org',
+                    desc: 'You will be asked for your login information for the new org'
+                }
+            ];
+
+            var orgs: Org[] = switchUserViewService.getChildren();
+            if(orgs) {
+                orgs.forEach(curOrg => {
+                    if(curOrg.orgInfo.username !== switchUserViewService.orgInfo.username) {
+                        opts.push({
+                            title: curOrg.orgInfo.username,
+                            desc: ''
+                        });
                     }
                 });
-            } else {
-                return setupNewUser(cfg);     
             }
+
+            let options: vscode.QuickPickItem[] = opts.map(res => {
+                return {
+                    description: `${res.desc}`,
+                    // detail: `${'Detail'}`,
+                    label: `${res.title}`,
+                };
+            });
+            const theseOptions: vscode.QuickPickOptions = {
+                ignoreFocusOut: true,
+                placeHolder: 'Select a saved org or login to a new one...'
+            };
+            return vscode.window.showQuickPick(options, theseOptions).then((res: vscode.QuickPickItem) => {
+                if(!res || res.label === undefined) {
+                    return cfg;
+                } else if(res.label === 'New Org') {
+                    return setupNewUser(cfg);
+                } else {
+                    
+                    switchUserViewService.orgInfo = switchUserViewService.getOrgInfoByUserName(res.label);
+                    cfg.username = res.label;
+                    cfg.url = switchUserViewService.orgInfo.loginUrl;
+                    return commandService.runCommand('ForceCode.switchUserText', { username: res.label, loginUrl: cfg.url}).then(() => {
+                        return Promise.resolve(cfg);
+                    });
+                    //return vscode.window.forceCode.dxCommands.login(switchUserViewService.orgInfo.loginUrl)
+                    //    .then(() => {
+                    //        return Promise.resolve(cfg);
+                    //    });
+                }
+            });
         });
     
     function setupNewUser(cfg) {
@@ -69,7 +80,7 @@ export default function enterCredentials(): Promise<any> {
             let options: vscode.InputBoxOptions = {
                 ignoreFocusOut: true,
                 placeHolder: 'mark@salesforce.com',
-                value: config.username || '',
+                value: !switchUserViewService.isLoggedIn() ? config.username : '',
                 prompt: 'Please enter your SFDC username',
             };
             vscode.window.showInputBox(options).then(result => {
@@ -107,18 +118,21 @@ export default function enterCredentials(): Promise<any> {
         });
     }
     function getAutoCompile(config) {
-        let options: vscode.QuickPickItem[] = [{
-            description: 'Automatically deploy/compile files on save',
-            label: 'Yes',
-        }, {
-            description: 'Deploy/compile code through the ForceCode menu',
-            label: 'No',
-        },
-        ];
-        return vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
-            config.autoCompile = res.label === 'Yes';
-            return config;
-        });
+        if(!switchUserViewService.isLoggedIn()) {
+            let options: vscode.QuickPickItem[] = [{
+                description: 'Automatically deploy/compile files on save',
+                label: 'Yes',
+            }, {
+                description: 'Deploy/compile code through the ForceCode menu',
+                label: 'No',
+            },
+            ];
+            return vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
+                config.autoCompile = res.label === 'Yes';
+                return config;
+            });
+        }
+        return config;
     }
 
     // =======================================================================================================================================
@@ -155,7 +169,8 @@ export default function enterCredentials(): Promise<any> {
         fs.outputFile(projPath + 'sfdx-project.json', JSON.stringify(sfdxProj, undefined, 4));
         fs.outputFile(projPath + 'force.json', JSON.stringify(Object.assign(defaultOptions, config), undefined, 4));
         // log in with dxLogin
-        return vscode.window.forceCode.dxCommands.login()
+        switchUserViewService.orgInfo.username = config.username;
+        return vscode.window.forceCode.dxCommands.login(config.url)
             .then(() => {
                 return Promise.resolve(configuration());
             });

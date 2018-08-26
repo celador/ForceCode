@@ -4,6 +4,9 @@ import { commandService, switchUserViewService } from '../services';
 
 export default function showMenu(context: vscode.ExtensionContext) {
     var quickpick: any[] = [];
+    if(!switchUserViewService.isLoggedIn()) {
+        return commandService.runCommand('ForceCode.enterCredentials', undefined);
+    }
     return Promise.resolve(vscode.window.forceCode)
         .then(displayMenu)
         .then(res => processResult(res))
@@ -13,15 +16,11 @@ export default function showMenu(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
 
     function displayMenu() {
-        if (switchUserViewService.isLoggedIn()) {
-            model.forEach(cur => {
-                if(!cur.hidden) {
-                    quickpick.push(cur);
-                }
-            });
-        } else {
-            quickpick.push(model.find(cur => { return cur.commandName === 'ForceCode.enterCredentials'; }));
-        }
+        model.forEach(cur => {
+            if(!cur.hidden) {
+                quickpick.push(cur);
+            }
+        });
         
         let options: vscode.QuickPickItem[] = quickpick.map(record => {
             return {
