@@ -30,13 +30,12 @@ export interface ExecuteAnonymousResult {
 }
 
 export interface SFDX {
-    username?: string,
-    id?: string,
-    userId?: string,
-    connectedStatus?: string,
-    accessToken?: string,
-    instanceUrl?: string,
-    clientId?: string
+    username: string,
+    id: string,
+    connectedStatus: string,
+    accessToken: string,
+    instanceUrl: string,
+    clientId: string,
 }
 
 export interface ExecuteAnonymousResult {
