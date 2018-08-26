@@ -28,7 +28,9 @@ export interface Config {
     debugFilter?: string;
     deployOptions?: {
         verbose?: boolean,
-        checkOnly?: boolean
+        checkOnly?: boolean,
+        runAllTests?: boolean,
+        ignoreWarnings: boolean,
     };
     poll?: number;
     pollTimeout?: number;
@@ -43,7 +45,7 @@ export interface Config {
     srcs?: {[key: string]: {src: string, url: string}};
     url?: string;
     username?: string;
-    overwritePackageXML?: string;
+    overwritePackageXML?: boolean;
 }
 
 export interface MetadataResult {

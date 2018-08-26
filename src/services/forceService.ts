@@ -41,8 +41,6 @@ export default class ForceService implements forceCode.IForceService {
         this.containerMembers = [];
         configuration(this).then(config => {
             commandService.runCommand('ForceCode.switchUserText', { username: config.username || '', loginUrl: config.url});
-        }).catch(() => {
-            this.statusBarItem.text = 'ForceCode: Missing Configuration';
         });
     }
     public connect(): Promise<forceCode.IForceService> {
@@ -195,7 +193,7 @@ export default class ForceService implements forceCode.IForceService {
         // Setup username and outputChannel
         var uname: string = switchUserViewService.orgInfo.username;
         switchUserViewService.orgInfo.username = uname ? uname : (self.config && self.config.username) || '';
-        if (!self.config || !self.config.username || !switchUserViewService.isLoggedIn()) {
+        if (!switchUserViewService.isLoggedIn()) {
             return creds.default().then(credentials => {
                 self.config.username = credentials.username;
                 self.config.autoCompile = credentials.autoCompile;

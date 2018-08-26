@@ -36,9 +36,8 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
     ._onDidChangeTreeData.event;
 
   public constructor() {
-    console.log('Strating user service...');
+    console.log('Starting user service...');
     this.orgs = [];
-    this.refreshOrgs();
   }
 
   public static getInstance() {
@@ -69,13 +68,14 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
     return null;    // this is the parent
   }
 
-  public refreshOrgs() {
-    this.refreshTheOrgs(this);
+  public refreshOrgs(): Promise<boolean> {
+    return this.refreshTheOrgs(this);
   }
 
-  private refreshTheOrgs(service: SwitchUserViewService): boolean {
+  private refreshTheOrgs(service: SwitchUserViewService): Promise<boolean> {
     this.orgs = [];
-    return klaw(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep)
+    return new Promise((resolve, reject) => {
+      klaw(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep)
       .on('data', function(file) {
         if(file.stats.isFile()) {
           var fileName: string = file.path.split(path.sep).pop().split('.')[0];
@@ -86,15 +86,18 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
         }
       })
       .on('end', function() {
-        const srcs: {[key: string]: {src: string, url: string}} = window.forceCode.config.srcs;
+        const fcConfig = window.forceCode.config;
+        const srcs: {[key: string]: {src: string, url: string}} = fcConfig && fcConfig.srcs ? fcConfig.srcs : undefined;
         if(srcs) {
           Object.keys(srcs).forEach(curOrg => {
             service.addOrg({username: curOrg, loginUrl: srcs[curOrg].url})
           });
         }
         service._onDidChangeTreeData.fire();
-        return true;
+        console.log('Orgs refreshed');
+        resolve(true);
       });
+    });
   }
 
   public getOrgInfoByUserName(userName: string): FCOauth {

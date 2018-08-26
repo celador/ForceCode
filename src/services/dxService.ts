@@ -214,6 +214,7 @@ export default class DXService implements DXCommands {
             // will need to change to accommadate for the current org url
             return this.runCommand('auth:web:login', '--instanceurl ' + url).then(loginRes => {
                 switchUserViewService.orgInfo = loginRes;
+                vscode.window.forceCode.config.username = loginRes.username;
                 return commandService.runCommand('ForceCode.switchUserText', loginRes).then(res => {
                     return Promise.resolve(res);
                 });
@@ -241,12 +242,7 @@ export default class DXService implements DXCommands {
             switchUserViewService.orgInfo = res;
             return Promise.resolve(res);
         }, () => {
-            return vscode.window.showWarningMessage('ForceCode: You are not logged in. Login now?', 'Yes', 'No').then(s => {
-                if (s === 'Yes') {
-                    return commandService.runCommand('ForceCode.enterCredentials', undefined);
-                } 
-                return undefined;
-            });
+            return Promise.reject();
         });
     }
 

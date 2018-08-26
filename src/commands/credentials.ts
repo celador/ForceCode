@@ -3,7 +3,6 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { getIcon } from './../parsers';
 import { configuration, switchUserViewService, commandService } from './../services';
-import constants from './../models/constants';
 import { Org } from '../services/switchUserView';
 
 const quickPickOptions: vscode.QuickPickOptions = {
@@ -11,6 +10,11 @@ const quickPickOptions: vscode.QuickPickOptions = {
 };
 export default function enterCredentials(): Promise<any> {
     return configuration()
+        .then(cfg => {
+            return switchUserViewService.refreshOrgs().then(() => {
+                return Promise.resolve(cfg);
+            })
+        })
         .then(cfg => {
             // ask if the user wants to log into a different account
             let opts: any[] = [
@@ -120,34 +124,7 @@ export default function enterCredentials(): Promise<any> {
     // =======================================================================================================================================
     function writeConfigAndLogin(config): Promise<any> {
         const projPath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep;
-        const defaultOptions: {} = {
-            checkForFileChanges: true,
-            autoRefresh: false,
-            showTestCoverage: true,
-            showTestLog: true,
-            showFilesOnOpen: true,
-            showFilesOnOpenMax: 3,
-            browser: 'Google Chrome Canary',
-            pollTimeout: 1200,
-            debugOnly: true,
-            debugFilter: 'USER_DEBUG|FATAL_ERROR',
-            apiVersion: constants.API_VERSION,
-            deployOptions: {
-                'checkOnly': false,
-                'runAllTests': false,
-                'ignoreWarnings': true,
-            },
-            overwritePackageXML: false,
-        };
-        // add in a bare sfdx-project.json file for language support from official salesforce extensions
-        const sfdxProj: {} = {
-            namespace: "", 
-            sfdcLoginUrl: config.url, 
-            sourceApiVersion: constants.API_VERSION,
-        };
-        
-        fs.outputFile(projPath + 'sfdx-project.json', JSON.stringify(sfdxProj, undefined, 4));
-        fs.outputFile(projPath + 'force.json', JSON.stringify(Object.assign(defaultOptions, config), undefined, 4));
+        fs.outputFile(projPath + 'force.json', JSON.stringify(config, undefined, 4));
         // log in with dxLogin
         return vscode.window.forceCode.dxCommands.login(config.url, true)
             .then(res => {

@@ -430,8 +430,10 @@ export default [
         name: 'Switching user',
         hidden: true,
         command: function (context, selectedResource?) {
+            if(!context.username || !context.loginUrl) {
+                return Promise.resolve();
+            }
             switchUserViewService.orgInfo = context;
-            switchUserViewService.refreshOrgs();
             vscode.window.forceCode.config.url = context.loginUrl;
             vscode.window.forceCode.config.username = context.username;
             const srcs: {[key: string]: {src: string, url: string}} = vscode.window.forceCode.config.srcs;
@@ -445,6 +447,7 @@ export default [
             vscode.window.forceCode.conn = undefined;
             codeCovViewService.clear();
             return vscode.window.forceCode.dxCommands.getOrgInfo().then(res => {
+                switchUserViewService.refreshOrgs();
                 const projPath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep;
                 return fs.outputFile(projPath + 'force.json', JSON.stringify(vscode.window.forceCode.config, undefined, 4), function() {
                     if(res) {
@@ -452,7 +455,8 @@ export default [
                     } 
                     return Promise.resolve(res);
                 });
-                
+            }, err => {
+                console.log('Not logged into this org');
             });
         }
     },

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ForceService, commandViewService, commandService, codeCovViewService, switchUserViewService } from './services';
+import { ForceService, commandViewService, commandService, codeCovViewService, configuration, switchUserViewService } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
 import { editorUpdateApexCoverageDecorator, updateDecorations } from './decorators/testCoverageDecorator';
@@ -15,8 +15,8 @@ export function activate(context: vscode.ExtensionContext): any {
         context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
     });
 
-    context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.treeDataProvider', commandViewService));
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.switchUserProvider', switchUserViewService));
+    context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.treeDataProvider', commandViewService));
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.codeCovDataProvider', codeCovViewService));
 
     vscode.window.forceCode = new ForceService();
@@ -63,7 +63,7 @@ export function activate(context: vscode.ExtensionContext): any {
     }
 
     // watch for config file changes
-    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => { if(switchUserViewService.isLoggedIn()) { vscode.window.forceCode.connect(context) }}));
+    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => { configuration() }));
     
     // watch for deleted files and update workspaceMembers
     context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, vscode.window.forceCode.config.src ? vscode.window.forceCode.config.src : 'src', '**/*.{cls,trigger,page,component}')).onDidDelete(uri => {
