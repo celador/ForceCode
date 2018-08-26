@@ -11,11 +11,6 @@ const quickPickOptions: vscode.QuickPickOptions = {
 export default function enterCredentials(): Promise<any> {
     return configuration()
         .then(cfg => {
-            return switchUserViewService.refreshOrgs().then(() => {
-                return Promise.resolve(cfg);
-            })
-        })
-        .then(cfg => {
             // ask if the user wants to log into a different account
             let opts: any[] = [
                 {
@@ -27,7 +22,7 @@ export default function enterCredentials(): Promise<any> {
             var orgs: Org[] = switchUserViewService.getChildren();
             if(orgs) {
                 orgs.forEach(curOrg => {
-                    if(curOrg.orgInfo.username !== switchUserViewService.orgInfo.username) {
+                    if(!curOrg.orgInfo.accessToken || curOrg.orgInfo.username !== switchUserViewService.orgInfo.username) {
                         opts.push({
                             title: curOrg.orgInfo.username,
                             desc: ''
@@ -57,9 +52,16 @@ export default function enterCredentials(): Promise<any> {
                     switchUserViewService.orgInfo = switchUserViewService.getOrgInfoByUserName(res.label);
                     cfg.username = res.label;
                     cfg.url = switchUserViewService.orgInfo.loginUrl;
-                    return commandService.runCommand('ForceCode.switchUserText', { username: res.label, loginUrl: cfg.url}).then(() => {
-                        return Promise.resolve(cfg);
-                    });
+                    if(switchUserViewService.isLoggedIn()) {
+                        return commandService.runCommand('ForceCode.switchUserText', switchUserViewService.orgInfo).then(() => {
+                            return Promise.resolve(cfg);
+                        });
+                    } else {
+                        return vscode.window.forceCode.dxCommands.login(cfg.url)
+                            .then(res => {
+                                return Promise.resolve(configuration());
+                            });
+                    }
                 }
             });
         });
@@ -124,9 +126,9 @@ export default function enterCredentials(): Promise<any> {
     // =======================================================================================================================================
     function writeConfigAndLogin(config): Promise<any> {
         const projPath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep;
-        fs.outputFile(projPath + 'force.json', JSON.stringify(config, undefined, 4));
+        fs.outputFileSync(projPath + 'force.json', JSON.stringify(config, undefined, 4));
         // log in with dxLogin
-        return vscode.window.forceCode.dxCommands.login(config.url, true)
+        return vscode.window.forceCode.dxCommands.login(config.url)
             .then(res => {
                 return Promise.resolve(configuration());
             });

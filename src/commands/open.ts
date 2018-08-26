@@ -83,7 +83,6 @@ export function showFileOptions(promises: any[]) {
                         if(tType !== 'AuraDefinitionBundle' && tType !== 'StaticResource') {
                             var fName: string = curFile.label.slice(curFile.label.lastIndexOf(' ') + 1).split('.')[0];
                             var filePath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}${getFolder(tType)}${path.sep}${fName}.${getExtension(tType)}`;
-                            console.log(filePath);
                             vscode.workspace.openTextDocument(filePath).then(document => {
                                 filesOpened++;
                                 vscode.window.showTextDocument(document, { preview: false });

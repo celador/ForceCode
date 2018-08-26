@@ -25,17 +25,6 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 		}
 		try {
 			self.config = fs.readJsonSync(projPath + 'force.json');
-			if (self.config && self.config !== null && typeof self.config === 'object' && !self.config.src) {
-				self.config.src = 'src';
-			}
-			self.workspaceRoot = `${projPath}${self.config.src}`;
-			if (!fs.existsSync(self.workspaceRoot)) {
-				fs.mkdirSync(self.workspaceRoot);
-			}
-			switchUserViewService.refreshOrgs().then(() => {
-				resolve(self.config);
-			});
-			
 		} catch (err) {
 			self.config =  {
 				checkForFileChanges: true,
@@ -56,7 +45,16 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 				},
 				overwritePackageXML: false,
 			};			
-			resolve(self.config);
 		}
+		if (self.config && self.config !== null && typeof self.config === 'object' && !self.config.src) {
+			self.config.src = 'src';
+		}
+		self.workspaceRoot = `${projPath}${self.config.src}`;
+		if (!fs.existsSync(self.workspaceRoot)) {
+			fs.mkdirpSync(self.workspaceRoot);
+		}
+		switchUserViewService.refreshOrgs().then(() => {
+			resolve(self.config);
+		});
 	});
 }

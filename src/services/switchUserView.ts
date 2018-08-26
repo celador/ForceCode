@@ -90,9 +90,12 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
         const srcs: {[key: string]: {src: string, url: string}} = fcConfig && fcConfig.srcs ? fcConfig.srcs : undefined;
         if(srcs) {
           Object.keys(srcs).forEach(curOrg => {
-            service.addOrg({username: curOrg, loginUrl: srcs[curOrg].url})
+            if(!service.getOrgInfoByUserName(curOrg)) {
+              service.addOrg({username: curOrg, loginUrl: srcs[curOrg].url});
+            }
           });
         }
+        service.orgs.sort(service.sortFunc);
         service._onDidChangeTreeData.fire();
         console.log('Orgs refreshed');
         resolve(true);
@@ -106,6 +109,12 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
       return this.orgs[index].orgInfo;
     }
     return undefined;
+  }
+
+  private sortFunc(a: Org, b: Org): number {
+    var aStr = a.label.toUpperCase();
+    var bStr = b.label.toUpperCase();
+    return aStr.localeCompare(bStr);
   }
 
   private findOrgIndex(org: Org): number {
@@ -136,9 +145,10 @@ export class Org extends TreeItem {
 
     if(switchUserView.orgInfo.username === orgInfo.username) {
       this.iconPath = {
-        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'currentOrg.svg'),
-        light: path.join(__filename, '..', '..', '..', '..', 'images', 'currentOrg.svg'),
+        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
+        light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
       }
+      this.tooltip = 'Current username';
     } else if(orgInfo.accessToken) {
       this.command = {
         command: 'ForceCode.switchUser',
@@ -146,9 +156,10 @@ export class Org extends TreeItem {
         arguments: [orgInfo]
       }
       this.iconPath = {
-        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
-        light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
+        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircle.svg'),
+        light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircle.svg'),
       }
+      this.tooltip = 'Click to switch to ' + orgInfo.username;
     } else {
       this.command = {
         command: 'ForceCode.login',
@@ -156,10 +167,10 @@ export class Org extends TreeItem {
         arguments: [orgInfo]
       }
       this.iconPath = {
-        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
-        light: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
+        dark: path.join(__filename, '..', '..', '..', '..', 'images', 'yellowCircle.svg'),
+        light: path.join(__filename, '..', '..', '..', '..', 'images', 'yellowCircle.svg'),
       }
+      this.tooltip = 'Click to login to ' + orgInfo.username;
     }
-    this.tooltip = switchUserView.orgInfo.username === orgInfo.username ? 'Current username' : 'Click to switch to this username';
   }
 }
