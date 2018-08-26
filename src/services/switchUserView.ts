@@ -131,7 +131,7 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
         const curOrgIndex: number = service.findOrgIndexByUsername(service.orgInfo.username);
         if(curOrgIndex !== -1) {
           service.orgs[curOrgIndex].tooltip = 'Current username - Limits: ' 
-            + service.prevLimits + '/' + window.forceCode.conn.limitInfo.apiUsage.limit;
+            + service.prevLimits + ' / ' + window.forceCode.conn.limitInfo.apiUsage.limit;
           service._onDidChangeTreeData.fire();
         }
       }
