@@ -277,7 +277,6 @@ export class FCFile extends TreeItem {
       if(saveTime && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
         var mTime: number = new Date(this.wsMember.lastModifiedDate).getTime();
         //var mTime: number = (new Date(mTimeString[0])).getTime() + parseInt(mTimeString[1].substring(0, 3));
-        console.log('Setting time on ' + this.wsMember.path);
         Utimes.utimes(this.wsMember.path, undefined, mTime, undefined, function(res) {});
       }
       this.iconPath = undefined;

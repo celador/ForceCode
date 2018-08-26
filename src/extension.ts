@@ -20,6 +20,7 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.switchUserProvider', fcConnection));
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.treeDataProvider', commandViewService));
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.switchUserProvider', switchUserViewService));
+    context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.treeDataProvider', commandViewService));
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.codeCovDataProvider', codeCovViewService));
     
     ForceService.start();
