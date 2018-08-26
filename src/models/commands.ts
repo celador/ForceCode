@@ -630,4 +630,14 @@ export const fcCommands: FCCommand[] = [
             });
         }
     },
+    {
+        commandName: 'ForceCode.login',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return vscode.window.forceCode.dxCommands.login(context.loginUrl, true)
+                .then(res => {
+                    return Promise.resolve(configuration());
+                });
+        }
+    },
 ]
