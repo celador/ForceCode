@@ -76,7 +76,7 @@ export interface DXCommands {
     outputToString(toConvert: any, depth?: number): string;
     runCommand(cmdString: string, arg: string): Promise<any>;
     toqlQuery(query: string): Promise<QueryResult>;
-    login(url: string): Promise<any>;
+    login(url: string, newUser: boolean): Promise<any>;
     logout(): Promise<any>;
     getOrgInfo(): Promise<SFDX>;
     isEmptyUndOrNull(param: any): boolean;
@@ -209,8 +209,8 @@ export default class DXService implements DXCommands {
         return Promise.resolve(this.runCommand('data:soql:query', '-q ' + query + ' -t -r json'));
     }
 
-    public login(url: string): Promise<any> {
-        if(!switchUserViewService.isLoggedIn() || switchUserViewService.orgInfo.loginUrl !== url) {
+    public login(url: string, newUser: boolean): Promise<any> {
+        if(!switchUserViewService.isLoggedIn() || newUser) {
             // will need to change to accommadate for the current org url
             return this.runCommand('auth:web:login', '--instanceurl ' + url).then(loginRes => {
                 switchUserViewService.orgInfo = loginRes;

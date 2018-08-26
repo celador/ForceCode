@@ -56,17 +56,12 @@ export default function enterCredentials(): Promise<any> {
                     return commandService.runCommand('ForceCode.switchUserText', { username: res.label, loginUrl: cfg.url}).then(() => {
                         return Promise.resolve(cfg);
                     });
-                    //return vscode.window.forceCode.dxCommands.login(switchUserViewService.orgInfo.loginUrl)
-                    //    .then(() => {
-                    //        return Promise.resolve(cfg);
-                    //    });
                 }
             });
         });
     
     function setupNewUser(cfg) {
-        return getUsername(cfg)
-            .then(cfg => getUrl(cfg))
+        return getUrl(cfg)
             .then(cfg => getAutoCompile(cfg))
             .then(cfg => writeConfigAndLogin(cfg))
             .catch(err => vscode.window.showErrorMessage(err.message));
@@ -75,50 +70,35 @@ export default function enterCredentials(): Promise<any> {
     // =======================================================================================================================================
     // =======================================================================================================================================
 
-    function getUsername(config) {
+    function getUrl(config) {
         return new Promise(function (resolve, reject) {
-            let options: vscode.InputBoxOptions = {
-                ignoreFocusOut: true,
-                placeHolder: 'mark@salesforce.com',
-                value: !switchUserViewService.isLoggedIn() ? config.username : '',
-                prompt: 'Please enter your SFDC username',
-            };
-            vscode.window.showInputBox(options).then(result => {
-                config.username = result || config.username || '';
-                if (!config.username) { reject('No Username'); };
+            let opts: any = [
+                {
+                    icon: 'code',
+                    title: 'Production / Developer',
+                    url: 'https://login.salesforce.com',
+                }, {
+                    icon: 'beaker',
+                    title: 'Sandbox / Test',
+                    url: 'https://test.salesforce.com',
+                },
+            ];
+            let options: vscode.QuickPickItem[] = opts.map(res => {
+                let icon: string = getIcon(res.icon);
+                return {
+                    description: `${res.url}`,
+                    // detail: `${'Detail'}`,
+                    label: `$(${icon}) ${res.title}`,
+                };
+            });
+            vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
+                config.url = res.description || 'https://login.salesforce.com';
                 resolve(config);
             });
         });
-    
-    }
-
-    function getUrl(config) {
-        let opts: any = [
-            {
-                icon: 'code',
-                title: 'Production / Developer',
-                url: 'https://login.salesforce.com',
-            }, {
-                icon: 'beaker',
-                title: 'Sandbox / Test',
-                url: 'https://test.salesforce.com',
-            },
-        ];
-        let options: vscode.QuickPickItem[] = opts.map(res => {
-            let icon: string = getIcon(res.icon);
-            return {
-                description: `${res.url}`,
-                // detail: `${'Detail'}`,
-                label: `$(${icon}) ${res.title}`,
-            };
-        });
-        return vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
-            config.url = res.description || 'https://login.salesforce.com';
-            return config;
-        });
     }
     function getAutoCompile(config) {
-        if(!switchUserViewService.isLoggedIn()) {
+        if(!config.username) {
             let options: vscode.QuickPickItem[] = [{
                 description: 'Automatically deploy/compile files on save',
                 label: 'Yes',
@@ -169,9 +149,8 @@ export default function enterCredentials(): Promise<any> {
         fs.outputFile(projPath + 'sfdx-project.json', JSON.stringify(sfdxProj, undefined, 4));
         fs.outputFile(projPath + 'force.json', JSON.stringify(Object.assign(defaultOptions, config), undefined, 4));
         // log in with dxLogin
-        switchUserViewService.orgInfo.username = config.username;
-        return vscode.window.forceCode.dxCommands.login(config.url)
-            .then(() => {
+        return vscode.window.forceCode.dxCommands.login(config.url, true)
+            .then(res => {
                 return Promise.resolve(configuration());
             });
     }
