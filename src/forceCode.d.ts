@@ -156,12 +156,11 @@ export interface IForceService {
     describe: IMetadataDescribe;
     declarations?: IDeclarations;
     containerId?: string;
-    statusInterval: any;    
+    statusTimeout: any;    
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
     conn?: jsforce.Connection;
     outputChannel: vscode.OutputChannel;
-    statusBarItem_UserInfo: vscode.StatusBarItem;
     statusBarItem: vscode.StatusBarItem;
     fcDiagnosticCollection: vscode.DiagnosticCollection;
     connect(context: vscode.ExtensionContext): Promise<IForceService>;

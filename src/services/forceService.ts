@@ -20,12 +20,11 @@ export default class ForceService implements forceCode.IForceService {
     public describe: forceCode.IMetadataDescribe;
     public declarations: forceCode.IDeclarations;
     public containerAsyncRequestId: string;
-    public statusBarItem_UserInfo: vscode.StatusBarItem;
     public statusBarItem: vscode.StatusBarItem;
     public outputChannel: vscode.OutputChannel;
     public operatingSystem: string;
     public workspaceRoot: string;
-    public statusInterval: any; 
+    public statusTimeout: any; 
 
     constructor() {
         this.dxCommands = new DXService();
@@ -35,7 +34,6 @@ export default class ForceService implements forceCode.IForceService {
         // Setup username and outputChannel
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
         this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
-        this.statusBarItem_UserInfo = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 5);
         this.statusBarItem.command = 'ForceCode.showMenu';
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         this.containerMembers = [];
@@ -52,24 +50,15 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     public showStatus(message: string) {
-        vscode.window.forceCode.statusBarItem_UserInfo.text = message;
+        vscode.window.forceCode.statusBarItem.text = message;
         this.resetStatus();
     }
 
     public resetStatus() {
         // for status bar updates. update every 5 seconds
-        clearInterval(vscode.window.forceCode.statusInterval);
-        vscode.window.forceCode.statusInterval = setInterval(function () {
-            var lim = '';
-            if (vscode.window.forceCode.conn && vscode.window.forceCode.conn.limitInfo && vscode.window.forceCode.conn.limitInfo.apiUsage) {
-                lim = ' - Limits: ' + vscode.window.forceCode.conn.limitInfo.apiUsage.used + '/' + vscode.window.forceCode.conn.limitInfo.apiUsage.limit;
-            }
-            if(switchUserViewService.orgInfo.username) {
-                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected' + lim;
-            } else {
-                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode not connected';
-                vscode.window.forceCode.statusBarItem_UserInfo.tooltip = '';
-            }
+        clearTimeout(vscode.window.forceCode.statusTimeout);
+        vscode.window.forceCode.statusTimeout = setTimeout(function () {
+            vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
         }, 5000);
     }
 
@@ -221,7 +210,6 @@ export default class ForceService implements forceCode.IForceService {
                     reject();
                 }
             }).then(() => {
-                    vscode.window.forceCode.statusBarItem_UserInfo.text = `ForceCode: $(plug) Connecting as ${switchUserViewService.orgInfo.username}`;
                     self.conn = new jsforce.Connection({
                         oauth2: {
                             clientId: switchUserViewService.orgInfo.clientId
@@ -275,11 +263,6 @@ export default class ForceService implements forceCode.IForceService {
             function connectionSuccess() {
                 vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
                 vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
-                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected';
-                vscode.window.forceCode.statusBarItem_UserInfo.tooltip = 'Connected as ' + switchUserViewService.orgInfo.username;
-                
-                vscode.window.forceCode.resetStatus();
-                self.statusBarItem_UserInfo.show();
                 self.statusBarItem.show();
 
                 return self;
