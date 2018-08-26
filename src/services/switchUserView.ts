@@ -126,8 +126,7 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
         && window.forceCode.conn.limitInfo 
         && window.forceCode.conn.limitInfo.apiUsage
         && service.prevLimits !== window.forceCode.conn.limitInfo.apiUsage.used) {
-        console.log(service.prevLimits);
-        console.log('yep');
+
         service.prevLimits = window.forceCode.conn.limitInfo.apiUsage.used;
         const curOrgIndex: number = service.findOrgIndexByUsername(service.orgInfo.username);
         if(curOrgIndex !== -1) {
