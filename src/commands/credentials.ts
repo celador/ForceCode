@@ -9,11 +9,6 @@ const quickPickOptions: vscode.QuickPickOptions = {
 export default function enterCredentials(): Promise<FCOauth> {
     return configuration()
         .then(cfg => {
-            return switchUserViewService.refreshOrgs().then(() => {
-                return Promise.resolve(cfg);
-            })
-        })
-        .then(cfg => {
             // ask if the user wants to log into a different account
             let opts: any[] = [
                 {

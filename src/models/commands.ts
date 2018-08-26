@@ -611,13 +611,15 @@ export const fcCommands: FCCommand[] = [
                 vscode.window.forceCode.config.src = srcs[context.username].src;
                 vscode.window.forceCode.workspaceRoot = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}${srcs[context.username].src}`;
                 if (!fs.existsSync(vscode.window.forceCode.workspaceRoot)) {
-                    fs.mkdirSync(vscode.window.forceCode.workspaceRoot);
+                    fs.mkdirpSync(vscode.window.forceCode.workspaceRoot);
                 }
+            } else {
+                const srcDefault: string = vscode.window.forceCode.config.srcDefault;
+                vscode.window.forceCode.config.src = srcDefault ? srcDefault : 'src';
             }
             vscode.window.forceCode.conn = undefined;
             codeCovViewService.clear();
             return vscode.window.forceCode.dxCommands.getOrgInfo().then(res => {
-                switchUserViewService.refreshOrgs();
                 const projPath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep;
                 return fs.outputFile(projPath + 'force.json', JSON.stringify(vscode.window.forceCode.config, undefined, 4), function() {
                     if(res) {
@@ -627,6 +629,7 @@ export const fcCommands: FCCommand[] = [
                 });
             }, err => {
                 console.log('Not logged into this org');
+                return commandService.runCommand('ForceCode.showMenu', undefined);
             });
         }
     },
@@ -634,7 +637,7 @@ export const fcCommands: FCCommand[] = [
         commandName: 'ForceCode.login',
         hidden: true,
         command: function (context, selectedResource?) {
-            return vscode.window.forceCode.dxCommands.login(context.loginUrl, true)
+            return vscode.window.forceCode.dxCommands.login(context.loginUrl)
                 .then(res => {
                     return Promise.resolve(configuration());
                 });

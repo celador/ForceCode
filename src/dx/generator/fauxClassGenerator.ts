@@ -232,7 +232,7 @@ export class FauxClassGenerator {
   public generateFauxClass(folderPath: string, sobject: SObject): string {
     vscode.window.forceCode.outputChannel.appendLine('Generating faux class for ' + sobject.name);
     if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath);
+      fs.mkdirpSync(folderPath);
     }
     const fauxClassPath = path.join(folderPath, sobject.name + '.cls');
     fs.writeFileSync(fauxClassPath, this.generateFauxClassText(sobject), {
