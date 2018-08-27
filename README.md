@@ -141,6 +141,8 @@ The configuration file should look something like... (THIS IS AN EXAMPLE WITH EV
     "showTestLog": false,
     "showFilesOnOpen": true,
     "showFilesOnOpenMax": 3,
+    "showTestCoverage": true,
+    "showTestLog": false,
     "spaDist": "dist",
     "src": "src",
     "srcDefault": "src",
