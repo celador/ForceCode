@@ -24,14 +24,15 @@ export interface Config {
     autoRefresh?: boolean;
     browser?: string;
     checkForFileChanges?: boolean;
-    debugOnly?: boolean;
     debugFilter?: string;
+    debugOnly?: boolean;
     deployOptions?: {
-        verbose?: boolean,
         checkOnly?: boolean,
-        runAllTests?: boolean,
         ignoreWarnings?: boolean,
+        rollbackOnError?: boolean,
+        testLevel?: string,       
     };
+    overwritePackageXML?: boolean;
     poll?: number;
     pollTimeout?: number;
     prefix?: string;
@@ -45,8 +46,7 @@ export interface Config {
     srcDefault?: string;
     srcs?: {[key: string]: {src: string, url: string}};
     url?: string;
-    username?: string;
-    overwritePackageXML?: boolean;
+    username?: string;    
 }
 
 export interface MetadataResult {

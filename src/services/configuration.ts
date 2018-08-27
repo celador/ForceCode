@@ -40,7 +40,7 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 				apiVersion: constants.API_VERSION,
 				deployOptions: {
 					'checkOnly': false,
-					'runAllTests': false,
+					//'runAllTests': false,
 					'ignoreWarnings': true,
 				},
 				overwritePackageXML: false,
