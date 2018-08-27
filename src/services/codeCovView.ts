@@ -130,10 +130,13 @@ import {
     }
   
     public getParent(element: FCFile): any {
-      //if(element.getWsMember().id) {  // there's a bug in vscode, so for future use
-      //  return this.findByPath(path.sep + element.getType());
-      //}
-      return null;    // this is the parent
+      const wsMem: IWorkspaceMember = element.getWsMember();
+      if(wsMem && wsMem.id) {  // there's a bug in vscode, so for future use
+        var newFCFile: FCFile = new FCFile(element.getType(), TreeItemCollapsibleState.Expanded, this);
+        newFCFile.setType(element.getType());
+        return newFCFile;
+      }
+      return null;    // this is the parent      
     }
 
     private sortFunc(a: FCFile, b: FCFile): number {

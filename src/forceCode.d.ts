@@ -30,12 +30,12 @@ export interface Config {
         verbose?: boolean,
         checkOnly?: boolean,
         runAllTests?: boolean,
-        ignoreWarnings: boolean,
+        ignoreWarnings?: boolean,
     };
     poll?: number;
     pollTimeout?: number;
     prefix?: string;
-    proxyUrl?: string;
+    revealTestedClass?: boolean;
     showFilesOnOpen?: boolean;
     showFilesOnOpenMax?: number;
     showTestCoverage? : boolean;
