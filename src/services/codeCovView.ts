@@ -11,7 +11,6 @@ import {
   import * as path from 'path';
   import * as fs from 'fs-extra';
   import constants from './../models/constants';
-  var Utimes = require('@ronomon/utimes');
 
   const ClassType = {
       CoveredClass : 'Sufficient Coverage',
@@ -183,9 +182,8 @@ import {
       }
       
       if(saveTime && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
-        var mTime: number = new Date(this.wsMember.lastModifiedDate).getTime();
-        //var mTime: number = (new Date(mTimeString[0])).getTime() + parseInt(mTimeString[1].substring(0, 3));
-        Utimes.utimes(this.wsMember.path, undefined, mTime, undefined, function(res) {});
+        var mTime: Date = new Date(this.wsMember.lastModifiedDate);
+        fs.utimesSync(this.wsMember.path, mTime, mTime);
       }
       this.iconPath = undefined;
       if(!this.wsMember.id || this.wsMember.id === '') {
