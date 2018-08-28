@@ -121,7 +121,7 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
     return workspace.workspaceFolders[0].uri.fsPath + path.sep
             + (fcConfig && fcConfig.srcs && fcConfig.srcs[username] 
             ? fcConfig.srcs[username].src 
-            : fcConfig.srcDefault);
+            : (fcConfig.srcDefault ? fcConfig.srcDefault : 'src'));
   }
 
   private showLimitsService() {

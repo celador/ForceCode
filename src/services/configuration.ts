@@ -27,23 +27,23 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 			self.config = fs.readJsonSync(projPath + 'force.json');
 		} catch (err) {
 			self.config =  {
-				checkForFileChanges: true,
+				apiVersion: constants.API_VERSION,
 				autoRefresh: false,
-				showTestCoverage: true,
-				showTestLog: true,
-				showFilesOnOpen: true,
-				showFilesOnOpenMax: 3,
 				browser: 'Google Chrome Canary',
-				pollTimeout: 1200,
+				checkForFileChanges: true,
 				debugOnly: true,
 				debugFilter: 'USER_DEBUG|FATAL_ERROR',
-				apiVersion: constants.API_VERSION,
 				deployOptions: {
 					'checkOnly': false,
 					//'runAllTests': false,
 					'ignoreWarnings': true,
 				},
 				overwritePackageXML: false,
+				pollTimeout: 1200,
+				showFilesOnOpen: true,
+				showFilesOnOpenMax: 3,
+				showTestCoverage: true,
+				showTestLog: true,
 			};			
 		}
 		if (self.config && self.config !== null && typeof self.config === 'object' && !self.config.src) {
