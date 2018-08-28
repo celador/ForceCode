@@ -629,7 +629,10 @@ export const fcCommands: FCCommand[] = [
                 });
             }, err => {
                 console.log('Not logged into this org');
-                return commandService.runCommand('ForceCode.showMenu', undefined);
+                return vscode.window.forceCode.dxCommands.logout().then(() => {
+                    return commandService.runCommand('ForceCode.enterCredentials', selectedResource);
+                });
+                
             });
         }
     },
