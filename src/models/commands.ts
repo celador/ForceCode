@@ -258,7 +258,7 @@ export default [
         icon: 'key',
         label: 'Log in to Salesforce',
         command: function (context, selectedResource?) {
-            return commands.credentials();
+            return commands.credentials(context);
         }
     },
     {
@@ -459,7 +459,10 @@ export default [
                 });
             }, err => {
                 console.log('Not logged into this org');
-                return commandService.runCommand('ForceCode.showMenu', undefined);
+                return vscode.window.forceCode.dxCommands.logout().then(() => {
+                    return commandService.runCommand('ForceCode.enterCredentials', selectedResource);
+                });
+                
             });
         }
     },

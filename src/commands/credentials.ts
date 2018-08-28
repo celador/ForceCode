@@ -8,7 +8,11 @@ import { Org } from '../services/switchUserView';
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
 };
-export default function enterCredentials(): Promise<any> {
+export default function enterCredentials(askForCreds?: boolean): Promise<any> {
+    if(!askForCreds && switchUserViewService.getChildren().length > 0) {
+        return configuration()
+            .then(writeConfigAndLogin);
+    }
     return configuration()
         .then(cfg => {
             // ask if the user wants to log into a different account

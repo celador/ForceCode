@@ -37,7 +37,7 @@ export default class ForceService implements forceCode.IForceService {
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         this.containerMembers = [];
         configuration(this).then(config => {
-            commandService.runCommand('ForceCode.switchUserText', { username: config.username || '', loginUrl: config.url});
+            commandService.runCommand('ForceCode.switchUserText', { username: config.username || '', loginUrl: config.url}, true);
         });
     }
     public connect(): Promise<forceCode.IForceService> {
