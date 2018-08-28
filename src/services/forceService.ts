@@ -8,7 +8,6 @@ import * as creds from './../commands/credentials';
 import { FCFile } from './codeCovView';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 const jsforce: any = require('jsforce');
-const pjson: any = require('./../../../package.json');
 
 export default class ForceService implements forceCode.IForceService {
     public fcDiagnosticCollection: vscode.DiagnosticCollection;

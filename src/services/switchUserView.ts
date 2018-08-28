@@ -5,6 +5,7 @@ import {
   TreeItem,
   TreeItemCollapsibleState,
   window,
+  workspace
 } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
@@ -115,6 +116,14 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
     return undefined;
   }
 
+  public getSrcByUsername(username: string): string {
+    const fcConfig = window.forceCode.config;
+    return workspace.workspaceFolders[0].uri.fsPath + path.sep
+            + (fcConfig && fcConfig.srcs && fcConfig.srcs[username] 
+            ? fcConfig.srcs[username].src 
+            : fcConfig.srcDefault);
+  }
+
   private showLimitsService() {
     if(this.limInterval) {
       clearInterval(this.limInterval);
@@ -131,7 +140,8 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
         const curOrgIndex: number = service.findOrgIndexByUsername(service.orgInfo.username);
         if(curOrgIndex !== -1) {
           service.orgs[curOrgIndex].tooltip = 'Current username - Limits: ' 
-            + service.prevLimits + ' / ' + window.forceCode.conn.limitInfo.apiUsage.limit;
+            + service.prevLimits + ' / ' + window.forceCode.conn.limitInfo.apiUsage.limit
+            + '\nPROJECT PATH - ' + service.getSrcByUsername(service.orgInfo.username);
           service._onDidChangeTreeData.fire();
         }
       }
@@ -203,5 +213,6 @@ export class Org extends TreeItem {
       }
       this.tooltip = 'Click to login to ' + orgInfo.username;
     }
+    this.tooltip += '\nPROJECT PATH - ' + switchUserView.getSrcByUsername(orgInfo.username);
   }
 }
