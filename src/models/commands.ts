@@ -457,7 +457,7 @@ export default [
             if(fs.existsSync(`${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}.sfdx`)) {
                 fs.removeSync(`${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}.sfdx`);
             }
-            fs.symlinkSync(vscode.window.forceCode.workspaceRoot + path.sep + '.sfdx', `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}.sfdx`, 'dir');
+            fs.symlinkSync(vscode.window.forceCode.workspaceRoot + path.sep + '.sfdx', `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}.sfdx`, 'junction');
             if(!fs.existsSync(vscode.window.forceCode.workspaceRoot + path.sep + 'sfdx-project.json')) {
                 // add in a bare sfdx-project.json file for language support from official salesforce extensions
                 const sfdxProj: {} = {
@@ -468,7 +468,7 @@ export default [
                 
                 fs.outputFileSync(vscode.window.forceCode.workspaceRoot + path.sep + 'sfdx-project.json', JSON.stringify(sfdxProj, undefined, 4));
             }
-            fs.symlinkSync(vscode.window.forceCode.workspaceRoot + path.sep + 'sfdx-project.json', `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}sfdx-project.json`);
+            fs.linkSync(vscode.window.forceCode.workspaceRoot + path.sep + 'sfdx-project.json', `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}sfdx-project.json`);
             vscode.window.forceCode.conn = undefined;
             codeCovViewService.clear();
             return vscode.window.forceCode.dxCommands.getOrgInfo().then(res => {
