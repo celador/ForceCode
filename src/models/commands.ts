@@ -444,35 +444,22 @@ export default [
                 const srcDefault: string = vscode.window.forceCode.config.srcDefault;
                 vscode.window.forceCode.config.src = srcDefault ? srcDefault : 'src';
             }
-            vscode.window.forceCode.workspaceRoot = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}${vscode.window.forceCode.config.src}`;
+            const projPath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}`;
+            vscode.window.forceCode.workspaceRoot = `${projPath}${vscode.window.forceCode.config.src}`;
             if (!fs.existsSync(vscode.window.forceCode.workspaceRoot)) {
                 fs.mkdirpSync(vscode.window.forceCode.workspaceRoot);
             }
-            if (!fs.existsSync(vscode.window.forceCode.workspaceRoot + path.sep + '.sfdx')) {
-                fs.mkdirpSync(vscode.window.forceCode.workspaceRoot + path.sep + '.sfdx');
+            if (!fs.existsSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx')) {
+                fs.mkdirpSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx');
             }
-            if(fs.existsSync(`${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}sfdx-project.json`)) {
-                fs.removeSync(`${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}sfdx-project.json`);
+            if(fs.existsSync(`${projPath}.sfdx`)) {
+                fs.removeSync(`${projPath}.sfdx`);
             }
-            if(fs.existsSync(`${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}.sfdx`)) {
-                fs.removeSync(`${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}.sfdx`);
-            }
-            fs.symlinkSync(vscode.window.forceCode.workspaceRoot + path.sep + '.sfdx', `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}.sfdx`, 'junction');
-            if(!fs.existsSync(vscode.window.forceCode.workspaceRoot + path.sep + 'sfdx-project.json')) {
-                // add in a bare sfdx-project.json file for language support from official salesforce extensions
-                const sfdxProj: {} = {
-                    namespace: "", 
-                    sfdcLoginUrl: 'https://login.salesforce.com/', 
-                    sourceApiVersion: constants.API_VERSION,
-                };
-                
-                fs.outputFileSync(vscode.window.forceCode.workspaceRoot + path.sep + 'sfdx-project.json', JSON.stringify(sfdxProj, undefined, 4));
-            }
-            fs.linkSync(vscode.window.forceCode.workspaceRoot + path.sep + 'sfdx-project.json', `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}sfdx-project.json`);
+            fs.symlinkSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx', `${projPath}.sfdx`, 'junction');
+            
             vscode.window.forceCode.conn = undefined;
             codeCovViewService.clear();
             return vscode.window.forceCode.dxCommands.getOrgInfo().then(res => {
-                const projPath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep;
                 return fs.outputFile(projPath + 'force.json', JSON.stringify(vscode.window.forceCode.config, undefined, 4), function() {
                     if(res) {
                         return commandService.runCommand('ForceCode.connect', undefined);

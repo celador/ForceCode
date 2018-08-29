@@ -43,6 +43,16 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 		if (!fs.existsSync(self.workspaceRoot)) {
 			fs.mkdirpSync(self.workspaceRoot);
 		}
+		if(!fs.existsSync(projPath + 'sfdx-project.json')) {
+			// add in a bare sfdx-project.json file for language support from official salesforce extensions
+			const sfdxProj: {} = {
+				namespace: "", 
+				sfdcLoginUrl: 'https://login.salesforce.com/', 
+				sourceApiVersion: constants.API_VERSION,
+			};
+			
+			fs.outputFileSync(projPath + 'sfdx-project.json', JSON.stringify(sfdxProj, undefined, 4));
+		}
 		switchUserViewService.refreshOrgs().then(() => {
 			resolve(self.config);
 		});
