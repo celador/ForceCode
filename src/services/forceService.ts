@@ -144,7 +144,7 @@ export default class ForceService implements forceCode.IForceService {
             klaw(vscode.window.forceCode.workspaceRoot)
                 .on('data', function (item) {
                     // Check to see if the file represents an actual member... 
-                    if (item.stats.isFile()) {                        
+                    if (item.stats.isFile() && item.path.indexOf('.sfdx') === -1) {                        
                         var type: string = getToolingTypeFromExt(item.path);
 
                         if(type) {
