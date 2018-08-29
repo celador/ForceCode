@@ -32,11 +32,20 @@ export function activate(context: vscode.ExtensionContext): any {
         if (vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
             const toolingType: string = parsers.getToolingType(textDocument);
             if(toolingType) {
-                commandService.runCommand('ForceCode.compileMenu', context, textDocument);
-            }
-            var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
-            if (isResource && isResource.index) {
-                commandService.runCommand('ForceCode.staticResourceDeployFromFile', context, textDocument);
+                const folderName: string = parsers.getFolder(toolingType);
+                const filePathBase: string = textDocument.uri.fsPath.split(folderName)[0];
+                if((vscode.window.forceCode.workspaceRoot + path.sep === filePathBase)) {
+                    return commandService.runCommand('ForceCode.compileMenu', context, textDocument);
+                } else {
+                    vscode.window.showErrorMessage('The file you are trying to save to the server isn\'t in the current org\'s source folder (' + vscode.window.forceCode.workspaceRoot + ')');
+                    return;
+                }
+            } else {
+            // TODO: Change this to make sure we're in the right folder too.
+                var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
+                if (isResource && isResource.index) {
+                    return commandService.runCommand('ForceCode.staticResourceDeployFromFile', context, textDocument);
+                }
             }
         }
     }));

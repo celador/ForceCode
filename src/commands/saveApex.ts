@@ -128,6 +128,8 @@ export function saveApex(document: vscode.TextDocument, toolingType: string, Met
                         codeCovViewService.addClass(workspaceMember, true);
                         return fc;
                     });
+                }, err => {
+                    vscode.window.showErrorMessage(err.message ? err.message : err);
                 });
             }
         }
