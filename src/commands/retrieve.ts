@@ -278,7 +278,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                         if(tType) {
                             // add to ws members
                             var wsMem: IWorkspaceMember = {
-                                name: name.split('/').pop().split('.')[0],
+                                name: name.split(path.sep).pop().split('.')[0],
                                 path: `${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`,
                                 id: '',//metadataFileProperties.id,
                                 lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
