@@ -12,7 +12,7 @@ export default function toql(): any {
             return undefined;
         }
         return vscode.window.forceCode.conn.tooling.query(query).then(res => {
-            let filePath: string = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'toql' + path.sep + Date.now() + '.json';
+            let filePath: string = vscode.window.forceCode.workspaceRoot + path.sep + 'toql' + path.sep + Date.now() + '.json';
             var data: string = vscode.window.forceCode.dxCommands.outputToString(res.records);
             return fs.outputFile(filePath, data, function() {
                 return vscode.workspace.openTextDocument(filePath).then(doc => { 

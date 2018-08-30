@@ -308,7 +308,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                                             if (zipEntry.isFile()) {
                                                 var zipFName: string = zipEntry.getName();
                                                 var zipFData: Buffer = zipEntry.getData();
-                                                var filePath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${zipFName}`;
+                                                var filePath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${zipFName}`;
                                                 fs.outputFileSync(filePath, zipFData);
                                             }
                                         });
@@ -321,7 +321,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                                             theData = actualResData.toString(mime.charset(ContentType) || 'UTF-8');
                                         }
                                         var ext = mime.extension(ContentType);
-                                        var filePath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${resFN}.${ext}`;
+                                        var filePath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${resFN}.${ext}`;
                                         fs.outputFileSync(filePath, theData);
                                     }
                                 }

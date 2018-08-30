@@ -30,22 +30,18 @@ export function activate(context: vscode.ExtensionContext): any {
     // AutoCompile Feature
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         if (vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
-            const toolingType: string = parsers.getToolingType(textDocument);
-            if(toolingType) {
-                const folderName: string = parsers.getFolder(toolingType);
-                const filePathBase: string = textDocument.uri.fsPath.split(folderName)[0];
-                if((vscode.window.forceCode.workspaceRoot + path.sep === filePathBase)) {
-                    return commandService.runCommand('ForceCode.compileMenu', context, textDocument);
-                } else {
-                    vscode.window.showErrorMessage('The file you are trying to save to the server isn\'t in the current org\'s source folder (' + vscode.window.forceCode.workspaceRoot + ')');
-                    return;
-                }
-            } else {
-            // TODO: Change this to make sure we're in the right folder too.
+            if(textDocument.uri.fsPath.includes(vscode.window.forceCode.workspaceRoot)) {
                 var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
                 if (isResource && isResource.index) {
                     return commandService.runCommand('ForceCode.staticResourceDeployFromFile', context, textDocument);
                 }
+                const toolingType: string = parsers.getToolingType(textDocument);
+                if(toolingType) {
+                    return commandService.runCommand('ForceCode.compileMenu', context, textDocument);
+                }
+                return;
+            } else {
+                vscode.window.showErrorMessage('The file you are trying to save to the server isn\'t in the current org\'s source folder (' + vscode.window.forceCode.workspaceRoot + ')');
             }
         }
     }));
@@ -68,14 +64,14 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator));
 
     if (!vscode.workspace.workspaceFolders) {
-        return;
+        throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
     }
 
     // watch for config file changes
     context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => { configuration() }));
     
     // watch for deleted files and update workspaceMembers
-    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, vscode.window.forceCode.config.src ? vscode.window.forceCode.config.src : 'src', '**/*.{cls,trigger,page,component,cmp}')).onDidDelete(uri => {
+    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.window.forceCode.workspaceRoot, '**/*.{cls,trigger,page,component,cmp}')).onDidDelete(uri => {
         const fcfile: FCFile = codeCovViewService.findByPath(uri.path);
 
         if(fcfile) {

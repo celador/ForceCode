@@ -12,7 +12,7 @@ export default function soql(): any {
             return undefined;
         }
         return vscode.window.forceCode.conn.query(query).then(res => {
-            let filePath: string = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep + 'soql' + path.sep + Date.now() + '.json';
+            let filePath: string = vscode.window.forceCode.workspaceRoot + path.sep + 'soql' + path.sep + Date.now() + '.json';
             var data: string = vscode.window.forceCode.dxCommands.outputToString(res.records);
             return fs.outputFile(filePath, data, function() {
                 return vscode.workspace.openTextDocument(filePath).then(doc => { 
