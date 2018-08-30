@@ -3,9 +3,10 @@ import fs = require('fs-extra');
 import * as path from 'path';
 import * as parsers from './../parsers';
 import constants from './../models/constants';
-import { commandService, codeCovViewService } from '../services';
+import { commandService, codeCovViewService, switchUserViewService } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
+import { FCOauth } from '../services/switchUserView';
 const mime = require('mime-types');
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
@@ -37,10 +38,11 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
     // =======================================================================================================================================
 
     function getPackages() {
-        var requestUrl: string = vscode.window.forceCode.dxCommands.orgInfo.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
+        var orgInfo: FCOauth = switchUserViewService.orgInfo;
+        var requestUrl: string = orgInfo.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
         var headers: any = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Cookie': 'sid=' + vscode.window.forceCode.dxCommands.orgInfo.accessToken,
+            'Cookie': 'sid=' + orgInfo.accessToken,
         };
         var body: string = 'action=EXTENT&extent=PACKAGES';
         return fetch(requestUrl, { method: 'POST', headers, body }).then(function (response) {
@@ -306,7 +308,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                                             if (zipEntry.isFile()) {
                                                 var zipFName: string = zipEntry.getName();
                                                 var zipFData: Buffer = zipEntry.getData();
-                                                var filePath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${zipFName}`;
+                                                var filePath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${zipFName}`;
                                                 fs.outputFileSync(filePath, zipFData);
                                             }
                                         });
@@ -319,7 +321,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                                             theData = actualResData.toString(mime.charset(ContentType) || 'UTF-8');
                                         }
                                         var ext = mime.extension(ContentType);
-                                        var filePath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${resFN}.${ext}`;
+                                        var filePath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${resFN}.${ext}`;
                                         fs.outputFileSync(filePath, theData);
                                     }
                                 }
@@ -365,7 +367,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                                 newWSMembers[index].lastModifiedDate = key.lastModifiedDate;
                                 newWSMembers[index].lastModifiedByName = key.lastModifiedByName; 
                                 newWSMembers[index].lastModifiedById = key.lastModifiedById;
-                                codeCovViewService.addClass(newWSMembers.splice(index, 1)[0]);
+                                codeCovViewService.addClass(newWSMembers.splice(index, 1)[0], true);
                             }
                         } else {
                             return true;

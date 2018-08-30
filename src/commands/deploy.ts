@@ -11,6 +11,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         checkOnly: true,
         ignoreWarnings: false,
         rollbackOnError: true,
+        singlePackage: true,
     };
 
     return Promise.resolve(vscode.window.forceCode)
@@ -24,7 +25,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
         vscode.window.forceCode.outputChannel.show();
         var archive = archiver('zip');
-        archive.glob(deployPath + path.sep + '**', { cwd: deployPath });
+        archive.directory(deployPath + path.sep, false);
         archive.finalize();
         return vscode.window.forceCode.conn.metadata.deploy(archive, deployOptions)
             .complete(function(err, result) {

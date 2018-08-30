@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { codeCovViewService } from '../services';
+import { codeCovViewService, switchUserViewService } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 const parseString: any = require('xml2js').parseString;
@@ -126,6 +126,10 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
 
     // =======================================================================================================================================
     function finished(res: any): boolean {
+        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(res)) {
+            vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
+            return true;
+        }
         var failures: number = 0;
         if (res.records && res.records.length > 0) {
             res.records.filter(r => r.State !== 'Error').forEach(containerAsyncRequest => {
@@ -158,8 +162,9 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                 const fcfile = codeCovViewService.findById(res.records[0].DeployDetails.componentSuccesses[0].id); 
                 if(fcfile) {
                     var fcMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
+                    fcMem.coverage = undefined;
                     fcMem.lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
-                    fcMem.lastModifiedById = vscode.window.forceCode.dxCommands.orgInfo.userId;
+                    fcMem.lastModifiedById = switchUserViewService.orgInfo.userId;
                     fcfile.updateWsMember(fcMem);
                 }
             }

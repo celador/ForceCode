@@ -1,15 +1,13 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { operatingSystem, configuration, commandService, codeCovViewService } from './../services';
+import { operatingSystem, configuration, commandService, codeCovViewService, switchUserViewService } from './../services';
 import constants from './../models/constants';
 import DXService from './dxService';
 import * as path from 'path';
 import * as creds from './../commands/credentials';
-import * as fs from 'fs-extra';
 import { FCFile } from './codeCovView';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 const jsforce: any = require('jsforce');
-const pjson: any = require('./../../../package.json');
 
 export default class ForceService implements forceCode.IForceService {
     public fcDiagnosticCollection: vscode.DiagnosticCollection;
@@ -21,13 +19,11 @@ export default class ForceService implements forceCode.IForceService {
     public describe: forceCode.IMetadataDescribe;
     public declarations: forceCode.IDeclarations;
     public containerAsyncRequestId: string;
-    public username: string;
-    public statusBarItem_UserInfo: vscode.StatusBarItem;
     public statusBarItem: vscode.StatusBarItem;
     public outputChannel: vscode.OutputChannel;
     public operatingSystem: string;
     public workspaceRoot: string;
-    public statusInterval: any; 
+    public statusTimeout: any; 
 
     constructor() {
         this.dxCommands = new DXService();
@@ -36,20 +32,12 @@ export default class ForceService implements forceCode.IForceService {
         this.operatingSystem = operatingSystem.getOS();
         // Setup username and outputChannel
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
-        this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
-        this.statusBarItem_UserInfo = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 5);
+        this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 6);
         this.statusBarItem.command = 'ForceCode.showMenu';
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         this.containerMembers = [];
         configuration(this).then(config => {
-            this.username = config.username || '';
-            commandService.runCommand('ForceCode.getOrgInfo', undefined).then(res => {
-                if(res) {
-                    commandService.runCommand('ForceCode.connect', undefined);
-                }
-            });  
-        }).catch(() => {
-            this.statusBarItem.text = 'ForceCode: Missing Configuration';
+            commandService.runCommand('ForceCode.switchUserText', { username: config.username || '', loginUrl: config.url}, true);
         });
     }
     public connect(): Promise<forceCode.IForceService> {
@@ -61,24 +49,15 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     public showStatus(message: string) {
-        vscode.window.forceCode.statusBarItem_UserInfo.text = message;
+        vscode.window.forceCode.statusBarItem.text = message;
         this.resetStatus();
     }
 
     public resetStatus() {
-        // for status bar updates. update every 5 seconds
-        clearInterval(vscode.window.forceCode.statusInterval);
-        vscode.window.forceCode.statusInterval = setInterval(function () {
-            var lim = '';
-            if (vscode.window.forceCode.conn && vscode.window.forceCode.conn.limitInfo && vscode.window.forceCode.conn.limitInfo.apiUsage) {
-                lim = ' - Limits: ' + vscode.window.forceCode.conn.limitInfo.apiUsage.used + '/' + vscode.window.forceCode.conn.limitInfo.apiUsage.limit;
-            }
-            if(vscode.window.forceCode.config.username) {
-                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected' + lim;
-            } else {
-                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode not connected';
-                vscode.window.forceCode.statusBarItem_UserInfo.tooltip = '';
-            }
+        // for status bar updates. resets after 5 seconds
+        clearTimeout(vscode.window.forceCode.statusTimeout);
+        vscode.window.forceCode.statusTimeout = setTimeout(function () {
+            vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
         }, 5000);
     }
 
@@ -124,24 +103,28 @@ export default class ForceService implements forceCode.IForceService {
         });
 
         function parseRecords(recs: any[]): Promise<any> {
+            if(!Array.isArray(recs)) {
+                Promise.resolve();
+            }
             //return Promise.all(recs).then(records => {
             console.log('Done retrieving metadata records');
             recs.forEach(curSet => {
-                curSet.forEach(key => {
-                    var curFCFile: FCFile = codeCovViewService.findByNameAndType(key.fullName, key.type);
-                    if(curFCFile) {
-                        var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
-                        if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges || curMem.type === 'AuraDefinitionBundle') {
-                            curMem.id = key.id;
-                            curMem.lastModifiedDate = key.lastModifiedDate;
-                            curMem.lastModifiedByName = key.lastModifiedByName; 
-                            curMem.lastModifiedById = key.lastModifiedById;
-                            curFCFile.updateWsMember(curMem);
-                        } else {
-                            commandService.runCommand('ForceCode.fileModified', curMem.path, key.lastModifiedByName);
+                if(Array.isArray(curSet)) {
+                    curSet.forEach(key => {
+                        var curFCFile: FCFile = codeCovViewService.findByNameAndType(key.fullName, key.type);
+                        if(curFCFile) {
+                            var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
+                            if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges || curMem.type === 'AuraDefinitionBundle') {
+                                curMem.id = key.id;
+                                curMem.lastModifiedByName = key.lastModifiedByName; 
+                                curMem.lastModifiedById = key.lastModifiedById;
+                                curFCFile.updateWsMember(curMem);
+                            } else {
+                                commandService.runCommand('ForceCode.fileModified', curMem.path, key.lastModifiedByName);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             });
             console.log('Done getting workspace info');
             return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined).then(() => {
@@ -161,10 +144,7 @@ export default class ForceService implements forceCode.IForceService {
             klaw(vscode.window.forceCode.workspaceRoot)
                 .on('data', function (item) {
                     // Check to see if the file represents an actual member... 
-                    if (item.stats.isFile()) {
-                        //var metadataFileProperties: IMetadataFileProperties = getMembersFor(item);
-                        
-                        //if (metadataFileProperties) {
+                    if (item.stats.isFile() && item.path.indexOf('.sfdx') === -1) {                        
                         var type: string = getToolingTypeFromExt(item.path);
 
                         if(type) {
@@ -180,12 +160,12 @@ export default class ForceService implements forceCode.IForceService {
                                     name: filename,
                                     path: item.path,
                                     id: '',//metadataFileProperties.id,
-                                    lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
+                                    lastModifiedDate: item.stats.mtime,
                                     lastModifiedByName: '',
                                     lastModifiedById: '',
                                     type: type,
                                 };
-                                codeCovViewService.addClass(workspaceMember);
+                                codeCovViewService.addClass(workspaceMember, false);
                             }
                         }
                     }
@@ -199,8 +179,9 @@ export default class ForceService implements forceCode.IForceService {
     private setupConfig(): Promise<forceCode.Config> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Setup username and outputChannel
-        self.username = (self.config && self.config.username) || '';
-        if (!self.config || !self.config.username || !self.dxCommands.isLoggedIn) {
+        var uname: string = switchUserViewService.orgInfo.username;
+        switchUserViewService.orgInfo.username = uname ? uname : (self.config && self.config.username) || '';
+        if (!switchUserViewService.isLoggedIn()) {
             return creds.default().then(credentials => {
                 self.config.username = credentials.username;
                 self.config.autoCompile = credentials.autoCompile;
@@ -213,13 +194,7 @@ export default class ForceService implements forceCode.IForceService {
     private login(config): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
         // Lazy-load the connection
-        if (self.dxCommands.orgInfo === undefined || self.config.username !== self.username || self.conn === undefined) {
-            var connectionOptions: any = {
-                loginUrl: self.config.url || 'https://login.salesforce.com'
-            };
-            if (self.config.proxyUrl) {
-                connectionOptions.proxyUrl = self.config.proxyUrl;
-            }
+        if (self.conn === undefined) {
             if (!config.username) {
                 throw { message: '$(alert) Missing Credentials $(alert)' };
             }
@@ -228,32 +203,36 @@ export default class ForceService implements forceCode.IForceService {
             
             // get the current org info
             return new Promise((resolve, reject) => {
-                if(self.dxCommands.orgInfo) {
-                    resolve(self.dxCommands.orgInfo);
+                if(switchUserViewService.isLoggedIn()) {
+                    resolve();
                 } else {
                     reject();
                 }
             }).then(() => {
-                    vscode.window.forceCode.statusBarItem_UserInfo.text = `ForceCode: $(plug) Connecting as ${config.username}`;
-                    // get the refresh token
-                    var refreshToken =  fs.readJsonSync(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep + self.dxCommands.orgInfo.username + '.json').refreshToken;
-                    // set the userId in connectionSuccess
                     self.conn = new jsforce.Connection({
                         oauth2: {
-                            clientId: self.dxCommands.orgInfo.clientId,
+                            clientId: switchUserViewService.orgInfo.clientId
                         },
-                        instanceUrl : self.dxCommands.orgInfo.instanceUrl,
-                        accessToken : self.dxCommands.orgInfo.accessToken,
-                        refreshToken: refreshToken,
+                        instanceUrl : switchUserViewService.orgInfo.instanceUrl,
+                        accessToken : switchUserViewService.orgInfo.accessToken,
+                        refreshToken: switchUserViewService.orgInfo.refreshToken,
                         version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                     });
+
+                    // query the userid
+                    return self.conn.tooling.sobject('User')
+                        .find({UserName: switchUserViewService.orgInfo.username})
+                        .execute(function(err, result) {
+                            if(err) { return Promise.reject(err) }
+                            switchUserViewService.orgInfo.userId = result[0].Id;
+                            return self
+                        });
                 })
                 .then(connectionSuccess)
-                .catch(connectionError)
                 .then(getNamespacePrefix)
                 .then(checkForChanges)
                 .then(cleanupContainers)
-                .catch(err => vscode.window.showErrorMessage(err.message));
+                .catch(connectionError);
 
                 // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
             function cleanupContainers(): Promise<any> {
@@ -262,9 +241,9 @@ export default class ForceService implements forceCode.IForceService {
                         .find({ Name: {$like : 'ForceCode-%'}})
                         .execute(function(err, records) {
                             var toDelete: string[] = new Array<string>();
-                            records.forEach(r => {
-                                toDelete.push(r.Id);
-                            })
+                            if(!records) {
+                                resolve();
+                            }
                             if(toDelete.length > 0) {
                                 resolve(vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
                                     .del(toDelete));
@@ -283,15 +262,8 @@ export default class ForceService implements forceCode.IForceService {
             function connectionSuccess() {
                 vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
                 vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
-                vscode.window.forceCode.statusBarItem_UserInfo.text = 'ForceCode ' + pjson.version + ' connected';
-                vscode.window.forceCode.statusBarItem_UserInfo.tooltip = 'Connected as ' + vscode.window.forceCode.config.username;
-                
-                vscode.window.forceCode.resetStatus();
-                self.statusBarItem_UserInfo.show();
                 self.statusBarItem.show();
 
-                self.username = config.username;
-                // query the userid
                 return self;
             }
             function getNamespacePrefix(svc: forceCode.IForceService) {
@@ -307,8 +279,6 @@ export default class ForceService implements forceCode.IForceService {
                 throw err;
             }
         } else {
-            // self.outputChannel.appendLine(`Connected as ` + self.config.username);
-            // vscode.window.forceCode.statusBarItem.text = `ForceCode: $(history) ${self.config.username}`;
             return Promise.resolve(self);
         }
     }

@@ -6,7 +6,6 @@ import {
     TreeItem,
     TreeItemCollapsibleState,
     window,
-    workspace
   } from 'vscode';
   import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
   import * as path from 'path';
@@ -18,11 +17,11 @@ import {
       NoCoverageData : 'No Coverage Data',
       TestClass : 'Test Classes',
       UncoveredClass : 'Insufficient Coverage',
+      NotInOrg: 'Not In Current Org',
       NoShow: 'NoShow',
   }
 
   export class CodeCovViewService implements TreeDataProvider<FCFile> {
-    private timeO: NodeJS.Timer;
     private static instance: CodeCovViewService;
     private classes: Array<FCFile> = new Array<FCFile>();
     private _onDidChangeTreeData: EventEmitter<
@@ -31,21 +30,6 @@ import {
   
     public readonly onDidChangeTreeData: Event <FCFile | undefined> = this
       ._onDidChangeTreeData.event;
-  
-    public constructor() {
-      try{
-				// read previous metadata
-				if(this.classes.length === 0) {
-          const tempClasses: any[] = fs.readJsonSync(workspace.workspaceFolders[0].uri.fsPath + path.sep + 'wsMembers.json');
-          tempClasses.forEach(cur => {
-            this.classes.push(new FCFile(cur.name, TreeItemCollapsibleState.None, this, cur));
-          });
-          console.log('Done loading wsMember data.');
-				}
-			} catch (e) {
-        console.log('Class data failed to load or no data found');
-			}
-    }
   
     public static getInstance() {
       if (!CodeCovViewService.instance) {
@@ -58,31 +42,16 @@ import {
     public refresh() {
       this._onDidChangeTreeData.fire();
     }
-
-    private saveClasses() {
-      if(this.timeO) {
-        clearTimeout(this.timeO);
-      }
-      this.timeO = setTimeout(() => { this.doSaveClasses(); }, 1500);
-    }
-
-    private doSaveClasses() {
-      return window.forceCode.dxCommands.saveToFile(JSON.stringify(this.getWsMembers()), 'wsMembers.json').then(() => {
-        console.log('Updated wsMembers.json file');
-        return Promise.resolve();
-      });
-    }
   
-    public addClass(wsMember: IWorkspaceMember) {
+    public addClass(wsMember: IWorkspaceMember, saveTime: boolean) {
       const index: number = this.classes.findIndex(curClass => { return curClass.getWsMember().path === wsMember.path });
       if(index !== -1) {
-        this.classes[index].setWsMember(wsMember);
+        this.classes[index].setWsMember(wsMember, saveTime);
       } else {
         var newClass: FCFile = new FCFile(wsMember.name, TreeItemCollapsibleState.None, this, wsMember);
         this.classes.push(newClass);
       }
       this.refresh();
-      this.saveClasses();
     }
 
     public findByNameAndType(name: string, type: string): FCFile {
@@ -120,10 +89,15 @@ import {
       if (index !== -1) {
         this.classes.splice(index, 1);
         this.refresh();
-        this.saveClasses();
         return true;
       } 
       return false;
+    }
+
+    public clear() {
+      delete this.classes;
+      this.classes = [];
+      this.refresh();
     }
   
     public getTreeItem(element: FCFile): TreeItem {
@@ -155,25 +129,19 @@ import {
     }
   
     public getParent(element: FCFile): any {
-      //if(element.getWsMember().id) {  // there's a bug in vscode, so for future use
-      //  return this.findByPath(path.sep + element.getType());
-      //}
-      return null;    // this is the parent
+      const wsMem: IWorkspaceMember = element.getWsMember();
+      if(wsMem && wsMem.id) {  // there's a bug in vscode, so for future use
+        var newFCFile: FCFile = new FCFile(element.getType(), TreeItemCollapsibleState.Expanded, this);
+        newFCFile.setType(element.getType());
+        return newFCFile;
+      }
+      return null;    // this is the parent      
     }
 
     private sortFunc(a: FCFile, b: FCFile): number {
         var aStr = a.label.split('% ').pop().toUpperCase();
         var bStr = b.label.split('% ').pop().toUpperCase();
         return aStr.localeCompare(bStr);
-    }
-
-    private getWsMembers(): IWorkspaceMember[] {
-      var wsMembers: IWorkspaceMember[] = new Array<IWorkspaceMember>();
-      this.classes.forEach(cur => {
-        const withoutCoverage: IWorkspaceMember = Object.assign({}, cur.getWsMember(), {coverage: undefined});
-        wsMembers.push(withoutCoverage);
-      });
-      return wsMembers;
     }
   }
   
@@ -193,10 +161,10 @@ import {
   
       this.collapsibleState = collapsibleState;
       this.parent = parent;
-      this.setWsMember(wsMember);
+      this.setWsMember(wsMember, false);
     }
 
-    public setWsMember(newMem: IWorkspaceMember) {
+    public setWsMember(newMem: IWorkspaceMember, saveTime: boolean) {
       this.wsMember = newMem;
 
       // we only want classes and triggers
@@ -212,6 +180,16 @@ import {
           title: '',
           arguments: [this.wsMember.path]
       }
+      
+      if(saveTime && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
+        var mTime: Date = new Date(this.wsMember.lastModifiedDate);
+        fs.utimesSync(this.wsMember.path, mTime, mTime);
+      }
+      this.iconPath = undefined;
+      if(!this.wsMember.id || this.wsMember.id === '') {
+        this.type = ClassType.NotInOrg;
+        return undefined;
+      }
 
       this.type = ClassType.UncoveredClass;
       if(this.wsMember.coverage) {
@@ -221,7 +199,16 @@ import {
         this.label = percent + '% ' + this.label;
         if(percent >= 75) {
             this.type = ClassType.CoveredClass;
-        } 
+            this.iconPath = {
+              dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
+              light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
+            }
+        } else {
+          this.iconPath = {
+            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
+            light: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
+          }
+        }
         // this next check needs changed to something different, as there are problems reading the file
       } else {
         var testFile: boolean = false;
@@ -237,7 +224,7 @@ import {
     }
 
     public updateWsMember(newMem: IWorkspaceMember) {
-      this.parent.addClass(newMem);
+      this.parent.addClass(newMem, true);
     }
 
     public getWsMember(): IWorkspaceMember {
@@ -257,12 +244,10 @@ import {
       if(!this.wsMember.lastModifiedDate) {
         return true;
       }
-      var serverSplit: string[] = serverDate.split('.');
-      var localSplit: string[] = this.wsMember.lastModifiedDate.split('.');
-      var serverMS: number = (new Date(serverSplit[0])).getTime() + parseInt(serverSplit[1].substring(0, 3));
-      var localMS: number = (new Date(localSplit[0])).getTime() + parseInt(localSplit[1].substring(0, 3));
+      var localMS: number = fs.statSync(this.wsMember.path).mtimeMs;
+      var serverMS: number = (new Date(serverDate)).getTime();
 
-      if(serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
+      if(localMS > serverMS || serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
           return true;
       }
       

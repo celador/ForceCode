@@ -4,6 +4,8 @@ import * as operatingSystem from './operatingSystem';
 import configuration from './configuration';
 
 export {ForceService, operatingSystem, configuration};
+import { SwitchUserViewService } from './switchUserView';
+export const switchUserViewService = SwitchUserViewService.getInstance();
 import { CommandViewService } from './commandView';
 export const commandViewService = CommandViewService.getInstance();
 export { Task } from './commandView';

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ForceService, commandViewService, commandService, codeCovViewService } from './services';
+import { ForceService, commandViewService, commandService, codeCovViewService, configuration, switchUserViewService } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
 import { editorUpdateApexCoverageDecorator, updateDecorations } from './decorators/testCoverageDecorator';
@@ -15,6 +15,7 @@ export function activate(context: vscode.ExtensionContext): any {
         context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
     });
 
+    context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.switchUserProvider', switchUserViewService));
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.treeDataProvider', commandViewService));
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.codeCovDataProvider', codeCovViewService));
 
@@ -29,13 +30,18 @@ export function activate(context: vscode.ExtensionContext): any {
     // AutoCompile Feature
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         if (vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
-            const toolingType: string = parsers.getToolingType(textDocument);
-            if(toolingType) {
-                commandService.runCommand('ForceCode.compileMenu', context, textDocument);
-            }
-            var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
-            if (isResource.index) {
-                commandService.runCommand('ForceCode.staticResourceDeployFromFile', context, textDocument);
+            if(textDocument.uri.fsPath.includes(vscode.window.forceCode.workspaceRoot)) {
+                var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
+                if (isResource && isResource.index) {
+                    return commandService.runCommand('ForceCode.staticResourceDeployFromFile', context, textDocument);
+                }
+                const toolingType: string = parsers.getToolingType(textDocument);
+                if(toolingType) {
+                    return commandService.runCommand('ForceCode.compileMenu', context, textDocument);
+                }
+                return;
+            } else {
+                vscode.window.showErrorMessage('The file you are trying to save to the server isn\'t in the current org\'s source folder (' + vscode.window.forceCode.workspaceRoot + ')');
             }
         }
     }));
@@ -58,14 +64,14 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator));
 
     if (!vscode.workspace.workspaceFolders) {
-        return;
+        throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
     }
 
     // watch for config file changes
-    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => { if(vscode.window.forceCode.dxCommands.isLoggedIn) { vscode.window.forceCode.connect(context) }}));
+    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, 'force.json')).onDidChange(uri => { configuration() }));
     
     // watch for deleted files and update workspaceMembers
-    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, vscode.window.forceCode.config.src ? vscode.window.forceCode.config.src : 'src', '**/*.{cls,trigger,page,component}')).onDidDelete(uri => {
+    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.window.forceCode.workspaceRoot, '**/*.{cls,trigger,page,component,cmp}')).onDidDelete(uri => {
         const fcfile: FCFile = codeCovViewService.findByPath(uri.path);
 
         if(fcfile) {

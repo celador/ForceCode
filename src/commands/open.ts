@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as retrieve from './retrieve';
 import { getIcon, getExtension, getFolder } from './../parsers';
+import * as path from 'path';
 const TYPEATTRIBUTE: string = 'type';
 
 export function open(context: vscode.ExtensionContext) {
@@ -54,29 +55,44 @@ export function showFileOptions(promises: any[]) {
         return vscode.window.showQuickPick(options, config);
     }).then(opt => {
         var opts: any = opt;
-        if(!opts) {
-            opts = [''];
+        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(opts)) {
+            return Promise.resolve();
         }
         var files: retrieve.ToolingType[] = [];
-        if(opts instanceof Array) {
-            opts.forEach(curOpt => {
-                //return getFile(curOpt);
-                var tType: string = curOpt.detail.split(' ')[0];
-                var fName: string = curOpt.label.slice(curOpt.label.lastIndexOf(' ') + 1).split('.')[0];
-                var index: number = getTTIndex(tType, files);
-                if(index >= 0) {
-                    files[index].members.push(fName);
-                } else {
-                    files.push({name: tType, members: [fName]});
-                }
-            });
-        } else {
-            var tType: string = opt.detail.split(' ')[0];
-            var fName: string = opt.label.slice(opt.label.lastIndexOf(' ') + 1).split('.')[0];
-            files.push({name: tType, members: [fName]});
+        if(!(opts instanceof Array)) {
+            opts = [opts];
         }
+        opts.forEach(curOpt => {
+            var tType: string = curOpt.detail.split(' ')[0];
+            var fName: string = curOpt.label.slice(curOpt.label.lastIndexOf(' ') + 1).split('.')[0];
+            var index: number = getTTIndex(tType, files);
+            if(index >= 0) {
+                files[index].members.push(fName);
+            } else {
+                files.push({name: tType, members: [fName]});
+            }
+        });
         
-        return retrieve.default({types: files});
+        return retrieve.default({types: files}).then(res => {
+            if(vscode.window.forceCode.config.showFilesOnOpen) {
+                // open the files in the editor
+                var filesOpened: number = 0;
+                return opts.forEach(curFile => {
+                    if(filesOpened < vscode.window.forceCode.config.showFilesOnOpenMax || 3) {
+                        var tType: string = curFile.detail.split(' ')[0];
+                        if(tType !== 'AuraDefinitionBundle' && tType !== 'StaticResource') {
+                            var fName: string = curFile.label.slice(curFile.label.lastIndexOf(' ') + 1).split('.')[0];
+                            var filePath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}${getFolder(tType)}${path.sep}${fName}.${getExtension(tType)}`;
+                            vscode.workspace.openTextDocument(filePath).then(document => {
+                                filesOpened++;
+                                vscode.window.showTextDocument(document, { preview: false });
+                            });
+                        }
+                    }
+                });
+            }
+            return res;
+        });
     });
     
     function getTTIndex(toolType: string, arr: retrieve.ToolingType[]): number {
