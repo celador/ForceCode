@@ -5,7 +5,7 @@ import { commandService, switchUserViewService } from '../services';
 export default function showMenu(context: vscode.ExtensionContext) {
     var quickpick: any[] = [];
     if(!switchUserViewService.isLoggedIn()) {
-        return commandService.runCommand('ForceCode.enterCredentials', undefined);
+        return commandService.runCommand('ForceCode.enterCredentials', true);
     }
     return Promise.resolve(vscode.window.forceCode)
         .then(displayMenu)

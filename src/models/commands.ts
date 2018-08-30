@@ -431,9 +431,6 @@ export default [
         name: 'Switching user',
         hidden: true,
         command: function (context, selectedResource?) {
-            if(!context.username || !context.loginUrl) {
-                return Promise.resolve();
-            }
             switchUserViewService.orgInfo = context;
             vscode.window.forceCode.config.url = context.loginUrl;
             vscode.window.forceCode.config.username = context.username;
@@ -449,14 +446,15 @@ export default [
             if (!fs.existsSync(vscode.window.forceCode.workspaceRoot)) {
                 fs.mkdirpSync(vscode.window.forceCode.workspaceRoot);
             }
-            if (!fs.existsSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx')) {
-                fs.mkdirpSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx');
+            if(context.username) {
+                if (!fs.existsSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx')) {
+                    fs.mkdirpSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx');
+                }
+                if(fs.existsSync(`${projPath}.sfdx`)) {
+                    fs.removeSync(`${projPath}.sfdx`);
+                }
+                fs.symlinkSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx', `${projPath}.sfdx`, 'junction');
             }
-            if(fs.existsSync(`${projPath}.sfdx`)) {
-                fs.removeSync(`${projPath}.sfdx`);
-            }
-            fs.symlinkSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx', `${projPath}.sfdx`, 'junction');
-            
             vscode.window.forceCode.conn = undefined;
             codeCovViewService.clear();
             return vscode.window.forceCode.dxCommands.getOrgInfo().then(res => {
