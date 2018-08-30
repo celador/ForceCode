@@ -76,7 +76,7 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator));
 
     if (!vscode.workspace.workspaceFolders) {
-        return;
+        throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
     }
 
     // watch for config file changes

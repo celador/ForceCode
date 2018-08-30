@@ -58,7 +58,6 @@ export default function runDX() {
     var objresult = await cmd.run(cliContext);
 
     function showMessage(message) {
-        vscode.window.forceCode.dxCommands.saveToFile(vscode.window.forceCode.dxCommands.outputToString(message), 'dx.log');
         vscode.window.forceCode.outputChannel.show();
         vscode.window.forceCode.outputChannel.appendLine(outputToString(message));
         vscode.window.forceCode.showStatus('ForceCode: DX Command execution complete!');
