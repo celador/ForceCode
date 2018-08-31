@@ -95,7 +95,11 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
                 });
             }
         } else if (bundle[0]) {
-            return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle[0].Id, DefType, Format, Source });
+            return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle[0].Id, DefType, Format, Source }).then(res => {
+                return res;
+            }, err => {
+                return {State: 'Error', message: 'Error: File not created on server either because the name of the file is incorrect or there are syntax errors.'};
+            });
         }
         return undefined;
     }
