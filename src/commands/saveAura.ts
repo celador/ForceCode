@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import constants from './../models/constants';
 import * as parsers from './../parsers';
-import { codeCovViewService } from '../services';
+import { codeCovViewService, switchUserViewService } from '../services';
 import { FCFile } from '../services/codeCovView';
 import diff from './diff';
 import * as forceCode from './../forceCode';
@@ -51,6 +51,16 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
                 Description: name.replace('_', ' '),
             }).then(bundle => {
                 results[0] = [bundle];
+                var newWSMember: forceCode.IWorkspaceMember = {
+                    id: results[0].Id,
+                    name: name,
+                    path: document.fileName,
+                    lastModifiedDate: (new Date()).toISOString(),
+                    lastModifiedByName: '',
+                    lastModifiedById: switchUserViewService.orgInfo.userId,
+                    type: 'AuraDefinitionBundle'
+                }
+                codeCovViewService.addClass(newWSMember, true);
                 return results;
             });
         } else {
@@ -78,8 +88,8 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
         // If the Definition doesn't exist, create it
         var def: any[] = definitions.filter(result => result.DefType === DefType);
         currentObjectDefinition = def.length > 0 ? def[0] : undefined;
+        var curFCFile: FCFile = codeCovViewService.findById(bundle[0].Id);
         if (currentObjectDefinition !== undefined) {
-            var curFCFile: FCFile = codeCovViewService.findById(bundle[0].Id);
             if(curFCFile ? curFCFile.compareDates(currentObjectDefinition.LastModifiedDate) : false) {
                 return updateAura(curFCFile);
             } else {
@@ -96,6 +106,11 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
             }
         } else if (bundle[0]) {
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle[0].Id, DefType, Format, Source }).then(res => {
+                var tempWSMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
+                tempWSMem.lastModifiedDate = (new Date()).toISOString();
+                tempWSMem.lastModifiedByName = '';
+                tempWSMem.lastModifiedById = switchUserViewService.orgInfo.userId;
+                curFCFile.updateWsMember(tempWSMem);
                 return res;
             }, err => {
                 return {State: 'Error', message: 'Error: File not created on server either because the name of the file is incorrect or there are syntax errors.'};
@@ -108,6 +123,8 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
         return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').update({ Id: currentObjectDefinition.Id, Source }).then(res => {
             var tempWSMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
             tempWSMem.lastModifiedDate = (new Date()).toISOString();
+            tempWSMem.lastModifiedByName = '';
+            tempWSMem.lastModifiedById = switchUserViewService.orgInfo.userId;
             fcfile.updateWsMember(tempWSMem);
             return res;
         });
