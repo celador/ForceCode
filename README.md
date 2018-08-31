@@ -345,6 +345,10 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.8.1
+    * Fix bug on windows with files not getting added to code coverage view on refresh or open
+    * Fix ForceCode throwing error when editing force.json
+    * Fix refreshing aura components (From the ForceCode: Refresh from server command)
 * 3.8.0
     * Multiple-org support. There are a lot of changes here, but the biggest is being able to switch to another org by clicking the username in the "Saved Usernames" view.
     * Project folder structure overhauled to allow for multiple orgs
