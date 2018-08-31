@@ -30,17 +30,16 @@ export function activate(context: vscode.ExtensionContext): any {
     // AutoCompile Feature
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         if (vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
+            var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
+            const toolingType: string = parsers.getToolingType(textDocument);
             if(textDocument.uri.fsPath.includes(vscode.window.forceCode.workspaceRoot)) {
-                var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
                 if (isResource && isResource.index) {
                     return commandService.runCommand('ForceCode.staticResourceDeployFromFile', context, textDocument);
                 }
-                const toolingType: string = parsers.getToolingType(textDocument);
                 if(toolingType) {
                     return commandService.runCommand('ForceCode.compileMenu', context, textDocument);
                 }
-                return;
-            } else {
+            } else if(isResource || toolingType) {
                 vscode.window.showErrorMessage('The file you are trying to save to the server isn\'t in the current org\'s source folder (' + vscode.window.forceCode.workspaceRoot + ')');
             }
         }
