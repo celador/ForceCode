@@ -175,6 +175,9 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     vscode.workspace.openTextDocument(resource).then(doc => {
                         var toolingType = parsers.getToolingType(doc);
                         const name: string = parsers.getName(doc, toolingType);
+                        if(toolingType === 'AuraDefinition') {
+                            toolingType = 'AuraDefinitionBundle';
+                        }
                         retrieveComponents(resolve, {types: [{name: toolingType, members: [name]}]});
                     });
                 } else {
