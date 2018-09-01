@@ -337,8 +337,8 @@ export class FCFile extends TreeItem {
       if(!this.wsMember.lastModifiedDate) {
         return true;
       }
-      var localMS: number = fs.statSync(this.wsMember.path).mtimeMs;
-      var serverMS: number = (new Date(serverDate)).getTime();
+      var localMS: number = (new Date(this.wsMember.lastModifiedDate)).getUTCMilliseconds();
+      var serverMS: number = (new Date(serverDate)).getUTCMilliseconds();
 
       if(localMS > serverMS || serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
           return true;
