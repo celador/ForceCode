@@ -151,9 +151,11 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
             // We got an error with the container
             res.errors.forEach(err => {
                 onError(err);
+                failures++;
             });
         } else if (res.State === 'Error') {
             onError(res);
+            failures++;
         }
 
         if(failures === 0 && !vscode.window.forceCode.dxCommands.isEmptyUndOrNull(res)) {
@@ -191,7 +193,7 @@ export default function compile(document: vscode.TextDocument, context: vscode.E
                     diagnostics.push(new vscode.Diagnostic(failureRange, errmess, 0));
                     diagnosticCollection.set(document.uri, diagnostics);
                 }
-            } catch (e) {}
+            } catch (e) { vscode.window.showErrorMessage(errorMessage); }
         } else {
             errorMessage = err;
             vscode.window.showErrorMessage(errorMessage);
