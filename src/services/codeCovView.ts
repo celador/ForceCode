@@ -244,8 +244,8 @@ import {
       if(!this.wsMember.lastModifiedDate) {
         return true;
       }
-      var localMS: number = (new Date(this.wsMember.lastModifiedDate)).getUTCMilliseconds();
-      var serverMS: number = (new Date(serverDate)).getUTCMilliseconds();
+      var localMS: number = (new Date(this.wsMember.lastModifiedDate)).getTime();
+      var serverMS: number = (new Date(serverDate)).getTime();
 
       if(localMS > serverMS || serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
           return true;
