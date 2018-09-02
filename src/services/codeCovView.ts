@@ -64,6 +64,16 @@ import {
       });
     }
 
+    public findByType(type: string): FCFile[] {
+      if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
+        return undefined;
+      }
+      return this.classes.filter(cur => {
+        const wsMem: IWorkspaceMember = cur.getWsMember();
+        return wsMem && wsMem.type === type;
+      });
+    }
+
     public findByPath(pa: string): FCFile {
       if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
         return undefined;
@@ -81,6 +91,12 @@ import {
       return this.classes.find(cur => {
         const wsMem: IWorkspaceMember = cur.getWsMember();
         return wsMem && wsMem.id === id;
+      });
+    }
+
+    public removeClasses(fcfiles: FCFile[]) {
+      fcfiles.forEach(cur => {
+        this.removeClass(cur);
       });
     }
   

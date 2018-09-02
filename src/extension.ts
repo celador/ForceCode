@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ForceService, commandViewService, commandService, codeCovViewService, configuration, switchUserViewService } from './services';
+import { ForceService, commandViewService, commandService, codeCovViewService, configuration, switchUserViewService, operatingSystem } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
 import { editorUpdateApexCoverageDecorator, updateDecorations } from './decorators/testCoverageDecorator';
@@ -9,6 +9,7 @@ import * as path from 'path';
 import { FCFile } from './services/codeCovView';
 import { IWorkspaceMember } from './forceCode';
 import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
+import { getToolingTypeFromFolder } from './parsers/open';
 
 export function activate(context: vscode.ExtensionContext): any {
     commands.default.forEach(cur => {
@@ -77,4 +78,17 @@ export function activate(context: vscode.ExtensionContext): any {
             codeCovViewService.removeClass(fcfile);
         }
     }));
+
+    // need this because windows won't tell us when a dir is removed like linux/mac does above
+    if(operatingSystem.isWindows()) {
+        context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.window.forceCode.workspaceRoot, '*')).onDidDelete(uri => {
+            const tType: string = getToolingTypeFromFolder(uri);
+            if(tType) {
+                const fcfiles: FCFile[] = codeCovViewService.findByType(tType);
+                if(fcfiles) {
+                    codeCovViewService.removeClasses(fcfiles);
+                }
+            }
+        }));
+    }
 }

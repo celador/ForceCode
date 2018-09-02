@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 export function getIcon(toolingType: string) {
     switch (toolingType) {
@@ -84,5 +85,21 @@ export function getFolder(toolingType: string) {
             return 'permissionsets';
         default:
             return 'classes';
+    }
+}
+export function getToolingTypeFromFolder(uri: vscode.Uri): string {
+    switch(uri.fsPath.split(path.sep).pop()) {
+        case 'classes':
+            return 'ApexClass';
+        case 'pages':
+            return 'ApexPage';
+        case 'triggers':
+            return 'ApexTrigger';
+        case 'aura':
+            return 'AuraDefinitionBundle';
+        case 'components':
+            return 'ApexComponent';
+        default:
+            return undefined;
     }
 }
