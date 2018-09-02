@@ -345,6 +345,10 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.8.2
+    * Fixed bugs on Windows where files weren't being removed from the code coverage view when they were deleted
+    * Fix error not being shown for lightning components when there's a syntax error on creation or the file naming convention is wrong
+    * Fix bug with lightning components always saying they've been changed on the server even if they haven't
 * 3.8.1
     * Fix bug on windows with files not getting added to code coverage view on refresh or open
     * Fix ForceCode throwing error when editing force.json
