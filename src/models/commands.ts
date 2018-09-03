@@ -6,7 +6,6 @@ import { commandService, commandViewService, codeCovViewService, configuration, 
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
 import * as fs from 'fs-extra';
-import constants from './../models/constants';
 
 export default [
     {
@@ -274,9 +273,14 @@ export default [
         name: 'Retrieving ',
         hidden: true,
         command: function (context, selectedResource?) {
-            if(selectedResource && selectedResource.path) {
-                return vscode.workspace.openTextDocument(selectedResource)
-                    .then(doc => commands.retrieve(doc.uri));
+            if(selectedResource && selectedResource instanceof Array) {
+                var proms: Promise<any>[] = selectedResource.map(cur => {
+                    return commands.retrieve(cur);
+                });
+                return Promise.all(proms);
+            }
+            if(context) {
+                return commands.retrieve(context);
             }
             if(!vscode.window.activeTextEditor) {
                 return undefined;

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs-extra';
 
 export function getIcon(toolingType: string) {
     switch (toolingType) {
@@ -102,4 +103,25 @@ export function getToolingTypeFromFolder(uri: vscode.Uri): string {
         default:
             return undefined;
     }
+}
+export function getAnyTTFromFolder(uri: vscode.Uri): string {
+    if(uri.fsPath.indexOf(vscode.window.forceCode.workspaceRoot) === -1) {
+        return undefined;
+    }
+    var baseDirectoryName: string;
+    if(fs.lstatSync(uri.fsPath).isDirectory()) {
+        baseDirectoryName = path.parse(uri.fsPath).name;
+    } else {
+        var fileNameParts: string[] = uri.fsPath.split(path.sep);
+        baseDirectoryName = fileNameParts[fileNameParts.length - 2];
+    }    
+    var types: any[] = vscode.window.forceCode.describe.metadataObjects
+        .filter(o => o.directoryName === baseDirectoryName)
+        .map(r => {
+            return r.xmlName;
+        });
+    if (types.length <= 0 && uri.fsPath.indexOf('aura') !== -1) {
+        types = ['AuraDefinitionBundle'];
+    }
+    return types[0];
 }

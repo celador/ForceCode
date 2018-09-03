@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
-import * as parsers from './../parsers';
 import constants from './../models/constants';
 import { commandService, codeCovViewService, switchUserViewService } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
 import { FCOauth } from '../services/switchUserView';
+import { getAnyTTFromFolder } from '../parsers/open';
 const mime = require('mime-types');
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
@@ -22,6 +22,8 @@ export interface ToolingTypes {
 }
 
 export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
+    const errMessage: string = 'Either the file/metadata type doesn\'t exist in the current org or you\'re trying to retrieve outside of '
+        + vscode.window.forceCode.workspaceRoot;
     let option: any;
     var newWSMembers: IWorkspaceMember[] = [];
     var toolTypes: Array<{}> = [];
@@ -151,41 +153,32 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
         } else if (resource) {
             return new Promise(function (resolve) {
                 // Get the Metadata Object type
-                var describe = vscode.window.forceCode.describe;
                 if (resource instanceof vscode.Uri && fs.lstatSync(resource.fsPath).isDirectory()) {
                     var baseDirectoryName: string = path.parse(resource.fsPath).name;
-                    var types: any[] = describe.metadataObjects
-                        .filter(o => o.directoryName === baseDirectoryName)
-                        .map(r => {
-                            return { name: r.xmlName, members: '*' };
-                        });
-
-                    if (types.length <= 0) {
-                        types = describe.metadataObjects
-                            .filter(o => o.xmlName === 'AuraDefinitionBundle')
-                            .map(r => {
-                                return { name: r.xmlName, members: baseDirectoryName };
-                            });
+                    var type: string = getAnyTTFromFolder(resource);
+                    if(!type) {
+                        throw new Error(errMessage);
                     }
-
-                    if (types.length > 0) {
-                        retrieveComponents(resolve, {types: types});
+                    var types: any[] = [];
+                    if (type === 'AuraDefinitionBundle') {
+                        types = [{ name: type, members: baseDirectoryName }];
+                    } else {
+                        types = [{ name: type, members: '*' }];
                     }
+                    retrieveComponents(resolve, {types: types});
                 } else if(resource instanceof vscode.Uri){
-                    vscode.workspace.openTextDocument(resource).then(doc => {
-                        var toolingType = parsers.getToolingType(doc);
-                        const name: string = parsers.getName(doc, toolingType);
-                        if(toolingType === 'AuraDefinition') {
-                            toolingType = 'AuraDefinitionBundle';
-                        }
-                        retrieveComponents(resolve, {types: [{name: toolingType, members: [name]}]});
-                    });
+                    var toolingType: string = getAnyTTFromFolder(resource);
+                    if(!toolingType) {
+                        throw new Error(errMessage);
+                    }
+                    const name: string = path.parse(resource.fsPath).name;
+                    retrieveComponents(resolve, {types: [{name: toolingType, members: [name]}]});
                 } else {
                     retrieveComponents(resolve, resource);
                 }
             });
         }
-        return Promise.resolve({});
+        throw new Error();
 
         function retrieveComponents(resolve, retrieveTypes: ToolingTypes) {
             resolve(vscode.window.forceCode.conn.metadata.retrieve({
@@ -341,21 +334,42 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
     // =======================================================================================================================================
     function finished(res): Promise<any> {
         if (res.success) {
+            var getCodeCov: boolean = false;
             console.log('Done retrieving files');
             // check the metadata and add the new members
-            var theTypes: {[key: string]: Array<any>} = {};
-            theTypes['type0'] = toolTypes;
-            if(theTypes['type0'].length > 3) {
-                for(var i = 1; theTypes['type0'].length > 3; i++) {
-                    theTypes['type' + i] = theTypes['type0'].splice(0, 3);
+            return updateWSMems().then(() => {
+                if (option) {
+                    vscode.window.forceCode.showStatus(`Retrieve ${option.description} $(thumbsup)`);
+                } else {
+                    vscode.window.forceCode.showStatus(`Retrieve $(thumbsup)`);
+                }
+                return Promise.resolve(res);
+            });
+            
+            function updateWSMems(): Promise<any> {
+                if(toolTypes.length > 0) {
+                    var theTypes: {[key: string]: Array<any>} = {};
+    
+                    theTypes['type0'] = toolTypes;
+                    if(theTypes['type0'].length > 3) {
+                        for(var i = 1; theTypes['type0'].length > 3; i++) {
+                            theTypes['type' + i] = theTypes['type0'].splice(0, 3);
+                        }
+                    }
+                    let proms = Object.keys(theTypes).map(curTypes => {
+                        const shouldGetCoverage = theTypes[curTypes].find(cur => {return cur.type === 'ApexClass' || cur.type === 'ApexTrigger';});
+                        if(shouldGetCoverage) {
+                            getCodeCov = true;
+                        }
+                        return vscode.window.forceCode.conn.metadata.list(theTypes[curTypes]);
+                    });
+                    return Promise.all(proms).then(rets => {
+                        return parseRecords(rets);
+                    });
+                } else {
+                    return Promise.resolve();
                 }
             }
-            let proms = Object.keys(theTypes).map(curTypes => {
-                return vscode.window.forceCode.conn.metadata.list(theTypes[curTypes]);
-            });
-            return Promise.all(proms).then(rets => {
-                return parseRecords(rets);
-            });
     
             function parseRecords(recs: any[]): Promise<any> {
                 console.log('Done retrieving metadata records');
@@ -378,20 +392,17 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     });
                 });
                 console.log('Done updating/adding metadata');
-                return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined).then(() => {
-                    console.log('Done retrieving code coverage');
-                    if (option) {
-                        vscode.window.forceCode.showStatus(`Retrieve ${option.description} $(thumbsup)`);
-                    } else {
-                        vscode.window.forceCode.showStatus(`Retrieve $(thumbsup)`);
-                    }
-                    return Promise.resolve(res);
-                });
+                if(getCodeCov) {
+                    return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined).then(() => {
+                        console.log('Done retrieving code coverage');
+                        return Promise.resolve();
+                    });
+                } else {
+                    return Promise.resolve();
+                }
             }
         } else {
-            setTimeout(function () {
-                vscode.window.showErrorMessage('Retrieve Errors');
-            }, 100);
+            vscode.window.showErrorMessage('Retrieve Errors');
         }
         vscode.window.forceCode.outputChannel.append(vscode.window.forceCode.dxCommands.outputToString(res).replace(/{/g, '').replace(/}/g, ''));
         return Promise.resolve(res);

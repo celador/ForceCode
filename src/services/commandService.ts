@@ -22,10 +22,10 @@ export class CommandService {
         }
         if(['ForceCode.compileMenu', 'ForceCode.refreshContext'].find(c => { return c === theCommand.commandName; })) {
             var splitPath;
-            if(selectedResource && selectedResource.path) {
-                splitPath = selectedResource.fsPath.split(path.sep); 
-            } else if(selectedResource) {
-                splitPath = selectedResource.fileName.split(path.sep);
+            if(context && context.fsPath) {
+                splitPath = context.fsPath.split(path.sep); 
+            } else if(context) {
+                splitPath = context.fileName.split(path.sep);
             } else {
                 splitPath = vscode.window.activeTextEditor.document.fileName.split(path.sep);
             }

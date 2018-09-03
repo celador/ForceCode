@@ -61,75 +61,63 @@
     "commands": [
       {
         "command": "ForceCode.showMenu",
-        "title": "ForceCode Menu",
-        "category": "ForceCode"
+        "title": "ForceCode: ForceCode Menu"
       },
       {
         "command": "ForceCode.openOrg",
-        "title": "Open Org In Browser",
-        "category": "ForceCode"
+        "title": "ForceCode: Open Org In Browser"
       },
       {
         "command": "ForceCode.compile",
-        "title": "Save/Deploy/Compile",
-        "category": "ForceCode"
+        "title": "ForceCode: Save/Deploy/Compile"
       },
       {
         "command": "ForceCode.refresh",
-        "title": "Refresh from server",
-        "category": "ForceCode"
+        "title": "ForceCode: Refresh from server"
       },
       {
         "command": "ForceCode.executeAnonymous",
-        "title": "Execute Anonymous",
-        "category": "ForceCode"
+        "title": "ForceCode: Execute Anonymous"
       },
       {
         "command": "ForceCode.open",
-        "title": "Get Class, Page, or Trigger",
-        "category": "ForceCode"
+        "title": "ForceCode: Get Class, Page, or Trigger"
       },
       {
         "command": "ForceCode.staticResource",
-        "title": "Bundle / Deploy Static Resource",
-        "category": "ForceCode"
+        "title": "ForceCode: Bundle / Deploy Static Resource"
       },
       {
         "command": "ForceCode.openFileInOrg",
-        "title": "Open this file in the Org",
-        "category": "ForceCode"
+        "title": "ForceCode: Open this file in the Org"
       },
       {
         "command": "ForceCode.toggleCoverage",
-        "title": "Toggle Test Coverage",
+        "title": "ForceCode: Toggle Test Coverage",
         "icon": {
           "light": "./images/coverage.svg",
           "dark": "./images/coverage.svg"
-        },
-        "category": "ForceCode"
+        }
       },
       {
         "command": "ForceCode.previewVF",
-        "title": "Preview Visualforce page",
+        "title": "ForceCode: Preview Visualforce page",
         "icon": {
           "light": "./images/logo.svg",
           "dark": "./images/logo.svg"
-        },
-        "category": "ForceCode"
+        }
       },
       {
         "command": "ForceCode.previewApp",
-        "title": "Preview Lightning App",
+        "title": "ForceCode: Preview Lightning App",
         "icon": {
           "light": "./images/logo.svg",
           "dark": "./images/logo.svg"
-        },
-        "category": "ForceCode"
+        }
       },
       {
         "command": "ForceCode.diff",
-        "title": "Diff Local <> Remote",
-        "category": "ForceCode"
+        "title": "ForceCode: Diff Local <> Remote"
       }
     ],
     "keybindings": [
@@ -265,12 +253,7 @@
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && ForceCodeActive",
-          "command": "ForceCode.refresh",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == visualforce && ForceCodeActive",
+          "when": "ForceCodeActive",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
@@ -312,6 +295,13 @@
         {
           "when": "resourceLangId == apex && ForceCodeActive",
           "command": "ForceCode.diff",
+          "group": "ForceCode"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "ForceCodeActive",
+          "command": "ForceCode.refresh",
           "group": "ForceCode"
         }
       ],
