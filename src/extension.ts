@@ -33,12 +33,12 @@ export function activate(context: vscode.ExtensionContext): any {
         if (vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
             var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
             const toolingType: string = parsers.getToolingType(textDocument);
-            if(textDocument.uri.fsPath.includes(vscode.window.forceCode.workspaceRoot)) {
+            if(textDocument.uri.fsPath.indexOf(vscode.window.forceCode.workspaceRoot) !== -1) {
                 if (isResource && isResource.index) {
                     return commandService.runCommand('ForceCode.staticResourceDeployFromFile', context, textDocument);
                 }
                 if(toolingType) {
-                    return commandService.runCommand('ForceCode.compileMenu', context, textDocument);
+                    return commandService.runCommand('ForceCode.compileMenu', textDocument);
                 }
             } else if(isResource || toolingType) {
                 vscode.window.showErrorMessage('The file you are trying to save to the server isn\'t in the current org\'s source folder (' + vscode.window.forceCode.workspaceRoot + ')');

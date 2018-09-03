@@ -143,14 +143,21 @@ export default [
         icon: 'rocket',
         label: 'Compile/Deploy',
         command: function (context, selectedResource?) {
-            if(selectedResource && selectedResource.path) {
-                return vscode.workspace.openTextDocument(selectedResource)
-                    .then(doc => commands.compile(doc, context));
+            /*if(selectedResource && selectedResource instanceof Array) {
+                var proms: Promise<any>[] = selectedResource.map(cur => {
+                    return vscode.workspace.openTextDocument(cur)
+                        .then(doc => { return commands.compile(doc); });
+                });
+                return Promise.all(proms);
+            }*/
+            if(context) {
+                return vscode.workspace.openTextDocument(context)
+                    .then(doc => { return commands.compile(doc); });
             }
             if(!vscode.window.activeTextEditor) {
                 return undefined;
             }
-            return commands.compile(vscode.window.activeTextEditor.document, context);
+            return commands.compile(vscode.window.activeTextEditor.document);
         }
     },
     {
