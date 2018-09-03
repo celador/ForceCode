@@ -93,8 +93,7 @@
       },
       {
         "command": "ForceCode.openFileInOrg",
-        "title": "Open this file in the Org",
-        "category": "ForceCode"
+        "title": "ForceCode: Open this file in the Org"
       },
       {
         "command": "ForceCode.toggleCoverage",
@@ -122,21 +121,19 @@
       },
       {
         "command": "ForceCode.previewVF",
-        "title": "Preview Visualforce page",
+        "title": "ForceCode: Preview Visualforce page",
         "icon": {
           "light": "./images/logo.svg",
           "dark": "./images/logo.svg"
-        },
-        "category": "ForceCode"
+        }
       },
       {
         "command": "ForceCode.previewApp",
-        "title": "Preview Lightning App",
+        "title": "ForceCode: Preview Lightning App",
         "icon": {
           "light": "./images/logo.svg",
           "dark": "./images/logo.svg"
-        },
-        "category": "ForceCode"
+        }
       },
       {
         "command": "ForceCode.diff",
