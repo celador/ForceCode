@@ -161,6 +161,9 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     }
                     var types: any[] = [];
                     if (type === 'AuraDefinitionBundle') {
+                        if(baseDirectoryName === 'aura') {
+                            baseDirectoryName = '*';
+                        }
                         types = [{ name: type, members: baseDirectoryName }];
                     } else {
                         types = [{ name: type, members: '*' }];

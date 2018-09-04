@@ -6,6 +6,8 @@ import { commandService, commandViewService, codeCovViewService, configuration, 
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
 import * as fs from 'fs-extra';
+import { ToolingType } from '../commands/retrieve';
+import { getAnyTTFromFolder, getAnyNameFromUri } from '../parsers/open';
 
 export default [
     {
@@ -143,13 +145,6 @@ export default [
         icon: 'rocket',
         label: 'Compile/Deploy',
         command: function (context, selectedResource?) {
-            /*if(selectedResource && selectedResource instanceof Array) {
-                var proms: Promise<any>[] = selectedResource.map(cur => {
-                    return vscode.workspace.openTextDocument(cur)
-                        .then(doc => { return commands.compile(doc); });
-                });
-                return Promise.all(proms);
-            }*/
             if(context) {
                 return vscode.workspace.openTextDocument(context)
                     .then(doc => { return commands.compile(doc); });
@@ -281,10 +276,23 @@ export default [
         hidden: true,
         command: function (context, selectedResource?) {
             if(selectedResource && selectedResource instanceof Array) {
-                var proms: Promise<any>[] = selectedResource.map(cur => {
-                    return commands.retrieve(cur);
+                var files: ToolingType[] = [];
+                selectedResource.forEach(curRes => {
+                    var tType: string = getAnyTTFromFolder(curRes);
+                    var index: number = getTTIndex(tType, files);
+                    const theName: string = getAnyNameFromUri(curRes);
+                    if(index >= 0) {
+                        if(theName === '*') {
+                            files[index].members = ['*'];
+                        } else {
+                            files[index].members.push(theName);
+                        }
+                    } else {
+                        files.push({name: tType, members: [theName]});
+                    }
                 });
-                return Promise.all(proms);
+
+                return commands.retrieve({types: files});
             }
             if(context) {
                 return commands.retrieve(context);
@@ -293,6 +301,12 @@ export default [
                 return undefined;
             }
             return commands.retrieve(vscode.window.activeTextEditor.document.uri);
+
+            function getTTIndex(toolType: string, arr: ToolingType[]): number {
+                return arr.findIndex(cur => {
+                    return cur.name === toolType && cur.members !== ['*'];
+                });
+            }
         }
     },
     {

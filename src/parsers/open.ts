@@ -125,3 +125,16 @@ export function getAnyTTFromFolder(uri: vscode.Uri): string {
     }
     return types[0];
 }
+export function getAnyNameFromUri(uri: vscode.Uri): string {
+    var baseDirectoryName: string = path.parse(uri.fsPath).name;
+    if(fs.lstatSync(uri.fsPath).isDirectory()) {
+        if(uri.fsPath.indexOf('aura') !== -1) {
+            if(baseDirectoryName === 'aura') {
+                baseDirectoryName = '*';
+            }
+        } else {
+            baseDirectoryName = '*';
+        }
+    } 
+    return baseDirectoryName;
+}
