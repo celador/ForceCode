@@ -146,7 +146,6 @@ export const fcCommands: FCCommand[] = [
         icon: 'rocket',
         label: 'Compile/Deploy',
         command: function (context, selectedResource?) {
-            console.log(context);
             if(context) {
                 if(context.uri) {
                     context = context.uri;
