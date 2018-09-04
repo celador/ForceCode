@@ -45,6 +45,10 @@ Please note that the following permissions are required to develop on the Force.
 
 * For code completion and highlighting I highly reccomend downloading the various Salesforce language server extensions.
     * For apex code completion, select code completion refresh from the ForceCode menu and it will work with the Salesforce apex language server extension. You will need to refresh for each org. ForceCode handles the rest and switches code completion files when switching orgs/usernames.
+* Edit and save almost everything in Salesforce textually (Workflows, classes, lead assignment rules, etc..)
+    * Now works with the autoCompile option. Save the file and Salesforce will send it to the org (If this option is on).
+* Right click on a file in the explorer to save.
+* Right click on a file or folder to refresh from the server.
 * Multiple org support. Log into each org through ForceCode and you won't need to log out to switch orgs, simply click on another org in the "Saved Usernames" view and ForceCode will log you in.
 * Open Classes, Triggers, Visualforce pages, and Visualforce components by right clicking and selecting open
     file in org.
@@ -345,6 +349,13 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.8.3
+    * Right click on any file to save to the org (Or simply save the file if autoCompile is on and if the file is valid (In the current org src folder and a valid type))
+        * Works with almost any type of file from the org (Workflow rules, assignment rules, etc)
+        * Only one file can be saved at a time, THIS HASN'T CHANGED!!
+    * Refresh files from the explorer context menu by right clicking on a file or folder (Refreshing a folder will retrieve all of that type of a whole Lightning component bundle)
+        * Multiple files can be selected for refreshing
+    * Optimization in the way ForceCode retrieves files. Before this version, code coverage and metadata would be retrieved each time any type of file was opened. Now it's only retrieved if it's needed (E.G. code coverage data is only retrieved when a class or trigger file has been retrieved instead of all of the time).
 * 3.8.2
     * Fixed bugs on Windows where files weren't being removed from the code coverage view when they were deleted
     * Fix error not being shown for lightning components when there's a syntax error on creation or the file naming convention is wrong
