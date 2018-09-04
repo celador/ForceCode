@@ -299,7 +299,7 @@
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },{
-          "when": "ForceCodeActive && resourceIsFile",
+          "when": "ForceCodeActive && !explorerResourceIsFolder",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         }
