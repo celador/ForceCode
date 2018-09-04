@@ -145,7 +145,11 @@ export default [
         icon: 'rocket',
         label: 'Compile/Deploy',
         command: function (context, selectedResource?) {
+            console.log(context);
             if(context) {
+                if(context.uri) {
+                    context = context.uri;
+                }
                 return vscode.workspace.openTextDocument(context)
                     .then(doc => { return commands.compile(doc); });
             }

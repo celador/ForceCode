@@ -4,6 +4,7 @@ import * as forceCode from './../forceCode';
 import { codeCovViewService, switchUserViewService } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
+import { getAnyTTFromFolder } from '../parsers/open';
 const parseString: any = require('xml2js').parseString;
 
 export default function compile(document: vscode.TextDocument): Promise<any> {
@@ -36,7 +37,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
     }
 
     // Start doing stuff
-    if (isMetadata(document) && toolingType === undefined) {
+    if (getAnyTTFromFolder(document.uri) && toolingType === undefined) {
         // This process uses the Metadata API to deploy specific files
         // This is where we extend it to create any kind of metadata
         // Currently only Objects and Permission sets ...
@@ -64,23 +65,6 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
     // =======================================================================================================================================
     // ================================                  All Metadata                  ===========================================
     // =======================================================================================================================================
-    function isMetadata(doc: vscode.TextDocument) {
-        if (vscode.window.forceCode.describe && vscode.window.forceCode.describe.metadataObjects) {
-            return getMetaType(doc) !== undefined;
-        }
-        return false;
-    }
-    function getMetaType(doc: vscode.TextDocument) {
-        if (vscode.window.forceCode.describe && vscode.window.forceCode.describe.metadataObjects) {
-            let extension: string = doc.fileName.slice(doc.fileName.lastIndexOf('.')).replace('.', '');
-            let foo: any[] = vscode.window.forceCode.describe.metadataObjects.filter(o => {
-                return o.suffix === extension;
-            });
-            if (foo.length) {
-                return foo[0].xmlName;
-            }
-        }
-    }
 
     function createMetaData() {
         let text: string = document.getText();
@@ -90,20 +74,20 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
                 if (err) {
                     reject(err);
                 }
-                var metadata: any = result[getMetaType(document)];
+                var metadata: any = result[getAnyTTFromFolder(document.uri)];
                 if (metadata) {
                     delete metadata['$'];
                     delete metadata['_'];
                     metadata.fullName = fileName;
                     resolve(metadata);
                 }
-                reject({ message: getMetaType(document) + ' metadata type not found in org' });
+                reject({ message: getAnyTTFromFolder(document.uri) + ' metadata type not found in org' });
             });
         });
     }
 
     function compileMetadata(metadata) {
-        return vscode.window.forceCode.conn.metadata.upsert(getMetaType(document), [metadata]);
+        return vscode.window.forceCode.conn.metadata.upsert(getAnyTTFromFolder(document.uri), [metadata]);
     }
 
     function reportMetadataResults(result) {

@@ -9,7 +9,7 @@ import * as path from 'path';
 import { FCFile } from './services/codeCovView';
 import { IWorkspaceMember } from './forceCode';
 import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
-import { getToolingTypeFromFolder } from './parsers/open';
+import { getToolingTypeFromFolder, getAnyTTFromFolder } from './parsers/open';
 
 export function activate(context: vscode.ExtensionContext): any {
     commands.default.forEach(cur => {
@@ -32,7 +32,8 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
         if (vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
             var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
-            const toolingType: string = parsers.getToolingType(textDocument);
+            const toolingType: string = getAnyTTFromFolder(textDocument.uri);
+            console.log(toolingType);
             if(textDocument.uri.fsPath.indexOf(vscode.window.forceCode.workspaceRoot) !== -1) {
                 if (isResource && isResource.index) {
                     return commandService.runCommand('ForceCode.staticResourceDeployFromFile', context, textDocument);
