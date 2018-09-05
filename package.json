@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "engines": {
-    "vscode": "^1.25.0"
+    "vscode": "^1.26.0"
   },
   "icon": "images/new-logo.png",
   "categories": [
@@ -394,9 +394,9 @@
     "nyc": "^13.0.1",
     "remap-istanbul": "^0.11.1",
     "rimraf": "^2.6.2",
-    "sinon": "^6.1.5",
+    "sinon": "^6.2.0",
     "source-map-support": "^0.5.9",
     "typescript": "^3.0.3",
-    "vsce": "^1.47.0"
+    "vsce": "^1.48.0"
   }
 }

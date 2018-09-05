@@ -30,7 +30,6 @@ const STANDARDOBJECTS_DIR = 'standardObjects';
 const CUSTOMOBJECTS_DIR = 'customObjects';
 
 export class FauxClassGenerator {
-
   // the empty string is used to represent the need for a special case
   // usually multiple fields with specialized names
   private static typeMapping: Map<string, string> = new Map([
@@ -59,16 +58,13 @@ export class FauxClassGenerator {
     ['combobox', 'String'],
     ['time', 'Time'],
     // TBD what are these mapped to and how to create them
-    //['calculated', 'xxx'],
-    //['masterrecord', 'xxx'],
+    // ['calculated', 'xxx'],
+    // ['masterrecord', 'xxx'],
     ['complexvalue', 'Object']
   ]);
-
-  public errorExit(err: string) {
-    // Take the results
-    // And write them to a file
-    vscode.window.showErrorMessage(err);
-    return err;
+  
+  private static fieldName(decl: string): string {
+    return decl.substr(decl.indexOf(' ') + 1);
   }
 
   public async generate(
@@ -159,6 +155,32 @@ export class FauxClassGenerator {
     return 'Success!!!';
   }
 
+    // VisibleForTesting
+    public generateFauxClassText(sobject: SObject): string {
+      const declarations: string[] = this.generateFauxClassDecls(sobject);
+      return this.generateFauxClassTextFromDecls(sobject.name, declarations);
+    }
+
+  // VisibleForTesting
+  public generateFauxClass(folderPath: string, sobject: SObject): string {
+    vscode.window.forceCode.outputChannel.appendLine('Generating faux class for ' + sobject.name);
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirpSync(folderPath);
+    }
+    const fauxClassPath = path.join(folderPath, sobject.name + '.cls');
+    fs.writeFileSync(fauxClassPath, this.generateFauxClassText(sobject), {
+      mode: 0o444
+    });
+    return fauxClassPath;
+  }
+
+  private errorExit(err: string) {
+    // Take the results
+    // And write them to a file
+    vscode.window.showErrorMessage(err);
+    return err;
+  }
+
   private stripId(name: string): string {
     if (name.endsWith('Id')) {
       return name.slice(0, name.length - 2);
@@ -213,10 +235,6 @@ export class FauxClassGenerator {
     return decls;
   }
 
-  private static fieldName(decl: string): string {
-    return decl.substr(decl.indexOf(' ') + 1);
-  }
-
   private generateFauxClasses(sobjects: SObject[], targetFolder: string): void {
     if (!this.createIfNeededOutputFolder(targetFolder)) {
       throw nls.localize('no_sobject_output_folder_text', targetFolder);
@@ -226,19 +244,6 @@ export class FauxClassGenerator {
         this.generateFauxClass(targetFolder, sobject);
       }
     }
-  }
-
-  // VisibleForTesting
-  public generateFauxClass(folderPath: string, sobject: SObject): string {
-    vscode.window.forceCode.outputChannel.appendLine('Generating faux class for ' + sobject.name);
-    if (!fs.existsSync(folderPath)) {
-      fs.mkdirpSync(folderPath);
-    }
-    const fauxClassPath = path.join(folderPath, sobject.name + '.cls');
-    fs.writeFileSync(fauxClassPath, this.generateFauxClassText(sobject), {
-      mode: 0o444
-    });
-    return fauxClassPath;
   }
 
   private generateFauxClassDecls(sobject: SObject): string[] {
@@ -309,12 +314,6 @@ export class FauxClassGenerator {
     )}${classDeclaration}${indentAndModifier}${declarationLines};${EOL}${EOL}${classConstructor}}`;
 
     return generatedClass;
-  }
-
-  //VisibleForTesting
-  public generateFauxClassText(sobject: SObject): string {
-    const declarations: string[] = this.generateFauxClassDecls(sobject);
-    return this.generateFauxClassTextFromDecls(sobject.name, declarations);
   }
 
   private createIfNeededOutputFolder(folderPath: string): boolean {
