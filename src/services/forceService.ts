@@ -219,14 +219,11 @@ export default class ForceService implements forceCode.IForceService {
                         version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                     });
 
-                    // query the userid
-                    return self.conn.tooling.sobject('User')
-                        .find({UserName: switchUserViewService.orgInfo.username})
-                        .execute(function(err, result) {
-                            if(err) { return Promise.reject(err) }
-                            switchUserViewService.orgInfo.userId = result[0].Id;
-                            return self
-                        });
+                    return self.conn.identity(function (err, res) {
+                        if(err) { return Promise.reject(err) }
+                        switchUserViewService.orgInfo.userId = res.user_id;
+                        return self
+                    });
                 })
                 .then(connectionSuccess)
                 .then(getNamespacePrefix)
