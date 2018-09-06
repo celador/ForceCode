@@ -101,16 +101,6 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 detail: `All Aura Bundles`,
                 description: 'aurabundles',
             });
-            options.push({
-                label: '$(cloud-download) Get All Standard Objects from org',
-                detail: `All Standard Objects`,
-                description: 'standardobj',
-            });
-            options.push({
-                label: '$(cloud-download) Get All Custom Objects from org',
-                detail: `All Custom Objects`,
-                description: 'customobj',
-            });
             let config: {} = {
                 matchOnDescription: true,
                 matchOnDetail: true,
