@@ -43,6 +43,7 @@ Please note that the following permissions are required to develop on the Force.
 ## Features
 
 * For code completion and highlighting I highly reccomend downloading the various Salesforce language server extensions.
+    * Follow the installation instructions on the Apex Code Editor page (You must install the Salesforce cli for code smartness to work!)
     * For apex code completion, select code completion refresh from the ForceCode menu and it will work with the Salesforce apex language server extension. You will need to refresh for each org. ForceCode handles the rest and switches code completion files when switching orgs/usernames.
 * Edit and save almost everything in Salesforce textually (Workflows, classes, lead assignment rules, etc..)
     * Now works with the autoCompile option. Save the file and Salesforce will send it to the org (If this option is on).
