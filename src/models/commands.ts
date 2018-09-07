@@ -154,7 +154,7 @@ export const fcCommands: FCCommand[] = [
                     .then(doc => { return commands.compile(doc); });
             }
             if(!vscode.window.activeTextEditor) {
-                return undefined;
+                return;
             }
             return commands.compile(vscode.window.activeTextEditor.document);
         }
