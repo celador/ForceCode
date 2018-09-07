@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
 import * as path from 'path';
+import { dxService } from '../services';
 
 export default function getOverallCoverage() {
     var query = 'SELECT ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered '
@@ -26,7 +27,7 @@ export default function getOverallCoverage() {
                 });
                 var orgPercent = ((orgTotalCoveredLines / orgTotalLines) * 100).toFixed(2) + '% covered';
                 outputString += '\nOverall coverage: ' + spaces.substr(0, spaces.length - 'Overall coverage: '.length - 1) + orgPercent + spaces.substr(0, 20 - orgPercent.length) + orgTotalCoveredLines + '/' + orgTotalLines
-                return vscode.window.forceCode.dxCommands.saveToFile(outputString, 'coverage' + path.sep + 'ApexCoverage-' + Date.now() + '.acov').then(filename =>{
+                return dxService.saveToFile(outputString, 'coverage' + path.sep + 'ApexCoverage-' + Date.now() + '.acov').then(filename =>{
                     vscode.window.forceCode.showStatus('ForceCode: Code coverage retrieval complete!');
                     return vscode.workspace.openTextDocument(filename).then(doc => vscode.window.showTextDocument(doc, 3));
                 });

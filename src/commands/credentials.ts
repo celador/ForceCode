@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { getIcon } from './../parsers';
-import { configuration, switchUserViewService, commandService } from './../services';
+import { configuration, switchUserViewService, commandService, dxService } from './../services';
 import { Org } from '../services/switchUserView';
 
 const quickPickOptions: vscode.QuickPickOptions = {
@@ -126,7 +126,7 @@ export default function enterCredentials(askForCreds?: boolean): Promise<any> {
     // =======================================================================================================================================
     // =======================================================================================================================================
     function writeConfigAndLogin(config): Promise<any> {
-        return vscode.window.forceCode.dxCommands.login(config.url)
+        return dxService.login(config.url)
             .then(res => {
                 return Promise.resolve(vscode.window.forceCode.config);
             });

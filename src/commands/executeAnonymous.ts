@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as logging from './../providers/LogProvider';
 import { ExecuteAnonymousResult } from '../services/dxService';
+import { dxService } from '../services';
 
 export default function executeAnonymous(document: vscode.TextDocument): any {
     const editor = vscode.window.activeTextEditor;
@@ -13,9 +14,9 @@ export default function executeAnonymous(document: vscode.TextDocument): any {
     }
 
     // we need to put the selected text in a temp file and then send it off to sfdx to run
-    return vscode.window.forceCode.dxCommands.saveToFile(text, 'execAnon.tmp').then(path => {
-        return vscode.window.forceCode.dxCommands.execAnon(path).then(res => {
-            vscode.window.forceCode.dxCommands.removeFile('execAnon.tmp');
+    return dxService.saveToFile(text, 'execAnon.tmp').then(path => {
+        return dxService.execAnon(path).then(res => {
+            dxService.removeFile('execAnon.tmp');
             return res;
         }).then(res => runDiagnostics(res, document, selection))
         .then(showResult)

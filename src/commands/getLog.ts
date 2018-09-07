@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { QueryResult } from '../services/dxService';
-import { switchUserViewService } from '../services';
+import { switchUserViewService, dxService } from '../services';
 const moment: any = require('moment');
 
 interface LogRecord {
@@ -46,7 +46,7 @@ export default function getLog() {
 
     function showLog(res) {
         if (res) {
-            return vscode.window.forceCode.dxCommands.getAndShowLog(res.description);
+            return dxService.getAndShowLog(res.description);
         }
         return res;
     }

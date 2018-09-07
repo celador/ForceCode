@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as retrieve from './retrieve';
 import { getIcon, getExtension, getFolder } from './../parsers';
 import * as path from 'path';
+import { dxService } from '../services';
 const TYPEATTRIBUTE: string = 'type';
 
 export function open(context: vscode.ExtensionContext) {
@@ -55,7 +56,7 @@ export function showFileOptions(promises: any[]) {
         return vscode.window.showQuickPick(options, config);
     }).then(opt => {
         var opts: any = opt;
-        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(opts)) {
+        if(dxService.isEmptyUndOrNull(opts)) {
             return Promise.resolve();
         }
         var files: retrieve.ToolingType[] = [];

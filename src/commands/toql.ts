@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
+import { dxService } from '../services';
 
 export default function toql(): any {
     let options: vscode.InputBoxOptions = {
@@ -13,7 +14,7 @@ export default function toql(): any {
         }
         return vscode.window.forceCode.conn.tooling.query(query).then(res => {
             let filePath: string = vscode.window.forceCode.workspaceRoot + path.sep + 'toql' + path.sep + Date.now() + '.json';
-            var data: string = vscode.window.forceCode.dxCommands.outputToString(res.records);
+            var data: string = dxService.outputToString(res.records);
             return fs.outputFile(filePath, data, function() {
                 return vscode.workspace.openTextDocument(filePath).then(doc => { 
                     vscode.window.showTextDocument(doc);

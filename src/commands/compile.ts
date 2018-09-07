@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, switchUserViewService } from '../services';
+import { codeCovViewService, switchUserViewService, dxService } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
@@ -110,7 +110,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
 
     // =======================================================================================================================================
     function finished(res: any): boolean {
-        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(res)) {
+        if(dxService.isEmptyUndOrNull(res)) {
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;
         }
@@ -142,7 +142,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
             failures++;
         }
 
-        if(failures === 0 && !vscode.window.forceCode.dxCommands.isEmptyUndOrNull(res)) {
+        if(failures === 0 && !dxService.isEmptyUndOrNull(res)) {
             // SUCCESS !!! 
             if(res.records && res.records[0].DeployDetails.componentSuccesses.length > 0) {
                 const fcfile = codeCovViewService.findById(res.records[0].DeployDetails.componentSuccesses[0].id); 

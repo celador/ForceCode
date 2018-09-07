@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import constants from './../models/constants';
-import { commandService, codeCovViewService, switchUserViewService } from '../services';
+import { commandService, codeCovViewService, switchUserViewService, dxService } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
 import { FCOauth } from '../services/switchUserView';
@@ -393,7 +393,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
         } else {
             vscode.window.showErrorMessage('Retrieve Errors');
         }
-        vscode.window.forceCode.outputChannel.append(vscode.window.forceCode.dxCommands.outputToString(res).replace(/{/g, '').replace(/}/g, ''));
+        vscode.window.forceCode.outputChannel.append(dxService.outputToString(res).replace(/{/g, '').replace(/}/g, ''));
         return Promise.resolve(res);
     }
     function onError(err) {

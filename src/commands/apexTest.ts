@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { configuration, switchUserViewService } from './../services';
+import { configuration, switchUserViewService, dxService } from './../services';
 import apexTestResults from '../services/apexTestResults';
 
 export default function apexTest(toTest: string, classOrMethod: string) { 
@@ -11,7 +11,7 @@ export default function apexTest(toTest: string, classOrMethod: string) {
     } else {
         toRun = '-t ' + toTest;
     }
-    return vscode.window.forceCode.dxCommands.runCommand('apex:test:run', toRun + ' -w 3 -y -r json')
+    return dxService.runCommand('apex:test:run', toRun + ' -w 3 -y -r json')
         .then(dxRes => {
                 // get the test class Ids from the result
                 var testClassIds: string[] = new Array<string>();
@@ -56,7 +56,7 @@ export default function apexTest(toTest: string, classOrMethod: string) {
                 // ` AND Operation like '%executeAnonymous%'`
                 ` ORDER BY StartTime DESC, Id DESC LIMIT 1`;
             vscode.window.forceCode.conn.tooling.query(queryString).then(res => {
-                vscode.window.forceCode.dxCommands.getAndShowLog(res.records[0].Id);
+                dxService.getAndShowLog(res.records[0].Id);
             });
         }
         return;

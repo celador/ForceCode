@@ -11,6 +11,7 @@ import {
   import * as path from 'path';
   import * as fs from 'fs-extra';
   import constants from './../models/constants';
+import { dxService } from '.';
 
   const ClassType = {
       CoveredClass : 'Sufficient Coverage',
@@ -55,7 +56,7 @@ import {
     }
 
     public findByNameAndType(name: string, type: string): FCFile {
-      if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
+      if(dxService.isEmptyUndOrNull(this.classes)) {
         return undefined;
       }
       return this.classes.find(cur => {
@@ -65,7 +66,7 @@ import {
     }
 
     public findByType(type: string): FCFile[] {
-      if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
+      if(dxService.isEmptyUndOrNull(this.classes)) {
         return undefined;
       }
       return this.classes.filter(cur => {
@@ -75,7 +76,7 @@ import {
     }
 
     public findByPath(pa: string): FCFile {
-      if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
+      if(dxService.isEmptyUndOrNull(this.classes)) {
         return undefined;
       }
       return this.classes.find(cur => {
@@ -85,7 +86,7 @@ import {
     }
 
     public findById(id: string): FCFile {
-      if(window.forceCode.dxCommands.isEmptyUndOrNull(this.classes)) {
+      if(dxService.isEmptyUndOrNull(this.classes)) {
         return undefined;
       }
       return this.classes.find(cur => {

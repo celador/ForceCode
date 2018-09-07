@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { dxService } from '../services';
 
 var archiver = require('archiver');
 
@@ -43,7 +44,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         } else {
             vscode.window.showErrorMessage('ForceCode: Deploy Errors');
         }
-        vscode.window.forceCode.outputChannel.append(vscode.window.forceCode.dxCommands.outputToString(res).replace(/{/g, '').replace(/}/g, ''));
+        vscode.window.forceCode.outputChannel.append(dxService.outputToString(res).replace(/{/g, '').replace(/}/g, ''));
         return res;
     }
     function onError(err) {

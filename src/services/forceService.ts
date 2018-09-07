@@ -9,7 +9,6 @@ const jsforce: any = require('jsforce');
 
 export default class ForceService implements forceCode.IForceService {
     public fcDiagnosticCollection: vscode.DiagnosticCollection;
-    public dxCommands: any;
     public config: forceCode.Config;
     public conn: any;
     public containerId: string;
@@ -24,7 +23,6 @@ export default class ForceService implements forceCode.IForceService {
     public statusTimeout: any; 
 
     constructor() {
-        this.dxCommands = dxService;
         this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
         // Set the ForceCode configuration
         this.operatingSystem = operatingSystem.getOS();
@@ -80,7 +78,7 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     private parseMembers(mems) {
-        if(vscode.window.forceCode.dxCommands.isEmptyUndOrNull(mems)) {
+        if(dxService.isEmptyUndOrNull(mems)) {
             return Promise.resolve({});
         }
         var types: {[key: string]: Array<any>} = {};

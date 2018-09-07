@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { dxService } from '../services';
 var alm: any = require('salesforce-alm');
 
 export default function runDX() {
@@ -31,7 +32,7 @@ export default function runDX() {
         if(opt === undefined) {
             return undefined;
         }
-        theCmd = vscode.window.forceCode.dxCommands.getCommand(opt.label);
+        theCmd = dxService.getCommand(opt.label);
         
         let options: vscode.InputBoxOptions = {
             ignoreFocusOut: true,
@@ -45,7 +46,7 @@ export default function runDX() {
                 vscode.window.forceCode.outputChannel.clear();
                 vscode.window.forceCode.outputChannel.show();
                 try{
-                    return vscode.window.forceCode.dxCommands.runCommand(opt.label, result);
+                    return dxService.runCommand(opt.label, result);
                 } catch(e) {
                     return ['Error running dx command:' + e];
                 }
@@ -56,7 +57,7 @@ export default function runDX() {
 
     function showMessage(message) {
         vscode.window.forceCode.outputChannel.show();
-        vscode.window.forceCode.outputChannel.appendLine(vscode.window.forceCode.dxCommands.outputToString(message));
+        vscode.window.forceCode.outputChannel.appendLine(dxService.outputToString(message));
         vscode.window.forceCode.showStatus('ForceCode: DX Command execution complete!');
     }
 }
