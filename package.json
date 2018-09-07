@@ -131,25 +131,25 @@
         "command": "ForceCode.compile",
         "key": "alt+cmd+s",
         "win": "ctrl+shift+s",
-        "when": "editorFocus && ForceCodeActive"
+        "when": "editorFocus && ForceCodeActive  && editorIsOpen && ForceCodeLoggedIn"
       },
       {
         "command": "ForceCode.executeAnonymous",
         "key": "alt+cmd+e",
         "win": "ctrl+shift+e",
-        "when": "editorFocus && resourceLangId == apex && ForceCodeActive && editorHasSelection"
+        "when": "editorFocus && resourceLangId == apex && ForceCodeActive && editorHasSelection && ForceCodeLoggedIn"
       },
       {
         "command": "ForceCode.open",
         "key": "alt+cmd+o",
         "win": "ctrl:shift+o",
-        "when": "ForceCodeActive"
+        "when": "ForceCodeActive && ForceCodeLoggedIn"
       },
       {
         "command": "ForceCode.staticResource",
         "key": "alt+cmd+b",
         "win": "ctrl+shift+b",
-        "when": "ForceCodeActive"
+        "when": "ForceCodeActive && ForceCodeLoggedIn"
       }
     ],
     "configuration": {
@@ -221,86 +221,86 @@
     "menus": {
       "editor/title": [
         {
-          "when": "resourceLangId == apex && ForceCodeActive",
+          "when": "resourceLangId == apex && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.toggleCoverage",
           "group": "navigation"
         },
         {
-          "when": "resourceExtname == .page && ForceCodeActive",
+          "when": "resourceExtname == .page && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.previewVF",
           "group": "navigation"
         },
         {
-          "when": "resourceExtname == .app && ForceCodeActive",
+          "when": "resourceExtname == .app && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.previewApp",
           "group": "navigation"
         }
       ],
       "editor/context": [
         {
-          "when": "ForceCodeActive",
+          "when": "ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.openOrg",
           "group": "ForceCode"
         },
         {
-          "when": "ForceCodeActive",
+          "when": "ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         },
         {
-          "when": "ForceCodeActive",
+          "when": "ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "resourceExtname == .page && ForceCodeActive",
+          "when": "resourceExtname == .page && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.previewVF",
           "group": "ForceCode"
         },
         {
-          "when": "resourceExtname == .app && ForceCodeActive",
+          "when": "resourceExtname == .app && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.previewApp",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && ForceCodeActive",
+          "when": "resourceLangId == apex && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.toggleCoverage",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == visualforce && ForceCodeActive",
+          "when": "resourceLangId == visualforce && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.openFileInOrg",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && ForceCodeActive",
+          "when": "resourceLangId == apex && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.openFileInOrg",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && editorHasSelection && ForceCodeActive",
+          "when": "resourceLangId == apex && editorHasSelection && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.executeAnonymous",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == visualforce && ForceCodeActive",
+          "when": "resourceLangId == visualforce && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.diff",
           "group": "ForceCode"
         },
         {
-          "when": "resourceLangId == apex && ForceCodeActive",
+          "when": "resourceLangId == apex && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.diff",
           "group": "ForceCode"
         }
       ],
       "explorer/context": [
         {
-          "when": "ForceCodeActive",
+          "when": "ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
         },
         {
-          "when": "ForceCodeActive && !explorerResourceIsFolder",
+          "when": "ForceCodeActive && !explorerResourceIsFolder && ForceCodeLoggedIn",
           "command": "ForceCode.compile",
           "group": "ForceCode"
         }
@@ -311,35 +311,47 @@
         },
         {
           "command": "ForceCode.compile",
-          "when": "ForceCodeActive"
+          "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
         },
         {
           "command": "ForceCode.refresh",
-          "when": "ForceCodeActive"
+          "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
         },
         {
           "command": "ForceCode.executeAnonymous",
-          "when": "ForceCodeActive"
+          "when": "ForceCodeActive && editorIsOpen && editorHasSelection && ForceCodeLoggedIn"
         },
         {
           "command": "ForceCode.open",
-          "when": "ForceCodeActive"
+          "when": "ForceCodeActive && ForceCodeLoggedIn"
         },
         {
           "command": "ForceCode.staticResource",
-          "when": "ForceCodeActive"
+          "when": "ForceCodeActive && ForceCodeLoggedIn"
         },
         {
           "command": "ForceCode.toggleCoverage",
-          "when": "ForceCodeActive && resourceLangId == apex"
+          "when": "ForceCodeActive && resourceLangId == apex && ForceCodeLoggedIn"
         },
         {
           "command": "ForceCode.diff",
-          "when": "ForceCodeActive && (resourceLangId == apex || resourceLangId == visualforce)"
+          "when": "ForceCodeActive && (resourceLangId == apex || resourceLangId == visualforce) && ForceCodeLoggedIn"
         },
         {
           "command": "ForceCode.openOrg",
-          "when": "ForceCodeActive"
+          "when": "ForceCodeActive && ForceCodeLoggedIn"
+        },
+        {
+          "command": "ForceCode.openFileInOrg",
+          "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
+        },
+        {
+          "command": "ForceCode.previewVF",
+          "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
+        },
+        {
+          "command": "ForceCode.previewApp",
+          "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
         }
       ]
     }

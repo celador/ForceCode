@@ -1,4 +1,5 @@
 import {
+  commands,
   Event,
   EventEmitter,
   TreeDataProvider,
@@ -53,7 +54,13 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
   }
 
   public isLoggedIn(): boolean {
-    return fs.existsSync(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep + this.orgInfo.username + '.json');
+    const loggedIn: boolean = fs.existsSync(operatingSystem.getHomeDir() + path.sep + '.sfdx' + path.sep + this.orgInfo.username + '.json');
+    if(loggedIn) {
+      commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
+    } else {
+      commands.executeCommand('setContext', 'ForceCodeLoggedIn', false);
+    }
+    return loggedIn;
   }
 
   public getTreeItem(element: Org): TreeItem {
@@ -188,6 +195,7 @@ export class Org extends TreeItem {
     this.orgInfo = orgInfo;
 
     if(switchUserView.orgInfo.username === orgInfo.username) {
+      commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
       this.iconPath = {
         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
         light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),

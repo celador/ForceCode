@@ -26,8 +26,10 @@ export class CommandService {
                 splitPath = context.fsPath.split(path.sep); 
             } else if(context) {
                 splitPath = context.fileName.split(path.sep);
-            } else {
+            } else if(vscode.window.activeTextEditor) {
                 splitPath = vscode.window.activeTextEditor.document.fileName.split(path.sep);
+            } else {
+                return Promise.reject({ message: 'Please open a file before trying to save through the ForceCode menu!' });
             }
             if(theCommand.commandName === 'ForceCode.compileMenu') {
                 theCommand.name = 'Saving ';
