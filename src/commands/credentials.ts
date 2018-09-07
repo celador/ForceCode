@@ -61,10 +61,7 @@ export default function enterCredentials(askForCreds?: boolean): Promise<any> {
                             return Promise.resolve(cfg);
                         });
                     } else {
-                        return vscode.window.forceCode.dxCommands.login(cfg.url)
-                            .then(res => {
-                                return Promise.resolve(configuration());
-                            });
+                        return writeConfigAndLogin(cfg)
                     }
                 }
             });
@@ -129,12 +126,9 @@ export default function enterCredentials(askForCreds?: boolean): Promise<any> {
     // =======================================================================================================================================
     // =======================================================================================================================================
     function writeConfigAndLogin(config): Promise<any> {
-        const projPath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep;
-        fs.outputFileSync(projPath + 'force.json', JSON.stringify(config, undefined, 4));
-        // log in with dxLogin
         return vscode.window.forceCode.dxCommands.login(config.url)
             .then(res => {
-                return Promise.resolve(configuration());
+                return Promise.resolve(vscode.window.forceCode.config);
             });
     }
 }

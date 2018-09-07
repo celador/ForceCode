@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 import { getFileName } from './../parsers';
-import { commandService, commandViewService, codeCovViewService, configuration, switchUserViewService } from './../services';
+import { commandService, commandViewService, codeCovViewService, configuration, switchUserViewService, dxService } from './../services';
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
 import * as fs from 'fs-extra';
@@ -19,7 +19,7 @@ export default [
         icon: 'browser',
         label: 'Open Org in browser',
         command: function (context, selectedResource?) {
-            return vscode.window.forceCode.dxCommands.openOrg();
+            return dxService.openOrg();
         }
     },
     {
@@ -250,7 +250,7 @@ export default [
         icon: 'x',
         label: 'Log out of Salesforce',
         command: function (context, selectedResource?) {
-            return vscode.window.forceCode.dxCommands.logout();
+            return dxService.logout();
         }
     },
     // Enter Salesforce Credentials
@@ -333,7 +333,7 @@ export default [
         command: function(context, selectedResource?) {
             var vfFileNameSplit = context.fsPath.split(path.sep);
             var vfFileName = vfFileNameSplit[vfFileNameSplit.length - 1].split('.')[0];
-            return vscode.window.forceCode.dxCommands.openOrgPage('/apex/' + vfFileName);
+            return dxService.openOrgPage('/apex/' + vfFileName);
         }
     },
     {
@@ -342,7 +342,7 @@ export default [
         command: function(context, selectedResource?) {
             var appFileNameSplit = context.fsPath.split(path.sep);
             var appFileName = appFileNameSplit[appFileNameSplit.length - 1];
-            return vscode.window.forceCode.dxCommands.openOrgPage('/c/' + appFileName);
+            return dxService.openOrgPage('/c/' + appFileName);
         }
     },
     {
@@ -353,7 +353,7 @@ export default [
                 var filePath = context.fsPath;
                 const fcfile: FCFile = codeCovViewService.findByPath(filePath);
                 
-                return vscode.window.forceCode.dxCommands.openOrgPage('/' + fcfile.getWsMember().id);
+                return dxService.openOrgPage('/' + fcfile.getWsMember().id);
             } else {
                 return Promise.resolve();
             }
@@ -485,7 +485,7 @@ export default [
             }
             vscode.window.forceCode.conn = undefined;
             codeCovViewService.clear();
-            return vscode.window.forceCode.dxCommands.getOrgInfo().then(res => {
+            return dxService.getOrgInfo().then(res => {
                 return fs.outputFile(projPath + 'force.json', JSON.stringify(vscode.window.forceCode.config, undefined, 4), function() {
                     if(res) {
                         return commandService.runCommand('ForceCode.connect', undefined);
@@ -494,7 +494,7 @@ export default [
                 });
             }, err => {
                 console.log('Not logged into this org');
-                return vscode.window.forceCode.dxCommands.logout().then(() => {
+                return dxService.logout().then(() => {
                     return commandService.runCommand('ForceCode.enterCredentials', selectedResource);
                 });
                 
@@ -505,7 +505,7 @@ export default [
         commandName: 'ForceCode.login',
         hidden: true,
         command: function (context, selectedResource?) {
-            return vscode.window.forceCode.dxCommands.login(context.loginUrl)
+            return dxService.login(context.loginUrl)
                 .then(res => {
                     return Promise.resolve(configuration());
                 });

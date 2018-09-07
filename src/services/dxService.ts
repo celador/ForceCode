@@ -2,7 +2,13 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { switchUserViewService, commandService} from '.';
+import { FCOauth } from './switchUserView';
 var alm: any = require('salesforce-alm');
+
+export interface OrgListResult {
+    nonScratchOrgs: FCOauth[],
+    scratchOrgs: FCOauth[]
+}
 
 export interface SFDX {
     username: string,
@@ -87,9 +93,19 @@ export interface DXCommands {
     removeFile(fileName: string): Promise<any>;
     openOrg(): Promise<any>;
     openOrgPage(url: string): Promise<any>;
+    orgList(): Promise<OrgListResult>;
 }
 
 export default class DXService implements DXCommands {
+    private static instance: DXService;
+
+    public static getInstance() {
+        if (!DXService.instance) {
+          DXService.instance = new DXService();
+        }
+        return DXService.instance;
+      }
+
     public getCommand(cmd: string): Command {
         return alm.commands.filter(c => {
             return (c.topic + ':' + c.command) === cmd;
@@ -130,18 +146,18 @@ export default class DXService implements DXCommands {
         return (param === undefined || param === null || Object.keys(param).length === 0)
     }
 
-    public async saveToFile(data: any, fileName: string): Promise<string> {
+    public saveToFile(data: any, fileName: string): Promise<string> {
         try{
-            await fs.outputFile(vscode.window.forceCode.workspaceRoot + path.sep + fileName, data);
+            fs.outputFileSync(vscode.window.forceCode.workspaceRoot + path.sep + fileName, data);
             return Promise.resolve(vscode.window.forceCode.workspaceRoot + path.sep + fileName);
         } catch(e) {
             return Promise.reject(undefined);
         }
     }
 
-    public async removeFile(fileName: string): Promise<any> {
+    public removeFile(fileName: string): Promise<any> {
         try{
-            await fs.remove(vscode.window.forceCode.workspaceRoot + path.sep + fileName);
+            fs.removeSync(vscode.window.forceCode.workspaceRoot + path.sep + fileName);
             return Promise.resolve(undefined);
         } catch(e) {
             return Promise.reject(undefined);
@@ -224,10 +240,7 @@ export default class DXService implements DXCommands {
             return Promise.resolve(this.runCommand('auth:logout', '--noprompt')).then(() => {
                 vscode.window.forceCode.conn = undefined;   // this will go away soon
                 switchUserViewService.orgInfo = {};
-                switchUserViewService.refreshOrgs().then(res => {
-                    return Promise.resolve(res);
-                });
-                  
+                return Promise.resolve(switchUserViewService.refreshOrgs());                  
             });
         } else {
             return Promise.resolve();
@@ -241,6 +254,10 @@ export default class DXService implements DXCommands {
         }, () => {
             return Promise.reject();
         });
+    }
+
+    public orgList(): Promise<OrgListResult> {
+        return this.runCommand('org:list', '--clean --json');
     }
 
     public getDebugLog(logid?: string): Promise<string> {

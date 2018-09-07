@@ -1,10 +1,8 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { operatingSystem, configuration, commandService, codeCovViewService, switchUserViewService } from './../services';
+import { operatingSystem, configuration, commandService, codeCovViewService, switchUserViewService, dxService } from './../services';
 import constants from './../models/constants';
-import DXService from './dxService';
 import * as path from 'path';
-import * as creds from './../commands/credentials';
 import { FCFile } from './codeCovView';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 const jsforce: any = require('jsforce');
@@ -26,7 +24,7 @@ export default class ForceService implements forceCode.IForceService {
     public statusTimeout: any; 
 
     constructor() {
-        this.dxCommands = new DXService();
+        this.dxCommands = dxService;
         this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
         // Set the ForceCode configuration
         this.operatingSystem = operatingSystem.getOS();
@@ -39,9 +37,6 @@ export default class ForceService implements forceCode.IForceService {
         configuration(this).then(config => {
             commandService.runCommand('ForceCode.switchUserText', { username: config.username, loginUrl: config.url}, true);
         });
-    }
-    public connect(): Promise<forceCode.IForceService> {
-        return this.setupConfig().then(this.login);
     }
 
     public clearLog() {
@@ -176,23 +171,9 @@ export default class ForceService implements forceCode.IForceService {
         });
     }
 
-    private setupConfig(): Promise<forceCode.Config> {
+    public connect(): Promise<forceCode.IForceService> {
         var self: forceCode.IForceService = vscode.window.forceCode;
-        // Setup username and outputChannel
-        var uname: string = switchUserViewService.orgInfo.username;
-        switchUserViewService.orgInfo.username = uname ? uname : (self.config && self.config.username) || '';
-        if (!switchUserViewService.isLoggedIn()) {
-            return creds.default(true).then(credentials => {
-                self.config.username = credentials.username;
-                self.config.autoCompile = credentials.autoCompile;
-                self.config.url = credentials.url;
-                return self.config;
-            });
-        }
-        return configuration();
-    }
-    private login(config): Promise<forceCode.IForceService> {
-        var self: forceCode.IForceService = vscode.window.forceCode;
+        var config = self.config;
         // Lazy-load the connection
         if (self.conn === undefined) {
             if (!config.username) {

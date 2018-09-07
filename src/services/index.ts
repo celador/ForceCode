@@ -4,7 +4,10 @@ import * as operatingSystem from './operatingSystem';
 import configuration from './configuration';
 
 export {ForceService, operatingSystem, configuration};
-import { SwitchUserViewService } from './switchUserView';
+import DXService from './dxService';
+export const dxService = DXService.getInstance();
+import { SwitchUserViewService, FCOauth } from './switchUserView';
+export { FCOauth };
 export const switchUserViewService = SwitchUserViewService.getInstance();
 import { CommandViewService } from './commandView';
 export const commandViewService = CommandViewService.getInstance();
