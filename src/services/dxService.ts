@@ -29,6 +29,11 @@ export interface ExecuteAnonymousResult {
     logs: string
 }
 
+export interface OrgListResult {
+    nonScratchOrgs: FCOauth[],
+    scratchOrgs: FCOauth[]
+}
+
 export interface SFDX {
     username: string,
     id: string,
@@ -156,18 +161,18 @@ export default class DXService implements DXCommands {
         return (param === undefined || param === null || Object.keys(param).length === 0)
     }
 
-    public async saveToFile(data: any, fileName: string): Promise<string> {
+    public saveToFile(data: any, fileName: string): Promise<string> {
         try{
-            await fs.outputFile(vscode.window.forceCode.workspaceRoot + path.sep + fileName, data);
+            fs.outputFileSync(vscode.window.forceCode.workspaceRoot + path.sep + fileName, data);
             return Promise.resolve(vscode.window.forceCode.workspaceRoot + path.sep + fileName);
         } catch(e) {
             return Promise.reject(undefined);
         }
     }
 
-    public async removeFile(fileName: string): Promise<any> {
+    public removeFile(fileName: string): Promise<any> {
         try{
-            await fs.remove(vscode.window.forceCode.workspaceRoot + path.sep + fileName);
+            fs.removeSync(vscode.window.forceCode.workspaceRoot + path.sep + fileName);
             return Promise.resolve(undefined);
         } catch(e) {
             return Promise.reject(undefined);
@@ -273,6 +278,10 @@ export default class DXService implements DXCommands {
             });
             return undefined;
         });
+    }
+
+    public orgList(): Promise<OrgListResult> {
+        return this.runCommand('org:list', '--clean --json');
     }
 
     public getDebugLog(logid?: string): Promise<string> {

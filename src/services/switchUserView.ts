@@ -9,7 +9,7 @@ import {
 } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { operatingSystem } from '.';
+import { operatingSystem, dxService } from '.';
 var klaw: any = require('klaw');
 
 export interface FCOauth {
@@ -74,7 +74,10 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
   }
 
   public refreshOrgs(): Promise<boolean> {
-    return this.refreshTheOrgs(this);
+    return dxService.orgList().then(res => { return Promise.resolve() }, err => { return Promise.resolve(); })
+      .then(() => {
+        return this.refreshTheOrgs(this);
+      });    
   }
 
   private refreshTheOrgs(service: SwitchUserViewService): Promise<boolean> {

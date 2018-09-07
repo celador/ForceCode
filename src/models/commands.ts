@@ -626,7 +626,7 @@ export const fcCommands: FCCommand[] = [
             }
             vscode.window.forceCode.conn = undefined;
             codeCovViewService.clear();
-            return vscode.window.forceCode.dxCommands.getOrgInfo().then(res => {
+            return dxService.getOrgInfo().then(res => {
                 return fs.outputFile(projPath + 'force.json', JSON.stringify(vscode.window.forceCode.config, undefined, 4), function() {
                     if(res) {
                         return commandService.runCommand('ForceCode.connect', undefined);
@@ -635,7 +635,7 @@ export const fcCommands: FCCommand[] = [
                 });
             }, err => {
                 console.log('Not logged into this org');
-                return vscode.window.forceCode.dxCommands.logout().then(() => {
+                return dxService.logout().then(() => {
                     return commandService.runCommand('ForceCode.enterCredentials', selectedResource);
                 });
                 
@@ -646,7 +646,7 @@ export const fcCommands: FCCommand[] = [
         commandName: 'ForceCode.login',
         hidden: true,
         command: function (context, selectedResource?) {
-            return vscode.window.forceCode.dxCommands.login(context.loginUrl)
+            return dxService.login(context.loginUrl)
                 .then(res => {
                     return Promise.resolve(configuration());
                 });
