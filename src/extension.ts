@@ -4,7 +4,6 @@ import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
 import { editorUpdateApexCoverageDecorator, updateDecorations } from './decorators/testCoverageDecorator';
 import * as commands from './models/commands';
-import * as parsers from './parsers';
 import * as path from 'path';
 import { FCFile } from './services/codeCovView';
 import { IWorkspaceMember } from './forceCode';
@@ -33,7 +32,6 @@ export function activate(context: vscode.ExtensionContext): any {
         if (vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
             var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
             const toolingType: string = getAnyTTFromFolder(textDocument.uri);
-            console.log(toolingType);
             if(textDocument.uri.fsPath.indexOf(vscode.window.forceCode.workspaceRoot) !== -1) {
                 if (isResource && isResource.index) {
                     return commandService.runCommand('ForceCode.staticResourceDeployFromFile', context, textDocument);

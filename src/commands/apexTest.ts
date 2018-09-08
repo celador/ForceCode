@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { configuration, switchUserViewService, dxService } from './../services';
+import { switchUserViewService, dxService } from './../services';
 import apexTestResults from '../services/apexTestResults';
 
 export default function apexTest(toTest: string, classOrMethod: string) { 
@@ -33,20 +33,18 @@ export default function apexTest(toTest: string, classOrMethod: string) {
 
     // =======================================================================================================================================
     function showResult(dxRes) {
-        return configuration().then(() => {
-            if(dxRes.summary.failing && dxRes.summary.failing > 0) {
-                let errorMessage: string = 'FAILED: ';
-                dxRes.tests.forEach(curTest => {
-                    if(curTest.StackTrace && curTest.Message) {
-                        errorMessage += curTest.StackTrace + '\n' + curTest.Message + '\n';
-                    }
-                }); 
-                vscode.window.showErrorMessage(errorMessage);
-            } else {
-                vscode.window.showInformationMessage('ForceCode: All Tests Passed!', 'Ok');
-            }
-            return dxRes;
-        });
+        if(dxRes.summary.failing && dxRes.summary.failing > 0) {
+            let errorMessage: string = 'FAILED: ';
+            dxRes.tests.forEach(curTest => {
+                if(curTest.StackTrace && curTest.Message) {
+                    errorMessage += curTest.StackTrace + '\n' + curTest.Message + '\n';
+                }
+            }); 
+            vscode.window.showErrorMessage(errorMessage);
+        } else {
+            vscode.window.showInformationMessage('ForceCode: All Tests Passed!', 'Ok');
+        }
+        return dxRes;
     }
     function showLog() {
         if (vscode.window.forceCode.config.showTestLog) {

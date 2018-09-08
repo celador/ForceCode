@@ -1,6 +1,4 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs-extra';
-import * as path from 'path';
 import { getIcon } from './../parsers';
 import { configuration, switchUserViewService, commandService, dxService } from './../services';
 import { Org } from '../services/switchUserView';

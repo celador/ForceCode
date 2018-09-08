@@ -5,7 +5,6 @@ import {
     TreeDataProvider,
     TreeItem,
     TreeItemCollapsibleState,
-    window,
   } from 'vscode';
   import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
   import * as path from 'path';
