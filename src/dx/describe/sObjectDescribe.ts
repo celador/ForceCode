@@ -210,7 +210,6 @@ export class SObjectDescribe {
     type: SObjectCategory,
     username?: string
   ): Promise<string[]> {
-    vscode.window.forceCode.outputChannel.appendLine('Getting descriptions for all objects...');
     const builder = new CommandBuilder()
       .withArg('force:schema:sobject:list')
       .withFlag('--sobjecttypecategory', type.toString());

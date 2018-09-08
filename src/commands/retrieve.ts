@@ -7,6 +7,7 @@ import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
 import { FCOauth } from '../services/switchUserView';
 import { getAnyTTFromFolder } from '../parsers/open';
+import { SObjectDescribe, SObjectCategory } from '../dx/describe';
 const mime = require('mime-types');
 const fetch: any = require('node-fetch');
 const ZIP: any = require('zip');
@@ -204,7 +205,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             } else if (option.description === 'customobj') {
                 getSpecificTypeMetadata('CustomObject');
             } else if (option.description === 'standardobj') {
-                getSpecificTypeMetadata('StandardObject');
+                getStandardObjects();
             } else {
                 packaged();
             }
@@ -245,6 +246,11 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 }).stream());
             }
 
+            function getStandardObjects() {
+                new SObjectDescribe().describeGlobal(SObjectCategory.STANDARD).then(objs => {
+                    retrieveComponents(resolve, {types: [{ name: 'CustomObject', members: objs }]});
+                });               
+            }
         }
     }
 
