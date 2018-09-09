@@ -58,7 +58,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
         // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
         return saveApex(document, toolingType, Metadata)
             .then(finished)
-            .then(vscode.window.forceCode.newContainer)
+            .then(res => vscode.window.forceCode.newContainer(res))
             .catch(onError);
     }
 

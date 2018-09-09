@@ -17,7 +17,7 @@ interface FCCommand {
   detail?: string,
   icon?: string,
   label?: string,
-  command(context: any, selectedResource: any): any;
+  command: (context: any, selectedResource: any) => any;
 }
 
 export class CommandViewService implements vscode.TreeDataProvider<Task> {
