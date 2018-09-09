@@ -1,13 +1,12 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { switchUserViewService, commandService} from '.';
+import { switchUserViewService, commandService, operatingSystem} from '.';
 import { FCOauth } from './switchUserView';
 var alm: any = require('salesforce-alm');
 
 export interface OrgListResult {
-    nonScratchOrgs: FCOauth[],
-    scratchOrgs: FCOauth[]
+    orgs: FCOauth[]
 }
 
 export interface SFDX {
@@ -31,16 +30,16 @@ export interface ExecuteAnonymousResult {
 }
 
 interface Topic {
-    name: string; // `json:"name"`
-    description: string; // `json:"description"`
-    hidden: boolean;   // `json:"hidden"`
+    name: string;
+    description: string;
+    hidden: boolean;
     commands: Command[];
 }
 
 interface Context {
-    topic: Topic;                 // `json:"topic"`
-    command: Command;               // `json:"command"`
-    flags: {}; // `json:"flags"`
+    topic: Topic;
+    command: Command;
+    flags: {};
 }
 
 interface Flag {
@@ -81,7 +80,6 @@ export interface DXCommands {
     getCommand(cmd: string): Command;
     outputToString(toConvert: any, depth?: number): string;
     runCommand(cmdString: string, arg: string): Promise<any>;
-    toqlQuery(query: string): Promise<QueryResult>;
     login(url: string): Promise<any>;
     logout(): Promise<any>;
     getOrgInfo(): Promise<SFDX>;
@@ -168,7 +166,8 @@ export default class DXService implements DXCommands {
     *   This does all the work. It will run a cli command through the built in dx.
     *   Takes a command as an argument and a string for the command's arguments.
     */
-    public async runCommand(cmdString: string, arg: string): Promise<any> {
+    public runCommand(cmdString: string, arg: string): Promise<any> {
+        arg += ' --json';
         var cmd: Command = this.getCommand(cmdString);
         var topic: Topic = alm.topics.filter(t => {
             return t.name === cmd.topic;
@@ -209,20 +208,16 @@ export default class DXService implements DXCommands {
         if(cliContext.flags['targetusername'] === undefined && switchUserViewService.orgInfo.username !== undefined && cmd.flags.find(fl => { return fl.name === 'targetusername' }) !== undefined) {
             cliContext.flags['targetusername'] = switchUserViewService.orgInfo.username;
         } 
-        var objresult = await cmd.run(cliContext);
-        
-        if(!this.isEmptyUndOrNull(objresult)) {
-            return Promise.resolve(objresult);
-        }
-        return Promise.reject('Failed to execute command: ' + cmdString + this.outputToString(theArgsArray));
+        return cmd.run(cliContext).then(res => {
+            if(!this.isEmptyUndOrNull(res)) {
+                return res;
+            }
+            return Promise.reject('Failed to execute command: ' + cmdString + this.outputToString(theArgsArray));
+        });
     }
 
     public execAnon(file: string): Promise<ExecuteAnonymousResult> {
-        return Promise.resolve(this.runCommand('apex:execute', '--apexcodefile ' + file));
-    }
-
-    public toqlQuery(query: string): Promise<QueryResult> {
-        return Promise.resolve(this.runCommand('data:soql:query', '-q ' + query + ' -t -r json'));
+        return this.runCommand('apex:execute', '--apexcodefile ' + file);
     }
 
     public login(url: string): Promise<any> {
@@ -248,7 +243,7 @@ export default class DXService implements DXCommands {
     }
 
     public getOrgInfo(): Promise<SFDX> {
-        return this.runCommand('org:display', '--json').then(res => {
+        return this.runCommand('org:display', '').then(res => {
             switchUserViewService.orgInfo = res;
             return Promise.resolve(res);
         }, () => {
@@ -257,7 +252,20 @@ export default class DXService implements DXCommands {
     }
 
     public orgList(): Promise<OrgListResult> {
-        return this.runCommand('org:list', '--clean --json');
+        if(switchUserViewService.isLoggedIn()) {
+            return this.runCommand('org:list', '--clean').then(res => {
+                const orgs: OrgListResult = { orgs: res.nonScratchOrgs.concat(res.scratchOrgs) }
+                orgs.orgs.forEach(org => {
+                    const sfdxPath: string = path.join(operatingSystem.getHomeDir(), '.sfdx', org.username + '.json');
+                    // cleanup if it's not actually connected
+                    if(org.connectedStatus !== 'Connected' && fs.existsSync(sfdxPath)) {
+                        fs.removeSync(sfdxPath);
+                    }
+                })
+                return orgs;
+            });
+        }
+        return Promise.reject();
     }
 
     public getDebugLog(logid?: string): Promise<string> {
@@ -283,7 +291,7 @@ export default class DXService implements DXCommands {
     }
 
     public openOrg(): Promise<any> {
-        return Promise.resolve(this.runCommand('org:open', ''));
+        return this.runCommand('org:open', '');
     }
 
     public openOrgPage(url: string): Promise<any> {

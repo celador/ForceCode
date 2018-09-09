@@ -16,6 +16,7 @@ import {
 } from 'vscode';
 
 import * as vscode from 'vscode';
+import { switchUserViewService } from '.';
 
 export class CommandViewService implements TreeDataProvider<Task> {
   private runningTasksStatus: StatusBarItem;
@@ -107,15 +108,18 @@ export class Task extends TreeItem {
   }
 
   public run() {
-    return Promise.resolve(this.execution.command(this.context, this.selectedResource))
-      .then(res => Promise.resolve(res), 
-      reason => {
-        window.showErrorMessage(reason.message ? reason.message : reason);
-        Promise.resolve(reason);
-      })
-      .then(done => {
+    return Promise.resolve(this.execution.command(this.context, this.selectedResource)
+      .then(res => {
+        this.taskViewProvider.removeTask(this);
+        Promise.resolve(res);
+      }, reason => {
+        Promise.resolve(switchUserViewService.checkLoginStatus().then(loggedIn => {
+          if(loggedIn) {
+            window.showErrorMessage(reason.message ? reason.message : reason);
+          }
           this.taskViewProvider.removeTask(this);
-          return done;
-      });
+          return reason;
+        }));
+      }));
   }
 }
