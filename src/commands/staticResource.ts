@@ -15,12 +15,10 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
             }
             if (option.label === 'All Static Resources') {
                 return bundleAndDeployAll()
-                    .then(deployAllComplete)
-                    .catch(err => vscode.window.showErrorMessage(err.message));
+                    .then(deployAllComplete);
             } else {
                 return bundleAndDeploy(option)
-                    .then(deployComplete)
-                    .catch(err => vscode.window.showErrorMessage(err.message));
+                    .then(deployComplete);
             }
         });
     // =======================================================================================================================================

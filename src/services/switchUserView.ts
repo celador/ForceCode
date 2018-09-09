@@ -68,7 +68,7 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
   public checkLoginStatus(): Promise<boolean> {
     return this.refreshOrgs().then(() => {
       if(!this.isLoggedIn()) {
-        return Promise.reject(credentials(true)).then(() => {
+        return Promise.resolve(credentials(true)).then(() => {
           return false;
         });
       } else {

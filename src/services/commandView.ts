@@ -5,33 +5,37 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import {
-  Event,
-  EventEmitter,
-  StatusBarItem,
-  TreeDataProvider,
-  TreeItem,
-  TreeItemCollapsibleState,
-  window
-} from 'vscode';
-
 import * as vscode from 'vscode';
 import { switchUserViewService } from '.';
+import { EventEmitter } from 'events';
 
-export class CommandViewService implements TreeDataProvider<Task> {
-  private runningTasksStatus: StatusBarItem;
+interface FCCommand {
+  commandName: string,
+  name?: string,
+  hidden: boolean,
+  description?: string,
+  detail?: string,
+  icon?: string,
+  label?: string,
+  command(context: any, selectedResource: any): any;
+}
+
+export class CommandViewService implements vscode.TreeDataProvider<Task> {
+  private runningTasksStatus: vscode.StatusBarItem;
   private static instance: CommandViewService;
   private readonly tasks: Task[];
-  private _onDidChangeTreeData: EventEmitter<
+  private _onDidChangeTreeData: vscode.EventEmitter<
     Task | undefined
-  > = new EventEmitter<Task | undefined>();
+  > = new vscode.EventEmitter<Task | undefined>();
 
-  public readonly onDidChangeTreeData: Event<Task | undefined> = this
+  public readonly onDidChangeTreeData: vscode.Event<Task | undefined> = this
     ._onDidChangeTreeData.event;
+  public removeEmitter = new EventEmitter();
 
   public constructor() {
     this.tasks = [];
     this.runningTasksStatus = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
+    this.removeEmitter.on('removeTask', (theTask) => this.removeTask(theTask));
   }
 
   public static getInstance() {
@@ -41,7 +45,7 @@ export class CommandViewService implements TreeDataProvider<Task> {
     return CommandViewService.instance;
   }
 
-  public addCommandExecution(execution: any, context: any, selectedResource?: any) {
+  public addCommandExecution(execution: FCCommand, context: any, selectedResource?: any) {
     var theTask: Task = new Task(this, execution, context, selectedResource);
     this.tasks.push(theTask);
     this.runningTasksStatus.text = 'ForceCode: Executing ' + this.tasks.length + ' Task(s)';
@@ -69,7 +73,7 @@ export class CommandViewService implements TreeDataProvider<Task> {
     return false;
   }
 
-  public getTreeItem(element: Task): TreeItem {
+  public getTreeItem(element: Task): vscode.TreeItem {
     return element;
   }
 
@@ -87,18 +91,18 @@ export class CommandViewService implements TreeDataProvider<Task> {
   }
 }
 
-export class Task extends TreeItem {
-  public readonly collapsibleState: TreeItemCollapsibleState;
+export class Task extends vscode.TreeItem {
+  public readonly collapsibleState: vscode.TreeItemCollapsibleState;
 
   private readonly taskViewProvider: CommandViewService;
   private readonly execution: any;
   private readonly context: any;
   private readonly selectedResource: any;
 
-  constructor(taskViewProvider: CommandViewService, execution: any, context: any, selectedResource?: any) {
+  constructor(taskViewProvider: CommandViewService, execution: FCCommand, context: any, selectedResource?: any) {
     super(
       execution.name,
-      TreeItemCollapsibleState.None
+      vscode.TreeItemCollapsibleState.None
     );
 
     this.taskViewProvider = taskViewProvider;
@@ -108,18 +112,18 @@ export class Task extends TreeItem {
   }
 
   public run() {
-    return Promise.resolve(this.execution.command(this.context, this.selectedResource)
-      .then(res => {
-        this.taskViewProvider.removeTask(this);
-        Promise.resolve(res);
-      }, reason => {
-        Promise.resolve(switchUserViewService.checkLoginStatus().then(loggedIn => {
+    return new Promise((resolve) => { resolve(this.execution.command(this.context, this.selectedResource)); })
+      .catch(reason => {
+        switchUserViewService.checkLoginStatus().then(loggedIn => {
           if(loggedIn) {
-            window.showErrorMessage(reason.message ? reason.message : reason);
+            vscode.window.showErrorMessage(reason.message ? reason.message : reason);
           }
-          this.taskViewProvider.removeTask(this);
           return reason;
-        }));
-      }));
+        });
+      })
+      .then(finalRes => {
+        this.taskViewProvider.removeEmitter.emit('removeTask', this);
+        return finalRes;
+      });
   }
 }

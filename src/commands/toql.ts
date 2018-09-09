@@ -21,13 +21,6 @@ export default function toql(): any {
                     vscode.window.forceCode.showStatus("ForceCode: Successfully executed query!");
                 });
             });
-        })
-        .catch(onError);
+        });
     });
-
-    function onError(err) {
-        err = "ForceCode: Error running query\n" + err;
-        vscode.window.showErrorMessage(err);
-    }
-    // =======================================================================================================================================
 }

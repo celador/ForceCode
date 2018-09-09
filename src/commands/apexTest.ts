@@ -21,15 +21,8 @@ export default function apexTest(toTest: string, classOrMethod: string) {
 
                 return apexTestResults(testClassIds)
                     .then(() => showResult(dxRes))
-                    .then(showLog)
-                    .catch(showFail);
+                    .then(showLog);
         });
-
-    function showFail(err?) {
-        err.message = 'ForceCode: Failed to execute tests, wait at least a minute and try again.\n' + err.message;
-        vscode.window.showErrorMessage(err.message);
-        return;
-    }
 
     // =======================================================================================================================================
     function showResult(dxRes) {

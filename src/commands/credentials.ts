@@ -68,8 +68,7 @@ export default function enterCredentials(askForCreds?: boolean): Promise<any> {
     function setupNewUser(cfg) {
         return getUrl(cfg)
             .then(cfg => getAutoCompile(cfg))
-            .then(cfg => writeConfigAndLogin(cfg))
-            .catch(err => vscode.window.showErrorMessage(err.message));
+            .then(cfg => writeConfigAndLogin(cfg));
     }
     // =======================================================================================================================================
     // =======================================================================================================================================

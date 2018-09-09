@@ -161,9 +161,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
     }
     
     function onError(err) {
-        var errorMessage: string;
         if(err.message) {
-            errorMessage = err.message;
             try {
                 var errmess: string = err.message.split('Message:')[1].split(': Source')[0];
                 var linCol: string[] = err.message.split(':')[1].split(',');
@@ -177,10 +175,8 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
                     diagnostics.push(new vscode.Diagnostic(failureRange, errmess, 0));
                     diagnosticCollection.set(document.uri, diagnostics);
                 }
-            } catch (e) { vscode.window.showErrorMessage(errorMessage); }
-        } else {
-            errorMessage = err;
-            vscode.window.showErrorMessage(errorMessage);
+            } catch (e) {}
         }
+        throw err;
     }
 }

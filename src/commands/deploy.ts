@@ -17,8 +17,7 @@ export default function deploy(context: vscode.ExtensionContext) {
 
     return Promise.resolve(vscode.window.forceCode)
         .then(deployPackage)
-        .then(finished)
-        .catch(onError);
+        .then(finished);
     // =======================================================================================================================================
     // =======================================================================================================================================
     function deployPackage() {
@@ -46,9 +45,6 @@ export default function deploy(context: vscode.ExtensionContext) {
         }
         vscode.window.forceCode.outputChannel.append(dxService.outputToString(res).replace(/{/g, '').replace(/}/g, ''));
         return res;
-    }
-    function onError(err) {
-        return vscode.window.showErrorMessage('ForceCode: Deploy Errors\n' + err.message);
     }
     // =======================================================================================================================================
 }

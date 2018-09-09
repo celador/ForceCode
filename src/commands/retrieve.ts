@@ -34,8 +34,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
         .then(showPackageOptions)
         .then(getPackage)
         .then(processResult)
-        .then(finished)
-        .catch(onError);
+        .then(finished);
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -415,11 +414,6 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
         }
         vscode.window.forceCode.outputChannel.append(dxService.outputToString(res).replace(/{/g, '').replace(/}/g, ''));
         return Promise.resolve(res);
-    }
-    function onError(err) {
-        if(err) {
-            vscode.window.showErrorMessage('Retrieve Errors\n' + err.message);
-        }
     }
     // =======================================================================================================================================
 }

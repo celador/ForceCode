@@ -9,8 +9,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
     }
     return Promise.resolve(vscode.window.forceCode)
         .then(displayMenu)
-        .then(res => processResult(res))
-        .catch(err => vscode.window.showErrorMessage(err.message));
+        .then(res => processResult(res));
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================

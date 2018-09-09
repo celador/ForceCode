@@ -19,8 +19,7 @@ export default function getLog() {
     //  then get the log and show it
     return getLast10Logs()
         .then(displayOptions)
-        .then(showLog)
-        .catch(err => vscode.window.showErrorMessage(err.message));
+        .then(showLog);
 
     function getLast10Logs(): Promise<QueryResult> {
 
