@@ -12,7 +12,7 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 		if (!vscode.workspace.workspaceFolders) {
 			throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
 		}
-		const projPath = vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep;
+		const projPath = vscode.window.forceCode.workspaceRoot + path.sep;
 		try {
 			self.config = fs.readJsonSync(projPath + 'force.json');
 		} catch (err) {
@@ -39,9 +39,9 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 		if (self.config && self.config !== null && typeof self.config === 'object' && !self.config.src) {
 			self.config.src = 'src';
 		}
-		self.workspaceRoot = `${projPath}${self.config.src}`;
-		if (!fs.existsSync(self.workspaceRoot)) {
-			fs.mkdirpSync(self.workspaceRoot);
+		self.projectRoot = `${projPath}${self.config.src}`;
+		if (!fs.existsSync(self.projectRoot)) {
+			fs.mkdirpSync(self.projectRoot);
 		}
 		if(!fs.existsSync(projPath + 'sfdx-project.json')) {
 			// add in a bare sfdx-project.json file for language support from official salesforce extensions

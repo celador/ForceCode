@@ -105,7 +105,7 @@ export function getToolingTypeFromFolder(uri: vscode.Uri): string {
     }
 }
 export function getAnyTTFromFolder(uri: vscode.Uri): string {
-    if(uri.fsPath.indexOf(vscode.window.forceCode.workspaceRoot) === -1) {
+    if(uri.fsPath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
         return undefined;
     }
     var baseDirectoryName: string;

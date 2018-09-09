@@ -7,7 +7,7 @@ export default function createClass() {
     const CUSTOM_CLASS: string = 'Custom';
     var classesPath: string;
     // Here is replaceSrc possiblity
-    classesPath = `${vscode.window.forceCode.workspaceRoot}${path.sep}classes`;
+    classesPath = `${vscode.window.forceCode.projectRoot}${path.sep}classes`;
     if (fs.statSync(classesPath).isDirectory()) {
         return userClassSelection().then(selectedOption => {
             if (selectedOption) {

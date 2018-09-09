@@ -6,7 +6,7 @@ var archiver = require('archiver');
 
 export default function deploy(context: vscode.ExtensionContext) {
     vscode.window.forceCode.outputChannel.clear();
-    const deployPath: string = vscode.window.forceCode.workspaceRoot;
+    const deployPath: string = vscode.window.forceCode.projectRoot;
 
     var deployOptions: any = {
         checkOnly: true,

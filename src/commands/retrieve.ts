@@ -24,7 +24,7 @@ export interface ToolingTypes {
 
 export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
     const errMessage: string = 'Either the file/metadata type doesn\'t exist in the current org or you\'re trying to retrieve outside of '
-        + vscode.window.forceCode.workspaceRoot;
+        + vscode.window.forceCode.projectRoot;
     let option: any;
     var newWSMembers: IWorkspaceMember[] = [];
     var toolTypes: Array<{}> = [];
@@ -226,7 +226,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             }
 
             function unpackaged() {
-                var xmlFilePath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}package.xml`;
+                var xmlFilePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}package.xml`;
                 var data: any = fs.readFileSync(xmlFilePath);
                 parseString(data, { explicitArray: false }, function (err, dom) {
                     if (err) { reject(err); } else {
@@ -276,14 +276,14 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                         }
                         name = path.normalize(name).replace('unpackaged' + path.sep, '');
                         if(name !== 'package.xml' || vscode.window.forceCode.config.overwritePackageXML) {
-                            fs.outputFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`, data);
+                            fs.outputFileSync(`${vscode.window.forceCode.projectRoot}${path.sep}${name}`, data);
                         }
                         var tType: string = getToolingTypeFromExt(name);
                         if(tType) {
                             // add to ws members
                             var wsMem: IWorkspaceMember = {
                                 name: name.split(path.sep).pop().split('.')[0],
-                                path: `${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`,
+                                path: `${vscode.window.forceCode.projectRoot}${path.sep}${name}`,
                                 id: '',//metadataFileProperties.id,
                                 lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
                                 lastModifiedByName: '',
@@ -302,7 +302,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                             // unzip the resource
                             parseString(data, { explicitArray: false }, function (err, dom) {
                                 if (!err) {
-                                    var actualResData = fs.readFileSync(`${vscode.window.forceCode.workspaceRoot}${path.sep}${name}`.split('-meta.xml')[0]);
+                                    var actualResData = fs.readFileSync(`${vscode.window.forceCode.projectRoot}${path.sep}${name}`.split('-meta.xml')[0]);
                                     var ContentType: string = dom.StaticResource.contentType;
                                     var ctFolderName = ContentType.split('/').join('.');
                                     const resFN: string = name.slice(name.indexOf(path.sep) + 1).split('.')[0];
@@ -312,7 +312,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                                             if (zipEntry.isFile()) {
                                                 var zipFName: string = zipEntry.getName();
                                                 var zipFData: Buffer = zipEntry.getData();
-                                                var filePath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${zipFName}`;
+                                                var filePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${zipFName}`;
                                                 fs.outputFileSync(filePath, zipFData);
                                             }
                                         });
@@ -325,7 +325,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                                             theData = actualResData.toString(mime.charset(ContentType) || 'UTF-8');
                                         }
                                         var ext = mime.extension(ContentType);
-                                        var filePath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${resFN}.${ext}`;
+                                        var filePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${resFN}.${ext}`;
                                         fs.outputFileSync(filePath, theData);
                                     }
                                 }

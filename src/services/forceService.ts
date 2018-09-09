@@ -8,6 +8,7 @@ import { getToolingTypeFromExt } from '../parsers/getToolingType';
 const jsforce: any = require('jsforce');
 
 export default class ForceService implements forceCode.IForceService {
+    private static instance: ForceService;
     public fcDiagnosticCollection: vscode.DiagnosticCollection;
     public config: forceCode.Config;
     public conn: any;
@@ -18,21 +19,32 @@ export default class ForceService implements forceCode.IForceService {
     public containerAsyncRequestId: string;
     public statusBarItem: vscode.StatusBarItem;
     public outputChannel: vscode.OutputChannel;
-    public operatingSystem: string;
+    public projectRoot: string;
     public workspaceRoot: string;
     public statusTimeout: any; 
 
     constructor() {
+        if (!vscode.workspace.workspaceFolders) {
+            throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
+        }
+        this.workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
         this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
-        // Set the ForceCode configuration
-        this.operatingSystem = operatingSystem.getOS();
-        // Setup username and outputChannel
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
         this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 6);
         this.statusBarItem.command = 'ForceCode.showMenu';
         this.statusBarItem.tooltip = 'Open the ForceCode Menu';
         this.containerMembers = [];
-        configuration(this).then(config => {
+    }
+
+    public static getInstance() {
+        if (!ForceService.instance) {
+            ForceService.instance = new ForceService();
+        }
+        return ForceService.instance;
+    }
+
+    public static start() {
+        configuration(this.getInstance()).then(config => {
             commandService.runCommand('ForceCode.switchUserText', { username: config.username, loginUrl: config.url}, true);
         });
     }
@@ -134,7 +146,7 @@ export default class ForceService implements forceCode.IForceService {
             var klaw: any = require('klaw');
             var types: Array<{}> = [];
             var typeNames: Array<string> = [];
-            klaw(vscode.window.forceCode.workspaceRoot)
+            klaw(vscode.window.forceCode.projectRoot)
                 .on('data', function (item) {
                     // Check to see if the file represents an actual member... 
                     if (item.stats.isFile()) {                        

@@ -146,8 +146,8 @@ export default class DXService implements DXCommands {
 
     public saveToFile(data: any, fileName: string): Promise<string> {
         try{
-            fs.outputFileSync(vscode.window.forceCode.workspaceRoot + path.sep + fileName, data);
-            return Promise.resolve(vscode.window.forceCode.workspaceRoot + path.sep + fileName);
+            fs.outputFileSync(vscode.window.forceCode.projectRoot + path.sep + fileName, data);
+            return Promise.resolve(vscode.window.forceCode.projectRoot + path.sep + fileName);
         } catch(e) {
             return Promise.reject(undefined);
         }
@@ -155,7 +155,7 @@ export default class DXService implements DXCommands {
 
     public removeFile(fileName: string): Promise<any> {
         try{
-            fs.removeSync(vscode.window.forceCode.workspaceRoot + path.sep + fileName);
+            fs.removeSync(vscode.window.forceCode.projectRoot + path.sep + fileName);
             return Promise.resolve(undefined);
         } catch(e) {
             return Promise.reject(undefined);

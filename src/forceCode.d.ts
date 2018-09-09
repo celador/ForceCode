@@ -148,8 +148,8 @@ export interface IMetadataDescribe {
 }
 
 export interface IForceService {
-    operatingSystem?: string;
     config?: Config;
+    projectRoot: string;
     workspaceRoot: string;
     describe: IMetadataDescribe;
     declarations?: IDeclarations;
