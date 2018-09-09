@@ -349,6 +349,11 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.8.4
+    * ForceCode now detects when a refresh token has expired and will make you log in again.
+    * Fix retrieving all standard objects
+    * Show an error if no file is open when trying to save through the menu.
+    * Optimizations on the switch user functionality
 * 3.8.3
     * Right click on any file to save to the org (Or simply save the file if autoCompile is on and if the file is valid (In the current org src folder and a valid type))
         * Works with almost any type of file from the org (Workflow rules, assignment rules, etc)
@@ -400,10 +405,3 @@ Step 6.  Have Fun!
 * 3.6.3
     * Fix duplicate error messages from ForceCode in problems panel
     * Don't show notification for every error in Apex, instead tell them to look at the problems panel
-* 3.6.2
-    * Test methods can now be ran by hovering over @isTest and testMethod, then clicking the link that it gives in the hover to run the test! Sorry for the changes, but this is the way tests will be run from now on.
-    * Fix saving lightning component parts (basically any part(javascript, css, etc..) that wasn't the component itself)
-* 3.6.1
-    * Fix ForceCode execution of apex test classes since v43.11.0 of the Salesforce extensions broke it. Now, in order to run apex test with forcecode you need to CTRL + click on @isTest or testMethod! Clicking on Run tests will throw an erro without the CLI installed so I had to make my own, enjoy!!
-* 3.6.0
-    * Not a huge release, just added checking for file changes with Lightning components (Aura). This feature only checks when you save a component file and doesn't check on start, because I can't query the proper object without using a lot of queries. So, for now this is the way it will work.
