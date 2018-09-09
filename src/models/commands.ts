@@ -610,10 +610,10 @@ export const fcCommands: FCCommand[] = [
                 const srcDefault: string = vscode.window.forceCode.config.srcDefault;
                 vscode.window.forceCode.config.src = srcDefault ? srcDefault : 'src';
             }
-            const projPath: string = `${vscode.workspace.workspaceFolders[0].uri.fsPath}${path.sep}`;
-            vscode.window.forceCode.workspaceRoot = `${projPath}${vscode.window.forceCode.config.src}`;
-            if (!fs.existsSync(vscode.window.forceCode.workspaceRoot)) {
-                fs.mkdirpSync(vscode.window.forceCode.workspaceRoot);
+            const projPath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}`;
+            vscode.window.forceCode.projectRoot = `${projPath}${vscode.window.forceCode.config.src}`;
+            if (!fs.existsSync(vscode.window.forceCode.projectRoot)) {
+                fs.mkdirpSync(vscode.window.forceCode.projectRoot);
             }
             if(context.username) {
                 if (!fs.existsSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx')) {
