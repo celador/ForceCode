@@ -11,6 +11,7 @@ import {
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { operatingSystem, dxService } from '.';
+import { credentials } from '../commands';
 var klaw: any = require('klaw');
 
 export interface FCOauth {
@@ -61,6 +62,19 @@ export class SwitchUserViewService implements TreeDataProvider<Org> {
       commands.executeCommand('setContext', 'ForceCodeLoggedIn', false);
     }
     return loggedIn;
+  }
+
+  // this is a check that will refresh the orgs and check if logged in. if not, it asks to log in
+  public checkLoginStatus(): Promise<boolean> {
+    return this.refreshOrgs().then(() => {
+      if(!this.isLoggedIn()) {
+        return Promise.reject(credentials(true)).then(() => {
+          return false;
+        });
+      } else {
+        return true;
+      }
+    });
   }
 
   public getTreeItem(element: Org): TreeItem {
@@ -194,7 +208,7 @@ export class Org extends TreeItem {
 
     this.orgInfo = orgInfo;
 
-    if(switchUserView.orgInfo.username === orgInfo.username) {
+    if(switchUserView.orgInfo && switchUserView.orgInfo.username === orgInfo.username) {
       commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
       this.iconPath = {
         dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
