@@ -8,8 +8,9 @@ import { FCFile } from '../services/codeCovView';
 import * as fs from 'fs-extra';
 import { ToolingType } from '../commands/retrieve';
 import { getAnyTTFromFolder, getAnyNameFromUri } from '../parsers/open';
+import { FCCommand } from '../services/commandView';
 
-export default [
+export const fcCommands: FCCommand[] = [
     {
         commandName: 'ForceCode.openOrg',
         name: 'Opening org in browser',

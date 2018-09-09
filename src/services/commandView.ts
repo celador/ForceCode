@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import { switchUserViewService } from '.';
 import { EventEmitter } from 'events';
 
-interface FCCommand {
+export interface FCCommand {
   commandName: string,
   name?: string,
   hidden: boolean,

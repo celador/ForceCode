@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as commands from './../models/commands';
 import * as path from 'path';
 import { commandViewService } from './';
+import { FCCommand } from './commandView';
 
 export class CommandService {
     private static instance: CommandService;
@@ -15,7 +16,7 @@ export class CommandService {
 
     public runCommand(command: string, context: any, selectedResource?: any): Promise<any> {
         // add something to keep track of the running command in here
-        var theCommand = commands.default.find(cur => { return cur.commandName === command; });
+        var theCommand: FCCommand = commands.fcCommands.find(cur => { return cur.commandName === command; });
 
         if(!theCommand) {
             return Promise.reject('Invalid command');

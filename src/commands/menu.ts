@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import model from './../models/commands';
+import { fcCommands } from './../models/commands';
 import { commandService, switchUserViewService } from '../services';
 
 export default function showMenu(context: vscode.ExtensionContext) {
@@ -15,7 +15,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
 
     function displayMenu() {
-        model.forEach(cur => {
+        fcCommands.forEach(cur => {
             if(!cur.hidden) {
                 quickpick.push(cur);
             }

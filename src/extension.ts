@@ -11,7 +11,7 @@ import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
 import { getToolingTypeFromFolder, getAnyTTFromFolder } from './parsers/open';
 
 export function activate(context: vscode.ExtensionContext): any {
-    commands.default.forEach(cur => {
+    commands.fcCommands.forEach(cur => {
         context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
     });
 
