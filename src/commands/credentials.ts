@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { getIcon } from './../parsers';
 import { configuration, fcConnection, commandService, dxService } from './../services';
-import { FCConnection } from '../services/fcConnection';
+import { FCConnection, FCOauth } from '../services/fcConnection';
 
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
@@ -118,10 +118,7 @@ export default function enterCredentials(): Promise<any> {
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
-    function writeConfigAndLogin(config): Promise<any> {
-        return dxService.login(config.url)
-            .then(res => {
-                return Promise.resolve(vscode.window.forceCode.config);
-            });
+    function writeConfigAndLogin(config): Promise<FCOauth> {
+        return dxService.login(config.url);
     }
 }
