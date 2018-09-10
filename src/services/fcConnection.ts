@@ -124,7 +124,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             // refreshConnections()
             fs.outputFileSync(path.join(projPath, 'force.json'), JSON.stringify(vscode.window.forceCode.config, undefined, 4));
             return Promise.resolve();
-        }
+        });
     }
 
     private checkLogin(orgInfo: FCOauth): Promise<FCOauth> {
