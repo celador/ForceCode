@@ -5,7 +5,7 @@ import { commandService, fcConnection } from '../services';
 export default function showMenu(context: vscode.ExtensionContext) {
     var quickpick: any[] = [];
     if(!fcConnection.isLoggedIn()) {
-        return commandService.runCommand('ForceCode.enterCredentials', undefined);
+        return commandService.runCommand('ForceCode.switchUser', undefined);
     }
     return Promise.resolve(vscode.window.forceCode)
         .then(displayMenu)

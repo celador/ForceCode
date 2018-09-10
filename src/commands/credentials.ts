@@ -6,7 +6,7 @@ import { FCConnection, FCOauth } from '../services/fcConnection';
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
 };
-export default function enterCredentials(): Promise<any> {
+export default function enterCredentials(): Promise<FCOauth> {
     return configuration()
         .then(cfg => {
             // ask if the user wants to log into a different account
@@ -42,7 +42,7 @@ export default function enterCredentials(): Promise<any> {
             };
             return vscode.window.showQuickPick(options, theseOptions).then((res: vscode.QuickPickItem) => {
                 if(!res || res.label === undefined) {
-                    return cfg;
+                    return undefined;
                 } else if(res.label === 'New Org') {
                     return setupNewUser(cfg);
                 } else {
@@ -51,9 +51,7 @@ export default function enterCredentials(): Promise<any> {
                     cfg.username = res.label;
                     cfg.url = fcConnection.currentConnection.orgInfo.loginUrl;
                     if(fcConnection.isLoggedIn()) {
-                        return commandService.runCommand('ForceCode.switchUserText', fcConnection.currentConnection.orgInfo).then(() => {
-                            return Promise.resolve(cfg);
-                        });
+                        return Promise.resolve(fcConnection.currentConnection.orgInfo);
                     } else {
                         return writeConfigAndLogin(cfg)
                     }

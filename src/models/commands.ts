@@ -256,7 +256,7 @@ export const fcCommands: FCCommand[] = [
     },
     // Enter Salesforce Credentials
     {
-        commandName: 'ForceCode.enterCredentials',
+        commandName: 'ForceCode.switchUserText',
         name: 'Logging in',
         hidden: false,
         description: 'Enter the credentials you wish to use.',
@@ -264,7 +264,17 @@ export const fcCommands: FCCommand[] = [
         icon: 'key',
         label: 'Log in to Salesforce',
         command: function (context, selectedResource?) {
-            return commands.credentials();
+            fcConnection.login(context).then(() => {
+                codeCovViewService.clear();
+                return commandService.runCommand('ForceCode.connect', undefined);
+            });
+        }
+    },
+    {
+        commandName: 'ForceCode.switchUser',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commandService.runCommand('ForceCode.switchUserText', context, selectedResource);
         }
     },
     {
@@ -449,30 +459,12 @@ export const fcCommands: FCCommand[] = [
         }
     },
     {
-        commandName: 'ForceCode.switchUser',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return commandService.runCommand('ForceCode.switchUserText', context, selectedResource);
-        }
-    },
-    {
-        commandName: 'ForceCode.switchUserText',
-        name: 'Switching user',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            fcConnection.login(context).then(() => {
-                codeCovViewService.clear();
-                return commandService.runCommand('ForceCode.connect', undefined);
-            });
-        }
-    },
-    {
         commandName: 'ForceCode.login',
         hidden: true,
         command: function (context, selectedResource?) {
             return dxService.login(context.loginUrl)
                 .then(res => {
-                    return Promise.resolve(configuration());
+                    return commandService.runCommand('ForceCode.switchUser', res);
                 });
         }
     },

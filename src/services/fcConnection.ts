@@ -106,24 +106,27 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
     public login(orgInf: FCOauth): Promise<any> {
         return this.checkLogin(orgInf).then(orgInfo => {
-            this.currentConnection = this.addConnection(orgInfo);
-            vscode.window.forceCode.config.url = orgInfo.loginUrl;
-            vscode.window.forceCode.config.username = orgInfo.username;
-            const projPath: string = vscode.window.forceCode.workspaceRoot;
-            vscode.window.forceCode.config.src = this.getSrcByUsername(orgInfo.username);
-            vscode.window.forceCode.projectRoot = path.join(projPath, vscode.window.forceCode.config.src);
-            if (!fs.existsSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'))) {
-                fs.mkdirpSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'));
+            if(orgInfo) {
+                this.currentConnection = this.addConnection(orgInfo);
+                vscode.window.forceCode.config.url = orgInfo.loginUrl;
+                vscode.window.forceCode.config.username = orgInfo.username;
+                const projPath: string = vscode.window.forceCode.workspaceRoot;
+                vscode.window.forceCode.config.src = this.getSrcByUsername(orgInfo.username);
+                vscode.window.forceCode.projectRoot = path.join(projPath, vscode.window.forceCode.config.src);
+                if (!fs.existsSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'))) {
+                    fs.mkdirpSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'));
+                }
+                if(fs.existsSync(path.join(projPath, '.sfdx'))) {
+                    fs.removeSync(path.join(projPath, '.sfdx'));
+                }
+                fs.symlinkSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'), path.join(projPath, '.sfdx'), 'junction');
+                vscode.window.forceCode.conn = undefined;
+                // this triggers a call to configuration() because the force.json file watcher, which triggers
+                // refreshConnections()
+                fs.outputFileSync(path.join(projPath, 'force.json'), JSON.stringify(vscode.window.forceCode.config, undefined, 4));
+                return Promise.resolve();
             }
-            if(fs.existsSync(path.join(projPath, '.sfdx'))) {
-                fs.removeSync(path.join(projPath, '.sfdx'));
-            }
-            fs.symlinkSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'), path.join(projPath, '.sfdx'), 'junction');
-            vscode.window.forceCode.conn = undefined;
-            // this triggers a call to configuration() because the force.json file watcher, which triggers
-            // refreshConnections()
-            fs.outputFileSync(path.join(projPath, 'force.json'), JSON.stringify(vscode.window.forceCode.config, undefined, 4));
-            return Promise.resolve();
+            return Promise.reject();
         });
     }
 
