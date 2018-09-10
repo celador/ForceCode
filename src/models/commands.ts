@@ -589,30 +589,12 @@ export const fcCommands: FCCommand[] = [
         }
     },
     {
-        commandName: 'ForceCode.switchUser',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return commandService.runCommand('ForceCode.switchUserText', context, selectedResource);
-        }
-    },
-    {
-        commandName: 'ForceCode.switchUserText',
-        name: 'Switching user',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            fcConnection.login(context).then(() => {
-                codeCovViewService.clear();
-                return commandService.runCommand('ForceCode.connect', undefined);
-            });
-        }
-    },
-    {
         commandName: 'ForceCode.login',
         hidden: true,
         command: function (context, selectedResource?) {
             return dxService.login(context.loginUrl)
                 .then(res => {
-                    return Promise.resolve(configuration());
+                    return commandService.runCommand('ForceCode.switchUser', res);
                 });
         }
     },
