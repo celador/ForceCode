@@ -280,20 +280,17 @@ export default class DXService implements DXCommands {
     }
 
     public orgList(): Promise<OrgListResult> {
-        if(switchUserViewService.isLoggedIn()) {
-            return this.runCommand('org:list', '--clean').then(res => {
-                const orgs: OrgListResult = { orgs: res.nonScratchOrgs.concat(res.scratchOrgs) }
-                orgs.orgs.forEach(org => {
-                    const sfdxPath: string = path.join(operatingSystem.getHomeDir(), '.sfdx', org.username + '.json');
-                    // cleanup if it's not actually connected
-                    if(org.connectedStatus !== 'Connected' && fs.existsSync(sfdxPath)) {
-                        fs.removeSync(sfdxPath);
-                    }
-                })
-                return orgs;
-            });
-        }
-        return Promise.reject();
+        return this.runCommand('org:list', '--clean').then(res => {
+            const orgs: OrgListResult = { orgs: res.nonScratchOrgs.concat(res.scratchOrgs) }
+            orgs.orgs.forEach(org => {
+                const sfdxPath: string = path.join(operatingSystem.getHomeDir(), '.sfdx', org.username + '.json');
+                // cleanup if it's not actually connected
+                if(org.connectedStatus !== 'Connected' && fs.existsSync(sfdxPath)) {
+                    fs.removeSync(sfdxPath);
+                }
+            })
+            return orgs;
+        });
     }
 
     public getDebugLog(logid?: string): Promise<string> {
