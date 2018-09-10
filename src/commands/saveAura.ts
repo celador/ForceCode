@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import constants from './../models/constants';
 import * as parsers from './../parsers';
-import { codeCovViewService, switchUserViewService } from '../services';
+import { codeCovViewService, fcConnection } from '../services';
 import { FCFile } from '../services/codeCovView';
 import diff from './diff';
 import * as forceCode from './../forceCode';
@@ -57,7 +57,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
                     path: document.fileName,
                     lastModifiedDate: (new Date()).toISOString(),
                     lastModifiedByName: '',
-                    lastModifiedById: switchUserViewService.orgInfo.userId,
+                    lastModifiedById: fcConnection.currentConnection.orgInfo.userId,
                     type: 'AuraDefinitionBundle'
                 }
                 codeCovViewService.addClass(newWSMember, true);
@@ -109,7 +109,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
                 var tempWSMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
                 tempWSMem.lastModifiedDate = (new Date()).toISOString();
                 tempWSMem.lastModifiedByName = '';
-                tempWSMem.lastModifiedById = switchUserViewService.orgInfo.userId;
+                tempWSMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
                 curFCFile.updateWsMember(tempWSMem);
                 return res;
             }, err => {
@@ -124,7 +124,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
             var tempWSMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
             tempWSMem.lastModifiedDate = (new Date()).toISOString();
             tempWSMem.lastModifiedByName = '';
-            tempWSMem.lastModifiedById = switchUserViewService.orgInfo.userId;
+            tempWSMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
             fcfile.updateWsMember(tempWSMem);
             return res;
         });

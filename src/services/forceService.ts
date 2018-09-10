@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { operatingSystem, configuration, commandService, codeCovViewService, switchUserViewService, dxService } from './../services';
+import { configuration, commandService, codeCovViewService, fcConnection, dxService } from './../services';
 import constants from './../models/constants';
 import * as path from 'path';
 import { FCFile } from './codeCovView';
@@ -27,6 +27,7 @@ export default class ForceService implements forceCode.IForceService {
         if (!vscode.workspace.workspaceFolders) {
             throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
         }
+        console.log('Initializing ForceCode service');
         this.workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
         this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
@@ -44,6 +45,7 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     public static start() {
+        console.log('Starting ForceCode service');
         configuration(this.getInstance()).then(config => {
             commandService.runCommand('ForceCode.switchUserText', { username: config.username, loginUrl: config.url}, true);
         });
@@ -193,28 +195,10 @@ export default class ForceService implements forceCode.IForceService {
             
             
             // get the current org info
-            return new Promise((resolve, reject) => {
-                if(switchUserViewService.isLoggedIn()) {
-                    resolve();
-                } else {
-                    reject();
-                }
-            }).then(() => {
-                    self.conn = new jsforce.Connection({
-                        oauth2: {
-                            clientId: switchUserViewService.orgInfo.clientId
-                        },
-                        instanceUrl : switchUserViewService.orgInfo.instanceUrl,
-                        accessToken : switchUserViewService.orgInfo.accessToken,
-                        refreshToken: switchUserViewService.orgInfo.refreshToken,
-                        version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-                    });
-
-                    return self.conn.identity(function (err, res) {
-                        if(err) { return Promise.reject(err) }
-                        switchUserViewService.orgInfo.userId = res.user_id;
-                        return self
-                    });
+            return fcConnection.currentConnection.connect()
+                .then(() => {
+                    self.conn = fcConnection.currentConnection.connection;
+                    return self;
                 })
                 .then(connectionSuccess)
                 .then(getNamespacePrefix)

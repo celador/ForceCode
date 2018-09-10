@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 import { getFileName } from './../parsers';
-import { commandService, commandViewService, codeCovViewService, configuration, switchUserViewService, dxService } from './../services';
+import { commandService, commandViewService, codeCovViewService, configuration, fcConnection, dxService } from './../services';
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
 import * as fs from 'fs-extra';
@@ -251,7 +251,7 @@ export const fcCommands: FCCommand[] = [
         icon: 'x',
         label: 'Log out of Salesforce',
         command: function (context, selectedResource?) {
-            return dxService.logout();
+            return fcConnection.logout();
         }
     },
     // Enter Salesforce Credentials
@@ -264,7 +264,7 @@ export const fcCommands: FCCommand[] = [
         icon: 'key',
         label: 'Log in to Salesforce',
         command: function (context, selectedResource?) {
-            return commands.credentials(context);
+            return commands.credentials();
         }
     },
     {
@@ -413,7 +413,7 @@ export const fcCommands: FCCommand[] = [
         name: 'Connecting',
         hidden: true,
         command: function (context, selectedResource?) {
-            return vscode.window.forceCode.connect(context);
+            return vscode.window.forceCode.connect();
         }
     },
     {
@@ -460,46 +460,9 @@ export const fcCommands: FCCommand[] = [
         name: 'Switching user',
         hidden: true,
         command: function (context, selectedResource?) {
-            switchUserViewService.orgInfo = context;
-            vscode.window.forceCode.config.url = context.loginUrl;
-            vscode.window.forceCode.config.username = context.username;
-            const srcs: {[key: string]: {src: string, url: string}} = vscode.window.forceCode.config.srcs;
-            if(srcs && srcs[context.username]) {
-                vscode.window.forceCode.config.src = srcs[context.username].src;
-            } else {
-                const srcDefault: string = vscode.window.forceCode.config.srcDefault;
-                vscode.window.forceCode.config.src = srcDefault ? srcDefault : 'src';
-            }
-            const projPath: string = `${vscode.window.forceCode.workspaceRoot}${path.sep}`;
-            vscode.window.forceCode.projectRoot = `${projPath}${vscode.window.forceCode.config.src}`;
-            if (!fs.existsSync(vscode.window.forceCode.projectRoot)) {
-                fs.mkdirpSync(vscode.window.forceCode.projectRoot);
-            }
-            if(context.username) {
-                if (!fs.existsSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx')) {
-                    fs.mkdirpSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx');
-                }
-                if(fs.existsSync(`${projPath}.sfdx`)) {
-                    fs.removeSync(`${projPath}.sfdx`);
-                }
-                fs.symlinkSync(projPath + '.forceCode' + path.sep + context.username + path.sep + '.sfdx', `${projPath}.sfdx`, 'junction');
-            }
-            vscode.window.forceCode.conn = undefined;
+            fcConnection.login(context.username, context.loginUrl);
             codeCovViewService.clear();
-            return dxService.getOrgInfo().then(res => {
-                return fs.outputFile(projPath + 'force.json', JSON.stringify(vscode.window.forceCode.config, undefined, 4), function() {
-                    if(res) {
-                        return commandService.runCommand('ForceCode.connect', undefined);
-                    } 
-                    return Promise.resolve(res);
-                });
-            }, err => {
-                console.log('Not logged into this org');
-                return dxService.logout().then(() => {
-                    return commandService.runCommand('ForceCode.enterCredentials', selectedResource);
-                });
-                
-            });
+            return commandService.runCommand('ForceCode.connect', undefined);
         }
     },
     {

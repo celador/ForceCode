@@ -161,7 +161,7 @@ export interface IForceService {
     outputChannel: vscode.OutputChannel;
     statusBarItem: vscode.StatusBarItem;
     fcDiagnosticCollection: vscode.DiagnosticCollection;
-    connect(context: vscode.ExtensionContext): Promise<IForceService>;
+    connect(): Promise<IForceService>;
     newContainer(force: Boolean): Promise<IForceService>;
     showStatus(message: string): void;
     clearLog(): void;

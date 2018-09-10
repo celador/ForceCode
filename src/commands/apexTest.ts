@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { switchUserViewService, dxService } from './../services';
+import { fcConnection, dxService } from './../services';
 import apexTestResults from '../services/apexTestResults';
 
 export default function apexTest(toTest: string, classOrMethod: string) { 
@@ -42,7 +42,7 @@ export default function apexTest(toTest: string, classOrMethod: string) {
     function showLog() {
         if (vscode.window.forceCode.config.showTestLog) {
             var queryString: string = `SELECT Id FROM ApexLog` +
-                ` WHERE LogUserId IN (SELECT Id FROM User WHERE UserName='${switchUserViewService.orgInfo.username}')` +
+                ` WHERE LogUserId IN (SELECT Id FROM User WHERE UserName='${fcConnection.currentConnection.orgInfo.username}')` +
                 // ` AND Request = 'API' AND Location = 'SystemLog'` +
                 // ` AND Operation like '%executeAnonymous%'`
                 ` ORDER BY StartTime DESC, Id DESC LIMIT 1`;

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import { FCFile } from '../services/codeCovView';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, switchUserViewService } from '../services';
+import { codeCovViewService, fcConnection } from '../services';
 import diff from './diff';
 
 const UPDATE: boolean = true;
@@ -122,7 +122,7 @@ export function saveApex(document: vscode.TextDocument, toolingType: string, Met
                             id: foo.id,
                             lastModifiedDate: bar[0].CreatedDate,
                             lastModifiedByName: '',
-                            lastModifiedById: switchUserViewService.orgInfo.userId,
+                            lastModifiedById: fcConnection.currentConnection.orgInfo.userId,
                             type: toolingType,
                         };
                         codeCovViewService.addClass(workspaceMember, true);

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ForceService, commandViewService, commandService, codeCovViewService, configuration, switchUserViewService, operatingSystem } from './services';
+import { ForceService, commandViewService, commandService, codeCovViewService, configuration, fcConnection, operatingSystem } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
 import { editorUpdateApexCoverageDecorator, updateDecorations } from './decorators/testCoverageDecorator';
@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext): any {
 
     vscode.window.forceCode = ForceService.getInstance();
 
-    context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.switchUserProvider', switchUserViewService));
+    context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.switchUserProvider', fcConnection));
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.treeDataProvider', commandViewService));
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.codeCovDataProvider', codeCovViewService));
     

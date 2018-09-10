@@ -4,7 +4,7 @@ import * as forceCode from './../forceCode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import constants from './../models/constants';
-import { switchUserViewService } from '.';
+import { fcConnection } from '.';
 
 export default function getSetConfig(service?: forceCode.IForceService): Promise<Config> {
 	return new Promise(function (resolve) {
@@ -53,7 +53,7 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 			
 			fs.outputFileSync(projPath + 'sfdx-project.json', JSON.stringify(sfdxProj, undefined, 4));
 		}
-		switchUserViewService.refreshOrgs().then(() => {
+		fcConnection.refreshConnections().then(() => {
 			resolve(self.config);
 		});
 	});

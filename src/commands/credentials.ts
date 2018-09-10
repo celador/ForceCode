@@ -1,16 +1,12 @@
 import * as vscode from 'vscode';
 import { getIcon } from './../parsers';
-import { configuration, switchUserViewService, commandService, dxService } from './../services';
-import { Org } from '../services/switchUserView';
+import { configuration, fcConnection, commandService, dxService } from './../services';
+import { FCConnection } from '../services/fcConnection';
 
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
 };
-export default function enterCredentials(askForCreds?: boolean): Promise<any> {
-    if(!askForCreds && switchUserViewService.getChildren().length > 0) {
-        return configuration()
-            .then(writeConfigAndLogin);
-    }
+export default function enterCredentials(): Promise<any> {
     return configuration()
         .then(cfg => {
             // ask if the user wants to log into a different account
@@ -21,10 +17,10 @@ export default function enterCredentials(askForCreds?: boolean): Promise<any> {
                 }
             ];
 
-            var orgs: Org[] = switchUserViewService.getChildren();
+            var orgs: FCConnection[] = fcConnection.getChildren();
             if(orgs) {
                 orgs.forEach(curOrg => {
-                    if(!curOrg.orgInfo.accessToken || curOrg.orgInfo.username !== switchUserViewService.orgInfo.username) {
+                    if(!curOrg.orgInfo.accessToken || !(fcConnection.currentConnection && curOrg.orgInfo.username === fcConnection.currentConnection.orgInfo.username)) {
                         opts.push({
                             title: curOrg.orgInfo.username,
                             desc: ''
@@ -51,11 +47,11 @@ export default function enterCredentials(askForCreds?: boolean): Promise<any> {
                     return setupNewUser(cfg);
                 } else {
                     
-                    switchUserViewService.orgInfo = switchUserViewService.getOrgInfoByUserName(res.label);
+                    fcConnection.currentConnection.orgInfo = fcConnection.getOrgInfoByUserName(res.label);
                     cfg.username = res.label;
-                    cfg.url = switchUserViewService.orgInfo.loginUrl;
-                    if(switchUserViewService.isLoggedIn()) {
-                        return commandService.runCommand('ForceCode.switchUserText', switchUserViewService.orgInfo).then(() => {
+                    cfg.url = fcConnection.currentConnection.orgInfo.loginUrl;
+                    if(fcConnection.isLoggedIn()) {
+                        return commandService.runCommand('ForceCode.switchUserText', fcConnection.currentConnection.orgInfo).then(() => {
                             return Promise.resolve(cfg);
                         });
                     } else {
