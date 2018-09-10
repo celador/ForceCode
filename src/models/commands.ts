@@ -600,9 +600,10 @@ export const fcCommands: FCCommand[] = [
         name: 'Switching user',
         hidden: true,
         command: function (context, selectedResource?) {
-            fcConnection.login(context.username, context.loginUrl);
-            codeCovViewService.clear();
-            return commandService.runCommand('ForceCode.connect', undefined);
+            fcConnection.login(context).then(() => {
+                codeCovViewService.clear();
+                return commandService.runCommand('ForceCode.connect', undefined);
+            });
         }
     },
     {
