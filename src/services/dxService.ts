@@ -240,11 +240,7 @@ export default class DXService implements DXCommands {
     }
 
     public getOrgInfo(): Promise<SFDX> {
-        return this.runCommand('org:display', '').then(res => {
-            return Promise.resolve(res);
-        }, () => {
-            return Promise.reject();
-        });
+        return this.runCommand('org:display', '');
     }
 
     public orgList(): Promise<OrgListResult> {
@@ -288,6 +284,6 @@ export default class DXService implements DXCommands {
     }
 
     public openOrgPage(url: string): Promise<any> {
-        return Promise.resolve(this.runCommand('org:open', '-p ' + url));
+        return this.runCommand('org:open', '-p ' + url);
     }
 }

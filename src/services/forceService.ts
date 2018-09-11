@@ -195,11 +195,7 @@ export default class ForceService implements forceCode.IForceService {
             
             
             // get the current org info
-            return fcConnection.currentConnection.connect()
-                .then(() => {
-                    self.conn = fcConnection.currentConnection.connection;
-                    return self;
-                })
+            return Promise.resolve(self)
                 .then(connectionSuccess)
                 .then(getNamespacePrefix)
                 .then(checkForChanges)
@@ -231,12 +227,12 @@ export default class ForceService implements forceCode.IForceService {
                 return svc;
             }
 
-            function connectionSuccess() {
+            function connectionSuccess(svc) {
                 vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
                 vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
-                self.statusBarItem.show();
+                svc.statusBarItem.show();
 
-                return self;
+                return svc;
             }
             function getNamespacePrefix(svc: forceCode.IForceService) {
                 return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {

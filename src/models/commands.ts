@@ -251,7 +251,7 @@ export const fcCommands: FCCommand[] = [
         icon: 'x',
         label: 'Log out of Salesforce',
         command: function (context, selectedResource?) {
-            return fcConnection.logout();
+            return fcConnection.disconnect();
         }
     },
     // Enter Salesforce Credentials
@@ -264,9 +264,9 @@ export const fcCommands: FCCommand[] = [
         icon: 'key',
         label: 'Log in to Salesforce',
         command: function (context, selectedResource?) {
-            fcConnection.login(context).then(() => {
+            fcConnection.connect(context).then(() => {
                 codeCovViewService.clear();
-                return commandService.runCommand('ForceCode.connect', undefined);
+                return vscode.window.forceCode.connect();
             });
         }
     },
@@ -416,14 +416,6 @@ export const fcCommands: FCCommand[] = [
         hidden: true,
         command: function (context, selectedResource?) {
             return vscode.window.forceCode.checkForFileChanges();
-        }
-    },
-    {
-        commandName: 'ForceCode.connect',
-        name: 'Connecting',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return vscode.window.forceCode.connect();
         }
     },
     {

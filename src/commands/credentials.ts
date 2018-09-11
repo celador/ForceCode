@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { getIcon } from './../parsers';
-import { configuration, fcConnection, commandService, dxService } from './../services';
+import { configuration, fcConnection, dxService } from './../services';
 import { FCConnection, FCOauth } from '../services/fcConnection';
 
 const quickPickOptions: vscode.QuickPickOptions = {
@@ -47,11 +47,11 @@ export default function enterCredentials(): Promise<FCOauth> {
                     return setupNewUser(cfg);
                 } else {
                     
-                    fcConnection.currentConnection.orgInfo = fcConnection.getOrgInfoByUserName(res.label);
+                    const curOrgInfo: FCOauth = fcConnection.getOrgInfoByUserName(res.label);
                     cfg.username = res.label;
-                    cfg.url = fcConnection.currentConnection.orgInfo.loginUrl;
+                    cfg.url = curOrgInfo.loginUrl;
                     if(fcConnection.isLoggedIn()) {
-                        return Promise.resolve(fcConnection.currentConnection.orgInfo);
+                        return Promise.resolve(curOrgInfo);
                     } else {
                         return writeConfigAndLogin(cfg)
                     }
