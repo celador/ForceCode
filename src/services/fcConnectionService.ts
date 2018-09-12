@@ -87,10 +87,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                         var fileName: string = file.path.split(path.sep).pop().split('.')[0];
                         if (fileName.indexOf('@') > 0) {
                             const orgInfo: FCOauth = fs.readJsonSync(file.path);
-                            console.log(orgInfo);
-                            if(orgInfo.connectedStatus === "Connected") {
-                                service.addConnection(orgInfo);
-                            }
+                            service.addConnection(orgInfo);
                         }
                     }
                 })
