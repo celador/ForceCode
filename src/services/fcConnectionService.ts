@@ -84,10 +84,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                         var fileName: string = file.path.split(path.sep).pop().split('.')[0];
                         if (fileName.indexOf('@') > 0) {
                             const orgInfo: FCOauth = fs.readJsonSync(file.path);
-                            console.log(orgInfo);
-                            if(orgInfo.connectedStatus === "Connected") {
-                                service.addConnection(orgInfo);
-                            }
+                            service.addConnection(orgInfo);
                         }
                     }
                 })
@@ -126,7 +123,6 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             .then(res => {
                 return this.login(this, res);
             })
-            .catch(err => vscode.window.showErrorMessage(err.message ? err.message : err));
     }
 
     private setupConn(service: FCConnectionService): Promise<boolean> {
@@ -213,8 +209,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
     public getSrcByUsername(username: string): string {
         const fcConfig = vscode.window.forceCode ? vscode.window.forceCode.config : undefined;
-        return vscode.workspace.workspaceFolders[0].uri.fsPath + path.sep
-            + (fcConfig && fcConfig.srcs && fcConfig.srcs[username]
+        return (fcConfig && fcConfig.srcs && fcConfig.srcs[username]
                 ? fcConfig.srcs[username].src
                 : (fcConfig.srcDefault ? fcConfig.srcDefault : 'src'));
     }

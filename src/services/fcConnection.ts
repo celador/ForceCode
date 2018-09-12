@@ -104,7 +104,8 @@ export class FCConnection extends vscode.TreeItem {
             service.tooltip += ' - Limits: ' + service.prevLimits 
                 + ' / ' + service.connection.limitInfo.apiUsage.limit;
         }
-        service.tooltip += '\nPROJECT PATH - ' + service.parent.getSrcByUsername(service.orgInfo.username);
+        service.tooltip += '\nPROJECT PATH - ' + path.join(vscode.window.forceCode.workspaceRoot,
+            service.parent.getSrcByUsername(service.orgInfo.username));
         service.parent.refreshView();
     }
 }
