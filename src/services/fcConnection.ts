@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { operatingSystem, dxService, FCConnectionService } from '.';
-import { credentials } from '../commands';
 
 export interface FCOauth {
     username?: string,
@@ -34,8 +33,7 @@ export class FCConnection extends vscode.TreeItem {
         this.parent = parent;
         this.orgInfo = orgInfo;
         this.sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInfo.username + '.json');
-        this.showConnection();
-        this.showLimitsService();
+        this.showLimitsService(this);
     }
 
     public isLoggedIn(): boolean {
@@ -48,6 +46,7 @@ export class FCConnection extends vscode.TreeItem {
                 clearInterval(this.limInterval);
             }
             return dxService.logout().then(() => {
+                this.parent.currentConnection = undefined;
                 return this.parent.refreshConnections();
             });
         }
@@ -60,7 +59,7 @@ export class FCConnection extends vscode.TreeItem {
                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
             }
-        } else if (this.isLoggedIn()) {
+        } else if (fs.existsSync(this.sfdxPath)) {
             this.command = {
                 command: 'ForceCode.switchUser',
                 title: '',
@@ -81,31 +80,31 @@ export class FCConnection extends vscode.TreeItem {
                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'yellowCircle.svg'),
             }
         }
-        this.showLimits();
+        this.showLimits(this);
     }
 
-    private showLimitsService() {
-        if (this.limInterval) {
-            clearInterval(this.limInterval);
+    private showLimitsService(service: FCConnection) {
+        if (service.limInterval) {
+            clearInterval(service.limInterval);
         }
-        this.limInterval = setInterval(function (service: FCConnection) {
-            service.showLimits();
-        }, 5000, this);
+        service.limInterval = setInterval(function (service: FCConnection) {
+            service.showLimits(service);
+        }, 5000, service);
     }
 
-    private showLimits() {
-        if (this.connection
-            && this.connection.limitInfo
-            && this.connection.limitInfo.apiUsage
-            && this.prevLimits !== this.connection.limitInfo.apiUsage.used) {
+    private showLimits(service: FCConnection) {
+        service.tooltip = (service.parent.currentConnection && service.parent.currentConnection.orgInfo.username === service.orgInfo.username 
+            ? 'Current username' : 'Click to switch to ' + service.orgInfo.username);
+        if (service.connection
+            && service.connection.limitInfo
+            && service.connection.limitInfo.apiUsage
+            && service.prevLimits !== service.connection.limitInfo.apiUsage.used) {
 
-            this.prevLimits = this.connection.limitInfo.apiUsage.used;
-            this.tooltip = (this.parent.currentConnection.orgInfo.username === this.orgInfo.username 
-                ? 'Current username' : 'Click to switch to ' + this.orgInfo.username)
-                + ' - Limits: '
-                + this.prevLimits + ' / ' + this.connection.limitInfo.apiUsage.limit
-                + '\nPROJECT PATH - ' + this.parent.getSrcByUsername(this.orgInfo.username);
-            this.parent.refreshView();
+            service.prevLimits = service.connection.limitInfo.apiUsage.used;
+            service.tooltip += ' - Limits: ' + service.prevLimits 
+                + ' / ' + service.connection.limitInfo.apiUsage.limit;
         }
+        service.tooltip += '\nPROJECT PATH - ' + service.parent.getSrcByUsername(service.orgInfo.username);
+        service.parent.refreshView();
     }
 }

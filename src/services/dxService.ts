@@ -224,11 +224,7 @@ export default class DXService implements DXCommands {
     }
 
     public login(url: string): Promise<any> {
-        return this.runCommand('auth:web:login', '--instanceurl ' + url).then(loginRes => {
-            return commandService.runCommand('ForceCode.switchUserText', loginRes).then(res => {
-                return Promise.resolve(res);
-            });
-        });
+        return this.runCommand('auth:web:login', '--instanceurl ' + url);
     }
 
     public logout(): Promise<any> {

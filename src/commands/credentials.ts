@@ -6,7 +6,10 @@ import { FCConnection, FCOauth } from '../services/fcConnection';
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
 };
-export default function enterCredentials(): Promise<FCOauth> {
+export default function enterCredentials(skipAndLogin?: boolean): Promise<FCOauth> {
+    if(skipAndLogin) {
+        return writeConfigAndLogin(vscode.window.forceCode.config);
+    }
     return configuration()
         .then(cfg => {
             // ask if the user wants to log into a different account
@@ -20,7 +23,7 @@ export default function enterCredentials(): Promise<FCOauth> {
             var orgs: FCConnection[] = fcConnection.getChildren();
             if(orgs) {
                 orgs.forEach(curOrg => {
-                    if(!curOrg.orgInfo.accessToken || !(fcConnection.currentConnection && curOrg.orgInfo.username === fcConnection.currentConnection.orgInfo.username)) {
+                    if(!fcConnection.currentConnection || curOrg.orgInfo.username !== fcConnection.currentConnection.orgInfo.username) {
                         opts.push({
                             title: curOrg.orgInfo.username,
                             desc: ''
@@ -47,11 +50,11 @@ export default function enterCredentials(): Promise<FCOauth> {
                     return setupNewUser(cfg);
                 } else {
                     
-                    const curOrgInfo: FCOauth = fcConnection.getOrgInfoByUserName(res.label);
+                    const curConn: FCConnection = fcConnection.getConnByUsername(res.label);
                     cfg.username = res.label;
-                    cfg.url = curOrgInfo.loginUrl;
-                    if(fcConnection.isLoggedIn()) {
-                        return Promise.resolve(curOrgInfo);
+                    cfg.url = curConn.orgInfo.loginUrl;
+                    if(curConn.isLoggedIn()) {
+                        return Promise.resolve(curConn.orgInfo);
                     } else {
                         return writeConfigAndLogin(cfg)
                     }

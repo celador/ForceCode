@@ -187,67 +187,63 @@ export default class ForceService implements forceCode.IForceService {
         var self: forceCode.IForceService = vscode.window.forceCode;
         var config = self.config;
         // Lazy-load the connection
-        if (self.conn === undefined) {
-            if (!config.username) {
-                throw { message: '$(alert) Missing Credentials $(alert)' };
-            }
-            // get sfdx login info and use oath2
-            
-            
-            // get the current org info
-            return Promise.resolve(self)
-                .then(connectionSuccess)
-                .then(getNamespacePrefix)
-                .then(checkForChanges)
-                .then(cleanupContainers)
-                .catch(connectionError);
+        if (!config.username) {
+            throw { message: '$(alert) Missing Credentials $(alert)' };
+        }
+        // get sfdx login info and use oath2
+        
+        
+        // get the current org info
+        return Promise.resolve(self)
+            .then(connectionSuccess)
+            .then(getNamespacePrefix)
+            .then(checkForChanges)
+            .then(cleanupContainers)
+            .catch(connectionError);
 
-                // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
-            function cleanupContainers(): Promise<any> {
-                return new Promise(function (resolve) {
-                    vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
-                        .find({ Name: {$like : 'ForceCode-%'}})
-                        .execute(function(err, records) {
-                            var toDelete: string[] = new Array<string>();
-                            if(!records) {
-                                resolve();
-                            }
-                            if(toDelete.length > 0) {
-                                resolve(vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
-                                    .del(toDelete));
-                            } else {
-                                resolve();
-                            }
-                        });     
-                });          
-            }
+            // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
+        function cleanupContainers(): Promise<any> {
+            return new Promise(function (resolve) {
+                vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
+                    .find({ Name: {$like : 'ForceCode-%'}})
+                    .execute(function(err, records) {
+                        var toDelete: string[] = new Array<string>();
+                        if(!records) {
+                            resolve();
+                        }
+                        if(toDelete.length > 0) {
+                            resolve(vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
+                                .del(toDelete));
+                        } else {
+                            resolve();
+                        }
+                    });     
+            });          
+        }
 
-            function checkForChanges(svc) {
-                commandService.runCommand('ForceCode.checkForFileChanges', undefined, undefined);
+        function checkForChanges(svc) {
+            commandService.runCommand('ForceCode.checkForFileChanges', undefined, undefined);
+            return svc;
+        }
+
+        function connectionSuccess(svc) {
+            vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
+            vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
+            svc.statusBarItem.show();
+
+            return svc;
+        }
+        function getNamespacePrefix(svc: forceCode.IForceService) {
+            return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {
+                if (res && res.records.length && res.records[0].NamespacePrefix) {
+                    svc.config.prefix = res.records[0].NamespacePrefix;
+                }
                 return svc;
-            }
-
-            function connectionSuccess(svc) {
-                vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
-                vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
-                svc.statusBarItem.show();
-
-                return svc;
-            }
-            function getNamespacePrefix(svc: forceCode.IForceService) {
-                return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {
-                    if (res && res.records.length && res.records[0].NamespacePrefix) {
-                        svc.config.prefix = res.records[0].NamespacePrefix;
-                    }
-                    return svc;
-                });
-            }
-            function connectionError(err) {
-                vscode.window.showErrorMessage(`ForceCode: Connection Error`);
-                throw err;
-            }
-        } else {
-            return Promise.resolve(self);
+            });
+        }
+        function connectionError(err) {
+            vscode.window.showErrorMessage(`ForceCode: Connection Error`);
+            throw err;
         }
     }
 }
