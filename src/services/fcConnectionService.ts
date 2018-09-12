@@ -9,6 +9,8 @@ import klaw = require('klaw');
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 
+export const REFRESH_EVENT_NAME: string = 'refreshConns';
+
 export class FCConnectionService implements vscode.TreeDataProvider<FCConnection> {
     private static instance: FCConnectionService;
     private connections: FCConnection[];
@@ -85,7 +87,10 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                         var fileName: string = file.path.split(path.sep).pop().split('.')[0];
                         if (fileName.indexOf('@') > 0) {
                             const orgInfo: FCOauth = fs.readJsonSync(file.path);
-                            service.addConnection(orgInfo);
+                            console.log(orgInfo);
+                            if(orgInfo.connectedStatus === "Connected") {
+                                service.addConnection(orgInfo);
+                            }
                         }
                     }
                 })

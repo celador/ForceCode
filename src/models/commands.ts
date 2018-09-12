@@ -594,7 +594,7 @@ export const fcCommands: FCCommand[] = [
         command: function (context, selectedResource?) {
             return dxService.login(context.loginUrl)
                 .then(res => {
-                    return commandService.runCommand('ForceCode.switchUser', res);
+                    return commandService.runCommand('ForceCode.switchUserText', res);
                 });
         }
     },
