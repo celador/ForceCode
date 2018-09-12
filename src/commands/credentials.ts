@@ -23,12 +23,10 @@ export default function enterCredentials(skipAndLogin?: boolean): Promise<FCOaut
             var orgs: FCConnection[] = fcConnection.getChildren();
             if(orgs) {
                 orgs.forEach(curOrg => {
-                    if(!fcConnection.currentConnection || curOrg.orgInfo.username !== fcConnection.currentConnection.orgInfo.username) {
-                        opts.push({
-                            title: curOrg.orgInfo.username,
-                            desc: ''
-                        });
-                    }
+                    opts.push({
+                        title: curOrg.orgInfo.username,
+                        desc: ''
+                    });
                 });
             }
 
@@ -53,11 +51,13 @@ export default function enterCredentials(skipAndLogin?: boolean): Promise<FCOaut
                     const curConn: FCConnection = fcConnection.getConnByUsername(res.label);
                     cfg.username = res.label;
                     cfg.url = curConn.orgInfo.loginUrl;
-                    if(curConn.isLoggedIn()) {
-                        return Promise.resolve(curConn.orgInfo);
-                    } else {
-                        return writeConfigAndLogin(cfg)
-                    }
+                    return getAutoCompile(cfg).then(cfgRes => {
+                        if(curConn.isLoggedIn()) {
+                            return Promise.resolve(curConn.orgInfo);
+                        } else {
+                            return writeConfigAndLogin(cfgRes)
+                        }
+                    });
                 }
             });
         });

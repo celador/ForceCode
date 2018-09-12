@@ -52,7 +52,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         this._onDidChangeTreeData.fire();
     }
 
-    public refreshConns() {
+    public refreshConnsStatus() {
         this.connections.forEach(conn => {
             conn.showConnection();
         });
@@ -98,7 +98,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                             }
                         });
                     }
-                    service.refreshConns();
+                    service.refreshConnsStatus();
                     // tell the connections to refresh their text/icons
                     console.log('Orgs refreshed');
                     resolve(true);
@@ -182,7 +182,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         vscode.window.forceCode.conn = this.currentConnection.connection;
         // this triggers a call to configuration() because the force.json file watcher, which triggers
         // refreshConnections()
-        service.refreshConns();
+        service.refreshConnsStatus();
         fs.outputFileSync(path.join(projPath, 'force.json'), JSON.stringify(vscode.window.forceCode.config, undefined, 4));
         return Promise.resolve(hadToLogIn);
     }
