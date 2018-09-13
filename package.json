@@ -118,6 +118,10 @@
       {
         "command": "ForceCode.diff",
         "title": "ForceCode: Diff Local <> Remote"
+      },
+      {
+        "command": "ForceCode.logout",
+        "title": "Log out of this org"
       }
     ],
     "keybindings": [
@@ -305,6 +309,16 @@
           "group": "ForceCode"
         }
       ],
+      "view/item/context": [
+        {
+          "when": "viewItem == currentConn",
+          "command": "ForceCode.logout"
+        },
+        {
+          "when": "viewItem == loggedInConn",
+          "command": "ForceCode.logout"
+        }
+      ],
       "commandPalette": [
         {
           "command": "ForceCode.showMenu"
@@ -335,7 +349,11 @@
         },
         {
           "command": "ForceCode.diff",
-          "when": "ForceCodeActive && (resourceLangId == apex || resourceLangId == visualforce) && ForceCodeLoggedIn"
+          "when": "ForceCodeActive && resourceLangId == apex && ForceCodeLoggedIn"
+        },
+        {
+          "command": "ForceCode.diff",
+          "when": "ForceCodeActive && resourceLangId == visualforce && ForceCodeLoggedIn"
         },
         {
           "command": "ForceCode.openOrg",

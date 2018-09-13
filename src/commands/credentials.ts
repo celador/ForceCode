@@ -6,10 +6,7 @@ import { FCConnection, FCOauth } from '../services/fcConnection';
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
 };
-export default function enterCredentials(skipAndLogin?: boolean): Promise<FCOauth> {
-    if(skipAndLogin) {
-        return writeConfigAndLogin(vscode.window.forceCode.config);
-    }
+export default function enterCredentials(): Promise<FCOauth> {
     return configuration()
         .then(cfg => {
             // ask if the user wants to log into a different account
@@ -23,12 +20,10 @@ export default function enterCredentials(skipAndLogin?: boolean): Promise<FCOaut
             var orgs: FCConnection[] = fcConnection.getChildren();
             if(orgs) {
                 orgs.forEach(curOrg => {
-                    if(!fcConnection.currentConnection || curOrg.orgInfo.username !== fcConnection.currentConnection.orgInfo.username) {
-                        opts.push({
-                            title: curOrg.orgInfo.username,
-                            desc: ''
-                        });
-                    }
+                    opts.push({
+                        title: curOrg.orgInfo.username,
+                        desc: ''
+                    });
                 });
             }
 
@@ -50,14 +45,16 @@ export default function enterCredentials(skipAndLogin?: boolean): Promise<FCOaut
                     return setupNewUser(cfg);
                 } else {
                     
-                    const curConn: FCConnection = fcConnection.getConnByUsername(res.label);
+                    fcConnection.currentConnection = fcConnection.getConnByUsername(res.label);
                     cfg.username = res.label;
-                    cfg.url = curConn.orgInfo.loginUrl;
-                    if(curConn.isLoggedIn()) {
-                        return Promise.resolve(curConn.orgInfo);
-                    } else {
-                        return writeConfigAndLogin(cfg)
-                    }
+                    cfg.url = fcConnection.currentConnection.orgInfo.loginUrl;
+                    return getAutoCompile(cfg).then(cfgRes => {
+                        return dxService.getOrgInfo().then(orgInfo => {
+                            return Promise.resolve(orgInfo);
+                        }).catch(() => {
+                            return writeConfigAndLogin(cfgRes);
+                        });
+                    });
                 }
             });
         });
@@ -99,21 +96,23 @@ export default function enterCredentials(skipAndLogin?: boolean): Promise<FCOaut
         });
     }
     function getAutoCompile(config) {
-        if(config.autoCompile === undefined) {
-            let options: vscode.QuickPickItem[] = [{
-                description: 'Automatically deploy/compile files on save',
-                label: 'Yes',
-            }, {
-                description: 'Deploy/compile code through the ForceCode menu',
-                label: 'No',
-            },
-            ];
-            return vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
-                config.autoCompile = res.label === 'Yes';
-                return config;
-            });
-        }
-        return config;
+        return new Promise(function (resolve, reject) {
+            if(config.autoCompile === undefined) {
+                let options: vscode.QuickPickItem[] = [{
+                    description: 'Automatically deploy/compile files on save',
+                    label: 'Yes',
+                }, {
+                    description: 'Deploy/compile code through the ForceCode menu',
+                    label: 'No',
+                },
+                ];
+                vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
+                    config.autoCompile = res.label === 'Yes';
+                    resolve(config);
+                });
+            }
+            resolve(config);
+        });
     }
 
     // =======================================================================================================================================

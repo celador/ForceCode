@@ -52,7 +52,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         this._onDidChangeTreeData.fire();
     }
 
-    public refreshConns() {
+    public refreshConnsStatus() {
         this.connections.forEach(conn => {
             conn.showConnection();
         });
@@ -98,8 +98,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                             }
                         });
                     }
-                    service.refreshConns();
                     // tell the connections to refresh their text/icons
+                    service.refreshConnsStatus();
                     console.log('Orgs refreshed');
                     resolve(true);
                 });
@@ -132,10 +132,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                     if(service.currentConnection) {
                         service.currentConnection.connection = undefined;
                     }
-                    return credentials().then(orgInfo => {
-                        service.currentConnection = service.addConnection(orgInfo);
-                        return dxService.getOrgInfo();
-                    });
+                    return credentials();
                 })
                 .then(orgInf => {
                     service.currentConnection = service.addConnection(orgInf);
@@ -182,19 +179,16 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         vscode.window.forceCode.conn = this.currentConnection.connection;
         // this triggers a call to configuration() because the force.json file watcher, which triggers
         // refreshConnections()
-        service.refreshConns();
+        service.refreshConnsStatus();
         fs.outputFileSync(path.join(projPath, 'force.json'), JSON.stringify(vscode.window.forceCode.config, undefined, 4));
         return Promise.resolve(hadToLogIn);
     }
 
-    public disconnect(): Promise<any> {
-        if (this.currentConnection) {
-            const connIndex: number = this.getConnIndex(this.currentConnection.orgInfo.username);
-            if (connIndex !== -1) {
-                this.connections.splice(connIndex, 1);
-                vscode.window.forceCode.conn = undefined;
-                return this.currentConnection.disconnect();
-            }
+    public disconnect(conn: FCConnection): Promise<any> {
+        const connIndex: number = this.getConnIndex(conn.orgInfo.username);
+        if (connIndex !== -1) {
+            this.connections.splice(connIndex, 1);
+            return this.currentConnection.disconnect();
         }
         return Promise.resolve();
     }

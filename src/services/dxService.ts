@@ -204,9 +204,9 @@ export default class DXService implements DXCommands {
             });
         }
         // add in targetusername so we can stay logged in
+        console.log(fcConnection.currentConnection);
         if(cliContext.flags['targetusername'] === undefined && cmdString !== 'auth:web:login' 
             && fcConnection.currentConnection 
-            && fcConnection.currentConnection.orgInfo && fcConnection.currentConnection.orgInfo.username
             && cmd.flags.find(fl => { return fl.name === 'targetusername' }) !== undefined) {
 
             cliContext.flags['targetusername'] = fcConnection.currentConnection.orgInfo.username;

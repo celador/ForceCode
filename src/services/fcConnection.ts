@@ -46,20 +46,29 @@ export class FCConnection extends vscode.TreeItem {
                 clearInterval(this.limInterval);
             }
             return dxService.logout().then(() => {
-                this.parent.currentConnection = undefined;
+                if(this.isCurrentConnection()) {
+                    this.parent.currentConnection = undefined;
+                    vscode.window.forceCode.conn = undefined;
+                }
                 return this.parent.refreshConnections();
             });
         }
     }
 
+    public isCurrentConnection(): boolean {
+        return this.parent.currentConnection && this.parent.currentConnection.orgInfo.username === this.orgInfo.username;
+    }
+
     public showConnection() {
-        if (this.parent.currentConnection && this.parent.currentConnection.orgInfo && this.parent.currentConnection.orgInfo.username === this.orgInfo.username) {
+        if (this.isCurrentConnection()) {
             vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
             this.iconPath = {
                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
             }
-        } else if (fs.existsSync(this.sfdxPath)) {
+            this.contextValue = 'currentConn';
+            this.command = undefined;
+        } else if (this.isLoggedIn()) {
             this.command = {
                 command: 'ForceCode.switchUser',
                 title: '',
@@ -69,6 +78,7 @@ export class FCConnection extends vscode.TreeItem {
                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircle.svg'),
                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircle.svg'),
             }
+            this.contextValue = 'loggedInConn';
         } else {
             this.command = {
                 command: 'ForceCode.login',
@@ -93,8 +103,8 @@ export class FCConnection extends vscode.TreeItem {
     }
 
     private showLimits(service: FCConnection) {
-        service.tooltip = (service.parent.currentConnection && service.parent.currentConnection.orgInfo.username === service.orgInfo.username 
-            ? 'Current username' : 'Click to switch to ' + service.orgInfo.username);
+        service.tooltip = (service.isCurrentConnection() ? 'Current username' 
+            : 'Click to switch to ' + service.orgInfo.username);
         if (service.connection
             && service.connection.limitInfo
             && service.connection.limitInfo.apiUsage

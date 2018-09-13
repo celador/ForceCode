@@ -243,7 +243,7 @@ export const fcCommands: FCCommand[] = [
         }
     },
     {
-        commandName: 'ForceCode.dxLogout',
+        commandName: 'ForceCode.logout',
         name: 'Logging out',
         hidden: false,
         description: 'Log out from current org',
@@ -251,7 +251,8 @@ export const fcCommands: FCCommand[] = [
         icon: 'x',
         label: 'Log out of Salesforce',
         command: function (context, selectedResource?) {
-            return fcConnection.disconnect();
+            var conn = context ? context : fcConnection.currentConnection;
+            return fcConnection.disconnect(conn);
         }
     },
     // Enter Salesforce Credentials
@@ -264,7 +265,7 @@ export const fcCommands: FCCommand[] = [
         icon: 'key',
         label: 'Log in to Salesforce',
         command: function (context, selectedResource?) {
-            fcConnection.connect(context).then(() => {
+            return fcConnection.connect(context).then(() => {
                 codeCovViewService.clear();
                 return vscode.window.forceCode.connect();
             });
