@@ -6,10 +6,7 @@ import { FCConnection, FCOauth } from '../services/fcConnection';
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
 };
-export default function enterCredentials(skipAndLogin?: boolean): Promise<FCOauth> {
-    if(skipAndLogin) {
-        return writeConfigAndLogin(vscode.window.forceCode.config);
-    }
+export default function enterCredentials(): Promise<FCOauth> {
     return configuration()
         .then(cfg => {
             // ask if the user wants to log into a different account

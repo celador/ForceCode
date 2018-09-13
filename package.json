@@ -495,7 +495,11 @@
         },
         {
           "command": "ForceCode.diff",
-          "when": "ForceCodeActive && (resourceLangId == apex || resourceLangId == visualforce) && ForceCodeLoggedIn"
+          "when": "ForceCodeActive && resourceLangId == apex && ForceCodeLoggedIn"
+        },
+        {
+          "command": "ForceCode.diff",
+          "when": "ForceCodeActive && resourceLangId == visualforce && ForceCodeLoggedIn"
         },
         {
           "command": "ForceCode.openOrg",
