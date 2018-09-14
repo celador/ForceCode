@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { operatingSystem, configuration, commandService, codeCovViewService, switchUserViewService, dxService } from './../services';
+import { configuration, commandService, codeCovViewService, fcConnection, dxService } from './../services';
 import constants from './../models/constants';
 import * as path from 'path';
 import { FCFile } from './codeCovView';
@@ -27,6 +27,7 @@ export default class ForceService implements forceCode.IForceService {
         if (!vscode.workspace.workspaceFolders) {
             throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
         }
+        console.log('Initializing ForceCode service');
         this.workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
         this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
         this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
@@ -44,6 +45,7 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     public static start() {
+        console.log('Starting ForceCode service');
         configuration(this.getInstance()).then(config => {
             commandService.runCommand('ForceCode.switchUserText', { username: config.username, loginUrl: config.url}, true);
         });
@@ -185,89 +187,63 @@ export default class ForceService implements forceCode.IForceService {
         var self: forceCode.IForceService = vscode.window.forceCode;
         var config = self.config;
         // Lazy-load the connection
-        if (self.conn === undefined) {
-            if (!config.username) {
-                throw { message: '$(alert) Missing Credentials $(alert)' };
-            }
-            // get sfdx login info and use oath2
-            
-            
-            // get the current org info
-            return new Promise((resolve, reject) => {
-                if(switchUserViewService.isLoggedIn()) {
-                    resolve();
-                } else {
-                    reject();
+        if (!config.username) {
+            throw { message: '$(alert) Missing Credentials $(alert)' };
+        }
+        // get sfdx login info and use oath2
+        
+        
+        // get the current org info
+        return Promise.resolve(self)
+            .then(connectionSuccess)
+            .then(getNamespacePrefix)
+            .then(checkForChanges)
+            .then(cleanupContainers)
+            .catch(connectionError);
+
+            // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
+        function cleanupContainers(): Promise<any> {
+            return new Promise(function (resolve) {
+                vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
+                    .find({ Name: {$like : 'ForceCode-%'}})
+                    .execute(function(err, records) {
+                        var toDelete: string[] = new Array<string>();
+                        if(!records) {
+                            resolve();
+                        }
+                        if(toDelete.length > 0) {
+                            resolve(vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
+                                .del(toDelete));
+                        } else {
+                            resolve();
+                        }
+                    });     
+            });          
+        }
+
+        function checkForChanges(svc) {
+            commandService.runCommand('ForceCode.checkForFileChanges', undefined, undefined);
+            return svc;
+        }
+
+        function connectionSuccess(svc) {
+            vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
+            vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
+            svc.statusBarItem.show();
+
+            return svc;
+        }
+        function getNamespacePrefix(svc: forceCode.IForceService) {
+            return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {
+                if (res && res.records.length && res.records[0].NamespacePrefix) {
+                    svc.config.prefix = res.records[0].NamespacePrefix;
                 }
-            }).then(() => {
-                    self.conn = new jsforce.Connection({
-                        oauth2: {
-                            clientId: switchUserViewService.orgInfo.clientId
-                        },
-                        instanceUrl : switchUserViewService.orgInfo.instanceUrl,
-                        accessToken : switchUserViewService.orgInfo.accessToken,
-                        refreshToken: switchUserViewService.orgInfo.refreshToken,
-                        version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-                    });
-
-                    return self.conn.identity(function (err, res) {
-                        if(err) { return Promise.reject(err) }
-                        switchUserViewService.orgInfo.userId = res.user_id;
-                        return self
-                    });
-                })
-                .then(connectionSuccess)
-                .then(getNamespacePrefix)
-                .then(checkForChanges)
-                .then(cleanupContainers)
-                .catch(connectionError);
-
-                // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
-            function cleanupContainers(): Promise<any> {
-                return new Promise(function (resolve) {
-                    vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
-                        .find({ Name: {$like : 'ForceCode-%'}})
-                        .execute(function(err, records) {
-                            var toDelete: string[] = new Array<string>();
-                            if(!records) {
-                                resolve();
-                            }
-                            if(toDelete.length > 0) {
-                                resolve(vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
-                                    .del(toDelete));
-                            } else {
-                                resolve();
-                            }
-                        });     
-                });          
-            }
-
-            function checkForChanges(svc) {
-                commandService.runCommand('ForceCode.checkForFileChanges', undefined, undefined);
                 return svc;
-            }
-
-            function connectionSuccess() {
-                vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
-                vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
-                self.statusBarItem.show();
-
-                return self;
-            }
-            function getNamespacePrefix(svc: forceCode.IForceService) {
-                return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {
-                    if (res && res.records.length && res.records[0].NamespacePrefix) {
-                        svc.config.prefix = res.records[0].NamespacePrefix;
-                    }
-                    return svc;
-                });
-            }
-            function connectionError(err) {
-                vscode.window.showErrorMessage(`ForceCode: Connection Error`);
-                throw err;
-            }
-        } else {
-            return Promise.resolve(self);
+            });
+        }
+        function connectionError(err) {
+            vscode.window.showErrorMessage(`ForceCode: Connection Error`);
+            throw err;
         }
     }
 }

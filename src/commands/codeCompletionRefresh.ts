@@ -20,6 +20,9 @@ export default async function codeCompletionRefresh(): Promise<any> {
     };
     var objectsToGet: SObjectCategory;
     await vscode.window.showQuickPick(options, config).then((res: vscode.QuickPickItem) => {
+        if(!res) {
+            return Promise.resolve();
+        }
         if(res.label === 'All') {
             objectsToGet = SObjectCategory.ALL;
         } else if(res.label === 'Standard') {
@@ -42,7 +45,7 @@ export default async function codeCompletionRefresh(): Promise<any> {
             vscode.window.showInformationMessage('ForceCode: Retrieval of objects complete!!!', 'OK');
             return Promise.resolve();
         } catch(e) {
-            return Promise.reject(vscode.window.showErrorMessage(e.message));
+            return Promise.reject();
         }
     });
     // =======================================================================================================================================

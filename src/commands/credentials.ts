@@ -1,16 +1,12 @@
 import * as vscode from 'vscode';
 import { getIcon } from './../parsers';
-import { configuration, switchUserViewService, commandService, dxService } from './../services';
-import { Org } from '../services/switchUserView';
+import { configuration, fcConnection, dxService } from './../services';
+import { FCConnection, FCOauth } from '../services/fcConnection';
 
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
 };
-export default function enterCredentials(askForCreds?: boolean): Promise<any> {
-    if(!askForCreds && switchUserViewService.getChildren().length > 0) {
-        return configuration()
-            .then(writeConfigAndLogin);
-    }
+export default function enterCredentials(): Promise<FCOauth> {
     return configuration()
         .then(cfg => {
             // ask if the user wants to log into a different account
@@ -21,15 +17,14 @@ export default function enterCredentials(askForCreds?: boolean): Promise<any> {
                 }
             ];
 
-            var orgs: Org[] = switchUserViewService.getChildren();
+            var orgs: FCConnection[] = fcConnection.getChildren();
             if(orgs) {
                 orgs.forEach(curOrg => {
-                    if(!curOrg.orgInfo.accessToken || curOrg.orgInfo.username !== switchUserViewService.orgInfo.username) {
-                        opts.push({
-                            title: curOrg.orgInfo.username,
-                            desc: ''
-                        });
-                    }
+                    opts.push({
+                        title: (curOrg.isLoggedIn() ? '$(diff-added) ' : '$(diff-removed) ' ) 
+                            + curOrg.orgInfo.username,
+                        desc: ''
+                    });
                 });
             }
 
@@ -46,21 +41,21 @@ export default function enterCredentials(askForCreds?: boolean): Promise<any> {
             };
             return vscode.window.showQuickPick(options, theseOptions).then((res: vscode.QuickPickItem) => {
                 if(!res || res.label === undefined) {
-                    return cfg;
+                    return undefined;
                 } else if(res.label === 'New Org') {
                     return setupNewUser(cfg);
                 } else {
                     
-                    switchUserViewService.orgInfo = switchUserViewService.getOrgInfoByUserName(res.label);
+                    fcConnection.currentConnection = fcConnection.getConnByUsername(res.label.split(' ')[1]);
                     cfg.username = res.label;
-                    cfg.url = switchUserViewService.orgInfo.loginUrl;
-                    if(switchUserViewService.isLoggedIn()) {
-                        return commandService.runCommand('ForceCode.switchUserText', switchUserViewService.orgInfo).then(() => {
-                            return Promise.resolve(cfg);
+                    cfg.url = fcConnection.currentConnection.orgInfo.loginUrl;
+                    return getAutoCompile(cfg).then(cfgRes => {
+                        return dxService.getOrgInfo().then(orgInfo => {
+                            return Promise.resolve(orgInfo);
+                        }).catch(() => {
+                            return writeConfigAndLogin(cfgRes);
                         });
-                    } else {
-                        return writeConfigAndLogin(cfg)
-                    }
+                    });
                 }
             });
         });
@@ -102,30 +97,29 @@ export default function enterCredentials(askForCreds?: boolean): Promise<any> {
         });
     }
     function getAutoCompile(config) {
-        if(config.autoCompile === undefined) {
-            let options: vscode.QuickPickItem[] = [{
-                description: 'Automatically deploy/compile files on save',
-                label: 'Yes',
-            }, {
-                description: 'Deploy/compile code through the ForceCode menu',
-                label: 'No',
-            },
-            ];
-            return vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
-                config.autoCompile = res.label === 'Yes';
-                return config;
-            });
-        }
-        return config;
+        return new Promise(function (resolve, reject) {
+            if(config.autoCompile === undefined) {
+                let options: vscode.QuickPickItem[] = [{
+                    description: 'Automatically deploy/compile files on save',
+                    label: 'Yes',
+                }, {
+                    description: 'Deploy/compile code through the ForceCode menu',
+                    label: 'No',
+                },
+                ];
+                vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
+                    config.autoCompile = res.label === 'Yes';
+                    resolve(config);
+                });
+            }
+            resolve(config);
+        });
     }
 
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
-    function writeConfigAndLogin(config): Promise<any> {
-        return dxService.login(config.url)
-            .then(res => {
-                return Promise.resolve(vscode.window.forceCode.config);
-            });
+    function writeConfigAndLogin(config): Promise<FCOauth> {
+        return dxService.login(config.url);
     }
 }

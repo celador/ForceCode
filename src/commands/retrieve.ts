@@ -2,10 +2,9 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import constants from './../models/constants';
-import { commandService, codeCovViewService, switchUserViewService, dxService } from '../services';
+import { commandService, codeCovViewService, fcConnection, dxService, FCOauth } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
-import { FCOauth } from '../services/switchUserView';
 import { getAnyTTFromFolder } from '../parsers/open';
 import { SObjectDescribe, SObjectCategory } from '../dx/describe';
 const mime = require('mime-types');
@@ -40,7 +39,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
     // =======================================================================================================================================
 
     function getPackages() {
-        var orgInfo: FCOauth = switchUserViewService.orgInfo;
+        var orgInfo: FCOauth = fcConnection.currentConnection.orgInfo;
         var requestUrl: string = orgInfo.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
         var headers: any = {
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',

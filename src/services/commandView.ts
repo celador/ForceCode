@@ -6,7 +6,7 @@
  */
 
 import * as vscode from 'vscode';
-import { switchUserViewService } from '.';
+import { fcConnection } from '.';
 import { EventEmitter } from 'events';
 
 export interface FCCommand {
@@ -114,7 +114,8 @@ export class Task extends vscode.TreeItem {
   public run() {
     return new Promise((resolve) => { resolve(this.execution.command(this.context, this.selectedResource)); })
       .catch(reason => {
-        switchUserViewService.checkLoginStatus().then(loggedIn => {
+        fcConnection.checkLoginStatus().then(loggedIn => {
+          console.log(loggedIn);
           if(loggedIn) {
             vscode.window.showErrorMessage(reason.message ? reason.message : reason);
           }

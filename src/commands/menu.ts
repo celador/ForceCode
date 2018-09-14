@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import { fcCommands } from './../models/commands';
-import { commandService, switchUserViewService } from '../services';
+import { commandService, fcConnection } from '../services';
 
 export default function showMenu(context: vscode.ExtensionContext) {
     var quickpick: any[] = [];
-    if(!switchUserViewService.isLoggedIn()) {
-        return commandService.runCommand('ForceCode.enterCredentials', true);
+    if(!fcConnection.isLoggedIn()) {
+        return commandService.runCommand('ForceCode.switchUser', undefined);
     }
     return Promise.resolve(vscode.window.forceCode)
         .then(displayMenu)

@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { switchUserViewService, commandService, operatingSystem} from '.';
-import { FCOauth } from './switchUserView';
+import { fcConnection, commandService, operatingSystem, FCOauth} from '.';
 var alm: any = require('salesforce-alm');
 
 export interface OrgListResult {
@@ -205,8 +204,11 @@ export default class DXService implements DXCommands {
             });
         }
         // add in targetusername so we can stay logged in
-        if(cliContext.flags['targetusername'] === undefined && switchUserViewService.orgInfo.username !== undefined && cmd.flags.find(fl => { return fl.name === 'targetusername' }) !== undefined) {
-            cliContext.flags['targetusername'] = switchUserViewService.orgInfo.username;
+        if(cliContext.flags['targetusername'] === undefined && cmdString !== 'auth:web:login' 
+            && fcConnection.currentConnection 
+            && cmd.flags.find(fl => { return fl.name === 'targetusername' }) !== undefined) {
+
+            cliContext.flags['targetusername'] = fcConnection.currentConnection.orgInfo.username;
         } 
         return cmd.run(cliContext).then(res => {
             if(!this.isEmptyUndOrNull(res)) {
@@ -221,51 +223,33 @@ export default class DXService implements DXCommands {
     }
 
     public login(url: string): Promise<any> {
-        return this.runCommand('auth:web:login', '--instanceurl ' + url).then(loginRes => {
-            switchUserViewService.orgInfo = loginRes;
-            vscode.window.forceCode.config.username = loginRes.username;
-            return commandService.runCommand('ForceCode.switchUserText', loginRes).then(res => {
-                return Promise.resolve(res);
-            });
-        });
+        return this.runCommand('auth:web:login', '--instanceurl ' + url);
     }
 
     public logout(): Promise<any> {
-        if(switchUserViewService.isLoggedIn()) {
-            return Promise.resolve(this.runCommand('auth:logout', '--noprompt')).then(() => {
-                vscode.window.forceCode.conn = undefined;   // this will go away soon
-                switchUserViewService.orgInfo = {};
-                return Promise.resolve(switchUserViewService.refreshOrgs());                  
-            });
+        if(fcConnection.isLoggedIn()) {
+            return Promise.resolve(this.runCommand('auth:logout', '--noprompt'));
         } else {
             return Promise.resolve();
         }
     }
 
     public getOrgInfo(): Promise<SFDX> {
-        return this.runCommand('org:display', '').then(res => {
-            switchUserViewService.orgInfo = res;
-            return Promise.resolve(res);
-        }, () => {
-            return Promise.reject();
-        });
+        return this.runCommand('org:display', '');
     }
 
     public orgList(): Promise<OrgListResult> {
-        if(switchUserViewService.isLoggedIn()) {
-            return this.runCommand('org:list', '--clean').then(res => {
-                const orgs: OrgListResult = { orgs: res.nonScratchOrgs.concat(res.scratchOrgs) }
-                orgs.orgs.forEach(org => {
-                    const sfdxPath: string = path.join(operatingSystem.getHomeDir(), '.sfdx', org.username + '.json');
-                    // cleanup if it's not actually connected
-                    if(org.connectedStatus !== 'Connected' && fs.existsSync(sfdxPath)) {
-                        fs.removeSync(sfdxPath);
-                    }
-                })
-                return orgs;
-            });
-        }
-        return Promise.reject();
+        return this.runCommand('org:list', '--clean').then(res => {
+            const orgs: OrgListResult = { orgs: res.nonScratchOrgs.concat(res.scratchOrgs) }
+            orgs.orgs.forEach(org => {
+                const sfdxPath: string = path.join(operatingSystem.getHomeDir(), '.sfdx', org.username + '.json');
+                // cleanup if it's not actually connected
+                if(org.connectedStatus !== 'Connected' && fs.existsSync(sfdxPath)) {
+                    fs.removeSync(sfdxPath);
+                }
+            })
+            return orgs;
+        });
     }
 
     public getDebugLog(logid?: string): Promise<string> {
@@ -295,6 +279,6 @@ export default class DXService implements DXCommands {
     }
 
     public openOrgPage(url: string): Promise<any> {
-        return Promise.resolve(this.runCommand('org:open', '-p ' + url));
+        return this.runCommand('org:open', '-p ' + url);
     }
 }
