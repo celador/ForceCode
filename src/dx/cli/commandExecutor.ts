@@ -27,7 +27,6 @@ export class CliCommandExecutor {
     var theArgs = this.command.args.join(' ');
     vscode.window.forceCode.outputChannel.appendLine('Executing command: ' + curCmd + ' ' + theArgs);
 
-    const retVal = await dxService.runCommand(curCmd, theArgs);
-    return Promise.resolve(retVal);
+    return dxService.runCommand(curCmd, theArgs);
   }
 }

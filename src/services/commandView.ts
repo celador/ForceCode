@@ -115,6 +115,7 @@ export class Task extends vscode.TreeItem {
     return new Promise((resolve) => { resolve(this.execution.command(this.context, this.selectedResource)); })
       .catch(reason => {
         fcConnection.checkLoginStatus().then(loggedIn => {
+          console.log(loggedIn);
           if(loggedIn) {
             vscode.window.showErrorMessage(reason.message ? reason.message : reason);
           }

@@ -91,9 +91,7 @@ export class FauxClassGenerator {
       !fs.existsSync(projectPath) ||
       !fs.existsSync(path.join(projectPath, SFDX_PROJECT_FILE))
     ) {
-      return this.errorExit(
-        nls.localize('no_generate_if_not_in_project', sobjectsFolderPath)
-      );
+      throw nls.localize('no_generate_if_not_in_project', sobjectsFolderPath);
     }
     if(type === SObjectCategory.ALL) {
       this.cleanupSObjectFolders(sobjectsFolderPath);
@@ -111,9 +109,7 @@ export class FauxClassGenerator {
     try {
       sobjects = await describe.describeGlobal(type);
     } catch (e) {
-      return this.errorExit(
-        nls.localize('failure_fetching_sobjects_list_text', e)
-      );
+      throw nls.localize('failure_fetching_sobjects_list_text', e);
     }
     let j = 0;
     while (j < sobjects.length) {
@@ -123,9 +119,7 @@ export class FauxClassGenerator {
         );
         j = fetchedSObjects.length;
       } catch (e) {
-        return this.errorExit(
-          nls.localize('failure_in_sobject_describe_text', e)
-        );
+        throw nls.localize('failure_in_sobject_describe_text', e);
       }
     }
 
@@ -139,17 +133,8 @@ export class FauxClassGenerator {
 
     this.logFetchedObjects(standardSObjects, customSObjects);
 
-    try {
-      this.generateFauxClasses(standardSObjects, standardSObjectsFolderPath);
-    } catch (e) {
-      return this.errorExit(e);
-    }
-
-    try {
-      this.generateFauxClasses(customSObjects, customSObjectsFolderPath);
-    } catch (e) {
-      return this.errorExit(e);
-    }
+    this.generateFauxClasses(standardSObjects, standardSObjectsFolderPath);
+    this.generateFauxClasses(customSObjects, customSObjectsFolderPath);
 
     vscode.window.forceCode.outputChannel.appendLine('=========================================DONE!!!=========================================');
     return 'Success!!!';
@@ -172,13 +157,6 @@ export class FauxClassGenerator {
       mode: 0o444
     });
     return fauxClassPath;
-  }
-
-  private errorExit(err: string) {
-    // Take the results
-    // And write them to a file
-    vscode.window.showErrorMessage(err);
-    return err;
   }
 
   private stripId(name: string): string {
