@@ -21,7 +21,8 @@ export default function enterCredentials(): Promise<FCOauth> {
             if(orgs) {
                 orgs.forEach(curOrg => {
                     opts.push({
-                        title: curOrg.orgInfo.username,
+                        title: (curOrg.isLoggedIn() ? '$(diff-added) ' : '$(diff-removed) ' ) 
+                            + curOrg.orgInfo.username,
                         desc: ''
                     });
                 });
@@ -45,7 +46,7 @@ export default function enterCredentials(): Promise<FCOauth> {
                     return setupNewUser(cfg);
                 } else {
                     
-                    fcConnection.currentConnection = fcConnection.getConnByUsername(res.label);
+                    fcConnection.currentConnection = fcConnection.getConnByUsername(res.label.split(' ')[1]);
                     cfg.username = res.label;
                     cfg.url = fcConnection.currentConnection.orgInfo.loginUrl;
                     return getAutoCompile(cfg).then(cfgRes => {

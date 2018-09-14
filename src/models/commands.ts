@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 import { getFileName } from './../parsers';
-import { commandService, commandViewService, codeCovViewService, configuration, fcConnection, dxService } from './../services';
+import { commandService, commandViewService, codeCovViewService, configuration, fcConnection, dxService, FCOauth, FCConnection } from './../services';
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
 import * as fs from 'fs-extra';
@@ -265,7 +265,13 @@ export const fcCommands: FCCommand[] = [
         icon: 'key',
         label: 'Log in to Salesforce',
         command: function (context, selectedResource?) {
-            return fcConnection.connect(context).then(() => {
+            var orgInfo: FCOauth;
+            if(context instanceof FCConnection) {
+                orgInfo = context.orgInfo;
+            } else {
+                orgInfo = context;
+            }
+            return fcConnection.connect(orgInfo).then(() => {
                 codeCovViewService.clear();
                 return vscode.window.forceCode.connect();
             });
@@ -455,7 +461,13 @@ export const fcCommands: FCCommand[] = [
         commandName: 'ForceCode.login',
         hidden: true,
         command: function (context, selectedResource?) {
-            return dxService.login(context.loginUrl)
+            var orgInfo: FCOauth;
+            if(context instanceof FCConnection) {
+                orgInfo = context.orgInfo;
+            } else {
+                orgInfo = context;
+            }
+            return dxService.login(orgInfo.loginUrl)
                 .then(res => {
                     return commandService.runCommand('ForceCode.switchUserText', res);
                 });

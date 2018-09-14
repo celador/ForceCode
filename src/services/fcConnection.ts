@@ -19,7 +19,6 @@ export interface FCOauth {
 export class FCConnection extends vscode.TreeItem {
     private readonly parent: FCConnectionService;
     private limInterval;
-    private prevLimits: number = 0;
     public readonly sfdxPath: string;
     public connection: any;
     public orgInfo: FCOauth;
@@ -33,7 +32,6 @@ export class FCConnection extends vscode.TreeItem {
         this.parent = parent;
         this.orgInfo = orgInfo;
         this.sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInfo.username + '.json');
-        this.showLimitsService(this);
     }
 
     public isLoggedIn(): boolean {
@@ -89,8 +87,10 @@ export class FCConnection extends vscode.TreeItem {
                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'yellowCircle.svg'),
                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'yellowCircle.svg'),
             }
+            this.contextValue = 'notLoggedInConn';
         }
         this.showLimits(this);
+        this.showLimitsService(this);
     }
 
     private showLimitsService(service: FCConnection) {
@@ -107,11 +107,9 @@ export class FCConnection extends vscode.TreeItem {
             : 'Click to switch to ' + service.orgInfo.username);
         if (service.connection
             && service.connection.limitInfo
-            && service.connection.limitInfo.apiUsage
-            && service.prevLimits !== service.connection.limitInfo.apiUsage.used) {
+            && service.connection.limitInfo.apiUsage) {
 
-            service.prevLimits = service.connection.limitInfo.apiUsage.used;
-            service.tooltip += ' - Limits: ' + service.prevLimits 
+            service.tooltip += ' - Limits: ' + service.connection.limitInfo.apiUsage.used 
                 + ' / ' + service.connection.limitInfo.apiUsage.limit;
         }
         service.tooltip += '\nPROJECT PATH - ' + path.join(vscode.window.forceCode.workspaceRoot,

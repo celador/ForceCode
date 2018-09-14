@@ -122,6 +122,14 @@
       {
         "command": "ForceCode.logout",
         "title": "Log out of this org"
+      },
+      {
+        "command": "ForceCode.switchUser",
+        "title": "Switch to this org"
+      },
+      {
+        "command": "ForceCode.login",
+        "title": "Log into this org"
       }
     ],
     "keybindings": [
@@ -317,6 +325,14 @@
         {
           "when": "viewItem == loggedInConn",
           "command": "ForceCode.logout"
+        },
+        {
+          "when": "viewItem == loggedInConn",
+          "command": "ForceCode.switchUser"
+        },
+        {
+          "when": "viewItem == notLoggedInConn",
+          "command": "ForceCode.login"
         }
       ],
       "commandPalette": [
