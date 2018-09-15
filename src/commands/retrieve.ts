@@ -9,7 +9,7 @@ import { getAnyTTFromFolder } from '../parsers/open';
 import { SObjectDescribe, SObjectCategory } from '../dx/describe';
 const mime = require('mime-types');
 const fetch: any = require('node-fetch');
-const ZIP: any = require('zip');
+//const ZIP: any = require('zip');
 const parseString: any = require('xml2js').parseString;
 
 export interface ToolingType {
@@ -262,7 +262,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 reject(err || { message: 'package not found' });
             });
             stream.on('end', function () {
-                var reader: any[] = ZIP.Reader(Buffer.concat(bufs));
+                var reader: any[]// = ZIP.Reader(Buffer.concat(bufs));
                 reader.forEach(function (entry) {
                     if (entry.isFile()) {
                         var name: string = entry.getName();
@@ -306,7 +306,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                                     var ctFolderName = ContentType.split('/').join('.');
                                     const resFN: string = name.slice(name.indexOf(path.sep) + 1).split('.')[0];
                                     if(ContentType.includes('zip')) {
-                                        var zipReader: any[] = ZIP.Reader(new Buffer(actualResData));
+                                        var zipReader: any[]// = ZIP.Reader(new Buffer(actualResData));
                                         zipReader.forEach(function (zipEntry) {
                                             if (zipEntry.isFile()) {
                                                 var zipFName: string = zipEntry.getName();

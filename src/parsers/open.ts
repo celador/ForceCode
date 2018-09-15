@@ -138,3 +138,21 @@ export function getAnyNameFromUri(uri: vscode.Uri): string {
     } 
     return baseDirectoryName;
 }
+export function getAnyFolderNameFromTT(tType: string): string {
+    var folder: any[] = vscode.window.forceCode.describe.metadataObjects
+        .filter(o => o.xmlName === tType)
+        .map(r => {
+            return r.directoryName;
+        });
+
+    return folder[0];
+}
+export function getAnyExtNameFromTT(tType: string): any {
+    var folder: any[] = vscode.window.forceCode.describe.metadataObjects
+        .filter(o => o.xmlName === tType)
+        .map(r => {
+            return r.suffix;
+        });
+
+    return folder[0];
+}

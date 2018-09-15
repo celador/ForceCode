@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
-import jszip = require('jszip');
 import globule = require('globule');
+import { zipFiles } from './../services';
 const mime = require('mime-types');
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
@@ -130,32 +130,6 @@ function getPackagePath(option) {
         }
     }
     return bundlePath;
-}
-
-/**
- * @private zipFiles
- * Given an array of file paths, make a zip file and add all
- * then returns the resulting zip object (not actual file) for use.
- * @param {String[]} fileList - Array of file paths
- * @return {Zip} - zip blob for use
- */
-function zipFiles(fileList: string[], root: string) {
-    var zip: any = new jszip();
-    // Add folders and files to zip object for each file in the list
-    fileList.forEach(function (file) {
-        // the below code should work, according to the documentation
-        // zip.file(file, content, { createFolders: true })
-        // the above code should work, but for some reason it isn't so we have to add the files manually, as per the code below
-        let pathFragments: string[] = file.split(path.sep);
-        // reduce all the directory names, adding Folders to the zip for each folder created
-        // The return of the reduce is the continuation of the parent, so adding folders just works... 
-        // Do that until you have mapped all the folders, then return the zip/folder and add the file from the contents
-        pathFragments.slice(0, -1)
-            .reduce((parent, name) => parent.folder(name), zip)
-            .file(pathFragments[pathFragments.length - 1], fs.readFileSync(root + path.sep + file));
-    });
-
-    return zip;
 }
 
 /**

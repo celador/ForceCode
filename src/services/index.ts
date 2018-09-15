@@ -17,3 +17,4 @@ import { CommandService } from './commandService';
 export const commandService = CommandService.getInstance();
 import { CodeCovViewService } from './codeCovView';
 export const codeCovViewService = CodeCovViewService.getInstance();
+export * from './fcZip';
