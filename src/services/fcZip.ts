@@ -40,10 +40,20 @@ export function getFileListFromPXML(): Promise<string[]> {
         var xmlFilePath: string = path.join(projectRoot, 'package.xml');
         var data: any = fs.readFileSync(xmlFilePath);
         var fileList: string[] = [];
+        fileList.push('package.xml');
+        if(fs.existsSync(path.join(projectRoot, 'destructiveChanges.xml'))) {
+            fileList.push('destructiveChanges.xml');
+        }
+        if(fs.existsSync(path.join(projectRoot, 'destructiveChangesPre.xml'))) {
+            fileList.push('destructiveChangesPre.xml');
+        }
+        if(fs.existsSync(path.join(projectRoot, 'destructiveChangesPost.xml'))) {
+            fileList.push('destructiveChangesPost.xml');
+        }
         return parseString(data, { explicitArray: false }, function (err, dom: PXML) {
             if (err) { reject(err); } else {
                 if (!dom.Package.types) {
-                    return undefined;
+                    resolve(fileList);
                 }
                 toArray(dom.Package.types).forEach(curType => {
                     var folder: string = getAnyFolderNameFromTT(curType.name);

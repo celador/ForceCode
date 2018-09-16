@@ -21,7 +21,6 @@ export default function deploy(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     function deployPackage() {
         return getFileListFromPXML().then(files => {
-            files.push('package.xml');
             var zip = zipFiles(files, deployPath);
             Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
             vscode.window.forceCode.outputChannel.show();
