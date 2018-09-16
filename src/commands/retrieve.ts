@@ -9,7 +9,7 @@ import { getAnyTTFromFolder } from '../parsers/open';
 import { SObjectDescribe, SObjectCategory } from '../dx/describe';
 const mime = require('mime-types');
 const fetch: any = require('node-fetch');
-//const ZIP: any = require('zip');
+import * as compress from 'compressing';
 const parseString: any = require('xml2js').parseString;
 
 export interface ToolingType {
@@ -97,7 +97,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 detail: `All Apex Classes`,
                 description: 'apexclasses',
             });
-             options.push({
+            options.push({
                 label: '$(cloud-download) Get All Apex Pages from org',
                 detail: `All Apex Pages`,
                 description: 'apexpages',
@@ -124,7 +124,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             };
             return vscode.window.showQuickPick(options, config);
         }).then(function (res) {
-            if(!res) {
+            if (!res) {
                 return Promise.reject();
             }
             if (res.description === 'manual') {
@@ -155,26 +155,26 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 if (resource instanceof vscode.Uri && fs.lstatSync(resource.fsPath).isDirectory()) {
                     var baseDirectoryName: string = path.parse(resource.fsPath).name;
                     var type: string = getAnyTTFromFolder(resource);
-                    if(!type) {
+                    if (!type) {
                         throw new Error(errMessage);
                     }
                     var types: any[] = [];
                     if (type === 'AuraDefinitionBundle') {
-                        if(baseDirectoryName === 'aura') {
+                        if (baseDirectoryName === 'aura') {
                             baseDirectoryName = '*';
                         }
                         types = [{ name: type, members: baseDirectoryName }];
                     } else {
                         types = [{ name: type, members: '*' }];
                     }
-                    retrieveComponents(resolve, {types: types});
-                } else if(resource instanceof vscode.Uri){
+                    retrieveComponents(resolve, { types: types });
+                } else if (resource instanceof vscode.Uri) {
                     var toolingType: string = getAnyTTFromFolder(resource);
-                    if(!toolingType) {
+                    if (!toolingType) {
                         throw new Error(errMessage);
                     }
                     const name: string = path.parse(resource.fsPath).name;
-                    retrieveComponents(resolve, {types: [{name: toolingType, members: [name]}]});
+                    retrieveComponents(resolve, { types: [{ name: toolingType, members: [name] }] });
                 } else {
                     retrieveComponents(resolve, resource);
                 }
@@ -212,7 +212,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 var types: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
                     return { name: r.xmlName, members: '*' };
                 });
-                retrieveComponents(resolve, {types: types});
+                retrieveComponents(resolve, { types: types });
             }
 
             function getSpecificTypeMetadata(metadataType: string) {
@@ -221,7 +221,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     .map(r => {
                         return { name: r.xmlName, members: '*' };
                     });
-                retrieveComponents(resolve, {types: types});
+                retrieveComponents(resolve, { types: types });
             }
 
             function unpackaged() {
@@ -246,39 +246,32 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
 
             function getStandardObjects() {
                 new SObjectDescribe().describeGlobal(SObjectCategory.STANDARD).then(objs => {
-                    retrieveComponents(resolve, {types: [{ name: 'CustomObject', members: objs }]});
-                });               
+                    retrieveComponents(resolve, { types: [{ name: 'CustomObject', members: objs }] });
+                });
             }
         }
     }
 
     function processResult(stream: NodeJS.ReadableStream) {
         return new Promise(function (resolve, reject) {
-            var bufs: any = [];
-            stream.on('data', function (d) {
-                bufs.push(d);
-            });
-            stream.on('error', function (err) {
-                reject(err || { message: 'package not found' });
-            });
-            stream.on('end', function () {
-                var reader: any[]// = ZIP.Reader(Buffer.concat(bufs));
-                reader.forEach(function (entry) {
-                    if (entry.isFile()) {
-                        var name: string = entry.getName();
-                        var data: Buffer = entry.getData();
-                        if (option && option.description === 'packaged') {
-                            option.description = 'unpackaged';
+            var resBundleNames: string[] = [];
+            const destDir: string = vscode.window.forceCode.projectRoot;
+            new compress.zip.UncompressStream({ source: stream })
+                .on('error', function (err) {
+                    reject(err || { message: 'package not found' });
+                })
+                .on('entry', function (header, stream, next) {
+                    stream.on('end', next);
+                    const name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
+                    if (header.type === 'file') {
+                        if (name !== 'package.xml' || vscode.window.forceCode.config.overwritePackageXML) {
+                            if(!fs.existsSync(path.dirname(path.join(destDir, name)))) {
+                                fs.mkdirpSync(path.dirname(path.join(destDir, name)));
+                            }
+                            stream.pipe(fs.createWriteStream(path.join(destDir, name)));
                         }
-                        if (option && option.description) {
-                            name = path.normalize(name).replace(option.description + path.sep, '');
-                        }
-                        name = path.normalize(name).replace('unpackaged' + path.sep, '');
-                        if(name !== 'package.xml' || vscode.window.forceCode.config.overwritePackageXML) {
-                            fs.outputFileSync(`${vscode.window.forceCode.projectRoot}${path.sep}${name}`, data);
-                        }
-                        var tType: string = getToolingTypeFromExt(name);
-                        if(tType) {
+                        const tType: string = getToolingTypeFromExt(name);
+                        if (tType) {
                             // add to ws members
                             var wsMem: IWorkspaceMember = {
                                 name: name.split(path.sep).pop().split('.')[0],
@@ -292,48 +285,51 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
 
                             newWSMembers.push(wsMem);
 
-                            if(!typeNames.includes(tType)) {
+                            if (!typeNames.includes(tType)) {
                                 typeNames.push(tType);
-                                toolTypes.push({type: tType});
+                                toolTypes.push({ type: tType });
                             }
                         }
-                        if(name.endsWith('.resource-meta.xml')) {
-                            // unzip the resource
-                            parseString(data, { explicitArray: false }, function (err, dom) {
-                                if (!err) {
-                                    var actualResData = fs.readFileSync(`${vscode.window.forceCode.projectRoot}${path.sep}${name}`.split('-meta.xml')[0]);
-                                    var ContentType: string = dom.StaticResource.contentType;
-                                    var ctFolderName = ContentType.split('/').join('.');
-                                    const resFN: string = name.slice(name.indexOf(path.sep) + 1).split('.')[0];
-                                    if(ContentType.includes('zip')) {
-                                        var zipReader: any[]// = ZIP.Reader(new Buffer(actualResData));
-                                        zipReader.forEach(function (zipEntry) {
-                                            if (zipEntry.isFile()) {
-                                                var zipFName: string = zipEntry.getName();
-                                                var zipFData: Buffer = zipEntry.getData();
-                                                var filePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${zipFName}`;
-                                                fs.outputFileSync(filePath, zipFData);
-                                            }
-                                        });
-                                    } else {
-                                        // this will work for most other things...
-                                        var theData: any;
-                                        if(ContentType.includes('image') || ContentType.includes('shockwave-flash')) {
-                                            theData = new Buffer(actualResData.toString('base64'), 'base64');
-                                        } else {
-                                            theData = actualResData.toString(mime.charset(ContentType) || 'UTF-8');
-                                        }
-                                        var ext = mime.extension(ContentType);
-                                        var filePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}resource-bundles${path.sep}${resFN}.resource.${ctFolderName}${path.sep}${resFN}.${ext}`;
-                                        fs.outputFileSync(filePath, theData);
-                                    }
-                                }
-                            });
+                        if (name.endsWith('.resource-meta.xml')) {
+                            resBundleNames.push(name);
                         }
+                    } else { // directory
+                        fs.mkdirpSync(path.join(destDir, header.name));
+                        stream.resume();
                     }
+                })
+                .on('finish', () => {
+                    resBundleNames.forEach(metaName => {
+                        const data: string = fs.readFileSync(path.join(destDir, metaName)).toString();
+                        // unzip the resource
+                        parseString(data, { explicitArray: false }, function (err, dom) {
+                            if (!err) {
+                                var actualResData = fs.readFileSync(path.join(destDir, metaName).split('-meta.xml')[0]);
+                                var ContentType: string = dom.StaticResource.contentType;
+                                var ctFolderName = ContentType.split('/').join('.');
+                                const resFN: string = metaName.slice(metaName.indexOf(path.sep) + 1).split('.')[0];
+                                var zipFilePath: string = path.join(destDir, 'resource-bundles', resFN + '.resource.' + ctFolderName);
+                                if (ContentType.includes('gzip')) {
+                                    compress.gzip.uncompress(actualResData, zipFilePath);
+                                } else if (ContentType.includes('zip')) {
+                                    compress.zip.uncompress(actualResData, zipFilePath);
+                                } else {
+                                    // this will work for most other things...
+                                    var theData: any;
+                                    if (ContentType.includes('image') || ContentType.includes('shockwave-flash')) {
+                                        theData = new Buffer(actualResData.toString('base64'), 'base64');
+                                    } else {
+                                        theData = actualResData.toString(mime.charset(ContentType) || 'UTF-8');
+                                    }
+                                    var ext = mime.extension(ContentType);
+                                    var filePath: string = path.join(destDir, 'resource-bundles', resFN + '.resource.' + ctFolderName, resFN + '.' + ext);
+                                    fs.outputFileSync(filePath, theData);
+                                }
+                            }
+                        });
+                    });
+                    resolve({ success: true });
                 });
-                resolve({ success: true });
-            });
         });
     }
     // =======================================================================================================================================
@@ -352,20 +348,20 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 }
                 return Promise.resolve(res);
             });
-            
+
             function updateWSMems(): Promise<any> {
-                if(toolTypes.length > 0) {
-                    var theTypes: {[key: string]: Array<any>} = {};
-    
+                if (toolTypes.length > 0) {
+                    var theTypes: { [key: string]: Array<any> } = {};
+
                     theTypes['type0'] = toolTypes;
-                    if(theTypes['type0'].length > 3) {
-                        for(var i = 1; theTypes['type0'].length > 3; i++) {
+                    if (theTypes['type0'].length > 3) {
+                        for (var i = 1; theTypes['type0'].length > 3; i++) {
                             theTypes['type' + i] = theTypes['type0'].splice(0, 3);
                         }
                     }
                     let proms = Object.keys(theTypes).map(curTypes => {
-                        const shouldGetCoverage = theTypes[curTypes].find(cur => {return cur.type === 'ApexClass' || cur.type === 'ApexTrigger';});
-                        if(shouldGetCoverage) {
+                        const shouldGetCoverage = theTypes[curTypes].find(cur => { return cur.type === 'ApexClass' || cur.type === 'ApexTrigger'; });
+                        if (shouldGetCoverage) {
                             getCodeCov = true;
                         }
                         return vscode.window.forceCode.conn.metadata.list(theTypes[curTypes]);
@@ -377,19 +373,19 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     return Promise.resolve();
                 }
             }
-    
+
             function parseRecords(recs: any[]): Promise<any> {
                 console.log('Done retrieving metadata records');
                 recs.some(curSet => {
                     return curSet.some(key => {
-                        if(newWSMembers.length > 0) {
+                        if (newWSMembers.length > 0) {
                             var index: number = newWSMembers.findIndex(curMem => {
                                 return curMem.name === key.fullName && curMem.type === key.type;
                             });
-                            if(index >= 0) {
+                            if (index >= 0) {
                                 newWSMembers[index].id = key.id;
                                 newWSMembers[index].lastModifiedDate = key.lastModifiedDate;
-                                newWSMembers[index].lastModifiedByName = key.lastModifiedByName; 
+                                newWSMembers[index].lastModifiedByName = key.lastModifiedByName;
                                 newWSMembers[index].lastModifiedById = key.lastModifiedById;
                                 codeCovViewService.addClass(newWSMembers.splice(index, 1)[0], true);
                             }
@@ -399,7 +395,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     });
                 });
                 console.log('Done updating/adding metadata');
-                if(getCodeCov) {
+                if (getCodeCov) {
                     return commandService.runCommand('ForceCode.getCodeCoverage', undefined, undefined).then(() => {
                         console.log('Done retrieving code coverage');
                         return Promise.resolve();

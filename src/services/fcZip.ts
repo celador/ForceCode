@@ -51,13 +51,13 @@ export function getFileListFromPXML(): Promise<string[]> {
                     var ext = getAnyExtNameFromTT(curType.name);
                     if (folder) {
                         var theExt: string = '.' + ext;
-                        if(folder === 'aura') {
+                        if (folder === 'aura') {
                             theExt = '';
                         }
                         toArray(curType.members).forEach(curMem => {
-                            if(fs.existsSync(path.join(projectRoot, folder, curMem + theExt))) {
+                            if (fs.existsSync(path.join(projectRoot, folder, curMem + theExt))) {
                                 fileList.push(path.join(folder, curMem + theExt));
-                                if(folder !== 'aura') {
+                                if (folder !== 'aura') {
                                     fileList.push(path.join(folder, curMem + theExt + '-meta.xml'));
                                 }
                             }
