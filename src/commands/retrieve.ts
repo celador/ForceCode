@@ -214,7 +214,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     .map(r => {
                         return { name: r.xmlName, members: '*' };
                     });
-                retrieveComponents(resolve, {types: types});
+                retrieveComponents(resolve, { types: types });
             }
 
             function unpackaged() {
