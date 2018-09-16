@@ -50,6 +50,7 @@ Please note that the following permissions are required to develop on the Force.
 * Right click on a file in the explorer to save.
 * Right click on a file or folder to refresh from the server.
 * Multiple org support. Log into each org through ForceCode and you won't need to log out to switch orgs, simply click on another org in the "Saved Usernames" view and ForceCode will log you in.
+    * You can now right-click on a username to switch/login/logout of an org. When logging out using this method you don't need to switch to the org you're logging out of.
 * Open Classes, Triggers, Visualforce pages, and Visualforce components by right clicking and selecting open
     file in org.
 * Open org in the browser. No more need to open a browser and login to salesforce.
@@ -85,6 +86,7 @@ Please note that the following permissions are required to develop on the Force.
 * Deploy Package
     * Replaces need for CumulusCI w/ Ant
     * Retrieve detailed deploy information
+    * ForceCode now only deploys the files contained in your package.xml! (Yes, destructiveChanges.xml, destructiveChangesPre.xml, and destructiveChangesPost.xml files will deploy as well so be careful!!!)
 * Retrieve Package - three options
     * Retrieve all metadata
     * Retrieve by selecting from available Packages
@@ -167,7 +169,7 @@ The configuration file should look something like... (THIS IS AN EXAMPLE WITH EV
 * debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
 * debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
 * deployOptions: Deploy your package based on your configured deploy options and the package.xml in your src folder.
-  * checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.  This will generate a `.validationId` file.
+  * checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.
   * ignoreWarnings:  Indicates whether a warning should allow a deployment to complete successfully \(true\) or not \(false\).
   * rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
   * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
@@ -268,7 +270,7 @@ SPA folders do not automatically deploy.  We typically run these offline with `j
 
 Menu: &gt;ForceCode Menu ... Deploy Package
 
-Deploy your package based on your configured deploy options and the package.xml in your src folder.
+Deploy your package based on your configured deploy options and the package.xml in your src folder. ForceCode will now only deploy the files contained in the package.xml file.
 
 **Options**:
 
@@ -349,6 +351,13 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.8.5
+    * Switching user optimizations (It's now quite a bit faster to switch (varys with workspace))
+    * Context menu added to user names. You can now right click on a username to log out without switching to it first and you can switch by right click as well.
+    * Limits now shown on all usernames if you've connected previously (will reset if you close and reopen vscode)
+    * Only deploy the files contained in package.xml when chosing the deploy menu option.
+    * Fix retrieving gzip static resources
+    * Fix exception when exiting "Retrieve Package/Metadata" menu
 * 3.8.4
     * ForceCode now detects when a refresh token has expired and will make you log in again.
     * Fix retrieving all standard objects
