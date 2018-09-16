@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 import { dxService } from '../services';
-
-var archiver = require('archiver');
+import { getFileListFromPXML, zipFiles } from './../services';
 
 export default function deploy(context: vscode.ExtensionContext) {
     vscode.window.forceCode.outputChannel.clear();
@@ -13,6 +11,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         ignoreWarnings: false,
         rollbackOnError: true,
         singlePackage: true,
+        allowMissingFiles: true,
     };
 
     return Promise.resolve(vscode.window.forceCode)
@@ -21,19 +20,18 @@ export default function deploy(context: vscode.ExtensionContext) {
     // =======================================================================================================================================
     // =======================================================================================================================================
     function deployPackage() {
-        // Proxy Console.info to capture the status output from metadata tools
-        Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
-        vscode.window.forceCode.outputChannel.show();
-        var archive = archiver('zip');
-        archive.directory(deployPath + path.sep, false);
-        archive.finalize();
-        return vscode.window.forceCode.conn.metadata.deploy(archive, deployOptions)
-            .complete(function(err, result) {
-                if (err) { 
-                    return err; 
-                } else {
-                    return result;
-                }
+        return getFileListFromPXML().then(files => {
+            var zip = zipFiles(files, deployPath);
+            Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
+            vscode.window.forceCode.outputChannel.show();
+            return vscode.window.forceCode.conn.metadata.deploy(zip, deployOptions)
+                .complete(function (err, result) {
+                    if (err) {
+                        return err;
+                    } else {
+                        return result;
+                    }
+                });
         });
     }
     // =======================================================================================================================================

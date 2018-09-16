@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
-import jszip = require('jszip');
 import globule = require('globule');
+import { zipFiles } from './../services';
 const mime = require('mime-types');
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
@@ -82,17 +82,16 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument, 
     }
 }
 
-function onError() {
+function onError(err) {
     var mess = 'Invalid static resource folder or file name. Name must be in the form of ResourceName.resource.type.subtype\nEXAMPLE: '
     + 'MyResource.resource.aplication.javascript\nThis folder would then contain one file, named MyResource.js';
-    vscode.window.showErrorMessage(mess);
+    vscode.window.showErrorMessage(mess + '\n' + (err.message ? err.message : err));
 }
 
 function bundleAndDeploy(option) {
     let root: string = getPackagePath(option);
     if(option.detail.includes('zip') || option.detail === 'SPA') {
         let zip: any = zipFiles(getFileList(root), root);
-        bundle(zip, option.label);
         return deploy(zip, option.label, option.detail).then(deployComplete);
     } else {
         var ext = '.' + mime.extension(option.detail);
@@ -130,32 +129,6 @@ function getPackagePath(option) {
         }
     }
     return bundlePath;
-}
-
-/**
- * @private zipFiles
- * Given an array of file paths, make a zip file and add all
- * then returns the resulting zip object (not actual file) for use.
- * @param {String[]} fileList - Array of file paths
- * @return {Zip} - zip blob for use
- */
-function zipFiles(fileList: string[], root: string) {
-    var zip: any = new jszip();
-    // Add folders and files to zip object for each file in the list
-    fileList.forEach(function (file) {
-        // the below code should work, according to the documentation
-        // zip.file(file, content, { createFolders: true })
-        // the above code should work, but for some reason it isn't so we have to add the files manually, as per the code below
-        let pathFragments: string[] = file.split(path.sep);
-        // reduce all the directory names, adding Folders to the zip for each folder created
-        // The return of the reduce is the continuation of the parent, so adding folders just works... 
-        // Do that until you have mapped all the folders, then return the zip/folder and add the file from the contents
-        pathFragments.slice(0, -1)
-            .reduce((parent, name) => parent.folder(name), zip)
-            .file(pathFragments[pathFragments.length - 1], fs.readFileSync(root + path.sep + file));
-    });
-
-    return zip;
 }
 
 /**
@@ -205,29 +178,21 @@ function getFileList(root) {
 }
 
 /**
- * @func bundle
- * The zip file is written to the static resource directory
- * @param none
- * @return undefined
- */
-function bundle(zip, packageName) {
-    // Here is replaceSrc possiblity
-    var finalPath: string = `${vscode.window.forceCode.projectRoot}${path.sep}staticresources${path.sep}${packageName}.resource`;
-    return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }).then(function (buffer) {
-        return fs.outputFile(finalPath, buffer);
-    });
-}
-
-/**
  * @func deploy
  * The zip file is zipped and deployed 
  * @param none
  * @return undefined
  */
 function deploy(zip, packageName, conType) {
-    // Create the base64 data to send to Salesforce 
-    return zip.generateAsync({ type: 'base64', compression: 'DEFLATE' })
-        .then(content => vscode.window.forceCode.conn.metadata.upsert('StaticResource', makeResourceMetadata(packageName, content, conType)));
+    return new Promise((resolve, reject) => {
+        var finalPath: string = `${vscode.window.forceCode.projectRoot}${path.sep}staticresources${path.sep}${packageName}.resource`;
+        zip.pipe(fs.createWriteStream(finalPath))
+            .on('finish', () => {
+                const content = fs.readFileSync(finalPath).toString('base64');
+                resolve(vscode.window.forceCode.conn.metadata.upsert('StaticResource', makeResourceMetadata(packageName, content, conType)));
+            })
+            .on('error', (err) => { reject(err); });
+    });
 }
 
 /**
