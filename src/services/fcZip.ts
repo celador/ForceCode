@@ -8,16 +8,15 @@ import { parseString } from 'xml2js';
 /**
  * @private zipFiles
  * Given an array of file paths, make a zip file and add all
- * then returns the resulting zip object (not actual file) for use.
+ * then returns the resulting zip stream (not actual file) for use.
  * @param {String[]} fileList - Array of file paths
- * @return {Zip} - zip blob for use
+ * @return {Zip} - zip stream
  */
 export function zipFiles(fileList: string[], root: string) {
     var zip: any = new compress.zip.Stream();
-    const projectRoot: string = vscode.window.forceCode.projectRoot;
     // Add folders and files to zip object for each file in the list
     fileList.forEach(function (file) {
-        zip.addEntry(path.join(projectRoot, file), { relativePath: file.indexOf('.') !== -1 ? file : 'aura' });
+        zip.addEntry(path.join(root, file), { relativePath: file.indexOf('.') !== -1 ? file : 'aura' });
     });
 
     return zip;
