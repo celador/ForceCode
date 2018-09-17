@@ -28,9 +28,6 @@ export default function diff(document: vscode.TextDocument, auraSource?: boolean
     }
 
     function buildSalesforceUriFromLocalUri(): vscode.Uri {
-        if(auraSource) {
-            ForceCodeContentProvider.getInstance().auraSource = auraSource;
-        }
         var sfuri: vscode.Uri = vscode.Uri.parse(`${PROVIDER}/${toolingType}/${fileName}?${Date.now()}`);
         return sfuri;
     }
