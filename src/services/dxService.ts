@@ -291,6 +291,16 @@ export default class DXService implements DXCommands {
                 }
             })
             return orgs;
+        })
+        .catch(err => {
+            // we got an error because there are no connections
+            fcConnection.getChildren().forEach(curConn => {
+                curConn.connection = undefined;
+                if(fs.existsSync(curConn.sfdxPath)) {
+                    fs.removeSync(curConn.sfdxPath);
+                }
+            });
+            return undefined;
         });
     }
 
