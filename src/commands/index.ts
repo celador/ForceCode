@@ -19,6 +19,7 @@ import soql from './soql';
 import staticResource from './staticResource';
 import toql from './toql';
 import {staticResourceDeployFromFile} from './staticResource';
+import settings from './settings';
 
 export {
     apexTest,
@@ -36,6 +37,7 @@ export {
     open,
     getOverallCoverage,
     retrieve,
+    settings,
     showFileOptions,
     showMenu,
     soql,

@@ -243,6 +243,18 @@ export const fcCommands: FCCommand[] = [
         }
     },
     {
+        commandName: 'ForceCode.settings',
+        name: 'Opening settings',
+        hidden: false,
+        description: 'Settings',
+        detail: 'Change the settings in you force.json via a GUI.',
+        icon: 'gear',
+        label: 'Settings',
+        command: function (context, selectedResource?) {
+            return commands.settings();
+        }
+    },
+    {
         commandName: 'ForceCode.logout',
         name: 'Logging out',
         hidden: false,

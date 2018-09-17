@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForceCode Settings</title>
+</head>
+
+<body>
+    <fieldset>
+        <legend>ForceCode Settings</legend>
+        <div id="settings">
+
+        </div>
+    </fieldset>
+
+</body>
+
+<script>
+    const vscode = acquireVsCodeApi();
+
+    // Handle the message inside the webview
+    window.addEventListener('message', event => {
+        const message = event.data; // The JSON data our extension sent
+        var html = '';
+
+        Object.keys(message).sort().forEach(key => {
+            html += getHTML(message, key, 2, '');
+        });
+        document.getElementById("settings").innerHTML = html;
+    });
+
+    function getHTML(message, key, level, subId) {
+        var theHtml = '';
+        if (level > 2 || key !== 'src' && key !== 'url' && key !== 'username') {
+            if (typeof (message[key]) === 'boolean') {
+                theHtml += '<div><input type="checkbox" id="'
+                    + subId + key
+                    + '" onchange="changeSetting(\''
+                    + subId + key
+                    + '\')"'
+                    + (message[key] === true ? ' checked' : '')
+                    + '>'
+                    + key
+                    + '</div>';
+            } else if (typeof (message[key]) === 'string') {
+                theHtml += '<div>'
+                    + key
+                    + ' <input type="text" id="'
+                    + subId + key
+                    + '" onchange="changeSetting(\''
+                    + subId + key
+                    + '\')"'
+                    + ' value="'
+                    + message[key]
+                    + '"></div>';
+            } else if (typeof (message[key]) === 'number') {
+                theHtml += '<div>'
+                    + key
+                    + ' <input type="number" id="'
+                    + subId + key
+                    + '" onchange="changeSetting(\''
+                    + subId + key
+                    + '\')"'
+                    + ' value="'
+                    + message[key]
+                    + '"></div>';
+            } else if (typeof (message[key]) === 'object') {
+                theHtml += '<div>'
+                    + key
+                    + '</div>';
+                Object.keys(message[key]).sort().forEach(subKey => {
+                    theHtml += '<div style="margin-left:'
+                        + level
+                        + 'em"' 
+                        + getHTML(message[key], subKey, level + 2, subId + key + '_fcSep_') 
+                        + '</div>';
+                }); 
+            }
+        }
+        return theHtml;
+    }
+
+    function changeSetting(setting_ID) {
+        const element = document.getElementById(setting_ID);
+        const type = element.getAttribute("type");
+        var value;
+        if (type === 'checkbox') {
+            value = element.checked;
+        } else if (type === 'text') {
+            value = element.value;
+        } else if (type === 'number') {
+            value = element.valueAsNumber;
+        }
+        var setting = {}
+        console.log(setting_ID);
+        if(setting_ID.indexOf('_fcSep_') !== -1) {
+            const pieces = setting_ID.split('_fcSep_');
+            setting = getSetting(setting, pieces, 0, value);
+        } else {
+            setting[setting_ID] = value;
+        }
+        
+        vscode.postMessage(setting);
+    }
+
+    function getSetting(setting, pieces, offset, value) {
+        console.log(offset);
+        console.log(pieces[offset]);
+        if(offset === pieces.length - 1) {
+            setting[pieces[offset]] = value;
+            return setting;
+        } 
+        setting[pieces[offset]] = {}
+        setting[pieces[offset]] = getSetting(setting[pieces[offset]], pieces, offset + 1, value);
+        return setting;
+    }
+</script>
+
+</html>
