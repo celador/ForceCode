@@ -70,7 +70,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     public refreshConnections(): Promise<boolean> {
-        return dxService.orgList().then(res => { return Promise.resolve() }, err => { return Promise.resolve(); })
+        return dxService.orgList()
             .then(() => {
                 return this.refreshTheConns(this);
             });
