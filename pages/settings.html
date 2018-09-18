@@ -7,6 +7,17 @@
     <title>ForceCode Settings</title>
 </head>
 
+<style>
+    div {
+        padding: 2px;
+        margin-left: 1em;
+    }
+
+    button {
+        margin-left: 10px;
+    }
+</style>
+
 <body>
     <fieldset>
         <legend>ForceCode Settings</legend>
@@ -19,21 +30,28 @@
 
 <script>
     const vscode = acquireVsCodeApi();
+    var fcSettings = {}
+    var fcHtml = '';
 
     // Handle the message inside the webview
     window.addEventListener('message', event => {
-        const message = event.data; // The JSON data our extension sent
-        var html = '';
-
-        Object.keys(message).sort().forEach(key => {
-            html += getHTML(message, key, 2, '');
-        });
-        document.getElementById("settings").innerHTML = html;
+        fcSettings = event.data;
+        refreshPage();
     });
+
+    function refreshPage() {
+        var html = '<div style="text-align:center;"><button type="button" onclick="saveSettings()">Save</button></div>';
+
+        Object.keys(fcSettings).sort().forEach(key => {
+            html += getHTML(fcSettings, key, 3, '');
+        });
+        html += '<div style="text-align:center;"><button type="button" onclick="saveSettings()">Save</button></div>';
+        document.getElementById("settings").innerHTML = html;
+    }
 
     function getHTML(message, key, level, subId) {
         var theHtml = '';
-        if (level > 2 || key !== 'src' && key !== 'url' && key !== 'username') {
+        if (level > 3 || key !== 'src' && key !== 'url' && key !== 'username') {
             if (typeof (message[key]) === 'boolean') {
                 theHtml += '<div><input type="checkbox" id="'
                     + subId + key
@@ -45,16 +63,25 @@
                     + key
                     + '</div>';
             } else if (typeof (message[key]) === 'string') {
-                theHtml += '<div>'
-                    + key
-                    + ' <input type="text" id="'
-                    + subId + key
-                    + '" onchange="changeSetting(\''
-                    + subId + key
-                    + '\')"'
-                    + ' value="'
-                    + message[key]
-                    + '"></div>';
+                if (key === 'testLevel') {
+                    theHtml += '<div>testLevel <select id="deployOptions_fcSep_testLevel" onchange="changeSetting(\'deployOptions_fcSep_testLevel\')">'
+                        + '<option value="NoTestRun" ' + (message[key] === 'NoTestRun' ? 'selected="selected"' : '') + '>NoTestRun</option>'
+                        + '<option value="RunSpecifiedTests" ' + (message[key] === 'RunSpecifiedTests' ? 'selected="selected"' : '') + '>RunSpecifiedTests</option>'
+                        + '<option value="RunLocalTests" ' + (message[key] === 'RunLocalTests' ? 'selected="selected"' : '') + '>RunLocalTests</option>'
+                        + '<option value="RunAllTestsInOrg" ' + (message[key] === 'RunAllTestsInOrg' ? 'selected="selected"' : '') + '>RunAllTestsInOrg</option>'
+                        + '</select></div>';
+                } else {
+                    theHtml += '<div>'
+                        + key
+                        + ' <input type="text" id="'
+                        + subId + key
+                        + '" onchange="changeSetting(\''
+                        + subId + key
+                        + '\')"'
+                        + ' value="'
+                        + message[key]
+                        + '"></div>';
+                }
             } else if (typeof (message[key]) === 'number') {
                 theHtml += '<div>'
                     + key
@@ -67,16 +94,30 @@
                     + message[key]
                     + '"></div>';
             } else if (typeof (message[key]) === 'object') {
-                theHtml += '<div>'
-                    + key
-                    + '</div>';
-                Object.keys(message[key]).sort().forEach(subKey => {
-                    theHtml += '<div style="margin-left:'
-                        + level
-                        + 'em"' 
-                        + getHTML(message[key], subKey, level + 2, subId + key + '_fcSep_') 
+                if (key === 'runTests') {
+                    theHtml += '<div>'
+                        + key
+                        + ' <input type="text" id="'
+                        + subId + key
+                        + '" onchange="changeSetting(\''
+                        + subId + key
+                        + '\')"'
+                        + ' value="'
+                        + message[key].join(',')
+                        + '"></div>';
+                } else {
+                    theHtml += '<div style="border-bottom: 2px solid blue;border-left: 2px solid blue; padding: 5px">'
+                        + key + (key === 'srcs' ? '<button type="button" onclick="addSrc()">Add</button>' : '')
+                        + (key.indexOf('@') !== -1 ? '<button type="button" onclick="removeSrc(\'' + key + '\')">Remove</button>' : '')
                         + '</div>';
-                }); 
+                    Object.keys(message[key]).sort().forEach(subKey => {
+                        theHtml += '<div style="margin-left:'
+                            + level
+                            + 'em">'
+                            + getHTML(message[key], subKey, level + 2, subId + key + '_fcSep_')
+                            + '</div>';
+                    });
+                }
             }
         }
         return theHtml;
@@ -94,27 +135,61 @@
             value = element.valueAsNumber;
         }
         var setting = {}
-        console.log(setting_ID);
-        if(setting_ID.indexOf('_fcSep_') !== -1) {
-            const pieces = setting_ID.split('_fcSep_');
-            setting = getSetting(setting, pieces, 0, value);
+        if (setting_ID.indexOf('_fcSep_') !== -1) {
+            if (setting_ID.split('_fcSep_')[1] === 'runTests') {
+                if (element.value.indexOf(',') !== -1) {
+                    value = element.value.split(',');
+                } else if (element.value.trim() !== '') {
+                    value = [element.value];
+                } else {
+                    value = [];
+                }
+                setting = { deployOptions: { runTests: value } }
+            } else if (setting_ID.split('_fcSep_')[1] === 'testLevel') {
+                setting = { deployOptions: { testLevel: element.options[element.selectedIndex].value }}
+            } else {
+                const pieces = setting_ID.split('_fcSep_');
+                setting = getSetting(setting, pieces, 0, value);
+            }
         } else {
             setting[setting_ID] = value;
         }
-        
+
         vscode.postMessage(setting);
     }
 
     function getSetting(setting, pieces, offset, value) {
         console.log(offset);
         console.log(pieces[offset]);
-        if(offset === pieces.length - 1) {
+        if (offset === pieces.length - 1) {
             setting[pieces[offset]] = value;
             return setting;
-        } 
+        }
         setting[pieces[offset]] = {}
         setting[pieces[offset]] = getSetting(setting[pieces[offset]], pieces, offset + 1, value);
         return setting;
+    }
+
+    function addSrc() {
+        document.getElementById("settings").innerHTML += 'Username: <input type="text" id="theUsername" onchange="addUsername()"/>'
+            + '<button type="button">Add</button>';
+    }
+
+    function addUsername() {
+        var uName = document.getElementById("theUsername").value;
+        fcSettings['srcs'][uName] = { src: '', url: '' }
+        refreshPage();
+    }
+
+    function removeSrc(toRemove) {
+        console.log(toRemove);
+        delete fcSettings['srcs'][toRemove];
+        refreshPage();
+        vscode.postMessage({ delete: toRemove });
+    }
+
+    function saveSettings() {
+        vscode.postMessage({ save: true });
     }
 </script>
 
