@@ -24,6 +24,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   private runningTasksStatus: vscode.StatusBarItem;
   private static instance: CommandViewService;
   private readonly tasks: Task[];
+  private fileModCommands: number = 0;
   private _onDidChangeTreeData: vscode.EventEmitter<
     Task | undefined
   > = new vscode.EventEmitter<Task | undefined>();
@@ -46,6 +47,12 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   }
 
   public addCommandExecution(execution: FCCommand, context: any, selectedResource?: any) {
+    if(execution.commandName === 'ForceCode.fileModified') {
+      this.fileModCommands++;
+    }
+    if(this.fileModCommands > vscode.window.forceCode.config.maxFileChangeNotifications) {
+      return Promise.resolve();
+    }
     var theTask: Task = new Task(this, execution, context, selectedResource);
     this.tasks.push(theTask);
     this.runningTasksStatus.text = 'ForceCode: Executing ' + this.tasks.length + ' Task(s)';
@@ -59,6 +66,9 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   public removeTask(task: Task): boolean {
     const index = this.tasks.indexOf(task);
     if (index !== -1) {
+      if(this.tasks[index].execution.commandName === 'ForceCode.fileModified') {
+        this.fileModCommands--;
+      }
       this.tasks.splice(index, 1);
 
       if(this.tasks.length > 0) {
@@ -93,9 +103,8 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
 
 export class Task extends vscode.TreeItem {
   public readonly collapsibleState: vscode.TreeItemCollapsibleState;
-
+  public readonly execution: FCCommand;
   private readonly taskViewProvider: CommandViewService;
-  private readonly execution: any;
   private readonly context: any;
   private readonly selectedResource: any;
 

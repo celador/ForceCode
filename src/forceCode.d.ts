@@ -34,6 +34,7 @@ export interface Config {
         singlePackage?: boolean,
         testLevel?: string,       
     };
+    maxFileChangeNotifications?: number;
     overwritePackageXML?: boolean;
     poll?: number;
     pollTimeout?: number;

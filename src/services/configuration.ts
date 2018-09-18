@@ -24,6 +24,7 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 			'singlePackage': true,
 			'testLevel': 'NoTestRun'
 		},
+		maxFileChangeNotifications: 15,
 		overwritePackageXML: false,
 		poll: 1500,
 		pollTimeout: 1200,
