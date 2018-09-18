@@ -5,8 +5,39 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import constants from './../models/constants';
 import { fcConnection } from '.';
+import * as deepmerge from 'deepmerge'
 
 export default function getSetConfig(service?: forceCode.IForceService): Promise<Config> {
+	const defautlOptions = {
+		apiVersion: constants.API_VERSION,
+		autoRefresh: false,
+		browser: 'Google Chrome Canary',
+		checkForFileChanges: true,
+		debugFilter: 'USER_DEBUG|FATAL_ERROR',
+		debugOnly: true,
+		deployOptions: {
+			'allowMissingFiles': true,
+			'checkOnly': false,
+			'ignoreWarnings': true,
+			'rollbackOnError': true,
+			'runTests': [],
+			'singlePackage': true,
+			'testLevel': 'NoTestRun'
+		},
+		overwritePackageXML: false,
+		poll: 1500,
+		pollTimeout: 1200,
+		prefix: '',
+		revealTestedClass: false,
+		showFilesOnOpen: true,
+		showFilesOnOpenMax: 3,
+		showTestCoverage: true,
+		showTestLog: true,
+		spaDist: '',
+		srcDefault: '',
+		srcs: {}
+	};
+
 	var self: forceCode.IForceService = service || vscode.window.forceCode;
 	if (!vscode.workspace.workspaceFolders) {
 		throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
@@ -15,26 +46,11 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 	try {
 		self.config = fs.readJsonSync(projPath + 'force.json');
 	} catch (err) {
-		self.config = {
-			apiVersion: constants.API_VERSION,
-			autoRefresh: false,
-			browser: 'Google Chrome Canary',
-			checkForFileChanges: true,
-			debugOnly: true,
-			debugFilter: 'USER_DEBUG|FATAL_ERROR',
-			deployOptions: {
-				'checkOnly': false,
-				//'runAllTests': false,
-				'ignoreWarnings': true,
-			},
-			overwritePackageXML: false,
-			pollTimeout: 1200,
-			showFilesOnOpen: true,
-			showFilesOnOpenMax: 3,
-			showTestCoverage: true,
-			showTestLog: true,
-		};
+		self.config = defautlOptions;
 	}
+	
+	self.config = deepmerge(defautlOptions, self.config);
+
 	if (self.config && self.config !== null && typeof self.config === 'object' && !self.config.src) {
 		self.config.src = 'src';
 	}
