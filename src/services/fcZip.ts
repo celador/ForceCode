@@ -79,7 +79,7 @@ export function getFileListFromPXML(): Promise<string[]> {
     });
 }
 
-function toArray(toConvert): any[] {
+export function toArray(toConvert): any[] {
     if (!Array.isArray(toConvert)) {
         return [toConvert];
     } else {

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import constants from './../models/constants';
-import { commandService, codeCovViewService, fcConnection, dxService, FCOauth } from '../services';
+import { commandService, codeCovViewService, fcConnection, dxService, FCOauth, toArray } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
 import { getAnyTTFromFolder } from '../parsers/open';
@@ -230,6 +230,23 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 parseString(data, { explicitArray: false }, function (err, dom) {
                     if (err) { reject(err); } else {
                         delete dom.Package.$;
+                        if(!dom.Package.types) {
+                            reject({ message: 'No types element found to retrieve in the package.xml file.'});
+                        }
+                        if(!dom.Package.version) {
+                            reject({ message: 'No version element found in package.xml file.'});
+                        }
+                        const typeWithoutMembersOrName = toArray(dom.Package.types).find(curType => {
+                            return !curType.members || !curType.name;
+                        })
+                        if(typeWithoutMembersOrName) {
+                            if(typeWithoutMembersOrName.name) {
+                                reject({ message: typeWithoutMembersOrName.name + ' element has no members element defined to retrieve in package.xml file.' });
+                            } else {
+                                reject({ message: 'package.xml file contains a type element without a name element' });
+                            }
+                            
+                        }
                         resolve(vscode.window.forceCode.conn.metadata.retrieve({
                             unpackaged: dom.Package
                         }).stream());
