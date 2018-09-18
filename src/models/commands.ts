@@ -1,11 +1,10 @@
 import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
-import { getFileName } from './../parsers';
+import { getFileName, getToolingType } from './../parsers';
 import { commandService, commandViewService, codeCovViewService, configuration, fcConnection, dxService, FCOauth, FCConnection } from './../services';
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
-import * as fs from 'fs-extra';
 import { ToolingType } from '../commands/retrieve';
 import { getAnyTTFromFolder, getAnyNameFromUri } from '../parsers/open';
 import { FCCommand } from '../services/commandView';
@@ -133,7 +132,8 @@ export const fcCommands: FCCommand[] = [
             if(!vscode.window.activeTextEditor) {
                 return;
             }
-            return commands.diff(vscode.window.activeTextEditor.document);
+            const ttype: string = getToolingType(vscode.window.activeTextEditor.document);
+            return commands.diff(vscode.window.activeTextEditor.document, ttype === 'AuraDefinition');
         }
     },
     // Compile/Deploy
@@ -240,6 +240,18 @@ export const fcCommands: FCCommand[] = [
         label: 'Code Completion Refresh',
         command: function (context, selectedResource?) {
             return commands.codeCompletionRefresh();
+        }
+    },
+    {
+        commandName: 'ForceCode.settings',
+        name: 'Opening settings',
+        hidden: false,
+        description: 'Settings',
+        detail: 'Change the settings in you force.json via a GUI.',
+        icon: 'gear',
+        label: 'Settings',
+        command: function (context, selectedResource?) {
+            return commands.settings();
         }
     },
     {

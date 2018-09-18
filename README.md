@@ -53,6 +53,7 @@ Please note that the following permissions are required to develop on the Force.
     * You can now right-click on a username to switch/login/logout of an org. When logging out using this method you don't need to switch to the org you're logging out of.
 * Open Classes, Triggers, Visualforce pages, and Visualforce components by right clicking and selecting open
     file in org.
+* Simple graphical settings editor.
 * Open org in the browser. No more need to open a browser and login to salesforce.
 * Preview Visualforce pages/Lightning apps.
     * Either right click and select preview or click the icon that appears in the upper right.
@@ -114,7 +115,7 @@ Please submit any issues or feature requests to [https://github.com/daishi4u/For
 To begin, press `Opt+Cmd+C` or open the Command Pallet and type `>ForceCode: Menu` to bring up the ForceCode Menu  
 You can then select if you want to log into a production org or test org. A browser will then open to the Salesforce login where you can enter your credentials. A configuration file will then be auto generated for you in your current open project folder in vscode called `force.json`.  
 You need to have a folder opened in VSCode to be able to store this configuration file.
-The configuration file should look something like... (THIS IS AN EXAMPLE WITH EVERY POSSIBLE OPTION, THE DEFAULT DOESN'T QUITE LOOK LIKE THIS)
+The configuration file should look something like... (THIS IS AN EXAMPLE WITH EVERY POSSIBLE OPTION, THE DEFAULT DOESN'T QUITE LOOK LIKE THIS). You can either edit this file to change the settings or you can use the new settings option in the ForceCode menu!
 
 ```json
 {
@@ -320,6 +321,10 @@ Use this option and ForceCode will create a list of all apex classes and their c
 
 This will grab all sObject data from Salesforce and allow you to use this extension with the Salesforce Apex language extension for code smartness. Make sure you set up the Apex extension correctly by following the instructions [here](https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode-apex)
 
+### Settings
+
+This will open a ForceCode Settings window where you can change all of the options in your force.json file in a GUI!
+
 
 ## Help Develop ForceCode 
 
@@ -351,6 +356,10 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.8.6
+    * Added a new GUI to edit the ForceCode settings (The settings in the force.json file). It's simple and not very pretty at the moment, but it's functional!
+    * Fixed diffing Lightning components (Only available through the menu for now).
+    * Fixed ForceCode sometimes not detecting an expired refresh token and throwing an error instead of asking the user to login again.
 * 3.8.5
     * Switching user optimizations (It's now quite a bit faster to switch (varys with workspace))
     * Context menu added to user names. You can now right click on a username to log out without switching to it first and you can switch by right click as well.

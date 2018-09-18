@@ -4,12 +4,15 @@ import ForceCodeContentProvider from '../providers/ContentProvider';
 
 const PROVIDER: string = 'forcecode://salesforce.com';
 
-export default function diff(document: vscode.TextDocument, auraSource?: string) {
+export default function diff(document: vscode.TextDocument, auraSource?: boolean) {
     if(!document) {
         return;
     }
     const toolingType: string = parsers.getToolingType(document);
     const fileName: string = parsers.getWholeFileName(document);
+    if(auraSource) {
+        ForceCodeContentProvider.getInstance().auraSource = document;
+    }
     try{
         diffFile()
     } catch(err) {
@@ -25,9 +28,6 @@ export default function diff(document: vscode.TextDocument, auraSource?: string)
     }
 
     function buildSalesforceUriFromLocalUri(): vscode.Uri {
-        if(auraSource) {
-            ForceCodeContentProvider.getInstance().auraSource = auraSource;
-        }
         var sfuri: vscode.Uri = vscode.Uri.parse(`${PROVIDER}/${toolingType}/${fileName}?${Date.now()}`);
         return sfuri;
     }

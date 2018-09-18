@@ -122,7 +122,7 @@ function getPackagePath(option) {
         bundlePath += 'resource-bundles' + path.sep + option.label + '.resource.' + option.detail.replace('/', '.');
     } else {
         let dist: string = vscode.window.forceCode.config.spaDist;
-        if (dist) {
+        if (dist && dist !== '') {
             bundlePath += 'spa' + path.sep + option.label + path.sep + dist;
         } else {
             bundlePath += 'spa' + path.sep + option.label;

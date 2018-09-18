@@ -26,9 +26,12 @@ export interface Config {
     debugFilter?: string;
     debugOnly?: boolean;
     deployOptions?: {
+        allowMissingFiles?: boolean,
         checkOnly?: boolean,
         ignoreWarnings?: boolean,
         rollbackOnError?: boolean,
+        runTests?: string[],
+        singlePackage?: boolean,
         testLevel?: string,       
     };
     overwritePackageXML?: boolean;

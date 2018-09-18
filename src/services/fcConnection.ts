@@ -58,11 +58,19 @@ export class FCConnection extends vscode.TreeItem {
     }
 
     public showConnection() {
-        if (this.isCurrentConnection()) {
+        if (this.isCurrentConnection() && this.isLoggedIn()) {
             vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
             this.iconPath = {
                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
+            }
+            this.contextValue = 'currentConn';
+            this.command = undefined;
+        } else if (this.isCurrentConnection()) {
+            vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
+            this.iconPath = {
+                dark: path.join(__filename, '..', '..', '..', '..', 'images', 'yellowCircleFilled.svg'),
+                light: path.join(__filename, '..', '..', '..', '..', 'images', 'yellowCircleFilled.svg'),
             }
             this.contextValue = 'currentConn';
             this.command = undefined;

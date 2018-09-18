@@ -95,7 +95,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
             } else {
                 return vscode.window.showWarningMessage('Someone has changed this file!', 'Diff', 'Overwrite').then(s => {
                     if (s === 'Diff') {
-                        diff(document, currentObjectDefinition.Source);
+                        diff(document, true);
                         return {};
                     }
                     if (s === 'Overwrite') {

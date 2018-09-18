@@ -70,7 +70,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     public refreshConnections(): Promise<boolean> {
-        return dxService.orgList().then(res => { return Promise.resolve() }, err => { return Promise.resolve(); })
+        return dxService.orgList()
             .then(() => {
                 return this.refreshTheConns(this);
             });
@@ -90,7 +90,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                 })
                 .on('end', function () {
                     const fcConfig = (vscode.window.forceCode && vscode.window.forceCode.config ? vscode.window.forceCode.config : undefined);
-                    const srcs: { [key: string]: { src: string, url: string } } = fcConfig && fcConfig.srcs ? fcConfig.srcs : undefined;
+                    const srcs: { [key: string]: { src: string, url: string } } = fcConfig && fcConfig.srcs && fcConfig.srcs !== {} ? fcConfig.srcs : undefined;
                     if (srcs) {
                         Object.keys(srcs).forEach(curOrg => {
                             if (!service.getConnByUsername(curOrg)) {
@@ -205,7 +205,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         const fcConfig = vscode.window.forceCode ? vscode.window.forceCode.config : undefined;
         return (fcConfig && fcConfig.srcs && fcConfig.srcs[username]
                 ? fcConfig.srcs[username].src
-                : (fcConfig.srcDefault ? fcConfig.srcDefault : 'src'));
+                : (fcConfig.srcDefault && fcConfig.srcDefault !== '' ? fcConfig.srcDefault : 'src'));
     }
 
     public addConnection(orgInfo: FCOauth): FCConnection {
