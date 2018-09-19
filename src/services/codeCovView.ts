@@ -140,7 +140,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
           fcFiles.push(newFCFile);
         }
       });
-      //fcFiles.sort(this.sortFunc);
+      fcFiles.sort(this.sortFunc);
 
       return fcFiles;
     } else if (!element.getWsMember()) {
