@@ -147,7 +147,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       if (element.label === ClassType.NotInSrc) {
         var fcFiles: FCFile[] = [];
         workspace.textDocuments.forEach(curEd => {
-          if (!curEd.fileName.startsWith(window.forceCode.projectRoot) && fs.existsSync(curEd.fileName)) {
+          if (!curEd.fileName.startsWith(window.forceCode.projectRoot) && curEd.uri.scheme === 'file') {
             var newFCFile: FCFile = new FCFile(curEd.fileName.split(path.sep).pop(), TreeItemCollapsibleState.None, this);
             newFCFile.setType(ClassType.NotInSrc);
             newFCFile.command = {

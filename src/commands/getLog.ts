@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { QueryResult } from '../services/dxService';
 import { fcConnection, dxService } from '../services';
-import * as moment from 'moment';
 
 interface LogRecord {
     Id: string;
@@ -36,7 +35,7 @@ export default function getLog() {
         var options: vscode.QuickPickItem[] = results.records.map((record: LogRecord) => {
             return {
                 label: `Status: ${record.Status}`,
-                detail: `Start: ${moment(record.StartTime).format('dddd, MMMM Do YYYY, h:mm:ss a')}, Bytes: ${record.LogLength}`,
+                detail: `Start: ${new Date(record.StartTime).toLocaleString()}, Bytes: ${record.LogLength}`,
                 description: record.Id,
             };
         });
