@@ -91,6 +91,7 @@ interface IWorkspaceMember {
     lastModifiedById: string;
     type: string;
     coverage?: ICodeCoverage;
+    doNotChange?: boolean;
 }
 
 interface ICodeCoverage {

@@ -42,6 +42,7 @@ export default function deploy(context: vscode.ExtensionContext) {
                         const wsMem: IWorkspaceMember = curFCFile.getWsMember();
                         wsMem.lastModifiedDate = (new Date()).toISOString();
                         wsMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
+                        wsMem.doNotChange = false;
                         curFCFile.updateWsMember(wsMem);
                     }
                 });

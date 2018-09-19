@@ -110,6 +110,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
                 tempWSMem.lastModifiedDate = (new Date()).toISOString();
                 tempWSMem.lastModifiedByName = '';
                 tempWSMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
+                tempWSMem.doNotChange = false;
                 curFCFile.updateWsMember(tempWSMem);
                 return res;
             }, err => {
@@ -125,6 +126,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
             tempWSMem.lastModifiedDate = (new Date()).toISOString();
             tempWSMem.lastModifiedByName = '';
             tempWSMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
+            tempWSMem.doNotChange = false;
             fcfile.updateWsMember(tempWSMem);
             return res;
         });
