@@ -300,7 +300,7 @@ export class FCFile extends TreeItem {
       arguments: [this.wsMember.path]
     }
 
-    if (saveTime && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
+    if (saveTime && !this.wsMember.doNotChange && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
       var mTime: Date = new Date(this.wsMember.lastModifiedDate);
       fs.utimesSync(this.wsMember.path, mTime, mTime);
     }
