@@ -283,7 +283,7 @@ export class FCFile extends TreeItem {
     this.setWsMember(wsMember, false);
   }
 
-  public setWsMember(newMem: IWorkspaceMember, saveTime: boolean) {
+  public setWsMember(newMem: IWorkspaceMember) {
     this.wsMember = newMem;
 
     // we only want classes and triggers
@@ -300,7 +300,7 @@ export class FCFile extends TreeItem {
       arguments: [this.wsMember.path]
     }
 
-    if (saveTime && !this.wsMember.doNotChange && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
+    if (this.wsMember.saveTime && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
       var mTime: Date = new Date(this.wsMember.lastModifiedDate);
       fs.utimesSync(this.wsMember.path, mTime, mTime);
     }
@@ -343,7 +343,7 @@ export class FCFile extends TreeItem {
   }
 
   public updateWsMember(newMem: IWorkspaceMember) {
-    this.parent.addClass(newMem, true);
+    this.parent.addClass(newMem);
   }
 
   public getWsMember(): IWorkspaceMember {

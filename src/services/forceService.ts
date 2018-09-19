@@ -216,7 +216,7 @@ export default class ForceService implements forceCode.IForceService {
                                     type: type,
                                     saveTime: false
                                 };
-                                codeCovViewService.addClass(workspaceMember, false);
+                                codeCovViewService.addClass(workspaceMember);
                             }
                         }
                     }

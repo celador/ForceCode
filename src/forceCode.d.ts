@@ -116,7 +116,6 @@ interface IWorkspaceMember {
     type: string;
     saveTime: boolean;
     coverage?: ICodeCoverage;
-    doNotChange?: boolean;
 }
 
 interface ICodeCoverage {
