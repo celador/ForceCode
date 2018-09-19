@@ -151,7 +151,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
                     fcMem.coverage = undefined;
                     fcMem.lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
                     fcMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
-                    fcMem.doNotChange = false;
+                    fcMem.saveTime = true;
                     fcfile.updateWsMember(fcMem);
                 }
             }

@@ -58,9 +58,10 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
                     lastModifiedDate: (new Date()).toISOString(),
                     lastModifiedByName: '',
                     lastModifiedById: fcConnection.currentConnection.orgInfo.userId,
-                    type: 'AuraDefinitionBundle'
+                    type: 'AuraDefinitionBundle',
+                    saveTime: true
                 }
-                codeCovViewService.addClass(newWSMember, true);
+                codeCovViewService.addClass(newWSMember);
                 return results;
             });
         } else {
@@ -110,7 +111,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
                 tempWSMem.lastModifiedDate = (new Date()).toISOString();
                 tempWSMem.lastModifiedByName = '';
                 tempWSMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
-                tempWSMem.doNotChange = false;
+                tempWSMem.saveTime = true;
                 curFCFile.updateWsMember(tempWSMem);
                 return res;
             }, err => {
@@ -126,7 +127,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
             tempWSMem.lastModifiedDate = (new Date()).toISOString();
             tempWSMem.lastModifiedByName = '';
             tempWSMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
-            tempWSMem.doNotChange = false;
+            tempWSMem.saveTime = true;
             fcfile.updateWsMember(tempWSMem);
             return res;
         });

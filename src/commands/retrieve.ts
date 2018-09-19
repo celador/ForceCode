@@ -298,6 +298,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                                 lastModifiedByName: '',
                                 lastModifiedById: '',
                                 type: tType,
+                                saveTime: true
                             }
 
                             newWSMembers.push(wsMem);
@@ -404,8 +405,8 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                                 newWSMembers[index].lastModifiedDate = key.lastModifiedDate;
                                 newWSMembers[index].lastModifiedByName = key.lastModifiedByName;
                                 newWSMembers[index].lastModifiedById = key.lastModifiedById;
-                                newWSMembers[index].doNotChange = false;
-                                codeCovViewService.addClass(newWSMembers.splice(index, 1)[0], true);
+                                newWSMembers[index].saveTime = true;
+                                codeCovViewService.addClass(newWSMembers.splice(index, 1)[0]);
                             }
                         } else {
                             return true;

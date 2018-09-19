@@ -124,8 +124,9 @@ export function saveApex(document: vscode.TextDocument, toolingType: string, Met
                             lastModifiedByName: '',
                             lastModifiedById: fcConnection.currentConnection.orgInfo.userId,
                             type: toolingType,
+                            saveTime: true
                         };
-                        codeCovViewService.addClass(workspaceMember, true);
+                        codeCovViewService.addClass(workspaceMember);
                         return fc;
                     });
                 }, err => {

@@ -52,10 +52,10 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     this._onDidChangeTreeData.fire();
   }
 
-  public addClass(wsMember: IWorkspaceMember, saveTime: boolean) {
+  public addClass(wsMember: IWorkspaceMember) {
     const index: number = this.classes.findIndex(curClass => { return curClass.getWsMember().path === wsMember.path });
     if (index !== -1) {
-      this.classes[index].setWsMember(wsMember, saveTime);
+      this.classes[index].setWsMember(wsMember);
     } else {
       var newClass: FCFile = new FCFile(wsMember.name, TreeItemCollapsibleState.None, this, wsMember);
       this.classes.push(newClass);
@@ -204,10 +204,10 @@ export class FCFile extends TreeItem {
 
     this.collapsibleState = collapsibleState;
     this.parent = parent;
-    this.setWsMember(wsMember, false);
+    this.setWsMember(wsMember);
   }
 
-  public setWsMember(newMem: IWorkspaceMember, saveTime: boolean) {
+  public setWsMember(newMem: IWorkspaceMember) {
     this.wsMember = newMem;
 
     // we only want classes and triggers
@@ -224,7 +224,7 @@ export class FCFile extends TreeItem {
       arguments: [this.wsMember.path]
     }
 
-    if (saveTime && !this.wsMember.doNotChange && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
+    if (this.wsMember.saveTime && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
       var mTime: Date = new Date(this.wsMember.lastModifiedDate);
       fs.utimesSync(this.wsMember.path, mTime, mTime);
     }
@@ -267,7 +267,7 @@ export class FCFile extends TreeItem {
   }
 
   public updateWsMember(newMem: IWorkspaceMember) {
-    this.parent.addClass(newMem, true);
+    this.parent.addClass(newMem);
   }
 
   public getWsMember(): IWorkspaceMember {

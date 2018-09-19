@@ -126,10 +126,10 @@ export default class ForceService implements forceCode.IForceService {
                             curMem.lastModifiedByName = key.lastModifiedByName; 
                             curMem.lastModifiedById = key.lastModifiedById;
                             if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges || curMem.type === 'AuraDefinitionBundle') {
-                                curMem.doNotChange = false;
+                                curMem.saveTime = true;
                                 curFCFile.updateWsMember(curMem);
                             } else {
-                                curMem.doNotChange = true;
+                                // cureMem.saveTime = false from when we made the member
                                 curFCFile.updateWsMember(curMem);
                                 commandService.runCommand('ForceCode.fileModified', curMem.path, key.lastModifiedByName);
                             }
@@ -174,8 +174,9 @@ export default class ForceService implements forceCode.IForceService {
                                     lastModifiedByName: '',
                                     lastModifiedById: '',
                                     type: type,
+                                    saveTime: false
                                 };
-                                codeCovViewService.addClass(workspaceMember, false);
+                                codeCovViewService.addClass(workspaceMember);
                             }
                         }
                     }

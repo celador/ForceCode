@@ -56,6 +56,7 @@ export function activate(context: vscode.ExtensionContext): any {
         
         if(fcfile && wsMem && wsMem.coverage) {
             wsMem.coverage = undefined;
+            wsMem.saveTime = false;
             fcfile.updateWsMember(wsMem);
             updateDecorations();
         }

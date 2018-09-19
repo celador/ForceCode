@@ -90,8 +90,8 @@ interface IWorkspaceMember {
     lastModifiedByName: string;
     lastModifiedById: string;
     type: string;
+    saveTime: boolean;
     coverage?: ICodeCoverage;
-    doNotChange?: boolean;
 }
 
 interface ICodeCoverage {
