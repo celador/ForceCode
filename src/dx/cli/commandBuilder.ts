@@ -44,11 +44,6 @@ export class CommandBuilder {
     return this;
   }
 
-  public withJson(): CommandBuilder {
-    this.args.push('--json');
-    return this;
-  }
-
   public build(): Command {
     return new Command(this);
   }

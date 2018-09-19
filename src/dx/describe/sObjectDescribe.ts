@@ -191,7 +191,7 @@ export class SObjectDescribe {
       if (username) {
         builder.args.push('--targetusername', username);
       }
-      const command = builder.withJson().build();
+      const command = builder.build();
       const execution = new CliCommandExecutor(command);
       orgInfo = await execution.execute();
       this.accessToken = orgInfo.accessToken;
@@ -216,7 +216,7 @@ export class SObjectDescribe {
     if (username) {
       builder.args.push('--targetusername', username);
     }
-    const command = builder.withJson().build();
+    const command = builder.build();
     const execution = new CliCommandExecutor(command);
 
     let result: string[];
