@@ -140,14 +140,14 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
           fcFiles.push(newFCFile);
         }
       });
-      fcFiles.sort(this.sortFunc);
+      //fcFiles.sort(this.sortFunc);
 
       return fcFiles;
     } else if (!element.getWsMember()) {
       if (element.label === ClassType.NotInSrc) {
         var fcFiles: FCFile[] = [];
         workspace.textDocuments.forEach(curEd => {
-          if (!curEd.fileName.startsWith(window.forceCode.projectRoot)) {
+          if (!curEd.fileName.startsWith(window.forceCode.projectRoot) && fs.existsSync(curEd.fileName)) {
             var newFCFile: FCFile = new FCFile(curEd.fileName.split(path.sep).pop(), TreeItemCollapsibleState.None, this);
             newFCFile.setType(ClassType.NotInSrc);
             newFCFile.command = {
