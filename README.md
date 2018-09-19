@@ -356,6 +356,10 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.8.7
+    * Add better error handling for malformed package.xml files
+    * Add new option for max file change notifications shown on start (maxFileChangeNotifications)
+    * Add 'Open Files Not In Src' in code coverage view. This will show any open files that aren't in the current org's src folder. Due to the way vscode reports open files, not all of them may show on start until you change active text documents!
 * 3.8.6
     * Added a new GUI to edit the ForceCode settings (The settings in the force.json file). It's simple and not very pretty at the moment, but it's functional!
     * Fixed diffing Lightning components (Only available through the menu for now).
