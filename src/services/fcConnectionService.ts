@@ -5,7 +5,7 @@ import { dxService, FCOauth, FCConnection, operatingSystem } from '.';
 import { credentials } from '../commands';
 import constants from '../models/constants';
 const jsforce: any = require('jsforce');
-const klaw: any = require('klaw');
+import klaw = require('klaw');
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 

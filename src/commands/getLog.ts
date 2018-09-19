@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { QueryResult } from '../services/dxService';
 import { fcConnection, dxService } from '../services';
-const moment: any = require('moment');
+import * as moment from 'moment';
 
 interface LogRecord {
     Id: string;

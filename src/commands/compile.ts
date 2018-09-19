@@ -5,7 +5,7 @@ import { codeCovViewService, fcConnection, dxService } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
-const parseString: any = require('xml2js').parseString;
+import { parseString } from 'xml2js';
 
 export default function compile(document: vscode.TextDocument): Promise<any> {
     if(!document) {

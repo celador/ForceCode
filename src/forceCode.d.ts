@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import jsforce = require('jsforce');
+import { Connection } from 'jsforce';
 
 declare module 'vscode' {
     export namespace window {
@@ -161,7 +161,7 @@ export interface IForceService {
     statusTimeout: any;    
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
-    conn?: jsforce.Connection;
+    conn?: Connection;
     outputChannel: vscode.OutputChannel;
     statusBarItem: vscode.StatusBarItem;
     fcDiagnosticCollection: vscode.DiagnosticCollection;

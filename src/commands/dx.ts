@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { dxService } from '../services';
-var alm: any = require('salesforce-alm');
+import alm = require('salesforce-alm');
 
 export default function runDX() {
     var theCmd: any = undefined;

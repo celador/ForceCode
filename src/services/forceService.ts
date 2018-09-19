@@ -1,17 +1,18 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { configuration, commandService, codeCovViewService, fcConnection, dxService } from './../services';
+import { configuration, commandService, codeCovViewService, dxService } from './../services';
 import constants from './../models/constants';
 import * as path from 'path';
 import { FCFile } from './codeCovView';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
-const jsforce: any = require('jsforce');
+import { Connection } from 'jsforce';
+import klaw = require('klaw');
 
 export default class ForceService implements forceCode.IForceService {
     private static instance: ForceService;
     public fcDiagnosticCollection: vscode.DiagnosticCollection;
     public config: forceCode.Config;
-    public conn: any;
+    public conn: Connection;
     public containerId: string;
     public containerMembers: forceCode.IContainerMember[];
     public describe: forceCode.IMetadataDescribe;
@@ -145,7 +146,6 @@ export default class ForceService implements forceCode.IForceService {
     // Match them up with ContainerMembers
     private getWorkspaceMembers(): Promise<any> {
         return new Promise((resolve) => {
-            var klaw: any = require('klaw');
             var types: Array<{}> = [];
             var typeNames: Array<string> = [];
             klaw(vscode.window.forceCode.projectRoot)
@@ -167,7 +167,7 @@ export default class ForceService implements forceCode.IForceService {
                                     name: filename,
                                     path: item.path,
                                     id: '',//metadataFileProperties.id,
-                                    lastModifiedDate: item.stats.mtime,
+                                    lastModifiedDate: item.stats.mtime.toISOString(),
                                     lastModifiedByName: '',
                                     lastModifiedById: '',
                                     type: type,

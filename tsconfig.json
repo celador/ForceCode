@@ -6,6 +6,7 @@
 		"removeComments": true,
 		"target": "es6",
 		"outDir": "out",
+		"noUnusedLocals": true,
 		"lib": [
 			"dom",
       		"es2016",

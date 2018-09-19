@@ -10,7 +10,7 @@ import { SObjectDescribe, SObjectCategory } from '../dx/describe';
 const mime = require('mime-types');
 const fetch: any = require('node-fetch');
 import * as compress from 'compressing';
-const parseString: any = require('xml2js').parseString;
+import { parseString } from 'xml2js';
 
 export interface ToolingType {
     name: string;

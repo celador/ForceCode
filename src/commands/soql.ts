@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import fs = require('fs-extra');
+import * as fs from 'fs-extra';
 import * as path from 'path';
 import { dxService } from '../services';
 

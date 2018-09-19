@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { fcConnection, commandService, operatingSystem, FCOauth} from '.';
-var alm: any = require('salesforce-alm');
+import { fcConnection, operatingSystem, FCOauth} from '.';
+import alm = require('salesforce-alm');
 
 export interface OrgListResult {
     orgs: FCOauth[]

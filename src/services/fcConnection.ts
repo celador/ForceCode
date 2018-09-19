@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { operatingSystem, dxService, FCConnectionService } from '.';
+import { Connection } from 'jsforce';
 
 export interface FCOauth {
     username?: string,
@@ -20,7 +21,7 @@ export class FCConnection extends vscode.TreeItem {
     private readonly parent: FCConnectionService;
     private limInterval;
     public readonly sfdxPath: string;
-    public connection: any;
+    public connection: Connection;
     public orgInfo: FCOauth;
 
     constructor(parent: FCConnectionService, orgInfo: FCOauth) {

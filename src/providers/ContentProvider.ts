@@ -1,4 +1,4 @@
-import vscode = require('vscode');
+import * as vscode from 'vscode';
 import { QueryResult } from '../services/dxService';
 import { codeCovViewService } from '../services';
 import { getAuraNameFromFileName } from '../parsers';

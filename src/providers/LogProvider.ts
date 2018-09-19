@@ -1,4 +1,4 @@
-import vscode = require('vscode');
+import * as vscode from 'vscode';
 import { dxService } from '../services';
 
 export default class ForceCodeLogProvider implements vscode.TextDocumentContentProvider {

@@ -16,9 +16,9 @@ import { dxService } from '.';
 
 const ClassType = {
   CoveredClass: 'Sufficient Coverage',
+  UncoveredClass: 'Insufficient Coverage',
   NoCoverageData: 'No Coverage Data',
   TestClass: 'Test Classes',
-  UncoveredClass: 'Insufficient Coverage',
   NotInOrg: 'Not In Current Org',
   NotInSrc: 'Open Files Not In Src',
   NoShow: 'NoShow',
@@ -140,7 +140,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
           fcFiles.push(newFCFile);
         }
       });
-      //fcFiles.sort(this.sortFunc);
+      fcFiles.sort(this.sortFunc);
 
       return fcFiles;
     } else if (!element.getWsMember()) {
