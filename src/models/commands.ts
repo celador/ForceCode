@@ -198,7 +198,7 @@ export const fcCommands: FCCommand[] = [
         name: 'Deploying package',
         hidden: false,
         description: 'Deploy your package.',
-        detail: 'If you have a directory with a package.xml, you will get the option to deploy it.',
+        detail: 'Deploy from a package.xml file or choose files to deploy',
         icon: 'package',
         label: 'Deploy Package',
         command: function (context, selectedResource?) {

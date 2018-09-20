@@ -105,14 +105,17 @@ export function getToolingTypeFromFolder(uri: vscode.Uri): string {
     }
 }
 export function getAnyTTFromFolder(uri: vscode.Uri): string {
-    if(uri.fsPath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
+    return getAnyTTFromPath(uri.fsPath);    
+}
+export function getAnyTTFromPath(thepath: string): string {
+    if(thepath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
         return undefined;
     }
     var baseDirectoryName: string;
-    if(fs.lstatSync(uri.fsPath).isDirectory()) {
-        baseDirectoryName = path.parse(uri.fsPath).name;
+    if(fs.lstatSync(thepath).isDirectory()) {
+        baseDirectoryName = path.parse(thepath).name;
     } else {
-        var fileNameParts: string[] = uri.fsPath.split(path.sep);
+        var fileNameParts: string[] = thepath.split(path.sep);
         baseDirectoryName = fileNameParts[fileNameParts.length - 2];
     }    
     var types: any[] = vscode.window.forceCode.describe.metadataObjects
@@ -120,7 +123,7 @@ export function getAnyTTFromFolder(uri: vscode.Uri): string {
         .map(r => {
             return r.xmlName;
         });
-    if (types.length <= 0 && uri.fsPath.indexOf('aura') !== -1) {
+    if (types.length <= 0 && thepath.indexOf('aura') !== -1) {
         types = ['AuraDefinitionBundle'];
     }
     return types[0];

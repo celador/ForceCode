@@ -140,7 +140,8 @@ export default class DXService implements DXCommands {
     }
 
     public isEmptyUndOrNull(param: any): boolean { 
-        return (param === undefined || param === null || Object.keys(param).length === 0)
+        return (param == undefined || param == null
+            || (Array.isArray(param) && param.length === 0) || Object.keys(param).length === 0)
     }
 
     public saveToFile(data: any, fileName: string): Promise<string> {
