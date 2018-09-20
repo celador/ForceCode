@@ -2,14 +2,10 @@ import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
 import * as path from 'path';
 import { dxService } from '../services';
+import { apexTestResults } from '.';
 
 export default function getOverallCoverage() {
-    var query = 'SELECT ApexClassOrTrigger.Name, NumLinesCovered, NumLinesUncovered '
-    + 'FROM ApexCodeCoverageAggregate '
-    + 'WHERE (NumLinesCovered > 0 OR NumLinesUncovered > 0) '
-    + 'ORDER BY ApexClassOrTrigger.Name ASC';
-
-    return vscode.window.forceCode.conn.tooling.query(query)
+    return apexTestResults()
         .then(res => {
             if (res.records) {
                 var outputString: string = 'Class/Trigger Name';
