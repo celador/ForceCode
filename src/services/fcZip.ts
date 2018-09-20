@@ -67,7 +67,9 @@ export function getFileListFromPXML(): Promise<string[]> {
                             if (fs.existsSync(path.join(projectRoot, folder, curMem + theExt))) {
                                 fileList.push(path.join(folder, curMem + theExt));
                                 if (folder !== 'aura') {
-                                    fileList.push(path.join(folder, curMem + theExt + '-meta.xml'));
+                                    if(fs.existsSync(path.join(folder, curMem + theExt + '-meta.xml'))) {
+                                        fileList.push(path.join(folder, curMem + theExt + '-meta.xml'));
+                                    }
                                 }
                             }
                         });
