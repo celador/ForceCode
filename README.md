@@ -85,6 +85,7 @@ Please note that the following permissions are required to develop on the Force.
   * Works with Classes, Triggers, Components, Pages, Static Resources, and Lightning Components
   * Multiple files can be selected to open from the server.
 * Deploy Package
+    * You can now choose files in your current org folder to deploy and ForceCode will build a package.xml file and deploy the files!
     * Replaces need for CumulusCI w/ Ant
     * Retrieve detailed deploy information
     * ForceCode now only deploys the files contained in your package.xml! (Yes, destructiveChanges.xml, destructiveChangesPre.xml, and destructiveChangesPost.xml files will deploy as well so be careful!!!)
@@ -271,7 +272,7 @@ SPA folders do not automatically deploy.  We typically run these offline with `j
 
 Menu: &gt;ForceCode Menu ... Deploy Package
 
-Deploy your package based on your configured deploy options and the package.xml in your src folder. ForceCode will now only deploy the files contained in the package.xml file.
+Deploy your package based on your configured deploy options and the package.xml in your src folder. ForceCode will now only deploy the files contained in the package.xml file. You now have the option to choose files in your current org folder to deploy and ForceCode will build a package.xml file and deploy the files!If it gives you a deploy error, you're most likely missing at least one -meta.xml file!
 
 **Options**:
 
@@ -356,6 +357,12 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.9.0
+    * New munu option in Deploy to choose files in your current org folder to deploy. ForceCode will build a package.xml file and deploy the files!
+    * Fixed package.xml task hanging. If it gives you a deploy error, you're most likely missing at least one -meta.xml file!
+    * ForceCode now retrieves code coverage (For the code coverage view) when you get the overall coverage.
+    * Fixed an issue with files being shown as 'Not in current org' when there has been changed files and the user dismissed the message(s).
+    * Fixed an issue with output panel stuff being shown in the 'Open Files Not In Src' section.
 * 3.8.7
     * Add better error handling for malformed package.xml files
     * Add new option for max file change notifications shown on start (maxFileChangeNotifications)
