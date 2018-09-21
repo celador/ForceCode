@@ -3,6 +3,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { fcConnection, operatingSystem, FCOauth} from '.';
 import alm = require('salesforce-alm');
+import { outputToString } from '../parsers/output';
 
 export interface OrgListResult {
     orgs: FCOauth[]
@@ -77,7 +78,6 @@ export interface QueryResult {
 
 export interface DXCommands {
     getCommand(cmd: string): Command;
-    outputToString(toConvert: any, depth?: number): string;
     runCommand(cmdString: string, arg: string): Promise<any>;
     login(url: string): Promise<any>;
     logout(): Promise<any>;
@@ -107,36 +107,6 @@ export default class DXService implements DXCommands {
         return alm.commands.filter(c => {
             return (c.topic + ':' + c.command) === cmd;
         })[0];
-    }
-
-    public outputToString(toConvert: any, depth?: number): string {
-        if(toConvert === undefined || toConvert === null)
-        {
-            return '';
-        }
-        var retval: string;
-        if(typeof toConvert === 'object') {
-            var level: number = depth ? depth : 1;
-            var tabs: string = '';
-            var brTabs: string = '';
-            for(var theTabs = 0; theTabs < level; theTabs++)
-            {
-                tabs += '\t';
-                if(theTabs + 1 < level) {
-                    brTabs += '\t';
-                }
-            }
-            retval = '\n' + brTabs + '{\n';
-            level++;
-            Object.keys(toConvert).forEach(key => {
-                retval += tabs + key + ': ' + this.outputToString(toConvert[key], level) + ',\n';
-            });
-            level--;
-            retval += brTabs + '}';
-        } else {
-            retval = toConvert;
-        }
-        return retval;
     }
 
     public isEmptyUndOrNull(param: any): boolean { 
@@ -215,7 +185,7 @@ export default class DXService implements DXCommands {
             if(!this.isEmptyUndOrNull(res)) {
                 return res;
             }
-            return Promise.reject('Failed to execute command: ' + cmdString + this.outputToString(theArgsArray));
+            return Promise.reject('Failed to execute command: ' + cmdString + outputToString(theArgsArray));
         });
     }
 

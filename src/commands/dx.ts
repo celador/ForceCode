@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { dxService } from '../services';
 import alm = require('salesforce-alm');
+import { outputToString } from '../parsers/output';
 
 export default function runDX() {
     var theCmd: any = undefined;
@@ -57,7 +58,7 @@ export default function runDX() {
 
     function showMessage(message) {
         vscode.window.forceCode.outputChannel.show();
-        vscode.window.forceCode.outputChannel.appendLine(dxService.outputToString(message));
+        vscode.window.forceCode.outputChannel.appendLine(outputToString(message));
         vscode.window.forceCode.showStatus('ForceCode: DX Command execution complete!');
     }
 }

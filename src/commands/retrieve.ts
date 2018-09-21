@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import constants from './../models/constants';
-import { commandService, codeCovViewService, fcConnection, dxService, FCOauth, toArray } from '../services';
+import { commandService, codeCovViewService, fcConnection, FCOauth, toArray } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
 import { getAnyTTFromFolder } from '../parsers/open';
@@ -11,6 +11,7 @@ const mime = require('mime-types');
 const fetch: any = require('node-fetch');
 import * as compress from 'compressing';
 import { parseString } from 'xml2js';
+import { outputToString } from '../parsers/output';
 
 export interface ToolingType {
     name: string;
@@ -221,7 +222,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                         }
                         const typeWithoutMembersOrName = toArray(dom.Package.types).find(curType => {
                             return !curType.members || !curType.name;
-                        })
+                        });
                         if(typeWithoutMembersOrName) {
                             if(typeWithoutMembersOrName.name) {
                                 reject({ message: typeWithoutMembersOrName.name + ' element has no members element defined to retrieve in package.xml file.' });
@@ -402,7 +403,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
         } else {
             vscode.window.showErrorMessage('Retrieve Errors');
         }
-        vscode.window.forceCode.outputChannel.append(dxService.outputToString(res).replace(/{/g, '').replace(/}/g, ''));
+        vscode.window.forceCode.outputChannel.append(outputToString(res).replace(/{/g, '').replace(/}/g, ''));
         return Promise.resolve(res);
     }
     // =======================================================================================================================================

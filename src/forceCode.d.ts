@@ -35,6 +35,7 @@ export interface Config {
         testLevel?: string,       
     };
     maxFileChangeNotifications?: number;
+    outputQueriesAsCSV?: boolean;
     overwritePackageXML?: boolean;
     poll?: number;
     pollTimeout?: number;

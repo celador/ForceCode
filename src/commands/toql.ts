@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { dxService } from '../services';
+import { outputToString, outputToCSV } from '../parsers/output';
 
 export default function toql(): any {
     let options: vscode.InputBoxOptions = {
@@ -13,8 +13,9 @@ export default function toql(): any {
             return undefined;
         }
         return vscode.window.forceCode.conn.tooling.query(query).then(res => {
-            let filePath: string = vscode.window.forceCode.projectRoot + path.sep + 'toql' + path.sep + Date.now() + '.json';
-            var data: string = dxService.outputToString(res.records);
+            const csv: boolean = vscode.window.forceCode.config.outputQueriesAsCSV;
+            let filePath: string = vscode.window.forceCode.projectRoot + path.sep + 'toql' + path.sep + Date.now() + (csv ? '.csv' : '.json');
+            var data: string = csv ? outputToCSV(res.records) : outputToString(res.records);
             return fs.outputFile(filePath, data, function() {
                 return vscode.workspace.openTextDocument(filePath).then(doc => { 
                     vscode.window.showTextDocument(doc);

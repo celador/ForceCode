@@ -10,6 +10,7 @@ import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
 import constants from '../models/constants';
 import { getAnyTTFromPath } from '../parsers/open';
+import { outputToString } from '../parsers/output';
 
 export default function deploy(context: vscode.ExtensionContext) {
     vscode.window.forceCode.outputChannel.clear();
@@ -184,7 +185,7 @@ export default function deploy(context: vscode.ExtensionContext) {
             } else {
                 vscode.window.showErrorMessage('ForceCode: Deploy Errors');
             }
-            vscode.window.forceCode.outputChannel.append(dxService.outputToString(res).replace(/{/g, '').replace(/}/g, ''));
+            vscode.window.forceCode.outputChannel.append(outputToString(res).replace(/{/g, '').replace(/}/g, ''));
             return res;
         }
     }

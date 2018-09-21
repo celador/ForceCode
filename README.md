@@ -101,7 +101,7 @@ Please note that the following permissions are required to develop on the Force.
 * SOQL and Tooling query
     * Quickly run [SOQL Queries](https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql.htm)
     * Query [Tooling Objects](https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/reference_objects_list.htm)
-    * Results are returned as JSON 
+    * Results are returned as JSON or CSV (if outputQueriesAsCSV is set to true (checked))
 * Arbitrary folder structure
     * Change your project `src` folder
     * Flexible project structure
@@ -133,6 +133,7 @@ The configuration file should look something like... (THIS IS AN EXAMPLE WITH EV
       "rollbackOnError": true,
       "testLevel": "runLocalTests",
     },
+    "outputQueriesAsCSV": false,
     "overwritePackageXML": false,
     "poll": 1500,
     "pollTimeout": 1200,
@@ -176,6 +177,7 @@ The configuration file should look something like... (THIS IS AN EXAMPLE WITH EV
   * rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
   * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
   * runTests:        A list of Apex tests to run during deployment \(commma separated list\)
+* outputQueriesAsCSV: if set to true, will retrieve soql/toql results in csv form. If false, json will be returned
 * overwritePackageXML: if set to true, will overwrite package.xml file upon opening or retrieving files
 * poll: When compiling, this is the interval \(in milliseconds\) at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
 * pollTimeout: When retrieving packages, or other long running tasks, this is the maximum amount of time \(in seconds\) it will wait before the process times out.  If you're having trouble retrieving your package, try increasing this number.  Default is 600 \(10 minutes\).
