@@ -75,13 +75,6 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                         description: pkg.Name,
                     };
                 });
-            if (Array.isArray(packages) && packages.length === 0) {
-                options.push({
-                    label: '$(briefcase) Retrieve by name',
-                    detail: `Packaged (Enter the package name manually)`,
-                    description: 'manual',
-                });
-            }
             options.push({
                 label: '$(package) Retrieve by package.xml',
                 detail: `Packaged (Retrieve metadata defined in Package.xml)`,
@@ -126,16 +119,6 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
         }).then(function (res) {
             if (!res) {
                 return Promise.reject();
-            }
-            if (res.description === 'manual') {
-                return vscode.window.showInputBox({
-                    ignoreFocusOut: true,
-                    prompt: 'enter your package name',
-                }).then(function (name) {
-                    return {
-                        description: name
-                    };
-                });
             }
             return res;
         });
@@ -205,7 +188,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             } else if (option.description === 'standardobj') {
                 getStandardObjects();
             } else {
-                packaged();
+                reject();
             }
 
             function all() {
@@ -252,13 +235,6 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                         }).stream());
                     }
                 });
-            }
-
-            function packaged() {
-                resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                    packageNames: [option.description],
-                    apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-                }).stream());
             }
 
             function getStandardObjects() {
