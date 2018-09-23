@@ -359,6 +359,10 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.9.1
+    * Added outputQueriesAsCSV option to allow retrieving query results as csv files instead of JSON
+    * Finally fixed the hanging retrieve bug (Would hang on open, refresh, retrieve by package.xml, etc)
+    * Remove manual package retrieval. If it doesn't show in the menu then it doesn't exist and retrieving by name will fail every time
 * 3.9.0
     * New munu option in Deploy to choose files in your current org folder to deploy. ForceCode will build a package.xml file and deploy the files!
     * Fixed package.xml task hanging. If it gives you a deploy error, you're most likely missing at least one -meta.xml file!
