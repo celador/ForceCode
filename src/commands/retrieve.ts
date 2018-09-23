@@ -258,12 +258,6 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     stream.on('end', next);
                     const name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
                     if (header.type === 'file') {
-                        if (name !== 'package.xml' || vscode.window.forceCode.config.overwritePackageXML) {
-                            if(!fs.existsSync(path.dirname(path.join(destDir, name)))) {
-                                fs.mkdirpSync(path.dirname(path.join(destDir, name)));
-                            }
-                            stream.pipe(fs.createWriteStream(path.join(destDir, name)));
-                        }
                         const tType: string = getToolingTypeFromExt(name);
                         if (tType) {
                             // add to ws members
@@ -287,6 +281,14 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                         }
                         if (name.endsWith('.resource-meta.xml')) {
                             resBundleNames.push(name);
+                        }
+                        if (name !== 'package.xml' || vscode.window.forceCode.config.overwritePackageXML) {
+                            if(!fs.existsSync(path.dirname(path.join(destDir, name)))) {
+                                fs.mkdirpSync(path.dirname(path.join(destDir, name)));
+                            }
+                            stream.pipe(fs.createWriteStream(path.join(destDir, name)));
+                        } else {
+                            stream.resume();
                         }
                     } else { // directory
                         fs.mkdirpSync(path.join(destDir, header.name));
