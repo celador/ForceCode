@@ -288,7 +288,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                             }
                             stream.pipe(fs.createWriteStream(path.join(destDir, name)));
                         } else {
-                            stream.resume();
+                            next();
                         }
                     } else { // directory
                         fs.mkdirpSync(path.join(destDir, header.name));
