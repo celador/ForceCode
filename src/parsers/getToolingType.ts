@@ -3,21 +3,22 @@ import * as path from 'path';
 
 export default function getToolingTypeFromBody(document: vscode.TextDocument, member = false): string {
 
-    if (document.fileName.endsWith('.cls')) {
+    var fileName:string = document.fileName.split('-meta.xml')[0];
+    if (fileName.endsWith('.cls')) {
         return member ? 'ApexClassMember' : 'ApexClass';
     }
-    if (document.fileName.endsWith('.trigger')) {
+    if (fileName.endsWith('.trigger')) {
         return member ? 'ApexTriggerMember' : 'ApexTrigger';
     }
-    if (document.fileName.endsWith('.component')) {
+    if (fileName.endsWith('.component')) {
         return member ? 'ApexComponentMember' : 'ApexComponent';
     }
-    if (document.fileName.endsWith('.page')) {
+    if (fileName.endsWith('.page')) {
         return member ? 'ApexPageMember' : 'ApexPage';
     }
 	// Here is replaceSrc possiblity
-    // if (document.fileName.indexOf(`${vscode.window.forceCode.workspaceRoot}${path.sep}aura`) >= 0) {
-    if (document.fileName.indexOf(`${vscode.window.forceCode.config.src}${path.sep}aura`) >= 0) {
+    // if (document.fileName.indexOf(`${vscode.window.forceCode.projectRoot}${path.sep}aura`) >= 0) {
+    if (fileName.indexOf(`${vscode.window.forceCode.config.src}${path.sep}aura`) >= 0) {
         return 'AuraDefinition';
     }
     return undefined;
@@ -31,6 +32,21 @@ export function getCoverageType(document: vscode.TextDocument): string {
     }
     if (document.fileName.endsWith('.trigger')) {
         return 'Trigger';
+    }
+    return undefined;
+}
+
+export function getToolingTypeFromExt(path: string) {
+    if (path.endsWith('.cls')) {
+        return 'ApexClass';
+    } else if (path.endsWith('.trigger')) {
+        return 'ApexTrigger';
+    } else if (path.endsWith('.component')) {
+        return 'ApexComponent';
+    } else if (path.endsWith('.page')) {
+        return 'ApexPage';
+    } else if (path.endsWith('.cmp')) {
+        return 'AuraDefinitionBundle';
     }
     return undefined;
 }

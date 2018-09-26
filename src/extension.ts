@@ -1,100 +1,92 @@
 import * as vscode from 'vscode';
-import { ForceService } from './services';
+import { ForceService, commandViewService, commandService, codeCovViewService, configuration, fcConnection, operatingSystem } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
-import ApexCompletionProvider from './providers/ApexCompletion';
-import { editorUpdateApexCoverageDecorator, documentUpdateApexCoverageDecorator } from './decorators/testCoverageDecorator';
-import * as commands from './commands';
-import * as parsers from './parsers';
-import { updateDecorations } from './decorators/testCoverageDecorator';
+import { editorUpdateApexCoverageDecorator, updateDecorations } from './decorators/testCoverageDecorator';
+import * as commands from './models/commands';
+import * as path from 'path';
+import { FCFile } from './services/codeCovView';
+import { IWorkspaceMember } from './forceCode';
+import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
+import { getToolingTypeFromFolder, getAnyTTFromFolder } from './parsers/open';
 
 export function activate(context: vscode.ExtensionContext): any {
-    vscode.window.forceCode = new ForceService();
+    commands.fcCommands.forEach(cur => {
+        context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
+    });
 
-    context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('forcecode', new ForceCodeContentProvider()));
+    vscode.window.forceCode = ForceService.getInstance();
+
+    context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.switchUserProvider', fcConnection));
+    context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.treeDataProvider', commandViewService));
+    context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.codeCovDataProvider', codeCovViewService));
+    
+    ForceService.start();
+
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('sflog', new ForceCodeLogProvider()));
+    context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('forcecode', ForceCodeContentProvider.getInstance()));
 
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.documentMethod', () => {
-        commands.documentMethod(context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.showMenu', () => {
-        commands.showMenu(context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.executeAnonymous', () => {
-        commands.executeAnonymous(vscode.window.activeTextEditor.document, context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.getLog', () => {
-        commands.getLog(context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.open', (selectedResource?: vscode.Uri) => {
-        if (selectedResource.path) {
-            vscode.workspace.openTextDocument(selectedResource).then(doc => commands.compile(doc, context));
-        } else {
-            commands.compile(vscode.window.activeTextEditor.document, context);
-        }
-        commands.open(context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.retrievePackage', () => {
-        commands.retrieve(context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.staticResource', () => {
-        commands.staticResource(context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.apexTest', () => {
-        commands.apexTest(vscode.window.activeTextEditor.document, context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.refresh', (selectedResource?: vscode.Uri) => {
-        commands.retrieve(context, selectedResource);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.compile', (selectedResource?: vscode.Uri) => {
-        if (selectedResource.path) {
-            vscode.workspace.openTextDocument(selectedResource)
-                .then(doc => commands.compile(doc, context));
-        } else {
-            commands.compile(vscode.window.activeTextEditor.document, context);
-        }
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.diff', () => {
-        commands.diff(vscode.window.activeTextEditor.document, context);
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand('ForceCode.toggleCoverage', () => {
-        vscode.window.forceCode.config.showTestCoverage = !vscode.window.forceCode.config.showTestCoverage;
-        updateDecorations();
-    }));
+    let sel: vscode.DocumentSelector = { scheme: 'file', language: 'apex' };
+    context.subscriptions.push(vscode.languages.registerHoverProvider(sel, new ApexTestLinkProvider()));
 
     // AutoCompile Feature
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
-        const toolingType: string = parsers.getToolingType(textDocument);
-        if (toolingType && vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
-            commands.compile(textDocument, context);
-        }
-        var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
-        if (isResource.index && vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
-            commands.staticResourceDeployFromFile(textDocument, context);
+        if (vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
+            var isResource: RegExpMatchArray = textDocument.fileName.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
+            const toolingType: string = getAnyTTFromFolder(textDocument.uri);
+            if(textDocument.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot) !== -1) {
+                if (isResource && isResource.index) {
+                    return commandService.runCommand('ForceCode.staticResourceDeployFromFile', context, textDocument);
+                }
+                if(toolingType) {
+                    return commandService.runCommand('ForceCode.compileMenu', textDocument);
+                }
+            } else if(isResource || toolingType) {
+                vscode.window.showErrorMessage('The file you are trying to save to the server isn\'t in the current org\'s source folder (' + vscode.window.forceCode.projectRoot + ')');
+            }
         }
     }));
 
-    // Code Completion Provider
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider('apex', new ApexCompletionProvider(), '.', '@'));
-
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(function(event) {
+        // clear the code coverage
+        var fileName = event.document.fileName;
+        // get the id
+        const fcfile: FCFile = codeCovViewService.findByPath(fileName);
+        var wsMem: IWorkspaceMember = fcfile ? fcfile.getWsMember() : undefined;
+        
+        if(fcfile && wsMem && wsMem.coverage) {
+            wsMem.coverage = undefined;
+            wsMem.saveTime = false;
+            fcfile.updateWsMember(wsMem);
+            updateDecorations();
+        }
+    }));
+    
     // Text Coverage Decorators
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator));
-    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(documentUpdateApexCoverageDecorator));
 
+    // watch for config file changes
+    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.window.forceCode.workspaceRoot, 'force.json')).onDidChange(uri => { configuration() }));
+    
+    // watch for deleted files and update workspaceMembers
+    context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.window.forceCode.projectRoot, '**', '*.{cls,trigger,page,component,cmp}')).onDidDelete(uri => {
+        const fcfile: FCFile = codeCovViewService.findByPath(uri.fsPath);
 
-    // // Peek Provider Setup
-    // const peekProvider: any = new commands.PeekFileDefinitionProvider();
-    // const definitionProvider: any = vscode.languages.registerDefinitionProvider(constants.PEEK_FILTER, peekProvider);
-    // context.subscriptions.push(definitionProvider);
+        if(fcfile) {
+            codeCovViewService.removeClass(fcfile);
+        }
+    }));
+
+    // need this because windows won't tell us when a dir is removed like linux/mac does above
+    if(operatingSystem.isWindows()) {
+        context.subscriptions.push(vscode.workspace.createFileSystemWatcher(path.join(vscode.window.forceCode.projectRoot, '*')).onDidDelete(uri => {
+            const tType: string = getToolingTypeFromFolder(uri);
+            if(tType) {
+                const fcfiles: FCFile[] = codeCovViewService.findByType(tType);
+                if(fcfiles) {
+                    codeCovViewService.removeClasses(fcfiles);
+                }
+            }
+        }));
+    }
 }

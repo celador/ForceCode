@@ -1,25 +1,33 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import * as error from './../util/error';
+import ForceCodeContentProvider from '../providers/ContentProvider';
 
 const PROVIDER: string = 'forcecode://salesforce.com';
 
-export default function diff(document: vscode.TextDocument, context: vscode.ExtensionContext) {
+export default function diff(document: vscode.TextDocument, auraSource?: boolean) {
+    if(!document) {
+        return;
+    }
     const toolingType: string = parsers.getToolingType(document);
     const fileName: string = parsers.getWholeFileName(document);
-    // vscode.window.forceCode.statusBarItem.text = 'ForceCode: Diffing';
-    return vscode.window.forceCode.connect(context)
-        .then(diffFile)
-        .catch(err => error.outputError({ message: err.toString() }, vscode.window.forceCode.outputChannel));
+    if(auraSource) {
+        ForceCodeContentProvider.getInstance().auraSource = document;
+    }
+    try{
+        diffFile()
+    } catch(err) {
+        vscode.window.showErrorMessage(err.message);
+    } 
+    return;
     // .then(finished)
     // =======================================================================================================================================
     // =======================================================================================================================================
     function diffFile() {
-        var command: Thenable<{}> = vscode.commands.executeCommand('vscode.diff', buildSalesforceUriFromLocalUri(document.uri), document.uri, `${fileName} (REMOTE) <~> ${fileName} (LOCAL)`);
+        var command: Thenable<{}> = vscode.commands.executeCommand('vscode.diff', buildSalesforceUriFromLocalUri(), document.uri, `${fileName} (REMOTE) <~> ${fileName} (LOCAL)`, { preview: false });
         return command;
     }
 
-    function buildSalesforceUriFromLocalUri(uri: vscode.Uri): vscode.Uri {
+    function buildSalesforceUriFromLocalUri(): vscode.Uri {
         var sfuri: vscode.Uri = vscode.Uri.parse(`${PROVIDER}/${toolingType}/${fileName}?${Date.now()}`);
         return sfuri;
     }
