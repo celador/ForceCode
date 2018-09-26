@@ -359,6 +359,9 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.9.2
+    * Fixed Switching Orgs and saving files results in "Insufficient access rights on cross-reference id" 
+    * Fixed retrieve still hanging as a task
 * 3.9.1
     * Added outputQueriesAsCSV option to allow retrieving query results as csv files instead of JSON
     * Finally fixed the hanging retrieve bug (Would hang on open, refresh, retrieve by package.xml, etc)
