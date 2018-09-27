@@ -110,19 +110,24 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     public checkLoginStatus(): Promise<boolean> {
         return this.refreshConnections().then(() => {
             if (!this.isLoggedIn()) {
-                return this.connect(this.currentConnection.orgInfo);
+                return this.connect(this.currentConnection ? this.currentConnection.orgInfo : undefined);
             } else {
                 return true;
             }
         });
     }
 
-    public connect(orgInfo: FCOauth): Promise<any> {
+    public connect(orgInfo: FCOauth): Promise<boolean> {
         this.currentConnection = this.addConnection(orgInfo);
         return this.setupConn(this)
             .then(res => {
-                return this.login(this, res);
+                return this.login(this, res).then(loginRes => {
+                    return vscode.window.forceCode.connect().then(() => {
+                        return loginRes;
+                    });
+                });
             })
+            .catch(err => { return false; });
     }
 
     private setupConn(service: FCConnectionService): Promise<boolean> {

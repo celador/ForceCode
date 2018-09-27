@@ -146,19 +146,21 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     } else if (!element.getWsMember()) {
       if (element.label === ClassType.NotInSrc) {
         var fcFiles: FCFile[] = [];
-        workspace.textDocuments.forEach(curEd => {
-          if (!curEd.fileName.startsWith(window.forceCode.projectRoot) && curEd.uri.scheme === 'file') {
-            var newFCFile: FCFile = new FCFile(curEd.fileName.split(path.sep).pop(), TreeItemCollapsibleState.None, this);
-            newFCFile.setType(ClassType.NotInSrc);
-            newFCFile.command = {
-              command: 'ForceCode.openOnClick',
-              title: '',
-              arguments: [curEd.fileName]
+        if(workspace.textDocuments) {
+          workspace.textDocuments.forEach(curEd => {
+            if (!curEd.fileName.startsWith(window.forceCode.projectRoot) && curEd.uri.scheme === 'file') {
+              var newFCFile: FCFile = new FCFile(curEd.fileName.split(path.sep).pop(), TreeItemCollapsibleState.None, this);
+              newFCFile.setType(ClassType.NotInSrc);
+              newFCFile.command = {
+                command: 'ForceCode.openOnClick',
+                title: '',
+                arguments: [curEd.fileName]
+              }
+              newFCFile.tooltip = `WARNING: This file isn\'t located in the current PROJECT PATH\n(${window.forceCode.projectRoot})`;
+              fcFiles.push(newFCFile);
             }
-            newFCFile.tooltip = `WARNING: This file isn\'t located in the current PROJECT PATH\n(${window.forceCode.projectRoot})`;
-            fcFiles.push(newFCFile);
-          }
-        });
+          });
+        }
         return fcFiles;
       } else {
         this.classes.sort(this.sortFunc);

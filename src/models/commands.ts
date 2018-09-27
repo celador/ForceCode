@@ -285,7 +285,6 @@ export const fcCommands: FCCommand[] = [
             }
             return fcConnection.connect(orgInfo).then(() => {
                 codeCovViewService.clear();
-                return vscode.window.forceCode.connect();
             });
         }
     },
