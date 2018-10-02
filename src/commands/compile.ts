@@ -119,6 +119,8 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
             res.records.filter(r => r.State !== 'Error').forEach(containerAsyncRequest => {
                 containerAsyncRequest.DeployDetails.componentFailures.forEach(failure => {
                     if (failure.problemType === 'Error') {
+                        failure.lineNumber = failure.lineNumber == null? 1 : failure.lineNumber;
+                        failure.columnNumber = failure.columnNumber == null? 0 : failure.columnNumber;
                         var failureRange: vscode.Range = document.lineAt(failure.lineNumber - 1).range;
                         if (failure.columnNumber - 1 >= 0) {
                             failureRange = failureRange.with(new vscode.Position((failure.lineNumber - 1), failure.columnNumber - 1));
