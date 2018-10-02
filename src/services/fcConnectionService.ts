@@ -17,6 +17,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     private _onDidChangeTreeData: vscode.EventEmitter<FCConnection | undefined>
         = new vscode.EventEmitter<FCConnection | undefined>();
     private loggingIn: boolean = false;
+    private refreshingConns: boolean = false;
 
     public readonly onDidChangeTreeData: vscode.Event<FCConnection | undefined> =
         this._onDidChangeTreeData.event;
@@ -73,10 +74,18 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     public refreshConnections(): Promise<boolean> {
-        return dxService.orgList()
-            .then(() => {
-                return this.refreshTheConns(this);
-            });
+        if(!this.refreshingConns) {
+            this.refreshingConns = true;
+            return dxService.orgList()
+                .then(() => {
+                    return this.refreshTheConns(this).then(res => {
+                        this.refreshingConns = false;
+                        return res;
+                    });
+                });
+        } else {
+            return Promise.resolve(true);
+        }
     }
 
     private refreshTheConns(service: FCConnectionService): Promise<boolean> {
