@@ -221,7 +221,7 @@ export default class DXService implements DXCommands {
             });
             return orgs;
         })
-        .catch(err => {
+        .catch(() => {
             // we got an error because there are no connections
             fcConnection.getChildren().forEach(curConn => {
                 curConn.connection = undefined;
