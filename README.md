@@ -342,8 +342,6 @@ Step 2.  Open the folder you just created when you cloned the repo in VSCode.
 ### Install the dependencies
 
 Step 3.  Open the terminal by pressing `ctrl` + `~` and install the dependencies by running `npm install`
-        After everything is installed read the Readme file in the needscopied file and place the files in that
-        folder where they need to be, replacing the existing files.
 
 ### Run the extension
 
@@ -359,6 +357,10 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.9.3
+    * Fixed some login issues
+    * Fixed invisible tasks showing up sometimes
+    * Fix issue with problem reporting on Visualforce and Apex (Thanks to mnunezdm)
 * 3.9.2
     * Fixed Switching Orgs and saving files results in "Insufficient access rights on cross-reference id" 
     * Fixed retrieve still hanging as a task
