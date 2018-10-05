@@ -277,15 +277,14 @@ export const fcCommands: FCCommand[] = [
         icon: 'key',
         label: 'Log in to Salesforce',
         command: function (context, selectedResource?) {
+            codeCovViewService.clear();
             var orgInfo: FCOauth;
             if(context instanceof FCConnection) {
                 orgInfo = context.orgInfo;
             } else {
                 orgInfo = context;
             }
-            return fcConnection.connect(orgInfo).then(() => {
-                codeCovViewService.clear();
-            });
+            return fcConnection.connect(orgInfo);
         }
     },
     {
