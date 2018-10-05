@@ -7,13 +7,10 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}"
-      ],
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "stopOnEntry": false,
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/out/src/**/*.js"],
-      "preLaunchTask": "npm"
+      "outFiles": ["${workspaceFolder}/out/src/**/*.js"]
     },
     {
       "name": "Launch Tests",
@@ -26,8 +23,7 @@
       ],
       "stopOnEntry": false,
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
-      "preLaunchTask": "npm"
+      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
     },
     {
       "name": "Debug Mocha",
@@ -37,10 +33,7 @@
       "stopOnEntry": false,
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": null,
-      "args": [
-        "test/open.spec.js",
-        "--colors"
-      ],
+      "args": ["test/open.spec.js", "--colors"],
       "env": {}
     }
   ]
