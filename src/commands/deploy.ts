@@ -1,122 +1,192 @@
 import * as vscode from 'vscode';
-import fs = require('fs-extra');
+import { dxService, codeCovViewService, fcConnection, toArray, PXML, PXMLMember } from '../services';
+import { getFileListFromPXML, zipFiles } from './../services';
 import * as path from 'path';
-import * as error from './../util/error';
-
-var tools: any = require('jsforce-metadata-tools');
+import { FCFile } from '../services/codeCovView';
+import { IWorkspaceMember } from '../forceCode';
+import klaw = require('klaw');
+import { getAuraNameFromFileName } from '../parsers';
+import * as xml2js from 'xml2js';
+import * as fs from 'fs-extra';
+import constants from '../models/constants';
+import { getAnyTTFromPath } from '../parsers/open';
+import { outputToString } from '../parsers/output';
 
 export default function deploy(context: vscode.ExtensionContext) {
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Started';
     vscode.window.forceCode.outputChannel.clear();
-    var _consoleInfoReference: any = console.info;
-    var _consoleErrorReference: any = console.error;
-    var _consoleLogReference: any = console.log;
-    const validationIdPath: string = `${vscode.workspace.rootPath}${path.sep}.validationId`;
-    const statsPath: string = `${vscode.workspace.rootPath}${path.sep}DeployStatistics.log`;
-    const deployPath: string = vscode.window.forceCode.workspaceRoot;
-    var logger: any = (function (fs) {
-        var buffer: string = '';
-        return {
-            log: log,
-            flush: flush,
-        };
-        function log(val) {
-            buffer += (val + '\n');
-            vscode.window.forceCode.outputChannel.appendLine(val);
-        }
-        function flush() {
-            var logFile: any = path.resolve(statsPath);
-            fs.writeFileSync(logFile, buffer, 'utf8');
-            buffer = '';
-        }
-    } (fs));
+    const deployPath: string = vscode.window.forceCode.projectRoot;
+
     var deployOptions: any = {
-        username: vscode.window.forceCode.config.username,
-        password: vscode.window.forceCode.config.password,
-        loginUrl: vscode.window.forceCode.config.url || 'https://login.salesforce.com',
         checkOnly: true,
-        testLevel: 'RunLocalTests',
-        verbose: false,
         ignoreWarnings: false,
         rollbackOnError: true,
-        pollInterval: vscode.window.forceCode.config.poll || 5000,
-        pollTimeout: vscode.window.forceCode.config.pollTimeout ? (vscode.window.forceCode.config.pollTimeout * 1000) : 600000,
+        singlePackage: true,
+        allowMissingFiles: true,
     };
 
-    return vscode.window.forceCode.connect(context)
-        .then(deployPackage)
-        .then(finished)
-        .catch(onError);
-    // =======================================================================================================================================
-    // =======================================================================================================================================
-    function deployPackage(conn) {
-        // Proxy Console.info to capture the status output from metadata tools
-        registerProxy();
+    let options: vscode.QuickPickItem[] = [{
+        label: 'Deploy from package.xml',
+        detail: 'If you have a package.xml file you can deploy based off of the contents of this file',
+    },
+    {
+        label: 'Choose files',
+        detail: 'WARNING: This will overwrite your package.xml file and deploy any destructiveChanges.xml files!!!',
+    }];
+    let config: {} = {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: 'Choose files to deploy',
+    };
+    return vscode.window.showQuickPick(options, config).then(choice => {
+        if (dxService.isEmptyUndOrNull(choice)) {
+            return Promise.resolve();
+        }
+        if (choice.label === 'Choose files') {
+            return getFileList()
+                .then(showFileList)
+                .then(createPackageXML)
+                .then(getFileListFromPXML)
+                .then(deployFiles);
+        } else {
+            return getFileListFromPXML()
+                .then(deployFiles);
+        }
+    });
+
+    function getFileList(): Promise<string[]> {
+        return new Promise((resolve) => {
+            var fileList: string[] = [];
+            klaw(vscode.window.forceCode.projectRoot)
+                .on('data', (file) => {
+                    if (file.stats.isFile() && !file.path.match(/resource\-bundles.*\.resource.*$/)
+                        && !(vscode.window.forceCode.config.spaDist !== '' 
+                        && file.path.indexOf(vscode.window.forceCode.config.spaDist) !== -1)
+                        && !file.path.endsWith('-meta.xml')) {
+
+                        if (file.path.indexOf(path.join(vscode.window.forceCode.projectRoot, 'aura')) !== -1) {
+                            const auraPath: string = path.join(vscode.window.forceCode.projectRoot, 'aura', getAuraNameFromFileName(file.path));
+                            if (fileList.indexOf(auraPath) === -1) {
+                                fileList.push(auraPath);
+                            }
+                            // this check will exclude files like package.xml
+                        } else if (file.path.split(vscode.window.forceCode.projectRoot).length > 1) {
+                            fileList.push(file.path);
+                        }
+                    }
+                })
+                .on('end', () => {
+                    resolve(fileList.sort());
+                })
+        });
+    }
+
+    function showFileList(files: string[]) {
+        return new Promise((resolve) => {
+            let options: vscode.QuickPickItem[] = files
+                .map(file => {
+                    return {
+                        label: file.split(path.sep).pop(),
+                        detail: file,
+                    };
+                });
+            let config: {} = {
+                matchOnDescription: true,
+                matchOnDetail: true,
+                placeHolder: files.length === 0 ? 'No files in the current project' : 'Choose files to deploy',
+                canPickMany: true,
+            };
+            vscode.window.showQuickPick(options, config).then(files => {
+                if(dxService.isEmptyUndOrNull(files)) {
+                    resolve();
+                }
+                var theFiles: string[] = [];
+                toArray(files).forEach(file => {
+                    if(file) {
+                        theFiles.push(file.detail);
+                    }
+                });
+                resolve(theFiles);
+            });
+        });
+    }
+
+    function findMDTIndex(pxmlObj: PXML, type: string) {
+        return pxmlObj.Package.types.findIndex(curType => { return curType.name === type; });
+    }
+
+    function createPackageXML(files: string[]): Promise<any> {
+        return new Promise((resolve) => {
+            const builder = new xml2js.Builder();
+            var packObj: PXML = {
+                Package: {
+                    types: [],
+                    version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION
+                },
+            }
+            files.forEach(file => {
+                const fileTT: string = getAnyTTFromPath(file);
+                var member: string;
+                if(fileTT === 'AuraDefinitionBundle') {
+                    member = getAuraNameFromFileName(file);
+                } else {
+                    member = file.split(path.sep).pop().split('.')[0];
+                }
+                const index: number = findMDTIndex(packObj, fileTT);
+                if(index !== -1) {
+                    packObj.Package.types[index].members.push(member);
+                } else {
+                    var newMem: PXMLMember = {
+                        members: [member],
+                        name: fileTT
+                    }
+                    packObj.Package.types.push(newMem);
+                }
+            });
+            var xml: string = builder.buildObject(packObj)
+                .replace('<Package>', '<Package xmlns="http://soap.sforce.com/2006/04/metadata">')
+                .replace(' standalone="yes"', '');
+            resolve(fs.outputFileSync(path.join(vscode.window.forceCode.projectRoot, 'package.xml'), xml));
+        });
+    }
+
+    function deployFiles(files: string[]): Promise<any> {
+        if(dxService.isEmptyUndOrNull(files)) {
+            return Promise.resolve();
+        }
+        var zip = zipFiles(files, deployPath);
         Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
-        // vscode.window.forceCode.outputChannel.show();
-        if (fs.existsSync(validationIdPath) && !deployOptions.checkOnly) {
-            var validationId: string = fs.readFileSync(validationIdPath, 'utf-8');
-            fs.unlinkSync(validationIdPath);
-            return tools.deployRecentValidation(validationId, deployOptions);
-        } else {
-            return tools.deployFromDirectory(deployPath, deployOptions);
+        vscode.window.forceCode.outputChannel.show();
+        return vscode.window.forceCode.conn.metadata.deploy(zip, deployOptions)
+            .complete(function (err, result) {
+                if (err) {
+                    return err;
+                } else {
+                    return result;
+                }
+            })
+            .then(finished);
+
+
+        // =======================================================================================================================================
+        function finished(res) /*Promise<any>*/ {
+            if (res.status !== 'Failed') {
+                // update the wsMembers with the newer date
+                files.forEach(file => {
+                    const curFCFile: FCFile = codeCovViewService.findByPath(path.join(deployPath, file));
+                    if (curFCFile) {
+                        const wsMem: IWorkspaceMember = curFCFile.getWsMember();
+                        wsMem.lastModifiedDate = (new Date()).toISOString();
+                        wsMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
+                        wsMem.saveTime = true;
+                        curFCFile.updateWsMember(wsMem);
+                    }
+                });
+                vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
+            } else {
+                vscode.window.showErrorMessage('ForceCode: Deploy Errors');
+            }
+            vscode.window.forceCode.outputChannel.append(outputToString(res).replace(/{/g, '').replace(/}/g, ''));
+            return res;
         }
-    }
-    // =======================================================================================================================================
-    function finished(res): boolean {
-        if (res.success) {
-            vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deployed $(thumbsup)';
-            if (deployOptions.checkOnly) {
-                fs.writeFileSync(validationIdPath, res.id);
-            }
-        } else {
-            vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Errors $(thumbsdown)';
-        }
-        tools.reportDeployResult(res, logger, deployOptions.verbose);
-        logger.flush();
-        unregisterProxy();
-        return res;
-    }
-    function onError(err) {
-        unregisterProxy();
-        vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Errors $(thumbsdown)';
-        return error.outputError(err, vscode.window.forceCode.outputChannel);
-    }
-    // =======================================================================================================================================
-    function registerProxy() {
-        console.info = function () {
-            var msg: string = arguments[0];
-            if (msg.match(/Deploy is Pending/)) {
-                vscode.window.forceCode.statusBarItem.text = 'ForceCode: Deploy Pending';
-            } else if (msg.match(/Components\:/)) {
-                let cnt: string = msg.match(/\d*\/\d*/) ? msg.match(/\d*\/\d*/)[0] : '...';
-                let icon: string = msg.match(/errors\: [1-9]/) ? 'thumbsdown' : 'thumbsup';
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: Deploying ${cnt} $(${icon})`;
-            } else if (msg.match(/Tests\:/)) {
-                let cnt: string = msg.match(/\d*\/\d*/) ? msg.match(/\d*\/\d*/)[0] : '...';
-                let icon: string = msg.match(/errors\: [1-9]/) ? 'thumbsdown' : 'thumbsup';
-                vscode.window.forceCode.statusBarItem.text = `ForceCode: Testing ${cnt} $(${icon})`;
-            }
-            vscode.window.forceCode.outputChannel.appendLine(msg);
-            return _consoleInfoReference.apply(this, arguments);
-        };
-        console.log = function () {
-            return _consoleLogReference.apply(this, arguments);
-        };
-        console.error = function () {
-            if (!arguments[0].match(/DeprecationWarning\:/)) {
-                vscode.window.forceCode.outputChannel.appendLine(arguments[0]);
-            }
-            // vscode.window.forceCode.outputChannel.appendLine(arguments[0]);
-            return _consoleErrorReference.apply(this, arguments);
-        };
-    }
-    function unregisterProxy() {
-        console.info = _consoleInfoReference;
-        console.log = _consoleLogReference;
-        console.error = _consoleErrorReference;
     }
 }
-
-
-

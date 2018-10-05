@@ -1,38 +1,27 @@
 import * as vscode from 'vscode';
-import fs = require('fs-extra');
+import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as error from './../util/error';
+import { outputToString, outputToCSV } from '../parsers/output';
 
-export default function soql(context: vscode.ExtensionContext): Promise<any> {
-    vscode.window.forceCode.statusBarItem.text = 'ForceCode: Run SOQL Query';
-    return vscode.window.forceCode.connect(context)
-        .then(svc => getSoqlQuery(svc))
-        .then(finished, onError);
-
-    function getSoqlQuery(svc) {
-        let options: vscode.InputBoxOptions = {
-            placeHolder: 'Enter SOQL query',
-            prompt: `Enter a SOQL query to get the results in a json file in the soql folder`,
-        };
-        return vscode.window.showInputBox(options).then(query => {
-            return vscode.window.forceCode.conn.query(query).then(res => {
-                let filePath: string = vscode.workspace.rootPath + path.sep + 'soql' + path.sep + Date.now() + '.json';
-                return fs.outputJson(filePath, res.records, (f) => {
-                    return vscode.workspace.openTextDocument(filePath).then(document => {
-                        return vscode.window.showTextDocument(document, vscode.ViewColumn.Three);
-                    });
+export default function soql(): any {
+    let options: vscode.InputBoxOptions = {
+        placeHolder: 'Enter SOQL query',
+        prompt: `Enter a SOQL query to get the results in a json file in the soql folder`,
+    };
+    return vscode.window.showInputBox(options).then(query => {
+        if(!query) {
+            return undefined;
+        }
+        return vscode.window.forceCode.conn.query(query).then(res => {
+            const csv: boolean = vscode.window.forceCode.config.outputQueriesAsCSV;
+            let filePath: string = vscode.window.forceCode.projectRoot + path.sep + 'soql' + path.sep + Date.now() + (csv ? '.csv' : '.json');
+            var data: string = csv ? outputToCSV(res.records) : outputToString(res.records);
+            return fs.outputFile(filePath, data, function() {
+                return vscode.workspace.openTextDocument(filePath).then(doc => { 
+                    vscode.window.showTextDocument(doc);
+                    vscode.window.forceCode.showStatus("ForceCode: Successfully executed query!");
                 });
             });
         });
-    }
-    function finished() {
-        // Take the results
-        // And write them to a file
-    }
-    function onError(err) {
-        // Take the results
-        // And write them to a file
-        error.outputError({ message: err }, vscode.window.forceCode.outputChannel);
-    }
-    // =======================================================================================================================================
+    });
 }

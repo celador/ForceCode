@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fs from 'fs-extra';
 
 export function getIcon(toolingType: string) {
     switch (toolingType) {
@@ -12,6 +14,8 @@ export function getIcon(toolingType: string) {
             return 'gist';
         case 'ApexLog':
             return 'bug';
+        case 'StandardObject':
+            return 'gist';
         case 'CustomObject':
             return 'gist';
         default:
@@ -56,6 +60,12 @@ export function getExtension(toolingType: string) {
             return 'resource';
         case 'AuraDefinitionBundle':
             return 'aura';
+        case 'Event':
+            return 'evt';
+        case 'Interface':
+            return 'intf';
+        case 'Tokens':
+            return 'tokens';
         default:
             throw toolingType + ' extension not defined';
     }
@@ -77,4 +87,75 @@ export function getFolder(toolingType: string) {
         default:
             return 'classes';
     }
+}
+export function getToolingTypeFromFolder(uri: vscode.Uri): string {
+    switch(uri.fsPath.split(path.sep).pop()) {
+        case 'classes':
+            return 'ApexClass';
+        case 'pages':
+            return 'ApexPage';
+        case 'triggers':
+            return 'ApexTrigger';
+        case 'aura':
+            return 'AuraDefinitionBundle';
+        case 'components':
+            return 'ApexComponent';
+        default:
+            return undefined;
+    }
+}
+export function getAnyTTFromFolder(uri: vscode.Uri): string {
+    return getAnyTTFromPath(uri.fsPath);    
+}
+export function getAnyTTFromPath(thepath: string): string {
+    if(thepath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
+        return undefined;
+    }
+    var baseDirectoryName: string;
+    if(fs.lstatSync(thepath).isDirectory()) {
+        baseDirectoryName = path.parse(thepath).name;
+    } else {
+        var fileNameParts: string[] = thepath.split(path.sep);
+        baseDirectoryName = fileNameParts[fileNameParts.length - 2];
+    }    
+    var types: any[] = vscode.window.forceCode.describe.metadataObjects
+        .filter(o => o.directoryName === baseDirectoryName)
+        .map(r => {
+            return r.xmlName;
+        });
+    if (types.length <= 0 && thepath.indexOf('aura') !== -1) {
+        types = ['AuraDefinitionBundle'];
+    }
+    return types[0];
+}
+export function getAnyNameFromUri(uri: vscode.Uri): string {
+    var baseDirectoryName: string = path.parse(uri.fsPath).name;
+    if(fs.lstatSync(uri.fsPath).isDirectory()) {
+        if(uri.fsPath.indexOf('aura') !== -1) {
+            if(baseDirectoryName === 'aura') {
+                baseDirectoryName = '*';
+            }
+        } else {
+            baseDirectoryName = '*';
+        }
+    } 
+    return baseDirectoryName;
+}
+export function getAnyFolderNameFromTT(tType: string): string {
+    var folder: any[] = vscode.window.forceCode.describe.metadataObjects
+        .filter(o => o.xmlName === tType)
+        .map(r => {
+            return r.directoryName;
+        });
+
+    return folder[0];
+}
+export function getAnyExtNameFromTT(tType: string): any {
+    var folder: any[] = vscode.window.forceCode.describe.metadataObjects
+        .filter(o => o.xmlName === tType)
+        .map(r => {
+            return r.suffix;
+        });
+
+    return folder[0];
 }

@@ -1,14 +1,43 @@
-import vscode = require('vscode');
+import * as vscode from 'vscode';
+import { dxService } from '../services';
+
 export default class ForceCodeLogProvider implements vscode.TextDocumentContentProvider {
     provideTextDocumentContent(uri: vscode.Uri): Thenable<string> {
         var logId: string = uri.path.substring(1, 19);
-        var url: string = `${vscode.window.forceCode.restUrl()}/sobjects/ApexLog/${logId}/Body`;
-        return vscode.window.forceCode.conn.request(url).then(function (body: string) {
-            if (vscode.window.forceCode.config.debugOnly) {
-                return body.split('\n').filter(l => l.match(new RegExp(vscode.window.forceCode.config.debugFilter || 'USER_DEBUG'))).join('\n');
-            } else {
-                return body;
+        if(logId === 'debugLog') {
+            logId = undefined;
+        }
+        return dxService.getDebugLog(logId).then(filterLog);
+    }
+}
+
+export function filterLog(body: string) {
+    if (!vscode.window.forceCode.config.debugOnly) {
+        return body;
+    } else {
+        var theLog = '';
+        var includeIt = false;
+        var debugLevel = ['USER_DEBUG'];
+        if(vscode.window.forceCode.config.debugFilter)
+        {
+            debugLevel = vscode.window.forceCode.config.debugFilter.split('|');
+        }
+        body.split('\n').forEach(function(l) {
+            var theSplitLine: string[] = l.split(')|');
+            if(theSplitLine.length > 1 && theSplitLine[0].split(':').length === 3 && theSplitLine[0].split('(').length === 2) {
+                includeIt = false;
+                debugLevel.forEach(function(i) {
+                    if(theSplitLine[1].split('|')[0] === i)
+                    {
+                        includeIt = true;
+                    }
+                });
+            }
+                       
+            if(includeIt) {
+                theLog += l + '\n';
             }
         });
+        return theLog;
     }
 }

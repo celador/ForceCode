@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
-// import jsforce = require('jsforce');
-import * as jsforce from 'jsforce';
-import { FileProperties, Connection, UserInfo } from 'jsforce';
+import { Connection } from 'jsforce';
 
 declare module 'vscode' {
     export namespace window {
@@ -9,29 +7,73 @@ declare module 'vscode' {
     }
 }
 
+export interface FCWorkspaceMembers {
+    [key: string]: IWorkspaceMember;
+}
+
+export interface FCOrg {
+    username: string;
+    url: string;
+    src?: string;
+}
+
 export interface Config {
     apiVersion?: string;
     autoCompile?: boolean;
     autoRefresh?: boolean;
     browser?: string;
-    debugOnly?: boolean;
+    checkForFileChanges?: boolean;
     debugFilter?: string;
+    debugOnly?: boolean;
     deployOptions?: {
-        verbose?: boolean,
-        checkOnly?: boolean
+        allowMissingFiles?: boolean,
+        checkOnly?: boolean,
+        ignoreWarnings?: boolean,
+        rollbackOnError?: boolean,
+        runTests?: string[],
+        singlePackage?: boolean,
+        testLevel?: string,       
     };
-    password?: string;
+    maxFileChangeNotifications?: number;
+    outputQueriesAsCSV?: boolean;
+    overwritePackageXML?: boolean;
     poll?: number;
     pollTimeout?: number;
     prefix?: string;
-    proxyUrl?: string;
+    revealTestedClass?: boolean;
+    showFilesOnOpen?: boolean;
+    showFilesOnOpenMax?: number;
     showTestCoverage? : boolean;
     showTestLog? : boolean;
     spaDist? : string;
     src?: string;
+    srcDefault?: string;
+    srcs?: {[key: string]: {src: string, url: string}};
     url?: string;
-    username?: string;
-    // workspaceRoot?: string;
+    username?: string;    
+}
+
+export interface MetadataResult {
+    ApiVersion: number;
+    attributes: { type: string };
+    Body: string;
+    BodyCrc: number;
+    CreatedById: string;
+    CreatedDate: string;
+    FullName: string;
+    Id: string;
+    IsValid: boolean;
+    LastModifiedById: string;
+    LastModifiedDate: string;
+    LastModifiedByName: string;
+    LengthWithoutComments: number;
+    ManageableState: string;
+    Metadata: {};
+    Name: string;
+    NamespacePrefix: string;
+    Status: string;
+    SymbolTable: {};
+    SystemModstamp: string;
 }
 
 interface ILocationsNotCovered {
@@ -44,27 +86,39 @@ interface ILocationsNotCovered {
 interface IWorkspaceMember {
     name: string;
     path: string;
-    memberInfo: FileProperties;
-}
-
-export interface IWorkspaceService {
-    getWorkspaceMembers: () => Promise<IWorkspaceMember[]>;
+    id: string;
+    lastModifiedDate: string;
+    lastModifiedByName: string;
+    lastModifiedById: string;
+    type: string;
+    saveTime: boolean;
+    coverage?: ICodeCoverage;
 }
 
 interface ICodeCoverage {
-    dmlInfo: any[];
-    id: string;
-    locationsNotCovered: ILocationsNotCovered[];
-    methodInfo: any[];
-    name: string;
-    namespace: string;
-    numLocations: Number;
-    numLocationsNotCovered: Number;
-    soqlInfo: any[];
-    soslInfo: any[];
-    type: string;
+    attributes: 
+		{
+			type: string,
+			url: string,
+		},
+		ApexClassOrTriggerId: string,
+		ApexClassOrTrigger: 
+		{
+			attributes: 
+			{
+				type: string,
+				url: string,
+			},
+			Name: string,
+		},
+		NumLinesCovered: number,
+		NumLinesUncovered: number,
+		Coverage: 
+		{
+            coveredLines: number[],
+            uncoveredLines: number[]
+        }
 }
-
 interface ICodeCoverageWarning {
     id: string;
     message: string;
@@ -92,22 +146,6 @@ interface IMetadataObject {
     childXmlNames?: string[];
 }
 
-// export class ConnectionOptions {
-//     oauth2?: any; // 	OAuth2 | Object	<optional> // OAuth2 instance or options to be passed to OAuth2 constructor
-//     logLevel?: string; // 	String	<optional> // Output logging level (DEBUG|INFO|WARN|ERROR|FATAL)
-//     version?: string; // 	String	<optional> // Salesforce API Version (without "v" prefix)
-//     maxRequest?: number; // 	Number	<optional> // Max number of requests allowed in parallel call
-//     loginUrl?: string; // 	String	<optional> // Salesforce Login Server URL (e.g. https://login.salesforce.com/)
-//     instanceUrl?: string; // 	String	<optional> // Salesforce Instance URL (e.g. https://na1.salesforce.com/)
-//     serverUrl?: string; // 	String	<optional> // Salesforce SOAP service endpoint URL (e.g. https://na1.salesforce.com/services/Soap/u/28.0)
-//     accessToken?: string; // 	String	<optional> // Salesforce OAuth2 access token
-//     sessionId?: string; // 	String	<optional> // Salesforce session ID
-//     refreshToken?: string; // 	String	<optional> // Salesforce OAuth2 refresh token
-//     signedRequest?: string; // 	String | Object	<optional> // Salesforce Canvas signed request (Raw Base64 string, JSON string, or deserialized JSON)
-//     proxyUrl?: string; // 	String	<optional> // Cross-domain proxy server URL, used in browser client, non Visualforce app.
-//     callOptions?: any; // 	Object	<optional> // Call options used in each SOAP/REST API request. See manual.
-//   }
-
 export interface IMetadataDescribe {
     metadataObjects: IMetadataObject[];
     organizationNamespace: string;
@@ -116,32 +154,25 @@ export interface IMetadataDescribe {
 }
 
 export interface IForceService {
-    operatingSystem?: string;
     config?: Config;
+    projectRoot: string;
     workspaceRoot: string;
-    completions?: vscode.CompletionItem[];
     describe: IMetadataDescribe;
-    apexMetadata: FileProperties[];
     declarations?: IDeclarations;
-    codeCoverage?: {};
-    codeCoverageWarnings?: ICodeCoverageWarning[];
-    // symbolTable?: any;
     containerId?: string;
-    queueCompile?: boolean;
-    isCompiling?: boolean;
-    workspaceMembers: IWorkspaceMember[];
+    statusTimeout: any;    
     containerMembers: IContainerMember[];
     containerAsyncRequestId?: string;
     conn?: Connection;
-    userInfo?: UserInfo;
-    username?: string;
     outputChannel: vscode.OutputChannel;
     statusBarItem: vscode.StatusBarItem;
-    connect(context: vscode.ExtensionContext): Promise<IForceService>;
+    fcDiagnosticCollection: vscode.DiagnosticCollection;
+    connect(): Promise<IForceService>;
     newContainer(force: Boolean): Promise<IForceService>;
+    showStatus(message: string): void;
     clearLog(): void;
-    refreshApexMetadata(): Promise<any>;
-    restUrl(): string;
+    resetStatus(): void;
+    checkForFileChanges(): any;
 }
 
 

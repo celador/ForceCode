@@ -1,19 +1,16 @@
 // A launch configuration that compiles the extension and then opens it inside a new window
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "configurations": [
     {
       "name": "Launch Extension",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceRoot}"
-      ],
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "stopOnEntry": false,
       "sourceMaps": true,
-      "outDir": "${workspaceRoot}/out/src",
-      "preLaunchTask": "npm"
+      "outFiles": ["${workspaceFolder}/out/src/**/*.js"]
     },
     {
       "name": "Launch Tests",
@@ -21,26 +18,22 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "--extensionDevelopmentPath=${workspaceRoot}",
-        "--extensionTestsPath=${workspaceRoot}/out/test"
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionTestsPath=${workspaceFolder}/out/test"
       ],
       "stopOnEntry": false,
       "sourceMaps": true,
-      "outDir": "${workspaceRoot}/out/test",
-      "preLaunchTask": "npm"
+      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
     },
     {
       "name": "Debug Mocha",
       "request": "launch",
       "type": "node",
-      "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
       "stopOnEntry": false,
-      "cwd": "${workspaceRoot}",
+      "cwd": "${workspaceFolder}",
       "runtimeExecutable": null,
-      "args": [
-        "test/open.spec.js",
-        "--colors"
-      ],
+      "args": ["test/open.spec.js", "--colors"],
       "env": {}
     }
   ]
