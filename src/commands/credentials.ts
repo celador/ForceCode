@@ -21,7 +21,7 @@ export default function enterCredentials(): Promise<FCOauth> {
             if(orgs) {
                 orgs.forEach(curOrg => {
                     opts.push({
-                        title: (curOrg.isLoggedIn() ? '$(diff-added) ' : '$(diff-removed) ' ) 
+                        title: (curOrg.isLoggedIn ? '$(diff-added) ' : '$(diff-removed) ' ) 
                             + curOrg.orgInfo.username,
                         desc: ''
                     });
