@@ -18,11 +18,6 @@ First or all, you don't need the wsMembers.json file anymore! ForceCode now uses
 4. The "resource-bundle" folder (If applicable) needs to be copied into the new project's src folder (NOT THE ROOT LIKE THE OLD PROJECT). Any SOQL, TOQL, or coverage folders can be copied into the src file as well (If desired).
 5. If you don't mind refreshing sObjects for code completion over again for each org then you are done. Skip this step and read on. If you don't want to refresh your code completion sobjects then go back to the project root of each project (the folder containing the force.json) and copy the .sfdx from the old project into the .forceCode/(USERNAME HERE)/.sfdx folder. You're all set now, read on for more info!
 
-## Download
-
-I am in the process of getting permission to publish this on the marketplace, but until then you can download
-this plugin by finding forcecode-X.X.X.vsix in the top level of this repository, click on it, then click Download.
-
 ## Overview
 
 I am continuing development of this extension and make updates to it pretty regularly. The original 
@@ -342,6 +337,8 @@ Step 2.  Open the folder you just created when you cloned the repo in VSCode.
 ### Install the dependencies
 
 Step 3.  Open the terminal by pressing `ctrl` + `~` and install the dependencies by running `npm install`
+        After everything is installed read the Readme file in the needscopied file and place the files in that
+        folder where they need to be, replacing the existing files.
 
 ### Run the extension
 
