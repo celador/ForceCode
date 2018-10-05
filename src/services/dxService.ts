@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { fcConnection, operatingSystem, FCOauth} from '.';
+import { fcConnection, FCOauth} from '.';
 import alm = require('salesforce-alm');
 import { outputToString } from '../parsers/output';
 
@@ -213,15 +213,19 @@ export default class DXService implements DXCommands {
         return this.runCommand('org:list', '--clean').then(res => {
             const orgs: OrgListResult = { orgs: res.nonScratchOrgs.concat(res.scratchOrgs) }
             orgs.orgs.forEach(org => {
-                const sfdxPath: string = path.join(operatingSystem.getHomeDir(), '.sfdx', org.username + '.json');
                 // cleanup if it's not actually connected
-                if(org.connectedStatus !== 'Connected' && fs.existsSync(sfdxPath)) {
-                    fs.removeSync(sfdxPath);
+                const index: number = fcConnection.getConnIndex(org.username);
+                if(index !== -1) {
+                    if(org.connectedStatus !== 'Connected') {
+                        fcConnection.connections[index].isLoggedIn = false;
+                    } else {
+                        fcConnection.connections[index].isLoggedIn = true;
+                    }
                 }
             });
             return orgs;
         })
-        .catch(err => {
+        .catch(() => {
             // we got an error because there are no connections
             fcConnection.getChildren().forEach(curConn => {
                 curConn.connection = undefined;

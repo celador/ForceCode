@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.9.2",
+  "version": "3.9.5",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -22,7 +22,7 @@
   "private": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/celador/ForceCode.git"
+    "url": "https://github.com/daishi4u/ForceCode.git"
   },
   "activationEvents": [
     "workspaceContains:force.json",
@@ -422,11 +422,11 @@
     "@types/klaw": "^2.1.1",
     "@types/node-fetch": "^2.1.2",
     "@types/mocha": "^5.2.5",
-    "@types/node": "10.11.0",
+    "@types/node": "10.11.3",
     "@types/xml2js": "^0.4.3",
     "mocha": "^5.2.0",
     "rimraf": "^2.6.2",
-    "typescript": "^3.0.3",
-    "vsce": "^1.50.0"
+    "typescript": "^3.1.1",
+    "vsce": "^1.51.1"
   }
 }

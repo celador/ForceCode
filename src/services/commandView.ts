@@ -55,7 +55,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     }
     var theTask: Task = new Task(this, execution, context, selectedResource);
     this.tasks.push(theTask);
-    this.runningTasksStatus.text = 'ForceCode: Executing ' + this.tasks.length + ' Task(s)';
+    this.runningTasksStatus.text = 'ForceCode: Executing ' + this.getChildren().length + ' Task(s)';
     this.runningTasksStatus.show();
     this.runningTasksStatus.command = 'ForceCode.showTasks';
 
@@ -71,8 +71,8 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
       }
       this.tasks.splice(index, 1);
 
-      if(this.tasks.length > 0) {
-        this.runningTasksStatus.text = 'ForceCode: Executing ' + this.tasks.length + ' Tasks';
+      if(this.getChildren().length > 0) {
+        this.runningTasksStatus.text = 'ForceCode: Executing ' + this.getChildren().length + ' Tasks';
       } else {
         this.runningTasksStatus.hide();
       }
@@ -90,7 +90,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   public getChildren(element?: Task): Task[] {
     if (!element) {
       // This is the root node
-      return this.tasks;
+      return this.tasks.filter(cur => { return cur.label !== '' && cur.label !== undefined });
     }
 
     return [];
