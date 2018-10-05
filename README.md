@@ -357,6 +357,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.9.4
+    * Fix issue with nothing showing up in the code coverage view
 * 3.9.3
     * Fixed some login issues
     * Fixed invisible tasks showing up sometimes
