@@ -357,6 +357,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.9.5
+    * Fix compatibility issues related to login with sfdx cli
 * 3.9.4
     * Fix issue with nothing showing up in the code coverage view
 * 3.9.3
