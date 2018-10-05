@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs-extra';
 import { operatingSystem, dxService, FCConnectionService } from '.';
 import { Connection } from 'jsforce';
 
@@ -23,6 +22,7 @@ export class FCConnection extends vscode.TreeItem {
     public readonly sfdxPath: string;
     public connection: Connection;
     public orgInfo: FCOauth;
+    public isLoggedIn: boolean;
 
     constructor(parent: FCConnectionService, orgInfo: FCOauth) {
         super(
@@ -35,12 +35,8 @@ export class FCConnection extends vscode.TreeItem {
         this.sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInfo.username + '.json');
     }
 
-    public isLoggedIn(): boolean {
-        return fs.existsSync(this.sfdxPath);
-    }
-
     public disconnect(): Promise<any> {
-        if(this.isLoggedIn()) {
+        if(this.isLoggedIn) {
             if (this.limInterval) {
                 clearInterval(this.limInterval);
             }
@@ -59,7 +55,7 @@ export class FCConnection extends vscode.TreeItem {
     }
 
     public showConnection() {
-        if (this.isCurrentConnection() && this.isLoggedIn()) {
+        if (this.isCurrentConnection() && this.isLoggedIn) {
             this.iconPath = {
                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
                 light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
@@ -73,7 +69,7 @@ export class FCConnection extends vscode.TreeItem {
             }
             this.contextValue = 'currentConn';
             this.command = undefined;
-        } else if (this.isLoggedIn()) {
+        } else if (this.isLoggedIn) {
             this.command = {
                 command: 'ForceCode.switchUser',
                 title: '',
