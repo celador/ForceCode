@@ -47,8 +47,6 @@ export interface Config {
     showTestLog? : boolean;
     spaDist? : string;
     src?: string;
-    srcDefault?: string;
-    srcs?: {[key: string]: {src: string, url: string}};
     url?: string;
     username?: string;    
 }

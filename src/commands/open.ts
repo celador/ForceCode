@@ -79,13 +79,13 @@ export function showFileOptions(promises: any[]) {
                 // open the files in the editor
                 var filesOpened: number = 0;
                 return opts.forEach(curFile => {
-                    if(filesOpened < vscode.window.forceCode.config.showFilesOnOpenMax || 3) {
+                    if(filesOpened < vscode.window.forceCode.config.showFilesOnOpenMax) {
                         var tType: string = curFile.detail.split(' ')[0];
                         if(tType !== 'AuraDefinitionBundle' && tType !== 'StaticResource') {
+                            filesOpened++;
                             var fName: string = curFile.label.slice(curFile.label.lastIndexOf(' ') + 1).split('.')[0];
                             var filePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}${getFolder(tType)}${path.sep}${fName}.${getExtension(tType)}`;
                             vscode.workspace.openTextDocument(filePath).then(document => {
-                                filesOpened++;
                                 vscode.window.showTextDocument(document, { preview: false });
                             });
                         }

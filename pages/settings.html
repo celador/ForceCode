@@ -20,7 +20,7 @@
 
 <body>
     <fieldset>
-        <legend>ForceCode Settings</legend>
+        <legend id="legend"></legend>
         <div id="settings">
 
         </div>
@@ -47,11 +47,12 @@
         });
         html += '<div style="text-align:center;"><button type="button" onclick="saveSettings()">Save</button></div>';
         document.getElementById("settings").innerHTML = html;
+        document.getElementById("legend").innerHTML = 'ForceCode Settings for ' + fcSettings.username;
     }
 
     function getHTML(message, key, level, subId) {
         var theHtml = '';
-        if (level > 3 || key !== 'src' && key !== 'url' && key !== 'username') {
+        if (level > 3 || key !== 'url' && key !== 'username') {
             if (typeof (message[key]) === 'boolean') {
                 theHtml += '<div><input type="checkbox" id="'
                     + subId + key
@@ -107,8 +108,7 @@
                         + '"></div>';
                 } else {
                     theHtml += '<div style="border-bottom: 2px solid blue;border-left: 2px solid blue; padding: 5px">'
-                        + key + (key === 'srcs' ? '<button type="button" onclick="addSrc()">Add</button>' : '')
-                        + (key.indexOf('@') !== -1 ? '<button type="button" onclick="removeSrc(\'' + key + '\')">Remove</button>' : '')
+                        + key
                         + '</div>';
                     Object.keys(message[key]).sort().forEach(subKey => {
                         theHtml += '<div style="margin-left:'
@@ -168,24 +168,6 @@
         setting[pieces[offset]] = {}
         setting[pieces[offset]] = getSetting(setting[pieces[offset]], pieces, offset + 1, value);
         return setting;
-    }
-
-    function addSrc() {
-        document.getElementById("settings").innerHTML += 'Username: <input type="text" id="theUsername" onchange="addUsername()"/>'
-            + '<button type="button">Add</button>';
-    }
-
-    function addUsername() {
-        var uName = document.getElementById("theUsername").value;
-        fcSettings['srcs'][uName] = { src: '', url: '' }
-        refreshPage();
-    }
-
-    function removeSrc(toRemove) {
-        console.log(toRemove);
-        delete fcSettings['srcs'][toRemove];
-        refreshPage();
-        vscode.postMessage({ delete: toRemove });
     }
 
     function saveSettings() {

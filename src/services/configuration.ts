@@ -37,17 +37,16 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 		showTestCoverage: true,
 		showTestLog: true,
 		spaDist: '',
-		srcDefault: '',
-		srcs: {}
 	};
 
 	var self: forceCode.IForceService = service || vscode.window.forceCode;
 	if (!vscode.workspace.workspaceFolders) {
 		throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
 	}
-	const projPath = vscode.window.forceCode.workspaceRoot + path.sep;
+	const projPath = vscode.window.forceCode.workspaceRoot;
 	try {
-		self.config = fs.readJsonSync(projPath + 'force.json');
+		var lastUsername: string = fs.readJsonSync(path.join(projPath, 'force.json')).lastUsername;
+		self.config = fs.readJsonSync(path.join(projPath, '.forceCode', lastUsername, 'settings.json'));
 	} catch (err) {
 		self.config = defautlOptions;
 	}
@@ -57,11 +56,11 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 	if (self.config && self.config !== null && typeof self.config === 'object' && !self.config.src) {
 		self.config.src = 'src';
 	}
-	self.projectRoot = `${projPath}${self.config.src}`;
+	self.projectRoot = path.join(projPath, self.config.src);
 	if (!fs.existsSync(self.projectRoot)) {
 		fs.mkdirpSync(self.projectRoot);
 	}
-	if (!fs.existsSync(projPath + 'sfdx-project.json')) {
+	if (!fs.existsSync(path.join(projPath, 'sfdx-project.json'))) {
 		// add in a bare sfdx-project.json file for language support from official salesforce extensions
 		const sfdxProj: {} = {
 			namespace: "",
@@ -69,7 +68,7 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 			sourceApiVersion: constants.API_VERSION,
 		};
 
-		fs.outputFileSync(projPath + 'sfdx-project.json', JSON.stringify(sfdxProj, undefined, 4));
+		fs.outputFileSync(path.join(projPath, 'sfdx-project.json'), JSON.stringify(sfdxProj, undefined, 4));
 	}
 	return fcConnection.refreshConnections().then(() => {
 		return Promise.resolve(self.config);
