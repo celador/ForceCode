@@ -80,7 +80,7 @@ export interface DXCommands {
     getCommand(cmd: string): Command;
     runCommand(cmdString: string, arg: string): Promise<any>;
     login(url: string): Promise<any>;
-    logout(): Promise<any>;
+    logout(username: string): Promise<any>;
     getOrgInfo(): Promise<SFDX>;
     isEmptyUndOrNull(param: any): boolean;
     getDebugLog(logid?: string): Promise<string>;
@@ -197,9 +197,9 @@ export default class DXService implements DXCommands {
         return this.runCommand('auth:web:login', '--instanceurl ' + url);
     }
 
-    public logout(): Promise<any> {
+    public logout(username: string): Promise<any> {
         if(fcConnection.isLoggedIn()) {
-            return Promise.resolve(this.runCommand('auth:logout', '--noprompt'));
+            return Promise.resolve(this.runCommand('auth:logout', '--noprompt --targetusername ' + username));
         } else {
             return Promise.resolve();
         }

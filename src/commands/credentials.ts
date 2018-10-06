@@ -47,13 +47,13 @@ export default function enterCredentials(): Promise<FCOauth> {
                 } else {
                     
                     fcConnection.currentConnection = fcConnection.getConnByUsername(res.label.split(' ')[1]);
-                    cfg.username = res.label;
+                    cfg.username = res.label.split(' ')[1];
                     cfg.url = fcConnection.currentConnection.orgInfo.loginUrl;
                     return getAutoCompile(cfg).then(cfgRes => {
                         return dxService.getOrgInfo().then(orgInfo => {
                             return Promise.resolve(orgInfo);
                         }).catch(() => {
-                            return writeConfigAndLogin(cfgRes);
+                            return login(cfgRes);
                         });
                     });
                 }
@@ -63,7 +63,7 @@ export default function enterCredentials(): Promise<FCOauth> {
     function setupNewUser(cfg) {
         return getUrl(cfg)
             .then(cfg => getAutoCompile(cfg))
-            .then(cfg => writeConfigAndLogin(cfg));
+            .then(cfg => login(cfg));
     }
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -119,7 +119,7 @@ export default function enterCredentials(): Promise<FCOauth> {
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
-    function writeConfigAndLogin(config): Promise<FCOauth> {
+    function login(config): Promise<FCOauth> {
         return dxService.login(config.url);
     }
 }

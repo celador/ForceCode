@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { operatingSystem, dxService, FCConnectionService } from '.';
 import { Connection } from 'jsforce';
+import { Config } from '../forceCode';
 
 export interface FCOauth {
     username?: string,
@@ -23,6 +24,7 @@ export class FCConnection extends vscode.TreeItem {
     public connection: Connection;
     public orgInfo: FCOauth;
     public isLoggedIn: boolean;
+    public config: Config;
 
     constructor(parent: FCConnectionService, orgInfo: FCOauth) {
         super(
@@ -40,7 +42,8 @@ export class FCConnection extends vscode.TreeItem {
             if (this.limInterval) {
                 clearInterval(this.limInterval);
             }
-            return dxService.logout().then(() => {
+            return dxService.logout(this.orgInfo.username).then(() => {
+                this.isLoggedIn = false;
                 if(this.isCurrentConnection()) {
                     this.parent.currentConnection = undefined;
                     vscode.window.forceCode.conn = undefined;

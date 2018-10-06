@@ -2,9 +2,10 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as deepmerge from 'deepmerge'
+import { configuration } from '../services';
 
 export default function settings(): Promise<any> {
-    const myExtDir = vscode.extensions.getExtension("BrettWagner.forcecode").extensionPath;
+    const myExtDir = vscode.extensions.getExtension("JohnAaronNelson.forcecode").extensionPath;
     const SETTINGS_FILE: string = path.join(myExtDir, 'pages', 'settings.html');
     const panel = vscode.window.createWebviewPanel('fcSettings', "ForceCode Settings", vscode.ViewColumn.One, {
         enableScripts: true,
@@ -22,12 +23,11 @@ export default function settings(): Promise<any> {
 
     // handle settings changes
     panel.webview.onDidReceiveMessage(message => {
-        if (message.delete) {
-            delete vscode.window.forceCode.config.srcs[message.delete];
-            delete tempSettings[message.delete];
-        } else if (message.save) {
+        if (message.save) {
             vscode.window.forceCode.config = deepmerge(vscode.window.forceCode.config, tempSettings, { arrayMerge: overwriteMerge });
-            fs.outputFileSync(path.join(vscode.window.forceCode.workspaceRoot, 'force.json'), JSON.stringify(vscode.window.forceCode.config, undefined, 4));
+            fs.outputFileSync(path.join(vscode.window.forceCode.workspaceRoot, '.forceCode',
+                vscode.window.forceCode.config.username, 'settings.json'), JSON.stringify(vscode.window.forceCode.config, undefined, 4));
+            configuration();
             vscode.window.showInformationMessage('ForceCode settings saved successfully!', 'OK');
         } else {
             tempSettings = deepmerge(tempSettings, message, { arrayMerge: overwriteMerge });
