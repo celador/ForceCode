@@ -340,6 +340,7 @@ Step 6.  Have Fun!
     * Fix right-click to log out of an org
     * Fix "Cannot read property 'getWsMember' of undefined" for lightning apps
     * Fix ForceCode opening more than showFilesOnOpenMax
+    * Fix connecting to a scratch org
     * Added settings-per-org feature.
 * 3.9.5
     * Fix compatibility issues related to login with sfdx cli
