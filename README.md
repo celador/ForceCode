@@ -338,6 +338,8 @@ Step 6.  Have Fun!
 * 3.9.6
     * Fix settings menu option throwing an error
     * Fix right-click to log out of an org
+    * Fix "Cannot read property 'getWsMember' of undefined" for lightning apps
+    * Fix ForceCode opening more than showFilesOnOpenMax
     * Added settings-per-org feature.
 * 3.9.5
     * Fix compatibility issues related to login with sfdx cli
