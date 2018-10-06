@@ -45,7 +45,7 @@ export function getToolingTypeFromExt(path: string) {
         return 'ApexComponent';
     } else if (path.endsWith('.page')) {
         return 'ApexPage';
-    } else if (path.endsWith('.cmp') || path.endsWith('.app')) {
+    } else if (path.endsWith('.cmp') || path.endsWith('.app') || path.endsWith('.evt')) {
         return 'AuraDefinitionBundle';
     }
     return undefined;
