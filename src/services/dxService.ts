@@ -216,7 +216,7 @@ export default class DXService implements DXCommands {
                 // cleanup if it's not actually connected
                 const index: number = fcConnection.getConnIndex(org.username);
                 if(index !== -1) {
-                    if(org.connectedStatus !== 'Connected') {
+                    if(org.connectedStatus !== 'Connected' && org.connectedStatus !== 'Unknown') {
                         fcConnection.connections[index].isLoggedIn = false;
                     } else {
                         fcConnection.connections[index].isLoggedIn = true;
