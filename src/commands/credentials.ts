@@ -43,6 +43,7 @@ export default function enterCredentials(): Promise<FCOauth> {
                 if(!res || res.label === undefined) {
                     return undefined;
                 } else if(res.label === 'New Org') {
+                    cfg.autoCompile = undefined;
                     return setupNewUser(cfg);
                 } else {
                     
@@ -98,18 +99,21 @@ export default function enterCredentials(): Promise<FCOauth> {
     }
     function getAutoCompile(config) {
         return new Promise(function (resolve, reject) {
-            let options: vscode.QuickPickItem[] = [{
-                description: 'Automatically deploy/compile files on save',
-                label: 'Yes',
-            }, {
-                description: 'Deploy/compile code through the ForceCode menu',
-                label: 'No',
-            },
-            ];
-            vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
-                config.autoCompile = res.label === 'Yes';
-                resolve(config);
-            });
+            if(config.autoCompile === undefined) {
+                let options: vscode.QuickPickItem[] = [{
+                    description: 'Automatically deploy/compile files on save',
+                    label: 'Yes',
+                }, {
+                    description: 'Deploy/compile code through the ForceCode menu',
+                    label: 'No',
+                },
+                ];
+                vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
+                    config.autoCompile = res.label === 'Yes';
+                    resolve(config);
+                });
+            }
+            resolve(config);
         });
     }
 
