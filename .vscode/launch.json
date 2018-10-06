@@ -10,6 +10,9 @@
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "stopOnEntry": false,
       "sourceMaps": true,
+      "linux": {
+        "preLaunchTask": "npm"
+      },      
       "outFiles": ["${workspaceFolder}/out/src/**/*.js"]
     },
     {
@@ -23,6 +26,9 @@
       ],
       "stopOnEntry": false,
       "sourceMaps": true,
+      "linux": {
+        "preLaunchTask": "npm"
+      },
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
     },
     {
