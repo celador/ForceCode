@@ -138,10 +138,6 @@ The configuration file should look something like... (THIS IS AN EXAMPLE WITH EV
     "showFilesOnOpenMax": 3,
     "showTestCoverage": true,
     "showTestLog": false,
-    "showFilesOnOpen": true,
-    "showFilesOnOpenMax": 3,
-    "showTestCoverage": true,
-    "showTestLog": false,
     "spaDist": "dist",
     "src": "src",
     "srcDefault": "src",
@@ -341,6 +337,8 @@ Step 2.  Open the folder you just created when you cloned the repo in VSCode.
 ### Install the dependencies
 
 Step 3.  Open the terminal by pressing `ctrl` + `~` and install the dependencies by running `npm install`
+        After everything is installed read the Readme file in the needscopied file and place the files in that
+        folder where they need to be, replacing the existing files.
 
 ### Run the extension
 

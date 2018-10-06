@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.9.2",
+  "version": "3.9.5",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -92,31 +92,11 @@
         "title": "ForceCode: Open this file in the Org"
       },
       {
-        "command": "ForceCode.openFileInOrg",
-        "title": "ForceCode: Open this file in the Org"
-      },
-      {
         "command": "ForceCode.toggleCoverage",
         "title": "ForceCode: Toggle Test Coverage",
         "icon": {
           "light": "./images/coverage.svg",
           "dark": "./images/coverage.svg"
-        }
-      },
-      {
-        "command": "ForceCode.previewVF",
-        "title": "ForceCode: Preview Visualforce page",
-        "icon": {
-          "light": "./images/logo.svg",
-          "dark": "./images/logo.svg"
-        }
-      },
-      {
-        "command": "ForceCode.previewApp",
-        "title": "ForceCode: Preview Lightning App",
-        "icon": {
-          "light": "./images/logo.svg",
-          "dark": "./images/logo.svg"
         }
       },
       {
@@ -248,12 +228,6 @@
         "extensions": [
           ".acov"
         ]
-      },
-      {
-        "id": "apexCodeCoverage",
-        "extensions": [
-          ".acov"
-        ]
       }
     ],
     "menus": {
@@ -329,46 +303,6 @@
           "when": "resourceLangId == apex && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.diff",
           "group": "ForceCode"
-        },
-        {
-          "when": "resourceExtname == .page && ForceCodeActive",
-          "command": "ForceCode.previewVF",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceExtname == .app && ForceCodeActive && ForceCodeLoggedIn",
-          "command": "ForceCode.previewApp",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == apex && ForceCodeActive && ForceCodeLoggedIn",
-          "command": "ForceCode.toggleCoverage",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == visualforce && ForceCodeActive && ForceCodeLoggedIn",
-          "command": "ForceCode.openFileInOrg",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == apex && ForceCodeActive && ForceCodeLoggedIn",
-          "command": "ForceCode.openFileInOrg",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == apex && editorHasSelection && ForceCodeActive && ForceCodeLoggedIn",
-          "command": "ForceCode.executeAnonymous",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == visualforce && ForceCodeActive && ForceCodeLoggedIn",
-          "command": "ForceCode.diff",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == apex && ForceCodeActive && ForceCodeLoggedIn",
-          "command": "ForceCode.diff",
-          "group": "ForceCode"
         }
       ],
       "explorer/context": [
@@ -399,70 +333,6 @@
         {
           "when": "viewItem == notLoggedInConn",
           "command": "ForceCode.login"
-        }
-      ],
-      "commandPalette": [
-        {
-          "command": "ForceCode.showMenu"
-        },
-        {
-          "command": "ForceCode.compile",
-          "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
-        },
-        {
-          "when": "resourceLangId == apex && ForceCodeActive",
-          "command": "ForceCode.refresh",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == visualforce && ForceCodeActive",
-          "command": "ForceCode.refresh",
-          "group": "ForceCode"
-        },
-        {
-          "when": "resourceLangId == xml && ForceCodeActive",
-          "command": "ForceCode.refresh",
-          "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
-        },
-        {
-          "command": "ForceCode.executeAnonymous",
-          "when": "ForceCodeActive && editorIsOpen && editorHasSelection && ForceCodeLoggedIn"
-        },
-        {
-          "command": "ForceCode.open",
-          "when": "ForceCodeActive && ForceCodeLoggedIn"
-        },
-        {
-          "command": "ForceCode.staticResource",
-          "when": "ForceCodeActive && ForceCodeLoggedIn"
-        },
-        {
-          "command": "ForceCode.toggleCoverage",
-          "when": "ForceCodeActive && resourceLangId == apex && ForceCodeLoggedIn"
-        },
-        {
-          "command": "ForceCode.diff",
-          "when": "ForceCodeActive && resourceLangId == apex && ForceCodeLoggedIn"
-        },
-        {
-          "command": "ForceCode.diff",
-          "when": "ForceCodeActive && resourceLangId == visualforce && ForceCodeLoggedIn"
-        },
-        {
-          "command": "ForceCode.openOrg",
-          "when": "ForceCodeActive && ForceCodeLoggedIn"
-        },
-        {
-          "command": "ForceCode.openFileInOrg",
-          "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
-        },
-        {
-          "command": "ForceCode.previewVF",
-          "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
-        },
-        {
-          "command": "ForceCode.previewApp",
-          "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
         }
       ],
       "commandPalette": [
