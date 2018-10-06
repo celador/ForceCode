@@ -20,6 +20,13 @@ First or all, you don't need the wsMembers.json file anymore! ForceCode now uses
 
 ## Overview
 
+I am continuing development of this extension and make updates to it pretty regularly. The original 
+plugin source can be found [here](https://github.com/celador/ForceCode). I have added a ton of extra
+functionality, by implementing almost all of the features that the developer console has and a lot of
+functionality that surpasses the developer console. This readme is nowhere near complete from what all
+I've added to the sourcecode, but I will work on updating it here and there. My main focus has been on
+creating functionality, as I use this plugin every day at work.
+
 This extension is a companion for SFDC (Salesforce.com) development with Visual Studio Code.  
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.  
 There's no complicated setup process or project configurations, no external apps to keep open, and no jarring errors knocking you out of your flow.
@@ -347,6 +354,14 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.9.5
+    * Fix compatibility issues related to login with sfdx cli
+* 3.9.4
+    * Fix issue with nothing showing up in the code coverage view
+* 3.9.3
+    * Fixed some login issues
+    * Fixed invisible tasks showing up sometimes
+    * Fix issue with problem reporting on Visualforce and Apex (Thanks to mnunezdm)
 * 3.9.2
     * Fixed Switching Orgs and saving files results in "Insufficient access rights on cross-reference id" 
     * Fixed retrieve still hanging as a task

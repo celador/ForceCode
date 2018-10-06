@@ -11,14 +11,15 @@ export const REFRESH_EVENT_NAME: string = 'refreshConns';
 
 export class FCConnectionService implements vscode.TreeDataProvider<FCConnection> {
     private static instance: FCConnectionService;
-    private connections: FCConnection[];
     private _onDidChangeTreeData: vscode.EventEmitter<FCConnection | undefined>
         = new vscode.EventEmitter<FCConnection | undefined>();
     private loggingIn: boolean = false;
+    private refreshingConns: boolean = false;
 
     public readonly onDidChangeTreeData: vscode.Event<FCConnection | undefined> =
         this._onDidChangeTreeData.event;
     public currentConnection: FCConnection;
+    public connections: FCConnection[];
 
     public constructor() {
         console.log('Starting connection service...');
@@ -61,7 +62,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     public isLoggedIn(): boolean {
-        const loggedIn: boolean = this.currentConnection && this.currentConnection.isLoggedIn();
+        const loggedIn: boolean = this.currentConnection && this.currentConnection.isLoggedIn;
         if (loggedIn) {
             vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
         } else {
@@ -71,10 +72,18 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     public refreshConnections(): Promise<boolean> {
-        return dxService.orgList()
-            .then(() => {
-                return this.refreshTheConns(this);
-            });
+        if(!this.refreshingConns) {
+            this.refreshingConns = true;
+            return dxService.orgList()
+                .then(() => {
+                    return this.refreshTheConns(this).then(res => {
+                        this.refreshingConns = false;
+                        return res;
+                    });
+                });
+        } else {
+            return Promise.resolve(true);
+        }
     }
 
     private refreshTheConns(service: FCConnectionService): Promise<boolean> {
@@ -241,7 +250,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         }
     }
 
-    private getConnIndex(username: string): number {
+    public getConnIndex(username: string): number {
         return this.connections.findIndex(cur => { return cur.orgInfo.username === username });
     }
 
