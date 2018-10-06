@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { dxService, codeCovViewService, fcConnection, toArray, PXML, PXMLMember } from '../services';
+import { dxService, codeCovViewService, fcConnection, toArray, PXML, PXMLMember, commandService } from '../services';
 import { getFileListFromPXML, zipFiles } from './../services';
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
@@ -183,7 +183,13 @@ export default function deploy(context: vscode.ExtensionContext) {
                 });
                 vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
             } else {
-                vscode.window.showErrorMessage('ForceCode: Deploy Errors');
+                vscode.window.showErrorMessage('ForceCode: Deploy Errors. View Details?', 'Yes', 'No').then(choice => {
+                    if(choice === 'Yes') {
+                        commandService.runCommand('ForceCode.openFileInOrg', 
+                            'changemgmt/monitorDeploymentsDetails.apexp?retURL=/changemgmt/monitorDeployment.apexp&asyncId='
+                            + res.id);
+                    }
+                });
             }
             vscode.window.forceCode.outputChannel.append(outputToString(res).replace(/{/g, '').replace(/}/g, ''));
             return res;

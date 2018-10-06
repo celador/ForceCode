@@ -377,11 +377,18 @@ export const fcCommands: FCCommand[] = [
         commandName: 'ForceCode.openFileInOrg',
         hidden: true,
         command: function(context, selectedResource?) {
+            var id: string;
             if(context) {
-                var filePath = context.fsPath;
-                const fcfile: FCFile = codeCovViewService.findByPath(filePath);
-                
-                return dxService.openOrgPage('/' + fcfile.getWsMember().id);
+                if(context.fsPath) {
+                    var filePath = context.fsPath;
+                    const fcfile: FCFile = codeCovViewService.findByPath(filePath);
+                    id = fcfile && fcfile.getWsMember() ? fcfile.getWsMember().id : undefined;
+                } else {
+                    id = context;
+                }
+            } 
+            if(id) {
+                return dxService.openOrgPage('/' + id);
             } else {
                 return Promise.resolve();
             }

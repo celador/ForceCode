@@ -341,7 +341,8 @@ Step 6.  Have Fun!
     * Fix "Cannot read property 'getWsMember' of undefined" for lightning apps
     * Fix ForceCode opening more than showFilesOnOpenMax
     * Fix connecting to a scratch org
-    * Added settings-per-org feature.
+    * Added settings-per-org feature
+    * Added option to view details of failed deployment
 * 3.9.5
     * Fix compatibility issues related to login with sfdx cli
 * 3.9.4
