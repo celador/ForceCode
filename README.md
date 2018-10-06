@@ -26,6 +26,11 @@ This extension is a companion for SFDC (Salesforce.com) development with Visual 
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.  
 There's no complicated setup process or project configurations, no external apps to keep open, and no jarring errors knocking you out of your flow.
 
+## Slack
+
+ForceCode now has a Slack channel. Click [here](https://join.slack.com/t/forcecodeworkspace/shared_invite/enQtNDUxNzc3MzA1NDE0LTRiZmQ0MjdmMjQ0ZmQ0NjM3OTI1MGNkYmY4YjdiNTU3MWEzNGZlZGJjYjIxODA2NTA0YzkwMzhmMGNmZTIzMDc) to join us! 
+Use this to ask question and receive updates on upcoming features!
+
 ### Permissions
 
 Please note that the following permissions are required to develop on the Force.com platform: [https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_intro_permissions.htm](https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_intro_permissions.htm)
