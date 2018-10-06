@@ -55,7 +55,6 @@ export default function runDX() {
             return result;
         });
     }
-    var objresult = await cmd.run(cliContext);
 
     function showMessage(message) {
         vscode.window.forceCode.outputChannel.show();

@@ -217,8 +217,6 @@ export class FCFile extends TreeItem {
       this.type = ClassType.NoShow;
       return undefined;
     }
-    return null;    // this is the parent      
-  }
 
     super.label = this.wsMember.path.split(path.sep).pop();
 
@@ -267,107 +265,6 @@ export class FCFile extends TreeItem {
       } else {
         this.type = ClassType.NoCoverageData;
       }
-
-  private parent: CodeCovViewService;
-  private wsMember: IWorkspaceMember;
-  private type: string;
-
-  constructor(name: string, collapsibleState: TreeItemCollapsibleState, parent: CodeCovViewService, wsMember?: IWorkspaceMember) {
-    super(
-      name,
-      collapsibleState
-    );
-
-    this.collapsibleState = collapsibleState;
-    this.parent = parent;
-    this.setWsMember(wsMember, false);
-  }
-
-  public setWsMember(newMem: IWorkspaceMember) {
-    this.wsMember = newMem;
-
-    // we only want classes and triggers
-    if (!this.wsMember || (this.wsMember.type !== 'ApexClass' && this.wsMember.type !== 'ApexTrigger')) {
-      this.type = ClassType.NoShow;
-      return undefined;
-    }
-
-    super.label = this.wsMember.path.split(path.sep).pop();
-
-    this.command = {
-      command: 'ForceCode.openOnClick',
-      title: '',
-      arguments: [this.wsMember.path]
-    }
-
-    if (this.wsMember.saveTime && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
-      var mTime: Date = new Date(this.wsMember.lastModifiedDate);
-      fs.utimesSync(this.wsMember.path, mTime, mTime);
-    }
-    this.iconPath = undefined;
-    if (!this.wsMember.id || this.wsMember.id === '') {
-      this.type = ClassType.NotInOrg;
-      return undefined;
-    }
-
-    this.type = ClassType.UncoveredClass;
-    if (this.wsMember.coverage) {
-      var fileCoverage: ICodeCoverage = this.wsMember.coverage;
-      var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
-      var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
-      this.label = percent + '% ' + this.label;
-      if (percent >= 75) {
-        this.type = ClassType.CoveredClass;
-        this.iconPath = {
-          dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
-          light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
-        }
-      } else {
-        this.iconPath = {
-          dark: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
-          light: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
-        }
-      }
-      // this next check needs changed to something different, as there are problems reading the file
-    } else {
-      var testFile: boolean = false;
-      try {
-        testFile = fs.readFileSync(this.wsMember.path).toString().toLowerCase().includes('@istest');
-      } catch (e) { }
-      if (testFile) {
-        this.type = ClassType.TestClass;
-      } else {
-        this.type = ClassType.NoCoverageData;
-      }
-    }
-  }
-
-  public updateWsMember(newMem: IWorkspaceMember) {
-    this.parent.addClass(newMem);
-  }
-
-  public getWsMember(): IWorkspaceMember {
-    return this.wsMember;
-  }
-
-  public getType(): string {
-    return this.type;
-  }
-
-  public setType(newType: string) {
-    this.type = newType;
-  }
-
-  // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
-  public compareDates(serverDate: string): boolean {
-    if (!this.wsMember.lastModifiedDate) {
-      return true;
-    }
-    var localMS: number = (new Date(this.wsMember.lastModifiedDate)).getTime();
-    var serverMS: number = (new Date(serverDate)).getTime();
-
-    if (localMS > serverMS || serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
-      return true;
     }
   }
 

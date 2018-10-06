@@ -306,14 +306,6 @@ export const fcCommands: FCCommand[] = [
         name: 'Retrieving ',
         hidden: true,
         command: function (context, selectedResource?) {
-            return commandService.runCommand('ForceCode.refreshContext', context, selectedResource);
-        }
-    },
-    {
-        commandName: 'ForceCode.refreshContext',
-        name: 'Retrieving ',
-        hidden: true,
-        command: function (context, selectedResource?) {
             if(selectedResource && selectedResource instanceof Array) {
                 var files: ToolingType[] = [];
                 selectedResource.forEach(curRes => {
@@ -486,112 +478,6 @@ export const fcCommands: FCCommand[] = [
                 orgInfo = context;
             }
             return dxService.login(orgInfo.loginUrl)
-                .then(res => {
-                    return commandService.runCommand('ForceCode.switchUserText', res);
-                });
-        }
-    },
-    {
-        commandName: 'ForceCode.showFileOptions',
-        name: 'Opening file',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return commands.showFileOptions(context, true);
-        }
-    },
-    {
-        commandName: 'ForceCode.apexTest',
-        name: 'Running apex test',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return commands.apexTest(context, selectedResource);
-        }
-    },
-    {
-        commandName: 'ForceCode.fileModified',
-        name: 'Modified file',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return vscode.workspace.openTextDocument(context).then(theDoc => {
-                return vscode.window.showWarningMessage(selectedResource + ' has changed ' + getFileName(theDoc), 'Refresh', 'Diff', 'Dismiss').then(s => {
-                    if (s === 'Refresh') {
-                        return commands.retrieve(theDoc.uri);
-                    } else if(s === 'Diff') {
-                        return commands.diff(theDoc);
-                    }
-                });
-            });
-        }
-    },
-    {
-        commandName: 'ForceCode.staticResourceDeployFromFile',
-        name: 'Saving static resource',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return commands.staticResourceDeployFromFile(selectedResource, context);
-        }
-    },
-    {
-        commandName: 'ForceCode.checkForFileChanges',
-        name: 'Getting workspace information',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return vscode.window.forceCode.checkForFileChanges();
-        }
-    },
-    {
-        commandName: 'ForceCode.getOrgInfo',
-        name: 'Getting org info',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return vscode.window.forceCode.dxCommands.getOrgInfo();
-        }
-    },
-    {
-        commandName: 'ForceCode.connect',
-        name: 'Connecting',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return vscode.window.forceCode.connect();
-        }
-    },
-    {
-        commandName: 'ForceCode.showTasks',
-        name: 'Show tasks',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            var treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {treeDataProvider: commandViewService});
-            return treePro.reveal(commandViewService.getChildren()[0]);
-        }
-    },
-    {
-        commandName: 'ForceCode.openOnClick',
-        name: 'Open From TestCov view',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return vscode.workspace.openTextDocument(context).then(doc => vscode.window.showTextDocument(doc, { preview: false }));
-        }
-    },
-    {
-        commandName: 'ForceCode.getCodeCoverage',
-        name: 'Retriving code coverage',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return commands.apexTestResults();
-        }
-    },
-    {
-        commandName: 'ForceCode.runTests', //'sfdx.force.apex.test.class.run.delegate',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return commandService.runCommand('ForceCode.apexTest', context.name, context.type);
-        }
-    },
-    {
-        commandName: 'ForceCode.login',
-        hidden: true,
-        command: function (context, selectedResource?) {
-            return dxService.login(context.loginUrl)
                 .then(res => {
                     return commandService.runCommand('ForceCode.switchUserText', res);
                 });

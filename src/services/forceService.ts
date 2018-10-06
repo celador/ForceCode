@@ -92,45 +92,6 @@ export default class ForceService implements forceCode.IForceService {
         });
     }
 
-    public parseRecords(members: forceCode.FCWorkspaceMembers, recs: any[]): forceCode.FCWorkspaceMembers {
-        var membersToReturn: forceCode.FCWorkspaceMembers = {};
-        //return Promise.all(recs).then(records => {
-        console.log('Retrieved metadata records');
-        recs.forEach(curSet => {
-            curSet.forEach(key => {
-                if(members[key.fullName] && members[key.fullName].type === key.type) {
-                    membersToReturn[key.id] = members[key.fullName];
-                    membersToReturn[key.id].id = key.id;
-                    membersToReturn[key.id].lastModifiedDate = key.lastModifiedDate; 
-                }
-            });
-        });
-
-        return membersToReturn;
-
-        //});
-    }
-
-    // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
-    public cleanupContainers(): Promise<any> {
-        return new Promise(function (resolve) {
-            vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
-                .find({ Name: {$like : 'ForceCode-%'}})
-                .execute(function(err, records) {
-                    var toDelete: string[] = new Array<string>();
-                    records.forEach(r => {
-                        toDelete.push(r.Id);
-                    })
-                    if(toDelete.length > 0) {
-                        resolve(vscode.window.forceCode.conn.tooling.sobject('MetadataContainer')
-                            .del(toDelete));
-                    } else {
-                        resolve();
-                    }
-                });     
-        });          
-    }
-
     private parseMembers(mems) {
         if(dxService.isEmptyUndOrNull(mems)) {
             return Promise.resolve({});
@@ -148,7 +109,6 @@ export default class ForceService implements forceCode.IForceService {
         return Promise.all(proms).then(rets => {
             return parseRecords(rets);
         });
-    }
 
         function parseRecords(recs: any[]): Promise<any> {
             if(!Array.isArray(recs)) {

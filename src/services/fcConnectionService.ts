@@ -9,8 +9,6 @@ import klaw = require('klaw');
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 
-export const REFRESH_EVENT_NAME: string = 'refreshConns';
-
 export class FCConnectionService implements vscode.TreeDataProvider<FCConnection> {
     private static instance: FCConnectionService;
     private _onDidChangeTreeData: vscode.EventEmitter<FCConnection | undefined>

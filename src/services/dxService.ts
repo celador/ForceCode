@@ -29,30 +29,6 @@ export interface ExecuteAnonymousResult {
     logs: string
 }
 
-export interface OrgListResult {
-    orgs: FCOauth[]
-}
-
-export interface SFDX {
-    username: string,
-    id: string,
-    connectedStatus: string,
-    accessToken: string,
-    instanceUrl: string,
-    clientId: string,
-}
-
-export interface ExecuteAnonymousResult {
-    compiled: boolean,
-    compileProblem: string,
-    success: boolean,
-    line: number,
-    column: number,
-    exceptionMessage: string,
-    exceptionStackTrace: string,
-    logs: string
-}
-
 interface Topic {
     name: string;
     description: string;
@@ -156,29 +132,6 @@ export default class DXService implements DXCommands {
         }
     }
 
-    public isEmptyUndOrNull(param: any): boolean { 
-        return (param == undefined || param == null
-            || (Array.isArray(param) && param.length === 0) || Object.keys(param).length === 0)
-    }
-
-    public saveToFile(data: any, fileName: string): Promise<string> {
-        try{
-            fs.outputFileSync(vscode.window.forceCode.projectRoot + path.sep + fileName, data);
-            return Promise.resolve(vscode.window.forceCode.projectRoot + path.sep + fileName);
-        } catch(e) {
-            return Promise.reject(undefined);
-        }
-    }
-
-    public removeFile(fileName: string): Promise<any> {
-        try{
-            fs.removeSync(vscode.window.forceCode.projectRoot + path.sep + fileName);
-            return Promise.resolve(undefined);
-        } catch(e) {
-            return Promise.reject(undefined);
-        }
-    }
-
     /*
     *   This does all the work. It will run a cli command through the built in dx.
     *   Takes a command as an argument and a string for the command's arguments.
@@ -222,7 +175,6 @@ export default class DXService implements DXCommands {
             });
         }
         // add in targetusername so we can stay logged in
-        console.log(fcConnection.currentConnection);
         if(cliContext.flags['targetusername'] === undefined && cmdString !== 'auth:web:login' 
             && fcConnection.currentConnection 
             && cmd.flags.find(fl => { return fl.name === 'targetusername' }) !== undefined) {
@@ -285,30 +237,6 @@ export default class DXService implements DXCommands {
         });
     }
 
-    public orgList(): Promise<OrgListResult> {
-        return this.runCommand('org:list', '--clean').then(res => {
-            const orgs: OrgListResult = { orgs: res.nonScratchOrgs.concat(res.scratchOrgs) }
-            orgs.orgs.forEach(org => {
-                const sfdxPath: string = path.join(operatingSystem.getHomeDir(), '.sfdx', org.username + '.json');
-                // cleanup if it's not actually connected
-                if(org.connectedStatus !== 'Connected' && fs.existsSync(sfdxPath)) {
-                    fs.removeSync(sfdxPath);
-                }
-            })
-            return orgs;
-        })
-        .catch(err => {
-            // we got an error because there are no connections
-            fcConnection.getChildren().forEach(curConn => {
-                curConn.connection = undefined;
-                if(fs.existsSync(curConn.sfdxPath)) {
-                    fs.removeSync(curConn.sfdxPath);
-                }
-            });
-            return undefined;
-        });
-    }
-
     public getDebugLog(logid?: string): Promise<string> {
         var theLogId: string = '';
         if(logid) {
@@ -337,13 +265,5 @@ export default class DXService implements DXCommands {
 
     public openOrgPage(url: string): Promise<any> {
         return this.runCommand('org:open', '-p ' + url);
-    }
-
-    public openOrg(): Promise<any> {
-        return Promise.resolve(this.runCommand('org:open', ''));
-    }
-
-    public openOrgPage(url: string): Promise<any> {
-        return Promise.resolve(this.runCommand('org:open', '-p ' + url));
     }
 }

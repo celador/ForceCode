@@ -208,15 +208,6 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 retrieveComponents(resolve, { types: types });
             }
 
-            function getSpecificTypeMetadata(metadataType: string) {
-                var types: any[] = vscode.window.forceCode.describe.metadataObjects
-                    .filter(o => o.xmlName === metadataType)
-                    .map(r => {
-                        return { name: r.xmlName, members: '*' };
-                    });
-                retrieveComponents(resolve, { types: types });
-            }
-
             function unpackaged() {
                 var xmlFilePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}package.xml`;
                 var data: any = fs.readFileSync(xmlFilePath);

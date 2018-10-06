@@ -15,8 +15,7 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
     + 'ORDER BY ApexClassOrTrigger.Name ASC';
 
     return vscode.window.forceCode.conn.tooling.query(query)
-        .then(res => updateCoverage(res))
-        .then(finish);
+        .then(res => updateCoverage(res));
 
     // =======================================================================================================================================
     function updateCoverage(res: QueryResult): QueryResult {
