@@ -338,7 +338,7 @@ Step 6.  Have Fun!
 * 3.9.6
     * Fix settings menu option throwing an error
     * Fix right-click to log out of an org
-    * Fix "Cannot read property 'getWsMember' of undefined" for lightning apps
+    * Fix "Cannot read property 'getWsMember' of undefined" for lightning apps and events
     * Fix ForceCode opening more than showFilesOnOpenMax
     * Fix connecting to a scratch org
     * Added settings-per-org feature
