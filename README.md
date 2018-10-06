@@ -341,6 +341,7 @@ Step 6.  Have Fun!
     * Fix "Cannot read property 'getWsMember' of undefined" for lightning apps and events
     * Fix ForceCode opening more than showFilesOnOpenMax
     * Fix connecting to a scratch org
+    * Implement saving lighting tokens and interfaces
     * Added settings-per-org feature
     * Added option to view details of failed deployment
 * 3.9.5

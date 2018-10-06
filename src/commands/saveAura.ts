@@ -185,14 +185,16 @@ export function getAuraDefTypeFromDocument(document: vscode.TextDocument) {
                 return 'RENDERER';
             };
             break;
+        case 'tokens':
+            return 'TOKENS';
+        case 'intf':
+            return 'INTERFACE';
         case 'xml':
             return 'Metadata';
         default:
             throw `Unknown extension: ${extension} .`;
     }
     // Yet to be implemented
-    // INTERFACE — interface definition
-    // TOKENS — tokens collection
     // PROVIDER — reserved for future use
     // TESTSUITE — reserved for future use
     // MODEL — deprecated, do not use
