@@ -50,12 +50,10 @@ export default function enterCredentials(): Promise<FCOauth> {
                     fcConnection.currentConnection = fcConnection.getConnByUsername(res.label.split(' ')[1]);
                     cfg.username = res.label.split(' ')[1];
                     cfg.url = fcConnection.currentConnection.orgInfo.loginUrl;
-                    return getAutoCompile(cfg).then(cfgRes => {
-                        return dxService.getOrgInfo().then(orgInfo => {
-                            return Promise.resolve(orgInfo);
-                        }).catch(() => {
-                            return login(cfgRes);
-                        });
+                    return dxService.getOrgInfo().then(orgInfo => {
+                        return Promise.resolve(orgInfo);
+                    }).catch(() => {
+                        return login(cfg);
                     });
                 }
             });
@@ -63,7 +61,6 @@ export default function enterCredentials(): Promise<FCOauth> {
     
     function setupNewUser(cfg) {
         return getUrl(cfg)
-            .then(cfg => getAutoCompile(cfg))
             .then(cfg => login(cfg));
     }
     // =======================================================================================================================================
@@ -95,25 +92,6 @@ export default function enterCredentials(): Promise<FCOauth> {
                 config.url = res.description || 'https://login.salesforce.com';
                 resolve(config);
             });
-        });
-    }
-    function getAutoCompile(config) {
-        return new Promise(function (resolve, reject) {
-            if(config.autoCompile === undefined) {
-                let options: vscode.QuickPickItem[] = [{
-                    description: 'Automatically deploy/compile files on save',
-                    label: 'Yes',
-                }, {
-                    description: 'Deploy/compile code through the ForceCode menu',
-                    label: 'No',
-                },
-                ];
-                vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
-                    config.autoCompile = res.label === 'Yes';
-                    resolve(config);
-                });
-            }
-            resolve(config);
         });
     }
 

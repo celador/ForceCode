@@ -6,6 +6,7 @@ import { credentials } from '../commands';
 import constants from '../models/constants';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
+import { Config } from '../forceCode';
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 
@@ -183,6 +184,27 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         }
     }
 
+    private getAutoCompile(config): Promise<Config> {
+        return new Promise(function (resolve, reject) {
+            if(Object.keys(config).indexOf('autoCompile') === -1) {
+                let options: vscode.QuickPickItem[] = [{
+                    description: 'Automatically deploy/compile files on save',
+                    label: 'Yes',
+                }, {
+                    description: 'Deploy/compile code through the ForceCode menu',
+                    label: 'No',
+                },
+                ];
+                vscode.window.showQuickPick(options, { ignoreFocusOut: true }).then((res: vscode.QuickPickItem) => {
+                    config.autoCompile = res.label === 'Yes';
+                    resolve(config);
+                });
+            } else {
+                resolve(config);
+            }
+        });
+    }
+
     private login(service: FCConnectionService, hadToLogIn: boolean): Promise<boolean> {
         vscode.window.forceCode.containerAsyncRequestId = undefined;
         vscode.window.forceCode.containerId = undefined;
@@ -195,23 +217,26 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         }
         vscode.window.forceCode.config.url = orgInfo.loginUrl;
         vscode.window.forceCode.config.username = orgInfo.username;
-        fs.outputFileSync(path.join(vscode.window.forceCode.workspaceRoot, '.forceCode',
-            vscode.window.forceCode.config.username, 'settings.json'), JSON.stringify(
-                vscode.window.forceCode.config, undefined, 4));
-        vscode.window.forceCode.projectRoot = path.join(projPath, vscode.window.forceCode.config.src);
-        if (!fs.existsSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'))) {
-            fs.mkdirpSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'));
-        }
-        if (fs.existsSync(path.join(projPath, '.sfdx'))) {
-            fs.removeSync(path.join(projPath, '.sfdx'));
-        }
-        fs.symlinkSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'), path.join(projPath, '.sfdx'), 'junction');
-        vscode.window.forceCode.conn = this.currentConnection.connection;
-        // this triggers a call to configuration() because the force.json file watcher, which triggers
-        // refreshConnections()
-        service.refreshConnsStatus();
-        fs.outputFileSync(path.join(projPath, 'force.json'), JSON.stringify({ lastUsername: orgInfo.username }, undefined, 4));
-        return Promise.resolve(hadToLogIn);
+        return service.getAutoCompile(vscode.window.forceCode.config).then(config => {
+            vscode.window.forceCode.config = config;
+            fs.outputFileSync(path.join(vscode.window.forceCode.workspaceRoot, '.forceCode',
+                config.username, 'settings.json'), JSON.stringify(config, undefined, 4));
+            vscode.window.forceCode.projectRoot = path.join(projPath, config.src);
+            if (!fs.existsSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'))) {
+                fs.mkdirpSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'));
+            }
+            if (fs.existsSync(path.join(projPath, '.sfdx'))) {
+                fs.removeSync(path.join(projPath, '.sfdx'));
+            }
+            fs.symlinkSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'), path.join(projPath, '.sfdx'), 'junction');
+            vscode.window.forceCode.conn = this.currentConnection.connection;
+            // this triggers a call to configuration() because the force.json file watcher, which triggers
+            // refreshConnections()
+            service.refreshConnsStatus();
+            fs.outputFileSync(path.join(projPath, 'force.json'), JSON.stringify({ lastUsername: orgInfo.username }, undefined, 4));
+            return Promise.resolve(hadToLogIn);
+        });
+        
     }
 
     public disconnect(conn: FCConnection): Promise<any> {
