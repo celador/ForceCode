@@ -46,6 +46,7 @@ export interface Config {
     showTestCoverage? : boolean;
     showTestLog? : boolean;
     spaDist? : string;
+    staticResourceCacheControl?: string;
     src?: string;
     url?: string;
     username?: string;    

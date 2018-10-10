@@ -143,6 +143,7 @@ The configuration file will look like the following. You can either edit this fi
     "showTestLog": false,
     "spaDist": "dist",
     "src": "src",
+    "staticResourceCacheControl": "Private",
     "username": "MonsterMike@Salesforce.com",
     "url": "https://login.salesforce.com"    
 }
@@ -176,6 +177,7 @@ The configuration file will look like the following. You can either edit this fi
 * showTestLog: This flag determines if the Log file for the last test run should show up after the tests are complete.  This is nice for debugging tests.  Use this in conjunction with the other debug flags to keep your output tidy. The log file will only show if it's not empty (Because of filtering).
 * spaDist: When working with SPAs we usually have a "distribution" folder where we build our files to.  If this string is set, and a SPA is bundled and deployed, this folder will be used as the distribution folder, otherwise the spa project will be deployed.
 * src: This will tell ForceCode where to store the project files for this org.
+* staticResourceCacheControl: You can select Public or Private and your static resources will save with the cacheControl set to what this option is set to.
 * username: DO NOT TOUCH THIS
 * url: DO NOT TOUCH THIS
 
@@ -338,6 +340,8 @@ Step 6.  Have Fun!
 ## Change Log
 
 * 3.9.7
+    * Add staticResourceCacheControl setting. Now you can select if the cacheControl is public or private.
+    * Fix issue with settings not loading correctly
     * Fix "illegal value for line" when saving apex classes or pages with specific errors.
     * Fix not asking for autoCompile when it's undefined. This solves saving issues.
 * 3.9.6

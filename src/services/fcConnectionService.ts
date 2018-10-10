@@ -7,6 +7,7 @@ import constants from '../models/constants';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
 import { Config } from '../forceCode';
+import { saveConfigFile, readConfigFile } from './configuration';
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 
@@ -97,11 +98,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                             const orgInfo: FCOauth = fs.readJsonSync(file.path);
                             service.addConnection(orgInfo);
                             const connIndex: number = service.getConnIndex(orgInfo.username);
-                            const settingsPath: string = path.join(vscode.window.forceCode.workspaceRoot, 
-                                '.forceCode', orgInfo.username, 'settings.json');
-                            if(fs.existsSync(settingsPath)) {
-                                service.connections[connIndex].config = fs.readJsonSync(settingsPath);
-                            }
+                            service.connections[connIndex].config = readConfigFile(orgInfo.username);
                         }
                     }
                 })
@@ -219,8 +216,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         vscode.window.forceCode.config.username = orgInfo.username;
         return service.getAutoCompile(vscode.window.forceCode.config).then(config => {
             vscode.window.forceCode.config = config;
-            fs.outputFileSync(path.join(vscode.window.forceCode.workspaceRoot, '.forceCode',
-                config.username, 'settings.json'), JSON.stringify(config, undefined, 4));
+            saveConfigFile(orgInfo.username);
             vscode.window.forceCode.projectRoot = path.join(projPath, config.src);
             if (!fs.existsSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'))) {
                 fs.mkdirpSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'));

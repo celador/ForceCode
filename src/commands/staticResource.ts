@@ -208,7 +208,7 @@ function makeResourceMetadata(bundleName, cont, contType) {
             fullName: bundleName,
             content: cont,
             contentType: contType,
-            cacheControl: 'Private',
+            cacheControl: vscode.window.forceCode.config.staticResourceCacheControl,
         },
     ];
 }
