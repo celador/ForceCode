@@ -143,6 +143,7 @@ The configuration file will look like the following. You can either edit this fi
     "showTestLog": false,
     "spaDist": "dist",
     "src": "src",
+    "staticResourceCacheControl": "Private",
     "username": "MonsterMike@Salesforce.com",
     "url": "https://login.salesforce.com"    
 }
@@ -176,6 +177,7 @@ The configuration file will look like the following. You can either edit this fi
 * showTestLog: This flag determines if the Log file for the last test run should show up after the tests are complete.  This is nice for debugging tests.  Use this in conjunction with the other debug flags to keep your output tidy. The log file will only show if it's not empty (Because of filtering).
 * spaDist: When working with SPAs we usually have a "distribution" folder where we build our files to.  If this string is set, and a SPA is bundled and deployed, this folder will be used as the distribution folder, otherwise the spa project will be deployed.
 * src: This will tell ForceCode where to store the project files for this org.
+* staticResourceCacheControl: You can select Public or Private and your static resources will save with the cacheControl set to what this option is set to.
 * username: DO NOT TOUCH THIS
 * url: DO NOT TOUCH THIS
 
@@ -322,14 +324,11 @@ Step 2.  Open the folder you just created when you cloned the repo in VSCode.
 
 ### Install the dependencies
 
-Step 3.  Open the terminal by pressing `ctrl` + `~` and install the dependencies by running `npm install`
-        After everything is installed read the Readme file in the needscopied file and place the files in that
-        folder where they need to be, replacing the existing files.
+Step 3.  Open the terminal by pressing `ctrl` + `~` and install the dependencies by running `npm ci`.
 
 ### Run the extension
 
 Step 4.  Press F5 to start debugging the extension. Another VSCode window will open up, which will host your extension.  Open your Salesforce project and start working.
-         If you get an error, ensure you have Typescript installed globally `npm install typescript -g`
 
 ### Debug the extension
 
@@ -340,6 +339,11 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.9.7
+    * Add staticResourceCacheControl setting. Now you can select if the cacheControl is public or private.
+    * Fix issue with settings not loading correctly
+    * Fix "illegal value for line" when saving apex classes or pages with specific errors.
+    * Fix not asking for autoCompile when it's undefined. This solves saving issues.
 * 3.9.6
     * Fix settings menu option throwing an error
     * Fix right-click to log out of an org

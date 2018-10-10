@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as deepmerge from 'deepmerge'
+import { saveConfigFile } from '../services/configuration';
 import { configuration } from '../services';
 
 export default function settings(): Promise<any> {
@@ -25,8 +26,7 @@ export default function settings(): Promise<any> {
     panel.webview.onDidReceiveMessage(message => {
         if (message.save) {
             vscode.window.forceCode.config = deepmerge(vscode.window.forceCode.config, tempSettings, { arrayMerge: overwriteMerge });
-            fs.outputFileSync(path.join(vscode.window.forceCode.workspaceRoot, '.forceCode',
-                vscode.window.forceCode.config.username, 'settings.json'), JSON.stringify(vscode.window.forceCode.config, undefined, 4));
+            saveConfigFile(vscode.window.forceCode.config.username);
             configuration();
             vscode.window.showInformationMessage('ForceCode settings saved successfully!', 'OK');
         } else {

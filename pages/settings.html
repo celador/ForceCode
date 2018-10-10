@@ -71,6 +71,11 @@
                         + '<option value="RunLocalTests" ' + (message[key] === 'RunLocalTests' ? 'selected="selected"' : '') + '>RunLocalTests</option>'
                         + '<option value="RunAllTestsInOrg" ' + (message[key] === 'RunAllTestsInOrg' ? 'selected="selected"' : '') + '>RunAllTestsInOrg</option>'
                         + '</select></div>';
+                } else if(key === 'staticResourceCacheControl') {
+                    theHtml += '<div>staticResourceCacheControl <select id="staticResourceCacheControl" onchange="changeSetting(\'staticResourceCacheControl\')">'
+                        + '<option value="Private" ' + (message[key] === 'Private' ? 'selected="selected"' : '') + '>Private</option>'
+                        + '<option value="Public" ' + (message[key] === 'Public' ? 'selected="selected"' : '') + '>Public</option>'
+                        + '</select></div>';
                 } else {
                     theHtml += '<div>'
                         + key
@@ -151,6 +156,8 @@
                 const pieces = setting_ID.split('_fcSep_');
                 setting = getSetting(setting, pieces, 0, value);
             }
+        } else if(setting_ID.indexOf('staticResourceCacheControl') !== -1) {
+            setting = { staticResourceCacheControl: element.options[element.selectedIndex].value };
         } else {
             setting[setting_ID] = value;
         }

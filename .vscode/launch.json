@@ -12,7 +12,10 @@
       "sourceMaps": true,
       "linux": {
         "preLaunchTask": "npm"
-      },      
+      },  
+      "windows": {
+        "preLaunchTask": "npm"
+      },    
       "outFiles": ["${workspaceFolder}/out/src/**/*.js"]
     },
     {
@@ -27,6 +30,9 @@
       "stopOnEntry": false,
       "sourceMaps": true,
       "linux": {
+        "preLaunchTask": "npm"
+      },
+      "windows": {
         "preLaunchTask": "npm"
       },
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"]

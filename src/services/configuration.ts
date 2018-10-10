@@ -7,55 +7,52 @@ import constants from './../models/constants';
 import { fcConnection } from '.';
 import * as deepmerge from 'deepmerge'
 
-export default function getSetConfig(service?: forceCode.IForceService): Promise<Config> {
-	const defautlOptions = {
-		apiVersion: constants.API_VERSION,
-		autoRefresh: false,
-		browser: 'Google Chrome Canary',
-		checkForFileChanges: true,
-		debugFilter: 'USER_DEBUG|FATAL_ERROR',
-		debugOnly: true,
-		deployOptions: {
-			'allowMissingFiles': true,
-			'checkOnly': false,
-			'ignoreWarnings': true,
-			'purgeOnDelete': false,
-			'rollbackOnError': true,
-			'runTests': [],
-			'singlePackage': true,
-			'testLevel': 'NoTestRun'
-		},
-		maxFileChangeNotifications: 15,
-		outputQueriesAsCSV: false,
-		overwritePackageXML: false,
-		poll: 1500,
-		pollTimeout: 1200,
-		prefix: '',
-		revealTestedClass: false,
-		showFilesOnOpen: true,
-		showFilesOnOpenMax: 3,
-		showTestCoverage: true,
-		showTestLog: true,
-		spaDist: '',
-	};
+export const defautlOptions = {
+	apiVersion: constants.API_VERSION,
+	autoRefresh: false,
+	browser: 'Google Chrome Canary',
+	checkForFileChanges: true,
+	debugFilter: 'USER_DEBUG|FATAL_ERROR',
+	debugOnly: true,
+	deployOptions: {
+		'allowMissingFiles': true,
+		'checkOnly': false,
+		'ignoreWarnings': true,
+		'purgeOnDelete': false,
+		'rollbackOnError': true,
+		'runTests': [],
+		'singlePackage': true,
+		'testLevel': 'NoTestRun'
+	},
+	maxFileChangeNotifications: 15,
+	outputQueriesAsCSV: false,
+	overwritePackageXML: false,
+	poll: 1500,
+	pollTimeout: 1200,
+	prefix: '',
+	revealTestedClass: false,
+	showFilesOnOpen: true,
+	showFilesOnOpenMax: 3,
+	showTestCoverage: true,
+	showTestLog: true,
+	spaDist: '',
+	src: 'src',
+	staticResourceCacheControl: 'Private',
+};
 
+export default function getSetConfig(service?: forceCode.IForceService): Promise<Config> {
 	var self: forceCode.IForceService = service || vscode.window.forceCode;
 	if (!vscode.workspace.workspaceFolders) {
 		throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
 	}
 	const projPath = vscode.window.forceCode.workspaceRoot;
-	try {
-		var lastUsername: string = fs.readJsonSync(path.join(projPath, 'force.json')).lastUsername;
-		self.config = fs.readJsonSync(path.join(projPath, '.forceCode', lastUsername, 'settings.json'));
-	} catch (err) {
-		self.config = defautlOptions;
+	var lastUsername: string = '';
+	if(fs.existsSync(path.join(projPath, 'force.json'))) {
+		lastUsername = fs.readJsonSync(path.join(projPath, 'force.json')).lastUsername;
 	}
 	
-	self.config = deepmerge(defautlOptions, self.config);
+	self.config = readConfigFile(lastUsername);
 
-	if (self.config && self.config !== null && typeof self.config === 'object' && !self.config.src) {
-		self.config.src = 'src';
-	}
 	self.projectRoot = path.join(projPath, self.config.src);
 	if (!fs.existsSync(self.projectRoot)) {
 		fs.mkdirpSync(self.projectRoot);
@@ -73,4 +70,20 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 	return fcConnection.refreshConnections().then(() => {
 		return Promise.resolve(self.config);
 	});
+}
+
+export function saveConfigFile(userName) {
+	fs.outputFileSync(path.join(vscode.window.forceCode.workspaceRoot, '.forceCode',
+		userName, 'settings.json'), 
+		JSON.stringify(vscode.window.forceCode.config, undefined, 4));
+}
+
+export function readConfigFile(userName): Config {
+	const configPath: string = path.join(vscode.window.forceCode.workspaceRoot, '.forceCode', 
+		userName, 'settings.json');
+	var config: Config = {}
+	if(fs.existsSync(configPath)) {
+		config = fs.readJsonSync(configPath);
+	}
+	return deepmerge(defautlOptions, config);
 }
