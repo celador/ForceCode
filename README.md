@@ -338,6 +338,7 @@ Step 6.  Have Fun!
 ## Change Log
 
 * 3.9.7
+    * Fix "illegal value for line" when saving apex classes or pages with specific errors.
     * Fix not asking for autoCompile when it's undefined. This solves saving issues.
 * 3.9.6
     * Fix settings menu option throwing an error
