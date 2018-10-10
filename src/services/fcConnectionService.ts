@@ -219,18 +219,19 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             saveConfigFile(orgInfo.username);
             vscode.window.forceCode.projectRoot = path.join(projPath, config.src);
             
-            const hubRoot = path.join(projPath, '.forceCode', orgInfo.username)
-            const hubPath = path.join(projPath, '.forceCode', orgInfo.username, '.sfdx')
+            const forceSfdxPath = path.join(projPath, '.forceCode', orgInfo.username, '.sfdx')
             const sfdxPath = path.join(projPath, '.sfdx')
             
-            if (!fs.existsSync(hubPath) && fs.existsSync(sfdxPath)) {
-                fs.moveSync(sfdxPath, hubRoot, { overwrite: true })
-                // New ForceCode Project from a SFDX project
-                fs.symlinkSync(hubPath, sfdxPath, 'junction');
-            } else {
-                // New ForceCode Project and new Classic Metadata project
-                fs.mkdirpSync(path.join(projPath, '.forceCode', orgInfo.username, '.sfdx'));
-                fs.symlinkSync(hubPath, sfdxPath, 'junction');
+            if (fs.existsSync(forceSfdxPath) && fs.existsSync(sfdxPath)) {
+                console.log('Do nothing');
+            } else if (!fs.existsSync(forceSfdxPath) && fs.existsSync(sfdxPath)) {
+                // New ForceCode Project from SFDX project
+                fs.moveSync(sfdxPath, forceSfdxPath, { overwrite: true })
+                fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
+            } else if (!fs.existsSync(forceSfdxPath)) {
+                // New ForceCode Project from Classic Metadata project
+                fs.mkdirpSync(forceSfdxPath);
+                fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
             }
             vscode.window.forceCode.conn = this.currentConnection.connection;
             // this triggers a call to configuration() because the force.json file watcher, which triggers
