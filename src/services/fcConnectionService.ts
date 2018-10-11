@@ -221,18 +221,22 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             
             const forceSfdxPath = path.join(projPath, '.forceCode', orgInfo.username, '.sfdx')
             const sfdxPath = path.join(projPath, '.sfdx')
-            
-            if (fs.existsSync(forceSfdxPath) && fs.existsSync(sfdxPath)) {
-                console.log('Do nothing');
-            } else if (!fs.existsSync(forceSfdxPath) && fs.existsSync(sfdxPath)) {
-                // New ForceCode Project from SFDX project
-                fs.moveSync(sfdxPath, forceSfdxPath, { overwrite: true })
-                fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
-            } else if (!fs.existsSync(forceSfdxPath)) {
-                // New ForceCode Project from Classic Metadata project
-                fs.mkdirpSync(forceSfdxPath);
-                fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
+
+            if (fs.existsSync(sfdxPath)) {
+                if(fs.lstatSync(sfdxPath).isSymbolicLink()) {
+                    // if it exists and is a symbolic link, remove it so we can relink with the new login
+                    fs.removeSync(sfdxPath);
+                } else {
+                    // not a symbolic link, so move it because it's an SFDX proj folder
+                    fs.moveSync(sfdxPath, forceSfdxPath, { overwrite: true });
+                }
             }
+            if (!fs.existsSync(forceSfdxPath)) {
+                fs.mkdirpSync(forceSfdxPath);
+            }
+            // link to the newly logged in org's sfdx folder in .forceCode/USERNAME/.sfdx
+            fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
+
             vscode.window.forceCode.conn = this.currentConnection.connection;
             // this triggers a call to configuration() because the force.json file watcher, which triggers
             // refreshConnections()
