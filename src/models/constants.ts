@@ -10,6 +10,7 @@ interface Constants {
     LOG_TYPE: string;
     API_VERSION: string;
     MAX_TIME_BETWEEN_FILE_CHANGES: number;
+    GA_TRACKING_ID: string;
 }
 const apexFilter: vscode.DocumentFilter[] = [
     {
@@ -31,5 +32,6 @@ const constants: Constants = {
     LOG_TYPE: 'DEVELOPER_LOG',
     API_VERSION: '43.0',
     MAX_TIME_BETWEEN_FILE_CHANGES: 10000,
+    GA_TRACKING_ID: 'UA-127320954-1'
 };
 export default constants;

@@ -6,6 +6,8 @@ import * as path from 'path';
 import { FCFile } from './codeCovView';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { Connection } from 'jsforce';
+import { trackEvent } from './fcAnalytics';
+const uuidv4 = require('uuid/v4');
 import klaw = require('klaw');
 
 export default class ForceService implements forceCode.IForceService {
@@ -23,6 +25,7 @@ export default class ForceService implements forceCode.IForceService {
     public projectRoot: string;
     public workspaceRoot: string;
     public statusTimeout: any; 
+    public uuid: string;
 
     constructor() {
         if (!vscode.workspace.workspaceFolders) {
@@ -48,7 +51,26 @@ export default class ForceService implements forceCode.IForceService {
     public static start() {
         console.log('Starting ForceCode service');
         configuration(this.getInstance()).then(config => {
-            commandService.runCommand('ForceCode.switchUserText', { username: config.username, loginUrl: config.url}, true);
+            return new Promise((resolve) => {
+                if(!vscode.window.forceCode.uuid) {
+                    // ask the user to opt-in
+                    return vscode.window.showInformationMessage(
+                        'The ForceCode Team would like to collect usage data to see how many people use our extension so we can improve your experience. Is this OK?', 'Yes', 'No')
+                        .then(choice => { 
+                            if(choice === 'Yes') {
+                                vscode.window.forceCode.uuid = uuidv4();
+                            } else {
+                                vscode.window.forceCode.uuid = 'OPT-OUT';
+                            }
+                            resolve();             
+                        });
+                } else {
+                    resolve();
+                }
+            }).then(() => {
+                trackEvent('Extension starts', 'Started');
+                commandService.runCommand('ForceCode.switchUserText', { username: config.username, loginUrl: config.url}, true);
+            });
         });
     }
 

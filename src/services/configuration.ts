@@ -48,7 +48,9 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 	const projPath = vscode.window.forceCode.workspaceRoot;
 	var lastUsername: string = '';
 	if(fs.existsSync(path.join(projPath, 'force.json'))) {
-		lastUsername = fs.readJsonSync(path.join(projPath, 'force.json')).lastUsername;
+		var forceFile = fs.readJsonSync(path.join(projPath, 'force.json'));
+		lastUsername = forceFile.lastUsername;
+		vscode.window.forceCode.uuid = forceFile.uuid;
 	}
 	
 	self.config = readConfigFile(lastUsername);
