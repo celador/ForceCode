@@ -7,7 +7,7 @@ const pjson = require('./../../../package.json');
 /*
  * This will send tracking info to GA
  *  Each time it will send the FC version + category param as the category, the OS as the event action,
- *      the message param as the event label, and the ForceCode version as the value (integer).
+ *      and the message param as the event label.
  * 
  * This will be used to track errors and how much the extension is used.
  */
