@@ -7,7 +7,7 @@ import constants from '../models/constants';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
 import { Config } from '../forceCode';
-import { saveConfigFile, readConfigFile } from './configuration';
+import { saveConfigFile, readConfigFile, defautlOptions } from './configuration';
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 
@@ -206,11 +206,13 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         vscode.window.forceCode.containerAsyncRequestId = undefined;
         vscode.window.forceCode.containerId = undefined;
         vscode.window.forceCode.containerMembers = [];
-        const orgInfo: FCOauth = service.currentConnection.orgInfo;
+        const conn: FCConnection = service.currentConnection;
+        const orgInfo: FCOauth = conn.orgInfo;
         const projPath: string = vscode.window.forceCode.workspaceRoot;
-        const conn: FCConnection = service.getConnByUsername(orgInfo.username);
         if(conn.config) {
             vscode.window.forceCode.config = conn.config;
+        } else {
+            vscode.window.forceCode.config = defautlOptions;
         }
         vscode.window.forceCode.config.url = orgInfo.loginUrl;
         vscode.window.forceCode.config.username = orgInfo.username;
