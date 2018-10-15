@@ -223,11 +223,15 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             
             const forceSfdxPath = path.join(projPath, '.forceCode', orgInfo.username, '.sfdx')
             const sfdxPath = path.join(projPath, '.sfdx')
+            var sfdxStat;
+            try {
+                sfdxStat = fs.lstatSync(sfdxPath);
+            } catch(e) {}
 
-            if (fs.existsSync(sfdxPath)) {
-                if(fs.lstatSync(sfdxPath).isSymbolicLink()) {
+            if (sfdxStat) {
+                if(sfdxStat.isSymbolicLink()) {
                     // if it exists and is a symbolic link, remove it so we can relink with the new login
-                    fs.removeSync(sfdxPath);
+                    fs.unlinkSync(sfdxPath);
                 } else {
                     // not a symbolic link, so move it because it's an SFDX proj folder
                     fs.moveSync(sfdxPath, forceSfdxPath, { overwrite: true });
