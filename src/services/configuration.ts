@@ -53,7 +53,7 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 	}
 	self.config = readConfigFile(lastUsername);
 
-	if(fs.existsSync(vscode.window.forceCode.storageRoot)) {
+	if(fs.existsSync(path.join(vscode.window.forceCode.storageRoot, 'analytics.json'))) {
 		vscode.window.forceCode.uuid = fs.readJsonSync(path.join(vscode.window.forceCode.storageRoot, 'analytics.json')).uuid;
 	}
 
