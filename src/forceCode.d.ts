@@ -156,6 +156,7 @@ export interface IForceService {
     config?: Config;
     projectRoot: string;
     workspaceRoot: string;
+    storageRoot: string;
     describe: IMetadataDescribe;
     declarations?: IDeclarations;
     containerId?: string;

@@ -7,6 +7,7 @@ import { FCFile } from './codeCovView';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { Connection } from 'jsforce';
 import { trackEvent } from './fcAnalytics';
+import * as fs from 'fs-extra';
 const uuidv4 = require('uuid/v4');
 import klaw = require('klaw');
 
@@ -24,6 +25,7 @@ export default class ForceService implements forceCode.IForceService {
     public outputChannel: vscode.OutputChannel;
     public projectRoot: string;
     public workspaceRoot: string;
+    public storageRoot: string;
     public statusTimeout: any; 
     public uuid: string;
 
@@ -55,13 +57,15 @@ export default class ForceService implements forceCode.IForceService {
                 if(!vscode.window.forceCode.uuid) {
                     // ask the user to opt-in
                     return vscode.window.showInformationMessage(
-                        'The ForceCode Team would like to collect usage data to see how many people use our extension so we can improve your experience. Is this OK?', 'Yes', 'No')
+                        'The ForceCode Team would like to collect anonymous usage data so we can improve your experience. Is this OK?', 'Yes', 'No')
                         .then(choice => { 
                             if(choice === 'Yes') {
                                 vscode.window.forceCode.uuid = uuidv4();
                             } else {
                                 vscode.window.forceCode.uuid = 'OPT-OUT';
                             }
+                            fs.outputFileSync(path.join(vscode.window.forceCode.storageRoot, 'analytics.json'), 
+                                JSON.stringify({ uuid: vscode.window.forceCode.uuid }, undefined, 4));
                             resolve();             
                         });
                 } else {

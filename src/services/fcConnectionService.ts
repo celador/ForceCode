@@ -242,8 +242,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             // refreshConnections()
             service.refreshConnsStatus();
             fs.outputFileSync(path.join(projPath, 'force.json'), 
-                JSON.stringify({ lastUsername: orgInfo.username, 
-                    uuid: vscode.window.forceCode.uuid }, undefined, 4));
+                JSON.stringify({ lastUsername: orgInfo.username }, undefined, 4));
             return Promise.resolve(hadToLogIn);         
         });
         
