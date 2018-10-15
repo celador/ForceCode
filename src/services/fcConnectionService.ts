@@ -145,7 +145,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     private setupConn(service: FCConnectionService): Promise<boolean> {
-        if (!this.isLoggedIn() || (service.currentConnection && !service.currentConnection.connection)) {
+        if (!this.isLoggedIn() || !service.currentConnection || !service.currentConnection.connection) {
             return dxService.getOrgInfo()
                 .catch(() => {
                     if (service.currentConnection) {
