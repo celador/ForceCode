@@ -343,6 +343,7 @@ Step 6.  Have Fun!
     * Fix errors related to lighting components (Creating new ones and errors with 'getWSMember of undefined')
     * Add analytics features that will help make tracking down errors a little easier
     * Fix some login related issues
+    * Fix extension loading issue when moving the project directory
 * 3.9.7
     * Add staticResourceCacheControl setting. Now you can select if the cacheControl is public or private.
     * Fix issue with settings not loading correctly
