@@ -46,12 +46,16 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 		throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
 	}
 	const projPath = vscode.window.forceCode.workspaceRoot;
-	var lastUsername: string = '';
+	var lastUsername: string;
 	if(fs.existsSync(path.join(projPath, 'force.json'))) {
-		lastUsername = fs.readJsonSync(path.join(projPath, 'force.json')).lastUsername;
+		var forceFile = fs.readJsonSync(path.join(projPath, 'force.json'));
+		lastUsername = forceFile.lastUsername;
 	}
-	
 	self.config = readConfigFile(lastUsername);
+
+	if(fs.existsSync(vscode.window.forceCode.storageRoot)) {
+		vscode.window.forceCode.uuid = fs.readJsonSync(path.join(vscode.window.forceCode.storageRoot, 'analytics.json')).uuid;
+	}
 
 	self.projectRoot = path.join(projPath, self.config.src);
 	if (!fs.existsSync(self.projectRoot)) {
@@ -79,11 +83,13 @@ export function saveConfigFile(userName) {
 }
 
 export function readConfigFile(userName): Config {
-	const configPath: string = path.join(vscode.window.forceCode.workspaceRoot, '.forceCode', 
-		userName, 'settings.json');
 	var config: Config = {}
-	if(fs.existsSync(configPath)) {
-		config = fs.readJsonSync(configPath);
+	if(userName) {
+		const configPath: string = path.join(vscode.window.forceCode.workspaceRoot, '.forceCode', 
+			userName, 'settings.json');
+		if(fs.existsSync(configPath)) {
+			config = fs.readJsonSync(configPath);
+		}
 	}
 	return deepmerge(defautlOptions, config);
 }

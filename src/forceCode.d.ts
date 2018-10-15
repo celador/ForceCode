@@ -156,6 +156,7 @@ export interface IForceService {
     config?: Config;
     projectRoot: string;
     workspaceRoot: string;
+    storageRoot: string;
     describe: IMetadataDescribe;
     declarations?: IDeclarations;
     containerId?: string;
@@ -166,6 +167,7 @@ export interface IForceService {
     outputChannel: vscode.OutputChannel;
     statusBarItem: vscode.StatusBarItem;
     fcDiagnosticCollection: vscode.DiagnosticCollection;
+    uuid: string;
     connect(): Promise<IForceService>;
     newContainer(force: Boolean): Promise<IForceService>;
     showStatus(message: string): void;

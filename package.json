@@ -411,6 +411,8 @@
     "os": "0.1.1",
     "request-light": "0.2.4",
     "salesforce-alm": "43.12.0",
+    "universal-analytics": "0.4.17",
+    "uuid": "3.3.2",
     "vscode": "1.1.21",
     "xml2js": "0.4.19"
   },
@@ -422,6 +424,7 @@
     "@types/node-fetch": "2.1.2",
     "@types/mocha": "5.2.5",
     "@types/node": "10.11.6",
+    "@types/universal-analytics": "0.4.2",
     "@types/xml2js": "0.4.3",
     "mocha": "5.2.0",
     "rimraf": "2.6.2",

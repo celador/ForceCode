@@ -8,6 +8,7 @@
 import * as vscode from 'vscode';
 import { fcConnection } from '.';
 import { EventEmitter } from 'events';
+import { trackEvent } from './fcAnalytics';
 
 export interface FCCommand {
   commandName: string,
@@ -124,11 +125,18 @@ export class Task extends vscode.TreeItem {
     return new Promise((resolve) => { resolve(this.execution.command(this.context, this.selectedResource)); })
       .catch(reason => {
         return fcConnection.checkLoginStatus().then(loggedIn => {
-          console.log(loggedIn);
           if(loggedIn) {
-            vscode.window.showErrorMessage(reason.message ? reason.message : reason);
+            if(reason) {
+              vscode.window.showErrorMessage(reason.message ? reason.message : reason);
+              return trackEvent('Error Thrown', reason.message ? reason.message : reason)
+                .then(() => {
+                  return reason;
+                });
+            }
+          } else {
+            return reason;
           }
-          return reason;
+          
         });
       })
       .then(finalRes => {

@@ -241,8 +241,9 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             // this triggers a call to configuration() because the force.json file watcher, which triggers
             // refreshConnections()
             service.refreshConnsStatus();
-            fs.outputFileSync(path.join(projPath, 'force.json'), JSON.stringify({ lastUsername: orgInfo.username }, undefined, 4));
-            return Promise.resolve(hadToLogIn);
+            fs.outputFileSync(path.join(projPath, 'force.json'), 
+                JSON.stringify({ lastUsername: orgInfo.username }, undefined, 4));
+            return Promise.resolve(hadToLogIn);         
         });
         
     }

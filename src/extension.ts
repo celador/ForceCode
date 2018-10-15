@@ -16,6 +16,7 @@ export function activate(context: vscode.ExtensionContext): any {
     });
 
     vscode.window.forceCode = ForceService.getInstance();
+    vscode.window.forceCode.storageRoot = context.storagePath;
 
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.switchUserProvider', fcConnection));
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.treeDataProvider', commandViewService));
