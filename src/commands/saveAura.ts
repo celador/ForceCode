@@ -50,9 +50,9 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
                 ApiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
                 Description: name.replace('_', ' '),
             }).then(bundle => {
-                results[0] = [bundle];
+                results[0] = bundle;
                 var newWSMember: forceCode.IWorkspaceMember = {
-                    id: results[0].Id,
+                    id: results[0].Id ? results[0].Id : results[0].id,
                     name: name,
                     path: document.fileName,
                     lastModifiedDate: (new Date()).toISOString(),
@@ -89,7 +89,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
         // If the Definition doesn't exist, create it
         var def: any[] = definitions.filter(result => result.DefType === DefType);
         currentObjectDefinition = def.length > 0 ? def[0] : undefined;
-        var curFCFile: FCFile = codeCovViewService.findById(bundle[0].Id);
+        var curFCFile: FCFile = codeCovViewService.findById(bundle[0].Id ? bundle[0].Id : bundle[0].id);
         if (currentObjectDefinition !== undefined) {
             if(curFCFile ? curFCFile.compareDates(currentObjectDefinition.LastModifiedDate) : false) {
                 return updateAura(curFCFile);
@@ -106,7 +106,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
                 });
             }
         } else if (bundle[0]) {
-            return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle[0].Id, DefType, Format, Source }).then(res => {
+            return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle[0].Id ? bundle[0].Id : bundle[0].id, DefType, Format, Source }).then(res => {
                 var tempWSMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
                 tempWSMem.lastModifiedDate = (new Date()).toISOString();
                 tempWSMem.lastModifiedByName = '';
@@ -137,11 +137,11 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
         // is 'js', 'css', or 'xml'
         switch (ext) {
             case 'js':
-                return 'js';
+                return 'JS';
             case 'css':
-                return 'css';
+                return 'CSS';
             default:
-                return 'xml';
+                return 'XML';
         }
     }
 }
