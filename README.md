@@ -342,6 +342,7 @@ Step 6.  Have Fun!
 * 3.9.8
     * Add analytics features that will help make tracking down errors a little easier
     * Retrieve standard objects when retrieving all metadata
+    * Fix connection issue where users were getting 'cannot read tooling/metadata of undefined' error
     * Fix errors related to lighting components (Creating new ones and errors with 'getWSMember of undefined')
     * Fix some login related issues
     * Fix extension loading issue when moving the project directory

@@ -172,6 +172,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
                         return service.currentConnection.connection.identity().then(res => {
                             service.currentConnection.orgInfo.userId = res.user_id;
+                            vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
                             return Promise.resolve(false);
                         });
                     }
@@ -243,7 +244,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             // link to the newly logged in org's sfdx folder in .forceCode/USERNAME/.sfdx
             fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
 
-            vscode.window.forceCode.conn = this.currentConnection.connection;
+            vscode.window.forceCode.conn = service.currentConnection.connection;
             // this triggers a call to configuration() because the force.json file watcher, which triggers
             // refreshConnections()
             service.refreshConnsStatus();
