@@ -340,8 +340,9 @@ Step 6.  Have Fun!
 ## Change Log
 
 * 3.9.8
-    * Fix errors related to lighting components (Creating new ones and errors with 'getWSMember of undefined')
     * Add analytics features that will help make tracking down errors a little easier
+    * Retrieve standard objects when retrieving all metadata
+    * Fix errors related to lighting components (Creating new ones and errors with 'getWSMember of undefined')
     * Fix some login related issues
     * Fix extension loading issue when moving the project directory
 * 3.9.7

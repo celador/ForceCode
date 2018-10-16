@@ -193,10 +193,17 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             }
 
             function all() {
-                var types: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
-                    return { name: r.xmlName, members: '*' };
+                new SObjectDescribe().describeGlobal(SObjectCategory.STANDARD).then(objs => {
+                    objs.push('*');
+                    var types: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
+                        if(r.xmlName === 'CustomObject') {
+                            return { name: r.xmlName, members: objs };
+                        } else {
+                            return { name: r.xmlName, members: '*' };
+                        }
+                    });
+                    retrieveComponents(resolve, { types: types });
                 });
-                retrieveComponents(resolve, { types: types });
             }
 
             function getSpecificTypeMetadata(metadataType: string) {
