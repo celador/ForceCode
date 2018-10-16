@@ -343,6 +343,7 @@ Step 6.  Have Fun!
     * Add analytics features that will help make tracking down errors a little easier
     * Retrieve standard objects when retrieving all metadata
     * Fix connection issue where users were getting 'cannot read tooling/metadata of undefined' error
+    * Fix 'illegal value for line' issue when trying to save scheduled class
     * Fix errors related to lighting components (Creating new ones and errors with 'getWSMember of undefined')
     * Fix some login related issues
     * Fix extension loading issue when moving the project directory
