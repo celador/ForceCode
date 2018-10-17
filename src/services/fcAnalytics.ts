@@ -65,23 +65,25 @@ export function getPreviousUUID(): boolean {
         }
     });
 
-    // get the newest version installed before the current version
-    const lastVersion: string = toCheck.reduce((ver1, ver2) => {
-        const ver1Parts: number[] = ver1.split('johnaaronnelson.forcecode-')[1].split('.').map(part => parseInt(part));
-        const ver2Parts: number[] = ver2.split('johnaaronnelson.forcecode-')[1].split('.').map(part => parseInt(part));
-        if(ver1Parts[0] !== ver2Parts[0]) {
-            return ver1Parts[0] > ver2Parts[0] ? ver1 : ver2;
-        } else if(ver1Parts[1] !== ver2Parts[1]) {
-            return ver1Parts[1] > ver2Parts[1] ? ver1 : ver2;
-        } else {
-            return ver1Parts[2] > ver2Parts[2] ? ver1 : ver2;
-        }
-    });
+    if(toCheck.length > 0) {
+        // get the newest version installed before the current version
+        const lastVersion: string = toCheck.reduce((ver1, ver2) => {
+            const ver1Parts: number[] = ver1.split('johnaaronnelson.forcecode-')[1].split('.').map(part => parseInt(part));
+            const ver2Parts: number[] = ver2.split('johnaaronnelson.forcecode-')[1].split('.').map(part => parseInt(part));
+            if(ver1Parts[0] !== ver2Parts[0]) {
+                return ver1Parts[0] > ver2Parts[0] ? ver1 : ver2;
+            } else if(ver1Parts[1] !== ver2Parts[1]) {
+                return ver1Parts[1] > ver2Parts[1] ? ver1 : ver2;
+            } else {
+                return ver1Parts[2] > ver2Parts[2] ? ver1 : ver2;
+            }
+        });
 
-    // if the analytics.json file exists in the previous install then copy it over
-    if(fs.existsSync(path.join(extensionsPath, lastVersion, 'analytics.json'))) {
-        fs.copyFileSync(path.join(extensionsPath, lastVersion, 'analytics.json'), path.join(fcExtPath, 'analytics.json'));
-        return true;
+        // if the analytics.json file exists in the previous install then copy it over
+        if(fs.existsSync(path.join(extensionsPath, lastVersion, 'analytics.json'))) {
+            fs.copyFileSync(path.join(extensionsPath, lastVersion, 'analytics.json'), path.join(fcExtPath, 'analytics.json'));
+            return true;
+        }
     }
     return false;
 }
