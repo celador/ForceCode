@@ -124,7 +124,7 @@ The configuration file will look like the following. You can either edit this fi
 
 ```json
 {
-    "apiVersion": "43.0",
+    "apiVersion": "44.0",
     "autoCompile": true,
     "autoRefresh": true,
     "browser": "Google Chrome Canary",

@@ -30,7 +30,7 @@ const constants: Constants = {
     OUTPUT_CHANNEL_NAME: 'ForceCode',
     DEBUG_LEVEL_NAME: 'Execute_Anonymous_Debug',
     LOG_TYPE: 'DEVELOPER_LOG',
-    API_VERSION: '43.0',
+    API_VERSION: '44.0',
     MAX_TIME_BETWEEN_FILE_CHANGES: 10000,
     GA_TRACKING_ID: 'UA-127320954-1'
 };
