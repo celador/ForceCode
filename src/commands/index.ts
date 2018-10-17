@@ -13,6 +13,7 @@ import find from './find';
 import getLog from './getLog';
 import { open, showFileOptions } from './open';
 import getOverallCoverage from './overallCoverage';
+import packageBuilder from './packageBuilder';
 import retrieve from './retrieve';
 import showMenu from './menu';
 import soql from './soql';
@@ -36,6 +37,7 @@ export {
     getLog,
     open,
     getOverallCoverage,
+    packageBuilder,
     retrieve,
     settings,
     showFileOptions,

@@ -7,7 +7,7 @@ import constants from '../models/constants';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
 import { Config } from '../forceCode';
-import { saveConfigFile, readConfigFile } from './configuration';
+import { saveConfigFile, readConfigFile, defautlOptions } from './configuration';
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 
@@ -145,7 +145,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     private setupConn(service: FCConnectionService): Promise<boolean> {
-        if (!this.isLoggedIn() || (service.currentConnection && !service.currentConnection.connection)) {
+        if (!this.isLoggedIn() || !service.currentConnection || !service.currentConnection.connection) {
             return dxService.getOrgInfo()
                 .catch(() => {
                     if (service.currentConnection) {
@@ -172,6 +172,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
                         return service.currentConnection.connection.identity().then(res => {
                             service.currentConnection.orgInfo.userId = res.user_id;
+                            vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
                             return Promise.resolve(false);
                         });
                     }
@@ -206,11 +207,13 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         vscode.window.forceCode.containerAsyncRequestId = undefined;
         vscode.window.forceCode.containerId = undefined;
         vscode.window.forceCode.containerMembers = [];
-        const orgInfo: FCOauth = service.currentConnection.orgInfo;
+        const conn: FCConnection = service.currentConnection;
+        const orgInfo: FCOauth = conn.orgInfo;
         const projPath: string = vscode.window.forceCode.workspaceRoot;
-        const conn: FCConnection = service.getConnByUsername(orgInfo.username);
         if(conn.config) {
             vscode.window.forceCode.config = conn.config;
+        } else {
+            vscode.window.forceCode.config = defautlOptions;
         }
         vscode.window.forceCode.config.url = orgInfo.loginUrl;
         vscode.window.forceCode.config.username = orgInfo.username;
@@ -221,11 +224,15 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             
             const forceSfdxPath = path.join(projPath, '.forceCode', orgInfo.username, '.sfdx')
             const sfdxPath = path.join(projPath, '.sfdx')
+            var sfdxStat;
+            try {
+                sfdxStat = fs.lstatSync(sfdxPath);
+            } catch(e) {}
 
-            if (fs.existsSync(sfdxPath)) {
-                if(fs.lstatSync(sfdxPath).isSymbolicLink()) {
+            if (sfdxStat) {
+                if(sfdxStat.isSymbolicLink()) {
                     // if it exists and is a symbolic link, remove it so we can relink with the new login
-                    fs.removeSync(sfdxPath);
+                    fs.unlinkSync(sfdxPath);
                 } else {
                     // not a symbolic link, so move it because it's an SFDX proj folder
                     fs.moveSync(sfdxPath, forceSfdxPath, { overwrite: true });
@@ -237,7 +244,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             // link to the newly logged in org's sfdx folder in .forceCode/USERNAME/.sfdx
             fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
 
-            vscode.window.forceCode.conn = this.currentConnection.connection;
+            vscode.window.forceCode.conn = service.currentConnection.connection;
             // this triggers a call to configuration() because the force.json file watcher, which triggers
             // refreshConnections()
             service.refreshConnsStatus();

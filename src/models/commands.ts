@@ -179,13 +179,25 @@ export const fcCommands: FCCommand[] = [
             return commands.staticResource(context);
         }
     },
+    {
+        commandName: 'ForceCode.buildPackage',
+        name: 'Building package.xml',
+        hidden: false,
+        description: 'Build a package.xml file and choose where to save it.',
+        detail: 'You will be able to choose the types to include in your package.xml (Only does * for members)',
+        icon: 'jersey',
+        label: 'Build package.xml file',
+        command: function (context, selectedResource?) {
+            return commands.packageBuilder(true);
+        }
+    },
     // Retrieve Package
     {
         commandName: 'ForceCode.retrievePackage',
         name: 'Retrieving package',
         hidden: false,
         description: 'Retrieve metadata to your src directory.',
-        detail: 'You will be prompted for the package name or you can choose to retrieve by your package.xml or to retrieve all metadata',
+        detail: 'You can choose to retrieve by your package.xml, retrieve all metadata, or choose which types to retrieve.',
         icon: 'cloud-download',
         label: 'Retrieve Package/Metadata',
         command: function (context, selectedResource?) {

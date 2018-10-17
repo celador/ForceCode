@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { fcConnection, FCOauth} from '.';
+import { fcConnection, FCOauth, FCConnection} from '.';
 import alm = require('salesforce-alm');
 import { outputToString } from '../parsers/output';
 
@@ -198,7 +198,8 @@ export default class DXService implements DXCommands {
     }
 
     public logout(username: string): Promise<any> {
-        if(fcConnection.isLoggedIn()) {
+        const conn: FCConnection = fcConnection.getConnByUsername(username);
+        if(conn && conn.isLoggedIn) {
             return Promise.resolve(this.runCommand('auth:logout', '--noprompt --targetusername ' + username));
         } else {
             return Promise.resolve();

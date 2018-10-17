@@ -12,6 +12,7 @@ const fetch: any = require('node-fetch');
 import * as compress from 'compressing';
 import { parseString } from 'xml2js';
 import { outputToString } from '../parsers/output';
+import { packageBuilder } from '.';
 
 export interface ToolingType {
     name: string;
@@ -80,6 +81,11 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 label: '$(package) Retrieve by package.xml',
                 detail: `Packaged (Retrieve metadata defined in Package.xml)`,
                 description: 'packaged',
+            });
+            options.push({
+                label: '$(check) Choose types...',
+                detail: `Choose which metadata types to retrieve`,
+                description: 'user-choice',
             });
             options.push({
                 label: '$(cloud-download) Get All Files from org',
@@ -188,15 +194,30 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 getSpecificTypeMetadata('CustomObject');
             } else if (option.description === 'standardobj') {
                 getStandardObjects();
+            } else if(option.description === 'user-choice') {
+                builder();
             } else {
                 reject();
             }
 
+            function builder() {
+                packageBuilder().then(mappedTypes => {
+                    retrieveComponents(resolve, { types: mappedTypes });
+                }).catch(reject);
+            }
+
             function all() {
-                var types: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
-                    return { name: r.xmlName, members: '*' };
+                new SObjectDescribe().describeGlobal(SObjectCategory.STANDARD).then(objs => {
+                    objs.push('*');
+                    var types: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
+                        if(r.xmlName === 'CustomObject') {
+                            return { name: r.xmlName, members: objs };
+                        } else {
+                            return { name: r.xmlName, members: '*' };
+                        }
+                    });
+                    retrieveComponents(resolve, { types: types });
                 });
-                retrieveComponents(resolve, { types: types });
             }
 
             function getSpecificTypeMetadata(metadataType: string) {

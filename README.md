@@ -28,7 +28,7 @@ There's no complicated setup process or project configurations, no external apps
 
 ## Slack
 
-ForceCode now has a Slack channel. Click [here](https://join.slack.com/t/forcecodeworkspace/shared_invite/enQtNDUxNzc3MzA1NDE0LTRiZmQ0MjdmMjQ0ZmQ0NjM3OTI1MGNkYmY4YjdiNTU3MWEzNGZlZGJjYjIxODA2NTA0YzkwMzhmMGNmZTIzMDc) to join us! 
+ForceCode now has a Slack channel! Click [here](https://join.slack.com/t/forcecodeworkspace/shared_invite/enQtNDUxNzc3MzA1NDE0LTRiZmQ0MjdmMjQ0ZmQ0NjM3OTI1MGNkYmY4YjdiNTU3MWEzNGZlZGJjYjIxODA2NTA0YzkwMzhmMGNmZTIzMDc) to join us! 
 Use this to ask question and receive updates on upcoming features!
 
 ### Permissions
@@ -85,10 +85,16 @@ Please note that the following permissions are required to develop on the Force.
     * Replaces need for CumulusCI w/ Ant
     * Retrieve detailed deploy information
     * ForceCode now only deploys the files contained in your package.xml! (Yes, destructiveChanges.xml, destructiveChangesPre.xml, and destructiveChangesPost.xml files will deploy as well so be careful!!!)
-* Retrieve Package - three options
+* Retrieve Package
     * Retrieve all metadata
     * Retrieve by selecting from available Packages
-    * Retrieve by package.xml    
+    * Retrieve by package.xml   
+    * Retrieve by selecting types
+    * Retrieve all classes 
+    * Retrieve all pages
+    * Retrieve all aura definition bundles (Lightning components, events, apps, etc)
+    * Retrieve all custom objects
+    * Retrieve all standard objects
 * Bundle & Deploy Static Resources on save
     * Auto refresh the browser on save (Mac only)
     * Works great with autosave
@@ -118,7 +124,7 @@ The configuration file will look like the following. You can either edit this fi
 
 ```json
 {
-    "apiVersion": "43.0",
+    "apiVersion": "44.0",
     "autoCompile": true,
     "autoRefresh": true,
     "browser": "Google Chrome Canary",
@@ -299,6 +305,11 @@ Open the org in a browser. No more logging in!!
 
 This works just like the "Search Files" feature in the developer console.
 
+### Build package.xml file
+
+This will present to you a list of all the non-foldered types that you want to include in your package.xml. Once you choose the types, you will be asked where you want to save the file. 
+    * Reports, documents, etc are foldered and currently not supported
+
 ### Get overall org test coverage
 
 Use this option and ForceCode will create a list of all apex classes and their coverage at the time of retrieval. It will also include an estimated overall coverage percentage (This is calculated by adding up all the other data (covered lines/total lines))
@@ -339,6 +350,16 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.9.8
+    * Add package builder menu option. Pick the types you want to be in your package then choose where to save
+    * Added option to select types in retrieve menu option
+    * Add analytics features that will help make tracking down errors a little easier
+    * Retrieve standard objects when retrieving all metadata
+    * Fix connection issue where users were getting 'cannot read tooling/metadata of undefined' error
+    * Fix 'illegal value for line' issue when trying to save scheduled class
+    * Fix errors related to lighting components (Creating new ones and errors with 'getWSMember of undefined')
+    * Fix some login related issues
+    * Fix extension loading issue when moving the project directory
 * 3.9.7
     * Add staticResourceCacheControl setting. Now you can select if the cacheControl is public or private.
     * Fix issue with settings not loading correctly
