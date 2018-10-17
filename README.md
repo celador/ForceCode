@@ -290,7 +290,7 @@ Menu: &gt;Force: Get Logs
 ### Create Class
 
 Menu: &gt;ForceCode Menu ... Create Class  
-This will automatically create classes based on `apiVersion` else it defaults to '43.0'.
+This will automatically create classes based on `apiVersion` else it defaults to '44.0'.
 
 **SPECIAL NOTE**  
 You can create Classes, Triggers, Components, and Pages by simply creating the file anywhere in your project structure.  
@@ -350,7 +350,7 @@ Step 6.  Have Fun!
 
 ## Change Log
 
-* 3.9.8
+* 3.9.9
     * Add package builder menu option. Pick the types you want to be in your package then choose where to save
     * Added option to select types in retrieve menu option
     * Add analytics features that will help make tracking down errors a little easier

@@ -6,6 +6,7 @@ import * as path from 'path';
 import constants from './../models/constants';
 import { fcConnection } from '.';
 import * as deepmerge from 'deepmerge'
+import { getPreviousUUID } from './fcAnalytics';
 
 export const defautlOptions = {
 	apiVersion: constants.API_VERSION,
@@ -52,8 +53,12 @@ export default function getSetConfig(service?: forceCode.IForceService): Promise
 		lastUsername = forceFile.lastUsername;
 	}
 	self.config = readConfigFile(lastUsername);
-
-	if(fs.existsSync(path.join(vscode.window.forceCode.storageRoot, 'analytics.json'))) {
+	
+	var analyticsFileExists: boolean = true;
+	if(!fs.existsSync(path.join(vscode.window.forceCode.storageRoot, 'analytics.json'))) {
+		analyticsFileExists = getPreviousUUID();
+	} 
+	if(analyticsFileExists) {
 		vscode.window.forceCode.uuid = fs.readJsonSync(path.join(vscode.window.forceCode.storageRoot, 'analytics.json')).uuid;
 	}
 
