@@ -7,7 +7,7 @@ import constants from '../models/constants';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
 import { Config } from '../forceCode';
-import { saveConfigFile, readConfigFile, defautlOptions } from './configuration';
+import { saveConfigFile, readConfigFile } from './configuration';
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 
@@ -64,7 +64,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     public isLoggedIn(): boolean {
-        const loggedIn: boolean = this.currentConnection && this.currentConnection.isLoggedIn;
+        const loggedIn: boolean = this.currentConnection && this.currentConnection.connection && this.currentConnection.isLoggedIn;
         if (loggedIn) {
             vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
         } else {
@@ -97,8 +97,6 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                         if (fileName.indexOf('@') > 0) {
                             const orgInfo: FCOauth = fs.readJsonSync(file.path);
                             service.addConnection(orgInfo);
-                            const connIndex: number = service.getConnIndex(orgInfo.username);
-                            service.connections[connIndex].config = readConfigFile(orgInfo.username);
                         }
                     }
                 })
@@ -125,8 +123,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     public connect(orgInfo: FCOauth): Promise<boolean> {
         if (!this.loggingIn) {
             this.loggingIn = true;
-            this.currentConnection = this.addConnection(orgInfo);
-            return this.setupConn(this)
+            return this.setupConn(this, orgInfo.username)
                 .then(res => {
                     return this.login(this, res).then(loginRes => {
                         return vscode.window.forceCode.connect().then(() => {
@@ -144,9 +141,10 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         }
     }
 
-    private setupConn(service: FCConnectionService): Promise<boolean> {
-        if (!this.isLoggedIn() || !service.currentConnection || !service.currentConnection.connection) {
-            return dxService.getOrgInfo()
+    private setupConn(service: FCConnectionService, username: string): Promise<boolean> {
+        service.currentConnection = service.getConnByUsername(username);
+        if (!service.isLoggedIn()) {
+            return dxService.getOrgInfo(username)
                 .catch(() => {
                     if (service.currentConnection) {
                         service.currentConnection.connection = undefined;
@@ -155,9 +153,11 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                 })
                 .then(orgInf => {
                     service.currentConnection = service.addConnection(orgInf);
+                    vscode.window.forceCode.config = readConfigFile(orgInf.username);
 
                     if (!service.currentConnection.connection) {
-                        service.currentConnection.orgInfo.refreshToken = fs.readJsonSync(this.currentConnection.sfdxPath).refreshToken;
+                        const sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInf.username + '.json');
+                        service.currentConnection.orgInfo.refreshToken = fs.readJsonSync(sfdxPath).refreshToken;
                         service.currentConnection.connection = new jsforce.Connection({
                             oauth2: {
                                 clientId: service.currentConnection.orgInfo.clientId || "SalesforceDevelopmentExperience"
@@ -172,12 +172,14 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
                         return service.currentConnection.connection.identity().then(res => {
                             service.currentConnection.orgInfo.userId = res.user_id;
+                            service.currentConnection.isLoggedIn = true;
                             vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
                             return Promise.resolve(false);
                         });
                     }
                 });
         } else {
+            vscode.window.forceCode.config = readConfigFile(username);
             return Promise.resolve(true);
         }
     }
@@ -210,11 +212,6 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         const conn: FCConnection = service.currentConnection;
         const orgInfo: FCOauth = conn.orgInfo;
         const projPath: string = vscode.window.forceCode.workspaceRoot;
-        if(conn.config) {
-            vscode.window.forceCode.config = conn.config;
-        } else {
-            vscode.window.forceCode.config = defautlOptions;
-        }
         vscode.window.forceCode.config.url = orgInfo.loginUrl;
         vscode.window.forceCode.config.username = orgInfo.username;
         return service.getAutoCompile(vscode.window.forceCode.config).then(config => {
@@ -273,8 +270,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     public getSrcByUsername(username: string): string {
-        const conn: FCConnection = this.getConnByUsername(username);
-        return conn && conn.config && conn.config.src ? conn.config.src : 'src';
+        const config: Config = readConfigFile(username);
+        return config && config.src ? config.src : 'src';
     }
 
     public addConnection(orgInfo: FCOauth): FCConnection {

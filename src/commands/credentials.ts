@@ -47,10 +47,10 @@ export default function enterCredentials(): Promise<FCOauth> {
                     return setupNewUser(cfg);
                 } else {
                     
-                    fcConnection.currentConnection = fcConnection.getConnByUsername(res.label.split(' ')[1]);
+                    const conn: FCConnection = fcConnection.getConnByUsername(res.label.split(' ')[1]);
                     cfg.username = res.label.split(' ')[1];
-                    cfg.url = fcConnection.currentConnection.orgInfo.loginUrl;
-                    return dxService.getOrgInfo().then(orgInfo => {
+                    cfg.url = conn.orgInfo.loginUrl;
+                    return dxService.getOrgInfo(cfg.username).then(orgInfo => {
                         return Promise.resolve(orgInfo);
                     }).catch(() => {
                         return login(cfg);

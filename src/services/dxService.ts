@@ -81,7 +81,7 @@ export interface DXCommands {
     runCommand(cmdString: string, arg: string): Promise<any>;
     login(url: string): Promise<any>;
     logout(username: string): Promise<any>;
-    getOrgInfo(): Promise<SFDX>;
+    getOrgInfo(username: string): Promise<SFDX>;
     isEmptyUndOrNull(param: any): boolean;
     getDebugLog(logid?: string): Promise<string>;
     saveToFile(data: any, fileName: string): Promise<string>;
@@ -206,8 +206,8 @@ export default class DXService implements DXCommands {
         }
     }
 
-    public getOrgInfo(): Promise<SFDX> {
-        return this.runCommand('org:display', '');
+    public getOrgInfo(username: string): Promise<SFDX> {
+        return this.runCommand('org:display', '--targetusername ' + username);
     }
 
     public orgList(): Promise<OrgListResult> {
@@ -230,9 +230,7 @@ export default class DXService implements DXCommands {
             // we got an error because there are no connections
             fcConnection.getChildren().forEach(curConn => {
                 curConn.connection = undefined;
-                if(fs.existsSync(curConn.sfdxPath)) {
-                    fs.removeSync(curConn.sfdxPath);
-                }
+                curConn.isLoggedIn = false;
             });
             return undefined;
         });
