@@ -9,6 +9,7 @@ import { FCFile } from './services/codeCovView';
 import { IWorkspaceMember } from './forceCode';
 import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
 import { getToolingTypeFromFolder, getAnyTTFromFolder } from './parsers/open';
+import { trackEvent } from './services/fcAnalytics';
 
 export function activate(context: vscode.ExtensionContext): any {
     commands.fcCommands.forEach(cur => {
@@ -87,4 +88,5 @@ export function activate(context: vscode.ExtensionContext): any {
             }
         }));
     }
+    trackEvent('Extension starts', 'Started');
 }

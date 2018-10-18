@@ -6,7 +6,7 @@ import * as path from 'path';
 import { FCFile } from './codeCovView';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { Connection } from 'jsforce';
-import { trackEvent, getPreviousUUID } from './fcAnalytics';
+import { getPreviousUUID } from './fcAnalytics';
 import * as fs from 'fs-extra';
 const uuidv4 = require('uuid/v4');
 import klaw = require('klaw');
@@ -44,7 +44,7 @@ export default class ForceService implements forceCode.IForceService {
 
         var analyticsFileExists: boolean = true;
         if(!fs.existsSync(path.join(this.storageRoot, 'analytics.json'))) {
-            analyticsFileExists = getPreviousUUID();
+            analyticsFileExists = getPreviousUUID(this.storageRoot);
         } 
         if(analyticsFileExists) {
             this.uuid = fs.readJsonSync(path.join(this.storageRoot, 'analytics.json')).uuid;
@@ -71,7 +71,6 @@ export default class ForceService implements forceCode.IForceService {
                     resolve();
                 }
             }).then(() => {
-                trackEvent('Extension starts', 'Started');
                 fcConnection.connect({ username: config.username, loginUrl: config.url});
             });
         });
