@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { operatingSystem, dxService, FCConnectionService } from '.';
+import { dxService, FCConnectionService } from '.';
 import { Connection } from 'jsforce';
-import { Config } from '../forceCode';
 
 export interface FCOauth {
     username?: string,
@@ -20,11 +19,10 @@ export interface FCOauth {
 export class FCConnection extends vscode.TreeItem {
     private readonly parent: FCConnectionService;
     private limInterval;
-    public readonly sfdxPath: string;
     public connection: Connection;
     public orgInfo: FCOauth;
     public isLoggedIn: boolean;
-    public config: Config;
+    public prevContext: string;
 
     constructor(parent: FCConnectionService, orgInfo: FCOauth) {
         super(
@@ -34,7 +32,6 @@ export class FCConnection extends vscode.TreeItem {
 
         this.parent = parent;
         this.orgInfo = orgInfo;
-        this.sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInfo.username + '.json');
     }
 
     public disconnect(): Promise<any> {
@@ -58,6 +55,7 @@ export class FCConnection extends vscode.TreeItem {
     }
 
     public showConnection() {
+        this.prevContext = this.contextValue;
         if (this.isCurrentConnection() && this.isLoggedIn) {
             this.iconPath = {
                 dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
@@ -118,8 +116,11 @@ export class FCConnection extends vscode.TreeItem {
             service.tooltip += ' - Limits: ' + service.connection.limitInfo.apiUsage.used 
                 + ' / ' + service.connection.limitInfo.apiUsage.limit;
         }
+        const prevToolTip = service.tooltip;
         service.tooltip += '\nPROJECT PATH - ' + path.join(vscode.window.forceCode.workspaceRoot,
             service.parent.getSrcByUsername(service.orgInfo.username));
-        service.parent.refreshView();
+        if(prevToolTip !== service.tooltip || service.prevContext !== service.contextValue) {
+            service.parent.refreshView();
+        }
     }
 }

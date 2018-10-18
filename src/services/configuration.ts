@@ -4,7 +4,7 @@ import * as forceCode from './../forceCode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import constants from './../models/constants';
-import { fcConnection } from '.';
+import { fcConnection, ForceService } from '.';
 import * as deepmerge from 'deepmerge'
 
 export const defautlOptions = {
@@ -40,23 +40,16 @@ export const defautlOptions = {
 	staticResourceCacheControl: 'Private',
 };
 
-export default function getSetConfig(service?: forceCode.IForceService): Promise<Config> {
+export default function getSetConfig(service?: ForceService): Promise<Config> {
 	var self: forceCode.IForceService = service || vscode.window.forceCode;
-	if (!vscode.workspace.workspaceFolders) {
-		throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
-	}
-	const projPath = vscode.window.forceCode.workspaceRoot;
+	const projPath = self.workspaceRoot;
 	var lastUsername: string;
 	if(fs.existsSync(path.join(projPath, 'force.json'))) {
 		var forceFile = fs.readJsonSync(path.join(projPath, 'force.json'));
 		lastUsername = forceFile.lastUsername;
 	}
-	self.config = readConfigFile(lastUsername);
-
-	if(fs.existsSync(path.join(vscode.window.forceCode.storageRoot, 'analytics.json'))) {
-		vscode.window.forceCode.uuid = fs.readJsonSync(path.join(vscode.window.forceCode.storageRoot, 'analytics.json')).uuid;
-	}
-
+	self.config = readConfigFile(lastUsername, service);
+	
 	self.projectRoot = path.join(projPath, self.config.src);
 	if (!fs.existsSync(self.projectRoot)) {
 		fs.mkdirpSync(self.projectRoot);
@@ -82,10 +75,11 @@ export function saveConfigFile(userName) {
 		JSON.stringify(vscode.window.forceCode.config, undefined, 4));
 }
 
-export function readConfigFile(userName): Config {
+export function readConfigFile(userName: string, service?: ForceService): Config {
+	var self: forceCode.IForceService = service || vscode.window.forceCode;
 	var config: Config = {}
 	if(userName) {
-		const configPath: string = path.join(vscode.window.forceCode.workspaceRoot, '.forceCode', 
+		const configPath: string = path.join(self.workspaceRoot, '.forceCode', 
 			userName, 'settings.json');
 		if(fs.existsSync(configPath)) {
 			config = fs.readJsonSync(configPath);

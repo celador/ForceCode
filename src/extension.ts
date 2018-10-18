@@ -15,15 +15,12 @@ export function activate(context: vscode.ExtensionContext): any {
         context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
     });
 
-    vscode.window.forceCode = ForceService.getInstance();
-    vscode.window.forceCode.storageRoot = context.extensionPath;
+    vscode.window.forceCode = new ForceService(context);
 
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.switchUserProvider', fcConnection));
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.treeDataProvider', commandViewService));
     context.subscriptions.push(vscode.window.registerTreeDataProvider('ForceCode.codeCovDataProvider', codeCovViewService));
     
-    ForceService.start();
-
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('sflog', new ForceCodeLogProvider()));
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('forcecode', ForceCodeContentProvider.getInstance()));
 
