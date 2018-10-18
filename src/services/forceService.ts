@@ -40,7 +40,7 @@ export default class ForceService implements forceCode.IForceService {
         this.statusBarItem.text = `ForceCode Loading...`;
         this.statusBarItem.show();
         this.containerMembers = [];
-        this.storageRoot = context.storagePath;
+        this.storageRoot = context.extensionPath;
 
         var analyticsFileExists: boolean = true;
         if(!fs.existsSync(path.join(this.storageRoot, 'analytics.json'))) {
