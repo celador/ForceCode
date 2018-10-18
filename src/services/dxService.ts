@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { fcConnection, FCOauth, FCConnection} from '.';
+import { fcConnection, FCOauth } from '.';
 import alm = require('salesforce-alm');
 import { outputToString } from '../parsers/output';
 
@@ -80,7 +80,7 @@ export interface DXCommands {
     getCommand(cmd: string): Command;
     runCommand(cmdString: string, arg: string): Promise<any>;
     login(url: string): Promise<any>;
-    logout(username: string): Promise<any>;
+    //logout(username: string): Promise<any>;
     getOrgInfo(username: string): Promise<SFDX>;
     isEmptyUndOrNull(param: any): boolean;
     getDebugLog(logid?: string): Promise<string>;
@@ -197,6 +197,8 @@ export default class DXService implements DXCommands {
         return this.runCommand('auth:web:login', '--instanceurl ' + url);
     }
 
+    // this command isn't working so for now get rid of it
+    /*
     public logout(username: string): Promise<any> {
         const conn: FCConnection = fcConnection.getConnByUsername(username);
         if(conn && conn.isLoggedIn) {
@@ -205,6 +207,7 @@ export default class DXService implements DXCommands {
             return Promise.resolve();
         }
     }
+    */
 
     public getOrgInfo(username: string): Promise<SFDX> {
         return this.runCommand('org:display', '--targetusername ' + username);
