@@ -350,6 +350,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.9.10
+    * Optimize the startup and login process
 * 3.9.9
     * Add package builder menu option. Pick the types you want to be in your package then choose where to save
     * Added option to select types in retrieve menu option
