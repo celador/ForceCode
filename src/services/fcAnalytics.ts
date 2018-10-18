@@ -43,10 +43,9 @@ export function trackEvent(category: string, message: string): Promise<any> {
  * would throw analytics way off.
  *
  */
-export function getPreviousUUID(): boolean {
+export function getPreviousUUID(fcExtPath): boolean {
     const debug = vscode.env.machineId === 'someValue.machineId';
     const currentVersion: string = pjson.version;
-    const fcExtPath: string = vscode.window.forceCode.storageRoot;
     var extensionsPath: string;
     // if we're debugging, the path will be wrong to the installed extensions
     if(debug) {

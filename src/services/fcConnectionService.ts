@@ -121,7 +121,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     public connect(orgInfo: FCOauth): Promise<boolean> {
-        if (!this.loggingIn) {
+        if(orgInfo && !this.loggingIn) {
             this.loggingIn = true;
             return this.setupConn(this, orgInfo.username)
                 .then(res => {
@@ -136,8 +136,6 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                     this.loggingIn = false;
                     return finalRes;
                 });
-        } else {
-            return Promise.resolve(false);
         }
     }
 
