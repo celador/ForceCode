@@ -11,7 +11,7 @@ export const defautlOptions = {
 	apiVersion: constants.API_VERSION,
 	autoRefresh: false,
 	browser: 'Google Chrome Canary',
-	checkForFileChanges: true,
+	checkForFileChanges: false,
 	debugFilter: 'USER_DEBUG|FATAL_ERROR',
 	debugOnly: true,
 	deployOptions: {
