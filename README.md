@@ -350,6 +350,8 @@ Step 6.  Have Fun!
 
 ## Change Log
 
+* 3.9.12
+    * Fix login and logout issues
 * 3.9.11
     * Emergency fix for startup bug where extension wouldn't start
 * 3.9.10

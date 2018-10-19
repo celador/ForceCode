@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { dxService, FCConnectionService } from '.';
+import { FCConnectionService, operatingSystem } from '.';
 import { Connection } from 'jsforce';
+import * as fs from 'fs-extra';
 
 export interface FCOauth {
     username?: string,
@@ -39,14 +40,16 @@ export class FCConnection extends vscode.TreeItem {
             if (this.limInterval) {
                 clearInterval(this.limInterval);
             }
-            return dxService.logout(this.orgInfo.username).then(() => {
-                this.isLoggedIn = false;
-                if(this.isCurrentConnection()) {
-                    this.parent.currentConnection = undefined;
-                    vscode.window.forceCode.conn = undefined;
-                }
-                return this.parent.refreshConnections();
-            });
+            const sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', this.orgInfo.username + '.json');
+            if(fs.existsSync(sfdxPath)) {
+                fs.removeSync(sfdxPath);
+            }
+            this.isLoggedIn = false;
+            if(this.isCurrentConnection()) {
+                this.parent.currentConnection = undefined;
+                vscode.window.forceCode.conn = undefined;
+            }
+            return this.parent.refreshConnections();
         }
     }
 
