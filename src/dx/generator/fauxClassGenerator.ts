@@ -19,10 +19,6 @@ import {
 } from '../describe';
 import { nls } from '../messages';
 
-export interface CancellationToken {
-  isCancellationRequested: boolean;
-}
-
 const SFDX_DIR = '.sfdx';
 const TOOLS_DIR = 'tools';
 const SOBJECTS_DIR = 'sobjects';

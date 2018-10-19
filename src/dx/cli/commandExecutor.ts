@@ -10,10 +10,6 @@ import * as vscode from 'vscode';
 import { Command } from './';
 import { dxService } from '../../services';
 
-export interface CancellationToken {
-  isCancellationRequested: boolean;
-}
-
 export class CliCommandExecutor {
   private readonly command: Command;
 
