@@ -170,6 +170,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
                 var errmess: string = err.message.split('Message:')[1].split(': Source')[0];
                 var linCol: string[] = err.message.split(':')[1].split(',');
                 var failureLineNumber: number = Number.parseInt(linCol[0]);
+                failureLineNumber = failureLineNumber < 1 ? 1 : failureLineNumber;
                 var failureColumnNumber: number = Number.parseInt(linCol[1]);
                 var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
                 if (failureColumnNumber - 1 >= 0) {
