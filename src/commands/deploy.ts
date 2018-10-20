@@ -164,6 +164,7 @@ export default function deploy(context: vscode.ExtensionContext) {
                     return result;
                 }
             })
+            .catch(finished)
             .then(finished);
 
 
