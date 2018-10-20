@@ -41,6 +41,10 @@ export function trackEvent(category: string, message: string): Promise<any> {
  * The purpose of this is to not lose track of tracking information, since it's based on the UUID.
  * Without this, the total user count would rise each time a new version of ForceCode is released and 
  * would throw analytics way off.
+ * 
+ * Updated 10/19/18 - added extra checks for beta versions. A full release will never have the 4th
+ * number, so if there are two versions where the first three parts of the version number are equal,
+ * but one version has a 4th part then the one with 3 parts will always trump the one with 4.
  *
  */
 export function getPreviousUUID(fcExtPath): boolean {
@@ -73,8 +77,14 @@ export function getPreviousUUID(fcExtPath): boolean {
                 return ver1Parts[0] > ver2Parts[0] ? ver1 : ver2;
             } else if(ver1Parts[1] !== ver2Parts[1]) {
                 return ver1Parts[1] > ver2Parts[1] ? ver1 : ver2;
-            } else {
+            } else if(ver1Parts[2] !== ver2Parts[2]) {
                 return ver1Parts[2] > ver2Parts[2] ? ver1 : ver2;
+            } else if(ver1Parts.length > 3 && ver2Parts.length > 3) {
+                return ver1Parts[3] > ver2Parts[3] ? ver1 : ver2;
+            } else if(ver1Parts.length > 3) {
+                return ver2;
+            } else {
+                return ver1;
             }
         });
 
