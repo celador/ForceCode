@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import * as ccr from '../dx/generator';
-import {SObjectCategory} from '../dx/describe';
+import { FauxClassGenerator, SObjectCategory } from '../dx'
 
 export default async function codeCompletionRefresh(): Promise<any> {    
     let options: vscode.QuickPickItem[] = [{
@@ -36,7 +35,7 @@ export default async function codeCompletionRefresh(): Promise<any> {
         }
         vscode.window.forceCode.outputChannel.clear();
         vscode.window.forceCode.outputChannel.show();
-        var gen = new ccr.FauxClassGenerator();
+        var gen = new FauxClassGenerator();
         try {
             var startTime = (new Date()).getTime();
             await gen.generate(vscode.window.forceCode.workspaceRoot, objectsToGet);

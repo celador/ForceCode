@@ -52,7 +52,41 @@ declare module 'jsforce/index' {
             describeGlobal(): Promise<ToolingDescribeResult>
         }
         interface ToolingDescribeResult {
-            
+            encoding: string;
+            maxBatchSize: number;
+            sobjects: SObjectDescription[];
+        }
+        interface SObjectDescription {
+            activateable: boolean;
+			createable: boolean;
+			custom: boolean;
+			customSetting: boolean;
+			deletable: boolean;
+			deprecatedAndHidden: boolean;
+			feedEnabled: boolean;
+			hasSubtypes: boolean;
+			isSubtype: boolean;
+			keyPrefix: string;
+			label: string;
+			labelPlural: string;
+			layoutable: boolean;
+			mergeable: boolean;
+			mruEnabled: boolean;
+			name: string;
+			queryable: boolean;
+			replicateable: boolean;
+			retrieveable: boolean;
+			searchable: boolean;
+			triggerable: boolean;
+			undeletable: boolean;
+			updateable: boolean;
+			urls: 
+			{
+				rowTemplate: string;
+				defaultValues: string;
+				describe: string;
+				sobject: string;
+			},
         }
         interface CompletionResult {
             publicDeclarations: {}

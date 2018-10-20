@@ -155,19 +155,19 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                     return credentials();
                 })
                 .then(orgInf => {
-                    service.currentConnection = service.addConnection(orgInf);
+                    service.currentConnection = service.addConnection(orgInf, true);
                     vscode.window.forceCode.config = readConfigFile(orgInf.username);
 
                     if (!service.currentConnection.connection) {
                         const sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInf.username + '.json');
-                        service.currentConnection.orgInfo.refreshToken = fs.readJsonSync(sfdxPath).refreshToken;
+                        const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
                         service.currentConnection.connection = new jsforce.Connection({
                             oauth2: {
                                 clientId: service.currentConnection.orgInfo.clientId || "SalesforceDevelopmentExperience"
                             },
                             instanceUrl: service.currentConnection.orgInfo.instanceUrl,
                             accessToken: service.currentConnection.orgInfo.accessToken,
-                            refreshToken: service.currentConnection.orgInfo.refreshToken,
+                            refreshToken: refreshToken,
                             version: (vscode.window.forceCode && vscode.window.forceCode.config
                                 && vscode.window.forceCode.config.apiVersion
                                 ? vscode.window.forceCode.config.apiVersion : constants.API_VERSION),
@@ -277,14 +277,25 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         return config && config.src ? config.src : 'src';
     }
 
-    public addConnection(orgInfo: FCOauth): FCConnection {
+    public addConnection(orgInfo: FCOauth, saveToken?: boolean): FCConnection {
         if (orgInfo && orgInfo.username) {
             var connIndex: number = this.getConnIndex(orgInfo.username);
             if (connIndex === -1) {
                 this.connections.push(new FCConnection(this, orgInfo));
                 connIndex = this.getConnIndex(orgInfo.username);
             } else {
+                const aToken: string = this.connections[connIndex].orgInfo.accessToken;
+                if(aToken !== orgInfo.accessToken) {
+                    console.log('THEY\'RE DIFFERENT!! Saving? ' + saveToken);
+                    console.log(aToken);
+                    console.log('SECOND ONE');
+                    console.log(orgInfo.accessToken);
+                }
                 Object.assign(this.connections[connIndex].orgInfo, orgInfo);
+                // only the getOrgInfo command gives us the right access token, for some reason the others don't work
+                if(!saveToken) {
+                    this.connections[connIndex].orgInfo.accessToken = aToken;
+                }
             }
             return this.connections[connIndex];
         } else {

@@ -6,7 +6,7 @@ import { commandService, codeCovViewService, fcConnection, FCOauth, toArray } fr
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
 import { getAnyTTFromFolder } from '../parsers/open';
-import { SObjectDescribe, SObjectCategory } from '../dx/describe';
+import { SObjectDescribe, SObjectCategory } from '../dx';
 const mime = require('mime-types');
 const fetch: any = require('node-fetch');
 import * as compress from 'compressing';
