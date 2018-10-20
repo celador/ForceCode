@@ -285,12 +285,6 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                 connIndex = this.getConnIndex(orgInfo.username);
             } else {
                 const aToken: string = this.connections[connIndex].orgInfo.accessToken;
-                if(aToken !== orgInfo.accessToken) {
-                    console.log('THEY\'RE DIFFERENT!! Saving? ' + saveToken);
-                    console.log(aToken);
-                    console.log('SECOND ONE');
-                    console.log(orgInfo.accessToken);
-                }
                 Object.assign(this.connections[connIndex].orgInfo, orgInfo);
                 // only the getOrgInfo command gives us the right access token, for some reason the others don't work
                 if(!saveToken) {

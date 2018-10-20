@@ -9,6 +9,7 @@ import * as vscode from 'vscode';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
 import constants from '../models/constants';
 import { FCOauth, fcConnection, dxService } from '../services';
+import { CLIENT_ID } from './'
 
 export interface SObject {
   actionOverrides: any[];
@@ -166,8 +167,6 @@ type BatchRequest = { batchRequests: SubRequest[] };
 type SubResponse = { statusCode: number; result: SObject };
 
 type BatchResponse = { hasErrors: boolean; results: SubResponse[] };
-
-const CLIENT_ID = 'sfdx-vscode';
 
 export class SObjectDescribe {
   private readonly servicesPath: string = 'services/data';

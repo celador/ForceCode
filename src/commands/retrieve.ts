@@ -6,13 +6,13 @@ import { commandService, codeCovViewService, fcConnection, FCOauth, toArray } fr
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
 import { getAnyTTFromFolder } from '../parsers/open';
-import { SObjectDescribe, SObjectCategory } from '../dx';
+import { SObjectDescribe, SObjectCategory, CLIENT_ID } from '../dx';
 const mime = require('mime-types');
-const fetch: any = require('node-fetch');
 import * as compress from 'compressing';
 import { parseString } from 'xml2js';
 import { outputToString } from '../parsers/output';
 import { packageBuilder } from '.';
+import { XHROptions, xhr } from 'request-light';
 
 export interface ToolingType {
     name: string;
@@ -40,19 +40,26 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
     // =======================================================================================================================================
     // =======================================================================================================================================
 
-    function getPackages() {
+    function getPackages(): Promise<any> {
         var orgInfo: FCOauth = fcConnection.currentConnection.orgInfo;
         var requestUrl: string = orgInfo.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
-        var headers: any = {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Cookie': 'sid=' + orgInfo.accessToken,
+        const foptions: XHROptions = {
+            type: 'POST',
+            url: requestUrl,
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+              Authorization: `OAuth ${orgInfo.accessToken}`,
+              'User-Agent': 'salesforcedx-extension',
+              'Sforce-Call-Options': `client=${CLIENT_ID}`
+            },
+            data: 'action=EXTENT&extent=PACKAGES'
         };
-        var body: string = 'action=EXTENT&extent=PACKAGES';
-        return fetch(requestUrl, { method: 'POST', headers, body }).then(function (response) {
+
+        return xhr(foptions).then(response => {
             if (response.status === 200) {
-                return response.text();
+                return response;
             } else {
-                vscode.window.showErrorMessage(response.statusText);
                 return JSON.stringify({ PACKAGES: { packages: [] } });
             }
         }).then(function (json: string) {
@@ -66,7 +73,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
         });
     }
 
-    function showPackageOptions() {
+    function showPackageOptions(): Promise<any> {
         if (resource !== undefined) { return Promise.resolve(); }
         return getPackages().then(packages => {
             let options: vscode.QuickPickItem[] = packages
@@ -122,12 +129,12 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 matchOnDetail: true,
                 placeHolder: 'Retrieve Package',
             };
-            return vscode.window.showQuickPick(options, config);
-        }).then(function (res) {
+            return vscode.window.showQuickPick(options, config).then(res => {
             if (!res) {
                 return Promise.reject();
             }
             return res;
+        });
         });
     }
 

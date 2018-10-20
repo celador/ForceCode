@@ -12,4 +12,5 @@ export {
     SObject,
     SObjectCategory,
     SObjectDescribe
-  } from './sObjectDescribe'
+  } from './sObjectDescribe';
+export const CLIENT_ID = 'sfdx-vscode';

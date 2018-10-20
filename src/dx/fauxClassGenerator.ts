@@ -108,8 +108,9 @@ export class FauxClassGenerator {
     let j = 0;
     while (j < sobjects.length) {
       try {
-        let batch: SObject[] = await describe.describeSObjectBatch(sobjects, j);
-        fetchedSObjects = fetchedSObjects.concat(batch);
+        fetchedSObjects = fetchedSObjects.concat(
+          await describe.describeSObjectBatch(sobjects, j)
+        );
         j = fetchedSObjects.length;
       } catch (e) {
         throw 'Failure performing sObject describe ' + e;
