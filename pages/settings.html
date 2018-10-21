@@ -52,7 +52,7 @@
 
     function getHTML(message, key, level, subId) {
         var theHtml = '';
-        if (level > 3 || key !== 'url' && key !== 'username') {
+        if (key !== 'singlePackage' && (level > 3 || key !== 'url' && key !== 'username')) {
             if (typeof (message[key]) === 'boolean') {
                 theHtml += '<div><input type="checkbox" id="'
                     + subId + key
