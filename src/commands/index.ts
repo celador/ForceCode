@@ -4,7 +4,6 @@ import apexTestResults from '../services/apexTestResults';
 import codeCompletionRefresh from './codeCompletionRefresh'
 import compile from './compile';
 import createClass from './createClass';
-import credentials from './credentials';
 import deploy from './deploy';
 import diff from './diff';
 import dx from './dx';
@@ -28,7 +27,6 @@ export {
     codeCompletionRefresh,
     compile,
     createClass,
-    credentials,
     deploy,
     diff,
     dx,

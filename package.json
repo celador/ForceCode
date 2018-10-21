@@ -130,6 +130,10 @@
       {
         "command": "ForceCode.login",
         "title": "Log into this org"
+      },
+      {
+        "command": "ForceCode.removeConfig",
+        "title": "Remove ForceCode configuration folder"
       }
     ],
     "keybindings": [
@@ -331,8 +335,16 @@
           "command": "ForceCode.switchUser"
         },
         {
+          "when": "viewItem == loggedInConn",
+          "command": "ForceCode.removeConfig"
+        },
+        {
           "when": "viewItem == notLoggedInConn",
           "command": "ForceCode.login"
+        },
+        {
+          "when": "viewItem == notLoggedInConn",
+          "command": "ForceCode.removeConfig"
         }
       ],
       "commandPalette": [

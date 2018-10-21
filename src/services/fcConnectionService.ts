@@ -2,12 +2,12 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { dxService, FCOauth, FCConnection, operatingSystem } from '.';
-import { credentials } from '../commands';
 import constants from '../models/constants';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
 import { Config } from '../forceCode';
 import { saveConfigFile, readConfigFile } from './configuration';
+import { checkConfig, enterCredentials } from './credentials';
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 
@@ -74,6 +74,24 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         return loggedIn;
     }
 
+    public getSavedUsernames(): Promise<string[]> {
+        return new Promise((resolve) => {
+            var usernames: string[] = [];
+            klaw(path.join(vscode.window.forceCode.workspaceRoot, '.forceCode'))
+                .on('data', function (file) {
+                    if (file.stats.isDirectory()) {
+                        var fileName: string = file.path.split(path.sep).pop();
+                        if (fileName.indexOf('@') > 0) {
+                            usernames.push(fileName);
+                        }
+                    }
+                })
+                .on('end', function () {
+                    resolve(usernames);
+                });
+        });
+    }
+
     public refreshConnections(): Promise<boolean> {
         if(!this.refreshingConns) {
             this.refreshingConns = true;
@@ -91,22 +109,27 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
     private refreshTheConns(service: FCConnectionService): Promise<boolean> {
         return new Promise((resolve) => {
-            klaw(path.join(operatingSystem.getHomeDir(), '.sfdx'))
-                .on('data', function (file) {
-                    if (file.stats.isFile()) {
-                        var fileName: string = file.path.split(path.sep).pop().split('.')[0];
-                        if (fileName.indexOf('@') > 0) {
-                            const orgInfo: FCOauth = fs.readJsonSync(file.path);
-                            service.addConnection(orgInfo);
-                        }
-                    }
-                })
-                .on('end', function () {
-                    // tell the connections to refresh their text/icons
-                    service.refreshConnsStatus();
-                    console.log('Orgs refreshed');
-                    resolve(true);
+            service.getSavedUsernames().then(uNames => {
+                uNames.forEach(uName => {
+                    service.addConnection({ username: uName });
                 });
+                klaw(path.join(operatingSystem.getHomeDir(), '.sfdx'))
+                    .on('data', function (file) {
+                        if (file.stats.isFile()) {
+                            var fileName: string = file.path.split(path.sep).pop().split('.')[0];
+                            if (fileName.indexOf('@') > 0) {
+                                const orgInfo: FCOauth = fs.readJsonSync(file.path);
+                                service.addConnection(orgInfo);
+                            }
+                        }
+                    })
+                    .on('end', function () {
+                        // tell the connections to refresh their text/icons
+                        service.refreshConnsStatus();
+                        console.log('Orgs refreshed');
+                        resolve(true);
+                    });
+            });
         });
     }
 
@@ -157,7 +180,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                     if (service.currentConnection) {
                         service.currentConnection.connection = undefined;
                     }
-                    return credentials();
+                    return enterCredentials();
                 })
                 .then(orgInf => {
                     service.currentConnection = service.addConnection(orgInf, true);
@@ -192,42 +215,17 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         }
     }
 
-    private getAutoCompile(config): Promise<Config> {
-        return new Promise(function (resolve, reject) {
-            if(Object.keys(config).indexOf('autoCompile') === -1) {
-                let options: vscode.QuickPickItem[] = [{
-                    description: 'Automatically deploy/compile files on save',
-                    label: 'Yes',
-                }, {
-                    description: 'Deploy/compile code through the ForceCode menu',
-                    label: 'No',
-                },
-                ];
-                vscode.window.showQuickPick(options, { ignoreFocusOut: true }).then((res: vscode.QuickPickItem) => {
-                    config.autoCompile = res.label === 'Yes';
-                    resolve(config);
-                });
-            } else {
-                resolve(config);
-            }
-        });
-    }
-
     private login(service: FCConnectionService, hadToLogIn: boolean): Promise<boolean> {
         vscode.window.forceCode.containerAsyncRequestId = undefined;
         vscode.window.forceCode.containerId = undefined;
         vscode.window.forceCode.containerMembers = [];
-        const conn: FCConnection = service.currentConnection;
-        const orgInfo: FCOauth = conn.orgInfo;
         const projPath: string = vscode.window.forceCode.workspaceRoot;
-        vscode.window.forceCode.config.url = orgInfo.loginUrl;
-        vscode.window.forceCode.config.username = orgInfo.username;
-        return service.getAutoCompile(vscode.window.forceCode.config).then(config => {
+        return checkConfig(vscode.window.forceCode.config).then(config => {
             vscode.window.forceCode.config = config;
-            saveConfigFile(orgInfo.username);
+            saveConfigFile(config.username, config);
             vscode.window.forceCode.projectRoot = path.join(projPath, config.src);
             
-            const forceSfdxPath = path.join(projPath, '.forceCode', orgInfo.username, '.sfdx')
+            const forceSfdxPath = path.join(projPath, '.forceCode', config.username, '.sfdx')
             const sfdxPath = path.join(projPath, '.sfdx')
             var sfdxStat;
             try {
@@ -254,7 +252,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             // refreshConnections()
             service.refreshConnsStatus();
             fs.outputFileSync(path.join(projPath, 'force.json'), 
-                JSON.stringify({ lastUsername: orgInfo.username }, undefined, 4));
+                JSON.stringify({ lastUsername: config.username }, undefined, 4));
             return Promise.resolve(hadToLogIn);         
         });
         
