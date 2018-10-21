@@ -8,6 +8,8 @@ import { FCFile } from '../services/codeCovView';
 import { ToolingType } from '../commands/retrieve';
 import { getAnyTTFromFolder, getAnyNameFromUri } from '../parsers/open';
 import { FCCommand } from '../services/commandView';
+import { Config } from '../forceCode';
+import { readConfigFile, removeConfigFolder } from '../services/configuration';
 
 export const fcCommands: FCCommand[] = [
     {
@@ -496,10 +498,35 @@ export const fcCommands: FCCommand[] = [
             } else {
                 orgInfo = context;
             }
-            return dxService.login(orgInfo.loginUrl)
+            const cfg: Config = readConfigFile(orgInfo.username);
+            return dxService.login(cfg.url)
                 .then(res => {
                     return commandService.runCommand('ForceCode.switchUserText', res);
                 });
+        }
+    },
+    {
+        commandName: 'ForceCode.removeConfig',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            var orgInfo: FCOauth;
+            if(context instanceof FCConnection) {
+                orgInfo = context.orgInfo;
+            } else {
+                orgInfo = context;
+            }
+            return vscode.window.showWarningMessage('This will remove the .forceCode/' + orgInfo.username 
+                + ' folder and all contents. Continue?', 'Yes', 'No').then(s => {
+                if (s === 'Yes') {
+                    if(removeConfigFolder(orgInfo.username)) {
+                        return vscode.window.showInformationMessage('.forceCode/' + orgInfo.username 
+                            + ' folder remove successfully', 'OK');
+                    } else {
+                        return vscode.window.showInformationMessage('.forceCode/' + orgInfo.username 
+                            + ' folder not found', 'OK');
+                    }
+                }
+            });
         }
     },
 ]
