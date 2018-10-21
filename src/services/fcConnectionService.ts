@@ -64,7 +64,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     public isLoggedIn(): boolean {
-        const loggedIn: boolean = this.currentConnection && this.currentConnection.connection && this.currentConnection.isLoggedIn;
+        const loggedIn: boolean = this.currentConnection && this.currentConnection.connection 
+            && vscode.window.forceCode.conn && this.currentConnection.isLoggedIn;
         if (loggedIn) {
             vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
         } else {
