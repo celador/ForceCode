@@ -520,12 +520,15 @@ export const fcCommands: FCCommand[] = [
                 if (s === 'Yes') {
                     if(removeConfigFolder(orgInfo.username)) {
                         return vscode.window.showInformationMessage('.forceCode/' + orgInfo.username 
-                            + ' folder remove successfully', 'OK');
+                            + ' folder removed successfully', 'OK');
                     } else {
                         return vscode.window.showInformationMessage('.forceCode/' + orgInfo.username 
                             + ' folder not found', 'OK');
                     }
                 }
+            }).then(() => {
+                const conn: FCConnection = fcConnection.getConnByUsername(orgInfo.username);
+                return fcConnection.disconnect(conn);
             });
         }
     },
