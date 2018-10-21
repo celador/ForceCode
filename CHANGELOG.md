@@ -1,0 +1,58 @@
+## Change Log
+
+* 3.9.13
+    * Fix more 'illegal value for line' issues
+    * Catch deployment failed errors. ForceCode will ask if you would like to view the deployment status in the org.
+    * Fix 'expired access/refresh token' error being shown instead of being asked to login again
+    * Fix 'metadata of undefined' errors
+* 3.9.12
+    * Fix login and logout issues
+* 3.9.11
+    * Emergency fix for startup bug where extension wouldn't start
+* 3.9.10
+    * Optimize the startup and login process
+* 3.9.9
+    * Add package builder menu option. Pick the types you want to be in your package then choose where to save
+    * Added option to select types in retrieve menu option
+    * Add analytics features that will help make tracking down errors a little easier
+    * Retrieve standard objects when retrieving all metadata
+    * Fix connection issue where users were getting 'cannot read tooling/metadata of undefined' error
+    * Fix 'illegal value for line' issue when trying to save scheduled class
+    * Fix errors related to lighting components (Creating new ones and errors with 'getWSMember of undefined')
+    * Fix some login related issues
+    * Fix extension loading issue when moving the project directory
+* 3.9.7
+    * Add staticResourceCacheControl setting. Now you can select if the cacheControl is public or private.
+    * Fix issue with settings not loading correctly
+    * Fix "illegal value for line" when saving apex classes or pages with specific errors.
+    * Fix not asking for autoCompile when it's undefined. This solves saving issues.
+* 3.9.6
+    * Fix settings menu option throwing an error
+    * Fix right-click to log out of an org
+    * Fix "Cannot read property 'getWsMember' of undefined" for lightning apps and events
+    * Fix ForceCode opening more than showFilesOnOpenMax
+    * Fix connecting to a scratch org
+    * Implement saving lighting tokens and interfaces
+    * Added settings-per-org feature
+    * Added option to view details of failed deployment
+* 3.9.5
+    * Fix compatibility issues related to login with sfdx cli
+* 3.9.4
+    * Fix issue with nothing showing up in the code coverage view
+* 3.9.3
+    * Fixed some login issues
+    * Fixed invisible tasks showing up sometimes
+    * Fix issue with problem reporting on Visualforce and Apex (Thanks to mnunezdm)
+* 3.9.2
+    * Fixed Switching Orgs and saving files results in "Insufficient access rights on cross-reference id" 
+    * Fixed retrieve still hanging as a task
+* 3.9.1
+    * Added outputQueriesAsCSV option to allow retrieving query results as csv files instead of JSON
+    * Finally fixed the hanging retrieve bug (Would hang on open, refresh, retrieve by package.xml, etc)
+    * Remove manual package retrieval. If it doesn't show in the menu then it doesn't exist and retrieving by name will fail every time
+* 3.9.0
+    * New munu option in Deploy to choose files in your current org folder to deploy. ForceCode will build a package.xml file and deploy the files!
+    * Fixed package.xml task hanging. If it gives you a deploy error, you're most likely missing at least one -meta.xml file!
+    * ForceCode now retrieves code coverage (For the code coverage view) when you get the overall coverage.
+    * Fixed an issue with files being shown as 'Not in current org' when there has been changed files and the user dismissed the message(s).
+    * Fixed an issue with output panel stuff being shown in the 'Open Files Not In Src' section.
