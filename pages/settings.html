@@ -31,17 +31,23 @@
 <script>
     const vscode = acquireVsCodeApi();
     var fcSettings = {}
+    var userNames = []
     var fcHtml = '';
 
     // Handle the message inside the webview
     window.addEventListener('message', event => {
-        fcSettings = event.data;
+        fcSettings = event.data.currentSettings;
+        userNames = event.data.userNames;
         refreshPage();
     });
 
     function refreshPage() {
         var html = '<div style="text-align:center;"><button type="button" onclick="saveSettings()">Save</button></div>';
-
+        html += '<div>Change settings for:&nbsp<select id="selectedUser" onchange="changeUserName()">';
+        userNames.forEach(uName => {
+            html += '<option value="' + uName + '" ' + (uName === fcSettings.username ? 'selected="selected"' : '') + '>' + uName + '</option>'
+        });
+        html += '</select></div><br/>'
         Object.keys(fcSettings).sort().forEach(key => {
             html += getHTML(fcSettings, key, 3, '');
         });
@@ -179,6 +185,12 @@
 
     function saveSettings() {
         vscode.postMessage({ save: true });
+    }
+
+    function changeUserName() {
+        const element = document.getElementById('selectedUser');
+        const uName = element.options[element.selectedIndex].value;
+        vscode.postMessage({ switchUsername: true, username: uName });
     }
 </script>
 

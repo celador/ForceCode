@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as deepmerge from 'deepmerge'
-import { saveConfigFile } from '../services/configuration';
-import { configuration } from '../services';
+import { saveConfigFile, readConfigFile } from '../services/configuration';
+import { configuration, fcConnection } from '../services';
 
 export default function settings(): Promise<any> {
     const myExtDir = vscode.extensions.getExtension("JohnAaronNelson.forcecode").extensionPath;
@@ -14,27 +14,38 @@ export default function settings(): Promise<any> {
     });
 
     var tempSettings = {};
+    var currentSettings = vscode.window.forceCode.config;
+    var userNames: string[];
 
     // And set its HTML content
     panel.webview.html = getSettingsPage();
-
-    panel.webview.postMessage(vscode.window.forceCode.config);
 
     const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
 
     // handle settings changes
     panel.webview.onDidReceiveMessage(message => {
         if (message.save) {
-            vscode.window.forceCode.config = deepmerge(vscode.window.forceCode.config, tempSettings, { arrayMerge: overwriteMerge });
-            saveConfigFile(vscode.window.forceCode.config.username);
-            configuration();
+            currentSettings = deepmerge(currentSettings, tempSettings, { arrayMerge: overwriteMerge });
+            saveConfigFile(currentSettings.username, currentSettings);
+            if(currentSettings.username === vscode.window.forceCode.config.username) {
+                vscode.window.forceCode.config = currentSettings;
+                configuration();
+            }
             vscode.window.showInformationMessage('ForceCode settings saved successfully!', 'OK');
+        } else if(message.switchUsername && message.username !== currentSettings.username) {
+            // the user wants to change settings for another username
+            tempSettings = {};
+            currentSettings = readConfigFile(message.username);
+            panel.webview.postMessage({ currentSettings: currentSettings, userNames: userNames });
         } else {
             tempSettings = deepmerge(tempSettings, message, { arrayMerge: overwriteMerge });
         }
     }, undefined);
 
-    return Promise.resolve();
+    return fcConnection.getSavedUsernames().then(uNames => {
+        userNames = uNames;
+        panel.webview.postMessage({ currentSettings: currentSettings, userNames: uNames });
+    });
 
     function getSettingsPage(): string {
         return fs.readFileSync(SETTINGS_FILE).toString();
