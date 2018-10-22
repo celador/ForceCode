@@ -3,7 +3,8 @@ import { getIcon } from '../parsers';
 import { fcConnection, dxService } from '.';
 import { FCConnection, FCOauth } from './fcConnection';
 import { Config } from '../forceCode';
-import { readConfigFile } from './configuration';
+import { readConfigFile, saveConfigFile } from './configuration';
+import * as deepmerge from 'deepmerge'
 
 const quickPickOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true
@@ -44,7 +45,7 @@ export function enterCredentials(): Promise<FCOauth> {
             if(!res || res.label === undefined) {
                 return undefined;
             } else if(res.label === 'New Org') {
-                return setupNewUser({});
+                return resolve(setupNewUser({}));
             } else {
                 
                 const cfg = readConfigFile(res.label.split(' ')[1]);
@@ -61,7 +62,7 @@ export function enterCredentials(): Promise<FCOauth> {
         return checkConfig(cfg)
             .then(login)
             .then(orgInfo => {
-                cfg = readConfigFile(orgInfo.username);
+                saveConfigFile(orgInfo.username, deepmerge(readConfigFile(orgInfo.username), cfg));
                 return orgInfo;
             });
     }

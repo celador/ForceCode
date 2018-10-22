@@ -509,25 +509,25 @@ export const fcCommands: FCCommand[] = [
         commandName: 'ForceCode.removeConfig',
         hidden: true,
         command: function (context, selectedResource?) {
-            var orgInfo: FCOauth;
+            var username: string;
             if(context instanceof FCConnection) {
-                orgInfo = context.orgInfo;
+                username = context.orgInfo.username;
             } else {
-                orgInfo = context;
+                username = context;
             }
-            return vscode.window.showWarningMessage('This will remove the .forceCode/' + orgInfo.username 
+            return vscode.window.showWarningMessage('This will remove the .forceCode/' + username 
                 + ' folder and all contents. Continue?', 'Yes', 'No').then(s => {
                 if (s === 'Yes') {
-                    if(removeConfigFolder(orgInfo.username)) {
-                        return vscode.window.showInformationMessage('.forceCode/' + orgInfo.username 
+                    if(removeConfigFolder(username)) {
+                        return vscode.window.showInformationMessage('.forceCode/' + username 
                             + ' folder removed successfully', 'OK');
                     } else {
-                        return vscode.window.showInformationMessage('.forceCode/' + orgInfo.username 
+                        return vscode.window.showInformationMessage('.forceCode/' + username 
                             + ' folder not found', 'OK');
                     }
                 }
             }).then(() => {
-                const conn: FCConnection = fcConnection.getConnByUsername(orgInfo.username);
+                const conn: FCConnection = fcConnection.getConnByUsername(username);
                 return fcConnection.disconnect(conn);
             });
         }

@@ -3,7 +3,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as deepmerge from 'deepmerge'
 import { saveConfigFile, readConfigFile } from '../services/configuration';
-import { configuration, fcConnection } from '../services';
+import { configuration, fcConnection, commandService } from '../services';
 
 export default function settings(): Promise<any> {
     const myExtDir = vscode.extensions.getExtension("JohnAaronNelson.forcecode").extensionPath;
@@ -36,16 +36,31 @@ export default function settings(): Promise<any> {
             // the user wants to change settings for another username
             tempSettings = {};
             currentSettings = readConfigFile(message.username);
-            panel.webview.postMessage({ currentSettings: currentSettings, userNames: userNames });
+            sendSettings();
+        } else if(message.removeConfig) {
+            commandService.runCommand('ForceCode.removeConfig', message.username).then(() => {
+                currentSettings = vscode.window.forceCode.config;
+                refreshUsernames();
+            });
         } else {
             tempSettings = deepmerge(tempSettings, message, { arrayMerge: overwriteMerge });
         }
     }, undefined);
 
-    return fcConnection.getSavedUsernames().then(uNames => {
-        userNames = uNames;
-        panel.webview.postMessage({ currentSettings: currentSettings, userNames: uNames });
-    });
+    return refreshUsernames();
+
+    function refreshUsernames() {
+        return fcConnection.getSavedUsernames().then(uNames => {
+            userNames = uNames;
+            sendSettings();
+        });
+    }
+
+    function sendSettings() {
+        panel.webview.postMessage({ currentSettings: currentSettings, 
+                                    currentUserName: vscode.window.forceCode.config.username,
+                                    userNames: userNames });
+    }
 
     function getSettingsPage(): string {
         return fs.readFileSync(SETTINGS_FILE).toString();
