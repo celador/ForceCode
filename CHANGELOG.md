@@ -1,6 +1,10 @@
 ## Change Log
 
-* 3.9.13
+* 3.10.0
+    * Show orgs that have a ForceCode configuration folder saved in the project in Saved Usernames
+    * Add right-click to remove ForceCode configuration folder
+    * Add ability to change settings for each org with a saved ForceCode configuration in settings
+    * Add ability to remove ForceCode configuration folder in settings (Current logged in org can't be removed)
     * Fix more 'illegal value for line' issues
     * Catch deployment failed errors. ForceCode will ask if you would like to view the deployment status in the org.
     * Fix 'expired access/refresh token' error being shown instead of being asked to login again
