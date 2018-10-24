@@ -5,10 +5,13 @@
     * Add right-click to remove ForceCode configuration folder
     * Add ability to change settings for each org with a saved ForceCode configuration in settings
     * Add ability to remove ForceCode configuration folder in settings (Current logged in org can't be removed)
+    * Hide singlePackage from setting. Forcecode doen't support the folder structure required when setting this to false
+    * Set checkForFileChanges to false by default for new projects
     * Fix more 'illegal value for line' issues
     * Catch deployment failed errors. ForceCode will ask if you would like to view the deployment status in the org.
     * Fix 'expired access/refresh token' error being shown instead of being asked to login again
     * Fix 'metadata of undefined' errors
+    * Fix issue of ForceCode not executing any tasks once reaching the maxFileChangeNotifications limit
 * 3.9.12
     * Fix login and logout issues
 * 3.9.11

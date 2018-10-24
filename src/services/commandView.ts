@@ -50,10 +50,11 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   public addCommandExecution(execution: FCCommand, context: any, selectedResource?: any) {
     if(execution.commandName === 'ForceCode.fileModified') {
       this.fileModCommands++;
+      if(this.fileModCommands > vscode.window.forceCode.config.maxFileChangeNotifications) {
+        return Promise.resolve();
+      }
     }
-    if(this.fileModCommands > vscode.window.forceCode.config.maxFileChangeNotifications) {
-      return Promise.resolve();
-    }
+    
     var theTask: Task = new Task(this, execution, context, selectedResource);
     this.tasks.push(theTask);
     this.runningTasksStatus.text = 'ForceCode: Executing ' + this.getChildren().length + ' Task(s)';
