@@ -164,6 +164,7 @@ export default function deploy(context: vscode.ExtensionContext) {
                     return result;
                 }
             })
+            .catch(finished)
             .then(finished);
 
 
@@ -182,7 +183,7 @@ export default function deploy(context: vscode.ExtensionContext) {
                     }
                 });
                 vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
-            } else {
+            } else if(res.status !== 'Failed') {
                 vscode.window.showErrorMessage('ForceCode: Deploy Errors. View Details?', 'Yes', 'No').then(choice => {
                     if(choice === 'Yes') {
                         commandService.runCommand('ForceCode.openFileInOrg', 
@@ -190,6 +191,24 @@ export default function deploy(context: vscode.ExtensionContext) {
                             + res.id);
                     }
                 });
+            } else {
+                var depId: string;
+                if(res.id) {
+                    depId = res.id;
+                } else {
+                    const message: string = res.message ? res.message : res;
+                    if(!message.startsWith('Polling time out')) {
+                        throw res;  // we don't know what happened so just throw it
+                    }
+                    depId = (res.message ? res.message : res).split(' = ').pop();
+                    vscode.window.showErrorMessage('ForceCode: Deployment timed out. View details status in the org?', 'Yes', 'No').then(choice => {
+                        if(choice === 'Yes') {
+                            commandService.runCommand('ForceCode.openFileInOrg', 
+                                'changemgmt/monitorDeploymentsDetails.apexp?retURL=/changemgmt/monitorDeployment.apexp&asyncId='
+                                + depId);
+                        }
+                    });
+                }
             }
             vscode.window.forceCode.outputChannel.append(outputToString(res).replace(/{/g, '').replace(/}/g, ''));
             return res;

@@ -5,8 +5,6 @@
 * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 */
 import * as vscode from 'vscode';
-import { SFDX_PROJECT_FILE } from '../constants';
-//import { LocalCommandExecution } from '../cli';
 import { EOL } from 'os';
 import * as path from 'path';
 import * as fs from 'fs-extra';
@@ -16,18 +14,14 @@ import {
   SObject,
   SObjectCategory,
   SObjectDescribe
-} from '../describe';
-import { nls } from '../messages';
-
-export interface CancellationToken {
-  isCancellationRequested: boolean;
-}
+} from './';
 
 const SFDX_DIR = '.sfdx';
 const TOOLS_DIR = 'tools';
 const SOBJECTS_DIR = 'sobjects';
 const STANDARDOBJECTS_DIR = 'standardObjects';
 const CUSTOMOBJECTS_DIR = 'customObjects';
+const SFDX_PROJECT_FILE = 'sfdx-project.json';
 
 export class FauxClassGenerator {
   // the empty string is used to represent the need for a special case
@@ -91,7 +85,7 @@ export class FauxClassGenerator {
       !fs.existsSync(projectPath) ||
       !fs.existsSync(path.join(projectPath, SFDX_PROJECT_FILE))
     ) {
-      throw nls.localize('no_generate_if_not_in_project', sobjectsFolderPath);
+      throw 'Unable to generate faux classes for sObjects when not in a ForceCode project';
     }
     if(type === SObjectCategory.ALL) {
       this.cleanupSObjectFolders(sobjectsFolderPath);
@@ -109,7 +103,7 @@ export class FauxClassGenerator {
     try {
       sobjects = await describe.describeGlobal(type);
     } catch (e) {
-      throw nls.localize('failure_fetching_sobjects_list_text', e);
+      throw 'Failure fetching list of sObjects from org ' + e;
     }
     let j = 0;
     while (j < sobjects.length) {
@@ -119,7 +113,7 @@ export class FauxClassGenerator {
         );
         j = fetchedSObjects.length;
       } catch (e) {
-        throw nls.localize('failure_in_sobject_describe_text', e);
+        throw 'Failure performing sObject describe ' + e;
       }
     }
 
@@ -214,8 +208,9 @@ export class FauxClassGenerator {
   }
 
   private generateFauxClasses(sobjects: SObject[], targetFolder: string): void {
-    if (!this.createIfNeededOutputFolder(targetFolder)) {
-      throw nls.localize('no_sobject_output_folder_text', targetFolder);
+    if (!fs.existsSync(targetFolder)) {
+      vscode.window.forceCode.outputChannel.appendLine('Creating output folder in ' + targetFolder);
+      fs.mkdirpSync(targetFolder);
     }
     for (const sobject of sobjects) {
       if (sobject.name) {
@@ -286,21 +281,18 @@ export class FauxClassGenerator {
     const classDeclaration = `global class ${className} {${EOL}`;
     const declarationLines = declarations.join(`;${EOL}${indentAndModifier}`);
     const classConstructor = `${indentAndModifier}${className} () ${EOL}    {${EOL}    }${EOL}`;
-
-    const generatedClass = `${nls.localize(
-      'class_header_generated_comment'
-    )}${classDeclaration}${indentAndModifier}${declarationLines};${EOL}${EOL}${classConstructor}}`;
+    const classComment = `\/\/ This file is generated as an Apex representation of the
+    \/\/     corresponding sObject and its fields.
+    \/\/ This read-only file is used by the Apex Language Server to
+    \/\/     provide code smartness, and is deleted each time you
+    \/\/     refresh your sObject definitions.
+    \/\/ To edit your sObjects and their fields, edit the corresponding
+    \/\/     .object-meta.xml and .field-meta.xml files.
+    
+    `
+    const generatedClass = `${classComment}${classDeclaration}${indentAndModifier}${declarationLines};${EOL}${EOL}${classConstructor}}`;
 
     return generatedClass;
-  }
-
-  private createIfNeededOutputFolder(folderPath: string): boolean {
-    if (!fs.existsSync(folderPath)) {
-      vscode.window.forceCode.outputChannel.appendLine('Creating output folder in ' + folderPath);
-      fs.mkdirpSync(folderPath);
-      return fs.existsSync(folderPath);
-    }
-    return true;
   }
 
   private cleanupSObjectFolders(baseSObjectsFolder: string) {
@@ -312,8 +304,8 @@ export class FauxClassGenerator {
 
   private logSObjects(sobjectKind: string, fetchedLength: number) {
     if (fetchedLength > 0) {
-      vscode.window.forceCode.outputChannel.appendLine(
-        nls.localize('fetched_sobjects_length_text', fetchedLength, sobjectKind)
+      vscode.window.forceCode.outputChannel.appendLine('Fetched '
+        + fetchedLength + ' ' + sobjectKind + ' sObjects from the org\n'
       );
     }
   }

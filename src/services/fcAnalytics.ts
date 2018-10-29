@@ -41,6 +41,10 @@ export function trackEvent(category: string, message: string): Promise<any> {
  * The purpose of this is to not lose track of tracking information, since it's based on the UUID.
  * Without this, the total user count would rise each time a new version of ForceCode is released and 
  * would throw analytics way off.
+ * 
+ * Updated 10/19/18 - added extra checks for beta versions. A full release will never have the 4th
+ * number, so if there are two versions where the first three parts of the version number are equal,
+ * but one version has a 4th part then the one with 3 parts will always trump the one with 4.
  *
  */
 export function getPreviousUUID(fcExtPath): boolean {
@@ -67,14 +71,24 @@ export function getPreviousUUID(fcExtPath): boolean {
     if(toCheck.length > 0) {
         // get the newest version installed before the current version
         const lastVersion: string = toCheck.reduce((ver1, ver2) => {
-            const ver1Parts: number[] = ver1.split('johnaaronnelson.forcecode-')[1].split('.').map(part => parseInt(part));
-            const ver2Parts: number[] = ver2.split('johnaaronnelson.forcecode-')[1].split('.').map(part => parseInt(part));
+            const ver1String: string = ver1.split('johnaaronnelson.forcecode-')[1];
+            const ver2String: string = ver2.split('johnaaronnelson.forcecode-')[1];
+            const ver1Beta: string = ver1String.split('-').pop();
+            const ver2Beta: string = ver2String.split('-').pop();
+            const ver1Parts: number[] = ver1String.split('-')[0].split('.').map(part => parseInt(part));
+            const ver2Parts: number[] = ver2String.split('-')[0].split('.').map(part => parseInt(part));
             if(ver1Parts[0] !== ver2Parts[0]) {
                 return ver1Parts[0] > ver2Parts[0] ? ver1 : ver2;
             } else if(ver1Parts[1] !== ver2Parts[1]) {
                 return ver1Parts[1] > ver2Parts[1] ? ver1 : ver2;
-            } else {
+            } else if(ver1Parts[2] !== ver2Parts[2]) {
                 return ver1Parts[2] > ver2Parts[2] ? ver1 : ver2;
+            } else if(ver1Beta !== ver1String && ver2Beta !== ver2String) {
+                return parseInt(ver1Beta) > parseInt(ver2Beta) ? ver1 : ver2;
+            } else if(ver1Beta === ver1String) {
+                return ver1;
+            } else {
+                return ver2;
             }
         });
 

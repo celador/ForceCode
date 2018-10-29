@@ -109,9 +109,17 @@ Please note that the following permissions are required to develop on the Force.
     * Flexible project structure
 * API Limit Warnings (Now a hover, when you hover over usernames in the Saved Usernames view (This also shows the project's path))
 
+## FAQ
+
+* Why do I receive an error that says 'ForceCode.showMenu' failed?
+    * You must open a folder in the VSCode workspace before trying to connect with ForceCode.
+* Why do I get an error when trying to login about a localhost connection failure?
+    * This means your network is either on a proxy or vpn and you will need to go [here](https://salesforce.stackexchange.com/questions/194719/salesforce-dx-proxy-issues) to set up Forcecode to work with this type of connection.
+
 ## Issues
 
-Please submit any issues or feature requests to [https://github.com/daishi4u/ForceCode/issues](https://github.com/daishi4u/ForceCode/issues)  
+Before submitting an issue, please read the FAQ section above to make sure that your issue isn't answered already.
+Please submit any issues or feature requests to [https://github.com/celador/ForceCode/issues](https://github.com/celador/ForceCode/issues)  
 
 ## Configuration
 
@@ -132,10 +140,13 @@ The configuration file will look like the following. You can either edit this fi
     "debugFilter": "USER_DEBUG|FATAL_ERROR",
     "debugOnly": true,
     "deployOptions": {
-      "checkOnly": false,
-      "ignoreWarnings": true,
-      "rollbackOnError": true,
-      "testLevel": "runLocalTests",
+        "allowMissingFiles": true,
+        "checkOnly": false,
+        "ignoreWarnings": true,
+        "purgeOnDelete": false,
+        "rollbackOnError": true,
+        "runTests": [],
+        "testLevel": "NoTestRun"
     },
     "outputQueriesAsCSV": false,
     "overwritePackageXML": false,
@@ -166,11 +177,13 @@ The configuration file will look like the following. You can either edit this fi
 * debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
 * debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
 * deployOptions: Deploy your package based on your configured deploy options and the package.xml in your src folder.
+  * allowMissingFiles: Specifies whether a deploy succeeds even if files that are specified in package.xml but are not in the .zip file or not.
   * checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.
   * ignoreWarnings:  Indicates whether a warning should allow a deployment to complete successfully \(true\) or not \(false\).
+  * purgeOnDelete: If true, the deleted components in the destructiveChanges.xml manifest file aren't stored in the Recycle Bin.
   * rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
-  * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
   * runTests:        A list of Apex tests to run during deployment \(commma separated list\)
+  * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
 * outputQueriesAsCSV: if set to true, will retrieve soql/toql results in csv form. If false, json will be returned
 * overwritePackageXML: if set to true, will overwrite package.xml file upon opening or retrieving files
 * poll: When compiling, this is the interval \(in milliseconds\) at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
@@ -350,125 +363,4 @@ Step 6.  Have Fun!
 
 ## Change Log
 
-* 3.9.12
-    * Fix login and logout issues
-* 3.9.11
-    * Emergency fix for startup bug where extension wouldn't start
-* 3.9.10
-    * Optimize the startup and login process
-* 3.9.9
-    * Add package builder menu option. Pick the types you want to be in your package then choose where to save
-    * Added option to select types in retrieve menu option
-    * Add analytics features that will help make tracking down errors a little easier
-    * Retrieve standard objects when retrieving all metadata
-    * Fix connection issue where users were getting 'cannot read tooling/metadata of undefined' error
-    * Fix 'illegal value for line' issue when trying to save scheduled class
-    * Fix errors related to lighting components (Creating new ones and errors with 'getWSMember of undefined')
-    * Fix some login related issues
-    * Fix extension loading issue when moving the project directory
-* 3.9.7
-    * Add staticResourceCacheControl setting. Now you can select if the cacheControl is public or private.
-    * Fix issue with settings not loading correctly
-    * Fix "illegal value for line" when saving apex classes or pages with specific errors.
-    * Fix not asking for autoCompile when it's undefined. This solves saving issues.
-* 3.9.6
-    * Fix settings menu option throwing an error
-    * Fix right-click to log out of an org
-    * Fix "Cannot read property 'getWsMember' of undefined" for lightning apps and events
-    * Fix ForceCode opening more than showFilesOnOpenMax
-    * Fix connecting to a scratch org
-    * Implement saving lighting tokens and interfaces
-    * Added settings-per-org feature
-    * Added option to view details of failed deployment
-* 3.9.5
-    * Fix compatibility issues related to login with sfdx cli
-* 3.9.4
-    * Fix issue with nothing showing up in the code coverage view
-* 3.9.3
-    * Fixed some login issues
-    * Fixed invisible tasks showing up sometimes
-    * Fix issue with problem reporting on Visualforce and Apex (Thanks to mnunezdm)
-* 3.9.2
-    * Fixed Switching Orgs and saving files results in "Insufficient access rights on cross-reference id" 
-    * Fixed retrieve still hanging as a task
-* 3.9.1
-    * Added outputQueriesAsCSV option to allow retrieving query results as csv files instead of JSON
-    * Finally fixed the hanging retrieve bug (Would hang on open, refresh, retrieve by package.xml, etc)
-    * Remove manual package retrieval. If it doesn't show in the menu then it doesn't exist and retrieving by name will fail every time
-* 3.9.0
-    * New munu option in Deploy to choose files in your current org folder to deploy. ForceCode will build a package.xml file and deploy the files!
-    * Fixed package.xml task hanging. If it gives you a deploy error, you're most likely missing at least one -meta.xml file!
-    * ForceCode now retrieves code coverage (For the code coverage view) when you get the overall coverage.
-    * Fixed an issue with files being shown as 'Not in current org' when there has been changed files and the user dismissed the message(s).
-    * Fixed an issue with output panel stuff being shown in the 'Open Files Not In Src' section.
-* 3.8.7
-    * Add better error handling for malformed package.xml files
-    * Add new option for max file change notifications shown on start (maxFileChangeNotifications)
-    * Add 'Open Files Not In Src' in code coverage view. This will show any open files that aren't in the current org's src folder. Due to the way vscode reports open files, not all of them may show on start until you change active text documents!
-* 3.8.6
-    * Added a new GUI to edit the ForceCode settings (The settings in the force.json file). It's simple and not very pretty at the moment, but it's functional!
-    * Fixed diffing Lightning components (Only available through the menu for now).
-    * Fixed ForceCode sometimes not detecting an expired refresh token and throwing an error instead of asking the user to login again.
-* 3.8.5
-    * Switching user optimizations (It's now quite a bit faster to switch (varys with workspace))
-    * Context menu added to user names. You can now right click on a username to log out without switching to it first and you can switch by right click as well.
-    * Limits now shown on all usernames if you've connected previously (will reset if you close and reopen vscode)
-    * Only deploy the files contained in package.xml when chosing the deploy menu option.
-    * Fix retrieving gzip static resources
-    * Fix exception when exiting "Retrieve Package/Metadata" menu
-* 3.8.4
-    * ForceCode now detects when a refresh token has expired and will make you log in again.
-    * Fix retrieving all standard objects
-    * Show an error if no file is open when trying to save through the menu.
-    * Optimizations on the switch user functionality
-* 3.8.3
-    * Right click on any file to save to the org (Or simply save the file if autoCompile is on and if the file is valid (In the current org src folder and a valid type))
-        * Works with almost any type of file from the org (Workflow rules, assignment rules, etc)
-        * Only one file can be saved at a time, THIS HASN'T CHANGED!!
-    * Refresh files from the explorer context menu by right clicking on a file or folder (Refreshing a folder will retrieve all of that type of a whole Lightning component bundle)
-        * Multiple files can be selected for refreshing
-    * Optimization in the way ForceCode retrieves files. Before this version, code coverage and metadata would be retrieved each time any type of file was opened. Now it's only retrieved if it's needed (E.G. code coverage data is only retrieved when a class or trigger file has been retrieved instead of all of the time).
-* 3.8.2
-    * Fixed bugs on Windows where files weren't being removed from the code coverage view when they were deleted
-    * Fix error not being shown for lightning components when there's a syntax error on creation or the file naming convention is wrong
-    * Fix bug with lightning components always saying they've been changed on the server even if they haven't
-* 3.8.1
-    * Fix bug on windows with files not getting added to code coverage view on refresh or open
-    * Fix ForceCode throwing error when editing force.json
-    * Fix refreshing aura components (From the ForceCode: Refresh from server command)
-* 3.8.0
-    * Multiple-org support. There are a lot of changes here, but the biggest is being able to switch to another org by clicking the username in the "Saved Usernames" view.
-    * Project folder structure overhauled to allow for multiple orgs
-    * Fixed deploying packages based on a package.xml
-    * wsMembers.json is no longer needed. ForceCode uses files last modified date for comparison with the server now
-    * If access (or refresh) token becomes expired, handle it better by asking the user to log in again
-    * Many changes to the force.json file. Starting ForceCode should still work with the "old" force.json files
-    * User status bar removed. Limit information is now a hover when you hover over your usernames in the "Saved Usernames" view along with the path that files are saved in for each org. Try it, it's awesome!!
-    * Added option for revealing the class with the highest coverage as a result from running an apex test (set revealTestedClass to true in force.json to enable)
-    * Pretty icons for the Code Coverage view and for the Saved usernames view
-    * Added a section in the Code Coverage view for classes not in the current org. This will make it easy to see what files you shouldn't touch or that you're in the process of copying from one org to another
-    * Fixed showing files on open
-    * Fixed an error when compiling a class
-    * Added more error messages for things such as creating a class in ForceCode with syntax errors and trying to deploy
-    * Added an error if a user tried to save a file that isn't in the current org
-* 3.7.1
-    * Add option (overwritePackageXML) to force.json to control overwriting package.xml. Set it to true to overwrite or false to not.
-    * Fix 'running an entire test class throws error' issue
-    * Fix 'ForceCode 3.7.0 Changed file notifications never go away' issue
-* 3.7.0
-    * handleMetaFiles option removed. Handling metafiles is now required because of the new way I have implemented opening files (Especially static resources)
-    * Errors only reported in problems panel now for apex files, no more notifications
-    * Open aura files from salesforce open file menu, even multiple ones.
-    * FOR NOW, files no longer open in  the editor when retrieving from the org. Can fix in the future.
-    * Opening a large number of files should use less limits now because I use the 'retrieve' way of opening now.
-* 3.6.6
-    * Don't depend on Salesforce extensions for activation anymore, but if you have them then code completion will still work. This makes ForceCode start a LOT faster.
-    * Saving meta.xml files now works (Only for classes, triggers, pages, components, and lightning components)
-        * You will only get meta.xml files when handleMetaFiles is set to true in force.json
-* 3.6.5
-    * Fix spaDist way of uploading SPA static resources
-* 3.6.4
-    * Fix retrieve getting stuck and a few other errors with it. Retrieving by package.xml works now too.
-* 3.6.3
-    * Fix duplicate error messages from ForceCode in problems panel
-    * Don't show notification for every error in Apex, instead tell them to look at the problems panel
+* The change log has been moved to the CHANGELOG.md file. You should be able to view this information on the extension's home page.

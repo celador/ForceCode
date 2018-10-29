@@ -11,7 +11,7 @@ export const defautlOptions = {
 	apiVersion: constants.API_VERSION,
 	autoRefresh: false,
 	browser: 'Google Chrome Canary',
-	checkForFileChanges: true,
+	checkForFileChanges: false,
 	debugFilter: 'USER_DEBUG|FATAL_ERROR',
 	debugOnly: true,
 	deployOptions: {
@@ -69,10 +69,9 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
 	});
 }
 
-export function saveConfigFile(userName) {
+export function saveConfigFile(userName: string, config: Config) {
 	fs.outputFileSync(path.join(vscode.window.forceCode.workspaceRoot, '.forceCode',
-		userName, 'settings.json'), 
-		JSON.stringify(vscode.window.forceCode.config, undefined, 4));
+		userName, 'settings.json'), JSON.stringify(config, undefined, 4));
 }
 
 export function readConfigFile(userName: string, service?: ForceService): Config {
@@ -83,7 +82,20 @@ export function readConfigFile(userName: string, service?: ForceService): Config
 			userName, 'settings.json');
 		if(fs.existsSync(configPath)) {
 			config = fs.readJsonSync(configPath);
+		} else {
+			config.username = userName;
 		}
 	}
 	return deepmerge(defautlOptions, config);
+}
+
+export function removeConfigFolder(userName: string): boolean {
+	if(userName) {
+		const configDir: string = path.join(vscode.window.forceCode.workspaceRoot, '.forceCode', userName);
+		if(fs.existsSync(configDir)) {
+			fs.removeSync(configDir);
+			return true;
+		}
+	}
+	return false;
 }

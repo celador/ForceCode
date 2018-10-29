@@ -36,8 +36,8 @@ export default function executeAnonymous(document: vscode.TextDocument): any {
                 col = selection.start.character;
             }
             const columnNumber: number = Number(res.column) - 1 + col;
-            var failureRange: vscode.Range = document.lineAt(lineNumber).range;
-            if (columnNumber > 0) {
+            var failureRange: vscode.Range = document.lineAt(lineNumber < 0 ? 0 : lineNumber).range;
+            if (columnNumber >= 0) {
                 failureRange = failureRange.with(new vscode.Position(lineNumber, columnNumber));
             }
             diagnostics.push(new vscode.Diagnostic(failureRange, res.compileProblem));

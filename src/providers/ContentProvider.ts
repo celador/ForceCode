@@ -21,7 +21,6 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
 
     /**
      * @param {vscode.Uri} uri file
-     * @param {vscode.CancellationToken} token
      * @return {Thenable<string>} TODO: give a description
      */
     provideTextDocumentContent(uri: vscode.Uri): Thenable<string> {

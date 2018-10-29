@@ -7,11 +7,9 @@ import * as fs from 'fs-extra';
 export interface FCOauth {
     username?: string,
     loginUrl?: string,
-    id?: string,
     userId?: string,
     accessToken?: string,
     instanceUrl?: string,
-    refreshToken?: string,
     orgId?: string,
     clientId?: string,
     connectedStatus?: string,
