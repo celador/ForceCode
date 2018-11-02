@@ -21,6 +21,9 @@ export interface FCCommand {
   command: (context: any, selectedResource: any) => any;
 }
 
+const FIRST_TRY = 1;
+const SECOND_TRY = 2;
+
 export class CommandViewService implements vscode.TreeDataProvider<Task> {
   private runningTasksStatus: vscode.StatusBarItem;
   private static instance: CommandViewService;
@@ -62,7 +65,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     this.runningTasksStatus.command = 'ForceCode.showTasks';
 
     this._onDidChangeTreeData.fire();
-    return theTask.run();
+    return theTask.run(FIRST_TRY);
   }
 
   public removeTask(task: Task): boolean {
@@ -122,11 +125,11 @@ export class Task extends vscode.TreeItem {
     this.selectedResource = selectedResource;
   }
 
-  public run() {
+  public run(attempt: number) {
     return new Promise((resolve) => { resolve(this.execution.command(this.context, this.selectedResource)); })
       .catch(reason => {
         return fcConnection.checkLoginStatus(reason).then(loggedIn => {
-          if(loggedIn) {
+          if(loggedIn || attempt === SECOND_TRY) {
             if(reason) {
               vscode.window.showErrorMessage(reason.message ? reason.message : reason);
               return trackEvent('Error Thrown', reason.message ? reason.message : reason)
@@ -135,14 +138,19 @@ export class Task extends vscode.TreeItem {
                 });
             }
           } else {
-            return reason;
+            return 'FC:AGAIN';
           }
           
         });
       })
       .then(finalRes => {
-        this.taskViewProvider.removeEmitter.emit('removeTask', this);
-        return finalRes;
+        if(finalRes === 'FC:AGAIN') {
+          // try again, possibly had to refresh the access token
+          return this.run(SECOND_TRY);
+        } else {
+          this.taskViewProvider.removeEmitter.emit('removeTask', this);
+          return finalRes;
+        }
       });
   }
 }

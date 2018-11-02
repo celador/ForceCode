@@ -186,29 +186,27 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                     service.currentConnection = service.addConnection(orgInf, true);
                     vscode.window.forceCode.config = readConfigFile(orgInf.username);
 
-                    if (!service.currentConnection.connection) {
-                        const sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInf.username + '.json');
-                        const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
-                        service.currentConnection.connection = new jsforce.Connection({
-                            oauth2: {
-                                clientId: service.currentConnection.orgInfo.clientId || "SalesforceDevelopmentExperience"
-                            },
-                            instanceUrl: service.currentConnection.orgInfo.instanceUrl,
-                            accessToken: service.currentConnection.orgInfo.accessToken,
-                            refreshToken: refreshToken,
-                            version: (vscode.window.forceCode && vscode.window.forceCode.config
-                                && vscode.window.forceCode.config.apiVersion
-                                ? vscode.window.forceCode.config.apiVersion : constants.API_VERSION),
-                        });
+                    const sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInf.username + '.json');
+                    const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
+                    service.currentConnection.connection = new jsforce.Connection({
+                        oauth2: {
+                            clientId: service.currentConnection.orgInfo.clientId || "SalesforceDevelopmentExperience"
+                        },
+                        instanceUrl: service.currentConnection.orgInfo.instanceUrl,
+                        accessToken: service.currentConnection.orgInfo.accessToken,
+                        refreshToken: refreshToken,
+                        version: (vscode.window.forceCode && vscode.window.forceCode.config
+                            && vscode.window.forceCode.config.apiVersion
+                            ? vscode.window.forceCode.config.apiVersion : constants.API_VERSION),
+                    });
 
-                        return service.currentConnection.connection.identity().then(res => {
-                            service.currentConnection.orgInfo.userId = res.user_id;
-                            service.currentConnection.isLoggedIn = true;
-                            service.currentConnection.watchRefresh();
-                            vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
-                            return Promise.resolve(false);
-                        });
-                    }
+                    return service.currentConnection.connection.identity().then(res => {
+                        service.currentConnection.orgInfo.userId = res.user_id;
+                        service.currentConnection.isLoggedIn = true;
+                        service.currentConnection.watchRefresh();
+                        vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
+                        return Promise.resolve(false);
+                    });
                 });
         } else {
             vscode.window.forceCode.config = readConfigFile(username);

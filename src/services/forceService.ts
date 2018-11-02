@@ -272,7 +272,7 @@ export default class ForceService implements forceCode.IForceService {
         }
         function connectionError(err) {
             vscode.window.showErrorMessage(`ForceCode: Connection Error`);
-            vscode.window.forceCode.statusBarItem.hide();
+            //vscode.window.forceCode.statusBarItem.hide();
             throw err;
         }
     }
