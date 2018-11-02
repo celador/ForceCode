@@ -203,7 +203,6 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                     return service.currentConnection.connection.identity().then(res => {
                         service.currentConnection.orgInfo.userId = res.user_id;
                         service.currentConnection.isLoggedIn = true;
-                        service.currentConnection.watchRefresh();
                         vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
                         return Promise.resolve(false);
                     });

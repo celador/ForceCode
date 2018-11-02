@@ -33,14 +33,6 @@ export class FCConnection extends vscode.TreeItem {
         this.orgInfo = orgInfo;
     }
 
-    public watchRefresh() {
-        this.connection.on('refresh', this.updateAToken);
-    }
-
-    private updateAToken(newAToken: string, res: any) {
-        this.orgInfo.accessToken = newAToken;
-    }
-
     public disconnect(): Promise<any> {
         if(this.isLoggedIn) {
             if (this.limInterval) {

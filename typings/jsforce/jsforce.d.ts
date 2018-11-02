@@ -151,7 +151,6 @@ declare module 'jsforce/index' {
             login(name: string, password: string): any;
             login(name: string, password: string, callback: (err: any, res: any) => void): any;
             _baseUrl(): string;
-            on(event: string, callback: (atoken: string, res: any) => any): any;
         }
         interface ConnectionOptions {
             oauth2?: OAuth2 | {}; // OAuth2 instance or options to be passed to OAuth2 constructor
