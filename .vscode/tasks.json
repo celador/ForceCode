@@ -20,6 +20,12 @@
                     "$HOME/.nvm/versions/node/v8.11.4/bin/npm", "run", "compile"
                 ],
             },
+            "osx": {
+                "command": "npm",
+                "args": [
+                    "run", "compile"
+                ],
+            },
 
             // show the output window only if unrecognized errors occur.
             "presentation": {
