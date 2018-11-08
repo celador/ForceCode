@@ -77,18 +77,23 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     public getSavedUsernames(): Promise<string[]> {
         return new Promise((resolve) => {
             var usernames: string[] = [];
-            klaw(path.join(vscode.window.forceCode.workspaceRoot, '.forceCode'))
-                .on('data', function (file) {
-                    if (file.stats.isDirectory()) {
-                        var fileName: string = file.path.split(path.sep).pop();
-                        if (fileName.indexOf('@') > 0) {
-                            usernames.push(fileName);
+            var fcPath: string = path.join(vscode.window.forceCode.workspaceRoot, '.forceCode');
+            if(fs.existsSync(fcPath)) {
+                klaw(fcPath, { depthLimit: 1 })
+                    .on('data', function (file) {
+                        if (file.stats.isDirectory()) {
+                            var fileName: string = file.path.split(path.sep).pop();
+                            if (fileName.indexOf('@') > 0) {
+                                usernames.push(fileName);
+                            }
                         }
-                    }
-                })
-                .on('end', function () {
-                    resolve(usernames);
-                });
+                    })
+                    .on('end', function () {
+                        resolve(usernames);
+                    });
+            } else {
+                resolve(usernames);
+            }
         });
     }
 
@@ -113,22 +118,27 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                 uNames.forEach(uName => {
                     service.addConnection({ username: uName });
                 });
-                klaw(path.join(operatingSystem.getHomeDir(), '.sfdx'))
-                    .on('data', function (file) {
-                        if (file.stats.isFile()) {
-                            var fileName: string = file.path.split(path.sep).pop().split('.')[0];
-                            if (fileName.indexOf('@') > 0) {
-                                const orgInfo: FCOauth = fs.readJsonSync(file.path);
-                                service.addConnection(orgInfo);
+                const fcPath: string = path.join(operatingSystem.getHomeDir(), '.sfdx');
+                if(fs.existsSync(fcPath)) {
+                    klaw(fcPath)
+                        .on('data', function (file) {
+                            if (file.stats.isFile()) {
+                                var fileName: string = file.path.split(path.sep).pop().split('.')[0];
+                                if (fileName.indexOf('@') > 0) {
+                                    const orgInfo: FCOauth = fs.readJsonSync(file.path);
+                                    service.addConnection(orgInfo);
+                                }
                             }
-                        }
-                    })
-                    .on('end', function () {
-                        // tell the connections to refresh their text/icons
-                        service.refreshConnsStatus();
-                        console.log('Orgs refreshed');
-                        resolve(true);
-                    });
+                        })
+                        .on('end', function () {
+                            // tell the connections to refresh their text/icons
+                            service.refreshConnsStatus();
+                            console.log('Orgs refreshed');
+                            resolve(true);
+                        });
+                } else {
+                    resolve(true);
+                }
             });
         });
     }
@@ -186,28 +196,26 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                     service.currentConnection = service.addConnection(orgInf, true);
                     vscode.window.forceCode.config = readConfigFile(orgInf.username);
 
-                    if (!service.currentConnection.connection) {
-                        const sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInf.username + '.json');
-                        const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
-                        service.currentConnection.connection = new jsforce.Connection({
-                            oauth2: {
-                                clientId: service.currentConnection.orgInfo.clientId || "SalesforceDevelopmentExperience"
-                            },
-                            instanceUrl: service.currentConnection.orgInfo.instanceUrl,
-                            accessToken: service.currentConnection.orgInfo.accessToken,
-                            refreshToken: refreshToken,
-                            version: (vscode.window.forceCode && vscode.window.forceCode.config
-                                && vscode.window.forceCode.config.apiVersion
-                                ? vscode.window.forceCode.config.apiVersion : constants.API_VERSION),
-                        });
+                    const sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInf.username + '.json');
+                    const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
+                    service.currentConnection.connection = new jsforce.Connection({
+                        oauth2: {
+                            clientId: service.currentConnection.orgInfo.clientId || "SalesforceDevelopmentExperience"
+                        },
+                        instanceUrl: service.currentConnection.orgInfo.instanceUrl,
+                        accessToken: service.currentConnection.orgInfo.accessToken,
+                        refreshToken: refreshToken,
+                        version: (vscode.window.forceCode && vscode.window.forceCode.config
+                            && vscode.window.forceCode.config.apiVersion
+                            ? vscode.window.forceCode.config.apiVersion : constants.API_VERSION),
+                    });
 
-                        return service.currentConnection.connection.identity().then(res => {
-                            service.currentConnection.orgInfo.userId = res.user_id;
-                            service.currentConnection.isLoggedIn = true;
-                            vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
-                            return Promise.resolve(false);
-                        });
-                    }
+                    return service.currentConnection.connection.identity().then(res => {
+                        service.currentConnection.orgInfo.userId = res.user_id;
+                        service.currentConnection.isLoggedIn = true;
+                        vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
+                        return Promise.resolve(false);
+                    });
                 });
         } else {
             vscode.window.forceCode.config = readConfigFile(username);

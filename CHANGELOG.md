@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.10.1
+    * Fix access token bug where it wasn't being refreshed automatically
 * 3.10.0
     * Show orgs that have a ForceCode configuration folder saved in the project in Saved Usernames
     * Add right-click to remove ForceCode configuration folder
