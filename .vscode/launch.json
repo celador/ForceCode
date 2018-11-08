@@ -16,6 +16,9 @@
       "windows": {
         "preLaunchTask": "npm"
       },    
+      "osx": {
+        "preLaunchTask": "npm"
+      },    
       "outFiles": ["${workspaceFolder}/out/src/**/*.js"]
     },
     {
@@ -33,6 +36,9 @@
         "preLaunchTask": "npm"
       },
       "windows": {
+        "preLaunchTask": "npm"
+      },
+      "osx": {
         "preLaunchTask": "npm"
       },
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
