@@ -28,7 +28,7 @@ There's no complicated setup process or project configurations, no external apps
 
 ## Slack
 
-ForceCode now has a Slack channel! Click [here](https://join.slack.com/t/forcecodeworkspace/shared_invite/enQtNDUxNzc3MzA1NDE0LTRiZmQ0MjdmMjQ0ZmQ0NjM3OTI1MGNkYmY4YjdiNTU3MWEzNGZlZGJjYjIxODA2NTA0YzkwMzhmMGNmZTIzMDc) to join us! 
+ForceCode now has a Slack channel! Click [here](https://join.slack.com/t/forcecodeworkspace/shared_invite/enQtNDczMDg3Nzg2ODcxLWRhYWM2NmI3MGNmMmE1MmRkOTFkMGQzZmQ1YjlhMDhjY2YzNmU0NDEyNDU4OGM1NzdlZjU2NTg3Y2FkNTdhMjA) to join us! 
 Use this to ask question and receive updates on upcoming features!
 
 ### Permissions
