@@ -1,5 +1,9 @@
 ## Change Log
 
+* 3.10.3
+    * Update Slack invite link
+* 3.10.2
+    * Development fixes for OS X by @mnunezdm
 * 3.10.1
     * Fix access token bug where it wasn't being refreshed automatically
 * 3.10.0
