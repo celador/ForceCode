@@ -12,6 +12,7 @@ import * as compress from 'compressing';
 import { parseString } from 'xml2js';
 import { outputToString } from '../parsers/output';
 import { packageBuilder } from '.';
+import { getToolingTypes } from './packageBuilder';
 import { XHROptions, xhr } from 'request-light';
 
 export interface ToolingType {
@@ -214,17 +215,9 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             }
 
             function all() {
-                new SObjectDescribe().describeGlobal(SObjectCategory.STANDARD).then(objs => {
-                    objs.push('*');
-                    var types: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
-                        if(r.xmlName === 'CustomObject') {
-                            return { name: r.xmlName, members: objs };
-                        } else {
-                            return { name: r.xmlName, members: '*' };
-                        }
-                    });
-                    retrieveComponents(resolve, { types: types });
-                });
+                getToolingTypes(vscode.window.forceCode.describe.metadataObjects).then(mappedTypes => {
+                    retrieveComponents(resolve, { types: mappedTypes })
+                }).catch(reject);
             }
 
             function getSpecificTypeMetadata(metadataType: string) {

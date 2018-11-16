@@ -136,7 +136,7 @@ interface IContainerMember {
     id: string;
 }
 
-interface IMetadataObject {
+export interface IMetadataObject {
     directoryName: string;
     inFolder: boolean;
     metaFile: boolean;
