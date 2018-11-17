@@ -6,6 +6,7 @@ import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
 import { parseString } from 'xml2js';
+import * as path from 'path';
 
 export default function compile(document: vscode.TextDocument): Promise<any> {
     if(!document) {
@@ -70,6 +71,18 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
         let text: string = document.getText();
 
         return new Promise(function (resolve, reject) {
+            if(Metadata) {
+                resolve(Metadata);
+            }
+            const ffNameParts: string[] = document.fileName
+                .split(vscode.window.forceCode.projectRoot + path.sep)[1]
+                .split(path.sep);
+            var folderedName: string;
+            if(ffNameParts.length > 2) {
+                // we have foldered metadata
+                ffNameParts.shift();
+                folderedName = ffNameParts.join('/').split('.')[0];
+            }
             parseString(text, { explicitArray: false, async: true }, function (err, result) {
                 if (err) {
                     reject(err);
@@ -78,7 +91,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
                 if (metadata) {
                     delete metadata['$'];
                     delete metadata['_'];
-                    metadata.fullName = fileName;
+                    metadata.fullName = folderedName ? folderedName : fileName;
                     resolve(metadata);
                 }
                 reject({ message: getAnyTTFromFolder(document.uri) + ' metadata type not found in org' });

@@ -111,21 +111,17 @@ export function getAnyTTFromPath(thepath: string): string {
     if(thepath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
         return undefined;
     }
-    var baseDirectoryName: string;
-    if(fs.lstatSync(thepath).isDirectory()) {
-        baseDirectoryName = path.parse(thepath).name;
-    } else {
-        var fileNameParts: string[] = thepath.split(path.sep);
-        baseDirectoryName = fileNameParts[fileNameParts.length - 2];
-    }    
+    var fileName: string = thepath.split(vscode.window.forceCode.projectRoot + path.sep)[1];
+    var baseDirectoryName: string = fileName.split(path.sep)[0];
+    const isInFolder: boolean = fileName.split(path.sep).length > 2;
     var types: any[] = vscode.window.forceCode.describe.metadataObjects
         .filter(o => o.directoryName === baseDirectoryName)
         .map(r => {
+            if(!isInFolder && r.inFolder) {
+                return r.xmlName === 'EmailTemplate' ? 'EmailFolder' : `${r.xmlName}Folder`;
+            }
             return r.xmlName;
         });
-    if (types.length <= 0 && thepath.indexOf('aura') !== -1) {
-        types = ['AuraDefinitionBundle'];
-    }
     return types[0];
 }
 export function getAnyNameFromUri(uri: vscode.Uri): string {
