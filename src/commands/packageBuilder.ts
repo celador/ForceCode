@@ -12,9 +12,9 @@ function sortFunc(a: any, b: any): number {
     return aStr.localeCompare(bStr);
 }
 
-export function getToolingTypes(metadataTypes: IMetadataObject[], retrieveManaged?: boolean): Promise<any> {
-    var proms = metadataTypes.map(r => {
-        return new Promise((resolve, reject) => {
+export function getToolingTypes(metadataTypes: IMetadataObject[], retrieveManaged?: boolean): Promise<PXMLMember[]> {
+    var proms: Promise<PXMLMember>[] = metadataTypes.map(r => {
+        return new Promise<PXMLMember>((resolve, reject) => {
             if(r.xmlName === 'CustomObject') {
                 new SObjectDescribe().describeGlobal(SObjectCategory.STANDARD)
                     .then(objs => {
@@ -27,6 +27,7 @@ export function getToolingTypes(metadataTypes: IMetadataObject[], retrieveManage
                 vscode.window.forceCode.conn.metadata.list([{ type: folderType }])
                     .then((folders) => {
                         let proms: Promise<any>[] = [];
+                        folders = toArray(folders);
                         folders.forEach(f => {
                             if(f.manageableState === 'unmanaged' || retrieveManaged) {
                                 proms.push(vscode.window.forceCode.conn.metadata.list([{ type: r.xmlName, folder: f.fullName }]));
@@ -34,7 +35,8 @@ export function getToolingTypes(metadataTypes: IMetadataObject[], retrieveManage
                         });
                         Promise.all(proms)
                         .then(folderList => {
-                            const members = [].concat([...folders, ...folderList])
+                            folderList = toArray(folderList);
+                            const members = [].concat(...folders, ...folderList)
                                 .filter(f => f !== undefined)
                                 .map(f => f.fullName);
                             resolve({ name: r.xmlName, members: members });
@@ -44,11 +46,11 @@ export function getToolingTypes(metadataTypes: IMetadataObject[], retrieveManage
                     })
                     .catch(reject);
             } else {
-                resolve({ name: r.xmlName, members: '*' });
+                resolve({ name: r.xmlName, members: ['*'] });
             }
         });                        
     });
-    return Promise.all(proms)
+    return Promise.all(proms);
 }
 
 export default function packageBuilder(buildPackage?: boolean): Promise<any> {
@@ -82,7 +84,7 @@ export default function packageBuilder(buildPackage?: boolean): Promise<any> {
                         const builder = new xml2js.Builder();
                         var packObj: PXML = {
                             Package: {
-                                types: <PXMLMember[]> mappedTypes,
+                                types: mappedTypes,
                                 version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION
                             },
                         }
