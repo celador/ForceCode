@@ -10,7 +10,6 @@
 <style>
     div {
         padding: 2px;
-        margin-left: 1em;
         text-align: center;
     }
 
@@ -19,7 +18,6 @@
     }
 
     table {
-        text-align: center;
         border-collapse: collapse;
         width: 100%;
     }
@@ -28,6 +26,11 @@
         border: 1px solid grey;
         text-align: left;
         padding: 2px;
+    }
+
+    th {
+        font-weight: bold;
+        font-style: italic;
     }
 
     tr:nth-child(even) {
@@ -65,10 +68,9 @@
     const vscode = acquireVsCodeApi();
     var maxQueryResultsPerPage;
     var pageNumber;
+    var totalPages;
     var queryRows;
     var queryResHeader;
-
-    // TODO: ADD PAGINATION WITH A LIMIT PER PAGE SET IN THE FORCECODE SETTINGS (maxQueryResultsPerPage)
 
     // Handle the message inside the webview
     window.addEventListener('message', event => {
@@ -80,15 +82,25 @@
                 if(histToShow.length > 75) {
                     histToShow = histToShow.substring(0, 76);
                 }
-                histroyOptions += '<option value="' + history + '">' + histToShow + '</option>'
+                histroyOptions += '<option value="' + history + '">' + histToShow + '</option>';
             });
+            if(d.qHistory.length > 0) {
+                document.getElementById('query').value = d.qHistory[0];
+            } else {
+                histroyOptions = '<option value="">There is currently no query history to show</option>';
+            }
             document.getElementById('history').innerHTML = histroyOptions;
-            document.getElementById('query').value = d.qHistory[0];
         } else if(d.success) {
             maxQueryResultsPerPage = d.limit;
             pageNumber = 0;
-            queryRows = d.results.split('"\n');
+            // the substring in this will cut off the last " character
+            queryRows = d.results.substring(0, d.results.length - 1).split('"\n');
             const resHead = queryRows.shift().split('","');
+            totalPages = Math.floor(queryRows.length / maxQueryResultsPerPage);
+            if(queryRows.length % maxQueryResultsPerPage > 0) {
+                totalPages++;
+            }
+            totalPages--;
             queryResHeader = '<tr>';
             resHead.forEach(header => {
                 header = header.replace('"', '');
@@ -114,10 +126,12 @@
             ? queryRows.length 
             : rowStart + maxQueryResultsPerPage;
         var resultsTable = '<div>'
-            + (showButtons ? '<button type="button" onclick="prevPage()">Prev</button>' : '')
+            + (showButtons ? '<button type="button" onclick="prevPage()" ' 
+            + (pageNumber === 0 ? 'disabled' : '') + '>Prev</button>' : '')
             + 'Showing ' + (rowStart + 1) + '-' + rowEnd
             + ' of ' + rowCount + ' results'
-            + (showButtons ? '<button type="button" onclick="nextPage()">Next</button>' : '')
+            + (showButtons ? '<button type="button" onclick="nextPage()" '
+            + (pageNumber === totalPages ? 'disabled' : '') + '>Next</button>' : '')
             + '</div><table>';
         resultsTable += queryResHeader;
         for(var row = rowStart; row < rowEnd; row++) {
@@ -134,17 +148,12 @@
     }
 
     function nextPage() {
-        if((pageNumber + 1) * maxQueryResultsPerPage < queryRows.length) {
-            pageNumber++;
-        }
+        pageNumber++;
         showResults();
     }
 
     function prevPage() {
         pageNumber--;
-        if(pageNumber < 0) {
-            pageNumber = 0;
-        }
         showResults();
     }
 

@@ -67,7 +67,7 @@ export default function queryEditor(): Promise<any> {
 
     function sendResults(results) {
         curResults = results.records;
-        const queryIndex: number = queryHistory.indexOf(curResults);
+        const queryIndex: number = queryHistory.indexOf(curQuery);
         if(queryIndex !== -1) {
             queryHistory.splice(queryIndex, 1);
         }
@@ -77,10 +77,18 @@ export default function queryEditor(): Promise<any> {
         }
         // save the query history
         fs.outputFileSync(qHistPath, JSON.stringify({ queries: queryHistory }, undefined, 4));
-        var resToSend: {} = {
-            success: true,
-            results: outputToCSV(curResults),
-            limit: vscode.window.forceCode.config.maxQueryResultsPerPage
+        var resToSend: {}
+        if(results.totalSize > 0) {
+            resToSend = {
+                success: true,
+                results: outputToCSV(curResults),
+                limit: vscode.window.forceCode.config.maxQueryResultsPerPage
+            }
+        } else {
+            resToSend = {
+                success: false,
+                results: 'The query you entered returned no results',
+            }
         }
         sendData(resToSend);
         sendQueryHistory();
