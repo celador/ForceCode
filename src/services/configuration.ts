@@ -25,7 +25,9 @@ export const defautlOptions = {
 		'testLevel': 'NoTestRun'
 	},
 	maxFileChangeNotifications: 15,
-	outputQueriesAsCSV: false,
+	maxQueryHistory: 10,
+	maxQueryResultsPerPage: 250,
+	outputQueriesAsCSV: true,
 	overwritePackageXML: false,
 	poll: 1500,
 	pollTimeout: 1200,

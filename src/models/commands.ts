@@ -104,17 +104,17 @@ export const fcCommands: FCCommand[] = [
             return commands.getOverallCoverage();
         }
     },
-    // Run SOQL
+    // Run SOQL/TOQL
     {
-        commandName: 'ForceCode.soql',
-        name: 'Executing SOQL query',
+        commandName: 'ForceCode.queryEditor',
+        name: 'Opening Query Editor',
         hidden: false,
-        description: 'Run a SOQL query',
-        detail: 'The SOQL query results will be dumped to a json file in the soql directory',
+        description: 'Run a SOQL/TOQL query',
+        detail: 'The SOQL/TOQL query results will be shown in the window with the option to save',
         icon: 'telescope',
-        label: 'SOQL Query',
+        label: 'SOQL/TOQL Query',
         command: function (context, selectedResource?) {
-            return commands.soql();
+            return commands.queryEditor();
         }
     },
     // Diff Files
@@ -217,19 +217,6 @@ export const fcCommands: FCCommand[] = [
         label: 'Deploy Package',
         command: function (context, selectedResource?) {
             return commands.deploy(context);
-        }
-    },
-    // Run Tooling Query
-    {
-        commandName: 'ForceCode.toql',
-        name: 'Executing TOQL query',
-        hidden: false,
-        description: 'Run a Tooling API query',
-        detail: 'The Tooling API query (Select SymbolTable From ApexClass) results will be dumped to a json file in the toql directory',
-        icon: 'telescope',
-        label: 'Tooling Query',
-        command: function (context, selectedResource?) {
-            return commands.toql();
         }
     },
     {
