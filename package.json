@@ -141,30 +141,35 @@
         "command": "ForceCode.showMenu",
         "key": "alt+cmd+c",
         "win": "ctrl+shift+c",
+        "linux": "ctrl+shift+c",
         "when": "editorFocus"
       },
       {
         "command": "ForceCode.compile",
         "key": "alt+cmd+s",
         "win": "ctrl+shift+s",
+        "linux": "ctrl+shift+s",
         "when": "editorFocus && ForceCodeActive  && editorIsOpen && ForceCodeLoggedIn"
       },
       {
         "command": "ForceCode.executeAnonymous",
         "key": "alt+cmd+e",
-        "win": "ctrl+shift+e",
-        "when": "editorFocus && resourceLangId == apex && ForceCodeActive && editorHasSelection && ForceCodeLoggedIn"
+        "win": "alt+shift+e",
+        "linux": "alt+shift+e",
+        "when": "editorFocus && ForceCodeActive && editorHasSelection && ForceCodeLoggedIn"
       },
       {
         "command": "ForceCode.open",
         "key": "alt+cmd+o",
-        "win": "ctrl:shift+o",
+        "win": "alt+shift+o",
+        "linux": "alt+shift+o",
         "when": "ForceCodeActive && ForceCodeLoggedIn"
       },
       {
         "command": "ForceCode.staticResource",
         "key": "alt+cmd+b",
-        "win": "ctrl+shift+b",
+        "win": "alt+shift+b",
+        "linux": "alt+shift+b",
         "when": "ForceCodeActive && ForceCodeLoggedIn"
       }
     ],

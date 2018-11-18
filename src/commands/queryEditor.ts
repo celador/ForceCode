@@ -72,8 +72,10 @@ export default function queryEditor(): Promise<any> {
             queryHistory.splice(queryIndex, 1);
         }
         queryHistory.unshift(curQuery);
-        if(queryHistory.length > vscode.window.forceCode.config.maxQueryHistory) {
-            queryHistory.pop();
+        const maxQueryHistory = vscode.window.forceCode.config.maxQueryHistory;
+        if(queryHistory.length > maxQueryHistory) {
+            const toDrop = queryHistory.length - maxQueryHistory;
+            queryHistory.splice(maxQueryHistory, toDrop);
         }
         // save the query history
         fs.outputFileSync(qHistPath, JSON.stringify({ queries: queryHistory }, undefined, 4));

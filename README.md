@@ -125,7 +125,7 @@ Please submit any issues or feature requests to [https://github.com/celador/Forc
 
 You need to have a folder opened in VSCode to be able to start this extension!
 
-To begin, press `Opt+Cmd+C` or open the Command Pallet and type `>ForceCode: Menu` to bring up the ForceCode Menu  
+To begin, press `Opt+Cmd+C` (Mac) or `Ctrl+Shift+C` (Win/Linux) or open the Command Pallet and type `>ForceCode: Menu` to bring up the ForceCode Menu  
 You can then select if you want to log into a production org or test org. A browser will then open to the Salesforce login where you can enter your credentials. A configuration file will then be auto generated for you for each of your orgs in the .forceCode folder called `settings.json`.  
 
 The configuration file will look like the following. You can either edit this file to change the settings or you can use the settings option in the ForceCode menu (Recommended)!
@@ -136,7 +136,7 @@ The configuration file will look like the following. You can either edit this fi
     "autoCompile": true,
     "autoRefresh": true,
     "browser": "Google Chrome Canary",
-    "checkForFileChanges": true,
+    "checkForFileChanges": false,
     "debugFilter": "USER_DEBUG|FATAL_ERROR",
     "debugOnly": true,
     "deployOptions": {
@@ -148,7 +148,10 @@ The configuration file will look like the following. You can either edit this fi
         "runTests": [],
         "testLevel": "NoTestRun"
     },
-    "outputQueriesAsCSV": false,
+    "maxFileChangeNotifications": 15,
+	"maxQueryHistory": 10,
+	"maxQueryResultsPerPage": 250,
+    "outputQueriesAsCSV": true,
     "overwritePackageXML": false,
     "poll": 1500,
     "pollTimeout": 1200,
@@ -170,7 +173,7 @@ The configuration file will look like the following. You can either edit this fi
 ### Options
 
 * apiVersion: This is the default api version that all your files will be saved with.  If this is not set, this will default to the version of the org in use.  ForceCode will not change the version of an existing file.  This is also the version used for package retrieval and deploy.
-* autoCompile: When a supported file is saved \(works with VSCode's autosave feature\) the file is saved/compiled on the server.  Otherwise, use `cmd + opt + s` to save the file to the server.
+* autoCompile: When a supported file is saved \(works with VSCode's autosave feature\) the file is saved/compiled on the server.  Otherwise, use `cmd + opt + s` (Mac) or `ctrl + shift + s` (Win/Linux) to save the file to the server.
 * autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on \(and you're working on a Mac\), the currently active tab in Google Chrome Canary \(or your configured browser\) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
 * browser: Define which browser you want to reload when the static resource refreshes \(this only works with Macs at the moment\)
 * checkForFileChanges: This option, when set to true, will allow ForceCode to check for file changes against the server on startup of ForceCode.
@@ -184,6 +187,9 @@ The configuration file will look like the following. You can either edit this fi
   * rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
   * runTests:        A list of Apex tests to run during deployment \(commma separated list\)
   * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
+* maxFileChangeNotifications: The maximum number of file change notifications that will be shown on statup of the extension
+* maxQueryHistory: The maximum number of queries to store in the query history of the query editor
+* maxQueryResultsPerPage: The maximum number of results to show per page when executing a query
 * outputQueriesAsCSV: if set to true, will retrieve soql/toql results in csv form. If false, json will be returned
 * overwritePackageXML: if set to true, will overwrite package.xml file upon opening or retrieving files
 * poll: When compiling, this is the interval \(in milliseconds\) at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
@@ -230,9 +236,9 @@ ForceCode provides a number of commands to work with your Salesforce org and met
 
 Menu: &gt;Force: Save/Deploy/Compile  
 Mac: alt + cmd + s  
-Win: ctrl + shift + s  
+Win/Linux: ctrl + shift + s  
 To automatically compile/save your changes to Salesforce when the file is saved locally, you can set the `autoCompile` setting to `true`.  
-Otherwise, you will need to use alt + cmd + s to save/compile your file.
+Otherwise, you will need to use the keyboard shortcut or menu option to save/compile your file.
 
 #### Get errors as you type
 
@@ -246,20 +252,20 @@ Simply hover over an @isTest or testMethod and you will see a ForceCode hover ap
 
 Manu: &gt;Force: Execute Anonymous  
 Mac: alt + cmd + e  
-Win: ctrl + shift + e  
+Win/Linux: alt + shift + e  
 Simply select the code that you want to run, then right click and select Execute Anonymous!
 
 ### Open
 
 Menu: &gt;Force: Get Class, Page, or Trigger  
 Mac: alt + cmd + o  
-Win: ctrl + shift + o
+Win/Linux: alt + shift + o
 
 ### Bundle and Deploy Static Resource
 
 Menu: &gt;Force: Save/Deploy/Compile  
 Mac: alt + cmd + b  
-Win: ctrl + shift + b
+Win/Linux: alt + shift + b
 You can also save a file in a resource-bundle folder and it will deploy
 
 ForceCode looks for Static Resources in two places.  The first is `resource-bundles`, the second is `spa`.  Typically, static resources go in the resource-bundles folder, and the resource is named something like `foo.resource` where foo is the name of the static resource.

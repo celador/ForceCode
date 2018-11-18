@@ -4,6 +4,8 @@
     * Add ability to retrieve foldered metadata (Reports, Dashboards, Email templates, and Documents) thanks @kenhuman!
         * You can currently only save reports and dashboards. Some email template metadata can be saved, but the templates themselves can't be saved.
     * Added a query editor to replace the simple SOQL/TOQL query menu options
+    * Updated keyboard shortcuts for Execute Anonymous, Open, and deploying static resources for Windows and Linux, since there was conflicts with default VSCode shortcuts (Please see the README for the new shortcuts)
+    * Change default of outputQueriesAsCSV to true
 * 3.10.3
     * Update Slack invite link
 * 3.10.2
