@@ -12,8 +12,12 @@ function sortFunc(a: any, b: any): number {
     return aStr.localeCompare(bStr);
 }
 
-export function getToolingTypes(metadataTypes: IMetadataObject[], retrieveManaged?: boolean): Promise<PXMLMember[]> {
-    var proms: Promise<PXMLMember>[] = metadataTypes.map(r => {
+export function getMembers(metadataTypes: string[], retrieveManaged?: boolean): Promise<PXMLMember[]> {
+    var metadataObjects: IMetadataObject[] = vscode.window.forceCode.describe.metadataObjects;
+    if(metadataTypes !== ['*']) {
+        metadataObjects = metadataObjects.filter(type => metadataTypes.includes(type.xmlName))
+    }
+    var proms: Promise<PXMLMember>[] = metadataObjects.map(r => {
         return new Promise<PXMLMember>((resolve, reject) => {
             if(r.xmlName === 'CustomObject') {
                 new SObjectDescribe().describeGlobal(SObjectCategory.STANDARD)
@@ -30,15 +34,16 @@ export function getToolingTypes(metadataTypes: IMetadataObject[], retrieveManage
                         folders = toArray(folders);
                         folders.forEach(f => {
                             if(f.manageableState === 'unmanaged' || retrieveManaged) {
-                                proms.push(vscode.window.forceCode.conn.metadata.list([{ type: r.xmlName, folder: f.fullName }]));
+                                proms.push(getFolderContents(r.xmlName, f.fullName));
                             }
                         });
                         Promise.all(proms)
                         .then(folderList => {
                             folderList = toArray(folderList);
-                            const members = [].concat(...folders, ...folderList)
+                            var members = folders
                                 .filter(f => f !== undefined)
                                 .map(f => f.fullName);
+                            members = [].concat(...members, ...folderList);
                             resolve({ name: r.xmlName, members: members });
                         })
                         .catch(reject)
@@ -51,6 +56,13 @@ export function getToolingTypes(metadataTypes: IMetadataObject[], retrieveManage
         });                        
     });
     return Promise.all(proms);
+}
+
+export function getFolderContents(type: string, folder: string): Promise<string[]> {
+    return vscode.window.forceCode.conn.metadata.list([{ type, folder }]).then(contents => {
+        contents = toArray(contents);
+        return contents.filter(f => f !== undefined).map(m => m.fullName);
+    });
 }
 
 export default function packageBuilder(buildPackage?: boolean): Promise<any> {
@@ -75,7 +87,7 @@ export default function packageBuilder(buildPackage?: boolean): Promise<any> {
                 reject();
             }
 
-            getToolingTypes(vscode.window.forceCode.describe.metadataObjects.filter(f => typesArray.includes(f.xmlName)))
+            getMembers(typesArray)
                 .then(mappedTypes => {
                     if(!buildPackage) {
                         resolve(mappedTypes);

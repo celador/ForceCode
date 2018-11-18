@@ -2,11 +2,11 @@ import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 import { getFileName, getToolingType } from './../parsers';
-import { commandService, commandViewService, codeCovViewService, fcConnection, dxService, FCOauth, FCConnection } from './../services';
+import { commandService, commandViewService, codeCovViewService, fcConnection, dxService, FCOauth, FCConnection, PXMLMember } from './../services';
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
 import { ToolingType } from '../commands/retrieve';
-import { getAnyTTFromFolder, getAnyNameFromUri } from '../parsers/open';
+import { getAnyNameFromUri } from '../parsers/open';
 import { FCCommand } from '../services/commandView';
 import { Config } from '../forceCode';
 import { readConfigFile, removeConfigFolder } from '../services/configuration';
@@ -319,25 +319,28 @@ export const fcCommands: FCCommand[] = [
         commandName: 'ForceCode.refreshContext',
         name: 'Retrieving ',
         hidden: true,
-        command: function (context, selectedResource?) {
+        command: async function (context, selectedResource?) {
             if(selectedResource && selectedResource instanceof Array) {
-                var files: ToolingType[] = [];
-                selectedResource.forEach(curRes => {
-                    var tType: string = getAnyTTFromFolder(curRes);
-                    var index: number = getTTIndex(tType, files);
-                    const theName: string = getAnyNameFromUri(curRes);
-                    if(index >= 0) {
-                        if(theName === '*') {
-                            files[index].members = ['*'];
-                        } else {
-                            files[index].members.push(theName);
-                        }
-                    } else {
-                        files.push({name: tType, members: [theName]});
-                    }
+                return new Promise((resolve) => {
+                    var files: PXMLMember[] = [];
+                    var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => getAnyNameFromUri(curRes));
+                    Promise.all(proms).then(theNames => {
+                        theNames.forEach(curName => {
+                            var index: number = getTTIndex(curName.name, files);
+                            if(index >= 0) {
+                                if(curName.members === ['*']) {
+                                    files[index].members = ['*'];
+                                } else {
+                                    files[index].members.push(...curName.members);
+                                }
+                            } else {
+                                files.push(curName);
+                            }
+                        });
+                        console.log(files);
+                        resolve(commands.retrieve({types: files}));
+                    });
                 });
-
-                return commands.retrieve({types: files});
             }
             if(context) {
                 return commands.retrieve(context);
