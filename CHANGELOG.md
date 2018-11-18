@@ -1,5 +1,8 @@
 ## Change Log
 
+* 3.11.0
+    * Add ability to retrieve foldered metadata (Reports, Dashboards, Email templates, and Documents) thanks @kenhuman!
+        * You can currently only save reports and dashboards. Some email template metadata can be saved, but the templates themselves can't be saved.
 * 3.10.3
     * Update Slack invite link
 * 3.10.2
