@@ -38,7 +38,7 @@ export const fcCommands: FCCommand[] = [
     },
     // Open File
     {
-        commandName: 'ForceCode.open',
+        commandName: 'ForceCode.openMenu',
         name: 'Opening file',
         hidden: false,
         description: 'Open Classes, Pages, Triggers, Components, Lightning Components, and Static Resources',
@@ -47,6 +47,13 @@ export const fcCommands: FCCommand[] = [
         label: 'Open Salesforce File',
         command: function (context, selectedResource?) {
             return commands.open(context);
+        }
+    },
+    {
+        commandName: 'ForceCode.open',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commandService.runCommand('ForceCode.openMenu', context, selectedResource);
         }
     },
     // Create Classes
@@ -65,7 +72,7 @@ export const fcCommands: FCCommand[] = [
     // Execute Anonymous 
     // Execute Selected Code
     {
-        commandName: 'ForceCode.executeAnonymous',
+        commandName: 'ForceCode.executeAnonymousMenu',
         name: 'Executing anonymous code',
         hidden: false,
         description: 'Execute code and get the debug log',
@@ -77,6 +84,13 @@ export const fcCommands: FCCommand[] = [
                 return;
             }
             return commands.executeAnonymous(vscode.window.activeTextEditor.document);
+        }
+    },
+    {
+        commandName: 'ForceCode.executeAnonymous',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commandService.runCommand('ForceCode.executeAnonymousMenu', context, selectedResource);
         }
     },
     // Get Log(s)
@@ -170,7 +184,7 @@ export const fcCommands: FCCommand[] = [
     },
     // Build/Deploy Resource Bundle(s)
     {
-        commandName: 'ForceCode.staticResource',
+        commandName: 'ForceCode.staticResourceMenu',
         name: 'Retrieving static resource',
         hidden: false,
         description: 'Build and Deploy a resource bundle.',
@@ -179,6 +193,13 @@ export const fcCommands: FCCommand[] = [
         label: 'Build Resource Bundle',
         command: function (context, selectedResource?) {
             return commands.staticResource(context);
+        }
+    },
+    {
+        commandName: 'ForceCode.staticResource',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commandService.runCommand('ForceCode.staticResourceMenu', context, selectedResource);
         }
     },
     {
