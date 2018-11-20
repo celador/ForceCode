@@ -40,7 +40,7 @@ export function outputToCSV(arr: ObjArr[]): string {
         var curItemArr: string[] = [];
         Object.keys(curItem).forEach(key => {
             if(key != 'attributes') {
-                curItemArr.push('\"' + curItem[key] + '\"');
+                curItemArr.push('\"' + (curItem[key] === null ? '' : curItem[key]) + '\"');
             }
         });
         csvContent += curItemArr.join(',');
