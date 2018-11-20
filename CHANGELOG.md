@@ -6,6 +6,8 @@
     * Added a query editor to replace the simple SOQL/TOQL query menu options
     * Updated keyboard shortcuts for Execute Anonymous, Open, and deploying static resources for Windows and Linux, since there was conflicts with default VSCode shortcuts (Please see the README for the new shortcuts)
     * Change default of outputQueriesAsCSV to true
+    * Add custom domain support
+    * Don't include expired orgs in saved usernames list
 * 3.10.3
     * Update Slack invite link
 * 3.10.2
