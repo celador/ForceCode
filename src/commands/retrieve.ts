@@ -5,14 +5,14 @@ import constants from './../models/constants';
 import { commandService, codeCovViewService, fcConnection, FCOauth, toArray } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
-import { getAnyTTFromFolder } from '../parsers/open';
+import { getAnyTTFromFolder, getAnyNameFromUri } from '../parsers/open';
 import { SObjectDescribe, SObjectCategory, CLIENT_ID } from '../dx';
 const mime = require('mime-types');
 import * as compress from 'compressing';
 import { parseString } from 'xml2js';
 import { outputToString } from '../parsers/output';
 import { packageBuilder } from '.';
-import { getToolingTypes } from './packageBuilder';
+import { getMembers } from './packageBuilder';
 import { XHROptions, xhr } from 'request-light';
 
 export interface ToolingType {
@@ -150,29 +150,14 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
         } else if (resource) {
             return new Promise(function (resolve) {
                 // Get the Metadata Object type
-                if (resource instanceof vscode.Uri && fs.lstatSync(resource.fsPath).isDirectory()) {
-                    var baseDirectoryName: string = path.parse(resource.fsPath).name;
-                    var type: string = getAnyTTFromFolder(resource);
-                    if (!type) {
-                        throw new Error(errMessage);
-                    }
-                    var types: any[] = [];
-                    if (type === 'AuraDefinitionBundle') {
-                        if (baseDirectoryName === 'aura') {
-                            baseDirectoryName = '*';
-                        }
-                        types = [{ name: type, members: baseDirectoryName }];
-                    } else {
-                        types = [{ name: type, members: '*' }];
-                    }
-                    retrieveComponents(resolve, { types: types });
-                } else if (resource instanceof vscode.Uri) {
+                if (resource instanceof vscode.Uri) {
                     var toolingType: string = getAnyTTFromFolder(resource);
                     if (!toolingType) {
                         throw new Error(errMessage);
                     }
-                    const name: string = path.parse(resource.fsPath).name;
-                    retrieveComponents(resolve, { types: [{ name: toolingType, members: [name] }] });
+                    getAnyNameFromUri(resource).then(names => {
+                        retrieveComponents(resolve, { types: [names] });
+                    });
                 } else {
                     retrieveComponents(resolve, resource);
                 }
@@ -215,7 +200,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             }
 
             function all() {
-                getToolingTypes(vscode.window.forceCode.describe.metadataObjects).then(mappedTypes => {
+                getMembers(['*']).then(mappedTypes => {
                     retrieveComponents(resolve, { types: mappedTypes })
                 }).catch(reject);
             }

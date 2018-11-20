@@ -101,46 +101,29 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         if(!this.refreshingConns) {
             this.refreshingConns = true;
             return dxService.orgList()
-                .then(() => {
-                    return this.refreshTheConns(this).then(res => {
+                .then(orgs => {
+                    return this.getSavedUsernames().then(uNames => {
+                        uNames.forEach(uName => {
+                            this.addConnection({ username: uName });
+                        });
+                        if(orgs) {
+                            orgs.orgs.forEach(curOrg => {
+                                if(!curOrg.isExpired && (curOrg.connectedStatus === 'Connected' 
+                                        || curOrg.connectedStatus === 'Unknown')) {
+                                    this.addConnection(curOrg);
+                                }
+                            });
+                        }
+                        // tell the connections to refresh their text/icons
+                        this.refreshConnsStatus();
+                        console.log('Orgs refreshed');
                         this.refreshingConns = false;
-                        return res;
+                        return true;
                     });
                 });
         } else {
             return Promise.resolve(true);
         }
-    }
-
-    private refreshTheConns(service: FCConnectionService): Promise<boolean> {
-        return new Promise((resolve) => {
-            service.getSavedUsernames().then(uNames => {
-                uNames.forEach(uName => {
-                    service.addConnection({ username: uName });
-                });
-                const fcPath: string = path.join(operatingSystem.getHomeDir(), '.sfdx');
-                if(fs.existsSync(fcPath)) {
-                    klaw(fcPath)
-                        .on('data', function (file) {
-                            if (file.stats.isFile()) {
-                                var fileName: string = file.path.split(path.sep).pop().split('.')[0];
-                                if (fileName.indexOf('@') > 0) {
-                                    const orgInfo: FCOauth = fs.readJsonSync(file.path);
-                                    service.addConnection(orgInfo);
-                                }
-                            }
-                        })
-                        .on('end', function () {
-                            // tell the connections to refresh their text/icons
-                            service.refreshConnsStatus();
-                            console.log('Orgs refreshed');
-                            resolve(true);
-                        });
-                } else {
-                    resolve(true);
-                }
-            });
-        });
     }
 
     // this is a check that will refresh the orgs and check if logged in. if not, it asks to log in

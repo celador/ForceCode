@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
+import { IMetadataObject } from '../forceCode';
+import { getFolderContents, getMembers } from '../commands/packageBuilder';
+import { PXMLMember } from '../services';
 
 export function getIcon(toolingType: string) {
     switch (toolingType) {
@@ -111,35 +114,66 @@ export function getAnyTTFromPath(thepath: string): string {
     if(thepath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
         return undefined;
     }
-    var baseDirectoryName: string;
-    if(fs.lstatSync(thepath).isDirectory()) {
-        baseDirectoryName = path.parse(thepath).name;
-    } else {
-        var fileNameParts: string[] = thepath.split(path.sep);
-        baseDirectoryName = fileNameParts[fileNameParts.length - 2];
-    }    
+    var fileName: string = thepath.split(vscode.window.forceCode.projectRoot + path.sep)[1];
+    var baseDirectoryName: string = fileName.split(path.sep)[0];
     var types: any[] = vscode.window.forceCode.describe.metadataObjects
         .filter(o => o.directoryName === baseDirectoryName)
         .map(r => {
             return r.xmlName;
         });
-    if (types.length <= 0 && thepath.indexOf('aura') !== -1) {
-        types = ['AuraDefinitionBundle'];
-    }
     return types[0];
 }
-export function getAnyNameFromUri(uri: vscode.Uri): string {
-    var baseDirectoryName: string = path.parse(uri.fsPath).name;
-    if(fs.lstatSync(uri.fsPath).isDirectory()) {
-        if(uri.fsPath.indexOf('aura') !== -1) {
-            if(baseDirectoryName === 'aura') {
+
+function isFoldered(toolingType: string): boolean {
+    if(toolingType && toolingType.endsWith('Folder')) {
+        return true;
+    }
+    const metadata: IMetadataObject = vscode.window.forceCode.describe.metadataObjects
+        .find(mObject => mObject.xmlName === toolingType);
+    return metadata ? metadata.inFolder : false;
+}
+
+export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
+    return new Promise((resolve) => {
+        const projRoot: string = vscode.window.forceCode.projectRoot + path.sep;
+        const ffNameParts: string[] = uri.fsPath.split(projRoot)[1].split(path.sep);
+        var baseDirectoryName: string = path.parse(uri.fsPath).name;
+        const isAura: boolean = ffNameParts[0] === 'aura';
+        const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
+        const tType: string = getAnyTTFromFolder(uri);
+        const isInFolder: boolean = isFoldered(tType);
+        var folderedName: string;
+        if(isInFolder && ffNameParts.length > 2) {
+            console.log('infolder length 3');
+            // we have foldered metadata
+            ffNameParts.shift();
+            folderedName = ffNameParts.join('/').split('.')[0];
+            resolve({ name: tType, members: [folderedName] });
+        } else if(isDir) {
+            if(isAura) {
+                if(baseDirectoryName === 'aura') {
+                    baseDirectoryName = '*';
+                }
+                resolve({ name: tType, members: [baseDirectoryName] });
+            } else if(isInFolder && ffNameParts.length > 1) {
+                console.log('infolder length 2');
+                getFolderContents(tType, ffNameParts[1]).then(contents => {
+                    resolve({ name: tType, members: contents });
+                });
+                
+            } else if(isInFolder) {
+                console.log('infolder');
+                getMembers([tType]).then(members => {
+                    resolve(members[0]);
+                });
+            } else {
                 baseDirectoryName = '*';
+                resolve({ name: tType, members: [baseDirectoryName] });
             }
         } else {
-            baseDirectoryName = '*';
+            resolve({ name: tType, members: [baseDirectoryName] });
         }
-    } 
-    return baseDirectoryName;
+    });
 }
 export function getAnyFolderNameFromTT(tType: string): string {
     var folder: any[] = vscode.window.forceCode.describe.metadataObjects

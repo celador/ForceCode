@@ -6,6 +6,7 @@ import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
 import { parseString } from 'xml2js';
+import * as path from 'path';
 
 export default function compile(document: vscode.TextDocument): Promise<any> {
     if(!document) {
@@ -18,16 +19,21 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
     var exDiagnostics: vscode.Diagnostic[] = vscode.languages.getDiagnostics(document.uri);
     
     const toolingType: string = parsers.getToolingType(document);
+    const folderToolingType: string = getAnyTTFromFolder(document.uri);
     const fileName: string = parsers.getFileName(document);
     const name: string = parsers.getName(document, toolingType);
 
     var DefType: string = undefined;
     var Metadata: {} = undefined;
 
+    if(folderToolingType === 'StaticResource') {
+        return Promise.reject('To save a static resource you must edit the files contained in the resource-bundles folder, not the staticresources folder.');
+    }
+
     if(document.fileName.endsWith('-meta.xml')) {
         parseString(document.getText(), { explicitArray: false }, function (err, dom) {
             if (err) { 
-                return undefined; 
+                return Promise.reject(err); 
             } else {
                 const metadataType: string = Object.keys(dom)[0];
                 delete dom[metadataType].$;
@@ -37,7 +43,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
     }
 
     // Start doing stuff
-    if (getAnyTTFromFolder(document.uri) && toolingType === undefined) {
+    if (folderToolingType && toolingType === undefined) {
         // This process uses the Metadata API to deploy specific files
         // This is where we extend it to create any kind of metadata
         // Currently only Objects and Permission sets ...
@@ -70,24 +76,36 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
         let text: string = document.getText();
 
         return new Promise(function (resolve, reject) {
+            if(Metadata) {
+                resolve(Metadata);
+            }
+            const ffNameParts: string[] = document.fileName
+                .split(vscode.window.forceCode.projectRoot + path.sep)[1]
+                .split(path.sep);
+            var folderedName: string;
+            if(ffNameParts.length > 2) {
+                // we have foldered metadata
+                ffNameParts.shift();
+                folderedName = ffNameParts.join('/').split('.')[0];
+            }
             parseString(text, { explicitArray: false, async: true }, function (err, result) {
                 if (err) {
                     reject(err);
                 }
-                var metadata: any = result[getAnyTTFromFolder(document.uri)];
+                var metadata: any = result[folderToolingType];
                 if (metadata) {
                     delete metadata['$'];
                     delete metadata['_'];
-                    metadata.fullName = fileName;
+                    metadata.fullName = folderedName ? folderedName : fileName;
                     resolve(metadata);
                 }
-                reject({ message: getAnyTTFromFolder(document.uri) + ' metadata type not found in org' });
+                reject({ message: folderToolingType + ' metadata type not found in org' });
             });
         });
     }
 
     function compileMetadata(metadata) {
-        return vscode.window.forceCode.conn.metadata.upsert(getAnyTTFromFolder(document.uri), [metadata]);
+        return vscode.window.forceCode.conn.metadata.upsert(folderToolingType, [metadata]);
     }
 
     function reportMetadataResults(result) {

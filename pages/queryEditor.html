@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForceCode SOQL/TOQL Editor</title>
+</head>
+
+<style>
+    div {
+        padding: 2px;
+        text-align: center;
+    }
+
+    button {
+        margin: 3px;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid grey;
+        text-align: left;
+        padding: 2px;
+    }
+
+    th {
+        font-weight: bold;
+        font-style: italic;
+    }
+
+    tr:nth-child(even) {
+        background-color: lightgrey;
+        color: black;
+    }
+</style>
+
+<body>
+    <fieldset>
+        <legend>ForceCode Query Editor</legend>
+        <div>
+            Enter query below, then click execute to get results
+        </div>
+        <div>
+            <textarea rows="3" cols="75" id="query"></textarea>
+        </div>
+        <div>
+            Query History
+            <select id="history" onchange="changeHistory()"></select>
+        </div>
+        <div>
+            <input type="checkbox" id="toqlQuery" name="isToql">
+            <label for="isToql">Tooling Query</label>
+            <button type="button" onclick="executeQuery()">Execute Query</button>
+            <button type="button" onclick="saveResults()" id="saveButton">Save Results</button>
+        </div>
+        <div style="border-bottom: 2px solid blue; padding: 5px"></div>
+        <div style="border-bottom: 2px solid blue; padding: 5px" id="queryResults"></div>
+    </fieldset>
+
+</body>
+
+<script>
+    const vscode = acquireVsCodeApi();
+    var maxQueryResultsPerPage;
+    var pageNumber;
+    var totalPages;
+    var queryRows;
+    var queryResHeader;
+
+    // Handle the message inside the webview
+    window.addEventListener('message', event => {
+        const d = event.data;
+        if(d.qHistory) {
+            var histroyOptions = '';
+            d.qHistory.forEach(history => {
+                var histToShow = history
+                if(histToShow.length > 75) {
+                    histToShow = histToShow.substring(0, 76);
+                }
+                histroyOptions += '<option value="' + history + '">' + histToShow + '</option>';
+            });
+            if(d.qHistory.length > 0) {
+                document.getElementById('query').value = d.qHistory[0];
+            } else {
+                histroyOptions = '<option value="">There is currently no query history to show</option>';
+            }
+            document.getElementById('history').innerHTML = histroyOptions;
+        } else if(d.success) {
+            maxQueryResultsPerPage = d.limit;
+            pageNumber = 0;
+            // the substring in this will cut off the last " character
+            queryRows = d.results.substring(0, d.results.length - 1).split('"\n');
+            const resHead = queryRows.shift().split('","');
+            totalPages = Math.floor(queryRows.length / maxQueryResultsPerPage);
+            if(queryRows.length % maxQueryResultsPerPage > 0) {
+                totalPages++;
+            }
+            totalPages--;
+            queryResHeader = '<tr>';
+            resHead.forEach(header => {
+                header = header.replace('"', '');
+                queryResHeader += '<th>' + header + '</th>';
+            });
+            queryResHeader += '</tr>';
+            document.getElementById('saveButton').style.display = 'initial';
+            showResults();
+        } else {
+            showError(d.results);
+        }
+        //refreshPage();
+    });
+
+    document.getElementById('saveButton').style.display = 'none';
+
+    function showResults() {
+        // format the csv results into a table
+        const rowCount = queryRows.length;
+        const showButtons = rowCount > maxQueryResultsPerPage;
+        const rowStart = pageNumber * maxQueryResultsPerPage;
+        const rowEnd = rowStart + maxQueryResultsPerPage > queryRows.length 
+            ? queryRows.length 
+            : rowStart + maxQueryResultsPerPage;
+        var resultsTable = '<div>'
+            + (showButtons ? '<button type="button" onclick="prevPage()" ' 
+            + (pageNumber === 0 ? 'disabled' : '') + '>Prev</button>' : '')
+            + 'Showing ' + (rowStart + 1) + '-' + rowEnd
+            + ' of ' + rowCount + ' results'
+            + (showButtons ? '<button type="button" onclick="nextPage()" '
+            + (pageNumber === totalPages ? 'disabled' : '') + '>Next</button>' : '')
+            + '</div><table>';
+        resultsTable += queryResHeader;
+        for(var row = rowStart; row < rowEnd; row++) {
+            resultsTable += '<tr>';
+            const cells = queryRows[row].split('","');
+            cells.forEach(cell => {
+                cell = cell.replace('"', '');
+                resultsTable += '<td>' + cell + '</td>';
+            });
+            resultsTable += '</tr>'
+        }
+        resultsTable += '</table>'
+        document.getElementById('queryResults').innerHTML = resultsTable;
+    }
+
+    function nextPage() {
+        pageNumber++;
+        showResults();
+    }
+
+    function prevPage() {
+        pageNumber--;
+        showResults();
+    }
+
+    function changeHistory() {
+        const historyElement = document.getElementById('history');
+        const selectedHistory = historyElement.options[historyElement.selectedIndex].value;
+        document.getElementById('query').value = selectedHistory;
+    }
+
+    function showError(error) {
+        document.getElementById('queryResults').innerHTML = error;
+    }
+
+    function executeQuery() {
+        // get the text in the input box
+        const query = document.getElementById('query').value;
+        // get the checkbox value
+        const toql = document.getElementById('toqlQuery').checked;
+        vscode.postMessage({ toql, query });
+        document.getElementById('queryResults').innerHTML = 'Executing query...';
+        document.getElementById('saveButton').style.display = 'none';
+    }
+
+    function saveResults() {
+        vscode.postMessage({ save: true });
+    }
+</script>
+
+</html>

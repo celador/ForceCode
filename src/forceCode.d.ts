@@ -35,6 +35,8 @@ export interface Config {
         testLevel?: string,       
     };
     maxFileChangeNotifications?: number;
+    maxQueryHistory?: number;
+    maxQueryResultsPerPage?: number;
     outputQueriesAsCSV?: boolean;
     overwritePackageXML?: boolean;
     poll?: number;

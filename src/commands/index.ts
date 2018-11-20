@@ -13,11 +13,10 @@ import getLog from './getLog';
 import { open, showFileOptions } from './open';
 import getOverallCoverage from './overallCoverage';
 import packageBuilder from './packageBuilder';
+import queryEditor from './queryEditor';
 import retrieve from './retrieve';
 import showMenu from './menu';
-import soql from './soql';
 import staticResource from './staticResource';
-import toql from './toql';
 import {staticResourceDeployFromFile} from './staticResource';
 import settings from './settings';
 
@@ -36,12 +35,11 @@ export {
     open,
     getOverallCoverage,
     packageBuilder,
+    queryEditor,
     retrieve,
     settings,
     showFileOptions,
     showMenu,
-    soql,
     staticResource,
     staticResourceDeployFromFile,
-    toql,
 };

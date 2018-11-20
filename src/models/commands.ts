@@ -2,11 +2,11 @@ import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 import { getFileName, getToolingType } from './../parsers';
-import { commandService, commandViewService, codeCovViewService, fcConnection, dxService, FCOauth, FCConnection } from './../services';
+import { commandService, commandViewService, codeCovViewService, fcConnection, dxService, FCOauth, FCConnection, PXMLMember } from './../services';
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
 import { ToolingType } from '../commands/retrieve';
-import { getAnyTTFromFolder, getAnyNameFromUri } from '../parsers/open';
+import { getAnyNameFromUri } from '../parsers/open';
 import { FCCommand } from '../services/commandView';
 import { Config } from '../forceCode';
 import { readConfigFile, removeConfigFolder } from '../services/configuration';
@@ -38,7 +38,7 @@ export const fcCommands: FCCommand[] = [
     },
     // Open File
     {
-        commandName: 'ForceCode.open',
+        commandName: 'ForceCode.openMenu',
         name: 'Opening file',
         hidden: false,
         description: 'Open Classes, Pages, Triggers, Components, Lightning Components, and Static Resources',
@@ -47,6 +47,13 @@ export const fcCommands: FCCommand[] = [
         label: 'Open Salesforce File',
         command: function (context, selectedResource?) {
             return commands.open(context);
+        }
+    },
+    {
+        commandName: 'ForceCode.open',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commandService.runCommand('ForceCode.openMenu', context, selectedResource);
         }
     },
     // Create Classes
@@ -65,7 +72,7 @@ export const fcCommands: FCCommand[] = [
     // Execute Anonymous 
     // Execute Selected Code
     {
-        commandName: 'ForceCode.executeAnonymous',
+        commandName: 'ForceCode.executeAnonymousMenu',
         name: 'Executing anonymous code',
         hidden: false,
         description: 'Execute code and get the debug log',
@@ -77,6 +84,13 @@ export const fcCommands: FCCommand[] = [
                 return;
             }
             return commands.executeAnonymous(vscode.window.activeTextEditor.document);
+        }
+    },
+    {
+        commandName: 'ForceCode.executeAnonymous',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commandService.runCommand('ForceCode.executeAnonymousMenu', context, selectedResource);
         }
     },
     // Get Log(s)
@@ -104,17 +118,17 @@ export const fcCommands: FCCommand[] = [
             return commands.getOverallCoverage();
         }
     },
-    // Run SOQL
+    // Run SOQL/TOQL
     {
-        commandName: 'ForceCode.soql',
-        name: 'Executing SOQL query',
+        commandName: 'ForceCode.queryEditor',
+        name: 'Opening Query Editor',
         hidden: false,
-        description: 'Run a SOQL query',
-        detail: 'The SOQL query results will be dumped to a json file in the soql directory',
+        description: 'Run a SOQL/TOQL query',
+        detail: 'The SOQL/TOQL query results will be shown in the window with the option to save',
         icon: 'telescope',
-        label: 'SOQL Query',
+        label: 'SOQL/TOQL Query',
         command: function (context, selectedResource?) {
-            return commands.soql();
+            return commands.queryEditor();
         }
     },
     // Diff Files
@@ -170,7 +184,7 @@ export const fcCommands: FCCommand[] = [
     },
     // Build/Deploy Resource Bundle(s)
     {
-        commandName: 'ForceCode.staticResource',
+        commandName: 'ForceCode.staticResourceMenu',
         name: 'Retrieving static resource',
         hidden: false,
         description: 'Build and Deploy a resource bundle.',
@@ -179,6 +193,13 @@ export const fcCommands: FCCommand[] = [
         label: 'Build Resource Bundle',
         command: function (context, selectedResource?) {
             return commands.staticResource(context);
+        }
+    },
+    {
+        commandName: 'ForceCode.staticResource',
+        hidden: true,
+        command: function (context, selectedResource?) {
+            return commandService.runCommand('ForceCode.staticResourceMenu', context, selectedResource);
         }
     },
     {
@@ -217,19 +238,6 @@ export const fcCommands: FCCommand[] = [
         label: 'Deploy Package',
         command: function (context, selectedResource?) {
             return commands.deploy(context);
-        }
-    },
-    // Run Tooling Query
-    {
-        commandName: 'ForceCode.toql',
-        name: 'Executing TOQL query',
-        hidden: false,
-        description: 'Run a Tooling API query',
-        detail: 'The Tooling API query (Select SymbolTable From ApexClass) results will be dumped to a json file in the toql directory',
-        icon: 'telescope',
-        label: 'Tooling Query',
-        command: function (context, selectedResource?) {
-            return commands.toql();
         }
     },
     {
@@ -319,25 +327,28 @@ export const fcCommands: FCCommand[] = [
         commandName: 'ForceCode.refreshContext',
         name: 'Retrieving ',
         hidden: true,
-        command: function (context, selectedResource?) {
+        command: async function (context, selectedResource?) {
             if(selectedResource && selectedResource instanceof Array) {
-                var files: ToolingType[] = [];
-                selectedResource.forEach(curRes => {
-                    var tType: string = getAnyTTFromFolder(curRes);
-                    var index: number = getTTIndex(tType, files);
-                    const theName: string = getAnyNameFromUri(curRes);
-                    if(index >= 0) {
-                        if(theName === '*') {
-                            files[index].members = ['*'];
-                        } else {
-                            files[index].members.push(theName);
-                        }
-                    } else {
-                        files.push({name: tType, members: [theName]});
-                    }
+                return new Promise((resolve) => {
+                    var files: PXMLMember[] = [];
+                    var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => getAnyNameFromUri(curRes));
+                    Promise.all(proms).then(theNames => {
+                        theNames.forEach(curName => {
+                            var index: number = getTTIndex(curName.name, files);
+                            if(index >= 0) {
+                                if(curName.members === ['*']) {
+                                    files[index].members = ['*'];
+                                } else {
+                                    files[index].members.push(...curName.members);
+                                }
+                            } else {
+                                files.push(curName);
+                            }
+                        });
+                        console.log(files);
+                        resolve(commands.retrieve({types: files}));
+                    });
                 });
-
-                return commands.retrieve({types: files});
             }
             if(context) {
                 return commands.retrieve(context);
