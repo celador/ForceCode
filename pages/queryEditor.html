@@ -71,6 +71,11 @@
     var totalPages;
     var queryRows;
     var queryResHeader;
+    var headerArray;
+    var headArrIdIndex;
+    var curCellAsInput;
+    var curCellData;
+    var changedRows = new Map();
 
     // Handle the message inside the webview
     window.addEventListener('message', event => {
@@ -101,14 +106,41 @@
                 totalPages++;
             }
             totalPages--;
+            headerArray = [];
+            headArrIdIndex = undefined;
             queryResHeader = '<tr>';
             resHead.forEach(header => {
                 header = header.replace('"', '');
+                if(header.toLowerCase() === 'id') {
+                    headArrIdIndex = headerArray.length;
+                }
+                headerArray.push(header);
                 queryResHeader += '<th>' + header + '</th>';
             });
             queryResHeader += '</tr>';
             document.getElementById('saveButton').style.display = 'initial';
             showResults();
+        } else if(d.saveResult) {
+            if(d.saveSuccess) {
+                // reset the bg color
+                // change the cells back to their normal color
+                var table = document.getElementById('resultsTable');
+                for(let key of changedRows.keys()) {
+                    const cells = table.rows.item(parseInt(key)).cells;
+                    const oddRow = parseInt(key) % 2 === 1;
+                    for(var i = 0; i < cells.length; i++) {
+                        cells[i].style.backgroundColor = '';
+                    }
+                }
+                changedRows = new Map();
+                var saveRowsDiv = document.getElementById('saveRowsDiv');
+                saveRowsDiv.innerHTML = '';
+            } else {
+                // show errors
+                if(d.errors) {
+                    document.getElementById('errorsDiv').innerText = d.errors.join('\n');
+                }
+            }
         } else {
             showError(d.results);
         }
@@ -125,22 +157,23 @@
         const rowEnd = rowStart + maxQueryResultsPerPage > queryRows.length 
             ? queryRows.length 
             : rowStart + maxQueryResultsPerPage;
-        var resultsTable = '<div>'
+        var resultsTable = '<div id="saveRowsDiv"></div><div id="errorsDiv"></div><div>'
             + (showButtons ? '<button type="button" onclick="prevPage()" ' 
             + (pageNumber === 0 ? 'disabled' : '') + '>Prev</button>' : '')
             + 'Showing ' + (rowStart + 1) + '-' + rowEnd
             + ' of ' + rowCount + ' results'
             + (showButtons ? '<button type="button" onclick="nextPage()" '
             + (pageNumber === totalPages ? 'disabled' : '') + '>Next</button>' : '')
-            + '</div><table>';
+            + '</div><table id="resultsTable">';
         resultsTable += queryResHeader;
         for(var row = rowStart; row < rowEnd; row++) {
             resultsTable += '<tr>';
             const cells = queryRows[row].split('","');
-            cells.forEach(cell => {
+            for(var col = 0; col < cells.length; col++) {
+                var cell = cells[col];
                 cell = cell.replace('"', '');
-                resultsTable += '<td>' + cell + '</td>';
-            });
+                resultsTable += '<td' + (col === headArrIdIndex ? '>' : ' onclick="showData(this)">') + cell + '</td>';
+            }
             resultsTable += '</tr>'
         }
         resultsTable += '</table>'
@@ -179,6 +212,98 @@
 
     function saveResults() {
         vscode.postMessage({ save: true });
+    }
+
+    function showData(x) {
+        if(!x.innerHTML || !x.innerHTML.startsWith('<input type="')) {
+            if(curCellAsInput) {
+                var cellElement = document.getElementById('curCellInput');
+                if(cellElement) {
+                    var theData;
+                    if(curCellAsInput.innerHTML && curCellAsInput.innerHTML.startsWith('<input type="checkbox"')) {
+                        theData = cellElement.checked;
+                    } else {
+                        theData = cellElement.value;
+                    }
+                    if((cellElement.type === 'checkbox' && curCellData !== cellElement.checked) 
+                        || (cellElement.type === 'text' && curCellData !== cellElement.value)) {
+                        // add to the rows that were changed to update
+                        var table = document.getElementById('resultsTable');
+                        // this ends up being an array of HTMLCollection items
+                        curCellAsInput.style.backgroundColor = 'rgba(247,98,34,0.3)';
+                        var otherChangedFields = changedRows.get(curCellAsInput.parentNode.rowIndex);
+                        var cells = table.rows.item(curCellAsInput.parentNode.rowIndex).cells;
+                        if(!otherChangedFields) {
+                            // update the object
+                            otherChangedFields = {}
+                            otherChangedFields['Id'] = cells[headArrIdIndex].innerText;
+                        }
+                        otherChangedFields[headerArray[curCellAsInput.cellIndex]] = theData;
+                        changedRows.set(curCellAsInput.parentNode.rowIndex, otherChangedFields);
+                        // show the save and cancel buttons
+                        var saveRowsDiv = document.getElementById('saveRowsDiv');
+                        saveRowsDiv.innerHTML = '<button type="button" onclick="saveRows()">Save Rows</button>'
+                            + '<button type="button" onclick="clearRows()">Discard Changes</button>';
+                    }
+                    curCellAsInput.innerText = theData;
+                }
+            }
+            curCellData = x.innerText;
+            x.innerHTML = '<input type=' 
+                + (curCellData === 'false' || curCellData === 'true' ? '"checkbox" ' 
+                    : ('"text" value="' + x.innerText + '" '))
+                + (curCellData === 'true' ? 'checked ' : '') + 'id="curCellInput">';
+            curCellAsInput = x;
+        }
+    }
+
+    function clearRows() {
+        // send off to get the current results again. this doesn't re-run th query, as the results are
+        // saved in a variable in queryEditor.ts
+        changedRows = new Map();
+        vscode.postMessage({ getResults: true });
+    }
+
+    function saveRows() {
+        document.getElementById('errorsDiv').innerText = '';
+        // convert the map to an array, and send over like this
+        // [{ Id: "123456789123456789", Name: "Test Account" }]
+        var toSendArray = [];
+        if(curCellAsInput) {
+            var cellElement = document.getElementById('curCellInput');
+            if(cellElement) {
+                var theData;
+                if(curCellAsInput.innerHTML && curCellAsInput.innerHTML.startsWith('<input type="checkbox"')) {
+                    theData = cellElement.checked;
+                } else {
+                    theData = cellElement.value;
+                }
+                if((cellElement.type === 'checkbox' && curCellData !== cellElement.checked) 
+                    || (cellElement.type === 'text' && curCellData !== cellElement.value)) {
+                    var table = document.getElementById('resultsTable');
+                    // this ends up being an array of HTMLCollection items
+                    curCellAsInput.style.backgroundColor = 'rgba(247,98,34,0.3)';
+                    var otherChangedFields = changedRows.get(curCellAsInput.parentNode.rowIndex);
+                    var cells = table.rows.item(curCellAsInput.parentNode.rowIndex).cells;
+                    if(!otherChangedFields) {
+                        // update the object
+                        otherChangedFields = {}
+                        otherChangedFields['Id'] = cells[headArrIdIndex].innerText;
+                    }
+                    otherChangedFields[headerArray[curCellAsInput.cellIndex]] = theData;
+                    changedRows.set(curCellAsInput.parentNode.rowIndex, otherChangedFields);
+                }
+                curCellAsInput.innerText = theData;
+            }
+        }
+
+        for(let value of changedRows.values()) {
+            toSendArray.push(value);
+        }
+        const toql = document.getElementById('toqlQuery').checked;
+        vscode.postMessage({ update: true, rows: toSendArray, updateToql: toql });
+        curCellAsInput = undefined;
+        curCellData = undefined;
     }
 </script>
 

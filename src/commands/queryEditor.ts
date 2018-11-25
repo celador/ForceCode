@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { outputToString, outputToCSV } from '../parsers/output';
+import { RecordResult } from 'jsforce';
 
 export default function queryEditor(): Promise<any> {
     const myExtDir = vscode.extensions.getExtension("JohnAaronNelson.forcecode").extensionPath;
@@ -56,6 +57,40 @@ export default function queryEditor(): Promise<any> {
             vscode.window.forceCode.conn.tooling.query(curQuery)
                 .then(sendResults)
                 .catch(onError);
+        } else if(message.getResults) {
+            sendResults(curResults, true);
+        } else if(message.update) {
+            // push the update to the server here
+            // get the type from the query
+            const lowerCaseQuery: string = curQuery.toLowerCase();
+            const fromIndex: number = lowerCaseQuery.indexOf(' from ');
+            const typeStart: string = curQuery.substring(fromIndex + 6, curQuery.length).trimLeft();
+            const type: string = typeStart.split(' ')[0];
+            // save the records using the bulk api
+            //vscode.window.forceCode.conn.bulk.load(type, 'update', message.rows).then(res => {
+            var prom: Promise<RecordResult>;
+            if(message.updateToql) {
+                prom = vscode.window.forceCode.conn.tooling.sobject(type).update(message.rows);
+            } else {
+                prom = vscode.window.forceCode.conn.sobject(type).update(message.rows);
+            }
+            prom.then(res => {
+                // take the res and show message based off of it
+                // clear out the bg color
+                var resToSend = {
+                    saveResult: true,
+                    saveSuccess: res[0].success,
+                    errors: res[0].errors
+                }
+                sendData(resToSend);
+            }).catch(err => {
+                var resToSend = {
+                    saveResult: true,
+                    saveSuccess: false,
+                    errors: [err.message ? err.message : err]
+                }
+                sendData(resToSend);
+            });
         } else {
             vscode.window.forceCode.conn.query(curQuery)
                 .then(sendResults)
@@ -65,8 +100,10 @@ export default function queryEditor(): Promise<any> {
 
     return sendQueryHistory();
 
-    function sendResults(results) {
-        curResults = results.records;
+    function sendResults(results, records?: boolean) {
+        if(!records) {
+            curResults = results.records;
+        }
         const queryIndex: number = queryHistory.indexOf(curQuery);
         if(queryIndex !== -1) {
             queryHistory.splice(queryIndex, 1);
@@ -80,7 +117,7 @@ export default function queryEditor(): Promise<any> {
         // save the query history
         fs.outputFileSync(qHistPath, JSON.stringify({ queries: queryHistory }, undefined, 4));
         var resToSend: {}
-        if(results.totalSize > 0) {
+        if(results.length > 0 || results.totalSize > 0) {
             resToSend = {
                 success: true,
                 results: outputToCSV(curResults),
