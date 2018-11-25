@@ -240,10 +240,7 @@
                         }
                         otherChangedFields[headerArray[curCellAsInput.cellIndex]] = theData;
                         changedRows.set(curCellAsInput.parentNode.rowIndex, otherChangedFields);
-                        // show the save and cancel buttons
-                        var saveRowsDiv = document.getElementById('saveRowsDiv');
-                        saveRowsDiv.innerHTML = '<button type="button" onclick="saveRows()">Save Rows</button>'
-                            + '<button type="button" onclick="clearRows()">Discard Changes</button>';
+                        showSaveDisButtons();
                     }
                     curCellAsInput.innerText = theData;
                 }
@@ -252,9 +249,16 @@
             x.innerHTML = '<input type=' 
                 + (curCellData === 'false' || curCellData === 'true' ? '"checkbox" ' 
                     : ('"text" value="' + x.innerText + '" '))
-                + (curCellData === 'true' ? 'checked ' : '') + 'id="curCellInput">';
+                + (curCellData === 'true' ? 'checked ' : '') + 'id="curCellInput" oninput="showSaveDisButtons()">';
             curCellAsInput = x;
         }
+    }
+
+    function showSaveDisButtons() {
+        // show the save and cancel buttons
+        var saveRowsDiv = document.getElementById('saveRowsDiv');
+        saveRowsDiv.innerHTML = '<button type="button" onclick="saveRows()">Save Rows</button>'
+            + '<button type="button" onclick="clearRows()">Discard Changes</button>';
     }
 
     function clearRows() {
@@ -297,8 +301,8 @@
             }
         }
 
-        for(let value of changedRows.values()) {
-            toSendArray.push(value);
+        for(let [key, value] of changedRows.entries()) {
+            toSendArray.push({ key, value});
         }
         const toql = document.getElementById('toqlQuery').checked;
         vscode.postMessage({ update: true, rows: toSendArray, updateToql: toql });

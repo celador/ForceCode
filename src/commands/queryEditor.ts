@@ -62,17 +62,20 @@ export default function queryEditor(): Promise<any> {
         } else if(message.update) {
             // push the update to the server here
             // get the type from the query
+            var toUpdateArray: [] = message.rows.map(row => {
+                return row.value;
+            });
             const lowerCaseQuery: string = curQuery.toLowerCase();
             const fromIndex: number = lowerCaseQuery.indexOf(' from ');
             const typeStart: string = curQuery.substring(fromIndex + 6, curQuery.length).trimLeft();
             const type: string = typeStart.split(' ')[0];
             // save the records using the bulk api
             //vscode.window.forceCode.conn.bulk.load(type, 'update', message.rows).then(res => {
-            var prom: Promise<RecordResult>;
+            var prom: Promise<Array<RecordResult>>;
             if(message.updateToql) {
-                prom = vscode.window.forceCode.conn.tooling.sobject(type).update(message.rows);
+                prom = vscode.window.forceCode.conn.tooling.sobject(type).update(toUpdateArray);
             } else {
-                prom = vscode.window.forceCode.conn.sobject(type).update(message.rows);
+                prom = vscode.window.forceCode.conn.sobject(type).update(toUpdateArray);
             }
             prom.then(res => {
                 // take the res and show message based off of it
@@ -83,6 +86,10 @@ export default function queryEditor(): Promise<any> {
                     errors: res[0].errors
                 }
                 sendData(resToSend);
+                // update the curResults array
+                message.rows.forEach(curRow => {
+                    Object.assign(curResults[curRow.key - 1], curRow.value);
+                });
             }).catch(err => {
                 var resToSend = {
                     saveResult: true,
