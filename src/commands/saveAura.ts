@@ -93,7 +93,7 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
         if (currentObjectDefinition !== undefined) {
             if(curFCFile ? curFCFile.compareDates(currentObjectDefinition.LastModifiedDate) : false) {
                 return updateAura(curFCFile);
-            } else {
+            } else if(curFCFile) {
                 return vscode.window.showWarningMessage('Someone has changed this file!', 'Diff', 'Overwrite').then(s => {
                     if (s === 'Diff') {
                         diff(document, true);
@@ -107,12 +107,14 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
             }
         } else if (bundle[0]) {
             return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').create({ AuraDefinitionBundleId: bundle[0].Id ? bundle[0].Id : bundle[0].id, DefType, Format, Source }).then(res => {
-                var tempWSMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
-                tempWSMem.lastModifiedDate = (new Date()).toISOString();
-                tempWSMem.lastModifiedByName = '';
-                tempWSMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
-                tempWSMem.saveTime = true;
-                curFCFile.updateWsMember(tempWSMem);
+                if(curFCFile) {
+                    var tempWSMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
+                    tempWSMem.lastModifiedDate = (new Date()).toISOString();
+                    tempWSMem.lastModifiedByName = '';
+                    tempWSMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
+                    tempWSMem.saveTime = true;
+                    curFCFile.updateWsMember(tempWSMem);
+                }
                 return res;
             }, err => {
                 return {State: 'Error', message: 'Error: File not created on server either because the name of the file is incorrect or there are syntax errors.'};
