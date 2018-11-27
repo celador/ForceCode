@@ -1,5 +1,8 @@
 ## Change Log
 
+* 3.11.1
+    * Add ability to make inline edits to query results and save back to the server. Simply click the cell you want to edit, make the edit, then click Save Rows.
+    * Fix issue with no files being retrieved when retrieving all metadata from an org
 * 3.11.0
     * Add ability to retrieve foldered metadata (Reports, Dashboards, Email templates, and Documents) thanks @kenhuman!
         * You can currently only save reports and dashboards. Some email template metadata can be saved, but the templates themselves can't be saved.
