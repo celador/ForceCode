@@ -426,7 +426,7 @@
     "mime-types": "2.1.21",
     "os": "0.1.1",
     "request-light": "0.2.4",
-    "salesforce-alm": "44.7.0",
+    "salesforce-alm": "44.8.0",
     "tslib": "1.9.3",
     "universal-analytics": "0.4.20",
     "uuid": "3.3.2",
