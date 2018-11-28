@@ -14,7 +14,7 @@ function sortFunc(a: any, b: any): number {
 
 export function getMembers(metadataTypes: string[], retrieveManaged?: boolean): Promise<PXMLMember[]> {
     var metadataObjects: IMetadataObject[] = vscode.window.forceCode.describe.metadataObjects;
-    if(metadataTypes !== ['*']) {
+    if(!(metadataTypes.length === 1 && metadataTypes[0] === '*')) {
         metadataObjects = metadataObjects.filter(type => metadataTypes.includes(type.xmlName))
     }
     var proms: Promise<PXMLMember>[] = metadataObjects.map(r => {

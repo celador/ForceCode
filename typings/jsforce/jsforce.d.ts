@@ -134,8 +134,12 @@ declare module 'jsforce/index' {
             deploy({}, {}): DeployResult;
             upsert(foo: string, bar: any): Promise<any>;
         }
+        interface Bulk {
+            load(type: string, operation: string, records: Array<{}>): Promise<any>;
+        }
         // Connection
         interface Connection {
+            bulk: Bulk;
             soap: any;
             debuggingHeader: any;
             version: string;
@@ -146,6 +150,7 @@ declare module 'jsforce/index' {
             query: any;
             accessToken: string;
             instanceUrl: string;
+            sobject(name: string): SObject;
             search(searchString: string, callback: (err: any, res: any) => void): any;
             identity(callback?: (err: any, res: any) => void): any;
             login(name: string, password: string): any;

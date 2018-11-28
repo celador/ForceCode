@@ -75,7 +75,7 @@ Please note that the following permissions are required to develop on the Force.
     * Auto-open test log (If there is output, based on the filter)
     * Easy to run a single tests, or all tests in a Class
 * Execute Anonymous 
-    * Highlight text, then right click and select "Execute Anonymous"
+    * Highlight text, then right click and select "Execute Anonymous" or select "Execute Anonymous" from the ForceCode menu
 * View / Save Debug Logs (Use the menu item to get debug logs to save)
 * Open / Retrieve a file
   * Works with Classes, Triggers, Components, Pages, Static Resources, and Lightning Components
@@ -100,10 +100,12 @@ Please note that the following permissions are required to develop on the Force.
     * Works great with autosave
 * Create Classes from templates
 * Diff server & local versions
-* SOQL and Tooling query
+* SOQL and Tooling query editor
     * Quickly run [SOQL Queries](https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql.htm)
     * Query [Tooling Objects](https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/reference_objects_list.htm)
-    * Results are returned as JSON or CSV (if outputQueriesAsCSV is set to true (checked))
+    * Results displayed in a table
+    * Results can be saved as JSON or CSV (if outputQueriesAsCSV is set to true (checked))
+    * Inline edits can be made in the results table (Just like in the developer console)
 * Arbitrary folder structure
     * Change your project `src` folder
     * Flexible project structure
