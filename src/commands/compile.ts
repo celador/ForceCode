@@ -12,6 +12,10 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
     if(!document) {
         return Promise.resolve();
     }
+    if(document.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot + path.sep) === -1) {
+        vscode.window.showErrorMessage('The file you are trying to save to the server isn\'t in the current org\'s source folder (' + vscode.window.forceCode.projectRoot + ')');
+        return Promise.resolve();
+    }
     
     var diagnosticCollection: vscode.DiagnosticCollection = vscode.window.forceCode.fcDiagnosticCollection;
     diagnosticCollection.delete(document.uri);
