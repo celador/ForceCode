@@ -252,7 +252,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
         }
     }
 
-    function processResult(stream: NodeJS.ReadableStream) {
+    function processResult(stream: fs.ReadStream) {
         return new Promise(function (resolve, reject) {
             var resBundleNames: string[] = [];
             const destDir: string = vscode.window.forceCode.projectRoot;
