@@ -33,7 +33,7 @@ export function getMembers(metadataTypes: string[], retrieveManaged?: boolean): 
                         let proms: Promise<any>[] = [];
                         folders = toArray(folders);
                         folders.forEach(f => {
-                            if(f && f.manageableState === 'unmanaged' || retrieveManaged) {
+                            if(f && (f.manageableState === 'unmanaged' || retrieveManaged)) {
                                 proms.push(getFolderContents(r.xmlName, f.fullName));
                             }
                         });
