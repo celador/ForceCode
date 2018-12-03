@@ -50,6 +50,23 @@ export function getMembers(metadataTypes: string[], retrieveManaged?: boolean): 
                         
                     })
                     .catch(reject);
+            } else if(r.xmlName === 'StandardValueSet') {
+                // metadata list for StandardValueSet doesn't work. This is the workaround
+                // IdeaCategory and QuestionOrigin can't be read or written to so we skip them in this list
+                const sValSet: string[] = ['AccountContactMultiRoles', 'AccountContactRole', 'AccountOwnership',
+                    'AccountRating', 'AccountType', 'AssetStatus', 'CampaignMemberStatus', 'CampaignStatus',
+                    'CampaignType', 'CaseContactRole', 'CaseOrigin', 'CasePriority', 'CaseReason', 'CaseStatus',
+                    'CaseType', 'ContactRole', 'ContractContactRole', 'ContractStatus', 'EntitlementType',
+                    'EventSubject', 'EventType', 'FiscalYearPeriodName', 'FiscalYearPeriodPrefix', 'FiscalYearQuarterName',
+                    'FiscalYearQuarterPrefix', 'IdeaMultiCategory', 'IdeaStatus', 'IdeaThemeStatus', 'Industry',
+                    'LeadSource', 'LeadStatus', 'OpportunityCompetitor', 'OpportunityStage', 'OpportunityType',
+                    'OrderType', 'PartnerRole', 'Product2Family', 'QuickTextCategory', 'QuickTextChannel',
+                    'QuoteStatus', 'RoleInTerritory2', 'SalesTeamRole', 'Salutation', 'ServiceContractApprovalStatus',
+                    'SocialPostClassification', 'SocialPostEngagementLevel', 'SocialPostReviewedStatus',
+                    'SolutionStatus', 'TaskPriority', 'TaskStatus', 'TaskSubject', 'TaskType', 'WorkOrderLineItemStatus',
+                    'WorkOrderPriority', 'WorkOrderStatus'];
+
+                resolve({ name: r.xmlName, members: sValSet });
             } else {
                 resolve({ name: r.xmlName, members: ['*'] });
             }
@@ -82,10 +99,10 @@ export default function packageBuilder(buildPackage?: boolean): Promise<any> {
             canPickMany: true
         };
         vscode.window.showQuickPick(options, config).then(types => {
-            const typesArray: string[] = toArray(types).map(r => r.label);
-            if(dxService.isEmptyUndOrNull(typesArray)) {
+            if(dxService.isEmptyUndOrNull(types)) {
                 reject();
             }
+            const typesArray: string[] = toArray(types).map(r => r.label);
 
             getMembers(typesArray)
                 .then(mappedTypes => {
