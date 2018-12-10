@@ -1,5 +1,10 @@
 ## Change Log
 
+* 3.11.2
+    * Add retrieve support for StandardValueSet per issue #214
+    * Fix issues when retrieving metadata
+    * Fix issue while retrieving lightning components
+    * Show nice error message when deploying code outside of the src folder
 * 3.11.1
     * Add ability to make inline edits to query results and save back to the server. Simply click the cell you want to edit, make the edit, then click Save Rows.
     * Fix issue with no files being retrieved when retrieving all metadata from an org
