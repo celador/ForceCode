@@ -60,10 +60,10 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
 		// add in a bare sfdx-project.json file for language support from official salesforce extensions
 		const sfdxProj: {} = {
 			namespace: "",
-			packageDirectories: {
+			packageDirectories: [{
 				path: 'src',
 				default: true
-			},
+			}],
 			sfdcLoginUrl: 'https://login.salesforce.com/',
 			sourceApiVersion: constants.API_VERSION,
 		};
