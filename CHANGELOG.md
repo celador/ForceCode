@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.11.3
+    * Fix packageDirectories in sfdx-project.json (Thanks ReaperBeats!)
 * 3.11.2
     * Add retrieve support for StandardValueSet per issue #214
     * Fix issues when retrieving metadata
