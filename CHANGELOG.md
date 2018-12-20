@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.11.4
+    * Fix 'Retrieve Package not getting list of Unmanaged Packages' issue
 * 3.11.3
     * Fix packageDirectories in sfdx-project.json (Thanks ReaperBeats!)
 * 3.11.2

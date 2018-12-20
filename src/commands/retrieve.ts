@@ -6,7 +6,7 @@ import { commandService, codeCovViewService, fcConnection, FCOauth, toArray } fr
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
 import { getAnyTTFromFolder, getAnyNameFromUri } from '../parsers/open';
-import { SObjectDescribe, SObjectCategory, CLIENT_ID } from '../dx';
+import { SObjectDescribe, SObjectCategory } from '../dx';
 const mime = require('mime-types');
 import * as compress from 'compressing';
 import { parseString } from 'xml2js';
@@ -48,18 +48,15 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             type: 'POST',
             url: requestUrl,
             headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-              Authorization: `OAuth ${orgInfo.accessToken}`,
-              'User-Agent': 'salesforcedx-extension',
-              'Sforce-Call-Options': `client=${CLIENT_ID}`
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              'Cookie': 'sid=' + orgInfo.accessToken,
             },
             data: 'action=EXTENT&extent=PACKAGES'
         };
 
         return xhr(foptions).then(response => {
             if (response.status === 200) {
-                return response;
+                return response.responseText;
             } else {
                 return JSON.stringify({ PACKAGES: { packages: [] } });
             }
