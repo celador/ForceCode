@@ -213,7 +213,7 @@ export default class DXService implements DXCommands {
     }
 
     public orgList(): Promise<OrgListResult> {
-        return this.runCommand('org:list', '--clean').then(res => {
+        return this.runCommand('org:list', '--clean --noprompt').then(res => {
             const orgs: OrgListResult = { orgs: res.nonScratchOrgs.concat(res.scratchOrgs) }
             orgs.orgs.forEach(org => {
                 // cleanup if it's not actually connected
