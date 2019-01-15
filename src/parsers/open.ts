@@ -69,6 +69,8 @@ export function getExtension(toolingType: string) {
             return 'intf';
         case 'Tokens':
             return 'tokens';
+        case 'LightningComponentBundle':
+            return 'lwc';
         default:
             throw toolingType + ' extension not defined';
     }

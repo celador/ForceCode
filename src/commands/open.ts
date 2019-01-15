@@ -22,6 +22,9 @@ export function open(context: vscode.ExtensionContext) {
             return vscode.window.forceCode.conn.tooling.query(q);
         });
         promises.push(vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' + predicate));
+        if(vscode.window.forceCode.config.apiVersion && parseInt(vscode.window.forceCode.config.apiVersion) >= 45) {
+            promises.push(vscode.window.forceCode.conn.tooling.query('SELECT Id, DeveloperName, NamespacePrefix, Description FROM LightningComponentBundle ' + predicate));
+        }
         return promises;
     }
 }
@@ -81,7 +84,7 @@ export function showFileOptions(promises: any[]) {
                 return opts.forEach(curFile => {
                     if(filesOpened < vscode.window.forceCode.config.showFilesOnOpenMax) {
                         var tType: string = curFile.detail.split(' ')[0];
-                        if(tType !== 'AuraDefinitionBundle' && tType !== 'StaticResource') {
+                        if(tType !== 'AuraDefinitionBundle' && tType !== 'StaticResource' && tType != 'LightningComponentBundle') {
                             filesOpened++;
                             var fName: string = curFile.label.slice(curFile.label.lastIndexOf(' ') + 1).split('.')[0];
                             var filePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}${getFolder(tType)}${path.sep}${fName}.${getExtension(tType)}`;
