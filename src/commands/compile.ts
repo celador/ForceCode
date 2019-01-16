@@ -7,6 +7,7 @@ import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
 import { parseString } from 'xml2js';
 import * as path from 'path';
+import { saveLWC } from './saveLWC';
 
 export default function compile(document: vscode.TextDocument): Promise<any> {
     if(!document) {
@@ -62,6 +63,10 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
     } else if (toolingType === 'AuraDefinition') {
         DefType = getAuraDefTypeFromDocument(document);
         return saveAura(document, toolingType, Metadata)
+                .then(finished)
+                .catch(onError);
+    } else if (toolingType === 'LightningComponentResource') {
+        return saveLWC(document, toolingType, Metadata)
                 .then(finished)
                 .catch(onError);
     } else {
