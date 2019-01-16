@@ -34,9 +34,13 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
             field = 'Markup';
         } else if (toolingType === 'AuraDefinition') {
             field = 'Source';
-            name = getAuraNameFromFileName(this.auraSource.fileName);
+            name = getAuraNameFromFileName(this.auraSource.fileName, 'aura');
             const DefType: string = getAuraDefTypeFromDocument(this.auraSource);
             nsPrefix = `DefType='${DefType}' AND AuraDefinitionBundleId='${codeCovViewService.findByNameAndType(name, 'AuraDefinitionBundle').getWsMember().id}'`;
+        } else if (toolingType === 'LightningComponentResource') {
+            field = 'Source';
+            name = getAuraNameFromFileName(this.auraSource.fileName, 'lwc');
+            nsPrefix = `LightningComponentBundleId='${codeCovViewService.findByNameAndType(name, 'LightningComponentBundle').getWsMember().id}'`;
         }
         return new Promise<string>((resolve, reject) => {
             var query: string = `SELECT ${field} FROM ${toolingType} WHERE ${nsPrefix}`;
