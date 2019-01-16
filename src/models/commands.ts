@@ -345,7 +345,6 @@ export const fcCommands: FCCommand[] = [
                                 files.push(curName);
                             }
                         });
-                        console.log(files);
                         resolve(commands.retrieve({types: files}));
                     });
                 });

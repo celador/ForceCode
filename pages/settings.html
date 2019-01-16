@@ -175,8 +175,6 @@
     }
 
     function getSetting(setting, pieces, offset, value) {
-        console.log(offset);
-        console.log(pieces[offset]);
         if (offset === pieces.length - 1) {
             setting[pieces[offset]] = value;
             return setting;
