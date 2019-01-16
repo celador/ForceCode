@@ -209,6 +209,5 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
                 }
             } catch (e) {}
         }
-        throw err;
     }
 }
