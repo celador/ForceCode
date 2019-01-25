@@ -66,7 +66,7 @@ export default function createClass() {
         }
         let options: vscode.InputBoxOptions = {
             placeHolder: 'Base name',
-            prompt: `Enter ${classType} class name. ${classType}.cls will appended to this name`,
+            prompt: `Enter ${classType} class name. ${classType}.cls will be appended to this name`,
         };
         return vscode.window.showInputBox(options).then(classname => {
             if (classname) {
