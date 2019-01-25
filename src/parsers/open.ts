@@ -69,6 +69,8 @@ export function getExtension(toolingType: string) {
             return 'intf';
         case 'Tokens':
             return 'tokens';
+        case 'LightningComponentBundle':
+            return 'lwc';
         default:
             throw toolingType + ' extension not defined';
     }
@@ -144,7 +146,6 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
         const isInFolder: boolean = isFoldered(tType);
         var folderedName: string;
         if(isInFolder && ffNameParts.length > 2) {
-            console.log('infolder length 3');
             // we have foldered metadata
             ffNameParts.shift();
             folderedName = ffNameParts.join('/').split('.')[0];
@@ -156,13 +157,11 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
                 }
                 resolve({ name: tType, members: [baseDirectoryName] });
             } else if(isInFolder && ffNameParts.length > 1) {
-                console.log('infolder length 2');
                 getFolderContents(tType, ffNameParts[1]).then(contents => {
                     resolve({ name: tType, members: contents });
                 });
                 
             } else if(isInFolder) {
-                console.log('infolder');
                 getMembers([tType]).then(members => {
                     resolve(members[0]);
                 });

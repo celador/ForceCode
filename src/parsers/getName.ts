@@ -5,7 +5,9 @@ export default function getName(document: vscode.TextDocument, toolingType: stri
     if (toolingType === 'ApexClass') {
         return getNameFromClassBody(document);
     } else if (toolingType === 'AuraDefinition') {
-      return getAuraNameFromFileName(document.fileName);
+        return getAuraNameFromFileName(document.fileName, 'aura');
+    } else if (toolingType === 'LightningComponentResource') {
+        return getAuraNameFromFileName(document.fileName, 'lwc');
     }
     return getFileName(document);
 }
@@ -33,6 +35,6 @@ function getNameFromClassBody(document: vscode.TextDocument): string {
     }
     return className;
 }
-export function getAuraNameFromFileName(fileName: string): string {
-    return fileName.split(`${vscode.window.forceCode.config.src}${path.sep}aura${path.sep}`).pop().split(path.sep).shift();
+export function getAuraNameFromFileName(fileName: string, folderName: string): string {
+    return fileName.split(`${vscode.window.forceCode.config.src}${path.sep}${folderName}${path.sep}`).pop().split(path.sep).shift();
 }

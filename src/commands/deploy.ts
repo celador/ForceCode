@@ -64,9 +64,15 @@ export default function deploy(context: vscode.ExtensionContext) {
                         && !file.path.endsWith('-meta.xml')) {
 
                         if (file.path.indexOf(path.join(vscode.window.forceCode.projectRoot, 'aura')) !== -1) {
-                            const auraPath: string = path.join(vscode.window.forceCode.projectRoot, 'aura', getAuraNameFromFileName(file.path));
+                            const auraPath: string = path.join(vscode.window.forceCode.projectRoot, 'aura', getAuraNameFromFileName(file.path, 'aura'));
                             if (fileList.indexOf(auraPath) === -1) {
                                 fileList.push(auraPath);
+                            }
+                            // this check will exclude files like package.xml
+                        } else if (file.path.indexOf(path.join(vscode.window.forceCode.projectRoot, 'lwc')) !== -1) {
+                            const lwcPath: string = path.join(vscode.window.forceCode.projectRoot, 'lwc', getAuraNameFromFileName(file.path, 'lwc'));
+                            if (fileList.indexOf(lwcPath) === -1) {
+                                fileList.push(lwcPath);
                             }
                             // this check will exclude files like package.xml
                         } else if (file.path.split(vscode.window.forceCode.projectRoot).length > 1) {
@@ -127,7 +133,9 @@ export default function deploy(context: vscode.ExtensionContext) {
                 const fileTT: string = getAnyTTFromPath(file);
                 var member: string;
                 if(fileTT === 'AuraDefinitionBundle') {
-                    member = getAuraNameFromFileName(file);
+                    member = getAuraNameFromFileName(file, 'aura');
+                } else if(fileTT === 'LightningComponentBundle') {
+                    member = getAuraNameFromFileName(file, 'lwc');
                 } else {
                     member = file.split(path.sep).pop().split('.')[0];
                 }

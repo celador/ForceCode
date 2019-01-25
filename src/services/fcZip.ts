@@ -16,7 +16,7 @@ export function zipFiles(fileList: string[], root: string) {
     var zip: any = new compress.zip.Stream();
     // Add folders and files to zip object for each file in the list
     fileList.forEach(function (file) {
-        zip.addEntry(path.join(root, file), { relativePath: file.indexOf('.') !== -1 ? file : 'aura' });
+        zip.addEntry(path.join(root, file), { relativePath: file.indexOf('.') !== -1 ? file : file.split(path.sep)[0] });
     });
 
     return zip;
@@ -60,13 +60,13 @@ export function getFileListFromPXML(): Promise<string[]> {
                     var ext = getAnyExtNameFromTT(curType.name);
                     if (folder) {
                         var theExt: string = '.' + ext;
-                        if (folder === 'aura') {
+                        if (folder === 'aura' || folder === 'lwc') {
                             theExt = '';
                         }
                         toArray(curType.members).forEach(curMem => {
                             if (fs.existsSync(path.join(projectRoot, folder, curMem + theExt))) {
                                 fileList.push(path.join(folder, curMem + theExt));
-                                if (folder !== 'aura') {
+                                if (folder !== 'aura' && folder != 'lwc') {
                                     if(fs.existsSync(path.join(projectRoot, folder, curMem + theExt + '-meta.xml'))) {
                                         fileList.push(path.join(folder, curMem + theExt + '-meta.xml'));
                                     }

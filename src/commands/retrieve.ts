@@ -6,7 +6,7 @@ import { commandService, codeCovViewService, fcConnection, FCOauth, toArray } fr
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
 import { getAnyTTFromFolder, getAnyNameFromUri } from '../parsers/open';
-import { SObjectDescribe, SObjectCategory, CLIENT_ID } from '../dx';
+import { SObjectDescribe, SObjectCategory } from '../dx';
 const mime = require('mime-types');
 import * as compress from 'compressing';
 import { parseString } from 'xml2js';
@@ -48,18 +48,15 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             type: 'POST',
             url: requestUrl,
             headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-              Authorization: `OAuth ${orgInfo.accessToken}`,
-              'User-Agent': 'salesforcedx-extension',
-              'Sforce-Call-Options': `client=${CLIENT_ID}`
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              'Cookie': 'sid=' + orgInfo.accessToken,
             },
             data: 'action=EXTENT&extent=PACKAGES'
         };
 
         return xhr(foptions).then(response => {
             if (response.status === 200) {
-                return response;
+                return response.responseText;
             } else {
                 return JSON.stringify({ PACKAGES: { packages: [] } });
             }
@@ -148,7 +145,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
         if (opt) {
             return new Promise(pack);
         } else if (resource) {
-            return new Promise(function (resolve) {
+            return new Promise(function (resolve, reject) {
                 // Get the Metadata Object type
                 if (resource instanceof vscode.Uri) {
                     var toolingType: string = getAnyTTFromFolder(resource);
@@ -156,20 +153,38 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                         throw new Error(errMessage);
                     }
                     getAnyNameFromUri(resource).then(names => {
-                        retrieveComponents(resolve, { types: [names] });
+                        retrieveComponents(resolve, reject, { types: [names] });
                     });
                 } else {
-                    retrieveComponents(resolve, resource);
+                    retrieveComponents(resolve, reject, resource);
                 }
             });
         }
         throw new Error();
 
-        function retrieveComponents(resolve, retrieveTypes: ToolingTypes) {
-            resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                unpackaged: retrieveTypes,
-                apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-            }).stream());
+        function retrieveComponents(resolve, reject, retrieveTypes: ToolingTypes) {
+            // count the number of types. if it's more than 10,000 the retrieve will fail
+            var totalTypes: number = 0;
+            retrieveTypes.types.forEach(type => {
+                totalTypes += type.members.length;
+            });
+            if(totalTypes > 10000) {
+                reject({ message: 'Cannot retrieve more than 10,000 files at a time. Please select "Choose Types..." from the retrieve menu and try to download without Reports selected first.'});
+            }
+            var theStream;
+            try {
+                theStream = vscode.window.forceCode.conn.metadata.retrieve({
+                    unpackaged: retrieveTypes,
+                    apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
+                });
+            } catch(e) {
+                reject(e);
+            }
+            if(theStream) {
+                resolve(theStream.stream());
+            } else {
+                reject({ message: 'Cannot retrieve more than 10,000 files at a time. Please select "Choose Types..." from the retrieve menu and try to download without Reports selected first.'});
+            }
         }
 
         function pack(resolve, reject) {
@@ -195,13 +210,13 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
 
             function builder() {
                 packageBuilder().then(mappedTypes => {
-                    retrieveComponents(resolve, { types: mappedTypes });
+                    retrieveComponents(resolve, reject, { types: mappedTypes });
                 }).catch(reject);
             }
 
             function all() {
-                getMembers(['*']).then(mappedTypes => {
-                    retrieveComponents(resolve, { types: mappedTypes })
+                getMembers(['*'], true).then(mappedTypes => {
+                    retrieveComponents(resolve, reject, { types: mappedTypes })
                 }).catch(reject);
             }
 
@@ -211,7 +226,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     .map(r => {
                         return { name: r.xmlName, members: '*' };
                     });
-                retrieveComponents(resolve, { types: types });
+                retrieveComponents(resolve, reject, { types: types });
             }
 
             function unpackaged() {
@@ -237,16 +252,20 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                             }
                             
                         }
-                        resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                            unpackaged: dom.Package
-                        }).stream());
+                        try {
+                            resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                                unpackaged: dom.Package
+                            }).stream());
+                        } catch(e) {
+                            reject(e);
+                        }
                     }
                 });
             }
 
             function getStandardObjects() {
                 new SObjectDescribe().describeGlobal(SObjectCategory.STANDARD).then(objs => {
-                    retrieveComponents(resolve, { types: [{ name: 'CustomObject', members: objs }] });
+                    retrieveComponents(resolve, reject, { types: [{ name: 'CustomObject', members: objs }] });
                 });
             }
         }
