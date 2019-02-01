@@ -136,6 +136,10 @@ Mac: alt + cmd + e
 Win/Linux: alt + shift + e  
 Simply select the code that you want to run, then right click and select Execute Anonymous!
 
+### Create scratch org
+
+If your current working org that you are logged into is a DevHub, then you will see the option in the Forcecode menu to create a scratch org. When you choose to do so, you will be asked for the edition, duration in days till expiration, and whether you want the scratch org created with sample data. Once the scratch org is created, you will be able to log into it by clicking on the new username under the saved usernames view.
+
 ### Open
 
 Menu: &gt;Force: Get Class, Page, or Trigger  

@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.13.0
+    * Add menu option to create scratch orgs
 * 3.12.0
     * Fix 'Retrieve Package not getting list of Unmanaged Packages' issue
     * Add --nopromt flag to fix issue #205
