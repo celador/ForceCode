@@ -12,3 +12,4 @@ out/test/**
 .vscode-test/**
 needscopied/**
 .sfdx/**
+.github/**
