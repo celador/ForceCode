@@ -5,11 +5,12 @@
     * The Create Class menu option is now the New... option. You can now create Aura components, classes, LWC components, triggers, and Visualforce pages/components.
     * Fix an issue with failing deployments not showing the option to view details about the failed deployment
     * Rework first save of Aura components to deploy the entire component package to make life easier and avoid errors on save
+    * Fix 'fullName of undefined' issue after retrieving files
 * 3.12.0
     * Fix 'Retrieve Package not getting list of Unmanaged Packages' issue
     * Add --nopromt flag to fix issue #205
     * Fixes for issues related to retrieve
-    * Add support for Lightning Web Components
+    * Add support for Lightning Web Components (API version 45.0 and higher)
     * Fixed not showing all errors on compile
 * 3.11.3
     * Fix packageDirectories in sfdx-project.json (Thanks ReaperBeats!)
