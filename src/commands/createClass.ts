@@ -281,7 +281,7 @@ export default class ${jsClassName} extends LightningElement {}`;
                 objname = '';
             } 
             
-            const fileContents = `trigger ${name} on ${objname} (before insert, before update, before delete, after insert, after update, after delete) {
+            const fileContents = `trigger ${name} on ${objname} (before insert, before update, before delete, after insert, after update, after delete, after undelete) {
     
 }`;
             createSrcFile(name, folderPath, fileContents, ext, resolve);

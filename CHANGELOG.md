@@ -3,6 +3,8 @@
 * 3.13.0
     * Add menu option to create scratch orgs
     * The Create Class menu option is now the New... option. You can now create Aura components, classes, LWC components, triggers, and Visualforce pages/components.
+    * Fix an issue with failing deployments not showing the option to view details about the failed deployment
+    * Rework first save of Aura components to deploy the entire component package to make life easier and avoid errors on save
 * 3.12.0
     * Fix 'Retrieve Package not getting list of Unmanaged Packages' issue
     * Add --nopromt flag to fix issue #205

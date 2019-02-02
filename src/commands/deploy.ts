@@ -192,7 +192,7 @@ export function deployFiles(files: string[], lwcPackageXML?: string): Promise<an
                 }
             });
             vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
-        } else if(res.status !== 'Failed') {
+        } else if(res.status === 'Failed') {
             vscode.window.showErrorMessage('ForceCode: Deploy Errors. View Details?', 'Yes', 'No').then(choice => {
                 if(choice === 'Yes') {
                     commandService.runCommand('ForceCode.openFileInOrg', 

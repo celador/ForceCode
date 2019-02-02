@@ -38,16 +38,13 @@ export function saveLWC(document: vscode.TextDocument, toolingType: string, Meta
     function ensureLWCBundle(results) {
         // If the Bundle doesn't exist, create it, else Do nothing
         if (results.length === 0 || !results[0]) {
-            if(Metadata) {
-                throw {message: 'File must exist before updating its metadata file. Save the file first, then the metadata file.'};
-            }
             // Create LWC Bundle
             return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot)
                 .then(() => {
                     const files: string[] = [];
                     files.push(path.join('lwc', name));
                     files.push('package.xml');
-                    deployFiles(files, vscode.window.forceCode.storageRoot)
+                    return deployFiles(files, vscode.window.forceCode.storageRoot)
                         .then(getLWCBundle)
                         .then(bundle => {
                             results[0] = bundle;
