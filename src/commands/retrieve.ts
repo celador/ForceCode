@@ -400,7 +400,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 console.log('Done retrieving metadata records');
                 recs.some(curSet => {
                     return toArray(curSet).some(key => {
-                        if (newWSMembers.length > 0) {
+                        if (key && newWSMembers.length > 0) {
                             var index: number = newWSMembers.findIndex(curMem => {
                                 return curMem.name === key.fullName && curMem.type === key.type;
                             });
