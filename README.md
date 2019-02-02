@@ -84,7 +84,7 @@ Please note that the following permissions are required to develop on the Force.
 * Bundle & Deploy Static Resources on save
     * Auto refresh the browser on save (Mac only)
     * Works great with autosave
-* Create Classes from templates
+* Create Aura components, classes, LWC components, triggers, and Visualforce pages/components
 * Diff server & local versions
 * SOQL and Tooling query editor
     * Quickly run [SOQL Queries](https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql.htm)
@@ -208,6 +208,10 @@ Open the org in a browser. No more logging in!!
 ### Find
 
 This works just like the "Search Files" feature in the developer console.
+
+### New...
+
+Using this option, you can create Aura components, classes, LWC components, triggers, and Visualforce pages/components. Select what you would like to create, enter the name of the file, and Forcecode will create a basic empty file for you!
 
 ### Build package.xml file
 

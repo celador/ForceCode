@@ -20,8 +20,6 @@ export class CreateScratchOrg {
 			label: 'Professional',
 		}];
 		let config: {} = {
-			matchOnDescription: true,
-			matchOnDetail: true,
 			placeHolder: 'Choose an org edition to create...',
 		};
 		return new Promise((resolve, reject) => {

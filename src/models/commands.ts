@@ -60,12 +60,12 @@ export const fcCommands: FCCommand[] = [
 	// Create Classes
 	{
 		commandName: 'ForceCode.createClass',
-		name: 'Creating class',
+		name: 'Creating file',
 		hidden: false,
-		description: 'Create a Repository, Model, Service, Controller, or Custom class.',
-		detail: 'Creates classes based on common separation of concerns patterns',
+		description: 'Create an Aura Component, Class, LWC, Trigger, or Visualforce page/component',
+		detail: 'Creates a new file',
 		icon: 'plus',
-		label: 'Create Class',
+		label: 'New...',
 		command: function (context, selectedResource?) {
 			return commands.createClass();
 		}
