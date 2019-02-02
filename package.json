@@ -429,7 +429,6 @@
     "salesforce-alm": "44.16.0",
     "universal-analytics": "0.4.20",
     "uuid": "3.3.2",
-    "vscode": "1.1.28",
     "xml2js": "0.4.19"
   },
   "devDependencies": {
@@ -444,6 +443,7 @@
     "mocha": "5.2.0",
     "rimraf": "2.6.3",
     "typescript": "3.3.1",
-    "vsce": "1.55.0"
+    "vsce": "1.55.0",
+    "vscode": "1.1.28"
   }
 }
