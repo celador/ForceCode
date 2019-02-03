@@ -4,7 +4,8 @@ import { operatingSystem } from '.';
 import { Visitor } from 'universal-analytics';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-const pjson = require('./../../../package.json');
+
+const fcVersion = vscode.extensions.getExtension('JohnAaronNelson.forcecode').packageJSON.version;
 
 /*
  * This will send tracking info to GA
@@ -18,7 +19,7 @@ export function trackEvent(category: string, message: string): Promise<any> {
         // check if the user has opted in to tracking
         if(optIn()) {
             const params = {
-                ec: pjson.version + ' - ' + category,
+                ec: fcVersion + ' - ' + category,
                 ea: operatingSystem.getOS(),
                 el: message,
               }
@@ -49,7 +50,7 @@ export function trackEvent(category: string, message: string): Promise<any> {
  */
 export function getPreviousUUID(fcExtPath): boolean {
     const debug = vscode.env.machineId === 'someValue.machineId';
-    const currentVersion: string = pjson.version;
+    const currentVersion: string = fcVersion;
     var extensionsPath: string;
     // if we're debugging, the path will be wrong to the installed extensions
     if(debug) {

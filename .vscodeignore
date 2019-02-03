@@ -10,6 +10,6 @@ out/test/**
 **/*.js.map
 *.vsix
 .vscode-test/**
-needscopied/**
 .sfdx/**
 .github/**
+webpack.config.js
