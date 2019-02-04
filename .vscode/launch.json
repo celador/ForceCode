@@ -10,15 +10,7 @@
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "stopOnEntry": false,
       "sourceMaps": true,
-      "linux": {
-        "preLaunchTask": "npm"
-      },  
-      "windows": {
-        "preLaunchTask": "npm"
-      },    
-      "osx": {
-        "preLaunchTask": "npm"
-      },    
+      "preLaunchTask": "npm: webpack",
       "outFiles": ["${workspaceFolder}/out/src/**/*.js"]
     },
     {

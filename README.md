@@ -84,7 +84,7 @@ Please note that the following permissions are required to develop on the Force.
 * Bundle & Deploy Static Resources on save
     * Auto refresh the browser on save (Mac only)
     * Works great with autosave
-* Create Classes from templates
+* Create Aura components, classes, LWC components, triggers, and Visualforce pages/components
 * Diff server & local versions
 * SOQL and Tooling query editor
     * Quickly run [SOQL Queries](https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql.htm)
@@ -135,6 +135,10 @@ Manu: &gt;Force: Execute Anonymous
 Mac: alt + cmd + e  
 Win/Linux: alt + shift + e  
 Simply select the code that you want to run, then right click and select Execute Anonymous!
+
+### Create scratch org
+
+If your current working org that you are logged into is a DevHub, then you will see the option in the Forcecode menu to create a scratch org. When you choose to do so, you will be asked for the edition, duration in days till expiration, and whether you want the scratch org created with sample data. Once the scratch org is created, you will be able to log into it by clicking on the new username under the saved usernames view.
 
 ### Open
 
@@ -204,6 +208,10 @@ Open the org in a browser. No more logging in!!
 ### Find
 
 This works just like the "Search Files" feature in the developer console.
+
+### New...
+
+Using this option, you can create Aura components, classes, LWC components, triggers, and Visualforce pages/components. Select what you would like to create, enter the name of the file, and Forcecode will create a basic empty file for you!
 
 ### Build package.xml file
 

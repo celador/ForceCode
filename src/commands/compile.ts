@@ -172,7 +172,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
             failures++;
         }
 
-        if(failures === 0 && !dxService.isEmptyUndOrNull(res)) {
+        if(failures === 0) {
             // SUCCESS !!! 
             if(res.records && res.records[0].DeployDetails.componentSuccesses.length > 0) {
                 const fcfile = codeCovViewService.findById(res.records[0].DeployDetails.componentSuccesses[0].id); 
@@ -187,18 +187,22 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
             }
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;
+        } else if(diagnostics.length === 0) {
+            throw res;
         }
-        return false;
+        throw { message: 'File not saved due to build errors. Please open the Problems panel for more details.'}
     }
     
     function onError(err) {
         if(err.message) {
             try {
-                var errmess: string = err.message.split('Message:')[1].split(': Source')[0];
-                var linCol: string[] = err.message.split(':')[1].split(',');
-                var failureLineNumber: number = Number.parseInt(linCol[0]);
+                const errmess: string = err.message.split('Message:').pop().split(': Source').shift();
+                const linRowCol: string[] = err.message.split(',');
+                const linRow: string = linRowCol[0].split(':').pop();
+                const linCol: string = linRowCol[1].split(':').shift();
+                var failureLineNumber: number = Number.parseInt(linRow);
                 failureLineNumber = failureLineNumber < 1 ? 1 : failureLineNumber;
-                var failureColumnNumber: number = Number.parseInt(linCol[1]);
+                var failureColumnNumber: number = Number.parseInt(linCol);
                 var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
                 if (failureColumnNumber - 1 >= 0) {
                     failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));

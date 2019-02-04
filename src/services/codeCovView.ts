@@ -252,16 +252,17 @@ export class FCFile extends TreeItem {
       var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
       var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
       this.label = percent + '% ' + this.label;
+      const imagePath: string = path.join(window.forceCode.storageRoot, 'images');
       if (percent >= 75) {
         this.type = ClassType.CoveredClass;
         this.iconPath = {
-          dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
-          light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
+          dark: path.join(imagePath, 'greenCheck.svg'),
+          light: path.join(imagePath, 'greenCheck.svg'),
         }
       } else {
         this.iconPath = {
-          dark: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
-          light: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
+          dark: path.join(imagePath, 'redEx.svg'),
+          light: path.join(imagePath, 'redEx.svg'),
         }
       }
       // this next check needs changed to something different, as there are problems reading the file

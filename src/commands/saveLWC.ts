@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import constants from './../models/constants';
 import * as parsers from './../parsers';
 import { codeCovViewService, fcConnection } from '../services';
 import { FCFile } from '../services/codeCovView';
 import diff from './diff';
 import * as forceCode from './../forceCode';
 import * as path from 'path';
+import { createPackageXML, deployFiles } from './deploy';
 
 // =======================================================================================================================================
 // ================================                Lightning Components               ===========================================
@@ -38,30 +38,30 @@ export function saveLWC(document: vscode.TextDocument, toolingType: string, Meta
     function ensureLWCBundle(results) {
         // If the Bundle doesn't exist, create it, else Do nothing
         if (results.length === 0 || !results[0]) {
-            if(Metadata) {
-                throw {message: 'File must exist before updating its metadata file. Save the file first, then the metadata file.'};
-            }
             // Create LWC Bundle
-            return vscode.window.forceCode.conn.tooling.sobject('LightningComponentBundle').create({
-                DeveloperName: name,
-                MasterLabel: name,
-                ApiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-                Description: name.replace('_', ' '),
-            }).then(bundle => {
-                results[0] = bundle;
-                var newWSMember: forceCode.IWorkspaceMember = {
-                    id: results[0].Id ? results[0].Id : results[0].id,
-                    name: name,
-                    path: document.fileName,
-                    lastModifiedDate: (new Date()).toISOString(),
-                    lastModifiedByName: '',
-                    lastModifiedById: fcConnection.currentConnection.orgInfo.userId,
-                    type: 'LightningComponentBundle',
-                    saveTime: true
-                }
-                codeCovViewService.addClass(newWSMember);
-                return results;
-            });
+            return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot)
+                .then(() => {
+                    const files: string[] = [];
+                    files.push(path.join('lwc', name));
+                    files.push('package.xml');
+                    return deployFiles(files, vscode.window.forceCode.storageRoot)
+                        .then(getLWCBundle)
+                        .then(bundle => {
+                            results[0] = bundle;
+                            var newWSMember: forceCode.IWorkspaceMember = {
+                                id: results[0].Id ? results[0].Id : results[0].id,
+                                name: name,
+                                path: document.fileName,
+                                lastModifiedDate: (new Date()).toISOString(),
+                                lastModifiedByName: '',
+                                lastModifiedById: fcConnection.currentConnection.orgInfo.userId,
+                                type: 'LightningComponentBundle',
+                                saveTime: true
+                            }
+                            codeCovViewService.addClass(newWSMember);
+                            return results;
+                        });
+                });
         } else {
             return results;
         }
@@ -132,6 +132,7 @@ export function saveLWC(document: vscode.TextDocument, toolingType: string, Meta
                 fcfile.updateWsMember(tempWSMem);
             }
             return res;
-        });
+        })
+        .catch(err => { return { State: 'Error', message: err.message ? err.message : err }});
     }
 }

@@ -91,6 +91,7 @@ export interface DXCommands {
     openOrg(): Promise<any>;
     openOrgPage(url: string): Promise<any>;
     orgList(): Promise<OrgListResult>;
+    createScratchOrg(edition: string): Promise<any>;
 }
 
 export default class DXService implements DXCommands {
@@ -214,19 +215,7 @@ export default class DXService implements DXCommands {
 
     public orgList(): Promise<OrgListResult> {
         return this.runCommand('org:list', '--clean --noprompt').then(res => {
-            const orgs: OrgListResult = { orgs: res.nonScratchOrgs.concat(res.scratchOrgs) }
-            orgs.orgs.forEach(org => {
-                // cleanup if it's not actually connected
-                const index: number = fcConnection.getConnIndex(org.username);
-                if(index !== -1) {
-                    if(org.connectedStatus !== 'Connected' && org.connectedStatus !== 'Unknown') {
-                        fcConnection.connections[index].isLoggedIn = false;
-                    } else {
-                        fcConnection.connections[index].isLoggedIn = true;
-                    }
-                }
-            });
-            return orgs;
+            return { orgs: res.nonScratchOrgs.concat(res.scratchOrgs) };
         })
         .catch(() => {
             // we got an error because there are no connections
@@ -266,5 +255,10 @@ export default class DXService implements DXCommands {
 
     public openOrgPage(url: string): Promise<any> {
         return this.runCommand('org:open', '-p ' + url);
+    }
+
+    public createScratchOrg(options: string): Promise<any> {
+        return this.runCommand('org:create', 
+            options + ' --targetdevhubusername ' + fcConnection.currentConnection.orgInfo.username);
     }
 }

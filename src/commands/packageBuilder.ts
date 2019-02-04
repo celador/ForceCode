@@ -20,9 +20,8 @@ export function getMembers(metadataTypes: string[], retrieveManaged?: boolean): 
     var proms: Promise<PXMLMember>[] = metadataObjects.map(r => {
         return new Promise<PXMLMember>((resolve, reject) => {
             if(r.xmlName === 'CustomObject') {
-                new SObjectDescribe().describeGlobal(SObjectCategory.STANDARD)
+                new SObjectDescribe().describeGlobal(SObjectCategory.ALL)
                     .then(objs => {
-                        objs.push('*');
                         resolve({ name: r.xmlName, members: objs });
                     })
                     .catch(reject);

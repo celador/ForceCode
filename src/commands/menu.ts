@@ -17,7 +17,12 @@ export default function showMenu(context: vscode.ExtensionContext) {
     function displayMenu() {
         fcCommands.forEach(cur => {
             if(!cur.hidden) {
-                quickpick.push(cur);
+                if(cur.commandName !== 'ForceCode.createScratchOrg') {
+                    quickpick.push(cur);
+                }
+                else if(fcConnection.currentConnection && fcConnection.currentConnection.orgInfo.isDevHub) {
+                    quickpick.push(cur);
+                }
             }
         });
         

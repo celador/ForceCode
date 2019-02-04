@@ -285,6 +285,11 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                     this.connections[connIndex].orgInfo.accessToken = aToken;
                 }
             }
+            if(orgInfo.connectedStatus !== 'Connected' && orgInfo.connectedStatus !== 'Unknown') {
+                this.connections[connIndex].isLoggedIn = false;
+            } else {
+                this.connections[connIndex].isLoggedIn = true;
+            }
             return this.connections[connIndex];
         } else {
             return undefined;
