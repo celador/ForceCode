@@ -18,7 +18,6 @@ export default class ForceService implements forceCode.IForceService {
     public containerId: string;
     public containerMembers: forceCode.IContainerMember[];
     public describe: forceCode.IMetadataDescribe;
-    public declarations: forceCode.IDeclarations;
     public containerAsyncRequestId: string;
     public statusBarItem: vscode.StatusBarItem;
     public outputChannel: vscode.OutputChannel;

@@ -199,9 +199,9 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             } else if (option.description === 'aurabundles') {
                 getSpecificTypeMetadata('AuraDefinitionBundle');
             } else if (option.description === 'customobj') {
-                getSpecificTypeMetadata('CustomObject');
+                getObjects(SObjectCategory.CUSTOM);
             } else if (option.description === 'standardobj') {
-                getStandardObjects();
+                getObjects(SObjectCategory.STANDARD);
             } else if(option.description === 'user-choice') {
                 builder();
             } else {
@@ -263,8 +263,8 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 });
             }
 
-            function getStandardObjects() {
-                new SObjectDescribe().describeGlobal(SObjectCategory.STANDARD).then(objs => {
+            function getObjects(type: SObjectCategory) {
+                new SObjectDescribe().describeGlobal(type).then(objs => {
                     retrieveComponents(resolve, reject, { types: [{ name: 'CustomObject', members: objs }] });
                 });
             }
