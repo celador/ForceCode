@@ -135,7 +135,8 @@ export function saveAura(document: vscode.TextDocument, toolingType: string, Met
                 fcfile.updateWsMember(tempWSMem);
             }
             return res;
-        });
+        })
+        .catch(err => { return { State: 'Error', message: err.message ? err.message : err }});
     }
 
     function getAuraFormatFromDocument() {

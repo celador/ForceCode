@@ -6,6 +6,8 @@
     * Fix an issue with failing deployments not showing the option to view details about the failed deployment
     * Rework first save of Aura components to deploy the entire component package to make life easier and avoid errors on save
     * Fix 'fullName of undefined' issue after retrieving files
+    * Fix issue #236 related to not showing build errors
+    * Fix issue #224 by retrieving managed package objects
 * 3.12.0
     * Fix 'Retrieve Package not getting list of Unmanaged Packages' issue
     * Add --nopromt flag to fix issue #205

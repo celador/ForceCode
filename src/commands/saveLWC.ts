@@ -132,6 +132,7 @@ export function saveLWC(document: vscode.TextDocument, toolingType: string, Meta
                 fcfile.updateWsMember(tempWSMem);
             }
             return res;
-        });
+        })
+        .catch(err => { return { State: 'Error', message: err.message ? err.message : err }});
     }
 }
