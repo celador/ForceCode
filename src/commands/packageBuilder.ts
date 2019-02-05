@@ -12,13 +12,16 @@ function sortFunc(a: any, b: any): number {
     return aStr.localeCompare(bStr);
 }
 
-export function getToolingTypes(metadataTypes: IMetadataObject[], retrieveManaged?: boolean): Promise<any> {
-    var proms = metadataTypes.map(r => {
-        return new Promise((resolve, reject) => {
+export function getMembers(metadataTypes: string[], retrieveManaged?: boolean): Promise<PXMLMember[]> {
+    var metadataObjects: IMetadataObject[] = vscode.window.forceCode.describe.metadataObjects;
+    if(!(metadataTypes.length === 1 && metadataTypes[0] === '*')) {
+        metadataObjects = metadataObjects.filter(type => metadataTypes.includes(type.xmlName))
+    }
+    var proms: Promise<PXMLMember>[] = metadataObjects.map(r => {
+        return new Promise<PXMLMember>((resolve, reject) => {
             if(r.xmlName === 'CustomObject') {
-                new SObjectDescribe().describeGlobal(SObjectCategory.STANDARD)
+                new SObjectDescribe().describeGlobal(SObjectCategory.ALL)
                     .then(objs => {
-                        objs.push('*');
                         resolve({ name: r.xmlName, members: objs });
                     })
                     .catch(reject);
@@ -27,28 +30,55 @@ export function getToolingTypes(metadataTypes: IMetadataObject[], retrieveManage
                 vscode.window.forceCode.conn.metadata.list([{ type: folderType }])
                     .then((folders) => {
                         let proms: Promise<any>[] = [];
+                        folders = toArray(folders);
                         folders.forEach(f => {
-                            if(f.manageableState === 'unmanaged' || retrieveManaged) {
-                                proms.push(vscode.window.forceCode.conn.metadata.list([{ type: r.xmlName, folder: f.fullName }]));
+                            if(f && (f.manageableState === 'unmanaged' || retrieveManaged)) {
+                                proms.push(getFolderContents(r.xmlName, f.fullName));
                             }
                         });
                         Promise.all(proms)
                         .then(folderList => {
-                            const members = [].concat([...folders, ...folderList])
+                            folderList = toArray(folderList);
+                            var members = folders
                                 .filter(f => f !== undefined)
                                 .map(f => f.fullName);
+                            members = [].concat(...members, ...folderList);
                             resolve({ name: r.xmlName, members: members });
                         })
                         .catch(reject)
                         
                     })
                     .catch(reject);
+            } else if(r.xmlName === 'StandardValueSet') {
+                // metadata list for StandardValueSet doesn't work. This is the workaround
+                // IdeaCategory and QuestionOrigin can't be read or written to so we skip them in this list
+                const sValSet: string[] = ['AccountContactMultiRoles', 'AccountContactRole', 'AccountOwnership',
+                    'AccountRating', 'AccountType', 'AssetStatus', 'CampaignMemberStatus', 'CampaignStatus',
+                    'CampaignType', 'CaseContactRole', 'CaseOrigin', 'CasePriority', 'CaseReason', 'CaseStatus',
+                    'CaseType', 'ContactRole', 'ContractContactRole', 'ContractStatus', 'EntitlementType',
+                    'EventSubject', 'EventType', 'FiscalYearPeriodName', 'FiscalYearPeriodPrefix', 'FiscalYearQuarterName',
+                    'FiscalYearQuarterPrefix', 'IdeaMultiCategory', 'IdeaStatus', 'IdeaThemeStatus', 'Industry',
+                    'LeadSource', 'LeadStatus', 'OpportunityCompetitor', 'OpportunityStage', 'OpportunityType',
+                    'OrderType', 'PartnerRole', 'Product2Family', 'QuickTextCategory', 'QuickTextChannel',
+                    'QuoteStatus', 'RoleInTerritory2', 'SalesTeamRole', 'Salutation', 'ServiceContractApprovalStatus',
+                    'SocialPostClassification', 'SocialPostEngagementLevel', 'SocialPostReviewedStatus',
+                    'SolutionStatus', 'TaskPriority', 'TaskStatus', 'TaskSubject', 'TaskType', 'WorkOrderLineItemStatus',
+                    'WorkOrderPriority', 'WorkOrderStatus'];
+
+                resolve({ name: r.xmlName, members: sValSet });
             } else {
-                resolve({ name: r.xmlName, members: '*' });
+                resolve({ name: r.xmlName, members: ['*'] });
             }
         });                        
     });
-    return Promise.all(proms)
+    return Promise.all(proms);
+}
+
+export function getFolderContents(type: string, folder: string): Promise<string[]> {
+    return vscode.window.forceCode.conn.metadata.list([{ type, folder }]).then(contents => {
+        contents = toArray(contents);
+        return contents.filter(f => f !== undefined).map(m => m.fullName);
+    });
 }
 
 export default function packageBuilder(buildPackage?: boolean): Promise<any> {
@@ -68,12 +98,12 @@ export default function packageBuilder(buildPackage?: boolean): Promise<any> {
             canPickMany: true
         };
         vscode.window.showQuickPick(options, config).then(types => {
-            const typesArray: string[] = toArray(types).map(r => r.label);
-            if(dxService.isEmptyUndOrNull(typesArray)) {
+            if(dxService.isEmptyUndOrNull(types)) {
                 reject();
             }
+            const typesArray: string[] = toArray(types).map(r => r.label);
 
-            getToolingTypes(vscode.window.forceCode.describe.metadataObjects.filter(f => typesArray.includes(f.xmlName)))
+            getMembers(typesArray)
                 .then(mappedTypes => {
                     if(!buildPackage) {
                         resolve(mappedTypes);
@@ -82,7 +112,7 @@ export default function packageBuilder(buildPackage?: boolean): Promise<any> {
                         const builder = new xml2js.Builder();
                         var packObj: PXML = {
                             Package: {
-                                types: <PXMLMember[]> mappedTypes,
+                                types: mappedTypes,
                                 version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION
                             },
                         }

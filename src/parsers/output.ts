@@ -35,14 +35,18 @@ interface ObjArr {
 export function outputToCSV(arr: ObjArr[]): string {
     delete arr[0].attributes;
     var csvContent = '\"' + Object.keys(arr[0]).join('\",\"') + '\"\n';
-    arr.forEach(curItem => {
+    for(var i = 0; i < arr.length; i++) {
+        const curItem = arr[i];
         var curItemArr: string[] = [];
         Object.keys(curItem).forEach(key => {
             if(key != 'attributes') {
-                curItemArr.push('\"' + curItem[key] + '\"');
+                curItemArr.push('\"' + (curItem[key] === null ? '' : curItem[key]) + '\"');
             }
         });
-        csvContent += curItemArr.join(',') + '\n';
-    });
+        csvContent += curItemArr.join(',');
+        if(i !== arr.length - 1) {
+            csvContent += '\n';
+        }
+    }
     return csvContent;
 }

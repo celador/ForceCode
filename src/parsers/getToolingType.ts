@@ -21,6 +21,9 @@ export default function getToolingTypeFromBody(document: vscode.TextDocument, me
     if (fileName.indexOf(`${vscode.window.forceCode.config.src}${path.sep}aura`) >= 0) {
         return 'AuraDefinition';
     }
+    if (fileName.indexOf(`${vscode.window.forceCode.config.src}${path.sep}lwc`) >= 0) {
+        return 'LightningComponentResource';
+    }
     return undefined;
 }
 
