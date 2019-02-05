@@ -13,6 +13,8 @@ export interface FCOauth {
     orgId?: string,
     clientId?: string,
     connectedStatus?: string,
+    isExpired?: boolean,
+    isDevHub?: boolean
 }
 
 export class FCConnection extends vscode.TreeItem {
@@ -57,17 +59,18 @@ export class FCConnection extends vscode.TreeItem {
 
     public showConnection() {
         this.prevContext = this.contextValue;
+        const imagePath: string = path.join(vscode.window.forceCode.storageRoot, 'images');
         if (this.isCurrentConnection() && this.isLoggedIn) {
             this.iconPath = {
-                dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
-                light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircleFilled.svg'),
+                dark: path.join(imagePath, 'greenCircleFilled.svg'),
+                light: path.join(imagePath, 'greenCircleFilled.svg'),
             }
             this.contextValue = 'currentConn';
             this.command = undefined;
         } else if (this.isCurrentConnection()) {
             this.iconPath = {
-                dark: path.join(__filename, '..', '..', '..', '..', 'images', 'yellowCircleFilled.svg'),
-                light: path.join(__filename, '..', '..', '..', '..', 'images', 'yellowCircleFilled.svg'),
+                dark: path.join(imagePath, 'yellowCircleFilled.svg'),
+                light: path.join(imagePath, 'yellowCircleFilled.svg'),
             }
             this.contextValue = 'currentConn';
             this.command = undefined;
@@ -78,8 +81,8 @@ export class FCConnection extends vscode.TreeItem {
                 arguments: [this.orgInfo]
             }
             this.iconPath = {
-                dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircle.svg'),
-                light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCircle.svg'),
+                dark: path.join(imagePath, 'greenCircle.svg'),
+                light: path.join(imagePath, 'greenCircle.svg'),
             }
             this.contextValue = 'loggedInConn';
         } else {
@@ -89,8 +92,8 @@ export class FCConnection extends vscode.TreeItem {
                 arguments: [this.orgInfo]
             }
             this.iconPath = {
-                dark: path.join(__filename, '..', '..', '..', '..', 'images', 'yellowCircle.svg'),
-                light: path.join(__filename, '..', '..', '..', '..', 'images', 'yellowCircle.svg'),
+                dark: path.join(imagePath, 'yellowCircle.svg'),
+                light: path.join(imagePath, 'yellowCircle.svg'),
             }
             this.contextValue = 'notLoggedInConn';
         }

@@ -210,6 +210,20 @@ export class FCFile extends TreeItem {
   }
 
   public setWsMember(newMem: IWorkspaceMember) {
+    if(newMem && newMem.lastModifiedDate && newMem.lastModifiedDate !== '' ) {
+      if(this.wsMember && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
+        const newDate: number = (new Date(newMem.lastModifiedDate)).getTime();
+        const oldDate: number = (new Date(this.wsMember.lastModifiedDate)).getTime();
+        if(oldDate > newDate) {
+          newMem.lastModifiedDate = this.wsMember.lastModifiedDate;
+        }
+      }
+      if(newMem.saveTime) {
+        var mTime: Date = new Date(newMem.lastModifiedDate);
+        fs.utimesSync(newMem.path, mTime, mTime);
+      }
+    }
+
     this.wsMember = newMem;
 
     // we only want classes and triggers
@@ -226,10 +240,6 @@ export class FCFile extends TreeItem {
       arguments: [this.wsMember.path]
     }
 
-    if (this.wsMember.saveTime && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
-      var mTime: Date = new Date(this.wsMember.lastModifiedDate);
-      fs.utimesSync(this.wsMember.path, mTime, mTime);
-    }
     this.iconPath = undefined;
     if (!this.wsMember.id || this.wsMember.id === '') {
       this.type = ClassType.NotInOrg;
@@ -242,16 +252,17 @@ export class FCFile extends TreeItem {
       var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
       var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
       this.label = percent + '% ' + this.label;
+      const imagePath: string = path.join(window.forceCode.storageRoot, 'images');
       if (percent >= 75) {
         this.type = ClassType.CoveredClass;
         this.iconPath = {
-          dark: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
-          light: path.join(__filename, '..', '..', '..', '..', 'images', 'greenCheck.svg'),
+          dark: path.join(imagePath, 'greenCheck.svg'),
+          light: path.join(imagePath, 'greenCheck.svg'),
         }
       } else {
         this.iconPath = {
-          dark: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
-          light: path.join(__filename, '..', '..', '..', '..', 'images', 'redEx.svg'),
+          dark: path.join(imagePath, 'redEx.svg'),
+          light: path.join(imagePath, 'redEx.svg'),
         }
       }
       // this next check needs changed to something different, as there are problems reading the file

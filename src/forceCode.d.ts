@@ -35,6 +35,8 @@ export interface Config {
         testLevel?: string,       
     };
     maxFileChangeNotifications?: number;
+    maxQueryHistory?: number;
+    maxQueryResultsPerPage?: number;
     outputQueriesAsCSV?: boolean;
     overwritePackageXML?: boolean;
     poll?: number;
@@ -125,12 +127,6 @@ interface ICodeCoverageWarning {
     namespace: string;
 }
 
-interface IDeclarations {
-    public?: any[],
-    private?: any[],
-    managed?: any[]
-}
-
 interface IContainerMember {
     name: string;
     id: string;
@@ -158,7 +154,6 @@ export interface IForceService {
     workspaceRoot: string;
     storageRoot: string;
     describe: IMetadataDescribe;
-    declarations?: IDeclarations;
     containerId?: string;
     statusTimeout: any;    
     containerMembers: IContainerMember[];

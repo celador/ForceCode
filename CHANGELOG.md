@@ -1,5 +1,38 @@
 ## Change Log
 
+* 3.13.0
+    * Add menu option to create scratch orgs
+    * The Create Class menu option is now the New... option. You can now create Aura components, classes, LWC components, triggers, and Visualforce pages/components.
+    * Fix an issue with failing deployments not showing the option to view details about the failed deployment
+    * Rework first save of Aura components to deploy the entire component package to make life easier and avoid errors on save
+    * Fix 'fullName of undefined' issue after retrieving files
+    * Fix issue #236 related to not showing build errors
+    * Fix issue #224 by retrieving managed package objects
+* 3.12.0
+    * Fix 'Retrieve Package not getting list of Unmanaged Packages' issue
+    * Add --nopromt flag to fix issue #205
+    * Fixes for issues related to retrieve
+    * Add support for Lightning Web Components (API version 45.0 and higher)
+    * Fixed not showing all errors on compile
+* 3.11.3
+    * Fix packageDirectories in sfdx-project.json (Thanks ReaperBeats!)
+* 3.11.2
+    * Add retrieve support for StandardValueSet per issue #214
+    * Fix issues when retrieving metadata
+    * Fix issue while retrieving lightning components
+    * Show nice error message when deploying code outside of the src folder
+* 3.11.1
+    * Add ability to make inline edits to query results and save back to the server. Simply click the cell you want to edit, make the edit, then click Save Rows.
+    * Fix issue with no files being retrieved when retrieving all metadata from an org
+    * Fix 'Forcecode is reporting bad "Someone has changed this file!" for Aura files' #209
+* 3.11.0
+    * Add ability to retrieve foldered metadata (Reports, Dashboards, Email templates, and Documents) thanks @kenhuman!
+        * You can currently only save reports and dashboards. Some email template metadata can be saved, but the templates themselves can't be saved.
+    * Added a query editor to replace the simple SOQL/TOQL query menu options
+    * Updated keyboard shortcuts for Execute Anonymous, Open, and deploying static resources for Windows and Linux, since there was conflicts with default VSCode shortcuts (Please see the README for the new shortcuts)
+    * Change default of outputQueriesAsCSV to true
+    * Add custom domain support
+    * Don't include expired orgs in saved usernames list
 * 3.10.3
     * Update Slack invite link
 * 3.10.2

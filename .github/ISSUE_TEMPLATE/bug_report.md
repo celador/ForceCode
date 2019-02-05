@@ -22,8 +22,8 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. Windows]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 3.8.4]
+ - VSCode version [e.g. 1.29.0]
+ - ForceCode Version [e.g. 3.10.3]
 
 **Additional context**
 Add any other context about the problem here.

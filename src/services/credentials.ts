@@ -97,6 +97,10 @@ function getUrl(config): Promise<Config> {
                     icon: 'beaker',
                     title: 'Sandbox / Test',
                     url: 'https://test.salesforce.com',
+                }, {
+                    icon: 'tools',
+                    title: 'Custom domain',
+                    url: 'https://example.my.salesforce.com',
                 },
             ];
             let options: vscode.QuickPickItem[] = opts.map(res => {
@@ -108,8 +112,15 @@ function getUrl(config): Promise<Config> {
                 };
             });
             vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
-                config.url = res.description || 'https://login.salesforce.com';
-                resolve(config);
+                if(res && res.description === 'https://example.my.salesforce.com') {
+                    vscode.window.showInputBox({ ignoreFocusOut: true, placeHolder: 'Enter your custom domain then press Enter...' }).then(cDomain => {
+                        config.url = cDomain || 'https://login.salesforce.com';
+                        resolve(config);
+                    });
+                } else {
+                    config.url = res.description || 'https://login.salesforce.com';
+                    resolve(config);
+                }
             });
         } else {
             resolve(config);

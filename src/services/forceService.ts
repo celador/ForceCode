@@ -18,7 +18,6 @@ export default class ForceService implements forceCode.IForceService {
     public containerId: string;
     public containerMembers: forceCode.IContainerMember[];
     public describe: forceCode.IMetadataDescribe;
-    public declarations: forceCode.IDeclarations;
     public containerAsyncRequestId: string;
     public statusBarItem: vscode.StatusBarItem;
     public outputChannel: vscode.OutputChannel;
@@ -149,7 +148,7 @@ export default class ForceService implements forceCode.IForceService {
                             curMem.id = key.id;
                             curMem.lastModifiedByName = key.lastModifiedByName; 
                             curMem.lastModifiedById = key.lastModifiedById;
-                            if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges || curMem.type === 'AuraDefinitionBundle') {
+                            if(curFCFile.compareDates(key.lastModifiedDate) || !vscode.window.forceCode.config.checkForFileChanges || curMem.type === 'AuraDefinitionBundle' || curMem.type === 'LightningComponentBundle') {
                                 curMem.saveTime = true;
                                 curFCFile.updateWsMember(curMem);
                             } else {

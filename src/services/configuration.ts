@@ -25,7 +25,9 @@ export const defautlOptions = {
 		'testLevel': 'NoTestRun'
 	},
 	maxFileChangeNotifications: 15,
-	outputQueriesAsCSV: false,
+	maxQueryHistory: 10,
+	maxQueryResultsPerPage: 250,
+	outputQueriesAsCSV: true,
 	overwritePackageXML: false,
 	poll: 1500,
 	pollTimeout: 1200,
@@ -58,10 +60,10 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
 		// add in a bare sfdx-project.json file for language support from official salesforce extensions
 		const sfdxProj: {} = {
 			namespace: "",
-			packageDirectories: {
+			packageDirectories: [{
 				path: 'src',
 				default: true
-			},
+			}],
 			sfdcLoginUrl: 'https://login.salesforce.com/',
 			sourceApiVersion: constants.API_VERSION,
 		};

@@ -5,14 +5,14 @@ import constants from './../models/constants';
 import { commandService, codeCovViewService, fcConnection, FCOauth, toArray } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
-import { getAnyTTFromFolder } from '../parsers/open';
-import { SObjectDescribe, SObjectCategory, CLIENT_ID } from '../dx';
+import { getAnyTTFromFolder, getAnyNameFromUri } from '../parsers/open';
+import { SObjectDescribe, SObjectCategory } from '../dx';
 const mime = require('mime-types');
 import * as compress from 'compressing';
 import { parseString } from 'xml2js';
 import { outputToString } from '../parsers/output';
 import { packageBuilder } from '.';
-import { getToolingTypes } from './packageBuilder';
+import { getMembers } from './packageBuilder';
 import { XHROptions, xhr } from 'request-light';
 
 export interface ToolingType {
@@ -48,18 +48,15 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             type: 'POST',
             url: requestUrl,
             headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-              Authorization: `OAuth ${orgInfo.accessToken}`,
-              'User-Agent': 'salesforcedx-extension',
-              'Sforce-Call-Options': `client=${CLIENT_ID}`
+              'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+              'Cookie': 'sid=' + orgInfo.accessToken,
             },
             data: 'action=EXTENT&extent=PACKAGES'
         };
 
         return xhr(foptions).then(response => {
             if (response.status === 200) {
-                return response;
+                return response.responseText;
             } else {
                 return JSON.stringify({ PACKAGES: { packages: [] } });
             }
@@ -148,43 +145,46 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
         if (opt) {
             return new Promise(pack);
         } else if (resource) {
-            return new Promise(function (resolve) {
+            return new Promise(function (resolve, reject) {
                 // Get the Metadata Object type
-                if (resource instanceof vscode.Uri && fs.lstatSync(resource.fsPath).isDirectory()) {
-                    var baseDirectoryName: string = path.parse(resource.fsPath).name;
-                    var type: string = getAnyTTFromFolder(resource);
-                    if (!type) {
-                        throw new Error(errMessage);
-                    }
-                    var types: any[] = [];
-                    if (type === 'AuraDefinitionBundle') {
-                        if (baseDirectoryName === 'aura') {
-                            baseDirectoryName = '*';
-                        }
-                        types = [{ name: type, members: baseDirectoryName }];
-                    } else {
-                        types = [{ name: type, members: '*' }];
-                    }
-                    retrieveComponents(resolve, { types: types });
-                } else if (resource instanceof vscode.Uri) {
+                if (resource instanceof vscode.Uri) {
                     var toolingType: string = getAnyTTFromFolder(resource);
                     if (!toolingType) {
                         throw new Error(errMessage);
                     }
-                    const name: string = path.parse(resource.fsPath).name;
-                    retrieveComponents(resolve, { types: [{ name: toolingType, members: [name] }] });
+                    getAnyNameFromUri(resource).then(names => {
+                        retrieveComponents(resolve, reject, { types: [names] });
+                    });
                 } else {
-                    retrieveComponents(resolve, resource);
+                    retrieveComponents(resolve, reject, resource);
                 }
             });
         }
         throw new Error();
 
-        function retrieveComponents(resolve, retrieveTypes: ToolingTypes) {
-            resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                unpackaged: retrieveTypes,
-                apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-            }).stream());
+        function retrieveComponents(resolve, reject, retrieveTypes: ToolingTypes) {
+            // count the number of types. if it's more than 10,000 the retrieve will fail
+            var totalTypes: number = 0;
+            retrieveTypes.types.forEach(type => {
+                totalTypes += type.members.length;
+            });
+            if(totalTypes > 10000) {
+                reject({ message: 'Cannot retrieve more than 10,000 files at a time. Please select "Choose Types..." from the retrieve menu and try to download without Reports selected first.'});
+            }
+            var theStream;
+            try {
+                theStream = vscode.window.forceCode.conn.metadata.retrieve({
+                    unpackaged: retrieveTypes,
+                    apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
+                });
+            } catch(e) {
+                reject(e);
+            }
+            if(theStream) {
+                resolve(theStream.stream());
+            } else {
+                reject({ message: 'Cannot retrieve more than 10,000 files at a time. Please select "Choose Types..." from the retrieve menu and try to download without Reports selected first.'});
+            }
         }
 
         function pack(resolve, reject) {
@@ -199,9 +199,9 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             } else if (option.description === 'aurabundles') {
                 getSpecificTypeMetadata('AuraDefinitionBundle');
             } else if (option.description === 'customobj') {
-                getSpecificTypeMetadata('CustomObject');
+                getObjects(SObjectCategory.CUSTOM);
             } else if (option.description === 'standardobj') {
-                getStandardObjects();
+                getObjects(SObjectCategory.STANDARD);
             } else if(option.description === 'user-choice') {
                 builder();
             } else {
@@ -210,13 +210,13 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
 
             function builder() {
                 packageBuilder().then(mappedTypes => {
-                    retrieveComponents(resolve, { types: mappedTypes });
+                    retrieveComponents(resolve, reject, { types: mappedTypes });
                 }).catch(reject);
             }
 
             function all() {
-                getToolingTypes(vscode.window.forceCode.describe.metadataObjects).then(mappedTypes => {
-                    retrieveComponents(resolve, { types: mappedTypes })
+                getMembers(['*'], true).then(mappedTypes => {
+                    retrieveComponents(resolve, reject, { types: mappedTypes })
                 }).catch(reject);
             }
 
@@ -226,7 +226,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     .map(r => {
                         return { name: r.xmlName, members: '*' };
                     });
-                retrieveComponents(resolve, { types: types });
+                retrieveComponents(resolve, reject, { types: types });
             }
 
             function unpackaged() {
@@ -252,22 +252,26 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                             }
                             
                         }
-                        resolve(vscode.window.forceCode.conn.metadata.retrieve({
-                            unpackaged: dom.Package
-                        }).stream());
+                        try {
+                            resolve(vscode.window.forceCode.conn.metadata.retrieve({
+                                unpackaged: dom.Package
+                            }).stream());
+                        } catch(e) {
+                            reject(e);
+                        }
                     }
                 });
             }
 
-            function getStandardObjects() {
-                new SObjectDescribe().describeGlobal(SObjectCategory.STANDARD).then(objs => {
-                    retrieveComponents(resolve, { types: [{ name: 'CustomObject', members: objs }] });
+            function getObjects(type: SObjectCategory) {
+                new SObjectDescribe().describeGlobal(type).then(objs => {
+                    retrieveComponents(resolve, reject, { types: [{ name: 'CustomObject', members: objs }] });
                 });
             }
         }
     }
 
-    function processResult(stream: NodeJS.ReadableStream) {
+    function processResult(stream: fs.ReadStream) {
         return new Promise(function (resolve, reject) {
             var resBundleNames: string[] = [];
             const destDir: string = vscode.window.forceCode.projectRoot;
@@ -395,8 +399,8 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             function parseRecords(recs: any[]): Promise<any> {
                 console.log('Done retrieving metadata records');
                 recs.some(curSet => {
-                    return curSet.some(key => {
-                        if (newWSMembers.length > 0) {
+                    return toArray(curSet).some(key => {
+                        if (key && newWSMembers.length > 0) {
                             var index: number = newWSMembers.findIndex(curMem => {
                                 return curMem.name === key.fullName && curMem.type === key.type;
                             });
