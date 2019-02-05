@@ -342,9 +342,15 @@ export const fcCommands: FCCommand[] = [
 		hidden: true,
 		command: async function (context, selectedResource?) {
 			if (selectedResource && selectedResource instanceof Array) {
-				return new Promise((resolve) => {
+				return new Promise((resolve, reject) => {
 					var files: PXMLMember[] = [];
-					var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => getAnyNameFromUri(curRes));
+					var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => {
+						if(curRes.fsPath.match(vscode.window.forceCode.projectRoot + path.sep)) {
+							return getAnyNameFromUri(curRes);
+						} else {
+							reject({ message: 'Only files/folders within the current org\'s src folder (' + vscode.window.forceCode.projectRoot + ') can be retrieved/refreshed.' })
+						}
+					});
 					Promise.all(proms).then(theNames => {
 						theNames.forEach(curName => {
 							var index: number = getTTIndex(curName.name, files);
