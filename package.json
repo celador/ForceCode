@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.13.0",
+  "version": "3.13.1",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -414,7 +414,7 @@
     "clean": "rimraf ./out/ && rimraf ./node_modules/",
     "test": "node ./node_modules/vscode/bin/test",
     "package": "vsce package",
-    "vscode:prepublish": "webpack --mode production",
+    "vscode:prepublish": "rimraf ./out/ && webpack --mode production",
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch"
   },
