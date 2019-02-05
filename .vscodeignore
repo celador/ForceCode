@@ -13,3 +13,5 @@ out/test/**
 .sfdx/**
 .github/**
 webpack.config.js
+analytics.json
+package.xml

@@ -132,8 +132,11 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
                 member = getAuraNameFromFileName(file, 'aura');
             } else if(fileTT === 'LightningComponentBundle') {
                 member = getAuraNameFromFileName(file, 'lwc');
+            } else if(fileTT === 'Document' || fileTT === 'EmailTemplate' || fileTT === 'Report' || fileTT === 'Dashboard') {
+                const file2 = file.split(vscode.window.forceCode.projectRoot + path.sep).pop();
+                member = file2.substring(file2.indexOf(path.sep) + 1).split('.').shift();
             } else {
-                member = file.split(path.sep).pop().split('.')[0];
+                member = file.split(path.sep).pop().split('.').shift();
             }
             const index: number = findMDTIndex(packObj, fileTT);
             if(index !== -1) {

@@ -2,6 +2,8 @@
 
 * 3.13.1
     * Fix linguring issue with no notification shown on build error
+    * Add ability to save/deploy email templates and documents
+    * Fix deploying reports and dashboards
 * 3.13.0
     * Add menu option to create scratch orgs
     * The Create Class menu option is now the New... option. You can now create Aura components, classes, LWC components, triggers, and Visualforce pages/components.
