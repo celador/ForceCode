@@ -140,7 +140,7 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
         const projRoot: string = vscode.window.forceCode.projectRoot + path.sep;
         const ffNameParts: string[] = uri.fsPath.split(projRoot)[1].split(path.sep);
         var baseDirectoryName: string = path.parse(uri.fsPath).name;
-        const isAura: boolean = ffNameParts[0] === 'aura';
+        const isAura: boolean = ffNameParts[0] === 'aura' || ffNameParts[0] === 'lwc';
         const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
         const tType: string = getAnyTTFromFolder(uri);
         const isInFolder: boolean = isFoldered(tType);
@@ -152,7 +152,7 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
             resolve({ name: tType, members: [folderedName] });
         } else if(isDir) {
             if(isAura) {
-                if(baseDirectoryName === 'aura') {
+                if(baseDirectoryName === 'aura' || baseDirectoryName === 'lwc') {
                     baseDirectoryName = '*';
                 }
                 resolve({ name: tType, members: [baseDirectoryName] });
@@ -160,14 +160,10 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
                 getFolderContents(tType, ffNameParts[1]).then(contents => {
                     resolve({ name: tType, members: contents });
                 });
-                
-            } else if(isInFolder) {
+            } else {
                 getMembers([tType]).then(members => {
                     resolve(members[0]);
                 });
-            } else {
-                baseDirectoryName = '*';
-                resolve({ name: tType, members: [baseDirectoryName] });
             }
         } else {
             resolve({ name: tType, members: [baseDirectoryName] });
