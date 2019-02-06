@@ -72,6 +72,10 @@
         "title": "ForceCode: Save/Deploy/Compile"
       },
       {
+        "command": "ForceCode.openFlowBuilder",
+        "title": "ForceCode: Open Flow Builder"
+      },
+      {
         "command": "ForceCode.refresh",
         "title": "ForceCode: Refresh from server"
       },
@@ -269,6 +273,11 @@
           "group": "ForceCode"
         },
         {
+          "when": "resourceExtname == .flow && ForceCodeActive && ForceCodeLoggedIn",
+          "command": "ForceCode.openFlowBuilder",
+          "group": "ForceCode"
+        },
+        {
           "when": "ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.refresh",
           "group": "ForceCode"
@@ -324,6 +333,11 @@
           "when": "ForceCodeActive && !explorerResourceIsFolder && ForceCodeLoggedIn",
           "command": "ForceCode.compile",
           "group": "ForceCode"
+        },
+        {
+          "when": "resourceExtname == .flow && ForceCodeActive && ForceCodeLoggedIn",
+          "command": "ForceCode.openFlowBuilder",
+          "group": "ForceCode"
         }
       ],
       "view/item/context": [
@@ -359,6 +373,10 @@
         {
           "command": "ForceCode.compile",
           "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
+        },
+        {
+          "command": "ForceCode.openFlowBuilder",
+          "when": "resourceExtname == .flow && ForceCodeActive && ForceCodeLoggedIn"
         },
         {
           "command": "ForceCode.refresh",
@@ -451,7 +469,7 @@
     "vsce": "1.55.0",
     "vscode": "1.1.28",
     "webpack": "4.2.0",
-    "webpack-cli": "3.2.1",
+    "webpack-cli": "^3.2.1",
     "webpack-node-externals": "1.7.2"
   }
 }
