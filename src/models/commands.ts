@@ -12,6 +12,8 @@ import { Config } from '../forceCode';
 import { readConfigFile, removeConfigFolder } from '../services/configuration';
 import { createScratchOrg } from '../commands/createScratchOrg';
 import { Task } from '../services/commandView';
+import { parseString } from 'xml2js';
+import * as fs from 'fs-extra';
 
 export const fcCommands: FCCommand[] = [
 	{
@@ -341,7 +343,7 @@ export const fcCommands: FCCommand[] = [
 		commandName: 'ForceCode.refreshContext',
 		name: 'Retrieving ',
 		hidden: true,
-		command: async function (context, selectedResource?) {
+		command: async function (context, selectedResource?, task?: Task) {
 			if (selectedResource && selectedResource instanceof Array) {
 				return new Promise((resolve) => {
 					var files: PXMLMember[] = [];
@@ -359,17 +361,17 @@ export const fcCommands: FCCommand[] = [
 								files.push(curName);
 							}
 						});
-						resolve(commands.retrieve({ types: files }));
+						resolve(commands.retrieve({ types: files }, task));
 					});
 				});
 			}
 			if (context) {
-				return commands.retrieve(context);
+				return commands.retrieve(context, task);
 			}
 			if (!vscode.window.activeTextEditor) {
 				return undefined;
 			}
-			return commands.retrieve(vscode.window.activeTextEditor.document.uri);
+			return commands.retrieve(vscode.window.activeTextEditor.document.uri, task);
 
 			function getTTIndex(toolType: string, arr: ToolingType[]): number {
 				return arr.findIndex(cur => {
@@ -400,6 +402,33 @@ export const fcCommands: FCCommand[] = [
 			var vfFileNameSplit = context.fsPath.split(path.sep);
 			var vfFileName = vfFileNameSplit[vfFileNameSplit.length - 1].split('.')[0];
 			return dxService.openOrgPage('/apex/' + vfFileName);
+		}
+	},
+	{
+
+		commandName: 'ForceCode.openFlowBuilder',
+		hidden: false,
+		name: 'Opening ',
+		description: 'Open the active file in Flow Builder.',
+		icon: 'rocket',
+		label: 'Open Flow Builder',
+		command: function (context, selectedResource?) {
+			return new Promise((resolve, reject) => {
+				fs.readFile(context.fsPath, (err, data) => {
+					if(err) reject(err);
+					parseString(data, (err, result) => {
+						if(err) reject(err);
+						else {
+							const label = result.Flow.label[0];
+							const query = `SELECT Id FROM Flow WHERE MasterLabel = '${label}'`;
+							vscode.window.forceCode.conn.tooling.query(query).then(res => {
+								return dxService.openOrgPage('/builder_platform_interaction/flowBuilder.app?isFromAloha=false&flowId=' + res.records[0].Id);
+							}).catch(err => reject(err));
+						}
+					})
+				})
+
+			});			
 		}
 	},
 	{

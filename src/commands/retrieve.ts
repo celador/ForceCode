@@ -134,11 +134,11 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes, task?: Ta
                 placeHolder: 'Retrieve Package',
             };
             return vscode.window.showQuickPick(options, config).then(res => {
-            if (!res) {
-                return Promise.reject();
-            }
-            return res;
-        });
+                if (!res) {
+                    return Promise.reject();
+                }
+                return res;
+            });
         });
     }
 
@@ -245,6 +245,14 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes, task?: Ta
                             {
                                 name: 'CustomObject',
                                 members: objs
+                            },
+                            {
+                                name: 'DataCategoryGroup',
+                                members: ['*']
+                            },
+                            {
+                                name: 'ExternalDataSource',
+                                members: ['*']
                             },
                             {
                                 name: 'Layout',
