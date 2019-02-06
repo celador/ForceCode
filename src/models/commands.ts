@@ -11,6 +11,7 @@ import { FCCommand } from '../services/commandView';
 import { Config } from '../forceCode';
 import { readConfigFile, removeConfigFolder } from '../services/configuration';
 import { createScratchOrg } from '../commands/createScratchOrg';
+import { Task } from '../services/commandView';
 
 export const fcCommands: FCCommand[] = [
 	{
@@ -236,8 +237,8 @@ export const fcCommands: FCCommand[] = [
 		detail: 'You can choose to retrieve by your package.xml, retrieve all metadata, or choose which types to retrieve.',
 		icon: 'cloud-download',
 		label: 'Retrieve Package/Metadata',
-		command: function (context, selectedResource?) {
-			return commands.retrieve(context);
+		command: function (context, selectedResource?, task?: Task) {
+			return commands.retrieve(context, task);
 		}
 	},
 	// Export Package (Deploy via Metadata API, using Package.xml)

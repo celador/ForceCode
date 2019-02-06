@@ -14,6 +14,7 @@ import { outputToString } from '../parsers/output';
 import { packageBuilder } from '.';
 import { getMembers } from './packageBuilder';
 import { XHROptions, xhr } from 'request-light';
+import { Task, CommandViewService } from '../services/commandView';
 
 export interface ToolingType {
     name: string;
@@ -24,7 +25,7 @@ export interface ToolingTypes {
     types: ToolingType[];
 }
 
-export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
+export default function retrieve(resource?: vscode.Uri | ToolingTypes, task?: Task) {
     const errMessage: string = 'Either the file/metadata type doesn\'t exist in the current org or you\'re trying to retrieve outside of '
         + vscode.window.forceCode.projectRoot;
     let option: any;
@@ -122,6 +123,11 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 detail: `All Custom Objects`,
                 description: 'customobj',
             });
+            options.push({
+                label: '$(cloud-download) Get All Profiles from org',
+                detail: `All Profiles`,
+                description: 'profiles',
+            });
             let config: {} = {
                 matchOnDescription: true,
                 matchOnDetail: true,
@@ -181,7 +187,17 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 reject(e);
             }
             if(theStream) {
-                resolve(theStream.stream());
+                theStream
+                    .on('progress', (result) => {
+                        CommandViewService.getInstance().updateLabel(task, `Retrieving package (${result.id} - ${result.state})`);
+                    })
+                    .on('complete', (result) => {
+                        CommandViewService.getInstance().updateLabel(task, `Retrieving package (${result.id} - ${result.state})`);
+                    })
+                    .on('error', (err) => {
+                        reject(err);
+                    });
+                    resolve(theStream.stream());
             } else {
                 reject({ message: 'Cannot retrieve more than 10,000 files at a time. Please select "Choose Types..." from the retrieve menu and try to download without Reports selected first.'});
             }
@@ -204,8 +220,44 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 getObjects(SObjectCategory.STANDARD);
             } else if(option.description === 'user-choice') {
                 builder();
+            } else if(option.description === 'profiles') {
+                getProfiles();
             } else {
                 reject();
+            }
+
+            function getProfiles() {
+                new SObjectDescribe().describeGlobal(SObjectCategory.ALL).then(objs => {
+                    let retrieveTypes: ToolingTypes = {
+                        types: [
+                            {
+                                name: 'ApexClass',
+                                members: ['*']
+                            },
+                            {
+                                name: 'ApexPage',
+                                members: ['*']
+                            },
+                            {
+                                name: 'CustomApplication',
+                                members: ['*']
+                            },
+                            {
+                                name: 'CustomObject',
+                                members: objs
+                            },
+                            {
+                                name: 'Layout',
+                                members: ['*']
+                            },
+                            {
+                                name: 'Profile',
+                                members: ['*']
+                            },
+                        ]
+                    }
+                    retrieveComponents(resolve, reject, retrieveTypes);
+                });
             }
 
             function builder() {
@@ -283,31 +335,35 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                     stream.on('end', next);
                     const name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
                     if (header.type === 'file') {
-                        const tType: string = getToolingTypeFromExt(name);
-                        if (tType) {
-                            // add to ws members
-                            var wsMem: IWorkspaceMember = {
-                                name: name.split(path.sep).pop().split('.')[0],
-                                path: `${vscode.window.forceCode.projectRoot}${path.sep}${name}`,
-                                id: '',//metadataFileProperties.id,
-                                lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
-                                lastModifiedByName: '',
-                                lastModifiedById: '',
-                                type: tType,
-                                saveTime: true
+                        CommandViewService.getInstance().updateLabel(task, `Retrieving Package (Processing ${name})`);
+                        if(option.description !== 'profiles') {
+                            const tType: string = getToolingTypeFromExt(name);
+                            if (tType) {
+                                // add to ws members
+                                var wsMem: IWorkspaceMember = {
+                                    name: name.split(path.sep).pop().split('.')[0],
+                                    path: `${vscode.window.forceCode.projectRoot}${path.sep}${name}`,
+                                    id: '',//metadataFileProperties.id,
+                                    lastModifiedDate: '',//metadataFileProperties.lastModifiedDate,
+                                    lastModifiedByName: '',
+                                    lastModifiedById: '',
+                                    type: tType,
+                                    saveTime: true
+                                }
+
+                                newWSMembers.push(wsMem);
+
+                                if (!typeNames.includes(tType)) {
+                                    typeNames.push(tType);
+                                    toolTypes.push({ type: tType });
+                                }
                             }
-
-                            newWSMembers.push(wsMem);
-
-                            if (!typeNames.includes(tType)) {
-                                typeNames.push(tType);
-                                toolTypes.push({ type: tType });
+                            if (name.endsWith('.resource-meta.xml')) {
+                                resBundleNames.push(name);
                             }
                         }
-                        if (name.endsWith('.resource-meta.xml')) {
-                            resBundleNames.push(name);
-                        }
-                        if (name !== 'package.xml' || vscode.window.forceCode.config.overwritePackageXML) {
+                        if ((name !== 'package.xml' || vscode.window.forceCode.config.overwritePackageXML) &&
+                            (option.description !== 'profiles' || name.endsWith('.profile'))) {
                             if(!fs.existsSync(path.dirname(path.join(destDir, name)))) {
                                 fs.mkdirpSync(path.dirname(path.join(destDir, name)));
                             }

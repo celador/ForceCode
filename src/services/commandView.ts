@@ -18,7 +18,7 @@ export interface FCCommand {
   detail?: string,
   icon?: string,
   label?: string,
-  command: (context: any, selectedResource: any) => any;
+  command: (context: any, selectedResource: any, task: Task) => any;
 }
 
 const FIRST_TRY = 1;
@@ -88,6 +88,14 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     return false;
   }
 
+  public updateLabel(task: Task, label: string): void {
+    let treeItem: vscode.TreeItem = this.getTreeItem(task);
+    if(treeItem.label !== label) {
+      treeItem.label = label;
+      this._onDidChangeTreeData.fire();
+    }
+  }
+
   public getTreeItem(element: Task): vscode.TreeItem {
     return element;
   }
@@ -126,7 +134,7 @@ export class Task extends vscode.TreeItem {
   }
 
   public run(attempt: number) {
-    return new Promise((resolve) => { resolve(this.execution.command(this.context, this.selectedResource)); })
+    return new Promise((resolve) => { resolve(this.execution.command(this.context, this.selectedResource, this)); })
       .catch(reason => {
         return fcConnection.checkLoginStatus(reason).then(loggedIn => {
           if(loggedIn || attempt === SECOND_TRY) {
