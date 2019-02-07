@@ -51,6 +51,8 @@ export function getToolingTypeFromExt(path: string) {
     } else if (path.endsWith('.cmp') || path.endsWith('.app') || path.endsWith('.evt') || path.endsWith('.intf') 
         || path.endsWith('.tokens')) {
         return 'AuraDefinitionBundle';
+    } else if (path.endsWith('.html')) {
+        return 'LightningComponentBundle';
     }
     return undefined;
 }

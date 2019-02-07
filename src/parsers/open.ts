@@ -26,8 +26,7 @@ export function getIcon(toolingType: string) {
     }
 }
 export function getFileExtension(document: vscode.TextDocument) {
-    var ext: string = document.fileName.substring(document.fileName.lastIndexOf('.') + 1, document.fileName.length);
-    return ext;
+    return document.fileName.split('.').pop();
 }
 export function getExtension(toolingType: string) {
     switch (toolingType) {
@@ -105,6 +104,8 @@ export function getToolingTypeFromFolder(uri: vscode.Uri): string {
             return 'AuraDefinitionBundle';
         case 'components':
             return 'ApexComponent';
+        case 'lwc':
+            return 'LightningComponentBundle';
         default:
             return undefined;
     }
@@ -116,7 +117,7 @@ export function getAnyTTFromPath(thepath: string): string {
     if(thepath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
         return undefined;
     }
-    var fileName: string = thepath.split(vscode.window.forceCode.projectRoot + path.sep)[1];
+    var fileName: string = thepath.split(vscode.window.forceCode.projectRoot + path.sep).pop();
     var baseDirectoryName: string = fileName.split(path.sep)[0];
     var types: any[] = vscode.window.forceCode.describe.metadataObjects
         .filter(o => o.directoryName === baseDirectoryName)

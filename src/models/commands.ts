@@ -162,7 +162,7 @@ export const fcCommands: FCCommand[] = [
 				return;
 			}
 			const ttype: string = getToolingType(vscode.window.activeTextEditor.document);
-			return commands.diff(vscode.window.activeTextEditor.document, ttype === 'AuraDefinition');
+			return commands.diff(vscode.window.activeTextEditor.document, ttype === 'AuraDefinition' || ttype === 'LightningComponentResource');
 		}
 	},
 	// Compile/Deploy
