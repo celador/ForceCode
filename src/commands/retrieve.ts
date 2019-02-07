@@ -343,8 +343,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes, task?: Ta
                     stream.on('end', next);
                     const name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
                     if (header.type === 'file') {
-                        CommandViewService.getInstance().updateLabel(task, `Retrieving Package (Processing ${name})`);
-                        if(option.description !== 'profiles') {
+                        if(!option || option.description !== 'profiles') {
                             const tType: string = getToolingTypeFromExt(name);
                             if (tType) {
                                 // add to ws members
@@ -371,7 +370,9 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes, task?: Ta
                             }
                         }
                         if ((name !== 'package.xml' || vscode.window.forceCode.config.overwritePackageXML) &&
-                            (option.description !== 'profiles' || name.endsWith('.profile'))) {
+                            (!option || option.description !== 'profiles' || name.endsWith('.profile'))) {
+
+                            CommandViewService.getInstance().updateLabel(task, `Retrieving Package (Processing ${name})`);
                             if(!fs.existsSync(path.dirname(path.join(destDir, name)))) {
                                 fs.mkdirpSync(path.dirname(path.join(destDir, name)));
                             }

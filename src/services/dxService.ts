@@ -257,6 +257,10 @@ export default class DXService implements DXCommands {
         return this.runCommand('org:open', '-p ' + url);
     }
 
+    public getOrgPageUrl(url: string): Promise<any> {
+        return this.runCommand('org:open', '-r -p ' + url);
+    }
+
     public createScratchOrg(options: string): Promise<any> {
         return this.runCommand('org:create', 
             options + ' --targetdevhubusername ' + fcConnection.currentConnection.orgInfo.username);

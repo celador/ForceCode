@@ -7,13 +7,15 @@ import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
 import { ToolingType } from '../commands/retrieve';
 import { getAnyNameFromUri } from '../parsers/open';
-import { FCCommand } from '../services/commandView';
+import { FCCommand, CommandViewService } from '../services/commandView';
 import { Config } from '../forceCode';
 import { readConfigFile, removeConfigFolder } from '../services/configuration';
 import { createScratchOrg } from '../commands/createScratchOrg';
 import { Task } from '../services/commandView';
 import { parseString } from 'xml2js';
 import * as fs from 'fs-extra';
+import opn = require('opn');
+import { tmpdir } from 'os';
 
 export const fcCommands: FCCommand[] = [
 	{
@@ -405,14 +407,17 @@ export const fcCommands: FCCommand[] = [
 		}
 	},
 	{
-
 		commandName: 'ForceCode.openFlowBuilder',
-		hidden: false,
-		name: 'Opening ',
-		description: 'Open the active file in Flow Builder.',
-		icon: 'rocket',
-		label: 'Open Flow Builder',
+		hidden: true,
 		command: function (context, selectedResource?) {
+			commandService.runCommand('ForceCode.launchFlowBuilder', context, selectedResource);
+		}
+	},
+	{
+		commandName: 'ForceCode.launchFlowBuilder',
+		hidden: true,
+		name: 'Opening Flow Builder',
+		command: async function (context, selectedResource?, task?: Task) {
 			return new Promise((resolve, reject) => {
 				fs.readFile(context.fsPath, (err, data) => {
 					if(err) reject(err);
@@ -420,9 +425,33 @@ export const fcCommands: FCCommand[] = [
 						if(err) reject(err);
 						else {
 							const label = result.Flow.label[0];
-							const query = `SELECT Id FROM Flow WHERE MasterLabel = '${label}'`;
+							const query = `SELECT Id FROM Flow WHERE MasterLabel = '${label}' ORDER BY VersionNumber DESC`;
 							vscode.window.forceCode.conn.tooling.query(query).then(res => {
-								return dxService.openOrgPage('/builder_platform_interaction/flowBuilder.app?isFromAloha=false&flowId=' + res.records[0].Id);
+								let options = {
+									wait: true,
+									app: null
+								};
+
+								let randomDir = fs.mkdtempSync(path.join(tmpdir(), 'forcecode-'));
+
+								switch(process.platform) {
+									case 'darwin':
+										options.app = ['google chrome', `--user-data-dir=${randomDir}`];
+										break;
+									case 'win32':
+										options.app = ['chrome', `--user-data-dir=${randomDir}`];
+										break;
+									case 'linux':
+										options.app = ['google-chrome', `--user-data-dir=${randomDir}`];
+										break;
+								}
+
+								dxService.getOrgPageUrl(`/builder_platform_interaction/flowBuilder.app?isFromAloha=false&flowId=${res.records[0].Id}`).then(response => {
+									CommandViewService.getInstance().updateLabel(task, `Editing ${label}`);
+									opn(response.url, options).then(child => {
+										resolve(commands.retrieve(context, task));
+									});
+								});
 							}).catch(err => reject(err));
 						}
 					})
