@@ -98,16 +98,6 @@ export class FCConnection extends vscode.TreeItem {
             this.contextValue = 'notLoggedInConn';
         }
         this.showLimits(this);
-        this.showLimitsService(this);
-    }
-
-    private showLimitsService(service: FCConnection) {
-        if (service.limInterval) {
-            clearInterval(service.limInterval);
-        }
-        service.limInterval = setInterval(function (service: FCConnection) {
-            service.showLimits(service);
-        }, 5000, service);
     }
 
     private showLimits(service: FCConnection) {

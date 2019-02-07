@@ -83,6 +83,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
       }
 
       this._onDidChangeTreeData.fire();
+      fcConnection.refreshConnsStatus();
       return true;
     }
     return false;
