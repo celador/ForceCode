@@ -172,7 +172,7 @@
             for(var col = 0; col < cells.length; col++) {
                 var cell = cells[col];
                 cell = cell.replace('"', '');
-                resultsTable += '<td' + (col === headArrIdIndex ? '>' : ' onclick="showData(this)">') + cell + '</td>';
+                resultsTable += '<td' + ((headArrIdIndex === undefined || col === headArrIdIndex) ? '>' : ' onclick="showData(this)">') + cell + '</td>';
             }
             resultsTable += '</tr>'
         }
