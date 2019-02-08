@@ -8,7 +8,6 @@ import klaw = require('klaw');
 import { getAuraNameFromFileName } from '../parsers';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
-import constants from '../models/constants';
 import { getAnyTTFromPath } from '../parsers/open';
 import { outputToString } from '../parsers/output';
 
@@ -122,7 +121,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
         var packObj: PXML = {
             Package: {
                 types: [],
-                version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION
+                version: vscode.window.forceCode.config.apiVersion || vscode.workspace.getConfiguration('force')['defaultApiVersion']
             },
         }
         files.forEach(file => {

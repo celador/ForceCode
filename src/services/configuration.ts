@@ -3,12 +3,11 @@ import { Config } from './../forceCode';
 import * as forceCode from './../forceCode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import constants from './../models/constants';
 import { fcConnection, ForceService } from '.';
 import * as deepmerge from 'deepmerge'
 
 export const defautlOptions = {
-	apiVersion: constants.API_VERSION,
+	apiVersion: vscode.workspace.getConfiguration('force')['defaultApiVersion'],
 	autoRefresh: false,
 	browser: 'Google Chrome Canary',
 	checkForFileChanges: false,
@@ -65,7 +64,7 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
 				default: true
 			}],
 			sfdcLoginUrl: 'https://login.salesforce.com/',
-			sourceApiVersion: constants.API_VERSION,
+			sourceApiVersion: vscode.workspace.getConfiguration('force')['defaultApiVersion'],
 		};
 
 		fs.outputFileSync(path.join(projPath, 'sfdx-project.json'), JSON.stringify(sfdxProj, undefined, 4));

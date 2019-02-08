@@ -6,6 +6,7 @@
     * Fix deploying reports and dashboards
     * Fix issues with refreshing via the explorer context menu
     * Fix issue trying to update data in the query editor without selecting an Id
+    * Add force.defaultApiVersion workspace setting. This allows you to configure what API version to default to when creating a new project or logging into a new org
 * 3.13.0
     * Add menu option to create scratch orgs
     * The Create Class menu option is now the New... option. You can now create Aura components, classes, LWC components, triggers, and Visualforce pages/components.

@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
-import constants from './../models/constants';
 import { commandService, codeCovViewService, fcConnection, FCOauth, toArray } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
@@ -175,7 +174,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             try {
                 theStream = vscode.window.forceCode.conn.metadata.retrieve({
                     unpackaged: retrieveTypes,
-                    apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
+                    apiVersion: vscode.window.forceCode.config.apiVersion || vscode.workspace.getConfiguration('force')['defaultApiVersion'],
                 });
             } catch(e) {
                 reject(e);

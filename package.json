@@ -191,6 +191,11 @@
             ".log": true
           },
           "description": "An object describing the files to exclude from the Static Resource build. The key is a Nodejs \"Glob\" pattern, the value is true or false"
+        },
+        "force.defaultApiVersion": {
+          "type": "string",
+          "default": "45.0",
+          "description": "The Salesforce API version to use when logging into new orgs. Must be in the format of XX.X. Example: 45.0"
         }
       }
     },
