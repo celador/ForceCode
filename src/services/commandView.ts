@@ -53,7 +53,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   public addCommandExecution(execution: FCCommand, context: any, selectedResource?: any) {
     if(execution.commandName === 'ForceCode.fileModified') {
       this.fileModCommands++;
-      if(this.fileModCommands > vscode.window.forceCode.config.maxFileChangeNotifications) {
+      if(this.fileModCommands > vscode.workspace.getConfiguration('force')['maxFileChangeNotifications']) {
         return Promise.resolve();
       }
     }

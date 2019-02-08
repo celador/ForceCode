@@ -282,11 +282,6 @@ The configuration file will look like the following. You can either edit this fi
 
 * apiVersion: This is the default api version that all your files will be saved with. ForceCode will not change the version of an existing file.  This is also the version used for package retrieval and deploy.
 * autoCompile: When a supported file is saved \(works with VSCode's autosave feature\) the file is saved/compiled on the server.  Otherwise, use `cmd + opt + s` (Mac) or `ctrl + shift + s` (Win/Linux) to save the file to the server.
-* autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on \(and you're working on a Mac\), the currently active tab in Google Chrome Canary \(or your configured browser\) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
-* browser: Define which browser you want to reload when the static resource refreshes \(this only works with Macs at the moment\)
-* checkForFileChanges: This option, when set to true, will allow ForceCode to check for file changes against the server on startup of ForceCode.
-* debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
-* debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
 * deployOptions: Deploy your package based on your configured deploy options and the package.xml in your src folder.
   * allowMissingFiles: Specifies whether a deploy succeeds even if files that are specified in package.xml but are not in the .zip file or not.
   * checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.
@@ -295,19 +290,11 @@ The configuration file will look like the following. You can either edit this fi
   * rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
   * runTests:        A list of Apex tests to run during deployment \(commma separated list\)
   * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
-* maxFileChangeNotifications: The maximum number of file change notifications that will be shown on statup of the extension
-* maxQueryHistory: The maximum number of queries to store in the query history of the query editor
-* maxQueryResultsPerPage: The maximum number of results to show per page when executing a query
-* outputQueriesAsCSV: if set to true, will retrieve soql/toql results in csv form. If false, json will be returned
 * overwritePackageXML: if set to true, will overwrite package.xml file upon opening or retrieving files
 * poll: When compiling, this is the interval \(in milliseconds\) at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
 * pollTimeout: When retrieving packages, or other long running tasks, this is the maximum amount of time \(in seconds\) it will wait before the process times out.  If you're having trouble retrieving your package, try increasing this number.  Default is 600 \(10 minutes\).
 * prefix: This is the namespce prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise ForceCode will attempt to infer a prefix from your Salesforce Org.  If you have a namespaced org and do not set this setting, you may have problems, especially if working on an out of date Org.  This should be automatic as of Salesforce 38
-* revealTestedClass: When set to true, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed.
-* showFilesOnOpen: If set to true, will open files in the editor when opened from Salesforce
-* showFilesOnOpenMax: The maximum number of files to open in the editor. More than 3 usually causes problems or doesn't work.
 * showTestCoverage: This flag determines if Apex code coverage highlighting should be shown or hidden in the editor.  This can be toggled for the open editor by clicking the colorful icon in the editor bar.
-* showTestLog: This flag determines if the Log file for the last test run should show up after the tests are complete.  This is nice for debugging tests.  Use this in conjunction with the other debug flags to keep your output tidy. The log file will only show if it's not empty (Because of filtering).
 * spaDist: When working with SPAs we usually have a "distribution" folder where we build our files to.  If this string is set, and a SPA is bundled and deployed, this folder will be used as the distribution folder, otherwise the spa project will be deployed.
 * src: This will tell ForceCode where to store the project files for this org.
 * staticResourceCacheControl: You can select Public or Private and your static resources will save with the cacheControl set to what this option is set to.
@@ -315,7 +302,7 @@ The configuration file will look like the following. You can either edit this fi
 * url: DO NOT TOUCH THIS
 
 
-There's also two special configuration options that are not included in the settings.json, but rather in your vscode settings.json file. This reasoning for separating the files is for portability reasons; to make it easier to share this configuration with others and yourself across projects.  
+There's also workspace configuration options that are not included in the settings.json, but rather in your vscode settings.json file. The reasoning for separating the files is for portability reasons; to make it easier to share this configuration with others and yourself across projects.  
 If you open up your settings.json file, or go to Code &gt; Preferences &gt; Workspace Settings and create a new preference, starting with `force` you should see the defaultApiVersion and filesExclude preferences. The defaultApiVersion will be what ForceCode uses as the API version when creating new projects or logging into new orgs. 
 The filesExclude property allows you to have certain files ignored \(exluded\) from Static Resources when bundled/deployed.  This allows you to create a modern SPA project in a "spa" folder instead of keeping it in your "resource-bundles" directory.  
 However, when we build these SPAs we generally have a ton of preference and source files that we don't want to deploy to Salesforce, both for security and size reasons.  
@@ -335,6 +322,21 @@ Glob patterns can be tricky... so a little research and trial and error may be r
     ".log": true
 }
 ```
+
+The following settings have been migrated to the workspace settings as well:
+* autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on \(and you're working on a Mac\), the currently active tab in Google Chrome Canary \(or your configured browser\) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
+* browser: Define which browser you want to reload when the static resource refreshes \(this only works with Macs at the moment\)
+* checkForFileChanges: This option, when set to true, will allow ForceCode to check for file changes against the server on startup of ForceCode.
+* debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
+* debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
+* maxFileChangeNotifications: The maximum number of file change notifications that will be shown on startup of the extension
+* maxQueryHistory: The maximum number of queries to store in the query history of the query editor
+* maxQueryResultsPerPage: The maximum number of results to show per page when executing a query in the query editor
+* outputQueriesAsCSV: If set to true, will retrieve soql/toql results in csv form. If false, json will be returned
+* revealTestedClass: When set to true, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed.
+* showFilesOnOpen: If set to true, will open files in the editor when opened from Salesforce
+* showFilesOnOpenMax: The maximum number of files to open in the editor. More than 3 usually causes problems or doesn't work.
+* showTestLog: This flag determines if the Log file for the last test run should show up after the tests are complete.  This is nice for debugging tests.  Use this in conjunction with the other debug flags to keep your output tidy. The log file will only show if it's not empty (Because of filtering).
 
 ## Help Develop ForceCode 
 

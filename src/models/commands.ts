@@ -282,9 +282,9 @@ export const fcCommands: FCCommand[] = [
 		name: 'Opening settings',
 		hidden: false,
 		description: 'Settings',
-		detail: 'Change the settings in you force.json via a GUI.',
+		detail: 'Change project settings specific to each org.',
 		icon: 'gear',
-		label: 'Settings',
+		label: 'Org Settings',
 		command: function (context, selectedResource?) {
 			return commands.settings();
 		}

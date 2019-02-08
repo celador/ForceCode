@@ -177,6 +177,36 @@
       "type": "object",
       "title": "ForceCode configuration",
       "properties": {
+        "force.autoRefresh": {
+          "type": "boolean",
+          "default": false,
+          "description": "If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on (and you're working on a Mac), the currently active tab in Google Chrome Canary (or your configured browser) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync"
+        },
+        "force.browser": {
+          "type": "string",
+          "default": "Google Chrome Canary",
+          "description": "Define which browser you want to reload when the static resource refreshes (this only works with Macs at the moment)"
+        },
+        "force.checkForFileChanges": {
+          "type": "boolean",
+          "default": false,
+          "description": "This option, when set to true, will allow ForceCode to check for file changes against the server on startup of ForceCode."
+        },
+        "force.defaultApiVersion": {
+          "type": "string",
+          "default": "45.0",
+          "description": "The Salesforce API version to use when logging into new orgs. Must be in the format of XX.X. Example: 45.0"
+        },
+        "force.debugFilter": {
+          "type": "string",
+          "default": "USER_DEBUG|FATAL_ERROR",
+          "description": "A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise."
+        },
+        "force.debugOnly": {
+          "type": "boolean",
+          "default": true,
+          "description": "When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail."
+        },
         "force.filesExclude": {
           "type": "object",
           "default": {
@@ -192,10 +222,45 @@
           },
           "description": "An object describing the files to exclude from the Static Resource build. The key is a Nodejs \"Glob\" pattern, the value is true or false"
         },
-        "force.defaultApiVersion": {
-          "type": "string",
-          "default": "45.0",
-          "description": "The Salesforce API version to use when logging into new orgs. Must be in the format of XX.X. Example: 45.0"
+        "force.maxFileChangeNotifications": {
+          "type": "number",
+          "default": 15,
+          "description": "The maximum number of file change notifications that will be shown on startup of the extension."
+        },
+        "force.maxQueryHistory": {
+          "type": "number",
+          "default": 10,
+          "description": "The maximum number of queries to store in the query history of the query editor."
+        },
+        "force.maxQueryResultsPerPage": {
+          "type": "number",
+          "default": 250,
+          "description": "The maximum number of results to show per page when executing a query in the query editor."
+        },
+        "force.outputQueriesAsCSV": {
+          "type": "boolean",
+          "default": true,
+          "description": "If set to true, will retrieve soql/toql results in csv form. If false, json will be returned."
+        },
+        "force.revealTestedClass": {
+          "type": "boolean",
+          "default": false,
+          "description": "When set to true, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed."
+        },
+        "force.showFilesOnOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "If set to true, will open files in the editor when opened from Salesforce."
+        },
+        "force.showFilesOnOpenMax": {
+          "type": "number",
+          "default": 3,
+          "description": "The maximum number of files to open in the editor. More than 3 usually causes problems or doesn't work."
+        },
+        "force.showTestLog": {
+          "type": "boolean",
+          "default": true,
+          "description": "This flag determines if the Log file for the last test run should show up after the tests are complete.  This is nice for debugging tests.  Use this in conjunction with the other debug flags to keep your output tidy. The log file will only show if it's not empty (Because of filtering)."
         }
       }
     },
