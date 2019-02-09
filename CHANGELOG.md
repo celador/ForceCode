@@ -8,6 +8,7 @@
     * Fix deploying reports and dashboards
     * Fix issues with refreshing via the explorer context menu
     * Fix issue trying to update data in the query editor without selecting an Id
+    * Fix ugly error messages from dxService
 * 3.13.0
     * Add menu option to create scratch orgs
     * The Create Class menu option is now the New... option. You can now create Aura components, classes, LWC components, triggers, and Visualforce pages/components.

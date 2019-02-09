@@ -132,7 +132,7 @@ export class Task extends vscode.TreeItem {
         return fcConnection.checkLoginStatus(reason).then(loggedIn => {
           if(loggedIn || attempt === SECOND_TRY) {
             if(reason) {
-              vscode.window.showErrorMessage(reason.message ? reason.message : reason);
+              vscode.window.showErrorMessage(reason.message ? reason.message : reason, 'OK');
               return trackEvent('Error Thrown', reason.message ? reason.message : reason)
                 .then(() => {
                   return reason;
