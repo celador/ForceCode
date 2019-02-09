@@ -96,6 +96,7 @@ Please note that the following permissions are required to develop on the Force.
     * Change your project `src` folder
     * Flexible project structure
 * API Limit Warnings (Now a hover, when you hover over usernames in the Saved Usernames view (This also shows the project's path))
+* Perform bulk record updates with CSV files (Insert, update, upsert, delete, hard delete)
 
 ## FAQ
 
@@ -230,6 +231,10 @@ This will grab all sObject data from Salesforce and allow you to use this extens
 
 This will open a ForceCode Settings window where you can change all of the options in your settings.json file in a GUI!
 
+### Bulk Loader
+
+Select this menu option to be taked to a screen where you will be able to upload a CSV file full of record data that you will be able to perform CRUD operations on. Simply select an sObject name, CRUD operation, and upload a CSV. Then click "Execute" and watch the magic happen! If you get a file format error it will be shown on the screen. If there are errors during the CRUD operation then Forcecode will show you a save dialog box asking where you want to save the error file. The error file currently isn't as fancy as dataloader, as the results returned from errors aren't much, but it will tell you the line number(s) in Excel that have the errors, along with what the error was. 
+
 ## Configuration
 
 You need to have a folder opened in VSCode to be able to start this extension!
@@ -243,11 +248,6 @@ The configuration file will look like the following. You can either edit this fi
 {
     "apiVersion": "44.0",
     "autoCompile": true,
-    "autoRefresh": true,
-    "browser": "Google Chrome Canary",
-    "checkForFileChanges": false,
-    "debugFilter": "USER_DEBUG|FATAL_ERROR",
-    "debugOnly": true,
     "deployOptions": {
         "allowMissingFiles": true,
         "checkOnly": false,
@@ -257,19 +257,11 @@ The configuration file will look like the following. You can either edit this fi
         "runTests": [],
         "testLevel": "NoTestRun"
     },
-    "maxFileChangeNotifications": 15,
-	"maxQueryHistory": 10,
-	"maxQueryResultsPerPage": 250,
-    "outputQueriesAsCSV": true,
     "overwritePackageXML": false,
     "poll": 1500,
     "pollTimeout": 1200,
     "prefix": "",
-    "revealTestedClass": false,
-    "showFilesOnOpen": true,
-    "showFilesOnOpenMax": 3,
     "showTestCoverage": true,
-    "showTestLog": false,
     "spaDist": "dist",
     "src": "src",
     "staticResourceCacheControl": "Private",
@@ -326,6 +318,7 @@ Glob patterns can be tricky... so a little research and trial and error may be r
 The following settings have been migrated to the workspace settings as well:
 * autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on \(and you're working on a Mac\), the currently active tab in Google Chrome Canary \(or your configured browser\) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
 * browser: Define which browser you want to reload when the static resource refreshes \(this only works with Macs at the moment\)
+* bulkLoaderPollInterval: The amount of time in milliseconds between updates when doing bulk CRUD operations.
 * checkForFileChanges: This option, when set to true, will allow ForceCode to check for file changes against the server on startup of ForceCode.
 * debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
 * debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.

@@ -1,6 +1,8 @@
 ## Change Log
 
-* 3.13.1
+* 3.14.0
+    * Bump default API version to 45.0 for the spring 19 release
+    * Add bulk loader menu option. Now you can user ForceCode to do bulk operations on files!
     * Migrate general (Non org-specific) settings to workspace settings
     * Add force.defaultApiVersion workspace setting. This allows you to configure what API version to default to when creating a new project or logging into a new org
     * Fix linguring issue with no notification shown on build error

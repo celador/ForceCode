@@ -19,10 +19,12 @@ import showMenu from './menu';
 import staticResource from './staticResource';
 import {staticResourceDeployFromFile} from './staticResource';
 import settings from './settings';
+import bulkLoader from './bulkLoader';
 
 export {
     apexTest,
     apexTestResults,
+    bulkLoader,
     codeCompletionRefresh,
     compile,
     createClass,

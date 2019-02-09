@@ -278,6 +278,18 @@ export const fcCommands: FCCommand[] = [
 		}
 	},
 	{
+		commandName: 'ForceCode.bulkLoader',
+		name: 'Opening Bulk Loader',
+		hidden: false,
+		description: 'Perform bulk CRUD operations',
+		detail: 'Insert, update, or delete records in bulk by uploading a CSV file.',
+		icon: 'file',
+		label: 'Bulk Loader',
+		command: function (context, selectedResource?) {
+			return commands.bulkLoader();
+		}
+	},
+	{
 		commandName: 'ForceCode.settings',
 		name: 'Opening settings',
 		hidden: false,
