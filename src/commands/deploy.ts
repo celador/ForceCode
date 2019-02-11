@@ -8,7 +8,6 @@ import klaw = require('klaw');
 import { getAuraNameFromFileName } from '../parsers';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
-import constants from '../models/constants';
 import { getAnyTTFromPath } from '../parsers/open';
 import { outputToString } from '../parsers/output';
 
@@ -122,7 +121,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
         var packObj: PXML = {
             Package: {
                 types: [],
-                version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION
+                version: vscode.window.forceCode.config.apiVersion || vscode.workspace.getConfiguration('force')['defaultApiVersion']
             },
         }
         files.forEach(file => {
@@ -132,8 +131,11 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
                 member = getAuraNameFromFileName(file, 'aura');
             } else if(fileTT === 'LightningComponentBundle') {
                 member = getAuraNameFromFileName(file, 'lwc');
+            } else if(fileTT === 'Document' || fileTT === 'EmailTemplate' || fileTT === 'Report' || fileTT === 'Dashboard') {
+                const file2 = file.split(vscode.window.forceCode.projectRoot + path.sep).pop();
+                member = file2.substring(file2.indexOf(path.sep) + 1).split('.').shift();
             } else {
-                member = file.split(path.sep).pop().split('.')[0];
+                member = file.split(path.sep).pop().split('.').shift();
             }
             const index: number = findMDTIndex(packObj, fileTT);
             if(index !== -1) {

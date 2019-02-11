@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { toArray, dxService, PXML, PXMLMember } from '../services';
-import constants from '../models/constants';
 import { IMetadataObject } from '../forceCode';
 import { SObjectDescribe, SObjectCategory } from '../dx';
 import * as xml2js from 'xml2js';
@@ -113,7 +112,7 @@ export default function packageBuilder(buildPackage?: boolean): Promise<any> {
                         var packObj: PXML = {
                             Package: {
                                 types: mappedTypes,
-                                version: vscode.window.forceCode.config.apiVersion || constants.API_VERSION
+                                version: vscode.window.forceCode.config.apiVersion || vscode.workspace.getConfiguration('force')['defaultApiVersion']
                             },
                         }
                         var xml: string = builder.buildObject(packObj)

@@ -12,15 +12,15 @@ export default class ForceCodeLogProvider implements vscode.TextDocumentContentP
 }
 
 export function filterLog(body: string) {
-    if (!vscode.window.forceCode.config.debugOnly) {
+    if (!vscode.workspace.getConfiguration('force')['debugOnly']) {
         return body;
     } else {
         var theLog = '';
         var includeIt = false;
         var debugLevel = ['USER_DEBUG'];
-        if(vscode.window.forceCode.config.debugFilter)
+        if(vscode.workspace.getConfiguration('force')['debugFilter'])
         {
-            debugLevel = vscode.window.forceCode.config.debugFilter.split('|');
+            debugLevel = vscode.workspace.getConfiguration('force')['debugFilter'].split('|');
         }
         body.split('\n').forEach(function(l) {
             var theSplitLine: string[] = l.split(')|');

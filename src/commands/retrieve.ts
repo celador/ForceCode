@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
-import constants from './../models/constants';
 import { commandService, codeCovViewService, fcConnection, FCOauth, toArray } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
@@ -171,20 +170,14 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             if(totalTypes > 10000) {
                 reject({ message: 'Cannot retrieve more than 10,000 files at a time. Please select "Choose Types..." from the retrieve menu and try to download without Reports selected first.'});
             }
-            var theStream;
-            try {
-                theStream = vscode.window.forceCode.conn.metadata.retrieve({
-                    unpackaged: retrieveTypes,
-                    apiVersion: vscode.window.forceCode.config.apiVersion || constants.API_VERSION,
-                });
-            } catch(e) {
-                reject(e);
-            }
-            if(theStream) {
-                resolve(theStream.stream());
-            } else {
-                reject({ message: 'Cannot retrieve more than 10,000 files at a time. Please select "Choose Types..." from the retrieve menu and try to download without Reports selected first.'});
-            }
+            var theStream = vscode.window.forceCode.conn.metadata.retrieve({
+                unpackaged: retrieveTypes,
+                apiVersion: vscode.window.forceCode.config.apiVersion || vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+            });
+            theStream.on('error', (error) => {
+                reject(error || { message: 'Cannot retrieve more than 10,000 files at a time. Please select "Choose Types..." from the retrieve menu and try to download without Reports selected first.' });
+            });
+            resolve(theStream.stream());
         }
 
         function pack(resolve, reject) {

@@ -53,7 +53,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   public addCommandExecution(execution: FCCommand, context: any, selectedResource?: any) {
     if(execution.commandName === 'ForceCode.fileModified') {
       this.fileModCommands++;
-      if(this.fileModCommands > vscode.window.forceCode.config.maxFileChangeNotifications) {
+      if(this.fileModCommands > vscode.workspace.getConfiguration('force')['maxFileChangeNotifications']) {
         return Promise.resolve();
       }
     }
@@ -83,6 +83,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
       }
 
       this._onDidChangeTreeData.fire();
+      fcConnection.refreshConnsStatus();
       return true;
     }
     return false;
@@ -131,7 +132,7 @@ export class Task extends vscode.TreeItem {
         return fcConnection.checkLoginStatus(reason).then(loggedIn => {
           if(loggedIn || attempt === SECOND_TRY) {
             if(reason) {
-              vscode.window.showErrorMessage(reason.message ? reason.message : reason);
+              vscode.window.showErrorMessage(reason.message ? reason.message : reason, 'OK');
               return trackEvent('Error Thrown', reason.message ? reason.message : reason)
                 .then(() => {
                   return reason;

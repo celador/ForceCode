@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { dxService, FCOauth, FCConnection, operatingSystem } from '.';
-import constants from '../models/constants';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
 import { Config } from '../forceCode';
@@ -57,10 +56,12 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     public refreshConnsStatus() {
+        if(this.connections) {
         this.connections.forEach(conn => {
             conn.showConnection();
         });
         this.connections.sort(this.sortFunc);
+    }
     }
 
     public isLoggedIn(): boolean {
@@ -190,7 +191,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                         refreshToken: refreshToken,
                         version: (vscode.window.forceCode && vscode.window.forceCode.config
                             && vscode.window.forceCode.config.apiVersion
-                            ? vscode.window.forceCode.config.apiVersion : constants.API_VERSION),
+                            ? vscode.window.forceCode.config.apiVersion : vscode.workspace.getConfiguration('force')['defaultApiVersion']),
                     });
 
                     return service.currentConnection.connection.identity().then(res => {

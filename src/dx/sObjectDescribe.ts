@@ -7,7 +7,6 @@
 
 import * as vscode from 'vscode';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
-import constants from '../models/constants';
 import { FCOauth, fcConnection, dxService } from '../services';
 import { CLIENT_ID } from './'
 
@@ -176,7 +175,7 @@ export class SObjectDescribe {
   private readonly batchPart: string = 'composite/batch';
 
   private getVersion(): string {
-    return `${this.versionPrefix}${vscode.window.forceCode.config.apiVersion || constants.API_VERSION}`;
+    return `${this.versionPrefix}${vscode.window.forceCode.config.apiVersion || vscode.workspace.getConfiguration('force')['defaultApiVersion']}`;
   }
 
   public describeGlobal(

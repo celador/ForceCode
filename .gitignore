@@ -23,3 +23,6 @@ settings.json
 force.json
 open.spec.js
 notes.txt
+analytics.json
+package.xml
+forcecode-**.vsix

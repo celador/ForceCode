@@ -41,7 +41,7 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
             // update the current editor
             editorUpdateApexCoverageDecorator(vscode.window.activeTextEditor);
 
-            if(testClassIds && highestClass && vscode.window.forceCode.config.revealTestedClass) {
+            if(testClassIds && highestClass && vscode.workspace.getConfiguration('force')['revealTestedClass']) {
                 // reveal the tested class
                 var treePro = vscode.window.createTreeView('ForceCode.codeCovDataProvider', {treeDataProvider: codeCovViewService});
                 treePro.reveal(highestClass);

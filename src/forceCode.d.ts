@@ -20,33 +20,21 @@ export interface FCOrg {
 export interface Config {
     apiVersion?: string;
     autoCompile?: boolean;
-    autoRefresh?: boolean;
-    browser?: string;
-    checkForFileChanges?: boolean;
-    debugFilter?: string;
-    debugOnly?: boolean;
     deployOptions?: {
         allowMissingFiles?: boolean,
         checkOnly?: boolean,
         ignoreWarnings?: boolean,
+        purgeOnDelete?: boolean,
         rollbackOnError?: boolean,
         runTests?: string[],
         singlePackage?: boolean,
         testLevel?: string,       
     };
-    maxFileChangeNotifications?: number;
-    maxQueryHistory?: number;
-    maxQueryResultsPerPage?: number;
-    outputQueriesAsCSV?: boolean;
     overwritePackageXML?: boolean;
     poll?: number;
     pollTimeout?: number;
     prefix?: string;
-    revealTestedClass?: boolean;
-    showFilesOnOpen?: boolean;
-    showFilesOnOpenMax?: number;
     showTestCoverage? : boolean;
-    showTestLog? : boolean;
     spaDist? : string;
     staticResourceCacheControl?: string;
     src?: string;

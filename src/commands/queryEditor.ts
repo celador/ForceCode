@@ -36,7 +36,7 @@ export default function queryEditor(): Promise<any> {
         }
         if(message.save && curResults) {
             // save the results
-            const csv: boolean = vscode.window.forceCode.config.outputQueriesAsCSV;
+            const csv: boolean = vscode.workspace.getConfiguration('force')['outputQueriesAsCSV'];
             var data: string = csv ? outputToCSV(curResults) : outputToString(curResults);
             const defaultURI: vscode.Uri = {
                 scheme: 'file',
@@ -116,7 +116,7 @@ export default function queryEditor(): Promise<any> {
             queryHistory.splice(queryIndex, 1);
         }
         queryHistory.unshift(curQuery);
-        const maxQueryHistory = vscode.window.forceCode.config.maxQueryHistory;
+        const maxQueryHistory = vscode.workspace.getConfiguration('force')['maxQueryHistory'];
         if(queryHistory.length > maxQueryHistory) {
             const toDrop = queryHistory.length - maxQueryHistory;
             queryHistory.splice(maxQueryHistory, toDrop);
@@ -128,7 +128,7 @@ export default function queryEditor(): Promise<any> {
             resToSend = {
                 success: true,
                 results: outputToCSV(curResults),
-                limit: vscode.window.forceCode.config.maxQueryResultsPerPage
+                limit: vscode.workspace.getConfiguration('force')['maxQueryResultsPerPage']
             }
         } else {
             resToSend = {
