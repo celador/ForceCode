@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { QueryResult } from '../services/dxService';
 import { codeCovViewService } from '../services';
 import { getAuraNameFromFileName } from '../parsers';
@@ -40,10 +41,12 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
         } else if (toolingType === 'LightningComponentResource') {
             field = 'Source';
             name = getAuraNameFromFileName(this.auraSource.fileName, 'lwc');
-            nsPrefix = `LightningComponentBundleId='${codeCovViewService.findByNameAndType(name, 'LightningComponentBundle').getWsMember().id}'`;
+            const FilePath: string = this.auraSource.fileName.split(vscode.window.forceCode.projectRoot + path.sep).pop().split(path.sep).join('/');
+            nsPrefix = `FilePath='${FilePath}' AND LightningComponentBundleId='${codeCovViewService.findByNameAndType(name, 'LightningComponentBundle').getWsMember().id}'`;
         }
         return new Promise<string>((resolve, reject) => {
             var query: string = `SELECT ${field} FROM ${toolingType} WHERE ${nsPrefix}`;
+            console.log(query);
             vscode.window.forceCode.conn.tooling.query(query).then((results: QueryResult) => {
                 if (results && results.totalSize === 1) {
                     resolve(results.records[0][field]);

@@ -215,16 +215,16 @@ function makeResourceMetadata(bundleName, cont, contType) {
 
 function deployComplete(results) {
     vscode.window.forceCode.showStatus(`ForceCode: Deployed ${results.fullName} $(check)`);
-    if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
-        require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
+    if (vscode.workspace.getConfiguration('force')['autoRefresh'] && vscode.workspace.getConfiguration('force')['browser']) {
+        require('child_process').exec(`osascript -e 'tell application "${vscode.workspace.getConfiguration('force')['browser']}" to reload active tab of window 1'`);
     }
     return results;
 }
 
 function deployAllComplete(results) {
     vscode.window.forceCode.showStatus(`ForceCode: Deployed ${results.length} Resources $(check)`);
-    if (vscode.window.forceCode.config.autoRefresh && vscode.window.forceCode.config.browser) {
-        require('child_process').exec(`osascript -e 'tell application "${vscode.window.forceCode.config.browser}" to reload active tab of window 1'`);
+    if (vscode.workspace.getConfiguration('force')['autoRefresh'] && vscode.workspace.getConfiguration('force')['browser']) {
+        require('child_process').exec(`osascript -e 'tell application "${vscode.workspace.getConfiguration('force')['browser']}" to reload active tab of window 1'`);
     }
     var talliedResults: {} = results.reduce(function (prev, curr) {
         return Object.assign(prev, curr);

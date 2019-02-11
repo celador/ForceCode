@@ -8,6 +8,7 @@ import { getAnyTTFromFolder } from '../parsers/open';
 import { parseString } from 'xml2js';
 import * as path from 'path';
 import { saveLWC } from './saveLWC';
+import { createPackageXML, deployFiles } from './deploy';
 
 export default function compile(document: vscode.TextDocument): Promise<any> {
     if(!document) {
@@ -48,7 +49,23 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
     }
 
     // Start doing stuff
-    if (folderToolingType && toolingType === undefined) {
+    if (folderToolingType === 'EmailTemplate' || folderToolingType === 'Document') {
+        return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot)
+            .then(() => {
+                const files: string[] = [];
+                var pathSplit = 'documents';
+                if(folderToolingType === 'EmailTemplate') {
+                    pathSplit = 'email';
+                }
+                var foldName: string = document.fileName.split(path.sep + pathSplit + path.sep).pop();
+                //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
+                files.push(path.join(pathSplit, foldName));
+                files.push(path.join(pathSplit, foldName + '-meta.xml'));
+                files.push('package.xml');
+                return deployFiles(files, vscode.window.forceCode.storageRoot);
+            })
+            .catch(onError);
+    } else if (folderToolingType && toolingType === undefined) {
         // This process uses the Metadata API to deploy specific files
         // This is where we extend it to create any kind of metadata
         // Currently only Objects and Permission sets ...
@@ -188,30 +205,38 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
             vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
             return true;
         } else if(diagnostics.length === 0) {
-            throw res;
+            vscode.window.showErrorMessage(res.message ? res.message : res);
         }
-        throw { message: 'File not saved due to build errors. Please open the Problems panel for more details.'}
+        vscode.window.showErrorMessage('File not saved due to build errors. Please open the Problems panel for more details.');
+        return false;
     }
     
     function onError(err) {
-        if(err.message) {
-            try {
-                const errmess: string = err.message.split('Message:').pop().split(': Source').shift();
-                const linRowCol: string[] = err.message.split(',');
-                const linRow: string = linRowCol[0].split(':').pop();
-                const linCol: string = linRowCol[1].split(':').shift();
-                var failureLineNumber: number = Number.parseInt(linRow);
-                failureLineNumber = failureLineNumber < 1 ? 1 : failureLineNumber;
-                var failureColumnNumber: number = Number.parseInt(linCol);
-                var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
-                if (failureColumnNumber - 1 >= 0) {
-                    failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));
-                }
-                if(!exDiagnostics.find(exDia => { return exDia.message === errmess;})) {
-                    diagnostics.push(new vscode.Diagnostic(failureRange, errmess, 0));
-                    diagnosticCollection.set(document.uri, diagnostics);
-                }
-            } catch (e) {}
+        const errMsg: string = err.message ? err.message : err;
+        if(!errMsg) {
+            return false;
+        }
+        const matchRegex = /:(\d+),(\d+):|:(\d+),(\d+) :|\[(\d+),(\d+)\]/; // this will match :12,3432: :12,3432 : and [12,3432] 
+        var theerr = errMsg.split('Message:').pop().split(': Source').shift();
+        var match = errMsg.match(matchRegex);
+        var failureLineNumber: number = 1;
+        var failureColumnNumber: number = 0;
+        if(match) {
+            match = match.filter(mat => mat); // eliminate all undefined elements
+            theerr = theerr.split(match[0]).pop().trim();   // remove the line information from the error message if 'Message:' wasn't part of the string
+            const row = match[1];
+            const col = match[2];
+            failureLineNumber = Number.parseInt(row);
+            failureLineNumber = failureLineNumber < 1 ? 1 : failureLineNumber;
+            failureColumnNumber = Number.parseInt(col);
+        }
+        var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
+        if (failureColumnNumber - 1 >= 0) {
+            failureRange = failureRange.with(new vscode.Position((failureLineNumber - 1), failureColumnNumber));
+        }
+        if(!exDiagnostics.find(exDia => { return exDia.message === theerr;})) {
+            diagnostics.push(new vscode.Diagnostic(failureRange, theerr, 0));
+            diagnosticCollection.set(document.uri, diagnostics);
         }
     }
 }

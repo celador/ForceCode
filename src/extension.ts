@@ -12,6 +12,7 @@ import { getToolingTypeFromFolder, getAnyTTFromFolder } from './parsers/open';
 import { trackEvent } from './services/fcAnalytics';
 
 export function activate(context: vscode.ExtensionContext): any {
+    process.env.SFDX_JSON_TO_STDOUT = "true";
     commands.fcCommands.forEach(cur => {
         context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
     });

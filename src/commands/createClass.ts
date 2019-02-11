@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
-import constants from './../models/constants';
 
 export default function createFile() {
     // ask what the user wants to create
@@ -113,7 +112,7 @@ export default function createFile() {
         }
         var metaFile: string = `<?xml version="1.0" encoding="UTF-8"?>
 <${type} xmlns="urn:metadata.tooling.soap.sforce.com" fqn="${name}">
-    <apiVersion>${vscode.window.forceCode.config.apiVersion || vscode.window.forceCode.conn.version || constants.API_VERSION}</apiVersion>
+    <apiVersion>${vscode.window.forceCode.config.apiVersion || vscode.workspace.getConfiguration('force')['defaultApiVersion']}</apiVersion>
     ${extra}
 </${type}>`;
         var metaFileName: string = path.join(filePath, name + '.' + ext + '-meta.xml');

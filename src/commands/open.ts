@@ -78,11 +78,11 @@ export function showFileOptions(promises: any[]) {
         });
         
         return retrieve.default({types: files}).then(res => {
-            if(vscode.window.forceCode.config.showFilesOnOpen) {
+            if(vscode.workspace.getConfiguration('force')['showFilesOnOpen']) {
                 // open the files in the editor
                 var filesOpened: number = 0;
                 return opts.forEach(curFile => {
-                    if(filesOpened < vscode.window.forceCode.config.showFilesOnOpenMax) {
+                    if(filesOpened < vscode.workspace.getConfiguration('force')['showFilesOnOpenMax']) {
                         var tType: string = curFile.detail.split(' ')[0];
                         if(tType !== 'AuraDefinitionBundle' && tType !== 'StaticResource' && tType != 'LightningComponentBundle') {
                             filesOpened++;

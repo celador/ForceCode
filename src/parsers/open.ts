@@ -26,8 +26,7 @@ export function getIcon(toolingType: string) {
     }
 }
 export function getFileExtension(document: vscode.TextDocument) {
-    var ext: string = document.fileName.substring(document.fileName.lastIndexOf('.') + 1, document.fileName.length);
-    return ext;
+    return document.fileName.split('.').pop();
 }
 export function getExtension(toolingType: string) {
     switch (toolingType) {
@@ -105,6 +104,8 @@ export function getToolingTypeFromFolder(uri: vscode.Uri): string {
             return 'AuraDefinitionBundle';
         case 'components':
             return 'ApexComponent';
+        case 'lwc':
+            return 'LightningComponentBundle';
         default:
             return undefined;
     }
@@ -116,7 +117,7 @@ export function getAnyTTFromPath(thepath: string): string {
     if(thepath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
         return undefined;
     }
-    var fileName: string = thepath.split(vscode.window.forceCode.projectRoot + path.sep)[1];
+    var fileName: string = thepath.split(vscode.window.forceCode.projectRoot + path.sep).pop();
     var baseDirectoryName: string = fileName.split(path.sep)[0];
     var types: any[] = vscode.window.forceCode.describe.metadataObjects
         .filter(o => o.directoryName === baseDirectoryName)
@@ -140,7 +141,7 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
         const projRoot: string = vscode.window.forceCode.projectRoot + path.sep;
         const ffNameParts: string[] = uri.fsPath.split(projRoot)[1].split(path.sep);
         var baseDirectoryName: string = path.parse(uri.fsPath).name;
-        const isAura: boolean = ffNameParts[0] === 'aura';
+        const isAura: boolean = ffNameParts[0] === 'aura' || ffNameParts[0] === 'lwc';
         const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
         const tType: string = getAnyTTFromFolder(uri);
         const isInFolder: boolean = isFoldered(tType);
@@ -152,7 +153,7 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
             resolve({ name: tType, members: [folderedName] });
         } else if(isDir) {
             if(isAura) {
-                if(baseDirectoryName === 'aura') {
+                if(baseDirectoryName === 'aura' || baseDirectoryName === 'lwc') {
                     baseDirectoryName = '*';
                 }
                 resolve({ name: tType, members: [baseDirectoryName] });
@@ -160,14 +161,10 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
                 getFolderContents(tType, ffNameParts[1]).then(contents => {
                     resolve({ name: tType, members: contents });
                 });
-                
-            } else if(isInFolder) {
+            } else {
                 getMembers([tType]).then(members => {
                     resolve(members[0]);
                 });
-            } else {
-                baseDirectoryName = '*';
-                resolve({ name: tType, members: [baseDirectoryName] });
             }
         } else {
             resolve({ name: tType, members: [baseDirectoryName] });

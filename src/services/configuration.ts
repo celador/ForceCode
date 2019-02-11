@@ -3,17 +3,11 @@ import { Config } from './../forceCode';
 import * as forceCode from './../forceCode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import constants from './../models/constants';
 import { fcConnection, ForceService } from '.';
 import * as deepmerge from 'deepmerge'
 
-export const defautlOptions = {
-	apiVersion: constants.API_VERSION,
-	autoRefresh: false,
-	browser: 'Google Chrome Canary',
-	checkForFileChanges: false,
-	debugFilter: 'USER_DEBUG|FATAL_ERROR',
-	debugOnly: true,
+export const defautlOptions: Config = {
+	apiVersion: vscode.workspace.getConfiguration('force')['defaultApiVersion'],
 	deployOptions: {
 		'allowMissingFiles': true,
 		'checkOnly': false,
@@ -24,19 +18,11 @@ export const defautlOptions = {
 		'singlePackage': true,
 		'testLevel': 'NoTestRun'
 	},
-	maxFileChangeNotifications: 15,
-	maxQueryHistory: 10,
-	maxQueryResultsPerPage: 250,
-	outputQueriesAsCSV: true,
 	overwritePackageXML: false,
 	poll: 1500,
 	pollTimeout: 1200,
 	prefix: '',
-	revealTestedClass: false,
-	showFilesOnOpen: true,
-	showFilesOnOpenMax: 3,
 	showTestCoverage: true,
-	showTestLog: true,
 	spaDist: '',
 	src: 'src',
 	staticResourceCacheControl: 'Private',
@@ -65,7 +51,7 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
 				default: true
 			}],
 			sfdcLoginUrl: 'https://login.salesforce.com/',
-			sourceApiVersion: constants.API_VERSION,
+			sourceApiVersion: vscode.workspace.getConfiguration('force')['defaultApiVersion'],
 		};
 
 		fs.outputFileSync(path.join(projPath, 'sfdx-project.json'), JSON.stringify(sfdxProj, undefined, 4));
@@ -88,6 +74,21 @@ export function readConfigFile(userName: string, service?: ForceService): Config
 			userName, 'settings.json');
 		if(fs.existsSync(configPath)) {
 			config = fs.readJsonSync(configPath);
+			// these are temporary, just to purge old settings. Will remove in a future release ===
+			delete config['autoRefresh'];
+			delete config['browser'];
+			delete config['checkForFileChanges'];
+			delete config['debugFilter'];
+			delete config['debugOnly'];
+			delete config['maxFileChangeNotifications'];
+			delete config['maxQueryHistory'];
+			delete config['maxQueryResultsPerPage'];
+			delete config['outputQueriesAsCSV'];
+			delete config['revealTestedClass'];
+			delete config['showFilesOnOpen'];
+			delete config['showFilesOnOpenMax'];
+			delete config['showTestLog'];
+			// ====================================================================================
 		} else {
 			config.username = userName;
 		}

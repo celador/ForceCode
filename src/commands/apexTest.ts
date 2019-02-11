@@ -40,7 +40,7 @@ export default function apexTest(toTest: string, classOrMethod: string) {
         return dxRes;
     }
     function showLog() {
-        if (vscode.window.forceCode.config.showTestLog) {
+        if (vscode.workspace.getConfiguration('force')['showTestLog']) {
             var queryString: string = `SELECT Id FROM ApexLog` +
                 ` WHERE LogUserId IN (SELECT Id FROM User WHERE UserName='${fcConnection.currentConnection.orgInfo.username}')` +
                 // ` AND Request = 'API' AND Location = 'SystemLog'` +

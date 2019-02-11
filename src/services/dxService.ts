@@ -181,12 +181,26 @@ export default class DXService implements DXCommands {
 
             cliContext.flags['targetusername'] = fcConnection.currentConnection.orgInfo.username;
         } 
+        // get error output from SFDX
+        var errlog;
+        var oldConsole = console.log;
+        console.log = getErrLog;
         return cmd.run(cliContext).then(res => {
+            console.log = oldConsole;
             if(!this.isEmptyUndOrNull(res)) {
                 return res;
             }
-            return Promise.reject('Failed to execute command: ' + cmdString + outputToString(theArgsArray));
+            try {
+                console.log(errlog);
+                errlog = JSON.parse(errlog);
+                errlog = errlog.message ? errlog.message : errlog;
+            } catch(e) {}
+            return Promise.reject(errlog || 'Failed to execute command: ' + cmdString + outputToString(theArgsArray));
         });
+
+        function getErrLog(data) {
+            errlog = data;
+        }
     }
 
     public execAnon(file: string): Promise<ExecuteAnonymousResult> {

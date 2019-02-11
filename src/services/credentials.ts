@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { getIcon } from '../parsers';
 import { fcConnection, dxService } from '.';
 import { FCOauth } from './fcConnection';
 import { Config } from '../forceCode';
@@ -104,11 +103,10 @@ function getUrl(config): Promise<Config> {
                 },
             ];
             let options: vscode.QuickPickItem[] = opts.map(res => {
-                let icon: string = getIcon(res.icon);
                 return {
                     description: `${res.url}`,
                     // detail: `${'Detail'}`,
-                    label: `$(${icon}) ${res.title}`,
+                    label: `$(${res.icon}) ${res.title}`,
                 };
             });
             vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {

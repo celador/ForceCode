@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
-import constants from './../models/constants';
 import { commandService, codeCovViewService, fcConnection, FCOauth, toArray } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
