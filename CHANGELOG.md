@@ -2,6 +2,7 @@
 
 * 3.14.1
     * Fix issue on Windows with refreshing from server #244
+    * Add refresh and compile commands to the diff editor per issue #242
 * 3.14.0
     * Bump default API version to 45.0 for the spring 19 release
     * Add bulk loader menu option. Now you can user ForceCode to do bulk operations on files!

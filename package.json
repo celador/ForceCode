@@ -69,11 +69,19 @@
       },
       {
         "command": "ForceCode.compile",
-        "title": "ForceCode: Save/Deploy/Compile"
+        "title": "ForceCode: Save/Deploy/Compile",
+        "icon": {
+          "light": "./images/compile.svg",
+          "dark": "./images/compile.svg"
+        }
       },
       {
         "command": "ForceCode.refresh",
-        "title": "ForceCode: Refresh from server"
+        "title": "ForceCode: Refresh from server",
+        "icon": {
+          "light": "./images/refresh.svg",
+          "dark": "./images/refresh.svg"
+        }
       },
       {
         "command": "ForceCode.executeAnonymous",
@@ -329,6 +337,16 @@
         {
           "when": "resourceExtname == .app && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.previewApp",
+          "group": "navigation"
+        },
+        {
+          "when": "ForceCodeActive && ForceCodeLoggedIn && isInDiffEditor",
+          "command": "ForceCode.refresh",
+          "group": "navigation"
+        },
+        {
+          "when": "ForceCodeActive && ForceCodeLoggedIn && isInDiffEditor",
+          "command": "ForceCode.compile",
           "group": "navigation"
         }
       ],
