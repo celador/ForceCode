@@ -109,10 +109,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                         });
                         if(orgs) {
                             orgs.orgs.forEach(curOrg => {
-                                if(!curOrg.isExpired && (curOrg.connectedStatus === 'Connected' 
-                                        || curOrg.connectedStatus === 'Unknown')) {
-                                    this.addConnection(curOrg);
-                                }
+                                this.addConnection(curOrg);
                             });
                         }
                         // tell the connections to refresh their text/icons
@@ -277,7 +274,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             var connIndex: number = this.getConnIndex(orgInfo.username);
             if (connIndex === -1) {
                 this.connections.push(new FCConnection(this, orgInfo));
-                connIndex = this.getConnIndex(orgInfo.username);
+                connIndex = this.connections.length - 1;
             } else {
                 const aToken: string = this.connections[connIndex].orgInfo.accessToken;
                 Object.assign(this.connections[connIndex].orgInfo, orgInfo);
@@ -286,11 +283,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
                     this.connections[connIndex].orgInfo.accessToken = aToken;
                 }
             }
-            if(orgInfo.connectedStatus !== 'Connected' && orgInfo.connectedStatus !== 'Unknown') {
-                this.connections[connIndex].isLoggedIn = false;
-            } else {
-                this.connections[connIndex].isLoggedIn = true;
-            }
+            this.connections[connIndex].isLoggedIn = (!orgInfo.isExpired && (orgInfo.connectedStatus === 'Connected' 
+                                        || orgInfo.connectedStatus === 'Unknown'));
             return this.connections[connIndex];
         } else {
             return undefined;
