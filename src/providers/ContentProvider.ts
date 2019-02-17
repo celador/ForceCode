@@ -46,7 +46,6 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
         }
         return new Promise<string>((resolve, reject) => {
             var query: string = `SELECT ${field} FROM ${toolingType} WHERE ${nsPrefix}`;
-            console.log(query);
             vscode.window.forceCode.conn.tooling.query(query).then((results: QueryResult) => {
                 if (results && results.totalSize === 1) {
                     resolve(results.records[0][field]);

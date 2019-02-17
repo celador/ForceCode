@@ -51,17 +51,14 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         return null;    // this is the parent
     }
 
-    public refreshView() {
-        this._onDidChangeTreeData.fire();
-    }
-
     public refreshConnsStatus() {
         if(this.connections) {
-        this.connections.forEach(conn => {
-            conn.showConnection();
-        });
-        this.connections.sort(this.sortFunc);
-    }
+            this.connections.forEach(conn => {
+                conn.showConnection();
+            });
+            this.connections.sort(this.sortFunc);
+            this._onDidChangeTreeData.fire();
+        }
     }
 
     public isLoggedIn(): boolean {
@@ -273,8 +270,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         if (orgInfo && orgInfo.username) {
             var connIndex: number = this.getConnIndex(orgInfo.username);
             if (connIndex === -1) {
-                this.connections.push(new FCConnection(this, orgInfo));
-                connIndex = this.connections.length - 1;
+                connIndex = this.connections.push(new FCConnection(this, orgInfo)) - 1;
             } else {
                 const aToken: string = this.connections[connIndex].orgInfo.accessToken;
                 Object.assign(this.connections[connIndex].orgInfo, orgInfo);
