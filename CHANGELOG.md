@@ -3,12 +3,13 @@
 * 3.14.1
     * Fix issue on Windows with refreshing from server #244
     * Add refresh and compile commands to the diff editor per issue #242
+    * Fix expired access token not auto-refreshing on compile
 * 3.14.0
     * Bump default API version to 45.0 for the spring 19 release
     * Add bulk loader menu option. Now you can user ForceCode to do bulk operations on files!
     * Migrate general (Non org-specific) settings to workspace settings
     * Add force.defaultApiVersion workspace setting. This allows you to configure what API version to default to when creating a new project or logging into a new org
-    * Fix linguring issue with no notification shown on build error
+    * Fix lingering issue with no notification shown on build error
     * Add ability to save/deploy email templates and documents
     * Fix deploying reports and dashboards
     * Fix issues with refreshing via the explorer context menu
@@ -58,7 +59,7 @@
     * Add right-click to remove ForceCode configuration folder
     * Add ability to change settings for each org with a saved ForceCode configuration in settings
     * Add ability to remove ForceCode configuration folder in settings (Current logged in org can't be removed)
-    * Hide singlePackage from setting. Forcecode doen't support the folder structure required when setting this to false
+    * Hide singlePackage from setting. Forcecode doesn't support the folder structure required when setting this to false
     * Set checkForFileChanges to false by default for new projects
     * Fix more 'illegal value for line' issues
     * Catch deployment failed errors. ForceCode will ask if you would like to view the deployment status in the org.
@@ -111,7 +112,7 @@
     * Finally fixed the hanging retrieve bug (Would hang on open, refresh, retrieve by package.xml, etc)
     * Remove manual package retrieval. If it doesn't show in the menu then it doesn't exist and retrieving by name will fail every time
 * 3.9.0
-    * New munu option in Deploy to choose files in your current org folder to deploy. ForceCode will build a package.xml file and deploy the files!
+    * New menu option in Deploy to choose files in your current org folder to deploy. ForceCode will build a package.xml file and deploy the files!
     * Fixed package.xml task hanging. If it gives you a deploy error, you're most likely missing at least one -meta.xml file!
     * ForceCode now retrieves code coverage (For the code coverage view) when you get the overall coverage.
     * Fixed an issue with files being shown as 'Not in current org' when there has been changed files and the user dismissed the message(s).

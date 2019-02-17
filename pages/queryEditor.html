@@ -81,20 +81,20 @@
     window.addEventListener('message', event => {
         const d = event.data;
         if(d.qHistory) {
-            var histroyOptions = '';
+            var historyOptions = '';
             d.qHistory.forEach(history => {
                 var histToShow = history
                 if(histToShow.length > 75) {
                     histToShow = histToShow.substring(0, 76);
                 }
-                histroyOptions += '<option value="' + history + '">' + histToShow + '</option>';
+                historyOptions += '<option value="' + history + '">' + histToShow + '</option>';
             });
             if(d.qHistory.length > 0) {
                 document.getElementById('query').value = d.qHistory[0];
             } else {
-                histroyOptions = '<option value="">There is currently no query history to show</option>';
+                historyOptions = '<option value="">There is currently no query history to show</option>';
             }
-            document.getElementById('history').innerHTML = histroyOptions;
+            document.getElementById('history').innerHTML = historyOptions;
         } else if(d.success) {
             maxQueryResultsPerPage = d.limit;
             pageNumber = 0;

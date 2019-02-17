@@ -4,7 +4,6 @@ import * as fs from 'fs-extra';
 import { dxService, FCOauth, FCConnection, operatingSystem } from '.';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
-import { Config } from '../forceCode';
 import { saveConfigFile, readConfigFile } from './configuration';
 import { checkConfig, enterCredentials } from './credentials';
 
@@ -259,11 +258,6 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             return this.connections[index];
         }
         return undefined;
-    }
-
-    public getSrcByUsername(username: string): string {
-        const config: Config = readConfigFile(username);
-        return config && config.src ? config.src : 'src';
     }
 
     public addConnection(orgInfo: FCOauth, saveToken?: boolean): FCConnection {

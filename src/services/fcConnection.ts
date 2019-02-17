@@ -3,6 +3,8 @@ import * as path from 'path';
 import { FCConnectionService, operatingSystem } from '.';
 import { Connection } from 'jsforce';
 import * as fs from 'fs-extra';
+import { Config } from '../forceCode';
+import { readConfigFile } from './configuration';
 
 export interface FCOauth {
     username?: string,
@@ -103,7 +105,8 @@ export class FCConnection extends vscode.TreeItem {
             this.tooltip += ' - Limits: ' + this.connection.limitInfo.apiUsage.used 
                 + ' / ' + this.connection.limitInfo.apiUsage.limit;
         }
+        const config: Config = readConfigFile(this.orgInfo.username);
         this.tooltip += '\nPROJECT PATH - ' + path.join(vscode.window.forceCode.workspaceRoot,
-            this.parent.getSrcByUsername(this.orgInfo.username));
+            config && config.src ? config.src : 'src');
     }
 }

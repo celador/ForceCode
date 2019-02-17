@@ -104,6 +104,6 @@ export function getPreviousUUID(fcExtPath): boolean {
 
 function optIn(): boolean {
     const debug = vscode.env.machineId === 'someValue.machineId';
-    // turn off analytics when we are dubugging
+    // turn off analytics when we are debugging
     return vscode.window.forceCode.uuid !== 'OPT-OUT' && !debug;
 }
