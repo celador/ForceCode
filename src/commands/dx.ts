@@ -38,7 +38,7 @@ export default function runDX() {
         let options: vscode.InputBoxOptions = {
             ignoreFocusOut: true,
             value: '',
-            placeHolder: 'enter the arguements for this dx function',
+            placeHolder: 'enter the arguments for this dx function',
             prompt: theCmd.usage,
         };
         // this needs to wait for this input to get done somehow!!!

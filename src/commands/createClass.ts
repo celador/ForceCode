@@ -9,7 +9,7 @@ export default function createFile() {
         var fileOptions: vscode.QuickPickItem[] = [
             {
                 label: 'Aura Component',
-                description: 'Create an Aura Component AKA a Lightning Comonent'
+                description: 'Create an Aura Component AKA a Lightning Component'
             }, {
                 label: 'Class',
                 description: 'Create an Apex Class'

@@ -23,7 +23,7 @@ Please note that the following permissions are required to develop on the Force.
 
 ## Features
 
-* For code completion and highlighting I highly reccomend downloading the various Salesforce language server extensions.
+* For code completion and highlighting I highly recommend downloading the various Salesforce language server extensions.
     * Follow the installation instructions on the Apex Code Editor page (You must install the Salesforce cli for code smartness to work!)
     * For apex code completion, select code completion refresh from the ForceCode menu and it will work with the Salesforce apex language server extension. You will need to refresh for each org. ForceCode handles the rest and switches code completion files when switching orgs/usernames.
 * Edit and save almost everything in Salesforce textually (Workflows, classes, lead assignment rules, etc..)
@@ -128,11 +128,11 @@ To get code completion and errors as you type you will need to install the Sales
 
 ### Run Apex Unit Tests
 
-Simply hover over an @isTest or testMethod and you will see a ForceCode hover appear. Follow the instructions given and wath the magic happen!!
+Simply hover over an @isTest or testMethod and you will see a ForceCode hover appear. Follow the instructions given and watch the magic happen!!
 
 ### Execute Anonymous
 
-Manu: &gt;Force: Execute Anonymous  
+Menu: &gt;Force: Execute Anonymous  
 Mac: alt + cmd + e  
 Win/Linux: alt + shift + e  
 Simply select the code that you want to run, then right click and select Execute Anonymous!
@@ -175,7 +175,7 @@ Deploy your package based on your configured deploy options and the package.xml 
 * checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.  This will generate a `.validationId` file.
 * ignoreWarnings:  Indicates whether a warning should allow a deployment to complete successfully \(true\) or not \(false\).
 * rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
-* runAllTests:     Runn all tests in org
+* runAllTests:     Run all tests in org
 * runTests:        An array of test names to be run [TestClass1, TestClass2,...]
 
 If you want destructive changes as part of the deploy, put a `destructiveChanges.xml` file in your src folder
@@ -233,7 +233,7 @@ This will open a ForceCode Settings window where you can change all of the optio
 
 ### Bulk Loader
 
-Select this menu option to be taked to a screen where you will be able to upload a CSV file full of record data that you will be able to perform CRUD operations on. Simply select an sObject name, CRUD operation, and upload a CSV. Then click "Execute" and watch the magic happen! If you get a file format error it will be shown on the screen. If there are errors during the CRUD operation then Forcecode will show you a save dialog box asking where you want to save the error file. The error file currently isn't as fancy as dataloader, as the results returned from errors aren't much, but it will tell you the line number(s) in Excel that have the errors, along with what the error was. 
+Select this menu option to be taken to a screen where you will be able to upload a CSV file full of record data that you will be able to perform CRUD operations on. Simply select an sObject name, CRUD operation, and upload a CSV. Then click "Execute" and watch the magic happen! If you get a file format error it will be shown on the screen. If there are errors during the CRUD operation then Forcecode will show you a save dialog box asking where you want to save the error file. The error file currently isn't as fancy as dataloader, as the results returned from errors aren't much, but it will tell you the line number(s) in Excel that have the errors, along with what the error was. 
 
 ## Configuration
 
@@ -280,12 +280,12 @@ The configuration file will look like the following. You can either edit this fi
   * ignoreWarnings:  Indicates whether a warning should allow a deployment to complete successfully \(true\) or not \(false\).
   * purgeOnDelete: If true, the deleted components in the destructiveChanges.xml manifest file aren't stored in the Recycle Bin.
   * rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
-  * runTests:        A list of Apex tests to run during deployment \(commma separated list\)
+  * runTests:        A list of Apex tests to run during deployment \(comma separated list\)
   * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
 * overwritePackageXML: if set to true, will overwrite package.xml file upon opening or retrieving files
 * poll: When compiling, this is the interval \(in milliseconds\) at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
 * pollTimeout: When retrieving packages, or other long running tasks, this is the maximum amount of time \(in seconds\) it will wait before the process times out.  If you're having trouble retrieving your package, try increasing this number.  Default is 600 \(10 minutes\).
-* prefix: This is the namespce prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise ForceCode will attempt to infer a prefix from your Salesforce Org.  If you have a namespaced org and do not set this setting, you may have problems, especially if working on an out of date Org.  This should be automatic as of Salesforce 38
+* prefix: This is the namespace prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise ForceCode will attempt to infer a prefix from your Salesforce Org.  If you have a namespaced org and do not set this setting, you may have problems, especially if working on an out of date Org.  This should be automatic as of Salesforce 38
 * showTestCoverage: This flag determines if Apex code coverage highlighting should be shown or hidden in the editor.  This can be toggled for the open editor by clicking the colorful icon in the editor bar.
 * spaDist: When working with SPAs we usually have a "distribution" folder where we build our files to.  If this string is set, and a SPA is bundled and deployed, this folder will be used as the distribution folder, otherwise the spa project will be deployed.
 * src: This will tell ForceCode where to store the project files for this org.
@@ -296,7 +296,7 @@ The configuration file will look like the following. You can either edit this fi
 
 There's also workspace configuration options that are not included in the settings.json, but rather in your vscode settings.json file. The reasoning for separating the files is for portability reasons; to make it easier to share this configuration with others and yourself across projects.  
 If you open up your settings.json file, or go to Code &gt; Preferences &gt; Workspace Settings and create a new preference, starting with `force` you should see the defaultApiVersion and filesExclude preferences. The defaultApiVersion will be what ForceCode uses as the API version when creating new projects or logging into new orgs. 
-The filesExclude property allows you to have certain files ignored \(exluded\) from Static Resources when bundled/deployed.  This allows you to create a modern SPA project in a "spa" folder instead of keeping it in your "resource-bundles" directory.  
+The filesExclude property allows you to have certain files ignored \(excluded\) from Static Resources when bundled/deployed.  This allows you to create a modern SPA project in a "spa" folder instead of keeping it in your "resource-bundles" directory.  
 However, when we build these SPAs we generally have a ton of preference and source files that we don't want to deploy to Salesforce, both for security and size reasons.  
 So, you can create Node glob patterns to ignore. The default configuration is shown below.  
 Glob patterns can be tricky... so a little research and trial and error may be required to get your bundle just right.

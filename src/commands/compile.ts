@@ -216,6 +216,10 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
         if(!errMsg) {
             return false;
         }
+        // make sure we refresh an expired token
+        if(errMsg.indexOf('expired access/refresh token') !== -1) {
+            throw err;
+        }
         const matchRegex = /:(\d+),(\d+):|:(\d+),(\d+) :|\[(\d+),(\d+)\]/; // this will match :12,3432: :12,3432 : and [12,3432] 
         var theerr = errMsg.split('Message:').pop().split(': Source').shift();
         var match = errMsg.match(matchRegex);

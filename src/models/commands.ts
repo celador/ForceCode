@@ -357,7 +357,7 @@ export const fcCommands: FCCommand[] = [
 				return new Promise((resolve, reject) => {
 					var files: PXMLMember[] = [];
 					var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => {
-						if(curRes.fsPath.match(vscode.window.forceCode.projectRoot + path.sep)) {
+						if(curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
 							return getAnyNameFromUri(curRes);
 						} else {
 							reject({ message: 'Only files/folders within the current org\'s src folder (' + vscode.window.forceCode.projectRoot + ') can be retrieved/refreshed.' })
@@ -516,7 +516,7 @@ export const fcCommands: FCCommand[] = [
 	},
 	{
 		commandName: 'ForceCode.getCodeCoverage',
-		name: 'Retriving code coverage',
+		name: 'Retrieving code coverage',
 		hidden: true,
 		command: function (context, selectedResource?) {
 			return commands.apexTestResults();

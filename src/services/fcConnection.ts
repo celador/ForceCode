@@ -3,6 +3,8 @@ import * as path from 'path';
 import { FCConnectionService, operatingSystem } from '.';
 import { Connection } from 'jsforce';
 import * as fs from 'fs-extra';
+import { Config } from '../forceCode';
+import { readConfigFile } from './configuration';
 
 export interface FCOauth {
     username?: string,
@@ -19,7 +21,6 @@ export interface FCOauth {
 
 export class FCConnection extends vscode.TreeItem {
     private readonly parent: FCConnectionService;
-    private limInterval;
     public connection: Connection;
     public orgInfo: FCOauth;
     public isLoggedIn: boolean;
@@ -37,9 +38,6 @@ export class FCConnection extends vscode.TreeItem {
 
     public disconnect(): Promise<any> {
         if(this.isLoggedIn) {
-            if (this.limInterval) {
-                clearInterval(this.limInterval);
-            }
             const sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', this.orgInfo.username + '.json');
             if(fs.existsSync(sfdxPath)) {
                 fs.removeSync(sfdxPath);
@@ -97,24 +95,18 @@ export class FCConnection extends vscode.TreeItem {
             }
             this.contextValue = 'notLoggedInConn';
         }
-        this.showLimits(this);
-    }
+        
+        this.tooltip = (this.isCurrentConnection() ? 'Current username' 
+            : 'Click to switch to ' + this.orgInfo.username);
+        if (this.connection
+            && this.connection.limitInfo
+            && this.connection.limitInfo.apiUsage) {
 
-    private showLimits(service: FCConnection) {
-        service.tooltip = (service.isCurrentConnection() ? 'Current username' 
-            : 'Click to switch to ' + service.orgInfo.username);
-        if (service.connection
-            && service.connection.limitInfo
-            && service.connection.limitInfo.apiUsage) {
-
-            service.tooltip += ' - Limits: ' + service.connection.limitInfo.apiUsage.used 
-                + ' / ' + service.connection.limitInfo.apiUsage.limit;
+            this.tooltip += ' - Limits: ' + this.connection.limitInfo.apiUsage.used 
+                + ' / ' + this.connection.limitInfo.apiUsage.limit;
         }
-        const prevToolTip = service.tooltip;
-        service.tooltip += '\nPROJECT PATH - ' + path.join(vscode.window.forceCode.workspaceRoot,
-            service.parent.getSrcByUsername(service.orgInfo.username));
-        if(prevToolTip !== service.tooltip || service.prevContext !== service.contextValue) {
-            service.parent.refreshView();
-        }
+        const config: Config = readConfigFile(this.orgInfo.username);
+        this.tooltip += '\nPROJECT PATH - ' + path.join(vscode.window.forceCode.workspaceRoot,
+            config && config.src ? config.src : 'src');
     }
 }
