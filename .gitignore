@@ -17,6 +17,7 @@ _book
 
 /**/*.private
 out
+dist
 node_modules
 settings.json
 .*
