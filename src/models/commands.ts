@@ -359,7 +359,7 @@ export const fcCommands: FCCommand[] = [
 					var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => {
 						if(curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
 							return getAnyNameFromUri(curRes);
-						} else if (curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot)) {
+						} else if (curRes.fsPath === vscode.window.forceCode.projectRoot) {
 							var fcPath: string = path.join(vscode.window.forceCode.workspaceRoot, 'force.json');
 							var forcejson: vscode.Uri = vscode.Uri.parse(fcPath);
 							return commands.retrieve(forcejson);
