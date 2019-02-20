@@ -359,6 +359,10 @@ export const fcCommands: FCCommand[] = [
 					var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => {
 						if(curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
 							return getAnyNameFromUri(curRes);
+						} else if (curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot)) {
+							var fcPath: string = path.join(vscode.window.forceCode.workspaceRoot, 'force.json');
+							var forcejson: vscode.Uri = vscode.Uri.parse(fcPath);
+							return commands.retrieve(forcejson);
 						} else {
 							reject({ message: 'Only files/folders within the current org\'s src folder (' + vscode.window.forceCode.projectRoot + ') can be retrieved/refreshed.' })
 						}
@@ -386,6 +390,7 @@ export const fcCommands: FCCommand[] = [
 			if (!vscode.window.activeTextEditor) {
 				return undefined;
 			}
+			console.log(vscode.window.activeTextEditor.document.uri);
 			return commands.retrieve(vscode.window.activeTextEditor.document.uri);
 
 			function getTTIndex(toolType: string, arr: ToolingType[]): number {
