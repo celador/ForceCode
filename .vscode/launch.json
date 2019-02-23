@@ -11,7 +11,7 @@
       "stopOnEntry": false,
       "sourceMaps": true,
       "preLaunchTask": "npm: webpack",
-      "outFiles": ["${workspaceFolder}/out/src/**/*.js"]
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "name": "Launch Tests",
