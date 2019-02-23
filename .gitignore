@@ -20,7 +20,8 @@ out
 dist
 node_modules
 settings.json
-.*
+.sfdx
+.vscode-test
 force.json
 open.spec.js
 notes.txt

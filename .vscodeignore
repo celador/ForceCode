@@ -12,6 +12,7 @@ out/test/**
 .vscode-test/**
 .sfdx/**
 .github/**
+.prettierignore
 webpack.config.js
 analytics.json
 package.xml
