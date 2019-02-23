@@ -6,7 +6,8 @@ import * as path from 'path';
 import { fcConnection, ForceService } from '.';
 import * as deepmerge from 'deepmerge';
 
-export const defautlOptions: Config = {
+export const defaultOptions: Config = {
+  alias: '',
   apiVersion: vscode.workspace.getConfiguration('force')['defaultApiVersion'],
   deployOptions: {
     allowMissingFiles: true,
@@ -104,7 +105,7 @@ export function readConfigFile(userName: string, service?: ForceService): Config
       config.username = userName;
     }
   }
-  return deepmerge(defautlOptions, config);
+  return deepmerge(defaultOptions, config);
 }
 
 export function removeConfigFolder(userName: string): boolean {

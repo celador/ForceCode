@@ -246,7 +246,8 @@ The configuration file will look like the following. You can either edit this fi
 
 ```json
 {
-    "apiVersion": "44.0",
+    "alias": "My Sandbox"
+    "apiVersion": "45.0",
     "autoCompile": true,
     "deployOptions": {
         "allowMissingFiles": true,
@@ -272,6 +273,7 @@ The configuration file will look like the following. You can either edit this fi
 
 ### Options
 
+* alias: When set, the alias is what will show in the saved usernames section of the Forcecode view instead of the username. This makes keeping track of orgs easier than remembering each username
 * apiVersion: This is the default api version that all your files will be saved with. ForceCode will not change the version of an existing file.  This is also the version used for package retrieval and deploy.
 * autoCompile: When a supported file is saved \(works with VSCode's autosave feature\) the file is saved/compiled on the server.  Otherwise, use `cmd + opt + s` (Mac) or `ctrl + shift + s` (Win/Linux) to save the file to the server.
 * deployOptions: Deploy your package based on your configured deploy options and the package.xml in your src folder.

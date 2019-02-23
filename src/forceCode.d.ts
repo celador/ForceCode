@@ -18,6 +18,7 @@ export interface FCOrg {
 }
 
 export interface Config {
+  alias?: string;
   apiVersion?: string;
   autoCompile?: boolean;
   deployOptions?: {

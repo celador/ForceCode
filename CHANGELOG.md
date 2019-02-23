@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.15.0
+    * Add alias option to org settings. When set, the alias is what will show in the saved usernames section of the Forcecode view instead of the username. This makes keeping track of orgs easier than remembering each username
 * 3.14.1
     * Fix issue on Windows with refreshing from server #244
     * Add refresh and compile commands to the diff editor per issue #242

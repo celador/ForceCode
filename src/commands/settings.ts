@@ -30,12 +30,14 @@ export default function settings(): Promise<any> {
   // handle settings changes
   panel.webview.onDidReceiveMessage(message => {
     if (message.save) {
-      currentSettings = deepmerge(currentSettings, tempSettings, { arrayMerge: overwriteMerge });
+      currentSettings = deepmerge(currentSettings, tempSettings, {
+        arrayMerge: overwriteMerge,
+      });
       saveConfigFile(currentSettings.username, currentSettings);
       if (currentSettings.username === vscode.window.forceCode.config.username) {
         vscode.window.forceCode.config = currentSettings;
-        configuration();
       }
+      configuration();
       vscode.window.showInformationMessage('ForceCode settings saved successfully!', 'OK');
     } else if (message.switchUsername && message.username !== currentSettings.username) {
       // the user wants to change settings for another username
@@ -48,7 +50,9 @@ export default function settings(): Promise<any> {
         refreshUsernames();
       });
     } else {
-      tempSettings = deepmerge(tempSettings, message, { arrayMerge: overwriteMerge });
+      tempSettings = deepmerge(tempSettings, message, {
+        arrayMerge: overwriteMerge,
+      });
     }
   }, undefined);
 
