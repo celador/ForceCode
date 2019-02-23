@@ -90,7 +90,7 @@ Please note that the following permissions are required to develop on the Force.
     * Quickly run [SOQL Queries](https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql.htm)
     * Query [Tooling Objects](https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/reference_objects_list.htm)
     * Results displayed in a table
-    * Results can be saved as JSON or CSV (if outputQueriesAsCSV is set to true (checked))
+    * Results can be saved as JSON or CSV (if outputQueriesAsCSV is checked)
     * Inline edits can be made in the results table (Just like in the developer console)
 * Arbitrary folder structure
     * Change your project `src` folder
@@ -321,15 +321,16 @@ The following settings have been migrated to the workspace settings as well:
 * autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on \(and you're working on a Mac\), the currently active tab in Google Chrome Canary \(or your configured browser\) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
 * browser: Define which browser you want to reload when the static resource refreshes \(this only works with Macs at the moment\)
 * bulkLoaderPollInterval: The amount of time in milliseconds between updates when doing bulk CRUD operations.
-* checkForFileChanges: This option, when set to true, will allow ForceCode to check for file changes against the server on startup of ForceCode.
+* checkForFileChanges: This option, when checked, will allow ForceCode to check for file changes against the server on startup of ForceCode.
 * debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
 * debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
 * maxFileChangeNotifications: The maximum number of file change notifications that will be shown on startup of the extension
 * maxQueryHistory: The maximum number of queries to store in the query history of the query editor
 * maxQueryResultsPerPage: The maximum number of results to show per page when executing a query in the query editor
-* outputQueriesAsCSV: If set to true, will retrieve soql/toql results in csv form. If false, json will be returned
-* revealTestedClass: When set to true, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed.
-* showFilesOnOpen: If set to true, will open files in the editor when opened from Salesforce
+* onlyShowProjectUsernames: If checked, Forcecode will only show the usernames in use in each project instead of every one that has been authenticated on your machine.
+* outputQueriesAsCSV: If checked, will retrieve soql/toql results in csv form. If false, json will be returned
+* revealTestedClass: When checked, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed.
+* showFilesOnOpen: If checked, will open files in the editor when opened from Salesforce
 * showFilesOnOpenMax: The maximum number of files to open in the editor. More than 3 usually causes problems or doesn't work.
 * showTestLog: This flag determines if the Log file for the last test run should show up after the tests are complete.  This is nice for debugging tests.  Use this in conjunction with the other debug flags to keep your output tidy. The log file will only show if it's not empty (Because of filtering).
 

@@ -5,10 +5,6 @@ import { fcConnection, FCOauth } from '.';
 import alm = require('salesforce-alm');
 import { outputToString } from '../parsers/output';
 
-export interface OrgListResult {
-  orgs: FCOauth[];
-}
-
 export interface SFDX {
   username: string;
   id: string;
@@ -90,7 +86,7 @@ export interface DXCommands {
   removeFile(fileName: string): Promise<any>;
   openOrg(): Promise<any>;
   openOrgPage(url: string): Promise<any>;
-  orgList(): Promise<OrgListResult>;
+  orgList(): Promise<FCOauth[]>;
   createScratchOrg(edition: string): Promise<any>;
 }
 
@@ -236,15 +232,14 @@ export default class DXService implements DXCommands {
     return this.runCommand('org:display', '--targetusername ' + username);
   }
 
-  public orgList(): Promise<OrgListResult> {
+  public orgList(): Promise<FCOauth[]> {
     return this.runCommand('org:list', '--clean --noprompt')
       .then(res => {
-        return { orgs: res.nonScratchOrgs.concat(res.scratchOrgs) };
+        return res.nonScratchOrgs.concat(res.scratchOrgs);
       })
       .catch(() => {
         // we got an error because there are no connections
         fcConnection.getChildren().forEach(curConn => {
-          curConn.connection = undefined;
           curConn.isLoggedIn = false;
         });
         return undefined;

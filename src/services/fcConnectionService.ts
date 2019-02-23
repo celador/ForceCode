@@ -107,7 +107,13 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             this.addConnection({ username: uName });
           });
           if (orgs) {
-            orgs.orgs.forEach(curOrg => {
+            const showOnlyProjectOrgs: boolean = vscode.workspace.getConfiguration('force')[
+              'onlyShowProjectUsernames'
+            ];
+            if (showOnlyProjectOrgs) {
+              orgs = orgs.filter(currentOrg => uNames.includes(currentOrg.username));
+            }
+            orgs.forEach(curOrg => {
               this.addConnection(curOrg);
             });
           }

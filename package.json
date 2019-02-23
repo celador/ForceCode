@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.14.1",
+  "version": "3.15.0",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -203,7 +203,7 @@
         "force.checkForFileChanges": {
           "type": "boolean",
           "default": false,
-          "description": "This option, when set to true, will allow ForceCode to check for file changes against the server on startup of ForceCode."
+          "description": "This option, when checked, will allow ForceCode to check for file changes against the server on startup of ForceCode."
         },
         "force.defaultApiVersion": {
           "type": "string",
@@ -250,20 +250,25 @@
           "default": 250,
           "description": "The maximum number of results to show per page when executing a query in the query editor."
         },
+        "force.onlyShowProjectUsernames": {
+          "type": "boolean",
+          "default": true,
+          "description": "If checked, Forcecode will only show the usernames in use in each project instead of every one that has been authenticated on your machine."
+        },
         "force.outputQueriesAsCSV": {
           "type": "boolean",
           "default": true,
-          "description": "If set to true, will retrieve soql/toql results in csv form. If false, json will be returned."
+          "description": "If checked, will retrieve soql/toql results in csv form. If false, json will be returned."
         },
         "force.revealTestedClass": {
           "type": "boolean",
           "default": false,
-          "description": "When set to true, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed."
+          "description": "When checked, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed."
         },
         "force.showFilesOnOpen": {
           "type": "boolean",
           "default": true,
-          "description": "If set to true, will open files in the editor when opened from Salesforce."
+          "description": "If checked, will open files in the editor when opened from Salesforce."
         },
         "force.showFilesOnOpenMax": {
           "type": "number",

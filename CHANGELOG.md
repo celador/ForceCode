@@ -2,6 +2,8 @@
 
 * 3.15.0
     * Add alias option to org settings. When set, the alias is what will show in the saved usernames section of the Forcecode view instead of the username. This makes keeping track of orgs easier than remembering each username
+    * Add force.onlyShowProjectUsernames workspace setting. If checked, Forcecode will only show the usernames in use in each project instead of every one that has been authenticated on your machine.
+    * When selecting the Log In option in the Forcecode menu, all authenticated orgs on the machine will be shown in the list instead of just the project orgs. This makes it easier to set up a new project if you've previously authenticated an org
 * 3.14.1
     * Fix issue on Windows with refreshing from server #244
     * Add refresh and compile commands to the diff editor per issue #242

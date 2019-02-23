@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import { dxService, fcConnection } from '../services';
+import { Config } from '../forceCode';
+import { defaultOptions, saveConfigFile } from '../services/configuration';
 
 export class CreateScratchOrg {
   private static instance: CreateScratchOrg;
@@ -72,6 +74,9 @@ export class CreateScratchOrg {
               return dxService
                 .createScratchOrg(theOptions)
                 .then(res => {
+                  var scratchConfig: Config = defaultOptions;
+                  scratchConfig.username = res.username;
+                  saveConfigFile(res.username, scratchConfig);
                   fcConnection.refreshConnections().then(() => {
                     resolve(res);
                   });
