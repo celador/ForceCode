@@ -8,7 +8,7 @@
 import * as vscode from 'vscode';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
 import { FCOauth, fcConnection, dxService } from '../services';
-import { CLIENT_ID } from './'
+import { CLIENT_ID } from './';
 
 export interface SObject {
   actionOverrides: any[];
@@ -157,7 +157,7 @@ export interface DescribeSObjectResult {
 export enum SObjectCategory {
   ALL = 'ALL',
   STANDARD = 'STANDARD',
-  CUSTOM = 'CUSTOM'
+  CUSTOM = 'CUSTOM',
 }
 
 type SubRequest = { method: string; url: string };
@@ -175,37 +175,27 @@ export class SObjectDescribe {
   private readonly batchPart: string = 'composite/batch';
 
   private getVersion(): string {
-    return `${this.versionPrefix}${vscode.window.forceCode.config.apiVersion || vscode.workspace.getConfiguration('force')['defaultApiVersion']}`;
+    return `${this.versionPrefix}${vscode.window.forceCode.config.apiVersion ||
+      vscode.workspace.getConfiguration('force')['defaultApiVersion']}`;
   }
 
-  public describeGlobal(
-    type: SObjectCategory
-  ): Promise<string[]> {
+  public describeGlobal(type: SObjectCategory): Promise<string[]> {
     try {
-      return dxService.runCommand('schema:sobject:list', '--sobjecttypecategory ' + type.toString());
+      return dxService.runCommand(
+        'schema:sobject:list',
+        '--sobjecttypecategory ' + type.toString()
+      );
     } catch (e) {
       return Promise.reject(e);
     }
   }
 
-  public async describeSObjectBatch(
-    types: string[],
-    nextToProcess: number,
-  ): Promise<SObject[]> {
+  public async describeSObjectBatch(types: string[], nextToProcess: number): Promise<SObject[]> {
     const batchSize = 25;
     const batchRequest: BatchRequest = { batchRequests: [] };
-    for (
-      let i = nextToProcess;
-      i < nextToProcess + batchSize && i < types.length;
-      i++
-    ) {
+    for (let i = nextToProcess; i < nextToProcess + batchSize && i < types.length; i++) {
       vscode.window.forceCode.outputChannel.appendLine('Processing decription for ' + types[i]);
-      const urlElements = [
-        this.getVersion(),
-        this.sobjectsPart,
-        types[i],
-        'describe'
-      ];
+      const urlElements = [this.getVersion(), this.sobjectsPart, types[i], 'describe'];
       const requestUrl = urlElements.join('/');
 
       batchRequest.batchRequests.push({ method: 'GET', url: requestUrl });
@@ -215,7 +205,7 @@ export class SObjectDescribe {
       orgInfo.instanceUrl,
       this.servicesPath,
       this.getVersion(),
-      this.batchPart
+      this.batchPart,
     ];
     const batchRequestUrl = batchUrlElements.join('/');
     const options: XHROptions = {
@@ -226,9 +216,9 @@ export class SObjectDescribe {
         Accept: 'application/json',
         Authorization: `OAuth ${orgInfo.accessToken}`,
         'User-Agent': 'salesforcedx-extension',
-        'Sforce-Call-Options': `client=${CLIENT_ID}`
+        'Sforce-Call-Options': `client=${CLIENT_ID}`,
       },
-      data: JSON.stringify(batchRequest)
+      data: JSON.stringify(batchRequest),
     };
 
     try {

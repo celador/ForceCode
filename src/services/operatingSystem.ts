@@ -1,17 +1,17 @@
 import os = require('os');
 export function isWindows() {
-    return os.platform().startsWith('win');
+  return os.platform().startsWith('win');
 }
 export function isLinux() {
-    return os.platform().startsWith('linux');
+  return os.platform().startsWith('linux');
 }
 export function isMac() {
-    return os.platform().startsWith('darwin');
+  return os.platform().startsWith('darwin');
 }
 export function getOS() {
-    return os.platform();
+  return os.platform();
 }
 
 export function getHomeDir() {
-    return os.homedir();
+  return os.homedir();
 }

@@ -4,7 +4,8 @@ import { FCFile } from '../services/codeCovView';
 import { codeCovViewService } from '../services';
 
 // create a decorator type that we use to decorate small numbers
-const uncoveredLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({
+const uncoveredLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(
+  {
     backgroundColor: 'rgba(247,98,34,0.3)',
     // borderWidth: '1px',
     // borderStyle: 'dashed',
@@ -12,75 +13,88 @@ const uncoveredLineStyle: vscode.TextEditorDecorationType = vscode.window.create
     overviewRulerLane: vscode.OverviewRulerLane.Right,
     isWholeLine: true,
     light: {
-        // this color will be used in light color themes
-        borderColor: 'rgba(247,98,34,1)'
+      // this color will be used in light color themes
+      borderColor: 'rgba(247,98,34,1)',
     },
     dark: {
-        // this color will be used in dark color themes
-        borderColor: 'rgba(247,98,34,1)'
+      // this color will be used in dark color themes
+      borderColor: 'rgba(247,98,34,1)',
     },
-});
+  }
+);
 
-const acovLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType({ backgroundColor: 'rgba(72,54,36,1)', isWholeLine: true });
+const acovLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(
+  { backgroundColor: 'rgba(72,54,36,1)', isWholeLine: true }
+);
 
 // When this subscription is created (when the extension/Code boots), try to decorate the document
 let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
 if (activeEditor) {
-    updateDecorations();
+  updateDecorations();
 }
 // Export Function used when the Editor changes
 export function editorUpdateApexCoverageDecorator(editor) {
-    activeEditor = editor;
-    if (editor) {
-        updateDecorations();
-    }
-};
+  activeEditor = editor;
+  if (editor) {
+    updateDecorations();
+  }
+}
 
 export function updateDecorations() {
-    if (!activeEditor) {
-        return;
+  if (!activeEditor) {
+    return;
+  }
+  var uncoveredLineOptions: vscode.DecorationOptions[] = [];
+  var lineOpts: vscode.TextEditorDecorationType = uncoveredLineStyle;
+  if (activeEditor.document.languageId != 'apexCodeCoverage') {
+    if (
+      vscode.window.forceCode &&
+      vscode.window.forceCode.config &&
+      vscode.window.forceCode.config.showTestCoverage &&
+      activeEditor
+    ) {
+      uncoveredLineOptions = getUncoveredLineOptions(activeEditor.document);
     }
-    var uncoveredLineOptions: vscode.DecorationOptions[] = [];
-    var lineOpts: vscode.TextEditorDecorationType = uncoveredLineStyle;
-    if(activeEditor.document.languageId != 'apexCodeCoverage') {
-        if (vscode.window.forceCode && vscode.window.forceCode.config && vscode.window.forceCode.config.showTestCoverage && activeEditor) {
-            uncoveredLineOptions = getUncoveredLineOptions(activeEditor.document);
-        }
-    } else {
-        lineOpts = acovLineStyle;
-        for(var i: number = 2; i < activeEditor.document.lineCount; i += 2) {
-            let decorationRange: vscode.DecorationOptions = { range: activeEditor.document.lineAt(i).range };
-            uncoveredLineOptions.push(decorationRange);
-        }
+  } else {
+    lineOpts = acovLineStyle;
+    for (var i: number = 2; i < activeEditor.document.lineCount; i += 2) {
+      let decorationRange: vscode.DecorationOptions = {
+        range: activeEditor.document.lineAt(i).range,
+      };
+      uncoveredLineOptions.push(decorationRange);
     }
-    activeEditor.setDecorations(lineOpts, uncoveredLineOptions);
+  }
+  activeEditor.setDecorations(lineOpts, uncoveredLineOptions);
 }
 
 export function getUncoveredLineOptions(document: vscode.TextDocument) {
-    var uncoveredLineDec: vscode.DecorationOptions[] = [];
-    const fcfile: FCFile = codeCovViewService.findByPath(document.fileName);
-    if(fcfile) {
-        const wsMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
+  var uncoveredLineDec: vscode.DecorationOptions[] = [];
+  const fcfile: FCFile = codeCovViewService.findByPath(document.fileName);
+  if (fcfile) {
+    const wsMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
 
-        if(wsMem.id && wsMem.coverage) {
-            uncoveredLineDec = getUncoveredLineOptionsFor(wsMem);
-        }
+    if (wsMem.id && wsMem.coverage) {
+      uncoveredLineDec = getUncoveredLineOptionsFor(wsMem);
     }
-    return uncoveredLineDec;
+  }
+  return uncoveredLineDec;
 
-    function getUncoveredLineOptionsFor(workspaceMember: forceCode.IWorkspaceMember) {
-        var uncoveredLineDecorations: vscode.DecorationOptions[] = [];
-        let fileCoverage: forceCode.ICodeCoverage = workspaceMember.coverage;
-        if (fileCoverage) {
-            fileCoverage.Coverage.uncoveredLines.forEach(notCovered => {
-                let decorationRange: vscode.DecorationOptions = { range: document.lineAt(Number(notCovered - 1)).range, hoverMessage: 'Line ' + notCovered + ' not covered by a test' };
-                uncoveredLineDecorations.push(decorationRange);
-                // Add output to output channel
-            });
-            var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
-            var percent = ((fileCoverage.NumLinesCovered / total) * 100).toFixed(2) + '% covered';
-            vscode.window.forceCode.showStatus(fileCoverage.ApexClassOrTrigger.Name + ' ' + percent);
-        }
-        return uncoveredLineDecorations;
+  function getUncoveredLineOptionsFor(workspaceMember: forceCode.IWorkspaceMember) {
+    var uncoveredLineDecorations: vscode.DecorationOptions[] = [];
+    let fileCoverage: forceCode.ICodeCoverage = workspaceMember.coverage;
+    if (fileCoverage) {
+      fileCoverage.Coverage.uncoveredLines.forEach(notCovered => {
+        let decorationRange: vscode.DecorationOptions = {
+          range: document.lineAt(Number(notCovered - 1)).range,
+          hoverMessage: 'Line ' + notCovered + ' not covered by a test',
+        };
+        uncoveredLineDecorations.push(decorationRange);
+        // Add output to output channel
+      });
+      var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
+      var percent = ((fileCoverage.NumLinesCovered / total) * 100).toFixed(2) + '% covered';
+      vscode.window.forceCode.showStatus(fileCoverage.ApexClassOrTrigger.Name + ' ' + percent);
     }
+    return uncoveredLineDecorations;
+  }
 }
