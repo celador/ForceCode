@@ -322,6 +322,18 @@ export const fcCommands: FCCommand[] = [
     },
   },
   {
+    commandName: 'ForceCode.createProjectMenu',
+    name: 'Creating new project',
+    hidden: false,
+    description: 'Create new project',
+    detail: 'Create a new Forcecode project in a folder you select.',
+    icon: 'file-directory',
+    label: 'New Project',
+    command: function(context, selectedResource?) {
+      return vscode.commands.executeCommand('ForceCode.createProject');
+    },
+  },
+  {
     commandName: 'ForceCode.logout',
     name: 'Logging out',
     hidden: false,

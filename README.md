@@ -100,8 +100,8 @@ Please note that the following permissions are required to develop on the Force.
 
 ## FAQ
 
-* Why do I receive an error that says 'ForceCode.showMenu' failed?
-    * You must open a folder in the VSCode workspace before trying to connect with ForceCode.
+* Where did the ForceCode: Show Menu command go?
+    * To create a project with Forcecode, you should now use the ForceCode: Create Project command.
 * Why do I get an error when trying to login about a localhost connection failure?
     * This means your network is either on a proxy or vpn and you will need to go [here](https://salesforce.stackexchange.com/questions/194719/salesforce-dx-proxy-issues) to set up Forcecode to work with this type of connection.
 
@@ -235,11 +235,13 @@ This will open a ForceCode Settings window where you can change all of the optio
 
 Select this menu option to be taken to a screen where you will be able to upload a CSV file full of record data that you will be able to perform CRUD operations on. Simply select an sObject name, CRUD operation, and upload a CSV. Then click "Execute" and watch the magic happen! If you get a file format error it will be shown on the screen. If there are errors during the CRUD operation then Forcecode will show you a save dialog box asking where you want to save the error file. The error file currently isn't as fancy as dataloader, as the results returned from errors aren't much, but it will tell you the line number(s) in Excel that have the errors, along with what the error was. 
 
+### New Project
+
+Selecting this option will allow you to create a new Forcecode project in a different folder from the one currently open. You will be asked for the new project folder name and will be shown an open dialog so you can choose where to create the new project folder.
+
 ## Configuration
 
-You need to have a folder opened in VSCode to be able to start this extension!
-
-To begin, press `Opt+Cmd+C` (Mac) or `Ctrl+Shift+C` (Win/Linux) or open the Command Pallet and type `>ForceCode: Menu` to bring up the ForceCode Menu  
+To create a Forcecode project, open Visual Studio Code then open the command pallet (Ctrl + Shift + p) and run the `ForceCode: Create Project` command. Select the folder you wish to create a project in then Forcecode will open the folder and ask you to log in.
 You can then select if you want to log into a production org or test org. A browser will then open to the Salesforce login where you can enter your credentials. A configuration file will then be auto generated for you for each of your orgs in the .forceCode folder called `settings.json`.  
 
 The configuration file will look like the following. You can either edit this file to change the settings or you can use the settings option in the ForceCode menu (Recommended)!

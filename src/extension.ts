@@ -21,8 +21,58 @@ import { IWorkspaceMember } from './forceCode';
 import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
 import { getToolingTypeFromFolder, getAnyTTFromFolder } from './parsers/open';
 import { trackEvent } from './services/fcAnalytics';
+import * as fs from 'fs-extra';
 
 export function activate(context: vscode.ExtensionContext): any {
+  context.subscriptions.push(
+    vscode.commands.registerCommand('ForceCode.createProject', () => {
+      vscode.window
+        .showInputBox({
+          ignoreFocusOut: true,
+          placeHolder: 'Enter a Project Name...',
+          prompt:
+            'A folder with this name will be created inside the folder you select in the next step',
+        })
+        .then(folderName => {
+          if (!folderName || folderName.trim() === '') {
+            vscode.window.showErrorMessage(
+              'You must enter a project name to create a Forcecode project',
+              'OK'
+            );
+            return;
+          }
+          folderName = folderName.trim();
+          vscode.window
+            .showOpenDialog({
+              canSelectFiles: false,
+              canSelectFolders: true,
+              canSelectMany: false,
+              openLabel: `Create Folder '${folderName}'`,
+            })
+            .then(folder => {
+              if (!folder) {
+                return;
+              }
+              // create force.json in the folder, then open the folder
+              const projFolder: string = path.join(folder[0].fsPath, folderName);
+              if (!fs.existsSync(projFolder)) {
+                fs.mkdirpSync(projFolder);
+              }
+              fs.outputFileSync(
+                path.join(projFolder, 'force.json'),
+                JSON.stringify({ lastUsername: '' }, undefined, 4)
+              );
+              // open the folder
+              vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(projFolder));
+            });
+        });
+    })
+  );
+
+  if (!vscode.workspace.workspaceFolders) {
+    return;
+  }
+
   process.env.SFDX_JSON_TO_STDOUT = 'true';
   commands.fcCommands.forEach(cur => {
     context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));

@@ -1,6 +1,7 @@
 ## Change Log
 
 * 3.15.0
+    * Add ForceCode: Create Project command to replace ForceCode: Show Menu. Now you won't need to have a folder open to create a project. Forcecode will do the heavy lifting for you! There is also a new Forcecode menu option (Right below the settings menu option) to allow for creating a new Forcecode project when Forcecode is active.
     * Add alias option to org settings. When set, the alias is what will show in the saved usernames section of the Forcecode view instead of the username. This makes keeping track of orgs easier than remembering each username
     * Add force.onlyShowProjectUsernames workspace setting. If checked, Forcecode will only show the usernames in use in each project instead of every one that has been authenticated on your machine.
     * When selecting the Log In option in the Forcecode menu, all authenticated orgs on the machine will be shown in the list instead of just the project orgs. This makes it easier to set up a new project if you've previously authenticated an org
