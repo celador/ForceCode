@@ -262,7 +262,8 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
       const row = match[1];
       const col = match[2];
       failureLineNumber = Number.parseInt(row);
-      failureLineNumber = failureLineNumber < 1 ? 1 : failureLineNumber;
+      failureLineNumber =
+        failureLineNumber < 1 || failureLineNumber > document.lineCount ? 1 : failureLineNumber;
       failureColumnNumber = Number.parseInt(col);
     }
     var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
