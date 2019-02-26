@@ -71,6 +71,15 @@ export function activate(context: vscode.ExtensionContext): any {
 
   if (!vscode.workspace.workspaceFolders) {
     return;
+  } else {
+    const forcePath: string = path.join(
+      vscode.workspace.workspaceFolders[0].uri.fsPath,
+      'force.json'
+    );
+    if (!fs.existsSync(forcePath)) {
+      // if there's no force.json then we don't want to fully initialize, otherwise things get wonky
+      return;
+    }
   }
 
   process.env.SFDX_JSON_TO_STDOUT = 'true';
