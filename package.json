@@ -154,7 +154,7 @@
         "key": "alt+cmd+c",
         "win": "ctrl+shift+c",
         "linux": "ctrl+shift+c",
-        "when": "editorFocus"
+        "when": "editorFocus && ForceCodeActive"
       },
       {
         "command": "ForceCode.compile",
@@ -430,27 +430,27 @@
       ],
       "view/item/context": [
         {
-          "when": "viewItem == currentConn",
+          "when": "viewItem == currentConn && ForceCodeActive",
           "command": "ForceCode.logout"
         },
         {
-          "when": "viewItem == loggedInConn",
+          "when": "viewItem == loggedInConn && ForceCodeActive",
           "command": "ForceCode.logout"
         },
         {
-          "when": "viewItem == loggedInConn",
+          "when": "viewItem == loggedInConn && ForceCodeActive",
           "command": "ForceCode.switchUser"
         },
         {
-          "when": "viewItem == loggedInConn",
+          "when": "viewItem == loggedInConn && ForceCodeActive",
           "command": "ForceCode.removeConfig"
         },
         {
-          "when": "viewItem == notLoggedInConn",
+          "when": "viewItem == notLoggedInConn && ForceCodeActive",
           "command": "ForceCode.login"
         },
         {
-          "when": "viewItem == notLoggedInConn",
+          "when": "viewItem == notLoggedInConn && ForceCodeActive",
           "command": "ForceCode.removeConfig"
         }
       ],
@@ -548,7 +548,7 @@
     "@types/node": "11.9.5",
     "@types/universal-analytics": "0.4.2",
     "@types/xml2js": "0.4.3",
-    "mocha": "6.0.1",
+    "mocha": "6.0.2",
     "rimraf": "2.6.3",
     "ts-loader": "5.3.3",
     "tslint": "5.13.0",

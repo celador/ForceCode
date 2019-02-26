@@ -34,9 +34,6 @@ export default class ForceService implements forceCode.IForceService {
   public uuid: string;
 
   constructor(context: vscode.ExtensionContext) {
-    if (!vscode.workspace.workspaceFolders) {
-      throw new Error('Open a Folder with VSCode before trying to login to ForceCode');
-    }
     console.log('Initializing ForceCode service');
     this.workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
     this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
@@ -236,11 +233,12 @@ export default class ForceService implements forceCode.IForceService {
   public connect(): Promise<forceCode.IForceService> {
     var self: forceCode.IForceService = vscode.window.forceCode;
     var config = self.config;
-    // Lazy-load the connection
     if (!config.username) {
+      vscode.window.showErrorMessage(
+        `ForceCode: No username found. Please try to login to the org again.`
+      );
       throw { message: '$(alert) Missing Credentials $(alert)' };
     }
-    // get sfdx login info and use oath2
 
     // get the current org info
     return Promise.resolve(self)
