@@ -20,8 +20,7 @@ export const defaultOptions: Config = {
     testLevel: 'NoTestRun',
   },
   overwritePackageXML: false,
-  poll: 1500,
-  pollTimeout: 1200,
+  poll: 2000,
   prefix: '',
   showTestCoverage: true,
   spaDist: '',
@@ -96,6 +95,7 @@ export function readConfigFile(userName: string, service?: ForceService): Config
       delete config['maxQueryHistory'];
       delete config['maxQueryResultsPerPage'];
       delete config['outputQueriesAsCSV'];
+      delete config['pollTimeout'];
       delete config['revealTestedClass'];
       delete config['showFilesOnOpen'];
       delete config['showFilesOnOpenMax'];

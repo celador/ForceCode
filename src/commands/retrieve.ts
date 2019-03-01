@@ -143,9 +143,6 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
   // =======================================================================================================================================
   function getPackage(opt: vscode.QuickPickItem) {
     option = opt;
-    // Proxy Console.info to capture the status output from metadata tools
-    vscode.window.forceCode.conn.metadata.pollTimeout =
-      (vscode.window.forceCode.config.pollTimeout || 600) * 1000;
 
     if (opt) {
       return new Promise(pack);
