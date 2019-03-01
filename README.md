@@ -332,6 +332,7 @@ The following settings have been migrated to the workspace settings as well:
 * onlyShowProjectUsernames: If checked, Forcecode will only show the usernames in use in each project instead of every one that has been authenticated on your machine.
 * outputQueriesAsCSV: If checked, will retrieve soql/toql results in csv form. If false, json will be returned
 * revealTestedClass: When checked, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed.
+* setDefaultUsernameOnLogin: When checked, Forcecode will update the SFDX CLI default username to the current logged in org each time you switch usernames. This allows you to use Forcecode alongside of the Salesforce extensions, so you don't need to worry about changing the default username each time you switch orgs.
 * showFilesOnOpen: If checked, will open files in the editor when opened from Salesforce
 * showFilesOnOpenMax: The maximum number of files to open in the editor. More than 3 usually causes problems or doesn't work.
 * showTestLog: This flag determines if the Log file for the last test run should show up after the tests are complete.  This is nice for debugging tests.  Use this in conjunction with the other debug flags to keep your output tidy. The log file will only show if it's not empty (Because of filtering).

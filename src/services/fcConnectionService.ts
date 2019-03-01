@@ -263,6 +263,17 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         path.join(projPath, 'force.json'),
         JSON.stringify({ lastUsername: config.username }, undefined, 4)
       );
+
+      // update the defaultusername in the sfdx config file...
+      if (vscode.workspace.getConfiguration('force')['setDefaultUsernameOnLogin']) {
+        const sfdxConfigPath = path.join(operatingSystem.getHomeDir(), '.sfdx', 'sfdx-config.json');
+        var sfdxConfig = {};
+        if (fs.existsSync(sfdxConfigPath)) {
+          sfdxConfig = fs.readJsonSync(sfdxConfigPath);
+        }
+        sfdxConfig['defaultusername'] = config.username;
+        fs.outputFileSync(sfdxConfigPath, JSON.stringify(sfdxConfig, undefined, 4));
+      }
       return Promise.resolve(hadToLogIn);
     });
   }

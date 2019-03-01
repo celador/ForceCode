@@ -269,6 +269,11 @@
           "default": false,
           "description": "When checked, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed."
         },
+        "force.setDefaultUsernameOnLogin": {
+          "type": "boolean",
+          "default": true,
+          "description": "When checked, Forcecode will update the SFDX CLI default username to the current logged in org each time you switch usernames. This allows you to use Forcecode alongside of the Salesforce extensions, so you don't need to worry about changing the default username each time you switch orgs."
+        },
         "force.showFilesOnOpen": {
           "type": "boolean",
           "default": true,

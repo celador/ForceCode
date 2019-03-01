@@ -1,6 +1,7 @@
 ## Change Log
 
 * 3.15.0
+    * Added setDefaultUsernameOnLogin workspace setting. When checked, Forcecode will update the SFDX CLI default username to the current logged in org each time you switch usernames. This allows you to use Forcecode alongside of the Salesforce extensions, so you don't need to worry about changing the default username each time you switch orgs.
     * Add ForceCode: Create Project command to replace ForceCode: Show Menu. Now you won't need to have a folder open to create a project. Forcecode will do the heavy lifting for you! There is also a new Forcecode menu option (Right below the settings menu option) to allow for creating a new Forcecode project when Forcecode is active.
     * Add alias option to org settings. When set, the alias is what will show in the saved usernames section of the Forcecode view instead of the username. This makes keeping track of orgs easier than remembering each username
     * Add force.onlyShowProjectUsernames workspace setting. If checked, Forcecode will only show the usernames in use in each project instead of every one that has been authenticated on your machine.
