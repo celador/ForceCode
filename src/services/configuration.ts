@@ -42,25 +42,86 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
   if (!fs.existsSync(self.projectRoot)) {
     fs.mkdirpSync(self.projectRoot);
   }
-  if (!fs.existsSync(path.join(projPath, 'sfdx-project.json'))) {
+
+  if (!self.config.username) {
+    return fcConnection.refreshConnections().then(() => {
+      return Promise.resolve(self.config);
+    });
+  }
+
+  const forceConfigPath = path.join(projPath, '.forceCode', self.config.username);
+  const forceSfdxPath = path.join(forceConfigPath, '.sfdx');
+  const sfdxPath = path.join(projPath, '.sfdx');
+  const sfdxProjectJson = path.join(projPath, 'sfdx-project.json');
+  const forceSFDXProjJson = path.join(forceConfigPath, 'sfdx-project.json');
+  var sfdxStat;
+  var sfdxProjStat;
+  try {
+    sfdxStat = fs.lstatSync(sfdxPath);
+  } catch (e) {}
+  try {
+    sfdxProjStat = fs.lstatSync(sfdxProjectJson);
+  } catch (e) {}
+
+  if (sfdxStat) {
+    if (sfdxStat.isSymbolicLink()) {
+      // if it exists and is a symbolic link, remove it so we can relink with the new login
+      fs.unlinkSync(sfdxPath);
+    } else {
+      // not a symbolic link, so move it because it's an SFDX proj folder
+      fs.moveSync(sfdxPath, forceSfdxPath, { overwrite: true });
+    }
+  }
+  if (!fs.existsSync(forceSfdxPath)) {
+    fs.mkdirpSync(forceSfdxPath);
+  }
+  // link to the newly logged in org's sfdx folder in .forceCode/USERNAME/.sfdx
+  fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
+
+  // now work on the sfdx-project.json file
+  if (sfdxProjStat) {
+    if (sfdxProjStat.isSymbolicLink()) {
+      // if it exists and is a symbolic link, remove it so we can relink with the new login
+      fs.unlinkSync(sfdxProjectJson);
+    } else {
+      // not a symbolic link, so move it because it's an SFDX proj config file
+      fs.moveSync(sfdxProjectJson, forceSFDXProjJson, {
+        overwrite: true,
+      });
+    }
+  }
+
+  if (!fs.existsSync(forceSFDXProjJson)) {
     // add in a bare sfdx-project.json file for language support from official salesforce extensions
     const sfdxProj: {} = {
       namespace: '',
       packageDirectories: [
         {
-          path: 'src',
+          path: self.config.src,
           default: true,
         },
       ],
-      sfdcLoginUrl: 'https://login.salesforce.com/',
-      sourceApiVersion: vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+      sfdcLoginUrl: self.config.url,
+      sourceApiVersion: self.config.apiVersion,
     };
 
-    fs.outputFileSync(
-      path.join(projPath, 'sfdx-project.json'),
-      JSON.stringify(sfdxProj, undefined, 4)
-    );
+    fs.outputFileSync(forceSFDXProjJson, JSON.stringify(sfdxProj, undefined, 4));
   }
+
+  // link to the newly logged in org's sfdx folder in .forceCode/USERNAME/.sfdx
+  fs.symlinkSync(forceSFDXProjJson, sfdxProjectJson, 'junction');
+
+  // update the defaultusername in the sfdx config file...
+  if (vscode.workspace.getConfiguration('force')['setDefaultUsernameOnLogin']) {
+    const sfdxConfigPath = path.join(sfdxPath, 'sfdx-config.json');
+    var sfdxConfig = {};
+    if (fs.existsSync(sfdxConfigPath)) {
+      sfdxConfig = fs.readJsonSync(sfdxConfigPath);
+    }
+    sfdxConfig['defaultusername'] = self.config.username;
+    fs.outputFileSync(sfdxConfigPath, JSON.stringify(sfdxConfig, undefined, 4));
+  }
+
   return fcConnection.refreshConnections().then(() => {
     return Promise.resolve(self.config);
   });

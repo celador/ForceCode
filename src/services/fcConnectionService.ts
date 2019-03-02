@@ -227,53 +227,16 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     vscode.window.forceCode.containerAsyncRequestId = undefined;
     vscode.window.forceCode.containerId = undefined;
     vscode.window.forceCode.containerMembers = [];
-    const projPath: string = vscode.window.forceCode.workspaceRoot;
     return checkConfig(vscode.window.forceCode.config).then(config => {
-      vscode.window.forceCode.config = config;
       saveConfigFile(config.username, config);
-      vscode.window.forceCode.projectRoot = path.join(projPath, config.src);
-
-      const forceSfdxPath = path.join(projPath, '.forceCode', config.username, '.sfdx');
-      const sfdxPath = path.join(projPath, '.sfdx');
-      var sfdxStat;
-      try {
-        sfdxStat = fs.lstatSync(sfdxPath);
-      } catch (e) {}
-
-      if (sfdxStat) {
-        if (sfdxStat.isSymbolicLink()) {
-          // if it exists and is a symbolic link, remove it so we can relink with the new login
-          fs.unlinkSync(sfdxPath);
-        } else {
-          // not a symbolic link, so move it because it's an SFDX proj folder
-          fs.moveSync(sfdxPath, forceSfdxPath, { overwrite: true });
-        }
-      }
-      if (!fs.existsSync(forceSfdxPath)) {
-        fs.mkdirpSync(forceSfdxPath);
-      }
-      // link to the newly logged in org's sfdx folder in .forceCode/USERNAME/.sfdx
-      fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
-
       vscode.window.forceCode.conn = service.currentConnection.connection;
-      // this triggers a call to configuration() because the force.json file watcher, which triggers
-      // refreshConnections()
-      service.refreshConnsStatus();
+
+      // writing to force.json will trigger the file watcher. this, in turn, will call configuration()
+      // which will finish setting up the login process
       fs.outputFileSync(
-        path.join(projPath, 'force.json'),
+        path.join(vscode.window.forceCode.workspaceRoot, 'force.json'),
         JSON.stringify({ lastUsername: config.username }, undefined, 4)
       );
-
-      // update the defaultusername in the sfdx config file...
-      if (vscode.workspace.getConfiguration('force')['setDefaultUsernameOnLogin']) {
-        const sfdxConfigPath = path.join(operatingSystem.getHomeDir(), '.sfdx', 'sfdx-config.json');
-        var sfdxConfig = {};
-        if (fs.existsSync(sfdxConfigPath)) {
-          sfdxConfig = fs.readJsonSync(sfdxConfigPath);
-        }
-        sfdxConfig['defaultusername'] = config.username;
-        fs.outputFileSync(sfdxConfigPath, JSON.stringify(sfdxConfig, undefined, 4));
-      }
       return Promise.resolve(hadToLogIn);
     });
   }
