@@ -121,6 +121,11 @@ export function saveLWC(
           LightningComponentBundleId: bundle[0].Id ? bundle[0].Id : bundle[0].id,
           Format,
           Source,
+          FilePath: document.fileName
+            .split(vscode.window.forceCode.projectRoot + path.sep)
+            .pop()
+            .split('\\')
+            .join('/'),
         })
         .then(
           res => {
