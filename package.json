@@ -189,6 +189,11 @@
       "type": "object",
       "title": "ForceCode configuration",
       "properties": {
+        "force.allowAnonymousUsageTracking": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow the Forcecode team to track anonymous usage data so that we can improve your overall experience."
+        },
         "force.autoRefresh": {
           "type": "boolean",
           "default": false,

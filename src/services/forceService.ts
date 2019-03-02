@@ -12,9 +12,8 @@ import * as path from 'path';
 import { FCFile } from './codeCovView';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { Connection } from 'jsforce';
-import { getPreviousUUID } from './fcAnalytics';
-import * as fs from 'fs-extra';
-const uuidv4 = require('uuid/v4');
+import { getUUID, FCAnalytics } from './fcAnalytics';
+
 import klaw = require('klaw');
 
 export default class ForceService implements forceCode.IForceService {
@@ -44,18 +43,14 @@ export default class ForceService implements forceCode.IForceService {
     this.containerMembers = [];
     this.storageRoot = context.extensionPath;
 
-    var analyticsFileExists: boolean = true;
-    if (!fs.existsSync(path.join(this.storageRoot, 'analytics.json'))) {
-      analyticsFileExists = getPreviousUUID(this.storageRoot);
-    }
-    if (analyticsFileExists) {
-      this.uuid = fs.readJsonSync(path.join(this.storageRoot, 'analytics.json')).uuid;
-    }
+    const vsConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('force');
+    const uuidRes: FCAnalytics = getUUID();
+    this.uuid = uuidRes.uuid;
 
     console.log('Starting ForceCode service');
     configuration(this).then(config => {
       return new Promise(resolve => {
-        if (!this.uuid) {
+        if (uuidRes.firstTime) {
           // ask the user to opt-in
           return vscode.window
             .showInformationMessage(
@@ -65,14 +60,18 @@ export default class ForceService implements forceCode.IForceService {
             )
             .then(choice => {
               if (choice === 'Yes') {
-                this.uuid = uuidv4();
+                vsConfig.update(
+                  'allowAnonymousUsageTracking',
+                  true,
+                  vscode.ConfigurationTarget.Global
+                );
               } else {
-                this.uuid = 'OPT-OUT';
+                vsConfig.update(
+                  'allowAnonymousUsageTracking',
+                  false,
+                  vscode.ConfigurationTarget.Global
+                );
               }
-              fs.outputFileSync(
-                path.join(this.storageRoot, 'analytics.json'),
-                JSON.stringify({ uuid: this.uuid }, undefined, 4)
-              );
               resolve();
             });
         } else {
