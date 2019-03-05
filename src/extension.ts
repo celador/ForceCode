@@ -175,6 +175,25 @@ export function activate(context: vscode.ExtensionContext): any {
       })
   );
 
+  // watch for sfdx-project.json file changes. if it changes, we copy it back into the .forceCode folder for the org
+  context.subscriptions.push(
+    vscode.workspace
+      .createFileSystemWatcher(
+        path.join(vscode.window.forceCode.workspaceRoot, 'sfdx-project.json')
+      )
+      .onDidChange(uri => {
+        fs.copyFileSync(
+          path.join(vscode.window.forceCode.workspaceRoot, 'sfdx-project.json'),
+          path.join(
+            vscode.window.forceCode.workspaceRoot,
+            '.forceCode',
+            vscode.window.forceCode.config.username,
+            'sfdx-project.json'
+          )
+        );
+      })
+  );
+
   // watch for deleted files and update workspaceMembers
   context.subscriptions.push(
     vscode.workspace

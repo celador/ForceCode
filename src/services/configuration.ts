@@ -55,12 +55,9 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
   const sfdxProjectJson = path.join(projPath, 'sfdx-project.json');
   const forceSFDXProjJson = path.join(forceConfigPath, 'sfdx-project.json');
   var sfdxStat;
-  var sfdxProjStat;
+
   try {
     sfdxStat = fs.lstatSync(sfdxPath);
-  } catch (e) {}
-  try {
-    sfdxProjStat = fs.lstatSync(sfdxProjectJson);
   } catch (e) {}
 
   if (sfdxStat) {
@@ -70,26 +67,22 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
     } else {
       // not a symbolic link, so move it because it's an SFDX proj folder
       fs.moveSync(sfdxPath, forceSfdxPath, { overwrite: true });
+
+      // if the sfdx-project.json file exists, move it into the .forceCode folder
+      if (fs.existsSync(sfdxProjectJson)) {
+        fs.moveSync(sfdxProjectJson, forceSFDXProjJson, {
+          overwrite: true,
+        });
+      }
     }
   }
+
   if (!fs.existsSync(forceSfdxPath)) {
     fs.mkdirpSync(forceSfdxPath);
   }
+
   // link to the newly logged in org's sfdx folder in .forceCode/USERNAME/.sfdx
   fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
-
-  // now work on the sfdx-project.json file
-  if (sfdxProjStat) {
-    if (sfdxProjStat.isSymbolicLink()) {
-      // if it exists and is a symbolic link, remove it so we can relink with the new login
-      fs.unlinkSync(sfdxProjectJson);
-    } else {
-      // not a symbolic link, so move it because it's an SFDX proj config file
-      fs.moveSync(sfdxProjectJson, forceSFDXProjJson, {
-        overwrite: true,
-      });
-    }
-  }
 
   if (!fs.existsSync(forceSFDXProjJson)) {
     // add in a bare sfdx-project.json file for language support from official salesforce extensions
@@ -108,8 +101,8 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
     fs.outputFileSync(forceSFDXProjJson, JSON.stringify(sfdxProj, undefined, 4));
   }
 
-  // link to the newly logged in org's sfdx folder in .forceCode/USERNAME/.sfdx
-  fs.symlinkSync(forceSFDXProjJson, sfdxProjectJson, 'junction');
+  // copy the sfdx-project.json for the logged in org into the project folder
+  fs.copyFileSync(forceSFDXProjJson, sfdxProjectJson);
 
   // update the defaultusername in the sfdx config file...
   if (vscode.workspace.getConfiguration('force')['setDefaultUsernameOnLogin']) {
