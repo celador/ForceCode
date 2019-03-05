@@ -87,7 +87,7 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
   if (!fs.existsSync(forceSFDXProjJson)) {
     // add in a bare sfdx-project.json file for language support from official salesforce extensions
     const sfdxProj: {} = {
-      namespace: '',
+      namespace: self.config.prefix,
       packageDirectories: [
         {
           path: self.config.src,

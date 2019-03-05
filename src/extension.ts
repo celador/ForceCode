@@ -53,11 +53,33 @@ export function activate(context: vscode.ExtensionContext): any {
               if (!folder) {
                 return;
               }
-              // create force.json in the folder, then open the folder
+              // create default src folder so sfdx doesn't complain about a bad dir
               const projFolder: string = path.join(folder[0].fsPath, folderName);
-              if (!fs.existsSync(projFolder)) {
-                fs.mkdirpSync(projFolder);
+              if (!fs.existsSync(path.join(projFolder, 'src'))) {
+                fs.mkdirpSync(path.join(projFolder, 'src'));
               }
+
+              // make a dummy sfdx-project.json file so the Salesforce extensions are activated when we open the project folder
+              if (!fs.existsSync(path.join(projFolder, 'sfdx-project.json'))) {
+                const sfdxProj: {} = {
+                  namespace: '',
+                  packageDirectories: [
+                    {
+                      path: 'src',
+                      default: true,
+                    },
+                  ],
+                  sfdcLoginUrl: 'https://login.salesforce.com',
+                  sourceApiVersion: vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+                };
+
+                fs.outputFileSync(
+                  path.join(projFolder, 'sfdx-project.json'),
+                  JSON.stringify(sfdxProj, undefined, 4)
+                );
+              }
+
+              // make a dummy force.json to activate Forcecode
               fs.outputFileSync(
                 path.join(projFolder, 'force.json'),
                 JSON.stringify({ lastUsername: '' }, undefined, 4)
