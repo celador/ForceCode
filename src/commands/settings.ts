@@ -5,6 +5,15 @@ import * as deepmerge from 'deepmerge';
 import { saveConfigFile, readConfigFile } from '../services/configuration';
 import { configuration, fcConnection, commandService } from '../services';
 
+interface PDir {
+  default: boolean;
+  path: string;
+}
+
+interface SFDXProjectJson {
+  packageDirectories: PDir[];
+}
+
 export default function settings(): Promise<any> {
   const myExtDir = vscode.extensions.getExtension('JohnAaronNelson.forcecode').extensionPath;
   const SETTINGS_FILE: string = path.join(myExtDir, 'pages', 'settings.html');
@@ -30,6 +39,33 @@ export default function settings(): Promise<any> {
   // handle settings changes
   panel.webview.onDidReceiveMessage(message => {
     if (message.save) {
+      // if the src folder is changed, then update in packageDirectories in sfdx-config.json as well
+      const sfdxProjJsonPath = path.join(
+        vscode.window.forceCode.workspaceRoot,
+        '.forceCode',
+        currentSettings.username,
+        'sfdx-project.json'
+      );
+      if (
+        tempSettings['src'] &&
+        tempSettings['src'] !== currentSettings.src &&
+        fs.existsSync(sfdxProjJsonPath)
+      ) {
+        var sfdxProjJson: SFDXProjectJson = fs.readJsonSync(sfdxProjJsonPath);
+        if (sfdxProjJson.packageDirectories && sfdxProjJson.packageDirectories.length > 0) {
+          const forceProjIndex: number = sfdxProjJson.packageDirectories.findIndex(
+            dir => dir.path === currentSettings.src
+          );
+          if (forceProjIndex > -1) {
+            const currentDirInfo: PDir = sfdxProjJson.packageDirectories[forceProjIndex];
+            sfdxProjJson.packageDirectories.splice(forceProjIndex, 1, {
+              path: tempSettings['src'],
+              default: currentDirInfo.default,
+            });
+            fs.outputFileSync(sfdxProjJsonPath, JSON.stringify(sfdxProjJson, undefined, 4));
+          }
+        }
+      }
       currentSettings = deepmerge(currentSettings, tempSettings, {
         arrayMerge: overwriteMerge,
       });
