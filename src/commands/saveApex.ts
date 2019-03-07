@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import { FCFile } from '../services/codeCovView';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, fcConnection } from '../services';
+import { codeCovViewService, fcConnection, saveService } from '../services';
 import diff from './diff';
 
 const UPDATE: boolean = true;
@@ -70,9 +70,11 @@ export function saveApex(
     function shouldCompile(record) {
       const fcfile: FCFile = codeCovViewService.findById(record.Id);
       let mem: forceCode.IWorkspaceMember = fcfile ? fcfile.getWsMember() : undefined;
+      const serverContents: string = record.Body ? record.Body : record.Markup;
       if (
         mem &&
-        (!fcfile.compareDates(record.LastModifiedDate) ||
+        !Metadata &&
+        (!saveService.compareContents(document, serverContents) ||
           record.LastModifiedById !== mem.lastModifiedById)
       ) {
         // throw up an alert

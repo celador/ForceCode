@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import { codeCovViewService, fcConnection } from '../services';
+import { codeCovViewService, fcConnection, saveService } from '../services';
 import { FCFile } from '../services/codeCovView';
 import diff from './diff';
 import * as forceCode from './../forceCode';
@@ -103,7 +103,8 @@ export function saveAura(
     currentObjectDefinition = def.length > 0 ? def[0] : undefined;
     var curFCFile: FCFile = codeCovViewService.findById(bundle[0].Id ? bundle[0].Id : bundle[0].id);
     if (currentObjectDefinition !== undefined) {
-      if (curFCFile ? !curFCFile.compareDates(currentObjectDefinition.LastModifiedDate) : false) {
+      const serverContents: string = currentObjectDefinition.Source;
+      if (curFCFile ? !saveService.compareContents(document, serverContents) : false) {
         return vscode.window
           .showWarningMessage('Someone has changed this file!', 'Diff', 'Overwrite')
           .then(s => {

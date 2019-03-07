@@ -71,6 +71,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
         files.push('package.xml');
         return deployFiles(files, vscode.window.forceCode.storageRoot);
       })
+      .then(finished)
       .catch(onError);
   } else if (folderToolingType && toolingType === undefined) {
     // This process uses the Metadata API to deploy specific files
