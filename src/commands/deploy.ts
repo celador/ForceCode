@@ -1,17 +1,7 @@
 import * as vscode from 'vscode';
-import {
-  dxService,
-  codeCovViewService,
-  fcConnection,
-  toArray,
-  PXML,
-  PXMLMember,
-  commandService,
-} from '../services';
+import { dxService, toArray, PXML, PXMLMember, commandService } from '../services';
 import { getFileListFromPXML, zipFiles } from './../services';
 import * as path from 'path';
-import { FCFile } from '../services/codeCovView';
-import { IWorkspaceMember } from '../forceCode';
 import klaw = require('klaw');
 import { getAuraNameFromFileName } from '../parsers';
 import * as xml2js from 'xml2js';
@@ -232,17 +222,6 @@ export function deployFiles(files: string[], lwcPackageXML?: string): Promise<an
   // =======================================================================================================================================
   function finished(res) /*Promise<any>*/ {
     if (res.status !== 'Failed') {
-      // update the wsMembers with the newer date
-      files.forEach(file => {
-        const curFCFile: FCFile = codeCovViewService.findByPath(path.join(deployPath, file));
-        if (curFCFile) {
-          const wsMem: IWorkspaceMember = curFCFile.getWsMember();
-          wsMem.lastModifiedDate = new Date().toISOString();
-          wsMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
-          wsMem.saveTime = true;
-          curFCFile.updateWsMember(wsMem);
-        }
-      });
       vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
     } else if (res.status === 'Failed') {
       vscode.window

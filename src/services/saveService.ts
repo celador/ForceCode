@@ -59,6 +59,9 @@ export class SaveService {
     return new Promise((resolve, reject) => {
       compile(document).then(success => {
         if (success) {
+          // update the file time for start up file change checks
+          var mTime: Date = new Date();
+          fs.utimesSync(document.fileName, mTime, mTime);
           // remove the pre-save file version if successful
           return resolve(this.removeFile(document.fileName));
         }

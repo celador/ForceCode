@@ -154,18 +154,14 @@ export default class ForceService implements forceCode.IForceService {
             if (curFCFile) {
               var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
               curMem.id = key.id;
-              curMem.lastModifiedByName = key.lastModifiedByName;
-              curMem.lastModifiedById = key.lastModifiedById;
               if (
                 curFCFile.compareDates(key.lastModifiedDate) ||
                 !vscode.workspace.getConfiguration('force')['checkForFileChanges'] ||
                 curMem.type === 'AuraDefinitionBundle' ||
                 curMem.type === 'LightningComponentBundle'
               ) {
-                curMem.saveTime = true;
                 curFCFile.updateWsMember(curMem);
               } else {
-                // cureMem.saveTime = false from when we made the member
                 curFCFile.updateWsMember(curMem);
                 commandService.runCommand(
                   'ForceCode.fileModified',
@@ -212,11 +208,7 @@ export default class ForceService implements forceCode.IForceService {
                   name: filename,
                   path: item.path,
                   id: '', //metadataFileProperties.id,
-                  lastModifiedDate: item.stats.mtime.toISOString(),
-                  lastModifiedByName: '',
-                  lastModifiedById: '',
                   type: type,
-                  saveTime: false,
                 };
                 codeCovViewService.addClass(workspaceMember);
               }

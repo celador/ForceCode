@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import { FCFile } from '../services/codeCovView';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, fcConnection, saveService } from '../services';
+import { codeCovViewService, saveService } from '../services';
 import diff from './diff';
 
 const UPDATE: boolean = true;
@@ -68,15 +67,8 @@ export function saveApex(
     }
 
     function shouldCompile(record) {
-      const fcfile: FCFile = codeCovViewService.findById(record.Id);
-      let mem: forceCode.IWorkspaceMember = fcfile ? fcfile.getWsMember() : undefined;
       const serverContents: string = record.Body ? record.Body : record.Markup;
-      if (
-        mem &&
-        !Metadata &&
-        (!saveService.compareContents(document, serverContents) ||
-          record.LastModifiedById !== mem.lastModifiedById)
-      ) {
+      if (!Metadata && !saveService.compareContents(document, serverContents)) {
         // throw up an alert
         return vscode.window
           .showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite')
@@ -153,11 +145,7 @@ export function saveApex(
                     name: fileName,
                     path: document.fileName,
                     id: foo.id,
-                    lastModifiedDate: bar[0].CreatedDate,
-                    lastModifiedByName: '',
-                    lastModifiedById: fcConnection.currentConnection.orgInfo.userId,
                     type: toolingType,
-                    saveTime: true,
                   };
                   codeCovViewService.addClass(workspaceMember);
                   return fc;

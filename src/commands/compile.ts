@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, fcConnection, dxService } from '../services';
+import { codeCovViewService, dxService } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
@@ -219,9 +219,6 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
         if (fcfile) {
           var fcMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
           fcMem.coverage = undefined;
-          fcMem.lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
-          fcMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
-          fcMem.saveTime = true;
           fcfile.updateWsMember(fcMem);
         }
       }

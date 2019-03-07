@@ -76,11 +76,7 @@ interface IWorkspaceMember {
   name: string;
   path: string;
   id: string;
-  lastModifiedDate: string;
-  lastModifiedByName: string;
-  lastModifiedById: string;
   type: string;
-  saveTime: boolean;
   coverage?: ICodeCoverage;
 }
 
