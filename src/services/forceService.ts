@@ -156,9 +156,7 @@ export default class ForceService implements forceCode.IForceService {
               curMem.id = key.id;
               if (
                 curFCFile.compareDates(key.lastModifiedDate) ||
-                !vscode.workspace.getConfiguration('force')['checkForFileChanges'] ||
-                curMem.type === 'AuraDefinitionBundle' ||
-                curMem.type === 'LightningComponentBundle'
+                !vscode.workspace.getConfiguration('force')['checkForFileChanges']
               ) {
                 curFCFile.updateWsMember(curMem);
               } else {

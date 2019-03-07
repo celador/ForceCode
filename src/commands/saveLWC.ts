@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import { codeCovViewService, saveService } from '../services';
+import { saveService } from '../services';
 import diff from './diff';
-import * as forceCode from './../forceCode';
 import * as path from 'path';
 import { createPackageXML, deployFiles } from './deploy';
 
@@ -50,13 +49,6 @@ export function saveLWC(
           .then(getLWCBundle)
           .then(bundle => {
             results[0] = bundle;
-            var newWSMember: forceCode.IWorkspaceMember = {
-              id: results[0].Id ? results[0].Id : results[0].id,
-              name: name,
-              path: document.fileName,
-              type: 'LightningComponentBundle',
-            };
-            codeCovViewService.addClass(newWSMember);
             return results;
           });
       });

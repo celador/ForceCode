@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import { codeCovViewService, saveService } from '../services';
+import { saveService } from '../services';
 import diff from './diff';
-import * as forceCode from './../forceCode';
 import * as path from 'path';
 import { deployFiles, createPackageXML } from './deploy';
 
@@ -55,13 +54,6 @@ export function saveAura(
           .then(getAuraBundle)
           .then(bundle => {
             results[0] = bundle;
-            var newWSMember: forceCode.IWorkspaceMember = {
-              id: results[0].Id ? results[0].Id : results[0].id,
-              name: name,
-              path: document.fileName,
-              type: 'AuraDefinitionBundle',
-            };
-            codeCovViewService.addClass(newWSMember);
             return results;
           });
       });
