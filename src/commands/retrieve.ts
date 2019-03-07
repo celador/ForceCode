@@ -144,6 +144,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
   function getPackage(opt: vscode.QuickPickItem) {
     option = opt;
 
+    vscode.window.forceCode.conn.metadata.pollTimeout = (vscode.window.forceCode.config.pollTimeout || 600) * 1000;
     if (opt) {
       return new Promise(pack);
     } else if (resource) {

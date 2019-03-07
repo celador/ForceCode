@@ -33,6 +33,7 @@ export interface Config {
   };
   overwritePackageXML?: boolean;
   poll?: number;
+  pollTimeout?: number;
   prefix?: string;
   showTestCoverage?: boolean;
   spaDist?: string;
