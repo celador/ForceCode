@@ -1,136 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ForceCode SOQL/TOQL Editor</title>
-</head>
+  </head>
 
-<style>
+  <style>
     div {
-        padding: 2px;
-        text-align: center;
+      padding: 2px;
+      text-align: center;
     }
 
     button {
-        margin: 3px;
+      margin: 3px;
     }
 
     table {
-        border-collapse: collapse;
-        width: 100%;
+      border-collapse: collapse;
+      width: 100%;
     }
 
-    td, th {
-        border: 1px solid grey;
-        text-align: left;
-        padding: 2px;
+    td,
+    th {
+      border: 1px solid grey;
+      text-align: left;
+      padding: 2px;
     }
 
     th {
-        font-weight: bold;
-        font-style: italic;
+      font-weight: bold;
+      font-style: italic;
     }
 
     tr:nth-child(even) {
-        background-color: lightgrey;
-        color: black;
+      background-color: lightgrey;
+      color: black;
     }
-</style>
+  </style>
 
-<body>
+  <body>
     <fieldset>
-        <legend>ForceCode Bulk Loader</legend>
-        <div>
-            Select an sObject to update/insert or delete records from, click "Upload CSV", then click "Execute"
-        </div>
-        <div>
-            <select size="15" id="objects"></select>
-        </div>
-        <div>
-            CRUD Operation
-            <select id="operation">
-                <option value="insert">Insert</option>
-                <option value="update">Update</option>
-                <option value="upsert">Upsert</option>
-                <option value="delete">Delete</option>
-                <option value="hardDelete">Hard Delete (USE CAUTION!)</option>
-            </select>
-        </div>
-        <div>
-            <button type="button" onclick="uploadCSV()" id="upButton">Upload CSV</button>
-            <button type="button" onclick="execute()" id="exeButton" style="display:none">Execute</button>
-        </div>
-        <div>
-            <div id="state"></div>
-            <progress value="0" max="100" id="progress" style="display:none"></progress>
-        </div>
+      <legend>ForceCode Bulk Loader</legend>
+      <div>
+        Select an sObject to update/insert or delete records from, click "Upload CSV", then click
+        "Execute"
+      </div>
+      <div>
+        <select size="15" id="objects"></select>
+      </div>
+      <div>
+        CRUD Operation
+        <select id="operation">
+          <option value="insert">Insert</option>
+          <option value="update">Update</option>
+          <option value="upsert">Upsert</option>
+          <option value="delete">Delete</option>
+          <option value="hardDelete">Hard Delete (USE CAUTION!)</option>
+        </select>
+      </div>
+      <div>
+        <button type="button" onclick="uploadCSV()" id="upButton">Upload CSV</button>
+        <button type="button" onclick="execute()" id="exeButton" style="display:none">
+          Execute
+        </button>
+      </div>
+      <div>
+        <div id="state"></div>
+        <progress value="0" max="100" id="progress" style="display:none"></progress>
+      </div>
     </fieldset>
+  </body>
 
-</body>
-
-<script>
+  <script>
     const vscode = acquireVsCodeApi();
     var sObjects;
     var totalFiles;
 
     // Handle the message inside the webview
     window.addEventListener('message', event => {
-        const d = event.data;
-        if(d.sObjects) {
-            sObjects = d.sObjects;
-            reload();
-        } else if(d.fileSelected) {
-            // show the execute button
-            totalFiles = d.totalRecords;
-            document.getElementById('exeButton').style.display = 'initial';
-            document.getElementById('progress').max = totalFiles;
-            document.getElementById('state').innerHTML = 'Total records: ' + totalFiles;
-            document.getElementById('progress').value = "0";
-            document.getElementById('progress').style.display = 'none';
-        } else if(d.uploading) {
-            document.getElementById('exeButton').style.display = 'none';
-            document.getElementById('upButton').style.display = 'none';
-            document.getElementById('progress').style.display = 'initial';
-        } else if(d.state) {
-            document.getElementById('state').innerHTML = 'State: ' + d.state 
-                + '<br/>Failures: ' + d.failures
-                + '<br/>Total records: ' + totalFiles;
-            document.getElementById('progress').value = d.processed;
-            if(d.state === 'Completed') {
-                document.getElementById('upButton').style.display = 'initial';
-            }
-        } else if(d.error) {
-            document.getElementById('upButton').style.display = 'initial';
-            document.getElementById('progress').max = totalFiles;
-            document.getElementById('progress').value = "0";
-            document.getElementById('progress').style.display = 'none';
-            document.getElementById('state').innerHTML = 'ERROR: ' + d.error;
+      const d = event.data;
+      if (d.sObjects) {
+        sObjects = d.sObjects;
+        reload();
+      } else if (d.fileSelected) {
+        // show the execute button
+        totalFiles = d.totalRecords;
+        document.getElementById('exeButton').style.display = 'initial';
+        document.getElementById('progress').max = totalFiles;
+        document.getElementById('state').innerHTML = 'Total records: ' + totalFiles;
+        document.getElementById('progress').value = '0';
+        document.getElementById('progress').style.display = 'none';
+      } else if (d.uploading) {
+        document.getElementById('exeButton').style.display = 'none';
+        document.getElementById('upButton').style.display = 'none';
+        document.getElementById('progress').style.display = 'initial';
+      } else if (d.state) {
+        document.getElementById('state').innerHTML =
+          'State: ' +
+          d.state +
+          '<br/>Failures: ' +
+          d.failures +
+          '<br/>Total records: ' +
+          totalFiles;
+        document.getElementById('progress').value = d.processed;
+        if (d.state === 'Completed') {
+          document.getElementById('upButton').style.display = 'initial';
         }
+      } else if (d.error) {
+        document.getElementById('upButton').style.display = 'initial';
+        document.getElementById('progress').max = totalFiles;
+        document.getElementById('progress').value = '0';
+        document.getElementById('progress').style.display = 'none';
+        document.getElementById('state').innerHTML = 'ERROR: ' + d.error;
+      }
     });
 
     function reload() {
-        if(sObjects) {
-            var objectsHTML = '';
-            for(var i = 0; i < sObjects.length; i++) {
-                objectsHTML += '<option value="' + sObjects[i] + '">' + sObjects[i] + '</option>';
-            }
-            document.getElementById('objects').innerHTML = objectsHTML;
+      if (sObjects) {
+        var objectsHTML = '';
+        for (var i = 0; i < sObjects.length; i++) {
+          objectsHTML += '<option value="' + sObjects[i] + '">' + sObjects[i] + '</option>';
         }
+        document.getElementById('objects').innerHTML = objectsHTML;
+      }
     }
 
     function uploadCSV() {
-        vscode.postMessage({ uploadCSV: true });
+      vscode.postMessage({ uploadCSV: true });
     }
 
     function execute() {
-        const opElement = document.getElementById('operation');
-        const operation = opElement.options[opElement.selectedIndex].value;
-        const objElement = document.getElementById('objects');
-        const object = objElement.options[objElement.selectedIndex].value;
-        vscode.postMessage({ operation: operation, object: object });
+      const opElement = document.getElementById('operation');
+      const operation = opElement.options[opElement.selectedIndex].value;
+      const objElement = document.getElementById('objects');
+      const object = objElement.options[objElement.selectedIndex].value;
+      vscode.postMessage({ operation: operation, object: object });
     }
-</script>
-
+  </script>
 </html>

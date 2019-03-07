@@ -90,7 +90,7 @@ Please note that the following permissions are required to develop on the Force.
     * Quickly run [SOQL Queries](https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql.htm)
     * Query [Tooling Objects](https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/reference_objects_list.htm)
     * Results displayed in a table
-    * Results can be saved as JSON or CSV (if outputQueriesAsCSV is set to true (checked))
+    * Results can be saved as JSON or CSV (if outputQueriesAsCSV is checked)
     * Inline edits can be made in the results table (Just like in the developer console)
 * Arbitrary folder structure
     * Change your project `src` folder
@@ -100,8 +100,8 @@ Please note that the following permissions are required to develop on the Force.
 
 ## FAQ
 
-* Why do I receive an error that says 'ForceCode.showMenu' failed?
-    * You must open a folder in the VSCode workspace before trying to connect with ForceCode.
+* Where did the ForceCode: Show Menu command go?
+    * To create a project with Forcecode, you should now use the ForceCode: Create Project command.
 * Why do I get an error when trying to login about a localhost connection failure?
     * This means your network is either on a proxy or vpn and you will need to go [here](https://salesforce.stackexchange.com/questions/194719/salesforce-dx-proxy-issues) to set up Forcecode to work with this type of connection.
 
@@ -186,7 +186,6 @@ Derived from [https://jsforce.github.io/blog/posts/20151106-jsforce-metadata-too
 
 Menu: &gt;ForceCode Menu ... Retrieve Package  
 The `apiVersion` setting is used to retrieve your package \(this setting is important in CI setups\) comes directly from your org.  When you want to override your Salesforce org version, set the `apiVersion` setting manually.  This is a string, with the decimal.  
-The `pollTimeout` setting is used to determine how long you should wait for the retrieve command to complete.  This should usually take less than a minute, but can take longer with large packages.
 
 ### Get Log
 
@@ -235,18 +234,21 @@ This will open a ForceCode Settings window where you can change all of the optio
 
 Select this menu option to be taken to a screen where you will be able to upload a CSV file full of record data that you will be able to perform CRUD operations on. Simply select an sObject name, CRUD operation, and upload a CSV. Then click "Execute" and watch the magic happen! If you get a file format error it will be shown on the screen. If there are errors during the CRUD operation then Forcecode will show you a save dialog box asking where you want to save the error file. The error file currently isn't as fancy as dataloader, as the results returned from errors aren't much, but it will tell you the line number(s) in Excel that have the errors, along with what the error was. 
 
+### New Project
+
+Selecting this option will allow you to create a new Forcecode project in a different folder from the one currently open. You will be asked for the new project folder name and will be shown an open dialog so you can choose where to create the new project folder.
+
 ## Configuration
 
-You need to have a folder opened in VSCode to be able to start this extension!
-
-To begin, press `Opt+Cmd+C` (Mac) or `Ctrl+Shift+C` (Win/Linux) or open the Command Pallet and type `>ForceCode: Menu` to bring up the ForceCode Menu  
+To create a Forcecode project, open Visual Studio Code then open the command pallet (Ctrl + Shift + p) and run the `ForceCode: Create Project` command. Select the folder you wish to create a project in then Forcecode will open the folder and ask you to log in.
 You can then select if you want to log into a production org or test org. A browser will then open to the Salesforce login where you can enter your credentials. A configuration file will then be auto generated for you for each of your orgs in the .forceCode folder called `settings.json`.  
 
 The configuration file will look like the following. You can either edit this file to change the settings or you can use the settings option in the ForceCode menu (Recommended)!
 
 ```json
 {
-    "apiVersion": "44.0",
+    "alias": "My Sandbox"
+    "apiVersion": "45.0",
     "autoCompile": true,
     "deployOptions": {
         "allowMissingFiles": true,
@@ -258,8 +260,7 @@ The configuration file will look like the following. You can either edit this fi
         "testLevel": "NoTestRun"
     },
     "overwritePackageXML": false,
-    "poll": 1500,
-    "pollTimeout": 1200,
+    "poll": 2000,
     "prefix": "",
     "showTestCoverage": true,
     "spaDist": "dist",
@@ -272,6 +273,7 @@ The configuration file will look like the following. You can either edit this fi
 
 ### Options
 
+* alias: When set, the alias is what will show in the saved usernames section of the Forcecode view instead of the username. This makes keeping track of orgs easier than remembering each username
 * apiVersion: This is the default api version that all your files will be saved with. ForceCode will not change the version of an existing file.  This is also the version used for package retrieval and deploy.
 * autoCompile: When a supported file is saved \(works with VSCode's autosave feature\) the file is saved/compiled on the server.  Otherwise, use `cmd + opt + s` (Mac) or `ctrl + shift + s` (Win/Linux) to save the file to the server.
 * deployOptions: Deploy your package based on your configured deploy options and the package.xml in your src folder.
@@ -284,7 +286,6 @@ The configuration file will look like the following. You can either edit this fi
   * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
 * overwritePackageXML: if set to true, will overwrite package.xml file upon opening or retrieving files
 * poll: When compiling, this is the interval \(in milliseconds\) at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
-* pollTimeout: When retrieving packages, or other long running tasks, this is the maximum amount of time \(in seconds\) it will wait before the process times out.  If you're having trouble retrieving your package, try increasing this number.  Default is 600 \(10 minutes\).
 * prefix: This is the namespace prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise ForceCode will attempt to infer a prefix from your Salesforce Org.  If you have a namespaced org and do not set this setting, you may have problems, especially if working on an out of date Org.  This should be automatic as of Salesforce 38
 * showTestCoverage: This flag determines if Apex code coverage highlighting should be shown or hidden in the editor.  This can be toggled for the open editor by clicking the colorful icon in the editor bar.
 * spaDist: When working with SPAs we usually have a "distribution" folder where we build our files to.  If this string is set, and a SPA is bundled and deployed, this folder will be used as the distribution folder, otherwise the spa project will be deployed.
@@ -316,18 +317,21 @@ Glob patterns can be tricky... so a little research and trial and error may be r
 ```
 
 The following settings have been migrated to the workspace settings as well:
+* allowAnonymousUsageTracking: Checking this will allow the Forcecode team to track anonymous usage data so that we can improve your overall experience.
 * autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on \(and you're working on a Mac\), the currently active tab in Google Chrome Canary \(or your configured browser\) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
 * browser: Define which browser you want to reload when the static resource refreshes \(this only works with Macs at the moment\)
 * bulkLoaderPollInterval: The amount of time in milliseconds between updates when doing bulk CRUD operations.
-* checkForFileChanges: This option, when set to true, will allow ForceCode to check for file changes against the server on startup of ForceCode.
+* checkForFileChanges: This option, when checked, will allow ForceCode to check for file changes against the server on startup of ForceCode.
 * debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
 * debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
 * maxFileChangeNotifications: The maximum number of file change notifications that will be shown on startup of the extension
 * maxQueryHistory: The maximum number of queries to store in the query history of the query editor
 * maxQueryResultsPerPage: The maximum number of results to show per page when executing a query in the query editor
-* outputQueriesAsCSV: If set to true, will retrieve soql/toql results in csv form. If false, json will be returned
-* revealTestedClass: When set to true, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed.
-* showFilesOnOpen: If set to true, will open files in the editor when opened from Salesforce
+* onlyShowProjectUsernames: If checked, Forcecode will only show the usernames in use in each project instead of every one that has been authenticated on your machine.
+* outputQueriesAsCSV: If checked, will retrieve soql/toql results in csv form. If false, json will be returned
+* revealTestedClass: When checked, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed.
+* setDefaultUsernameOnLogin: When checked, Forcecode will update the SFDX CLI default username to the current logged in org each time you switch usernames. This allows you to use Forcecode alongside of the Salesforce extensions, so you don't need to worry about changing the default username each time you switch orgs.
+* showFilesOnOpen: If checked, will open files in the editor when opened from Salesforce
 * showFilesOnOpenMax: The maximum number of files to open in the editor. More than 3 usually causes problems or doesn't work.
 * showTestLog: This flag determines if the Log file for the last test run should show up after the tests are complete.  This is nice for debugging tests.  Use this in conjunction with the other debug flags to keep your output tidy. The log file will only show if it's not empty (Because of filtering).
 

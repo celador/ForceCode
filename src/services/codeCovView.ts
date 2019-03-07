@@ -6,7 +6,7 @@ import {
   TreeItem,
   TreeItemCollapsibleState,
   window,
-  workspace
+  workspace,
 } from 'vscode';
 import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
 import * as path from 'path';
@@ -22,17 +22,16 @@ const ClassType = {
   NotInOrg: 'Not In Current Org',
   NotInSrc: 'Open Files Not In Src',
   NoShow: 'NoShow',
-}
+};
 
 export class CodeCovViewService implements TreeDataProvider<FCFile> {
   private static instance: CodeCovViewService;
   private classes: Array<FCFile> = new Array<FCFile>();
-  private _onDidChangeTreeData: EventEmitter<
+  private _onDidChangeTreeData: EventEmitter<FCFile | undefined> = new EventEmitter<
     FCFile | undefined
-    > = new EventEmitter<FCFile | undefined>();
+  >();
 
-  public readonly onDidChangeTreeData: Event<FCFile | undefined> = this
-    ._onDidChangeTreeData.event;
+  public readonly onDidChangeTreeData: Event<FCFile | undefined> = this._onDidChangeTreeData.event;
 
   public static getInstance() {
     if (!CodeCovViewService.instance) {
@@ -43,7 +42,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public constructor() {
-    window.onDidChangeActiveTextEditor((event) => {
+    window.onDidChangeActiveTextEditor(event => {
       this.refresh();
     });
   }
@@ -53,11 +52,18 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public addClass(wsMember: IWorkspaceMember) {
-    const index: number = this.classes.findIndex(curClass => { return curClass.getWsMember().path === wsMember.path });
+    const index: number = this.classes.findIndex(curClass => {
+      return curClass.getWsMember().path === wsMember.path;
+    });
     if (index !== -1) {
       this.classes[index].setWsMember(wsMember);
     } else {
-      var newClass: FCFile = new FCFile(wsMember.name, TreeItemCollapsibleState.None, this, wsMember);
+      var newClass: FCFile = new FCFile(
+        wsMember.name,
+        TreeItemCollapsibleState.None,
+        this,
+        wsMember
+      );
       this.classes.push(newClass);
     }
     this.refresh();
@@ -135,7 +141,11 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       // This is the root node
       Object.keys(ClassType).forEach(val => {
         if (val !== ClassType.NoShow) {
-          var newFCFile: FCFile = new FCFile(ClassType[val], TreeItemCollapsibleState.Collapsed, this);
+          var newFCFile: FCFile = new FCFile(
+            ClassType[val],
+            TreeItemCollapsibleState.Collapsed,
+            this
+          );
           newFCFile.setType(ClassType[val]);
           fcFiles.push(newFCFile);
         }
@@ -146,17 +156,26 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     } else if (!element.getWsMember()) {
       if (element.label === ClassType.NotInSrc) {
         var fcFiles: FCFile[] = [];
-        if(workspace.textDocuments) {
+        if (workspace.textDocuments) {
           workspace.textDocuments.forEach(curEd => {
-            if (!curEd.fileName.startsWith(window.forceCode.projectRoot) && curEd.uri.scheme === 'file') {
-              var newFCFile: FCFile = new FCFile(curEd.fileName.split(path.sep).pop(), TreeItemCollapsibleState.None, this);
+            if (
+              !curEd.fileName.startsWith(window.forceCode.projectRoot) &&
+              curEd.uri.scheme === 'file'
+            ) {
+              var newFCFile: FCFile = new FCFile(
+                curEd.fileName.split(path.sep).pop(),
+                TreeItemCollapsibleState.None,
+                this
+              );
               newFCFile.setType(ClassType.NotInSrc);
               newFCFile.command = {
                 command: 'ForceCode.openOnClick',
                 title: '',
-                arguments: [curEd.fileName]
-              }
-              newFCFile.tooltip = `WARNING: This file isn\'t located in the current PROJECT PATH\n(${window.forceCode.projectRoot})`;
+                arguments: [curEd.fileName],
+              };
+              newFCFile.tooltip = `WARNING: This file isn\'t located in the current PROJECT PATH\n(${
+                window.forceCode.projectRoot
+              })`;
               fcFiles.push(newFCFile);
             }
           });
@@ -175,17 +194,28 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
   public getParent(element: FCFile): any {
     const wsMem: IWorkspaceMember = element.getWsMember();
-    if (wsMem && wsMem.id) {  // there's a bug in vscode, so for future use
-      var newFCFile: FCFile = new FCFile(element.getType(), TreeItemCollapsibleState.Expanded, this);
+    if (wsMem && wsMem.id) {
+      // there's a bug in vscode, so for future use
+      var newFCFile: FCFile = new FCFile(
+        element.getType(),
+        TreeItemCollapsibleState.Expanded,
+        this
+      );
       newFCFile.setType(element.getType());
       return newFCFile;
     }
-    return null;    // this is the parent      
+    return null; // this is the parent
   }
 
   private sortFunc(a: FCFile, b: FCFile): number {
-    var aStr = a.label.split('% ').pop().toUpperCase();
-    var bStr = b.label.split('% ').pop().toUpperCase();
+    var aStr = a.label
+      .split('% ')
+      .pop()
+      .toUpperCase();
+    var bStr = b.label
+      .split('% ')
+      .pop()
+      .toUpperCase();
     return aStr.localeCompare(bStr);
   }
 }
@@ -198,11 +228,13 @@ export class FCFile extends TreeItem {
   private wsMember: IWorkspaceMember;
   private type: string;
 
-  constructor(name: string, collapsibleState: TreeItemCollapsibleState, parent: CodeCovViewService, wsMember?: IWorkspaceMember) {
-    super(
-      name,
-      collapsibleState
-    );
+  constructor(
+    name: string,
+    collapsibleState: TreeItemCollapsibleState,
+    parent: CodeCovViewService,
+    wsMember?: IWorkspaceMember
+  ) {
+    super(name, collapsibleState);
 
     this.collapsibleState = collapsibleState;
     this.parent = parent;
@@ -210,15 +242,19 @@ export class FCFile extends TreeItem {
   }
 
   public setWsMember(newMem: IWorkspaceMember) {
-    if(newMem && newMem.lastModifiedDate && newMem.lastModifiedDate !== '' ) {
-      if(this.wsMember && this.wsMember.lastModifiedDate && this.wsMember.lastModifiedDate !== '') {
-        const newDate: number = (new Date(newMem.lastModifiedDate)).getTime();
-        const oldDate: number = (new Date(this.wsMember.lastModifiedDate)).getTime();
-        if(oldDate > newDate) {
+    if (newMem && newMem.lastModifiedDate && newMem.lastModifiedDate !== '') {
+      if (
+        this.wsMember &&
+        this.wsMember.lastModifiedDate &&
+        this.wsMember.lastModifiedDate !== ''
+      ) {
+        const newDate: number = new Date(newMem.lastModifiedDate).getTime();
+        const oldDate: number = new Date(this.wsMember.lastModifiedDate).getTime();
+        if (oldDate > newDate) {
           newMem.lastModifiedDate = this.wsMember.lastModifiedDate;
         }
       }
-      if(newMem.saveTime) {
+      if (newMem.saveTime) {
         var mTime: Date = new Date(newMem.lastModifiedDate);
         fs.utimesSync(newMem.path, mTime, mTime);
       }
@@ -227,7 +263,10 @@ export class FCFile extends TreeItem {
     this.wsMember = newMem;
 
     // we only want classes and triggers
-    if (!this.wsMember || (this.wsMember.type !== 'ApexClass' && this.wsMember.type !== 'ApexTrigger')) {
+    if (
+      !this.wsMember ||
+      (this.wsMember.type !== 'ApexClass' && this.wsMember.type !== 'ApexTrigger')
+    ) {
       this.type = ClassType.NoShow;
       return undefined;
     }
@@ -237,8 +276,8 @@ export class FCFile extends TreeItem {
     this.command = {
       command: 'ForceCode.openOnClick',
       title: '',
-      arguments: [this.wsMember.path]
-    }
+      arguments: [this.wsMember.path],
+    };
 
     this.iconPath = undefined;
     if (!this.wsMember.id || this.wsMember.id === '') {
@@ -258,19 +297,23 @@ export class FCFile extends TreeItem {
         this.iconPath = {
           dark: path.join(imagePath, 'greenCheck.svg'),
           light: path.join(imagePath, 'greenCheck.svg'),
-        }
+        };
       } else {
         this.iconPath = {
           dark: path.join(imagePath, 'redEx.svg'),
           light: path.join(imagePath, 'redEx.svg'),
-        }
+        };
       }
       // this next check needs changed to something different, as there are problems reading the file
     } else {
       var testFile: boolean = false;
       try {
-        testFile = fs.readFileSync(this.wsMember.path).toString().toLowerCase().includes('@istest');
-      } catch (e) { }
+        testFile = fs
+          .readFileSync(this.wsMember.path)
+          .toString()
+          .toLowerCase()
+          .includes('@istest');
+      } catch (e) {}
       if (testFile) {
         this.type = ClassType.TestClass;
       } else {
@@ -300,14 +343,14 @@ export class FCFile extends TreeItem {
     if (!this.wsMember.lastModifiedDate) {
       return true;
     }
-    var localMS: number = (new Date(this.wsMember.lastModifiedDate)).getTime();
-    var serverMS: number = (new Date(serverDate)).getTime();
+    var localMS: number = new Date(this.wsMember.lastModifiedDate).getTime();
+    var serverMS: number = new Date(serverDate).getTime();
 
     if (localMS > serverMS || serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
       return true;
     }
 
-    console.log("Time difference between file changes: " + (serverMS - localMS));
+    console.log('Time difference between file changes: ' + (serverMS - localMS));
     return false;
   }
 }

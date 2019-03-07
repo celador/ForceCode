@@ -7,10 +7,10 @@
 
 export { FauxClassGenerator } from './fauxClassGenerator';
 export {
-    ChildRelationship,
-    Field,
-    SObject,
-    SObjectCategory,
-    SObjectDescribe
-  } from './sObjectDescribe';
+  ChildRelationship,
+  Field,
+  SObject,
+  SObjectCategory,
+  SObjectDescribe,
+} from './sObjectDescribe';
 export const CLIENT_ID = 'sfdx-vscode';

@@ -1,204 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ForceCode Settings</title>
-</head>
+  </head>
 
-<style>
+  <style>
     div {
-        padding: 2px;
-        margin-left: 1em;
+      padding: 2px;
+      margin-left: 1em;
     }
 
     button {
-        margin-left: 10px;
+      margin-left: 10px;
     }
-</style>
+  </style>
 
-<body>
+  <body>
     <fieldset>
-        <legend id="legend"></legend>
-        <div id="settings">
-
-        </div>
+      <legend id="legend"></legend>
+      <div id="settings"></div>
     </fieldset>
+  </body>
 
-</body>
-
-<script>
+  <script>
     const vscode = acquireVsCodeApi();
-    var fcSettings = {}
-    var userNames = []
+    var fcSettings = {};
+    var userNames = [];
     var currentUserName;
     var fcHtml = '';
 
     // Handle the message inside the webview
     window.addEventListener('message', event => {
-        fcSettings = event.data.currentSettings;
-        userNames = event.data.userNames;
-        currentUserName = event.data.currentUserName;
-        refreshPage();
+      fcSettings = event.data.currentSettings;
+      userNames = event.data.userNames;
+      currentUserName = event.data.currentUserName;
+      refreshPage();
     });
 
     function refreshPage() {
-        var html = '<div style="text-align:center;"><button type="button" onclick="saveSettings()">Save</button>'
-            + (fcSettings.username !== currentUserName ? '<button type="button" onclick="removeConfig()">Remove Config Folder</button>' : '')
-            + '</div><div>Change settings for:&nbsp<select id="selectedUser" onchange="changeUserName()">';
-        userNames.forEach(uName => {
-            html += '<option value="' + uName + '" ' + (uName === fcSettings.username ? 'selected="selected"' : '') + '>' + uName + '</option>';
+      var html =
+        '<div style="text-align:center;"><button type="button" onclick="saveSettings()">Save</button>' +
+        (fcSettings.username !== currentUserName
+          ? '<button type="button" onclick="removeConfig()">Remove Config Folder</button>'
+          : '') +
+        '</div><div>Change settings for:&nbsp<select id="selectedUser" onchange="changeUserName()">';
+      userNames.forEach(uName => {
+        html +=
+          '<option value="' +
+          uName +
+          '" ' +
+          (uName === fcSettings.username ? 'selected="selected"' : '') +
+          '>' +
+          uName +
+          '</option>';
+      });
+      html += '</select></div><br/>';
+      Object.keys(fcSettings)
+        .sort()
+        .forEach(key => {
+          html += getHTML(fcSettings, key, 3, '');
         });
-        html += '</select></div><br/>'
-        Object.keys(fcSettings).sort().forEach(key => {
-            html += getHTML(fcSettings, key, 3, '');
-        });
-        html += '<div style="text-align:center;"><button type="button" onclick="saveSettings()">Save</button></div>';
-        document.getElementById("settings").innerHTML = html;
-        document.getElementById("legend").innerHTML = 'ForceCode Settings for ' + fcSettings.username;
+      html +=
+        '<div style="text-align:center;"><button type="button" onclick="saveSettings()">Save</button></div>';
+      document.getElementById('settings').innerHTML = html;
+      document.getElementById('legend').innerHTML = 'ForceCode Settings for ' + fcSettings.username;
     }
 
     function getHTML(message, key, level, subId) {
-        var theHtml = '';
-        if (key !== 'singlePackage' && (level > 3 || key !== 'url' && key !== 'username')) {
-            if (typeof (message[key]) === 'boolean') {
-                theHtml += '<div><input type="checkbox" id="'
-                    + subId + key
-                    + '" onchange="changeSetting(\''
-                    + subId + key
-                    + '\')"'
-                    + (message[key] === true ? ' checked' : '')
-                    + '>'
-                    + key
-                    + '</div>';
-            } else if (typeof (message[key]) === 'string') {
-                if (key === 'testLevel') {
-                    theHtml += '<div>testLevel <select id="deployOptions_fcSep_testLevel" onchange="changeSetting(\'deployOptions_fcSep_testLevel\')">'
-                        + '<option value="NoTestRun" ' + (message[key] === 'NoTestRun' ? 'selected="selected"' : '') + '>NoTestRun</option>'
-                        + '<option value="RunSpecifiedTests" ' + (message[key] === 'RunSpecifiedTests' ? 'selected="selected"' : '') + '>RunSpecifiedTests</option>'
-                        + '<option value="RunLocalTests" ' + (message[key] === 'RunLocalTests' ? 'selected="selected"' : '') + '>RunLocalTests</option>'
-                        + '<option value="RunAllTestsInOrg" ' + (message[key] === 'RunAllTestsInOrg' ? 'selected="selected"' : '') + '>RunAllTestsInOrg</option>'
-                        + '</select></div>';
-                } else if(key === 'staticResourceCacheControl') {
-                    theHtml += '<div>staticResourceCacheControl <select id="staticResourceCacheControl" onchange="changeSetting(\'staticResourceCacheControl\')">'
-                        + '<option value="Private" ' + (message[key] === 'Private' ? 'selected="selected"' : '') + '>Private</option>'
-                        + '<option value="Public" ' + (message[key] === 'Public' ? 'selected="selected"' : '') + '>Public</option>'
-                        + '</select></div>';
-                } else {
-                    theHtml += '<div>'
-                        + key
-                        + ' <input type="text" id="'
-                        + subId + key
-                        + '" onchange="changeSetting(\''
-                        + subId + key
-                        + '\')"'
-                        + ' value="'
-                        + message[key]
-                        + '"></div>';
-                }
-            } else if (typeof (message[key]) === 'number') {
-                theHtml += '<div>'
-                    + key
-                    + ' <input type="number" id="'
-                    + subId + key
-                    + '" onchange="changeSetting(\''
-                    + subId + key
-                    + '\')"'
-                    + ' value="'
-                    + message[key]
-                    + '"></div>';
-            } else if (typeof (message[key]) === 'object') {
-                if (key === 'runTests') {
-                    theHtml += '<div>'
-                        + key
-                        + ' <input type="text" id="'
-                        + subId + key
-                        + '" onchange="changeSetting(\''
-                        + subId + key
-                        + '\')"'
-                        + ' value="'
-                        + message[key].join(',')
-                        + '"></div>';
-                } else {
-                    theHtml += '<div style="border-bottom: 2px solid blue;border-left: 2px solid blue; padding: 5px">'
-                        + key
-                        + '</div>';
-                    Object.keys(message[key]).sort().forEach(subKey => {
-                        theHtml += '<div style="margin-left:'
-                            + level
-                            + 'em">'
-                            + getHTML(message[key], subKey, level + 2, subId + key + '_fcSep_')
-                            + '</div>';
-                    });
-                }
-            }
+      var theHtml = '';
+      if (key !== 'singlePackage' && (level > 3 || (key !== 'url' && key !== 'username'))) {
+        if (typeof message[key] === 'boolean') {
+          theHtml +=
+            '<div><input type="checkbox" id="' +
+            subId +
+            key +
+            '" onchange="changeSetting(\'' +
+            subId +
+            key +
+            '\')"' +
+            (message[key] === true ? ' checked' : '') +
+            '>' +
+            key +
+            '</div>';
+        } else if (typeof message[key] === 'string') {
+          if (key === 'testLevel') {
+            theHtml +=
+              '<div>testLevel <select id="deployOptions_fcSep_testLevel" onchange="changeSetting(\'deployOptions_fcSep_testLevel\')">' +
+              '<option value="NoTestRun" ' +
+              (message[key] === 'NoTestRun' ? 'selected="selected"' : '') +
+              '>NoTestRun</option>' +
+              '<option value="RunSpecifiedTests" ' +
+              (message[key] === 'RunSpecifiedTests' ? 'selected="selected"' : '') +
+              '>RunSpecifiedTests</option>' +
+              '<option value="RunLocalTests" ' +
+              (message[key] === 'RunLocalTests' ? 'selected="selected"' : '') +
+              '>RunLocalTests</option>' +
+              '<option value="RunAllTestsInOrg" ' +
+              (message[key] === 'RunAllTestsInOrg' ? 'selected="selected"' : '') +
+              '>RunAllTestsInOrg</option>' +
+              '</select></div>';
+          } else if (key === 'staticResourceCacheControl') {
+            theHtml +=
+              '<div>staticResourceCacheControl <select id="staticResourceCacheControl" onchange="changeSetting(\'staticResourceCacheControl\')">' +
+              '<option value="Private" ' +
+              (message[key] === 'Private' ? 'selected="selected"' : '') +
+              '>Private</option>' +
+              '<option value="Public" ' +
+              (message[key] === 'Public' ? 'selected="selected"' : '') +
+              '>Public</option>' +
+              '</select></div>';
+          } else {
+            theHtml +=
+              '<div>' +
+              key +
+              ' <input type="text" id="' +
+              subId +
+              key +
+              '" onchange="changeSetting(\'' +
+              subId +
+              key +
+              '\')"' +
+              ' value="' +
+              message[key] +
+              '"></div>';
+          }
+        } else if (typeof message[key] === 'number') {
+          theHtml +=
+            '<div>' +
+            key +
+            ' <input type="number" id="' +
+            subId +
+            key +
+            '" onchange="changeSetting(\'' +
+            subId +
+            key +
+            '\')"' +
+            ' value="' +
+            message[key] +
+            '"></div>';
+        } else if (typeof message[key] === 'object') {
+          if (key === 'runTests') {
+            theHtml +=
+              '<div>' +
+              key +
+              ' <input type="text" id="' +
+              subId +
+              key +
+              '" onchange="changeSetting(\'' +
+              subId +
+              key +
+              '\')"' +
+              ' value="' +
+              message[key].join(',') +
+              '"></div>';
+          } else {
+            theHtml +=
+              '<div style="border-bottom: 2px solid blue;border-left: 2px solid blue; padding: 5px">' +
+              key +
+              '</div>';
+            Object.keys(message[key])
+              .sort()
+              .forEach(subKey => {
+                theHtml +=
+                  '<div style="margin-left:' +
+                  level +
+                  'em">' +
+                  getHTML(message[key], subKey, level + 2, subId + key + '_fcSep_') +
+                  '</div>';
+              });
+          }
         }
-        return theHtml;
+      }
+      return theHtml;
     }
 
     function changeSetting(setting_ID) {
-        const element = document.getElementById(setting_ID);
-        const type = element.getAttribute("type");
-        var value;
-        if (type === 'checkbox') {
-            value = element.checked;
-        } else if (type === 'text') {
-            value = element.value;
-        } else if (type === 'number') {
-            value = element.valueAsNumber;
-        }
-        var setting = {}
-        if (setting_ID.indexOf('_fcSep_') !== -1) {
-            if (setting_ID.split('_fcSep_')[1] === 'runTests') {
-                if (element.value.indexOf(',') !== -1) {
-                    value = element.value.split(',');
-                } else if (element.value.trim() !== '') {
-                    value = [element.value];
-                } else {
-                    value = [];
-                }
-                setting = { deployOptions: { runTests: value } }
-            } else if (setting_ID.split('_fcSep_')[1] === 'testLevel') {
-                setting = { deployOptions: { testLevel: element.options[element.selectedIndex].value }}
-            } else {
-                const pieces = setting_ID.split('_fcSep_');
-                setting = getSetting(setting, pieces, 0, value);
-            }
-        } else if(setting_ID.indexOf('staticResourceCacheControl') !== -1) {
-            setting = { staticResourceCacheControl: element.options[element.selectedIndex].value };
+      const element = document.getElementById(setting_ID);
+      const type = element.getAttribute('type');
+      var value;
+      if (type === 'checkbox') {
+        value = element.checked;
+      } else if (type === 'text') {
+        value = element.value;
+      } else if (type === 'number') {
+        value = element.valueAsNumber;
+      }
+      var setting = {};
+      if (setting_ID.indexOf('_fcSep_') !== -1) {
+        if (setting_ID.split('_fcSep_')[1] === 'runTests') {
+          if (element.value.indexOf(',') !== -1) {
+            value = element.value.split(',');
+          } else if (element.value.trim() !== '') {
+            value = [element.value];
+          } else {
+            value = [];
+          }
+          setting = { deployOptions: { runTests: value } };
+        } else if (setting_ID.split('_fcSep_')[1] === 'testLevel') {
+          setting = { deployOptions: { testLevel: element.options[element.selectedIndex].value } };
         } else {
-            setting[setting_ID] = value;
+          const pieces = setting_ID.split('_fcSep_');
+          setting = getSetting(setting, pieces, 0, value);
         }
+      } else if (setting_ID.indexOf('staticResourceCacheControl') !== -1) {
+        setting = { staticResourceCacheControl: element.options[element.selectedIndex].value };
+      } else {
+        setting[setting_ID] = value;
+      }
 
-        vscode.postMessage(setting);
+      vscode.postMessage(setting);
     }
 
     function getSetting(setting, pieces, offset, value) {
-        if (offset === pieces.length - 1) {
-            setting[pieces[offset]] = value;
-            return setting;
-        }
-        setting[pieces[offset]] = {}
-        setting[pieces[offset]] = getSetting(setting[pieces[offset]], pieces, offset + 1, value);
+      if (offset === pieces.length - 1) {
+        setting[pieces[offset]] = value;
         return setting;
+      }
+      setting[pieces[offset]] = {};
+      setting[pieces[offset]] = getSetting(setting[pieces[offset]], pieces, offset + 1, value);
+      return setting;
     }
 
     function saveSettings() {
-        vscode.postMessage({ save: true });
+      vscode.postMessage({ save: true });
     }
 
     function changeUserName() {
-        const element = document.getElementById('selectedUser');
-        const uName = element.options[element.selectedIndex].value;
-        vscode.postMessage({ switchUsername: true, username: uName });
+      const element = document.getElementById('selectedUser');
+      const uName = element.options[element.selectedIndex].value;
+      vscode.postMessage({ switchUsername: true, username: uName });
     }
 
     function removeConfig() {
-        const element = document.getElementById('selectedUser');
-        const uName = element.options[element.selectedIndex].value;
-        vscode.postMessage({ removeConfig: true, username: uName });
+      const element = document.getElementById('selectedUser');
+      const uName = element.options[element.selectedIndex].value;
+      vscode.postMessage({ removeConfig: true, username: uName });
     }
-</script>
-
+  </script>
 </html>

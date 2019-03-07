@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.14.1",
+  "version": "3.15.0",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -26,7 +26,7 @@
   },
   "activationEvents": [
     "workspaceContains:force.json",
-    "onCommand:ForceCode.showMenu"
+    "onCommand:ForceCode.createProject"
   ],
   "main": "./dist/extension",
   "contributes": {
@@ -59,6 +59,10 @@
       ]
     },
     "commands": [
+      {
+        "command": "ForceCode.createProject",
+        "title": "ForceCode: Create Project"
+      },
       {
         "command": "ForceCode.showMenu",
         "title": "ForceCode: ForceCode Menu"
@@ -150,7 +154,7 @@
         "key": "alt+cmd+c",
         "win": "ctrl+shift+c",
         "linux": "ctrl+shift+c",
-        "when": "editorFocus"
+        "when": "editorFocus && ForceCodeActive"
       },
       {
         "command": "ForceCode.compile",
@@ -185,6 +189,11 @@
       "type": "object",
       "title": "ForceCode configuration",
       "properties": {
+        "force.allowAnonymousUsageTracking": {
+          "type": "boolean",
+          "default": false,
+          "description": "Allow the Forcecode team to track anonymous usage data so that we can improve your overall experience."
+        },
         "force.autoRefresh": {
           "type": "boolean",
           "default": false,
@@ -203,7 +212,7 @@
         "force.checkForFileChanges": {
           "type": "boolean",
           "default": false,
-          "description": "This option, when set to true, will allow ForceCode to check for file changes against the server on startup of ForceCode."
+          "description": "This option, when checked, will allow ForceCode to check for file changes against the server on startup of ForceCode."
         },
         "force.defaultApiVersion": {
           "type": "string",
@@ -250,20 +259,30 @@
           "default": 250,
           "description": "The maximum number of results to show per page when executing a query in the query editor."
         },
+        "force.onlyShowProjectUsernames": {
+          "type": "boolean",
+          "default": true,
+          "description": "If checked, Forcecode will only show the usernames in use in each project instead of every one that has been authenticated on your machine."
+        },
         "force.outputQueriesAsCSV": {
           "type": "boolean",
           "default": true,
-          "description": "If set to true, will retrieve soql/toql results in csv form. If false, json will be returned."
+          "description": "If checked, will retrieve soql/toql results in csv form. If false, json will be returned."
         },
         "force.revealTestedClass": {
           "type": "boolean",
           "default": false,
-          "description": "When set to true, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed."
+          "description": "When checked, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed."
+        },
+        "force.setDefaultUsernameOnLogin": {
+          "type": "boolean",
+          "default": true,
+          "description": "When checked, Forcecode will update the SFDX CLI default username to the current logged in org each time you switch usernames. This allows you to use Forcecode alongside of the Salesforce extensions, so you don't need to worry about changing the default username each time you switch orgs."
         },
         "force.showFilesOnOpen": {
           "type": "boolean",
           "default": true,
-          "description": "If set to true, will open files in the editor when opened from Salesforce."
+          "description": "If checked, will open files in the editor when opened from Salesforce."
         },
         "force.showFilesOnOpenMax": {
           "type": "number",
@@ -421,33 +440,37 @@
       ],
       "view/item/context": [
         {
-          "when": "viewItem == currentConn",
+          "when": "viewItem == currentConn && ForceCodeActive",
           "command": "ForceCode.logout"
         },
         {
-          "when": "viewItem == loggedInConn",
+          "when": "viewItem == loggedInConn && ForceCodeActive",
           "command": "ForceCode.logout"
         },
         {
-          "when": "viewItem == loggedInConn",
+          "when": "viewItem == loggedInConn && ForceCodeActive",
           "command": "ForceCode.switchUser"
         },
         {
-          "when": "viewItem == loggedInConn",
+          "when": "viewItem == loggedInConn && ForceCodeActive",
           "command": "ForceCode.removeConfig"
         },
         {
-          "when": "viewItem == notLoggedInConn",
+          "when": "viewItem == notLoggedInConn && ForceCodeActive",
           "command": "ForceCode.login"
         },
         {
-          "when": "viewItem == notLoggedInConn",
+          "when": "viewItem == notLoggedInConn && ForceCodeActive",
           "command": "ForceCode.removeConfig"
         }
       ],
       "commandPalette": [
         {
-          "command": "ForceCode.showMenu"
+          "command": "ForceCode.createProject"
+        },
+        {
+          "command": "ForceCode.showMenu",
+          "when": "ForceCodeActive"
         },
         {
           "command": "ForceCode.compile",
@@ -521,7 +544,7 @@
     "mime-types": "2.1.22",
     "os": "0.1.1",
     "request-light": "0.2.4",
-    "salesforce-alm": "45.4.0",
+    "salesforce-alm": "45.7.0",
     "universal-analytics": "0.4.20",
     "uuid": "3.3.2",
     "xml2js": "0.4.19"
@@ -530,19 +553,19 @@
     "@types/deepmerge": "2.2.0",
     "@types/fs-extra": "5.0.5",
     "@types/globule": "1.1.3",
-    "@types/klaw": "2.1.1",
+    "@types/klaw": "3.0.0",
     "@types/mocha": "5.2.6",
-    "@types/node": "11.9.4",
+    "@types/node": "11.9.6",
     "@types/universal-analytics": "0.4.2",
     "@types/xml2js": "0.4.3",
-    "mocha": "5.2.0",
+    "mocha": "6.0.2",
     "rimraf": "2.6.3",
     "ts-loader": "5.3.3",
-    "tslint": "5.12.1",
+    "tslint": "5.13.0",
     "typescript": "3.3.3",
-    "vsce": "1.57.0",
-    "vscode": "1.1.29",
-    "webpack": "4.29.4",
+    "vsce": "1.57.1",
+    "vscode": "1.1.30",
+    "webpack": "4.29.6",
     "webpack-cli": "3.2.3",
     "webpack-node-externals": "1.7.2"
   }

@@ -1,23 +1,15 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"moduleResolution": "node",
-		"noResolve": false,
-		"removeComments": true,
-		"target": "es6",
-		"outDir": "out",
-		"noUnusedLocals": true,
-		"lib": [
-			"dom",
-      		"es2016",
-			"es6"
-		],
-		"sourceMap": true,
-		"rootDir": "."
-	},
-	"exclude": [
-		"typings/browser",
-		"typings/browser.d.ts",
-		"node_modules"
-	]
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noResolve": false,
+    "removeComments": true,
+    "target": "es6",
+    "outDir": "out",
+    "noUnusedLocals": true,
+    "lib": ["dom", "es2016", "es6"],
+    "sourceMap": true,
+    "rootDir": "."
+  },
+  "exclude": ["typings/browser", "typings/browser.d.ts", "node_modules"]
 }

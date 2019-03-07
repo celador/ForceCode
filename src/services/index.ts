@@ -1,9 +1,9 @@
 /* tslint:disable:no-unused-variable */
-import ForceService from './forceService';
 import * as operatingSystem from './operatingSystem';
+import ForceService from './forceService';
 import configuration from './configuration';
 
-export {ForceService, operatingSystem, configuration};
+export { ForceService, operatingSystem, configuration };
 import DXService from './dxService';
 export const dxService = DXService.getInstance();
 import { FCOauth, FCConnection } from './fcConnection';
