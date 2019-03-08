@@ -94,7 +94,7 @@ export default function compile(
       .then(finished)
       .catch(onError);
   } else if (toolingType === 'LightningComponentResource') {
-    return saveLWC(document, toolingType, Metadata, forceCompile)
+    return saveLWC(document, toolingType, forceCompile)
       .then(finished)
       .catch(onError);
   } else {

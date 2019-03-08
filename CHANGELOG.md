@@ -4,6 +4,7 @@
     * Fix issues deploying code after creation
     * Check for file changes on save now diffs the file contents instead of checking last modified dates. This makes the check more accurate
     * Fix issues with retrieve timeouts by adding the pollTimeout option back in
+    * Fix issue with saving LWC metadata not working, but reporting success
     * Performance improvements
 * 3.15.0
     * Add ForceCode: Create Project command to replace ForceCode: Show Menu. Now you won't need to have a folder open to create a project. Forcecode will do the heavy lifting for you! There is also a new Forcecode menu option (Right below the settings menu option) to allow for creating a new Forcecode project when Forcecode is active.

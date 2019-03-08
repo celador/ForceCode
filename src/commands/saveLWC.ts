@@ -11,7 +11,6 @@ import { createPackageXML, deployFiles } from './deploy';
 export function saveLWC(
   document: vscode.TextDocument,
   toolingType: string,
-  Metadata?: {},
   forceCompile?: boolean
 ): Promise<any> {
   const fileName: string = document.fileName.split(path.sep).pop();
@@ -19,12 +18,7 @@ export function saveLWC(
   const Format: string = parsers.getFileExtension(document);
   var Source: string = document.getText();
   var currentObjectDefinition: any = undefined;
-  if (Metadata) {
-    return Promise.resolve(vscode.window.forceCode)
-      .then(getLWCBundle)
-      .then(ensureLWCBundle)
-      .then(updateMetaData);
-  }
+
   return Promise.resolve(vscode.window.forceCode)
     .then(getLWCBundle)
     .then(ensureLWCBundle)
@@ -56,23 +50,6 @@ export function saveLWC(
     } else {
       return results;
     }
-  }
-
-  function updateMetaData(bundle) {
-    return vscode.window.forceCode.conn.tooling
-      .sobject('LightningComponentBundle')
-      .update({
-        Metadata: Metadata,
-        Id: bundle[0].Id,
-      })
-      .then(
-        res => {
-          return res;
-        },
-        err => {
-          return err;
-        }
-      );
   }
 
   function getLWCDefinition(bundle) {
