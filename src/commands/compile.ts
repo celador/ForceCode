@@ -10,7 +10,10 @@ import * as path from 'path';
 import { saveLWC } from './saveLWC';
 import { createPackageXML, deployFiles } from './deploy';
 
-export default function compile(document: vscode.TextDocument): Promise<any> {
+export default function compile(
+  document: vscode.TextDocument,
+  forceCompile: boolean
+): Promise<any> {
   if (!document) {
     return Promise.resolve();
   }
@@ -87,16 +90,16 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
     return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
   } else if (toolingType === 'AuraDefinition') {
     DefType = getAuraDefTypeFromDocument(document);
-    return saveAura(document, toolingType, Metadata)
+    return saveAura(document, toolingType, Metadata, forceCompile)
       .then(finished)
       .catch(onError);
   } else if (toolingType === 'LightningComponentResource') {
-    return saveLWC(document, toolingType, Metadata)
+    return saveLWC(document, toolingType, Metadata, forceCompile)
       .then(finished)
       .catch(onError);
   } else {
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-    return saveApex(document, toolingType, Metadata)
+    return saveApex(document, toolingType, Metadata, forceCompile)
       .then(finished)
       .then(res => vscode.window.forceCode.newContainer(res))
       .catch(onError);

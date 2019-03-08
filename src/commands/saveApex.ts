@@ -10,7 +10,8 @@ const CREATE: boolean = false;
 export function saveApex(
   document: vscode.TextDocument,
   toolingType: string,
-  Metadata?: {}
+  Metadata?: {},
+  forceCompile?: boolean
 ): Promise<any> {
   const fileName: string = parsers.getFileName(document);
   const body: string = document.getText();
@@ -68,7 +69,7 @@ export function saveApex(
 
     function shouldCompile(record) {
       const serverContents: string = record.Body ? record.Body : record.Markup;
-      if (!Metadata && !saveService.compareContents(document, serverContents)) {
+      if (!forceCompile && !Metadata && !saveService.compareContents(document, serverContents)) {
         // throw up an alert
         return vscode.window
           .showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite')

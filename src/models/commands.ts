@@ -197,20 +197,27 @@ export const fcCommands: FCCommand[] = [
           context = context.uri;
         }
         return vscode.workspace.openTextDocument(context).then(doc => {
-          return saveService.saveFile(doc);
+          return saveService.saveFile(doc, selectedResource);
         });
       }
       if (!vscode.window.activeTextEditor) {
         return;
       }
-      return saveService.saveFile(vscode.window.activeTextEditor.document);
+      return saveService.saveFile(vscode.window.activeTextEditor.document, selectedResource);
     },
   },
   {
     commandName: 'ForceCode.compile',
     hidden: true,
     command: function(context, selectedResource?) {
-      return commandService.runCommand('ForceCode.compileMenu', context, selectedResource);
+      return commandService.runCommand('ForceCode.compileMenu', context, false);
+    },
+  },
+  {
+    commandName: 'ForceCode.forceCompile',
+    hidden: true,
+    command: function(context, selectedResource?) {
+      return commandService.runCommand('ForceCode.compileMenu', context, true);
     },
   },
   // Build/Deploy Resource Bundle(s)

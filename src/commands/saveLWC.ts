@@ -11,7 +11,8 @@ import { createPackageXML, deployFiles } from './deploy';
 export function saveLWC(
   document: vscode.TextDocument,
   toolingType: string,
-  Metadata?: {}
+  Metadata?: {},
+  forceCompile?: boolean
 ): Promise<any> {
   const fileName: string = document.fileName.split(path.sep).pop();
   const name: string = parsers.getName(document, toolingType);
@@ -85,7 +86,7 @@ export function saveLWC(
     currentObjectDefinition = def.length > 0 ? def[0] : undefined;
     if (currentObjectDefinition !== undefined) {
       const serverContents: string = currentObjectDefinition.Source;
-      if (!saveService.compareContents(document, serverContents)) {
+      if (!forceCompile && !saveService.compareContents(document, serverContents)) {
         return vscode.window
           .showWarningMessage('Someone has changed this file!', 'Diff', 'Overwrite')
           .then(s => {

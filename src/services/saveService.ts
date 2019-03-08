@@ -54,10 +54,10 @@ export class SaveService {
     return false;
   }
 
-  public saveFile(document: vscode.TextDocument): Promise<boolean> {
+  public saveFile(document: vscode.TextDocument, forceCompile: boolean): Promise<boolean> {
     // take the path and get the TextDocument, then hand it off to the compile() function
     return new Promise((resolve, reject) => {
-      compile(document).then(success => {
+      compile(document, forceCompile).then(success => {
         if (success) {
           // update the file time for start up file change checks
           var mTime: Date = new Date();

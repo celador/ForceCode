@@ -73,6 +73,10 @@
       },
       {
         "command": "ForceCode.compile",
+        "title": "ForceCode: Save/Deploy/Compile"
+      },
+      {
+        "command": "ForceCode.forceCompile",
         "title": "ForceCode: Save/Deploy/Compile",
         "icon": {
           "light": "./images/compile.svg",
@@ -365,7 +369,7 @@
         },
         {
           "when": "ForceCodeActive && ForceCodeLoggedIn && isInDiffEditor",
-          "command": "ForceCode.compile",
+          "command": "ForceCode.forceCompile",
           "group": "navigation"
         }
       ],
