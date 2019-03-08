@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, saveService } from '../services';
+import { saveService, codeCovViewService } from '../services';
 import diff from './diff';
+import { createPackageXML, deployFiles } from './deploy';
+import * as path from 'path';
 
 const UPDATE: boolean = true;
-const CREATE: boolean = false;
 
 export function saveApex(
   document: vscode.TextDocument,
@@ -124,59 +125,47 @@ export function saveApex(
         // Results was 0, meaning...
         // Tooling Object does not exist
         // so we CREATE it
-        if (Metadata) {
-          // object needs to exist before we update metadata, so throw an error
-          throw {
-            message:
-              'File must exist before updating its metadata file. Save the file first, then the metadata file.',
-          };
-        }
-        return fc.conn.tooling
-          .sobject(parsers.getToolingType(document, CREATE))
-          .create(createObject(body))
-          .then(
-            foo => {
+        return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot).then(
+          () => {
+            const files: string[] = [];
+            files.push(
+              path.join(parsers.getFolder(toolingType), parsers.getWholeFileName(document))
+            );
+            if (Metadata) {
+              // add the class/trigger/page/component
+              const codeFileName: string = parsers.getWholeFileName(document).split('-meta.xml')[0];
+              files.push(path.join(parsers.getFolder(toolingType), codeFileName));
+            } else {
+              // add the metadata
+              files.push(
+                path.join(
+                  parsers.getFolder(toolingType),
+                  parsers.getWholeFileName(document) + '-meta.xml'
+                )
+              );
+            }
+            files.push('package.xml');
+            return deployFiles(files, vscode.window.forceCode.storageRoot).then(foo => {
               return fc.conn.tooling
                 .sobject(toolingType)
-                .find({ Id: foo.id }, { Id: 1, CreatedDate: 1 })
+                .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' })
                 .execute()
-                .then(bar => {
-                  // retrieve the last modified date here
-                  var workspaceMember: forceCode.IWorkspaceMember = {
-                    name: fileName,
-                    path: document.fileName,
-                    id: foo.id,
-                    type: toolingType,
-                  };
-                  codeCovViewService.addClass(workspaceMember);
-                  return fc;
+                .then(records => {
+                  if (records.length > 0) {
+                    var workspaceMember: forceCode.IWorkspaceMember = {
+                      name: fileName,
+                      path: document.fileName,
+                      id: records[0].Id,
+                      type: toolingType,
+                    };
+                    codeCovViewService.addClass(workspaceMember);
+                    return fc;
+                  }
                 });
-            },
-            err => {
-              vscode.window.showErrorMessage(err.message ? err.message : err);
-            }
-          );
+            });
+          }
+        );
       }
-    }
-
-    function createObject(text: string): {} {
-      if (toolingType === 'ApexClass') {
-        return { Body: text };
-      } else if (toolingType === 'ApexTrigger') {
-        let matches: RegExpExecArray = /\btrigger\b\s\w*\s\bon\b\s(\w*)\s\(/.exec(text);
-        if (matches) {
-          return { Body: text, TableEnumOrId: matches[1] };
-        } else {
-          throw { message: 'Could not get object name from Trigger' };
-        }
-      } else if (toolingType === 'ApexPage' || toolingType === 'ApexComponent') {
-        return {
-          Markup: text,
-          Masterlabel: name + 'Label',
-          Name: name,
-        };
-      }
-      return { Body: text };
     }
   }
   // =======================================================================================================================================
