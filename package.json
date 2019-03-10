@@ -539,7 +539,6 @@
     "webpack-dev": "webpack --mode development --watch"
   },
   "dependencies": {
-    "request-light": "0.2.4",
     "salesforce-alm": "45.8.0"
   },
   "devDependencies": {
@@ -560,6 +559,7 @@
     "mime-types": "2.1.22",
     "mocha": "6.0.2",
     "os": "0.1.1",
+    "request-light": "0.2.4",
     "rimraf": "2.6.3",
     "ts-loader": "5.3.3",
     "tslint": "5.13.1",
