@@ -144,6 +144,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
   function getPackage(opt: vscode.QuickPickItem) {
     option = opt;
 
+    vscode.window.forceCode.conn.metadata.pollTimeout = (vscode.window.forceCode.config.pollTimeout || 600) * 1000;
     if (opt) {
       return new Promise(pack);
     } else if (resource) {
@@ -314,11 +315,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                   .split('.')[0],
                 path: `${vscode.window.forceCode.projectRoot}${path.sep}${name}`,
                 id: '', //metadataFileProperties.id,
-                lastModifiedDate: '', //metadataFileProperties.lastModifiedDate,
-                lastModifiedByName: '',
-                lastModifiedById: '',
                 type: tType,
-                saveTime: true,
               };
 
               newWSMembers.push(wsMem);
@@ -444,10 +441,6 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
               });
               if (index >= 0) {
                 newWSMembers[index].id = key.id;
-                newWSMembers[index].lastModifiedDate = key.lastModifiedDate;
-                newWSMembers[index].lastModifiedByName = key.lastModifiedByName;
-                newWSMembers[index].lastModifiedById = key.lastModifiedById;
-                newWSMembers[index].saveTime = true;
                 codeCovViewService.addClass(newWSMembers.splice(index, 1)[0]);
               }
             } else {

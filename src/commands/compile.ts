@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, fcConnection, dxService } from '../services';
+import { codeCovViewService, dxService } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
@@ -10,7 +10,10 @@ import * as path from 'path';
 import { saveLWC } from './saveLWC';
 import { createPackageXML, deployFiles } from './deploy';
 
-export default function compile(document: vscode.TextDocument): Promise<any> {
+export default function compile(
+  document: vscode.TextDocument,
+  forceCompile: boolean
+): Promise<any> {
   if (!document) {
     return Promise.resolve();
   }
@@ -71,6 +74,7 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
         files.push('package.xml');
         return deployFiles(files, vscode.window.forceCode.storageRoot);
       })
+      .then(finished)
       .catch(onError);
   } else if (folderToolingType && toolingType === undefined) {
     // This process uses the Metadata API to deploy specific files
@@ -86,16 +90,16 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
     return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
   } else if (toolingType === 'AuraDefinition') {
     DefType = getAuraDefTypeFromDocument(document);
-    return saveAura(document, toolingType, Metadata)
+    return saveAura(document, toolingType, Metadata, forceCompile)
       .then(finished)
       .catch(onError);
   } else if (toolingType === 'LightningComponentResource') {
-    return saveLWC(document, toolingType, Metadata)
+    return saveLWC(document, toolingType, forceCompile)
       .then(finished)
       .catch(onError);
   } else {
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-    return saveApex(document, toolingType, Metadata)
+    return saveApex(document, toolingType, Metadata, forceCompile)
       .then(finished)
       .then(res => vscode.window.forceCode.newContainer(res))
       .catch(onError);
@@ -218,9 +222,6 @@ export default function compile(document: vscode.TextDocument): Promise<any> {
         if (fcfile) {
           var fcMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
           fcMem.coverage = undefined;
-          fcMem.lastModifiedDate = res.records[0].DeployDetails.componentSuccesses[0].createdDate;
-          fcMem.lastModifiedById = fcConnection.currentConnection.orgInfo.userId;
-          fcMem.saveTime = true;
           fcfile.updateWsMember(fcMem);
         }
       }

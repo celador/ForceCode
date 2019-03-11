@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { QueryResult } from '../services/dxService';
-import { codeCovViewService } from '../services';
 import { getAuraNameFromFileName } from '../parsers';
 import { getAuraDefTypeFromDocument } from '../commands/saveAura';
 // import ReferencesDocument from './referencesDocument';
@@ -39,9 +38,7 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
       field = 'Source';
       name = getAuraNameFromFileName(this.auraSource.fileName, 'aura');
       const DefType: string = getAuraDefTypeFromDocument(this.auraSource);
-      nsPrefix = `DefType='${DefType}' AND AuraDefinitionBundleId='${
-        codeCovViewService.findByNameAndType(name, 'AuraDefinitionBundle').getWsMember().id
-      }'`;
+      nsPrefix = `DefType='${DefType}' AND AuraDefinitionBundleId IN (SELECT Id FROM AuraDefinitionBundle WHERE DeveloperName='${name}')`;
     } else if (toolingType === 'LightningComponentResource') {
       field = 'Source';
       name = getAuraNameFromFileName(this.auraSource.fileName, 'lwc');
@@ -50,9 +47,7 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
         .pop()
         .split(path.sep)
         .join('/');
-      nsPrefix = `FilePath='${FilePath}' AND LightningComponentBundleId='${
-        codeCovViewService.findByNameAndType(name, 'LightningComponentBundle').getWsMember().id
-      }'`;
+      nsPrefix = `FilePath='${FilePath}' AND LightningComponentBundleId IN (SELECT Id FROM LightningComponentBundle WHERE DeveloperName='${name}')`;
     }
     return new Promise<string>((resolve, reject) => {
       var query: string = `SELECT ${field} FROM ${toolingType} WHERE ${nsPrefix}`;

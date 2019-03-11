@@ -242,24 +242,6 @@ export class FCFile extends TreeItem {
   }
 
   public setWsMember(newMem: IWorkspaceMember) {
-    if (newMem && newMem.lastModifiedDate && newMem.lastModifiedDate !== '') {
-      if (
-        this.wsMember &&
-        this.wsMember.lastModifiedDate &&
-        this.wsMember.lastModifiedDate !== ''
-      ) {
-        const newDate: number = new Date(newMem.lastModifiedDate).getTime();
-        const oldDate: number = new Date(this.wsMember.lastModifiedDate).getTime();
-        if (oldDate > newDate) {
-          newMem.lastModifiedDate = this.wsMember.lastModifiedDate;
-        }
-      }
-      if (newMem.saveTime) {
-        var mTime: Date = new Date(newMem.lastModifiedDate);
-        fs.utimesSync(newMem.path, mTime, mTime);
-      }
-    }
-
     this.wsMember = newMem;
 
     // we only want classes and triggers
@@ -340,10 +322,8 @@ export class FCFile extends TreeItem {
 
   // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
   public compareDates(serverDate: string): boolean {
-    if (!this.wsMember.lastModifiedDate) {
-      return true;
-    }
-    var localMS: number = new Date(this.wsMember.lastModifiedDate).getTime();
+    const stat: fs.Stats = fs.statSync(this.wsMember.path);
+    var localMS: number = stat.mtime.getTime();
     var serverMS: number = new Date(serverDate).getTime();
 
     if (localMS > serverMS || serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {

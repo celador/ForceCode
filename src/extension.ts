@@ -7,6 +7,7 @@ import {
   configuration,
   fcConnection,
   operatingSystem,
+  saveService,
 } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
@@ -136,6 +137,13 @@ export function activate(context: vscode.ExtensionContext): any {
     vscode.languages.registerHoverProvider(sel, new ApexTestLinkProvider())
   );
 
+  // get the pre-save document contents and store them so we can diff with the server
+  context.subscriptions.push(
+    vscode.workspace.onWillSaveTextDocument((event: vscode.TextDocumentWillSaveEvent) => {
+      saveService.addFile(event.document);
+    })
+  );
+
   // AutoCompile Feature
   context.subscriptions.push(
     vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
@@ -174,9 +182,8 @@ export function activate(context: vscode.ExtensionContext): any {
       const fcfile: FCFile = codeCovViewService.findByPath(fileName);
       var wsMem: IWorkspaceMember = fcfile ? fcfile.getWsMember() : undefined;
 
-      if (fcfile && wsMem && wsMem.coverage) {
+      if (wsMem && wsMem.coverage) {
         wsMem.coverage = undefined;
-        wsMem.saveTime = false;
         fcfile.updateWsMember(wsMem);
         updateDecorations();
       }

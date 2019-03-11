@@ -41,7 +41,6 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
             highestCov = percent;
             highestClass = fcfile;
           }
-          wsMem.saveTime = false;
           fcfile.updateWsMember(wsMem);
         }
       });

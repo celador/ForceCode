@@ -11,6 +11,7 @@ import {
   FCOauth,
   FCConnection,
   PXMLMember,
+  saveService,
 } from './../services';
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
@@ -196,20 +197,27 @@ export const fcCommands: FCCommand[] = [
           context = context.uri;
         }
         return vscode.workspace.openTextDocument(context).then(doc => {
-          return commands.compile(doc);
+          return saveService.saveFile(doc, selectedResource);
         });
       }
       if (!vscode.window.activeTextEditor) {
         return;
       }
-      return commands.compile(vscode.window.activeTextEditor.document);
+      return saveService.saveFile(vscode.window.activeTextEditor.document, selectedResource);
     },
   },
   {
     commandName: 'ForceCode.compile',
     hidden: true,
     command: function(context, selectedResource?) {
-      return commandService.runCommand('ForceCode.compileMenu', context, selectedResource);
+      return commandService.runCommand('ForceCode.compileMenu', context, false);
+    },
+  },
+  {
+    commandName: 'ForceCode.forceCompile',
+    hidden: true,
+    command: function(context, selectedResource?) {
+      return commandService.runCommand('ForceCode.compileMenu', context, true);
     },
   },
   // Build/Deploy Resource Bundle(s)
