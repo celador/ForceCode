@@ -114,7 +114,6 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
 }
 
 export class Task extends vscode.TreeItem {
-  public readonly collapsibleState: vscode.TreeItemCollapsibleState;
   public readonly execution: FCCommand;
   private readonly taskViewProvider: CommandViewService;
   private readonly context: any;
@@ -134,7 +133,7 @@ export class Task extends vscode.TreeItem {
     this.selectedResource = selectedResource;
   }
 
-  public run(attempt: number) {
+  public run(attempt: number): Promise<any> {
     return new Promise(resolve => {
       resolve(this.execution.command(this.context, this.selectedResource));
     })

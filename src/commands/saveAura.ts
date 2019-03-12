@@ -32,7 +32,7 @@ export function saveAura(
     .then(getAuraBundle)
     .then(ensureAuraBundle)
     .then(bundle => {
-      return getAuraDefinition(bundle).then(definitions =>
+      return getAuraDefinition(bundle).then((definitions: any) =>
         upsertAuraDefinition(definitions, bundle)
       );
     });
@@ -43,7 +43,7 @@ export function saveAura(
       NamespacePrefix: vscode.window.forceCode.config.prefix || '',
     });
   }
-  function ensureAuraBundle(results) {
+  function ensureAuraBundle(results: any) {
     // If the Bundle doesn't exist, create it, else Do nothing
     if (name && (results.length === 0 || !results[0])) {
       // Create Aura Definition Bundle
@@ -63,7 +63,7 @@ export function saveAura(
     }
   }
 
-  function updateMetaData(bundle) {
+  function updateMetaData(bundle: any) {
     return vscode.window.forceCode.conn.tooling
       .sobject('AuraDefinitionBundle')
       .update({
@@ -80,14 +80,14 @@ export function saveAura(
       );
   }
 
-  function getAuraDefinition(bundle) {
+  function getAuraDefinition(bundle: any) {
     return vscode.window.forceCode.conn.tooling.sobject('AuraDefinition').find({
       AuraDefinitionBundleId: bundle[0].Id,
     });
   }
-  function upsertAuraDefinition(definitions, bundle) {
+  function upsertAuraDefinition(definitions: any, bundle: any) {
     // If the Definition doesn't exist, create it
-    var def: any[] = definitions.filter(result => result.DefType === DefType);
+    var def: any[] = definitions.filter((result: any) => result.DefType === DefType);
     currentObjectDefinition = def.length > 0 ? def[0] : undefined;
     if (currentObjectDefinition !== undefined) {
       const serverContents: string = currentObjectDefinition.Source;

@@ -1,5 +1,4 @@
 import {
-  Command,
   Event,
   EventEmitter,
   TreeDataProvider,
@@ -14,7 +13,18 @@ import * as fs from 'fs-extra';
 import constants from './../models/constants';
 import { dxService } from '.';
 
-const ClassType = {
+interface IClassType {
+  CoveredClass: string;
+  UncoveredClass: string;
+  NoCoverageData: string;
+  TestClass: string;
+  NotInOrg: string;
+  NotInSrc: string;
+  NoShow: string;
+  [key: string]: string;
+}
+
+const ClassType: IClassType = {
   CoveredClass: 'Sufficient Coverage',
   UncoveredClass: 'Insufficient Coverage',
   NoCoverageData: 'No Coverage Data',
@@ -219,7 +229,6 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
 export class FCFile extends TreeItem {
   public readonly collapsibleState: TreeItemCollapsibleState;
-  public command: Command;
 
   private parent: CodeCovViewService;
   private wsMember: IWorkspaceMember | undefined;
@@ -235,6 +244,7 @@ export class FCFile extends TreeItem {
 
     this.collapsibleState = collapsibleState;
     this.parent = parent;
+    this.type = ClassType.NoShow;
     this.setWsMember(wsMember);
   }
 

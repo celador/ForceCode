@@ -45,7 +45,7 @@ export default function getLog() {
     return vscode.window.showQuickPick(options);
   }
 
-  function showLog(res) {
+  function showLog(res: any) {
     if (res) {
       return dxService.getAndShowLog(res.description);
     }

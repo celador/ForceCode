@@ -31,10 +31,10 @@ export default function runDX() {
     return vscode.window.showQuickPick(options, config);
   }
 
-  function getArgsAndRun(opt: vscode.QuickPickItem): Thenable<string[] | undefined> {
+  function getArgsAndRun(opt: vscode.QuickPickItem | undefined): Thenable<string[] | undefined> {
     if (opt === undefined) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(undefined);
         },
       };
@@ -48,7 +48,7 @@ export default function runDX() {
       prompt: theCmd.usage,
     };
     // this needs to wait for this input to get done somehow!!!
-    return vscode.window.showInputBox(options).then(function(result: string) {
+    return vscode.window.showInputBox(options).then(function(result: string | undefined) {
       if (result != undefined) {
         vscode.window.forceCode.outputChannel.clear();
         vscode.window.forceCode.outputChannel.show();
@@ -62,7 +62,7 @@ export default function runDX() {
     });
   }
 
-  function showMessage(message) {
+  function showMessage(message: any) {
     vscode.window.forceCode.outputChannel.show();
     vscode.window.forceCode.outputChannel.appendLine(outputToString(message));
     vscode.window.forceCode.showStatus('ForceCode: DX Command execution complete!');

@@ -24,7 +24,7 @@ export default async function codeCompletionRefresh(): Promise<any> {
   var objectsToGet: SObjectCategory;
   await vscode.window
     .showQuickPick(options, config)
-    .then((res: vscode.QuickPickItem) => {
+    .then((res: vscode.QuickPickItem | undefined) => {
       if (!res) {
         return Promise.resolve();
       }

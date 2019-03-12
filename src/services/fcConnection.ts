@@ -32,6 +32,7 @@ export class FCConnection extends vscode.TreeItem {
 
     this.parent = parent;
     this.orgInfo = orgInfo;
+    this.isLoggedIn = false;
   }
 
   public disconnect(): Promise<any> {

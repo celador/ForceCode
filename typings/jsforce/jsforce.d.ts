@@ -25,7 +25,7 @@ declare module 'jsforce/index' {
       success: string; // Flag if the code is executed successfully
     }
     interface SObject {
-      find(config?: {}, fields?: {});
+      find(config?: {}, fields?: {}): any;
       create(records: Array<any>, options?: {}): Promise<Array<RecordResult>>;
       create(records: Array<any>, options?: {}, callback?: () => {}): Array<RecordResult>;
       create(record: any): Promise<RecordResult>;
@@ -97,7 +97,7 @@ declare module 'jsforce/index' {
       numberComponentErrors: number;
       numberComponentsDeployed: number;
       numberTestsCompleted: number;
-      complete(callback: (err, result) => any): any;
+      complete(callback: (err: any, result: any) => any): any;
     }
     interface RetrieveResult {
       id: string;
@@ -136,7 +136,12 @@ declare module 'jsforce/index' {
       upsert(foo: string, bar: any): Promise<any>;
     }
     interface Bulk {
-      load(type: string, operation: string, csvStream: any, callback: (err, rets) => any);
+      load(
+        type: string,
+        operation: string,
+        csvStream: any,
+        callback: (err: any, rets: any) => any
+      ): any;
     }
     // Connection
     interface Connection {

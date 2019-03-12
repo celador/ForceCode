@@ -11,7 +11,7 @@ const UPDATE: boolean = true;
 export function saveApex(
   document: vscode.TextDocument,
   toolingType: string,
-  Metadata?: {},
+  Metadata?: any,
   forceCompile?: boolean
 ): Promise<any> {
   const fileName: string | undefined = parsers.getFileName(document);
@@ -45,11 +45,11 @@ export function saveApex(
           .sobject(toolingType)
           .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' })
           .execute()
-          .then(records => addMember(records));
+          .then((records: any) => addMember(records));
       });
     }
 
-    function updateMember(records) {
+    function updateMember(records: any) {
       var member: {} = Metadata
         ? {
             Body: records.body,
@@ -73,7 +73,7 @@ export function saveApex(
       }
     }
 
-    function shouldCompile(record) {
+    function shouldCompile(record: any) {
       const serverContents: string = record.Body ? record.Body : record.Markup;
       if (!forceCompile && !Metadata && !saveService.compareContents(document, serverContents)) {
         // throw up an alert
@@ -93,16 +93,16 @@ export function saveApex(
         return Promise.resolve(true);
       }
     }
-    function addMember(records) {
+    function addMember(records: any) {
       if (records.length > 0) {
         // Tooling Object already exists
         //  UPDATE it
         var record = records[0];
         // Get the modified date of the local file...
-        if (Metadata && Metadata['packageVersions']) {
+        if (Metadata && Metadata.packageVersions) {
           // this is an ApexPage...so we might need to edit packageVersions
-          if (!Array.isArray(Metadata['packageVersions'])) {
-            Metadata['packageVersions'] = [Metadata['packageVersions']];
+          if (!Array.isArray(Metadata.packageVersions)) {
+            Metadata.packageVersions = [Metadata.packageVersions];
           }
         }
 
@@ -161,7 +161,7 @@ export function saveApex(
                 .sobject(toolingType)
                 .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' })
                 .execute()
-                .then(records => {
+                .then((records: any) => {
                   if (records.length > 0) {
                     var workspaceMember: forceCode.IWorkspaceMember = {
                       name: fileName,
@@ -183,7 +183,7 @@ export function saveApex(
   function requestCompile() {
     if (vscode.window.forceCode.containerMembers.length === 0) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(undefined);
         },
       };
@@ -206,7 +206,7 @@ export function saveApex(
       return Promise.resolve({}); // we don't need new container stuff on new file creation
     }
     return nextStatus();
-    function nextStatus() {
+    function nextStatus(): any {
       checkCount += 1;
       // Set a timeout to auto fail the compile after 60 seconds
       return getStatus().then(res => {
@@ -234,10 +234,10 @@ export function saveApex(
           }'`
       );
     }
-    function isFinished(res) {
+    function isFinished(res: any) {
       // Here, we're checking whether the Container Async Request, is Queued, or in some other state
       if (res.records && res.records[0]) {
-        if (res.records.some(record => record.State === 'Queued')) {
+        if (res.records.some((record: any) => record.State === 'Queued')) {
           return false;
         } else {
           // Completed, Failed, Invalidated, Error, Aborted

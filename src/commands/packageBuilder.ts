@@ -15,6 +15,11 @@ export function getMembers(
   metadataTypes: string[],
   retrieveManaged?: boolean
 ): Promise<PXMLMember[]> {
+  if (!vscode.window.forceCode.describe) {
+    return Promise.reject(
+      'Metadata describe error. Please try logging out of and back into the org.'
+    );
+  }
   var metadataObjects: IMetadataObject[] = vscode.window.forceCode.describe.metadataObjects;
   if (!(metadataTypes.length === 1 && metadataTypes[0] === '*')) {
     metadataObjects = metadataObjects.filter(type => metadataTypes.includes(type.xmlName));
@@ -129,6 +134,9 @@ export function getFolderContents(type: string, folder: string): Promise<string[
 
 export default function packageBuilder(buildPackage?: boolean): Promise<any> {
   return new Promise((resolve, reject) => {
+    if (!vscode.window.forceCode.describe) {
+      return reject('Metadata describe error. Please try logging out of and back into the org.');
+    }
     var options: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
       return {
         label: r.xmlName,

@@ -27,7 +27,7 @@ export default function queryEditor(): Promise<any> {
     'queryHistory.json'
   );
 
-  var curResults;
+  var curResults: any;
   var queryHistory: string[] = [];
   var curQuery: string;
 
@@ -71,7 +71,7 @@ export default function queryEditor(): Promise<any> {
     } else if (message.update) {
       // push the update to the server here
       // get the type from the query
-      var toUpdateArray: [] = message.rows.map(row => {
+      var toUpdateArray: [] = message.rows.map((row: any) => {
         return row.value;
       });
       const lowerCaseQuery: string = curQuery.toLowerCase();
@@ -97,7 +97,7 @@ export default function queryEditor(): Promise<any> {
           };
           sendData(resToSend);
           // update the curResults array
-          message.rows.forEach(curRow => {
+          message.rows.forEach((curRow: any) => {
             Object.assign(curResults[curRow.key - 1], curRow.value);
           });
         })
@@ -119,7 +119,7 @@ export default function queryEditor(): Promise<any> {
 
   return sendQueryHistory();
 
-  function sendResults(results, records?: boolean) {
+  function sendResults(results: any, records?: boolean) {
     if (!records) {
       curResults = results.records;
     }
@@ -152,7 +152,7 @@ export default function queryEditor(): Promise<any> {
     sendQueryHistory();
   }
 
-  function onError(err) {
+  function onError(err: any) {
     var errToSend: {} = {
       success: false,
       results: err && err.message ? err.message : err,
@@ -160,7 +160,7 @@ export default function queryEditor(): Promise<any> {
     sendData(errToSend);
   }
 
-  function sendData(data) {
+  function sendData(data: any) {
     panel.webview.postMessage(data);
   }
 

@@ -67,6 +67,14 @@ export interface Command {
   usage: string;
 }
 
+interface ApexTestResult {
+  StackTrace: string;
+  Message: string;
+  ApexClass: {
+    Id: string;
+  };
+}
+
 export interface QueryResult {
   done: boolean; // Flag if the query is fetched all records or not
   nextRecordsUrl?: string; // URL locator for next record set, (available when done = false)
@@ -74,7 +82,7 @@ export interface QueryResult {
   locator: string; // Total size for query
   records: Array<any>; // Array of records fetched
   summary: any;
-  tests: any;
+  tests: ApexTestResult[];
 }
 
 export interface DXCommands {
@@ -86,7 +94,7 @@ export interface DXCommands {
   isEmptyUndOrNull(param: any): boolean;
   getDebugLog(logid?: string): Promise<string>;
   saveToFile(data: any, fileName: string): Promise<string>;
-  getAndShowLog(id?: string);
+  getAndShowLog(id?: string): Thenable<vscode.TextEditor | undefined>;
   execAnon(file: string): Promise<ExecuteAnonymousResult>;
   removeFile(fileName: string): Promise<any>;
   openOrg(): Promise<any>;
@@ -191,7 +199,7 @@ export default class DXService implements DXCommands {
       cliContext.flags['targetusername'] = fcConnection.currentConnection.orgInfo.username;
     }
     // get error output from SFDX
-    var errlog;
+    var errlog: any;
     var oldConsole = console.log;
     console.log = getErrLog;
     return cmd.run(cliContext).then(res => {
@@ -209,7 +217,7 @@ export default class DXService implements DXCommands {
       );
     });
 
-    function getErrLog(data) {
+    function getErrLog(data: any) {
       errlog = data;
     }
   }
@@ -262,7 +270,7 @@ export default class DXService implements DXCommands {
     });
   }
 
-  public getAndShowLog(id?: string) {
+  public getAndShowLog(id?: string): Thenable<vscode.TextEditor | undefined> {
     if (!id) {
       id = 'debugLog';
     }

@@ -41,6 +41,21 @@ export interface Config {
   src?: string;
   url?: string;
   username?: string;
+
+  // obsolete, but used for strict checking
+  autoRefresh?: boolean;
+  browser?: string;
+  checkForFileChanges?: boolean;
+  debugFilter?: string;
+  debugOnly?: boolean;
+  maxFileChangeNotifications?: number;
+  maxQueryHistory?: number;
+  maxQueryResultsPerPage?: number;
+  outputQueriesAsCSV?: boolean;
+  revealTestedClass?: boolean;
+  showFilesOnOpen?: boolean;
+  showFilesOnOpenMax?: number;
+  showTestLog?: boolean;
 }
 
 export interface MetadataResult {
@@ -134,7 +149,7 @@ export interface IForceService {
   projectRoot: string;
   workspaceRoot: string;
   storageRoot: string;
-  describe: IMetadataDescribe;
+  describe?: IMetadataDescribe;
   containerId?: string;
   statusTimeout: any;
   containerMembers: IContainerMember[];

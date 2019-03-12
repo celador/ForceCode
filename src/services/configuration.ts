@@ -6,6 +6,10 @@ import * as path from 'path';
 import { fcConnection, ForceService } from '.';
 import * as deepmerge from 'deepmerge';
 
+interface SFDXConfig {
+  defaultusername?: string;
+}
+
 export const defaultOptions: Config = {
   alias: '',
   apiVersion: vscode.workspace.getConfiguration('force')['defaultApiVersion'],
@@ -108,11 +112,11 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
   // update the defaultusername in the sfdx config file...
   if (vscode.workspace.getConfiguration('force')['setDefaultUsernameOnLogin']) {
     const sfdxConfigPath = path.join(sfdxPath, 'sfdx-config.json');
-    var sfdxConfig = {};
+    var sfdxConfig: SFDXConfig = {};
     if (fs.existsSync(sfdxConfigPath)) {
       sfdxConfig = fs.readJsonSync(sfdxConfigPath);
     }
-    sfdxConfig['defaultusername'] = self.config.username;
+    sfdxConfig.defaultusername = self.config.username;
     fs.outputFileSync(sfdxConfigPath, JSON.stringify(sfdxConfig, undefined, 4));
   }
 

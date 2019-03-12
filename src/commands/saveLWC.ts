@@ -23,7 +23,9 @@ export function saveLWC(
     .then(getLWCBundle)
     .then(ensureLWCBundle)
     .then(bundle => {
-      return getLWCDefinition(bundle).then(definitions => upsertLWCDefinition(definitions, bundle));
+      return getLWCDefinition(bundle).then((definitions: any) =>
+        upsertLWCDefinition(definitions, bundle)
+      );
     });
 
   function getLWCBundle() {
@@ -32,7 +34,7 @@ export function saveLWC(
       NamespacePrefix: vscode.window.forceCode.config.prefix || '',
     });
   }
-  function ensureLWCBundle(results) {
+  function ensureLWCBundle(results: any) {
     // If the Bundle doesn't exist, create it, else Do nothing
     if (name && (results.length === 0 || !results[0])) {
       // Create LWC Bundle
@@ -52,14 +54,16 @@ export function saveLWC(
     }
   }
 
-  function getLWCDefinition(bundle) {
+  function getLWCDefinition(bundle: any) {
     return vscode.window.forceCode.conn.tooling.sobject('LightningComponentResource').find({
       LightningComponentBundleId: bundle[0].Id,
     });
   }
-  function upsertLWCDefinition(definitions, bundle) {
+  function upsertLWCDefinition(definitions: any, bundle: any) {
     // If the Definition doesn't exist, create it
-    var def: any[] = definitions.filter(result => result.FilePath.split('/').pop() === fileName);
+    var def: any[] = definitions.filter(
+      (result: any) => result.FilePath.split('/').pop() === fileName
+    );
     currentObjectDefinition = def.length > 0 ? def[0] : undefined;
     if (currentObjectDefinition !== undefined) {
       const serverContents: string = currentObjectDefinition.Source;

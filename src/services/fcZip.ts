@@ -64,21 +64,22 @@ export function getFileListFromPXML(): Promise<string[]> {
           resolve(fileList);
         }
         toArray(dom.Package.types).forEach(curType => {
-          var folder: string = getAnyFolderNameFromTT(curType.name);
+          var folder: string | undefined = getAnyFolderNameFromTT(curType.name);
           var ext = getAnyExtNameFromTT(curType.name);
           if (folder) {
+            const theFolder = folder;
             var theExt: string = '.' + ext;
             if (folder === 'aura' || folder === 'lwc') {
               theExt = '';
             }
             toArray(curType.members).forEach(curMem => {
-              if (fs.existsSync(path.join(projectRoot, folder, curMem + theExt))) {
-                fileList.push(path.join(folder, curMem + theExt));
+              if (fs.existsSync(path.join(projectRoot, theFolder, curMem + theExt))) {
+                fileList.push(path.join(theFolder, curMem + theExt));
                 if (folder !== 'aura' && folder != 'lwc') {
                   if (
-                    fs.existsSync(path.join(projectRoot, folder, curMem + theExt + '-meta.xml'))
+                    fs.existsSync(path.join(projectRoot, theFolder, curMem + theExt + '-meta.xml'))
                   ) {
-                    fileList.push(path.join(folder, curMem + theExt + '-meta.xml'));
+                    fileList.push(path.join(theFolder, curMem + theExt + '-meta.xml'));
                   }
                 }
               }
@@ -91,7 +92,7 @@ export function getFileListFromPXML(): Promise<string[]> {
   });
 }
 
-export function toArray(toConvert): any[] {
+export function toArray(toConvert: any): any[] {
   if (!Array.isArray(toConvert)) {
     return [toConvert];
   } else {

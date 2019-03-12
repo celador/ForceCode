@@ -33,7 +33,7 @@ if (activeEditor) {
   updateDecorations();
 }
 // Export Function used when the Editor changes
-export function editorUpdateApexCoverageDecorator(editor) {
+export function editorUpdateApexCoverageDecorator(editor: vscode.TextEditor | undefined) {
   activeEditor = editor;
   if (editor) {
     updateDecorations();

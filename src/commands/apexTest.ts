@@ -12,7 +12,7 @@ export default function apexTest(toTest: string, classOrMethod: string): Promise
   } else {
     toRun = '-t ' + toTest;
   }
-  return dxService.runCommand('apex:test:run', toRun + ' -w 3 -y').then(dxRes => {
+  return dxService.runCommand('apex:test:run', toRun + ' -w 3 -y').then((dxRes: QueryResult) => {
     // get the test class Ids from the result
     var testClassIds: string[] = new Array<string>();
     dxRes.tests.forEach(tRes => {

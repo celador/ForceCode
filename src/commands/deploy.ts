@@ -105,7 +105,7 @@ export default function deploy(context: vscode.ExtensionContext) {
     });
   }
 
-  function showFileList(files: string[]) {
+  function showFileList(files: string[]): Promise<string[]> {
     return new Promise(resolve => {
       let options: vscode.QuickPickItem[] = files
         .map(file => {
@@ -229,7 +229,7 @@ export function deployFiles(files: string[], lwcPackageXML?: string): Promise<an
     .then(finished);
 
   // =======================================================================================================================================
-  function finished(res) /*Promise<any>*/ {
+  function finished(res: any) /*Promise<any>*/ {
     if (res.status !== 'Failed') {
       vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
     } else if (res.status === 'Failed') {

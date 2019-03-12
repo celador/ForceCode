@@ -216,7 +216,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
           });
 
           if (service.currentConnection.connection) {
-            return service.currentConnection.connection.identity().then(res => {
+            return service.currentConnection.connection.identity().then((res: any) => {
               if (!service.currentConnection) {
                 return Promise.reject('Error setting up connection');
               }

@@ -22,8 +22,8 @@ export default function bulkLoader(): Promise<any> {
   // And set its HTML content
   panel.webview.html = getSettingsPage();
   var csvPath: string;
-  var batch;
-  var timeOut;
+  var batch: any;
+  var timeOut: NodeJS.Timeout;
   var totalRecords: number;
   const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
 
@@ -114,7 +114,7 @@ export default function bulkLoader(): Promise<any> {
     }
     timeOut = setTimeout(() => {
       try {
-        batch.check().then(res => {
+        batch.check().then((res: any) => {
           panel.webview.postMessage({
             state: res.state,
             processed: res.numberRecordsProcessed,

@@ -157,7 +157,7 @@ export default function compile(
     });
   }
 
-  function compileMetadata(metadata) {
+  function compileMetadata(metadata: any) {
     if (!folderToolingType) {
       return Promise.reject({
         message: 'Unknown metadata type. Make sure your project folders are set up properly.',
@@ -166,7 +166,7 @@ export default function compile(
     return vscode.window.forceCode.conn.metadata.upsert(folderToolingType, [metadata]);
   }
 
-  function reportMetadataResults(result) {
+  function reportMetadataResults(result: any) {
     if (Array.isArray(result) && result.length && !result.some(i => !i.success)) {
       vscode.window.forceCode.showStatus('Successfully deployed ' + result[0].fullName);
       return result;
@@ -197,9 +197,9 @@ export default function compile(
     var failures: number = 0;
     if (res.records && res.records.length > 0) {
       res.records
-        .filter(r => r.State !== 'Error')
-        .forEach(containerAsyncRequest => {
-          containerAsyncRequest.DeployDetails.componentFailures.forEach(failure => {
+        .filter((r: any) => r.State !== 'Error')
+        .forEach((containerAsyncRequest: any) => {
+          containerAsyncRequest.DeployDetails.componentFailures.forEach((failure: any) => {
             if (failure.problemType === 'Error') {
               failure.lineNumber =
                 failure.lineNumber == null || failure.lineNumber < 1 ? 1 : failure.lineNumber;
@@ -225,7 +225,7 @@ export default function compile(
         });
     } else if (res.errors && res.errors.length > 0) {
       // We got an error with the container
-      res.errors.forEach(err => {
+      res.errors.forEach((err: any) => {
         onError(err);
         failures++;
       });
@@ -259,7 +259,7 @@ export default function compile(
     return false;
   }
 
-  function onError(err) {
+  function onError(err: any) {
     const errMsg: string = err.message ? err.message : err;
     if (!errMsg) {
       return false;

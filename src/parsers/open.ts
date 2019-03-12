@@ -117,6 +117,9 @@ export function getAnyTTFromPath(thepath: string): string | undefined {
   if (thepath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
     return undefined;
   }
+  if (!vscode.window.forceCode.describe) {
+    return undefined;
+  }
   var fileName: string | undefined = thepath
     .split(vscode.window.forceCode.projectRoot + path.sep)
     .pop();
@@ -135,6 +138,9 @@ export function getAnyTTFromPath(thepath: string): string | undefined {
 function isFoldered(toolingType: string): boolean {
   if (toolingType && toolingType.endsWith('Folder')) {
     return true;
+  }
+  if (!vscode.window.forceCode.describe) {
+    return false;
   }
   const metadata:
     | IMetadataObject
@@ -183,7 +189,10 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
     }
   });
 }
-export function getAnyFolderNameFromTT(tType: string): string {
+export function getAnyFolderNameFromTT(tType: string): string | undefined {
+  if (!vscode.window.forceCode.describe) {
+    return undefined;
+  }
   var folder: any[] = vscode.window.forceCode.describe.metadataObjects
     .filter(o => o.xmlName === tType)
     .map(r => {
@@ -193,6 +202,9 @@ export function getAnyFolderNameFromTT(tType: string): string {
   return folder[0];
 }
 export function getAnyExtNameFromTT(tType: string): any {
+  if (!vscode.window.forceCode.describe) {
+    return undefined;
+  }
   var folder: any[] = vscode.window.forceCode.describe.metadataObjects
     .filter(o => o.xmlName === tType)
     .map(r => {

@@ -82,7 +82,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
       return Promise.resolve();
     }
     return getPackages().then(packages => {
-      let options: vscode.QuickPickItem[] = packages.map(pkg => {
+      let options: vscode.QuickPickItem[] = packages.map((pkg: any) => {
         return {
           label: `$(briefcase) ${pkg.Name}`,
           detail: `Package ${pkg.Id}`,
@@ -144,7 +144,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
   }
 
   // =======================================================================================================================================
-  function getPackage(opt: vscode.QuickPickItem) {
+  function getPackage(opt: vscode.QuickPickItem): Promise<any> {
     option = opt;
 
     vscode.window.forceCode.conn.metadata.pollTimeout =
@@ -169,7 +169,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
     }
     throw new Error();
 
-    function retrieveComponents(resolve, reject, retrieveTypes: ToolingTypes) {
+    function retrieveComponents(resolve: any, reject: any, retrieveTypes: ToolingTypes) {
       // count the number of types. if it's more than 10,000 the retrieve will fail
       var totalTypes: number = 0;
       retrieveTypes.types.forEach(type => {
@@ -198,7 +198,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
       resolve(theStream.stream());
     }
 
-    function pack(resolve, reject) {
+    function pack(resolve: any, reject: any) {
       if (option.description === 'unpackaged') {
         all();
       } else if (option.description === 'packaged') {
@@ -236,6 +236,11 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
       }
 
       function getSpecificTypeMetadata(metadataType: string) {
+        if (!vscode.window.forceCode.describe) {
+          return reject(
+            'Metadata describe error. Please try logging out of and back into the org.'
+          );
+        }
         var types: any[] = vscode.window.forceCode.describe.metadataObjects
           .filter(o => o.xmlName === metadataType)
           .map(r => {
@@ -297,15 +302,15 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
     }
   }
 
-  function processResult(stream: fs.ReadStream) {
+  function processResult(stream: fs.ReadStream): Promise<any> {
     return new Promise(function(resolve, reject) {
       var resBundleNames: string[] = [];
       const destDir: string = vscode.window.forceCode.projectRoot;
       new compress.zip.UncompressStream({ source: stream })
-        .on('error', function(err) {
+        .on('error', function(err: any) {
           reject(err || { message: 'package not found' });
         })
-        .on('entry', function(header, stream, next) {
+        .on('entry', function(header: any, stream: any, next: any) {
           stream.on('end', next);
           const name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
           if (header.type === 'file') {
@@ -393,7 +398,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
   // =======================================================================================================================================
   // =======================================================================================================================================
   // =======================================================================================================================================
-  function finished(res): Promise<any> {
+  function finished(res: any): Promise<any> {
     if (res.success) {
       var getCodeCov: boolean = false;
       console.log('Done retrieving files');

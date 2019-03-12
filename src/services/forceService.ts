@@ -15,15 +15,17 @@ import { Connection } from 'jsforce';
 import { getUUID, FCAnalytics } from './fcAnalytics';
 
 import klaw = require('klaw');
+import { QueryResult } from 'jsforce';
+import { defaultOptions } from './configuration';
 
 export default class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
   public config: forceCode.Config;
   public conn: Connection;
-  public containerId: string;
+  public containerId: string | undefined;
   public containerMembers: forceCode.IContainerMember[];
-  public describe: forceCode.IMetadataDescribe;
-  public containerAsyncRequestId: string;
+  public describe: forceCode.IMetadataDescribe | undefined;
+  public containerAsyncRequestId: string | undefined;
   public statusBarItem: vscode.StatusBarItem;
   public outputChannel: vscode.OutputChannel;
   public projectRoot: string;
@@ -38,6 +40,8 @@ export default class ForceService implements forceCode.IForceService {
       throw 'A folder needs to be open before Forcecode can be activated';
     }
     this.workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    this.projectRoot = path.join(this.workspaceRoot, 'src');
+    this.config = defaultOptions;
     this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
     this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 6);
@@ -126,7 +130,7 @@ export default class ForceService implements forceCode.IForceService {
     });
   }
 
-  private parseMembers(mems) {
+  private parseMembers(mems: any) {
     if (dxService.isEmptyUndOrNull(mems)) {
       return Promise.resolve({});
     }
@@ -251,7 +255,7 @@ export default class ForceService implements forceCode.IForceService {
         vscode.window.forceCode.conn.tooling
           .sobject('MetadataContainer')
           .find({ Name: { $like: 'ForceCode-%' } })
-          .execute(function(err, records) {
+          .execute(function(err: any, records: any) {
             var toDelete: string[] = new Array<string>();
             if (!records) {
               resolve();
@@ -267,12 +271,12 @@ export default class ForceService implements forceCode.IForceService {
       });
     }
 
-    function checkForChanges(svc) {
+    function checkForChanges(svc: forceCode.IForceService) {
       commandService.runCommand('ForceCode.checkForFileChanges', undefined, undefined);
       return svc;
     }
 
-    function connectionSuccess(svc) {
+    function connectionSuccess(svc: forceCode.IForceService) {
       vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
       svc.statusBarItem.command = 'ForceCode.showMenu';
       svc.statusBarItem.tooltip = 'Open the ForceCode Menu';
@@ -281,14 +285,14 @@ export default class ForceService implements forceCode.IForceService {
       return svc;
     }
     function getNamespacePrefix(svc: forceCode.IForceService) {
-      return svc.conn.query('SELECT NamespacePrefix FROM Organization').then(res => {
+      return svc.conn.query('SELECT NamespacePrefix FROM Organization').then((res: QueryResult) => {
         if (res && res.records.length && res.records[0].NamespacePrefix) {
           svc.config.prefix = res.records[0].NamespacePrefix;
         }
         return svc;
       });
     }
-    function connectionError(err) {
+    function connectionError(err: any) {
       vscode.window.showErrorMessage(`ForceCode: Connection Error`);
       //vscode.window.forceCode.statusBarItem.hide();
       throw err;

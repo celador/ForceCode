@@ -42,7 +42,7 @@ export default function showMenu(context: vscode.ExtensionContext) {
     };
     return vscode.window.showQuickPick(options, config);
   }
-  function processResult(result) {
+  function processResult(result: any) {
     if (result !== undefined && result.description !== undefined) {
       return commandService.runCommand(
         quickpick.find(cur => {

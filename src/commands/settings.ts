@@ -30,14 +30,14 @@ export default function settings(): Promise<any> {
     }
   );
 
-  var tempSettings = {};
+  var tempSettings: any;
   var currentSettings = vscode.window.forceCode.config;
   var userNames: string[];
 
   // And set its HTML content
   panel.webview.html = getSettingsPage();
 
-  const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
+  const overwriteMerge = (destinationArray: any, sourceArray: any, options: any) => sourceArray;
 
   // handle settings changes
   panel.webview.onDidReceiveMessage(message => {
