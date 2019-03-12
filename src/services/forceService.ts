@@ -34,6 +34,9 @@ export default class ForceService implements forceCode.IForceService {
 
   constructor(context: vscode.ExtensionContext) {
     console.log('Initializing ForceCode service');
+    if (!vscode.workspace.workspaceFolders) {
+      throw 'A folder needs to be open before Forcecode can be activated';
+    }
     this.workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
     this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
     this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
@@ -78,7 +81,7 @@ export default class ForceService implements forceCode.IForceService {
           resolve();
         }
       }).then(() => {
-        fcConnection.connect({ username: config.username, loginUrl: config.url });
+        fcConnection.connect(config.username ? { username: config.username } : undefined);
       });
     });
   }
@@ -150,22 +153,27 @@ export default class ForceService implements forceCode.IForceService {
       recs.forEach(curSet => {
         if (Array.isArray(curSet)) {
           curSet.forEach(key => {
-            var curFCFile: FCFile = codeCovViewService.findByNameAndType(key.fullName, key.type);
+            var curFCFile: FCFile | undefined = codeCovViewService.findByNameAndType(
+              key.fullName,
+              key.type
+            );
             if (curFCFile) {
-              var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
-              curMem.id = key.id;
-              if (
-                curFCFile.compareDates(key.lastModifiedDate) ||
-                !vscode.workspace.getConfiguration('force')['checkForFileChanges']
-              ) {
-                curFCFile.updateWsMember(curMem);
-              } else {
-                curFCFile.updateWsMember(curMem);
-                commandService.runCommand(
-                  'ForceCode.fileModified',
-                  curMem.path,
-                  key.lastModifiedByName
-                );
+              var curMem: forceCode.IWorkspaceMember | undefined = curFCFile.getWsMember();
+              if (curMem) {
+                curMem.id = key.id;
+                if (
+                  curFCFile.compareDates(key.lastModifiedDate) ||
+                  !vscode.workspace.getConfiguration('force')['checkForFileChanges']
+                ) {
+                  curFCFile.updateWsMember(curMem);
+                } else {
+                  curFCFile.updateWsMember(curMem);
+                  commandService.runCommand(
+                    'ForceCode.fileModified',
+                    curMem.path,
+                    key.lastModifiedByName
+                  );
+                }
               }
             }
           });
@@ -191,7 +199,7 @@ export default class ForceService implements forceCode.IForceService {
         .on('data', function(item) {
           // Check to see if the file represents an actual member...
           if (item.stats.isFile()) {
-            var type: string = getToolingTypeFromExt(item.path);
+            var type: string | undefined = getToolingTypeFromExt(item.path);
 
             if (type) {
               var pathParts: string[] = item.path.split(path.sep);

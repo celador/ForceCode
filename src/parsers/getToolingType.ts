@@ -4,7 +4,7 @@ import * as path from 'path';
 export default function getToolingTypeFromBody(
   document: vscode.TextDocument,
   member = false
-): string {
+): string | undefined {
   var fileName: string = document.fileName.split('-meta.xml')[0];
   if (fileName.endsWith('.cls')) {
     return member ? 'ApexClassMember' : 'ApexClass';
@@ -27,7 +27,7 @@ export default function getToolingTypeFromBody(
   return undefined;
 }
 
-export function getCoverageType(document: vscode.TextDocument): string {
+export function getCoverageType(document: vscode.TextDocument): string | undefined {
   if (document.fileName.endsWith('.cls')) {
     return 'Class';
   }

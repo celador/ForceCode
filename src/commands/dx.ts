@@ -11,7 +11,7 @@ export default function runDX() {
     .then(showMessage, showMessage);
 
   // =======================================================================================================================================
-  function showFileOptions(): Thenable<vscode.QuickPickItem> {
+  function showFileOptions(): Thenable<vscode.QuickPickItem | undefined> {
     let options: vscode.QuickPickItem[] = alm.commands
       .filter(c => {
         return !c.hidden;
@@ -31,9 +31,13 @@ export default function runDX() {
     return vscode.window.showQuickPick(options, config);
   }
 
-  function getArgsAndRun(opt: vscode.QuickPickItem): Thenable<string[]> {
+  function getArgsAndRun(opt: vscode.QuickPickItem): Thenable<string[] | undefined> {
     if (opt === undefined) {
-      return undefined;
+      return {
+        async then(callback) {
+          return callback(undefined);
+        },
+      };
     }
     theCmd = dxService.getCommand(opt.label);
 

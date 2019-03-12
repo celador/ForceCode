@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext): any {
               openLabel: `Create Folder '${folderName}'`,
             })
             .then(folder => {
-              if (!folder) {
+              if (!folder || !folderName) {
                 return;
               }
               // create default src folder so sfdx doesn't complain about a bad dir
@@ -148,10 +148,10 @@ export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
     vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
       if (vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
-        var isResource: RegExpMatchArray = textDocument.fileName.match(
+        var isResource: RegExpMatchArray | null = textDocument.fileName.match(
           /resource\-bundles.*\.resource.*$/
         ); // We are in a resource-bundles folder, bundle and deploy the staticResource
-        const toolingType: string = getAnyTTFromFolder(textDocument.uri);
+        const toolingType: string | undefined = getAnyTTFromFolder(textDocument.uri);
         if (textDocument.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot) !== -1) {
           if (isResource && isResource.index) {
             return commandService.runCommand(
@@ -179,10 +179,10 @@ export function activate(context: vscode.ExtensionContext): any {
       // clear the code coverage
       var fileName = event.document.fileName;
       // get the id
-      const fcfile: FCFile = codeCovViewService.findByPath(fileName);
-      var wsMem: IWorkspaceMember = fcfile ? fcfile.getWsMember() : undefined;
+      const fcfile: FCFile | undefined = codeCovViewService.findByPath(fileName);
+      var wsMem: IWorkspaceMember | undefined = fcfile ? fcfile.getWsMember() : undefined;
 
-      if (wsMem && wsMem.coverage) {
+      if (fcfile && wsMem && wsMem.coverage) {
         wsMem.coverage = undefined;
         fcfile.updateWsMember(wsMem);
         updateDecorations();
@@ -211,15 +211,17 @@ export function activate(context: vscode.ExtensionContext): any {
         path.join(vscode.window.forceCode.workspaceRoot, 'sfdx-project.json')
       )
       .onDidChange(uri => {
-        fs.copyFileSync(
-          path.join(vscode.window.forceCode.workspaceRoot, 'sfdx-project.json'),
-          path.join(
-            vscode.window.forceCode.workspaceRoot,
-            '.forceCode',
-            vscode.window.forceCode.config.username,
-            'sfdx-project.json'
-          )
-        );
+        if (vscode.window.forceCode.config.username) {
+          fs.copyFileSync(
+            path.join(vscode.window.forceCode.workspaceRoot, 'sfdx-project.json'),
+            path.join(
+              vscode.window.forceCode.workspaceRoot,
+              '.forceCode',
+              vscode.window.forceCode.config.username,
+              'sfdx-project.json'
+            )
+          );
+        }
       })
   );
 
@@ -230,7 +232,7 @@ export function activate(context: vscode.ExtensionContext): any {
         path.join(vscode.window.forceCode.projectRoot, '**', '*.{cls,trigger,page,component,cmp}')
       )
       .onDidDelete(uri => {
-        const fcfile: FCFile = codeCovViewService.findByPath(uri.fsPath);
+        const fcfile: FCFile | undefined = codeCovViewService.findByPath(uri.fsPath);
 
         if (fcfile) {
           codeCovViewService.removeClass(fcfile);
@@ -244,9 +246,9 @@ export function activate(context: vscode.ExtensionContext): any {
       vscode.workspace
         .createFileSystemWatcher(path.join(vscode.window.forceCode.projectRoot, '*'))
         .onDidDelete(uri => {
-          const tType: string = getToolingTypeFromFolder(uri);
+          const tType: string | undefined = getToolingTypeFromFolder(uri);
           if (tType) {
-            const fcfiles: FCFile[] = codeCovViewService.findByType(tType);
+            const fcfiles: FCFile[] | undefined = codeCovViewService.findByType(tType);
             if (fcfiles) {
               codeCovViewService.removeClasses(fcfiles);
             }

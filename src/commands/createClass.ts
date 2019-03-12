@@ -39,6 +39,7 @@ export default function createFile() {
     vscode.window.showQuickPick(fileOptions, config).then(selection => {
       if (!selection) {
         reject();
+        return;
       }
       getFileName(selection.label).then(name => {
         switch (selection.label) {
@@ -68,6 +69,7 @@ export default function createFile() {
           }
           default: {
             reject();
+            return;
           }
         }
       });
@@ -83,13 +85,15 @@ export default function createFile() {
       vscode.window.showInputBox(options).then(filename => {
         if (!filename) {
           reject();
+          return;
         } else {
-          resolve(
-            filename
-              .split('.')
-              .shift()
-              .trim()
-          );
+          const fnameShift = filename.split('.').shift();
+          if (fnameShift) {
+            resolve(fnameShift.trim());
+          } else {
+            reject();
+          }
+          return;
         }
       });
     });
@@ -131,8 +135,9 @@ export default function createFile() {
   function createSrcFile(name: string, thePath: string, src: string, ext: string, resolve) {
     const ofPath: string = path.join(thePath, name + '.' + ext);
     fs.outputFileSync(ofPath, src);
-    vscode.workspace.openTextDocument(ofPath).then(document => {
+    return vscode.workspace.openTextDocument(ofPath).then(document => {
       resolve(vscode.window.showTextDocument(document, vscode.ViewColumn.One));
+      return;
     });
   }
 
@@ -162,6 +167,7 @@ export default function createFile() {
     vscode.window.showQuickPick(auraOptions, config).then(type => {
       if (!type) {
         reject();
+        return;
       }
 
       if (type.label === 'App') {

@@ -53,7 +53,8 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
   public addClass(wsMember: IWorkspaceMember) {
     const index: number = this.classes.findIndex(curClass => {
-      return curClass.getWsMember().path === wsMember.path;
+      const wsMem: IWorkspaceMember | undefined = curClass.getWsMember();
+      return wsMem !== undefined && wsMem.path === wsMember.path;
     });
     if (index !== -1) {
       this.classes[index].setWsMember(wsMember);
@@ -69,43 +70,43 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     this.refresh();
   }
 
-  public findByNameAndType(name: string, type: string): FCFile {
+  public findByNameAndType(name: string, type: string): FCFile | undefined {
     if (dxService.isEmptyUndOrNull(this.classes)) {
       return undefined;
     }
     return this.classes.find(cur => {
-      const wsMem: IWorkspaceMember = cur.getWsMember();
-      return wsMem && wsMem.name === name && wsMem.type === type;
+      const wsMem: IWorkspaceMember | undefined = cur.getWsMember();
+      return wsMem !== undefined && wsMem.name === name && wsMem.type === type;
     });
   }
 
-  public findByType(type: string): FCFile[] {
+  public findByType(type: string): FCFile[] | undefined {
     if (dxService.isEmptyUndOrNull(this.classes)) {
       return undefined;
     }
     return this.classes.filter(cur => {
-      const wsMem: IWorkspaceMember = cur.getWsMember();
-      return wsMem && wsMem.type === type;
+      const wsMem: IWorkspaceMember | undefined = cur.getWsMember();
+      return wsMem !== undefined && wsMem.type === type;
     });
   }
 
-  public findByPath(pa: string): FCFile {
+  public findByPath(pa: string): FCFile | undefined {
     if (dxService.isEmptyUndOrNull(this.classes)) {
       return undefined;
     }
     return this.classes.find(cur => {
-      const wsMem: IWorkspaceMember = cur.getWsMember();
-      return wsMem && wsMem.path === pa;
+      const wsMem: IWorkspaceMember | undefined = cur.getWsMember();
+      return wsMem !== undefined && wsMem.path === pa;
     });
   }
 
-  public findById(id: string): FCFile {
+  public findById(id: string): FCFile | undefined {
     if (dxService.isEmptyUndOrNull(this.classes)) {
       return undefined;
     }
     return this.classes.find(cur => {
-      const wsMem: IWorkspaceMember = cur.getWsMember();
-      return wsMem && wsMem.id === id;
+      const wsMem: IWorkspaceMember | undefined = cur.getWsMember();
+      return wsMem !== undefined && wsMem.id === id;
     });
   }
 
@@ -162,11 +163,11 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
               !curEd.fileName.startsWith(window.forceCode.projectRoot) &&
               curEd.uri.scheme === 'file'
             ) {
-              var newFCFile: FCFile = new FCFile(
-                curEd.fileName.split(path.sep).pop(),
-                TreeItemCollapsibleState.None,
-                this
-              );
+              const fName = curEd.fileName.split(path.sep).pop();
+              if (!fName) {
+                return [];
+              }
+              var newFCFile: FCFile = new FCFile(fName, TreeItemCollapsibleState.None, this);
               newFCFile.setType(ClassType.NotInSrc);
               newFCFile.command = {
                 command: 'ForceCode.openOnClick',
@@ -193,7 +194,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public getParent(element: FCFile): any {
-    const wsMem: IWorkspaceMember = element.getWsMember();
+    const wsMem: IWorkspaceMember | undefined = element.getWsMember();
     if (wsMem && wsMem.id) {
       // there's a bug in vscode, so for future use
       var newFCFile: FCFile = new FCFile(
@@ -208,14 +209,10 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   private sortFunc(a: FCFile, b: FCFile): number {
-    var aStr = a.label
-      .split('% ')
-      .pop()
-      .toUpperCase();
-    var bStr = b.label
-      .split('% ')
-      .pop()
-      .toUpperCase();
+    var aStr = a.label ? a.label.split('% ').pop() : '';
+    aStr = aStr ? aStr.toUpperCase() : '';
+    var bStr = b.label ? b.label.split('% ').pop() : '';
+    bStr = bStr ? bStr.toUpperCase() : '';
     return aStr.localeCompare(bStr);
   }
 }
@@ -225,7 +222,7 @@ export class FCFile extends TreeItem {
   public command: Command;
 
   private parent: CodeCovViewService;
-  private wsMember: IWorkspaceMember;
+  private wsMember: IWorkspaceMember | undefined;
   private type: string;
 
   constructor(
@@ -241,7 +238,7 @@ export class FCFile extends TreeItem {
     this.setWsMember(wsMember);
   }
 
-  public setWsMember(newMem: IWorkspaceMember) {
+  public setWsMember(newMem: IWorkspaceMember | undefined) {
     this.wsMember = newMem;
 
     // we only want classes and triggers
@@ -308,7 +305,7 @@ export class FCFile extends TreeItem {
     this.parent.addClass(newMem);
   }
 
-  public getWsMember(): IWorkspaceMember {
+  public getWsMember(): IWorkspaceMember | undefined {
     return this.wsMember;
   }
 
@@ -322,6 +319,9 @@ export class FCFile extends TreeItem {
 
   // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
   public compareDates(serverDate: string): boolean {
+    if (!this.wsMember) {
+      return true;
+    }
     const stat: fs.Stats = fs.statSync(this.wsMember.path);
     var localMS: number = stat.mtime.getTime();
     var serverMS: number = new Date(serverDate).getTime();

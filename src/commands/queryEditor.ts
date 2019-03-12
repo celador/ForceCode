@@ -5,8 +5,11 @@ import { outputToString, outputToCSV } from '../parsers/output';
 import { RecordResult } from 'jsforce';
 
 export default function queryEditor(): Promise<any> {
-  const myExtDir = vscode.extensions.getExtension('JohnAaronNelson.forcecode').extensionPath;
-  const QUERYEDITOR_FILE: string = path.join(myExtDir, 'pages', 'queryEditor.html');
+  const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
+  if (!myExt || !vscode.window.forceCode.config.username) {
+    return Promise.reject();
+  }
+  const QUERYEDITOR_FILE: string = path.join(myExt.extensionPath, 'pages', 'queryEditor.html');
   const panel = vscode.window.createWebviewPanel(
     'fcQueryEditor',
     'ForceCode Query Editor',
@@ -47,16 +50,7 @@ export default function queryEditor(): Promise<any> {
       // save the results
       const csv: boolean = vscode.workspace.getConfiguration('force')['outputQueriesAsCSV'];
       var data: string = csv ? outputToCSV(curResults) : outputToString(curResults);
-      const defaultURI: vscode.Uri = {
-        scheme: 'file',
-        path: vscode.window.forceCode.projectRoot.split('\\').join('/'),
-        fsPath: vscode.window.forceCode.projectRoot,
-        authority: undefined,
-        query: undefined,
-        fragment: undefined,
-        with: undefined,
-        toJSON: undefined,
-      };
+      const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
       vscode.window
         .showSaveDialog({
           filters: csv ? { CSV: ['csv'] } : { JSON: ['json'] },

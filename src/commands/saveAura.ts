@@ -14,9 +14,9 @@ export function saveAura(
   Metadata?: {},
   forceCompile?: boolean
 ): Promise<any> {
-  const name: string = parsers.getName(document, toolingType);
-  const ext: string = parsers.getFileExtension(document);
-  var DefType: string = getAuraDefTypeFromDocument(document);
+  const name: string | undefined = parsers.getName(document, toolingType);
+  const ext: string | undefined = parsers.getFileExtension(document);
+  var DefType: string | undefined = getAuraDefTypeFromDocument(document);
   var Format: string = getAuraFormatFromDocument();
   var Source: string = document.getText();
   var currentObjectDefinition: any = undefined;
@@ -45,7 +45,7 @@ export function saveAura(
   }
   function ensureAuraBundle(results) {
     // If the Bundle doesn't exist, create it, else Do nothing
-    if (results.length === 0 || !results[0]) {
+    if (name && (results.length === 0 || !results[0])) {
       // Create Aura Definition Bundle
       return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot).then(() => {
         const files: string[] = [];
@@ -150,9 +150,9 @@ export function saveAura(
 }
 
 export function getAuraDefTypeFromDocument(document: vscode.TextDocument) {
-  const fname: string = parsers.getName(document, 'AuraDefinition');
-  const extension: string = parsers.getFileExtension(document);
-  const fileName: string = parsers.getFileName(document);
+  const fname: string | undefined = parsers.getName(document, 'AuraDefinition');
+  const extension: string | undefined = parsers.getFileExtension(document);
+  const fileName: string | undefined = parsers.getFileName(document);
   switch (extension) {
     case 'app':
       // APPLICATION — Lightning Components app
@@ -176,6 +176,9 @@ export function getAuraDefTypeFromDocument(document: vscode.TextDocument) {
       // SVG — SVG graphic resource
       return 'SVG';
     case 'js':
+      if (!fileName || !fname) {
+        return undefined;
+      }
       var fileNameEndsWith: string = fileName.replace(fname, '').toLowerCase();
       if (fileNameEndsWith === 'controller') {
         // CONTROLLER — client-side controller

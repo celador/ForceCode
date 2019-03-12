@@ -4,8 +4,11 @@ import * as path from 'path';
 import { SObjectDescribe, SObjectCategory } from '../dx';
 
 export default function bulkLoader(): Promise<any> {
-  const myExtDir = vscode.extensions.getExtension('JohnAaronNelson.forcecode').extensionPath;
-  const BULK_PAGE: string = path.join(myExtDir, 'pages', 'bulkLoader.html');
+  const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
+  if (!myExt) {
+    return Promise.reject('Error loading extension info');
+  }
+  const BULK_PAGE: string = path.join(myExt.extensionPath, 'pages', 'bulkLoader.html');
   const panel = vscode.window.createWebviewPanel(
     'fcBulk',
     'ForceCode Bulk Loader',
@@ -22,16 +25,7 @@ export default function bulkLoader(): Promise<any> {
   var batch;
   var timeOut;
   var totalRecords: number;
-  const defaultURI: vscode.Uri = {
-    scheme: 'file',
-    path: vscode.window.forceCode.projectRoot.split('\\').join('/'),
-    fsPath: vscode.window.forceCode.projectRoot,
-    authority: undefined,
-    query: undefined,
-    fragment: undefined,
-    with: undefined,
-    toJSON: undefined,
-  };
+  const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
 
   // handle settings changes
   panel.webview.onDidReceiveMessage(message => {
@@ -100,7 +94,7 @@ export default function bulkLoader(): Promise<any> {
           });
         }
       );
-      csvPath = undefined;
+      csvPath = '';
       panel.webview.postMessage({ uploading: true });
       checkStatus();
     }

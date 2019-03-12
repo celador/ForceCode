@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { QueryResult } from '../services/dxService';
 import { editorUpdateApexCoverageDecorator } from '../decorators/testCoverageDecorator';
 import { FCFile } from './codeCovView';
 import { codeCovViewService } from '.';
+import { QueryResult } from 'jsforce';
 
 export default function getApexTestResults(testClassIds?: string[]): Promise<QueryResult> {
   var fromWhere: string =
@@ -29,19 +29,21 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
     // Add Line Coverage information
     if (res.records) {
       var highestCov: number = 0;
-      var highestClass: FCFile;
+      var highestClass: FCFile | undefined;
       res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
-        const fcfile: FCFile = codeCovViewService.findById(curRes.ApexClassOrTriggerId);
+        const fcfile: FCFile | undefined = codeCovViewService.findById(curRes.ApexClassOrTriggerId);
         if (fcfile && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
-          var wsMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
-          wsMem.coverage = curRes;
-          var total: number = curRes.NumLinesCovered + curRes.NumLinesUncovered;
-          var percent = Math.floor((curRes.NumLinesCovered / total) * 100);
-          if (percent > highestCov) {
-            highestCov = percent;
-            highestClass = fcfile;
+          var wsMem: forceCode.IWorkspaceMember | undefined = fcfile.getWsMember();
+          if (wsMem) {
+            wsMem.coverage = curRes;
+            var total: number = curRes.NumLinesCovered + curRes.NumLinesUncovered;
+            var percent = Math.floor((curRes.NumLinesCovered / total) * 100);
+            if (percent > highestCov) {
+              highestCov = percent;
+              highestClass = fcfile;
+            }
+            fcfile.updateWsMember(wsMem);
           }
-          fcfile.updateWsMember(wsMem);
         }
       });
       // update the current editor

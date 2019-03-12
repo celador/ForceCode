@@ -16,7 +16,7 @@ export class CommandService {
 
   public runCommand(command: string, context: any, selectedResource?: any): Promise<any> {
     // add something to keep track of the running command in here
-    var theCommand: FCCommand = commands.fcCommands.find(cur => {
+    var theCommand: FCCommand | undefined = commands.fcCommands.find(cur => {
       return cur.commandName === command;
     });
 
@@ -25,7 +25,7 @@ export class CommandService {
     }
     if (
       ['ForceCode.compileMenu', 'ForceCode.refreshContext'].find(c => {
-        return c === theCommand.commandName;
+        return theCommand !== undefined && c === theCommand.commandName;
       })
     ) {
       var splitPath;

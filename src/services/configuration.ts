@@ -32,14 +32,14 @@ export const defaultOptions: Config = {
 export default function getSetConfig(service?: ForceService): Promise<Config> {
   var self: forceCode.IForceService = service || vscode.window.forceCode;
   const projPath = self.workspaceRoot;
-  var lastUsername: string;
+  var lastUsername: string | undefined;
   if (fs.existsSync(path.join(projPath, 'force.json'))) {
     var forceFile = fs.readJsonSync(path.join(projPath, 'force.json'));
     lastUsername = forceFile.lastUsername;
   }
   self.config = readConfigFile(lastUsername, service);
 
-  self.projectRoot = path.join(projPath, self.config.src);
+  self.projectRoot = path.join(projPath, self.config.src || 'src');
   if (!fs.existsSync(self.projectRoot)) {
     fs.mkdirpSync(self.projectRoot);
   }
@@ -121,16 +121,18 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
   });
 }
 
-export function saveConfigFile(userName: string, config: Config) {
-  fs.outputFileSync(
-    path.join(vscode.window.forceCode.workspaceRoot, '.forceCode', userName, 'settings.json'),
-    JSON.stringify(config, undefined, 4)
-  );
+export function saveConfigFile(userName: string | undefined, config: Config) {
+  if (userName) {
+    fs.outputFileSync(
+      path.join(vscode.window.forceCode.workspaceRoot, '.forceCode', userName, 'settings.json'),
+      JSON.stringify(config, undefined, 4)
+    );
+  }
 }
 
-export function readConfigFile(userName: string, service?: ForceService): Config {
+export function readConfigFile(userName: string | undefined, service?: ForceService): Config {
   var self: forceCode.IForceService = service || vscode.window.forceCode;
-  var config: Config = {};
+  var config: Config = defaultOptions;
   if (userName) {
     const configPath: string = path.join(
       self.workspaceRoot,

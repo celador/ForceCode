@@ -14,9 +14,9 @@ export function saveApex(
   Metadata?: {},
   forceCompile?: boolean
 ): Promise<any> {
-  const fileName: string = parsers.getFileName(document);
+  const fileName: string | undefined = parsers.getFileName(document);
   const body: string = document.getText();
-  const name: string = parsers.getName(document, toolingType);
+  const name: string | undefined = parsers.getName(document, toolingType);
   var checkCount: number = 0;
   return Promise.resolve(vscode.window.forceCode)
     .then(addToContainer)
@@ -60,12 +60,17 @@ export function saveApex(
             Body: body,
             Id: records.id,
           };
-      return fc.conn.tooling
-        .sobject(parsers.getToolingType(document, UPDATE))
-        .update(member)
-        .then(() => {
-          return fc;
-        });
+      const upToolType = parsers.getToolingType(document, UPDATE);
+      if (upToolType) {
+        return fc.conn.tooling
+          .sobject(upToolType)
+          .update(member)
+          .then(() => {
+            return fc;
+          });
+      } else {
+        return Promise.reject({ message: 'Unknown metadata type' });
+      }
     }
 
     function shouldCompile(record) {
@@ -109,11 +114,15 @@ export function saveApex(
           MetadataContainerId: fc.containerId,
         };
         return shouldCompile(record).then(should => {
-          if (should) {
+          const upToolType = parsers.getToolingType(document, UPDATE);
+          if (should && upToolType && name) {
             return fc.conn.tooling
-              .sobject(parsers.getToolingType(document, UPDATE))
+              .sobject(upToolType)
               .create(member)
               .then(res => {
+                if (!res.id) {
+                  throw { message: record.Name + ' not saved' };
+                }
                 fc.containerMembers.push({ name, id: res.id });
                 return fc;
               });
@@ -127,13 +136,15 @@ export function saveApex(
         // so we CREATE it
         return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot).then(
           () => {
+            const wholeFileName = parsers.getWholeFileName(document);
+            if (!wholeFileName || !fileName) {
+              return Promise.reject('Error reading file information');
+            }
             const files: string[] = [];
-            files.push(
-              path.join(parsers.getFolder(toolingType), parsers.getWholeFileName(document))
-            );
+            files.push(path.join(parsers.getFolder(toolingType), wholeFileName));
             if (Metadata) {
               // add the class/trigger/page/component
-              const codeFileName: string = parsers.getWholeFileName(document).split('-meta.xml')[0];
+              const codeFileName: string = wholeFileName.split('-meta.xml')[0];
               files.push(path.join(parsers.getFolder(toolingType), codeFileName));
             } else {
               // add the metadata
@@ -171,7 +182,11 @@ export function saveApex(
   // =======================================================================================================================================
   function requestCompile() {
     if (vscode.window.forceCode.containerMembers.length === 0) {
-      return undefined; // we don't need new container stuff on new file creation
+      return {
+        async then(callback) {
+          return callback(undefined);
+        },
+      };
     }
     return vscode.window.forceCode.conn.tooling
       .sobject('ContainerAsyncRequest')

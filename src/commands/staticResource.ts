@@ -82,9 +82,11 @@ export function staticResourceDeployFromFile(
   function getPackageName() {
     let bundlePath: string =
       vscode.window.forceCode.projectRoot + path.sep + 'resource-bundles' + path.sep;
+    var resType;
+    var resourceName;
     try {
-      var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource.')[0];
-      var resType: string = textDocument.fileName
+      resourceName = textDocument.fileName.split(bundlePath)[1].split('.resource.')[0];
+      resType = textDocument.fileName
         .split(bundlePath)[1]
         .split('.resource.')[1]
         .split(path.sep)[0]
@@ -135,8 +137,9 @@ function bundleAndDeployAll() {
           });
         })
     );
+  } else {
+    return Promise.reject();
   }
-  return undefined;
 }
 
 function getPackagePath(option) {

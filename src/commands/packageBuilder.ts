@@ -44,7 +44,7 @@ export function getMembers(
               .then(folderList => {
                 folderList = toArray(folderList);
                 var members = folders.filter(f => f !== undefined).map(f => f.fullName);
-                members = [].concat(...members, ...folderList);
+                members = members.concat(...folderList);
                 resolve({ name: r.xmlName, members: members });
               })
               .catch(reject);
@@ -167,16 +167,7 @@ export default function packageBuilder(buildPackage?: boolean): Promise<any> {
               .buildObject(packObj)
               .replace('<Package>', '<Package xmlns="http://soap.sforce.com/2006/04/metadata">')
               .replace(' standalone="yes"', '');
-            const defaultURI: vscode.Uri = {
-              scheme: 'file',
-              path: vscode.window.forceCode.projectRoot.split('\\').join('/'),
-              fsPath: vscode.window.forceCode.projectRoot,
-              authority: undefined,
-              query: undefined,
-              fragment: undefined,
-              with: undefined,
-              toJSON: undefined,
-            };
+            const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
             vscode.window
               .showSaveDialog({ filters: { XML: ['xml'] }, defaultUri: defaultURI })
               .then(uri => {

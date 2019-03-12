@@ -13,9 +13,9 @@ export function saveLWC(
   toolingType: string,
   forceCompile?: boolean
 ): Promise<any> {
-  const fileName: string = document.fileName.split(path.sep).pop();
-  const name: string = parsers.getName(document, toolingType);
-  const Format: string = parsers.getFileExtension(document);
+  const fileName: string | undefined = document.fileName.split(path.sep).pop();
+  const name: string | undefined = parsers.getName(document, toolingType);
+  const Format: string | undefined = parsers.getFileExtension(document);
   var Source: string = document.getText();
   var currentObjectDefinition: any = undefined;
 
@@ -34,7 +34,7 @@ export function saveLWC(
   }
   function ensureLWCBundle(results) {
     // If the Bundle doesn't exist, create it, else Do nothing
-    if (results.length === 0 || !results[0]) {
+    if (name && (results.length === 0 || !results[0])) {
       // Create LWC Bundle
       return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot).then(() => {
         const files: string[] = [];
@@ -80,25 +80,27 @@ export function saveLWC(
         return updateLWC();
       }
     } else if (bundle[0]) {
-      return vscode.window.forceCode.conn.tooling
-        .sobject('LightningComponentResource')
-        .create({
-          LightningComponentBundleId: bundle[0].Id ? bundle[0].Id : bundle[0].id,
-          Format,
-          Source,
-          FilePath: document.fileName
-            .split(vscode.window.forceCode.projectRoot + path.sep)
-            .pop()
-            .split('\\')
-            .join('/'),
-        })
-        .catch(err => {
-          return {
-            State: 'Error',
-            message:
-              'Error: File not created on server either because the name of the file is incorrect or there are syntax errors.',
-          };
-        });
+      var filePath = document.fileName.split(vscode.window.forceCode.projectRoot + path.sep).pop();
+      const errObj = {
+        State: 'Error',
+        message:
+          'Error: File not created on server either because the name of the file is incorrect or there are syntax errors.',
+      };
+      if (filePath) {
+        return vscode.window.forceCode.conn.tooling
+          .sobject('LightningComponentResource')
+          .create({
+            LightningComponentBundleId: bundle[0].Id ? bundle[0].Id : bundle[0].id,
+            Format,
+            Source,
+            FilePath: filePath.split('\\').join('/'),
+          })
+          .catch(err => {
+            return errObj;
+          });
+      } else {
+        return errObj;
+      }
     }
     return undefined;
   }

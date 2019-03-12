@@ -42,6 +42,9 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
   // =======================================================================================================================================
 
   function getPackages(): Promise<any> {
+    if (!fcConnection.currentConnection) {
+      return Promise.reject('No current connection');
+    }
     var orgInfo: FCOauth = fcConnection.currentConnection.orgInfo;
     var requestUrl: string = orgInfo.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
     const foptions: XHROptions = {
@@ -144,14 +147,15 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
   function getPackage(opt: vscode.QuickPickItem) {
     option = opt;
 
-    vscode.window.forceCode.conn.metadata.pollTimeout = (vscode.window.forceCode.config.pollTimeout || 600) * 1000;
+    vscode.window.forceCode.conn.metadata.pollTimeout =
+      (vscode.window.forceCode.config.pollTimeout || 600) * 1000;
     if (opt) {
       return new Promise(pack);
     } else if (resource) {
       return new Promise(function(resolve, reject) {
         // Get the Metadata Object type
         if (resource instanceof vscode.Uri) {
-          var toolingType: string = getAnyTTFromFolder(resource);
+          var toolingType: string | undefined = getAnyTTFromFolder(resource);
           if (!toolingType) {
             throw new Error(errMessage);
           }
@@ -305,14 +309,13 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
           stream.on('end', next);
           const name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
           if (header.type === 'file') {
-            const tType: string = getToolingTypeFromExt(name);
-            if (tType) {
+            const tType: string | undefined = getToolingTypeFromExt(name);
+            const fullName = name.split(path.sep).pop();
+            if (tType && fullName) {
               // add to ws members
+
               var wsMem: IWorkspaceMember = {
-                name: name
-                  .split(path.sep)
-                  .pop()
-                  .split('.')[0],
+                name: fullName.split('.')[0],
                 path: `${vscode.window.forceCode.projectRoot}${path.sep}${name}`,
                 id: '', //metadataFileProperties.id,
                 type: tType,
@@ -443,6 +446,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                 newWSMembers[index].id = key.id;
                 codeCovViewService.addClass(newWSMembers.splice(index, 1)[0]);
               }
+              return false;
             } else {
               return true;
             }

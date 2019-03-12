@@ -11,7 +11,7 @@ const quickPickOptions: vscode.QuickPickOptions = {
 export function enterCredentials(): Promise<FCOauth> {
   return fcConnection.getSavedUsernames().then(uNames => {
     return dxService.orgList().then(orgs => {
-      return new Promise(resolve => {
+      return new Promise<FCOauth>(resolve => {
         // ask if the user wants to log into a different account
         let opts: any[] = [
           {
@@ -30,7 +30,7 @@ export function enterCredentials(): Promise<FCOauth> {
         // add orgs that are authenticated, but not saved in the project
         if (orgs) {
           orgs
-            .filter(currentOrg => !uNames.includes(currentOrg.username))
+            .filter(currentOrg => !uNames.includes(currentOrg.username || ''))
             .forEach(filteredOrg => {
               opts.push({
                 title: filteredOrg.username,

@@ -12,6 +12,9 @@ export interface SFDX {
   accessToken: string;
   instanceUrl: string;
   clientId: string;
+  isExpired?: boolean;
+  userId?: string;
+  isDevHub?: boolean;
 }
 
 export interface ExecuteAnonymousResult {
@@ -70,6 +73,8 @@ export interface QueryResult {
   totalSize: number; // Total size for query
   locator: string; // Total size for query
   records: Array<any>; // Array of records fetched
+  summary: any;
+  tests: any;
 }
 
 export interface DXCommands {
@@ -153,7 +158,7 @@ export default class DXService implements DXCommands {
     if (arg !== undefined && arg !== '') {
       // this helps solve a bug when we have '-' in commands and queries and stuff
       arg = ' ' + arg;
-      var replaceString: string = undefined;
+      var replaceString: string;
       do {
         replaceString = '}@FC$' + Date.now() + '$FC@{';
       } while (arg.includes(replaceString));
@@ -163,15 +168,16 @@ export default class DXService implements DXCommands {
         if (i.length > 0) {
           var curCmd = new Array();
           curCmd = i.trim().split(' ');
-          var commandName = curCmd.shift();
-          if (commandName.length === 1) {
+          var flagName = curCmd.shift();
+          if (flagName.length === 1) {
             // this means we need to search for the argument name
-            commandName = cmd.flags.find(fl => {
-              return fl.char === commandName;
-            }).name;
+            const flag = cmd.flags.find(fl => {
+              return fl.char === flagName;
+            });
+            flagName = flag ? flag.name : undefined;
           }
-          if (curCmd.length > 0) cliContext.flags[commandName] = curCmd.join(' ').trim();
-          else cliContext.flags[commandName] = true;
+          if (curCmd.length > 0) cliContext.flags[flagName] = curCmd.join(' ').trim();
+          else cliContext.flags[flagName] = true;
         }
       });
     }
@@ -212,7 +218,7 @@ export default class DXService implements DXCommands {
     return this.runCommand('apex:execute', '--apexcodefile ' + file);
   }
 
-  public login(url: string): Promise<any> {
+  public login(url: string | undefined): Promise<any> {
     return this.runCommand('auth:web:login', '--instanceurl ' + url);
   }
 
@@ -228,7 +234,7 @@ export default class DXService implements DXCommands {
     }
     */
 
-  public getOrgInfo(username: string): Promise<SFDX> {
+  public getOrgInfo(username: string | undefined): Promise<SFDX> {
     return this.runCommand('org:display', '--targetusername ' + username);
   }
 
@@ -265,8 +271,13 @@ export default class DXService implements DXCommands {
       .then(function(_document: vscode.TextDocument) {
         if (_document.getText() !== '') {
           return vscode.window.showTextDocument(_document, 3, true);
+        } else {
+          return {
+            async then(callback) {
+              return callback(undefined);
+            },
+          };
         }
-        return undefined;
       });
   }
 
@@ -279,9 +290,14 @@ export default class DXService implements DXCommands {
   }
 
   public createScratchOrg(options: string): Promise<any> {
-    return this.runCommand(
-      'org:create',
-      options + ' --targetdevhubusername ' + fcConnection.currentConnection.orgInfo.username
-    );
+    const curConnection = fcConnection.currentConnection;
+    if (curConnection) {
+      return this.runCommand(
+        'org:create',
+        options + ' --targetdevhubusername ' + curConnection.orgInfo.username
+      );
+    } else {
+      return Promise.reject('Forcecode is not currently connected to an org');
+    }
   }
 }

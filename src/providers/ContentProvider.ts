@@ -26,7 +26,7 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
   provideTextDocumentContent(uri: vscode.Uri): Thenable<string> {
     var uriParts: string[] = uri.path.split('/');
     let toolingType: string = uriParts[1];
-    var name: string = uriParts[2];
+    var name: string | undefined = uriParts[2];
     var toolingName: string = name.split('.')[0];
     var field: string = 'Body';
     var nsPrefix = `NamespacePrefix = '${
@@ -37,16 +37,15 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
     } else if (toolingType === 'AuraDefinition') {
       field = 'Source';
       name = getAuraNameFromFileName(this.auraSource.fileName, 'aura');
-      const DefType: string = getAuraDefTypeFromDocument(this.auraSource);
+      const DefType: string | undefined = getAuraDefTypeFromDocument(this.auraSource);
       nsPrefix = `DefType='${DefType}' AND AuraDefinitionBundleId IN (SELECT Id FROM AuraDefinitionBundle WHERE DeveloperName='${name}')`;
     } else if (toolingType === 'LightningComponentResource') {
       field = 'Source';
       name = getAuraNameFromFileName(this.auraSource.fileName, 'lwc');
-      const FilePath: string = this.auraSource.fileName
+      var FilePath: string | undefined = this.auraSource.fileName
         .split(vscode.window.forceCode.projectRoot + path.sep)
-        .pop()
-        .split(path.sep)
-        .join('/');
+        .pop();
+      FilePath = FilePath ? FilePath.split(path.sep).join('/') : '';
       nsPrefix = `FilePath='${FilePath}' AND LightningComponentBundleId IN (SELECT Id FROM LightningComponentBundle WHERE DeveloperName='${name}')`;
     }
     return new Promise<string>((resolve, reject) => {

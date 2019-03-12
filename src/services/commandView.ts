@@ -126,7 +126,7 @@ export class Task extends vscode.TreeItem {
     context: any,
     selectedResource?: any
   ) {
-    super(execution.name, vscode.TreeItemCollapsibleState.None);
+    super(execution.name || '', vscode.TreeItemCollapsibleState.None);
 
     this.taskViewProvider = taskViewProvider;
     this.execution = execution;

@@ -92,7 +92,7 @@ export function getFolder(toolingType: string) {
       return 'classes';
   }
 }
-export function getToolingTypeFromFolder(uri: vscode.Uri): string {
+export function getToolingTypeFromFolder(uri: vscode.Uri): string | undefined {
   switch (uri.fsPath.split(path.sep).pop()) {
     case 'classes':
       return 'ApexClass';
@@ -110,14 +110,19 @@ export function getToolingTypeFromFolder(uri: vscode.Uri): string {
       return undefined;
   }
 }
-export function getAnyTTFromFolder(uri: vscode.Uri): string {
+export function getAnyTTFromFolder(uri: vscode.Uri): string | undefined {
   return getAnyTTFromPath(uri.fsPath);
 }
-export function getAnyTTFromPath(thepath: string): string {
+export function getAnyTTFromPath(thepath: string): string | undefined {
   if (thepath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
     return undefined;
   }
-  var fileName: string = thepath.split(vscode.window.forceCode.projectRoot + path.sep).pop();
+  var fileName: string | undefined = thepath
+    .split(vscode.window.forceCode.projectRoot + path.sep)
+    .pop();
+  if (!fileName) {
+    return undefined;
+  }
   var baseDirectoryName: string = fileName.split(path.sep)[0];
   var types: any[] = vscode.window.forceCode.describe.metadataObjects
     .filter(o => o.directoryName === baseDirectoryName)
@@ -131,20 +136,26 @@ function isFoldered(toolingType: string): boolean {
   if (toolingType && toolingType.endsWith('Folder')) {
     return true;
   }
-  const metadata: IMetadataObject = vscode.window.forceCode.describe.metadataObjects.find(
+  const metadata:
+    | IMetadataObject
+    | undefined = vscode.window.forceCode.describe.metadataObjects.find(
     mObject => mObject.xmlName === toolingType
   );
   return metadata ? metadata.inFolder : false;
 }
 
 export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const projRoot: string = vscode.window.forceCode.projectRoot + path.sep;
     const ffNameParts: string[] = uri.fsPath.split(projRoot)[1].split(path.sep);
     var baseDirectoryName: string = path.parse(uri.fsPath).name;
     const isAura: boolean = ffNameParts[0] === 'aura' || ffNameParts[0] === 'lwc';
     const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
-    const tType: string = getAnyTTFromFolder(uri);
+    const tType: string | undefined = getAnyTTFromFolder(uri);
+    if (!tType) {
+      reject('Unknown tooling type');
+      return;
+    }
     const isInFolder: boolean = isFoldered(tType);
     var folderedName: string;
     if (isInFolder && ffNameParts.length > 2) {
