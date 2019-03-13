@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, dxService } from '../services';
+import { codeCovViewService, dxService, saveHistoryService } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
@@ -39,6 +39,7 @@ export default function compile(
 
   var DefType: string | undefined;
   var Metadata: {} | undefined;
+  var errMessages: string[] = [];
 
   if (folderToolingType === 'StaticResource') {
     return Promise.reject(
@@ -219,6 +220,7 @@ export default function compile(
                 diagnostics.push(new vscode.Diagnostic(failureRange, failure.problem, 0));
                 diagnosticCollection.set(document.uri, diagnostics);
               }
+              errMessages.push(failure.problem);
               failures++;
             }
           });
@@ -233,6 +235,13 @@ export default function compile(
       onError(res);
       failures++;
     }
+
+    saveHistoryService.addSaveResult({
+      fileName: parsers.getWholeFileName(document) || 'UKNOWN',
+      path: document.fileName,
+      success: failures === 0,
+      messages: errMessages,
+    });
 
     if (failures === 0) {
       // SUCCESS !!!
@@ -301,5 +310,6 @@ export default function compile(
       diagnostics.push(new vscode.Diagnostic(failureRange, theerr, 0));
       diagnosticCollection.set(document.uri, diagnostics);
     }
+    errMessages.push(theerr);
   }
 }

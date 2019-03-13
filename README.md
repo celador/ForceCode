@@ -28,6 +28,7 @@ Please note that the following permissions are required to develop on the Force.
     * For apex code completion, select code completion refresh from the ForceCode menu and it will work with the Salesforce apex language server extension. You will need to refresh for each org. ForceCode handles the rest and switches code completion files when switching orgs/usernames.
 * Edit and save almost everything in Salesforce textually (Workflows, classes, lead assignment rules, etc..)
     * Now works with the autoCompile option. Save the file and Salesforce will send it to the org (If this option is on).
+* View save history results for x number of saves (maxSaveHistory setting) and view any error messages from the save by hovering over the save result (File name of the save)
 * Right click on a file in the explorer to save.
 * Right click on a file or folder to refresh from the server.
 * Multiple org support. Log into each org through ForceCode and you won't need to log out to switch orgs, simply click on another org in the "Saved Usernames" view and ForceCode will log you in.
@@ -329,6 +330,7 @@ The following settings have been migrated to the workspace settings as well:
 * maxFileChangeNotifications: The maximum number of file change notifications that will be shown on startup of the extension
 * maxQueryHistory: The maximum number of queries to store in the query history of the query editor
 * maxQueryResultsPerPage: The maximum number of results to show per page when executing a query in the query editor
+* maxSaveHistory: The maximum number of save history results to show in the Forcecode view. The default is 10.
 * onlyShowProjectUsernames: If checked, Forcecode will only show the usernames in use in each project instead of every one that has been authenticated on your machine.
 * outputQueriesAsCSV: If checked, will retrieve soql/toql results in csv form. If false, json will be returned
 * revealTestedClass: When checked, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed.

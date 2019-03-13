@@ -19,4 +19,6 @@ import { CodeCovViewService } from './codeCovView';
 export const codeCovViewService = CodeCovViewService.getInstance();
 import { SaveService } from './saveService';
 export const saveService = SaveService.getInstance();
+import { SaveHistoryService } from './saveHistoryService';
+export const saveHistoryService = SaveHistoryService.getInstance();
 export * from './fcZip';

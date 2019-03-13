@@ -8,6 +8,7 @@ import {
   fcConnection,
   operatingSystem,
   saveService,
+  saveHistoryService,
 } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
@@ -103,6 +104,9 @@ export function activate(context: vscode.ExtensionContext): any {
   );
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider('ForceCode.codeCovDataProvider', codeCovViewService)
+  );
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider('ForceCode.saveHistoryProvider', saveHistoryService)
   );
 
   context.subscriptions.push(
