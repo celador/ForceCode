@@ -42,6 +42,10 @@ export default function createFile() {
         return;
       }
       getFileName(selection.label).then(name => {
+        if (!name) {
+          resolve();
+          return;
+        }
         switch (selection.label) {
           case 'Aura Component': {
             createAura(name, resolve, reject);
@@ -84,7 +88,7 @@ export default function createFile() {
     return new Promise((resolve, reject) => {
       vscode.window.showInputBox(options).then(filename => {
         if (!filename) {
-          reject();
+          resolve();
           return;
         } else {
           const fnameShift = filename.split('.').shift();
