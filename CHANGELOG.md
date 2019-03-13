@@ -1,5 +1,9 @@
 ## Change Log
 
+* 3.15.2
+    * Fix issue with first save of LWC or Aura components after creation. Users were being shown the file change notification.
+    * Fix issue with hanging task after cancelling creating a file
+    * Remove folder name prompt when creating a project. Users will now be able to just select a folder to create the project in
 * 3.15.1
     * Fix issues deploying code after creation
     * Check for file changes on save now diffs the file contents instead of checking last modified dates. This makes the check more accurate
