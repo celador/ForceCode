@@ -22,19 +22,21 @@ export function saveAura(
   var currentObjectDefinition: any = undefined;
   // Aura Bundles are a special case, since they can be upserted with the Tooling API
   // Instead of needing to be compiled, like Classes and Pages..
-  if (Metadata) {
-    return Promise.resolve(vscode.window.forceCode)
-      .then(getAuraBundle)
-      .then(ensureAuraBundle)
-      .then(updateMetaData);
-  }
   return Promise.resolve(vscode.window.forceCode)
     .then(getAuraBundle)
     .then(ensureAuraBundle)
     .then(bundle => {
-      return getAuraDefinition(bundle).then((definitions: any) =>
-        upsertAuraDefinition(definitions, bundle)
-      );
+      if (bundle !== true) {
+        if (Metadata) {
+          return updateMetaData(bundle);
+        } else {
+          return getAuraDefinition(bundle).then((definitions: any) =>
+            upsertAuraDefinition(definitions, bundle)
+          );
+        }
+      } else {
+        return Promise.resolve();
+      }
     });
 
   function getAuraBundle() {
@@ -52,10 +54,8 @@ export function saveAura(
         files.push(path.join('aura', name));
         files.push('package.xml');
         return deployFiles(files, vscode.window.forceCode.storageRoot)
-          .then(getAuraBundle)
-          .then(bundle => {
-            results[0] = bundle;
-            return results;
+          .then(() => {
+            return true;
           });
       });
     } else {
