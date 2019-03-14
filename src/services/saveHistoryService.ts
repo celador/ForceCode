@@ -59,7 +59,10 @@ export class SaveResult extends vscode.TreeItem {
   private readonly result: ISaveResult;
 
   constructor(result: ISaveResult) {
-    super(result.fileName, vscode.TreeItemCollapsibleState.None);
+    super(
+      result.fileName + ' - ' + new Date().toLocaleTimeString(),
+      vscode.TreeItemCollapsibleState.None
+    );
 
     this.result = result;
     const imagePath: string = path.join(vscode.window.forceCode.storageRoot, 'images');
