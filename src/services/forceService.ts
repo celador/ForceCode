@@ -88,7 +88,7 @@ export default class ForceService implements forceCode.IForceService {
         fcConnection
           .connect(config.username ? { username: config.username } : undefined)
           .then(res => {
-            if (res === false) {
+            if (res === false && !fcConnection.isLoggedIn()) {
               this.statusBarItem.hide();
             }
           });
@@ -206,7 +206,7 @@ export default class ForceService implements forceCode.IForceService {
     return new Promise(resolve => {
       var types: Array<{}> = [];
       var typeNames: Array<string> = [];
-      klaw(vscode.window.forceCode.projectRoot)
+      klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
         .on('data', function(item) {
           // Check to see if the file represents an actual member...
           if (item.stats.isFile()) {

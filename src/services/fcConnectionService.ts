@@ -81,7 +81,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
       var usernames: string[] = [];
       var fcPath: string = path.join(vscode.window.forceCode.workspaceRoot, '.forceCode');
       if (fs.existsSync(fcPath)) {
-        klaw(fcPath, { depthLimit: 1 })
+        klaw(fcPath, { depthLimit: 0 })
           .on('data', function(file) {
             if (file.stats.isDirectory()) {
               var fileName: string | undefined = file.path.split(path.sep).pop();
