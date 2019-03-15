@@ -13,9 +13,9 @@ import { createPackageXML, deployFiles } from './deploy';
 export default function compile(
   document: vscode.TextDocument,
   forceCompile: boolean
-): Promise<any> {
+): Promise<boolean> {
   if (!document) {
-    return Promise.resolve();
+    return Promise.resolve(false);
   }
   if (document.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot + path.sep) === -1) {
     vscode.window.showErrorMessage(
@@ -23,7 +23,7 @@ export default function compile(
         vscode.window.forceCode.projectRoot +
         ')'
     );
-    return Promise.resolve();
+    return Promise.resolve(false);
   }
 
   var diagnosticCollection: vscode.DiagnosticCollection =
@@ -78,11 +78,12 @@ export default function compile(
           files.push('package.xml');
           return deployFiles(files, vscode.window.forceCode.storageRoot);
         } else {
-          return Promise.reject();
+          return Promise.reject(false);
         }
       })
       .then(finished)
-      .catch(onError);
+      .catch(onError)
+      .finally(updateSaveHistory);
   } else if (folderToolingType && toolingType === undefined) {
     // This process uses the Metadata API to deploy specific files
     // This is where we extend it to create any kind of metadata
@@ -92,24 +93,32 @@ export default function compile(
       .then(compileMetadata)
       .then(reportMetadataResults)
       .then(finished)
-      .catch(onError);
+      .catch(onError)
+      .finally(updateSaveHistory);
   } else if (toolingType === undefined) {
     return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
   } else if (toolingType === 'AuraDefinition') {
     DefType = getAuraDefTypeFromDocument(document);
     return saveAura(document, toolingType, Metadata, forceCompile)
       .then(finished)
-      .catch(onError);
+      .catch(onError)
+      .finally(updateSaveHistory);
   } else if (toolingType === 'LightningComponentResource') {
     return saveLWC(document, toolingType, forceCompile)
       .then(finished)
-      .catch(onError);
+      .catch(onError)
+      .finally(updateSaveHistory);
   } else {
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
     return saveApex(document, toolingType, Metadata, forceCompile)
       .then(finished)
-      .then(res => vscode.window.forceCode.newContainer(res))
-      .catch(onError);
+      .then(res => {
+        return vscode.window.forceCode.newContainer(res).then(() => {
+          return true;
+        });
+      })
+      .catch(onError)
+      .finally(updateSaveHistory);
   }
 
   // =======================================================================================================================================
@@ -236,13 +245,6 @@ export default function compile(
       failures++;
     }
 
-    saveHistoryService.addSaveResult({
-      fileName: parsers.getWholeFileName(document) || 'UKNOWN',
-      path: document.fileName,
-      success: failures === 0,
-      messages: errMessages,
-    });
-
     if (failures === 0) {
       // SUCCESS !!!
       if (res.records && res.records[0].DeployDetails.componentSuccesses.length > 0) {
@@ -268,7 +270,7 @@ export default function compile(
     return false;
   }
 
-  function onError(err: any) {
+  function onError(err: any): boolean {
     const errMsg: string = err.message ? err.message : err;
     if (!errMsg) {
       return false;
@@ -311,5 +313,16 @@ export default function compile(
       diagnosticCollection.set(document.uri, diagnostics);
     }
     errMessages.push(theerr);
+    return false;
+  }
+
+  function updateSaveHistory(): boolean {
+    saveHistoryService.addSaveResult({
+      fileName: parsers.getWholeFileName(document) || 'UKNOWN',
+      path: document.fileName,
+      success: errMessages.length === 0,
+      messages: errMessages,
+    });
+    return errMessages.length === 0;
   }
 }
