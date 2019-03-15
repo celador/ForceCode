@@ -6,6 +6,7 @@
     * Remove folder name prompt when creating a project. Users will now be able to just select a folder to create the project in
     * Add Save History view in the Forcecode view
     * Add maxSaveHistory in workspace settings to control the maximum number of save results to show in the Save History view
+    * Fix not being able to activate the extension again after exiting out of the login menu (After creating a new project)
 * 3.15.1
     * Fix issues deploying code after creation
     * Check for file changes on save now diffs the file contents instead of checking last modified dates. This makes the check more accurate

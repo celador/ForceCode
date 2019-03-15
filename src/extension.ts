@@ -243,5 +243,6 @@ export function activate(context: vscode.ExtensionContext): any {
         })
     );
   }
+  vscode.commands.executeCommand('setContext', 'ForceCodeShowMenu', true);
   trackEvent('Extension starts', 'Started');
 }

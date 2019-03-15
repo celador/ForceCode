@@ -85,7 +85,13 @@ export default class ForceService implements forceCode.IForceService {
           resolve();
         }
       }).then(() => {
-        fcConnection.connect(config.username ? { username: config.username } : undefined);
+        fcConnection
+          .connect(config.username ? { username: config.username } : undefined)
+          .then(res => {
+            if (res === false) {
+              this.statusBarItem.hide();
+            }
+          });
       });
     });
   }
@@ -95,6 +101,7 @@ export default class ForceService implements forceCode.IForceService {
   }
 
   public showStatus(message: string) {
+    this.statusBarItem.show();
     vscode.window.forceCode.statusBarItem.text = message;
     this.resetStatus();
   }

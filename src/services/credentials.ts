@@ -11,7 +11,7 @@ const quickPickOptions: vscode.QuickPickOptions = {
 export function enterCredentials(): Promise<FCOauth> {
   return fcConnection.getSavedUsernames().then(uNames => {
     return dxService.orgList().then(orgs => {
-      return new Promise<FCOauth>(resolve => {
+      return new Promise<FCOauth>((resolve, reject) => {
         // ask if the user wants to log into a different account
         let opts: any[] = [
           {
@@ -54,7 +54,7 @@ export function enterCredentials(): Promise<FCOauth> {
           .showQuickPick(options, theseOptions)
           .then((res: vscode.QuickPickItem | undefined) => {
             if (!res || res.label === undefined) {
-              return undefined;
+              return reject(undefined);
             } else if (res.label === 'New Org') {
               return resolve(setupNewUser(defaultOptions));
             } else {

@@ -484,7 +484,7 @@
         },
         {
           "command": "ForceCode.showMenu",
-          "when": "ForceCodeActive"
+          "when": "ForceCodeShowMenu"
         },
         {
           "command": "ForceCode.compile",
