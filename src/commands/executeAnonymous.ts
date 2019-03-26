@@ -5,6 +5,12 @@ import { dxService } from '../services';
 
 export default function executeAnonymous(document: vscode.TextDocument): any {
   const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    vscode.window.showErrorMessage(
+      'A text editor needs to be open with Apex code selected in order to user Execute Anonymous'
+    );
+    return;
+  }
   var selection = editor.selection;
   var text = editor.document.getText(selection);
   if (text === '') {

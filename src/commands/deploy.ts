@@ -38,7 +38,7 @@ export default function deploy(context: vscode.ExtensionContext) {
     placeHolder: 'Choose files to deploy',
   };
   return vscode.window.showQuickPick(options, config).then(choice => {
-    if (dxService.isEmptyUndOrNull(choice)) {
+    if (!choice) {
       return Promise.resolve();
     }
     if (choice.label === 'Choose files') {
@@ -67,25 +67,31 @@ export default function deploy(context: vscode.ExtensionContext) {
             !file.path.endsWith('-meta.xml')
           ) {
             if (file.path.indexOf(path.join(vscode.window.forceCode.projectRoot, 'aura')) !== -1) {
-              const auraPath: string = path.join(
-                vscode.window.forceCode.projectRoot,
-                'aura',
-                getAuraNameFromFileName(file.path, 'aura')
-              );
-              if (fileList.indexOf(auraPath) === -1) {
-                fileList.push(auraPath);
+              const auraName = getAuraNameFromFileName(file.path, 'aura');
+              if (auraName) {
+                const auraPath: string = path.join(
+                  vscode.window.forceCode.projectRoot,
+                  'aura',
+                  auraName
+                );
+                if (fileList.indexOf(auraPath) === -1) {
+                  fileList.push(auraPath);
+                }
               }
               // this check will exclude files like package.xml
             } else if (
               file.path.indexOf(path.join(vscode.window.forceCode.projectRoot, 'lwc')) !== -1
             ) {
-              const lwcPath: string = path.join(
-                vscode.window.forceCode.projectRoot,
-                'lwc',
-                getAuraNameFromFileName(file.path, 'lwc')
-              );
-              if (fileList.indexOf(lwcPath) === -1) {
-                fileList.push(lwcPath);
+              const lwcName = getAuraNameFromFileName(file.path, 'lwc');
+              if (lwcName) {
+                const lwcPath: string = path.join(
+                  vscode.window.forceCode.projectRoot,
+                  'lwc',
+                  lwcName
+                );
+                if (fileList.indexOf(lwcPath) === -1) {
+                  fileList.push(lwcPath);
+                }
               }
               // this check will exclude files like package.xml
             } else if (file.path.split(vscode.window.forceCode.projectRoot).length > 1) {
@@ -99,14 +105,17 @@ export default function deploy(context: vscode.ExtensionContext) {
     });
   }
 
-  function showFileList(files: string[]) {
+  function showFileList(files: string[]): Promise<string[]> {
     return new Promise(resolve => {
-      let options: vscode.QuickPickItem[] = files.map(file => {
-        return {
-          label: file.split(path.sep).pop(),
-          detail: file,
-        };
-      });
+      let options: vscode.QuickPickItem[] = files
+        .map(file => {
+          const fname = file.split(path.sep).pop();
+          return {
+            label: fname ? fname : '',
+            detail: file,
+          };
+        })
+        .filter(file => file.label !== '');
       let config: {} = {
         matchOnDescription: true,
         matchOnDetail: true,
@@ -131,7 +140,7 @@ export default function deploy(context: vscode.ExtensionContext) {
 }
 
 export function createPackageXML(files: string[], lwcPackageXML?: string): Promise<any> {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const builder = new xml2js.Builder();
     var packObj: PXML = {
       Package: {
@@ -142,8 +151,12 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       },
     };
     files.forEach(file => {
-      const fileTT: string = getAnyTTFromPath(file);
-      var member: string;
+      const fileTT: string | undefined = getAnyTTFromPath(file);
+      if (!fileTT) {
+        reject();
+        return;
+      }
+      var member: string | undefined;
       if (fileTT === 'AuraDefinitionBundle') {
         member = getAuraNameFromFileName(file, 'aura');
       } else if (fileTT === 'LightningComponentBundle') {
@@ -155,26 +168,22 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
         fileTT === 'Dashboard'
       ) {
         const file2 = file.split(vscode.window.forceCode.projectRoot + path.sep).pop();
-        member = file2
-          .substring(file2.indexOf(path.sep) + 1)
-          .split('.')
-          .shift();
+        member = file2 ? file2.substring(file2.indexOf(path.sep) + 1) : file2;
       } else {
-        member = file
-          .split(path.sep)
-          .pop()
-          .split('.')
-          .shift();
+        member = file.split(path.sep).pop();
       }
-      const index: number = findMDTIndex(packObj, fileTT);
-      if (index !== -1) {
-        packObj.Package.types[index].members.push(member);
-      } else {
-        var newMem: PXMLMember = {
-          members: [member],
-          name: fileTT,
-        };
-        packObj.Package.types.push(newMem);
+      member = member ? member.split('.').shift() : member;
+      if (member) {
+        const index: number = findMDTIndex(packObj, fileTT);
+        if (index !== -1) {
+          packObj.Package.types[index].members.push(member);
+        } else {
+          var newMem: PXMLMember = {
+            members: [member],
+            name: fileTT,
+          };
+          packObj.Package.types.push(newMem);
+        }
       }
     });
     var xml: string = builder
@@ -220,7 +229,7 @@ export function deployFiles(files: string[], lwcPackageXML?: string): Promise<an
     .then(finished);
 
   // =======================================================================================================================================
-  function finished(res) /*Promise<any>*/ {
+  function finished(res: any) /*Promise<any>*/ {
     if (res.status !== 'Failed') {
       vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
     } else if (res.status === 'Failed') {

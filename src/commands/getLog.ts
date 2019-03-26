@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { QueryResult } from '../services/dxService';
 import { fcConnection, dxService } from '../services';
+import { QueryResult } from 'jsforce';
 
 interface LogRecord {
   Id: string;
@@ -21,6 +21,9 @@ export default function getLog() {
     .then(showLog);
 
   function getLast10Logs(): Promise<QueryResult> {
+    if (!fcConnection.currentConnection) {
+      return Promise.reject('No org info found');
+    }
     var queryString: string =
       `SELECT Id, LogLength, Request, Status, DurationMilliseconds, StartTime, Location FROM ApexLog` +
       ` WHERE LogUserId='${fcConnection.currentConnection.orgInfo.userId}'` +
@@ -31,7 +34,7 @@ export default function getLog() {
     return vscode.window.forceCode.conn.tooling.query(queryString);
   }
 
-  function displayOptions(results: QueryResult): Thenable<vscode.QuickPickItem> {
+  function displayOptions(results: QueryResult): Thenable<vscode.QuickPickItem | undefined> {
     var options: vscode.QuickPickItem[] = results.records.map((record: LogRecord) => {
       return {
         label: `Status: ${record.Status}`,
@@ -42,7 +45,7 @@ export default function getLog() {
     return vscode.window.showQuickPick(options);
   }
 
-  function showLog(res) {
+  function showLog(res: any) {
     if (res) {
       return dxService.getAndShowLog(res.description);
     }

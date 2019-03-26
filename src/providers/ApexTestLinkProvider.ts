@@ -29,7 +29,7 @@ export class ApexTestLinkProvider implements vscode.HoverProvider {
         var lineText: string = fileContents.slice(wordIndex, bracketIndex);
         if (!lineText.toLowerCase().includes('class')) {
           // this means it's a method
-          var methodName: string = lineText
+          var methodName: string | undefined = lineText
             .slice(0, lineText.lastIndexOf('('))
             .trimRight()
             .split(' ')

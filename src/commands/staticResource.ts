@@ -82,9 +82,11 @@ export function staticResourceDeployFromFile(
   function getPackageName() {
     let bundlePath: string =
       vscode.window.forceCode.projectRoot + path.sep + 'resource-bundles' + path.sep;
+    var resType;
+    var resourceName;
     try {
-      var resourceName: string = textDocument.fileName.split(bundlePath)[1].split('.resource.')[0];
-      var resType: string = textDocument.fileName
+      resourceName = textDocument.fileName.split(bundlePath)[1].split('.resource.')[0];
+      resType = textDocument.fileName
         .split(bundlePath)[1]
         .split('.resource.')[1]
         .split(path.sep)[0]
@@ -97,14 +99,14 @@ export function staticResourceDeployFromFile(
   }
 }
 
-function onError(err) {
+function onError(err: any) {
   var mess =
     'Invalid static resource folder or file name. Name must be in the form of ResourceName.resource.type.subtype\nEXAMPLE: ' +
-    'MyResource.resource.aplication.javascript\nThis folder would then contain one file, named MyResource.js';
+    'MyResource.resource.application.javascript\nThis folder would then contain one file, named MyResource.js';
   vscode.window.showErrorMessage(mess + '\n' + (err.message ? err.message : err));
 }
 
-function bundleAndDeploy(option) {
+function bundleAndDeploy(option: any) {
   let root: string = getPackagePath(option);
   if (option.detail.includes('zip') || option.detail === 'SPA') {
     let zip: any = zipFiles(getFileList(root), root);
@@ -135,14 +137,15 @@ function bundleAndDeployAll() {
           });
         })
     );
+  } else {
+    return Promise.reject();
   }
-  return undefined;
 }
 
-function getPackagePath(option) {
+function getPackagePath(option: vscode.QuickPickItem) {
   var bundlePath: string = vscode.window.forceCode.projectRoot + path.sep;
   // Get package data
-  if (option.detail !== 'SPA') {
+  if (option.detail && option.detail !== 'SPA') {
     bundlePath +=
       'resource-bundles' + path.sep + option.label + '.resource.' + option.detail.replace('/', '.');
   } else {
@@ -163,7 +166,7 @@ function getPackagePath(option) {
  * @param {String} relativeRoot - path (relative or absolute) of folder to recurse
  * @return {String[]} - Array of paths relative to given root
  */
-function getFileList(root) {
+function getFileList(root: string) {
   // Throw if not a directory
   if (!fs.statSync(root).isDirectory()) {
     return [root];
@@ -174,7 +177,7 @@ function getFileList(root) {
   return (function innerGetFileList(localPath) {
     var fileslist: any[] = []; // List of files
     var files: any = fs.readdirSync(localPath); // Files in current'sfdc' directory
-    var ignoreFiles: {} = vscode.workspace.getConfiguration('force')['filesExclude'] || {
+    var ignoreFiles: any = vscode.workspace.getConfiguration('force')['filesExclude'] || {
       '.gitignore': true,
       '.DS_Store': true,
       '.org_metadata': true,
@@ -189,7 +192,7 @@ function getFileList(root) {
       .filter(setting => setting.value === true)
       .map(setting => root + path.sep + setting.key);
 
-    files.forEach(function(file) {
+    files.forEach(function(file: any) {
       var pathname: string = localPath + path.sep + file;
       var stat: any = fs.lstatSync(pathname);
 
@@ -210,7 +213,7 @@ function getFileList(root) {
  * @param none
  * @return undefined
  */
-function deploy(zip, packageName, conType) {
+function deploy(zip: any, packageName: string, conType: string) {
   return new Promise((resolve, reject) => {
     var finalPath: string = `${vscode.window.forceCode.projectRoot}${path.sep}staticresources${
       path.sep
@@ -226,7 +229,7 @@ function deploy(zip, packageName, conType) {
           )
         );
       })
-      .on('error', err => {
+      .on('error', (err: any) => {
         reject(err);
       });
   });
@@ -239,7 +242,7 @@ function deploy(zip, packageName, conType) {
  * @param {ZipBlob} - generated zip blob
  * @return {Metadata[]} - Array with one metadata object
  */
-function makeResourceMetadata(bundleName, cont, contType) {
+function makeResourceMetadata(bundleName: string, cont: any, contType: string) {
   return [
     {
       fullName: bundleName,
@@ -250,7 +253,7 @@ function makeResourceMetadata(bundleName, cont, contType) {
   ];
 }
 
-function deployComplete(results) {
+function deployComplete(results: any) {
   vscode.window.forceCode.showStatus(`ForceCode: Deployed ${results.fullName} $(check)`);
   if (
     vscode.workspace.getConfiguration('force')['autoRefresh'] &&
@@ -265,7 +268,7 @@ function deployComplete(results) {
   return results;
 }
 
-function deployAllComplete(results) {
+function deployAllComplete(results: any) {
   vscode.window.forceCode.showStatus(`ForceCode: Deployed ${results.length} Resources $(check)`);
   if (
     vscode.workspace.getConfiguration('force')['autoRefresh'] &&
@@ -277,7 +280,7 @@ function deployAllComplete(results) {
       }" to reload active tab of window 1'`
     );
   }
-  var talliedResults: {} = results.reduce(function(prev, curr) {
+  var talliedResults: {} = results.reduce(function(prev: any, curr: any) {
     return Object.assign(prev, curr);
   }, {});
   return talliedResults;

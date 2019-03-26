@@ -28,12 +28,12 @@ const acovLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextE
 );
 
 // When this subscription is created (when the extension/Code boots), try to decorate the document
-let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
+let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
 if (activeEditor) {
   updateDecorations();
 }
 // Export Function used when the Editor changes
-export function editorUpdateApexCoverageDecorator(editor) {
+export function editorUpdateApexCoverageDecorator(editor: vscode.TextEditor | undefined) {
   activeEditor = editor;
   if (editor) {
     updateDecorations();
@@ -69,11 +69,11 @@ export function updateDecorations() {
 
 export function getUncoveredLineOptions(document: vscode.TextDocument) {
   var uncoveredLineDec: vscode.DecorationOptions[] = [];
-  const fcfile: FCFile = codeCovViewService.findByPath(document.fileName);
+  const fcfile: FCFile | undefined = codeCovViewService.findByPath(document.fileName);
   if (fcfile) {
-    const wsMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
+    const wsMem: forceCode.IWorkspaceMember | undefined = fcfile.getWsMember();
 
-    if (wsMem.id && wsMem.coverage) {
+    if (wsMem && wsMem.id && wsMem.coverage) {
       uncoveredLineDec = getUncoveredLineOptionsFor(wsMem);
     }
   }
@@ -81,7 +81,7 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
 
   function getUncoveredLineOptionsFor(workspaceMember: forceCode.IWorkspaceMember) {
     var uncoveredLineDecorations: vscode.DecorationOptions[] = [];
-    let fileCoverage: forceCode.ICodeCoverage = workspaceMember.coverage;
+    let fileCoverage: forceCode.ICodeCoverage | undefined = workspaceMember.coverage;
     if (fileCoverage) {
       fileCoverage.Coverage.uncoveredLines.forEach(notCovered => {
         let decorationRange: vscode.DecorationOptions = {

@@ -26,65 +26,72 @@ export class CreateScratchOrg {
         label: 'Professional',
       },
     ];
-    let config: {} = {
+    let config: vscode.QuickPickOptions = {
       placeHolder: 'Choose an org edition to create...',
     };
     return new Promise((resolve, reject) => {
-      vscode.window.showQuickPick(options, config).then((edition: vscode.QuickPickItem) => {
-        if (!edition) {
-          return Promise.resolve();
-        }
-
-        let durOpts: vscode.QuickPickItem[] = [];
-        for (var i = 1; i < 31; i++) {
-          durOpts.push({ label: String(i) });
-        }
-
-        config['placeHolder'] = 'Days until org expires...';
-        vscode.window.showQuickPick(durOpts, config).then((duration: vscode.QuickPickItem) => {
-          if (!duration) {
+      vscode.window
+        .showQuickPick(options, config)
+        .then((edition: vscode.QuickPickItem | undefined) => {
+          if (!edition) {
             return Promise.resolve();
           }
 
-          let sDataOptions: vscode.QuickPickItem[] = [
-            {
-              label: 'Yes',
-            },
-            {
-              label: 'No',
-            },
-          ];
+          let durOpts: vscode.QuickPickItem[] = [];
+          for (var i = 1; i < 31; i++) {
+            durOpts.push({ label: String(i) });
+          }
 
-          config['placeHolder'] = 'Create org with sample data?';
+          config.placeHolder = 'Days until org expires...';
           vscode.window
-            .showQuickPick(sDataOptions, config)
-            .then((sampleData: vscode.QuickPickItem) => {
-              if (!sampleData) {
+            .showQuickPick(durOpts, config)
+            .then((duration: vscode.QuickPickItem | undefined) => {
+              if (!duration) {
                 return Promise.resolve();
               }
 
-              const sData: boolean = sampleData.label === 'Yes';
+              let sDataOptions: vscode.QuickPickItem[] = [
+                {
+                  label: 'Yes',
+                },
+                {
+                  label: 'No',
+                },
+              ];
 
-              const optsObj = {
-                edition: edition.label,
-                hasSampleData: sData,
-              };
-              const theOptions: string =
-                '--durationdays ' + duration.label + ' --definitionjson ' + JSON.stringify(optsObj);
-              return dxService
-                .createScratchOrg(theOptions)
-                .then(res => {
-                  var scratchConfig: Config = defaultOptions;
-                  scratchConfig.username = res.username;
-                  saveConfigFile(res.username, scratchConfig);
-                  fcConnection.refreshConnections().then(() => {
-                    resolve(res);
-                  });
-                })
-                .catch(reject);
+              config['placeHolder'] = 'Create org with sample data?';
+              vscode.window
+                .showQuickPick(sDataOptions, config)
+                .then((sampleData: vscode.QuickPickItem | undefined) => {
+                  if (!sampleData) {
+                    return Promise.resolve();
+                  }
+
+                  const sData: boolean = sampleData.label === 'Yes';
+
+                  const optsObj = {
+                    edition: edition.label,
+                    hasSampleData: sData,
+                  };
+                  const theOptions: string =
+                    '--durationdays ' +
+                    duration.label +
+                    ' --definitionjson ' +
+                    JSON.stringify(optsObj);
+                  return dxService
+                    .createScratchOrg(theOptions)
+                    .then(res => {
+                      var scratchConfig: Config = defaultOptions;
+                      scratchConfig.username = res.username;
+                      saveConfigFile(res.username, scratchConfig);
+                      fcConnection.refreshConnections().then(() => {
+                        resolve(res);
+                      });
+                    })
+                    .catch(reject);
+                });
             });
         });
-      });
     });
   }
 

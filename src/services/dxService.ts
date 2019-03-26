@@ -12,6 +12,9 @@ export interface SFDX {
   accessToken: string;
   instanceUrl: string;
   clientId: string;
+  isExpired?: boolean;
+  userId?: string;
+  isDevHub?: boolean;
 }
 
 export interface ExecuteAnonymousResult {
@@ -64,12 +67,22 @@ export interface Command {
   usage: string;
 }
 
+interface ApexTestResult {
+  StackTrace: string;
+  Message: string;
+  ApexClass: {
+    Id: string;
+  };
+}
+
 export interface QueryResult {
   done: boolean; // Flag if the query is fetched all records or not
   nextRecordsUrl?: string; // URL locator for next record set, (available when done = false)
   totalSize: number; // Total size for query
   locator: string; // Total size for query
   records: Array<any>; // Array of records fetched
+  summary: any;
+  tests: ApexTestResult[];
 }
 
 export interface DXCommands {
@@ -81,7 +94,7 @@ export interface DXCommands {
   isEmptyUndOrNull(param: any): boolean;
   getDebugLog(logid?: string): Promise<string>;
   saveToFile(data: any, fileName: string): Promise<string>;
-  getAndShowLog(id?: string);
+  getAndShowLog(id?: string): Thenable<vscode.TextEditor | undefined>;
   execAnon(file: string): Promise<ExecuteAnonymousResult>;
   removeFile(fileName: string): Promise<any>;
   openOrg(): Promise<any>;
@@ -153,7 +166,7 @@ export default class DXService implements DXCommands {
     if (arg !== undefined && arg !== '') {
       // this helps solve a bug when we have '-' in commands and queries and stuff
       arg = ' ' + arg;
-      var replaceString: string = undefined;
+      var replaceString: string;
       do {
         replaceString = '}@FC$' + Date.now() + '$FC@{';
       } while (arg.includes(replaceString));
@@ -163,15 +176,16 @@ export default class DXService implements DXCommands {
         if (i.length > 0) {
           var curCmd = new Array();
           curCmd = i.trim().split(' ');
-          var commandName = curCmd.shift();
-          if (commandName.length === 1) {
+          var flagName = curCmd.shift();
+          if (flagName.length === 1) {
             // this means we need to search for the argument name
-            commandName = cmd.flags.find(fl => {
-              return fl.char === commandName;
-            }).name;
+            const flag = cmd.flags.find(fl => {
+              return fl.char === flagName;
+            });
+            flagName = flag ? flag.name : undefined;
           }
-          if (curCmd.length > 0) cliContext.flags[commandName] = curCmd.join(' ').trim();
-          else cliContext.flags[commandName] = true;
+          if (curCmd.length > 0) cliContext.flags[flagName] = curCmd.join(' ').trim();
+          else cliContext.flags[flagName] = true;
         }
       });
     }
@@ -185,7 +199,7 @@ export default class DXService implements DXCommands {
       cliContext.flags['targetusername'] = fcConnection.currentConnection.orgInfo.username;
     }
     // get error output from SFDX
-    var errlog;
+    var errlog: any;
     var oldConsole = console.log;
     console.log = getErrLog;
     return cmd.run(cliContext).then(res => {
@@ -203,7 +217,7 @@ export default class DXService implements DXCommands {
       );
     });
 
-    function getErrLog(data) {
+    function getErrLog(data: any) {
       errlog = data;
     }
   }
@@ -212,7 +226,7 @@ export default class DXService implements DXCommands {
     return this.runCommand('apex:execute', '--apexcodefile ' + file);
   }
 
-  public login(url: string): Promise<any> {
+  public login(url: string | undefined): Promise<any> {
     return this.runCommand('auth:web:login', '--instanceurl ' + url);
   }
 
@@ -228,7 +242,7 @@ export default class DXService implements DXCommands {
     }
     */
 
-  public getOrgInfo(username: string): Promise<SFDX> {
+  public getOrgInfo(username: string | undefined): Promise<SFDX> {
     return this.runCommand('org:display', '--targetusername ' + username);
   }
 
@@ -256,7 +270,7 @@ export default class DXService implements DXCommands {
     });
   }
 
-  public getAndShowLog(id?: string) {
+  public getAndShowLog(id?: string): Thenable<vscode.TextEditor | undefined> {
     if (!id) {
       id = 'debugLog';
     }
@@ -265,8 +279,13 @@ export default class DXService implements DXCommands {
       .then(function(_document: vscode.TextDocument) {
         if (_document.getText() !== '') {
           return vscode.window.showTextDocument(_document, 3, true);
+        } else {
+          return {
+            async then(callback) {
+              return callback(undefined);
+            },
+          };
         }
-        return undefined;
       });
   }
 
@@ -279,9 +298,14 @@ export default class DXService implements DXCommands {
   }
 
   public createScratchOrg(options: string): Promise<any> {
-    return this.runCommand(
-      'org:create',
-      options + ' --targetdevhubusername ' + fcConnection.currentConnection.orgInfo.username
-    );
+    const curConnection = fcConnection.currentConnection;
+    if (curConnection) {
+      return this.runCommand(
+        'org:create',
+        options + ' --targetdevhubusername ' + curConnection.orgInfo.username
+      );
+    } else {
+      return Promise.reject('Forcecode is not currently connected to an org');
+    }
   }
 }

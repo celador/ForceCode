@@ -200,6 +200,9 @@ export class SObjectDescribe {
 
       batchRequest.batchRequests.push({ method: 'GET', url: requestUrl });
     }
+    if (!fcConnection.currentConnection) {
+      return Promise.reject('No current connection found');
+    }
     const orgInfo: FCOauth = fcConnection.currentConnection.orgInfo;
     const batchUrlElements = [
       orgInfo.instanceUrl,

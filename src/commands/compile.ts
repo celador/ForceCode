@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, dxService } from '../services';
+import { codeCovViewService, dxService, saveHistoryService } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
@@ -13,9 +13,9 @@ import { createPackageXML, deployFiles } from './deploy';
 export default function compile(
   document: vscode.TextDocument,
   forceCompile: boolean
-): Promise<any> {
+): Promise<boolean> {
   if (!document) {
-    return Promise.resolve();
+    return Promise.resolve(false);
   }
   if (document.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot + path.sep) === -1) {
     vscode.window.showErrorMessage(
@@ -23,7 +23,7 @@ export default function compile(
         vscode.window.forceCode.projectRoot +
         ')'
     );
-    return Promise.resolve();
+    return Promise.resolve(false);
   }
 
   var diagnosticCollection: vscode.DiagnosticCollection =
@@ -32,13 +32,14 @@ export default function compile(
   var diagnostics: vscode.Diagnostic[] = [];
   var exDiagnostics: vscode.Diagnostic[] = vscode.languages.getDiagnostics(document.uri);
 
-  const toolingType: string = parsers.getToolingType(document);
-  const folderToolingType: string = getAnyTTFromFolder(document.uri);
-  const fileName: string = parsers.getFileName(document);
-  const name: string = parsers.getName(document, toolingType);
+  const toolingType: string | undefined = parsers.getToolingType(document);
+  const folderToolingType: string | undefined = getAnyTTFromFolder(document.uri);
+  const fileName: string | undefined = parsers.getFileName(document);
+  const name: string | undefined = parsers.getName(document, toolingType);
 
-  var DefType: string = undefined;
-  var Metadata: {} = undefined;
+  var DefType: string | undefined;
+  var Metadata: {} | undefined;
+  var errMessages: string[] = [];
 
   if (folderToolingType === 'StaticResource') {
     return Promise.reject(
@@ -67,15 +68,22 @@ export default function compile(
         if (folderToolingType === 'EmailTemplate') {
           pathSplit = 'email';
         }
-        var foldName: string = document.fileName.split(path.sep + pathSplit + path.sep).pop();
-        //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
-        files.push(path.join(pathSplit, foldName));
-        files.push(path.join(pathSplit, foldName + '-meta.xml'));
-        files.push('package.xml');
-        return deployFiles(files, vscode.window.forceCode.storageRoot);
+        var foldName: string | undefined = document.fileName
+          .split(path.sep + pathSplit + path.sep)
+          .pop();
+        if (foldName) {
+          //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
+          files.push(path.join(pathSplit, foldName));
+          files.push(path.join(pathSplit, foldName + '-meta.xml'));
+          files.push('package.xml');
+          return deployFiles(files, vscode.window.forceCode.storageRoot);
+        } else {
+          return Promise.reject(false);
+        }
       })
       .then(finished)
-      .catch(onError);
+      .catch(onError)
+      .finally(updateSaveHistory);
   } else if (folderToolingType && toolingType === undefined) {
     // This process uses the Metadata API to deploy specific files
     // This is where we extend it to create any kind of metadata
@@ -85,24 +93,32 @@ export default function compile(
       .then(compileMetadata)
       .then(reportMetadataResults)
       .then(finished)
-      .catch(onError);
+      .catch(onError)
+      .finally(updateSaveHistory);
   } else if (toolingType === undefined) {
     return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
   } else if (toolingType === 'AuraDefinition') {
     DefType = getAuraDefTypeFromDocument(document);
     return saveAura(document, toolingType, Metadata, forceCompile)
       .then(finished)
-      .catch(onError);
+      .catch(onError)
+      .finally(updateSaveHistory);
   } else if (toolingType === 'LightningComponentResource') {
     return saveLWC(document, toolingType, forceCompile)
       .then(finished)
-      .catch(onError);
+      .catch(onError)
+      .finally(updateSaveHistory);
   } else {
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
     return saveApex(document, toolingType, Metadata, forceCompile)
       .then(finished)
-      .then(res => vscode.window.forceCode.newContainer(res))
-      .catch(onError);
+      .then(res => {
+        return vscode.window.forceCode.newContainer(res).then(() => {
+          return true;
+        });
+      })
+      .catch(onError)
+      .finally(updateSaveHistory);
   }
 
   // =======================================================================================================================================
@@ -115,6 +131,13 @@ export default function compile(
     return new Promise(function(resolve, reject) {
       if (Metadata) {
         resolve(Metadata);
+        return;
+      }
+      if (!folderToolingType) {
+        reject({
+          message: 'Unknown metadata type. Make sure your project folders are set up properly.',
+        });
+        return;
       }
       const ffNameParts: string[] = document.fileName
         .split(vscode.window.forceCode.projectRoot + path.sep)[1]
@@ -128,6 +151,7 @@ export default function compile(
       parseString(text, { explicitArray: false, async: true }, function(err, result) {
         if (err) {
           reject(err);
+          return;
         }
         var metadata: any = result[folderToolingType];
         if (metadata) {
@@ -135,17 +159,24 @@ export default function compile(
           delete metadata['_'];
           metadata.fullName = folderedName ? folderedName : fileName;
           resolve(metadata);
+          return;
         }
         reject({ message: folderToolingType + ' metadata type not found in org' });
+        return;
       });
     });
   }
 
-  function compileMetadata(metadata) {
+  function compileMetadata(metadata: any) {
+    if (!folderToolingType) {
+      return Promise.reject({
+        message: 'Unknown metadata type. Make sure your project folders are set up properly.',
+      });
+    }
     return vscode.window.forceCode.conn.metadata.upsert(folderToolingType, [metadata]);
   }
 
-  function reportMetadataResults(result) {
+  function reportMetadataResults(result: any) {
     if (Array.isArray(result) && result.length && !result.some(i => !i.success)) {
       vscode.window.forceCode.showStatus('Successfully deployed ' + result[0].fullName);
       return result;
@@ -176,9 +207,9 @@ export default function compile(
     var failures: number = 0;
     if (res.records && res.records.length > 0) {
       res.records
-        .filter(r => r.State !== 'Error')
-        .forEach(containerAsyncRequest => {
-          containerAsyncRequest.DeployDetails.componentFailures.forEach(failure => {
+        .filter((r: any) => r.State !== 'Error')
+        .forEach((containerAsyncRequest: any) => {
+          containerAsyncRequest.DeployDetails.componentFailures.forEach((failure: any) => {
             if (failure.problemType === 'Error') {
               failure.lineNumber =
                 failure.lineNumber == null || failure.lineNumber < 1 ? 1 : failure.lineNumber;
@@ -198,13 +229,14 @@ export default function compile(
                 diagnostics.push(new vscode.Diagnostic(failureRange, failure.problem, 0));
                 diagnosticCollection.set(document.uri, diagnostics);
               }
+              errMessages.push(failure.problem);
               failures++;
             }
           });
         });
     } else if (res.errors && res.errors.length > 0) {
       // We got an error with the container
-      res.errors.forEach(err => {
+      res.errors.forEach((err: any) => {
         onError(err);
         failures++;
       });
@@ -220,9 +252,11 @@ export default function compile(
           res.records[0].DeployDetails.componentSuccesses[0].id
         );
         if (fcfile) {
-          var fcMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
-          fcMem.coverage = undefined;
-          fcfile.updateWsMember(fcMem);
+          var fcMem: forceCode.IWorkspaceMember | undefined = fcfile.getWsMember();
+          if (fcMem) {
+            fcMem.coverage = undefined;
+            fcfile.updateWsMember(fcMem);
+          }
         }
       }
       vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
@@ -236,7 +270,7 @@ export default function compile(
     return false;
   }
 
-  function onError(err) {
+  function onError(err: any): boolean {
     const errMsg: string = err.message ? err.message : err;
     if (!errMsg) {
       return false;
@@ -246,20 +280,17 @@ export default function compile(
       throw err;
     }
     const matchRegex = /:(\d+),(\d+):|:(\d+),(\d+) :|\[(\d+),(\d+)\]/; // this will match :12,3432: :12,3432 : and [12,3432]
-    var theerr = errMsg
-      .split('Message:')
-      .pop()
-      .split(': Source')
-      .shift();
+    var errSplit = errMsg.split('Message:').pop();
+    var theerr: string = errSplit ? errSplit : errMsg;
+    errSplit = theerr.split(': Source').shift();
+    theerr = errSplit ? errSplit : theerr;
     var match = errMsg.match(matchRegex);
     var failureLineNumber: number = 1;
     var failureColumnNumber: number = 0;
     if (match) {
       match = match.filter(mat => mat); // eliminate all undefined elements
-      theerr = theerr
-        .split(match[0])
-        .pop()
-        .trim(); // remove the line information from the error message if 'Message:' wasn't part of the string
+      errSplit = theerr.split(match[0]).pop();
+      theerr = (errSplit ? errSplit : theerr).trim(); // remove the line information from the error message if 'Message:' wasn't part of the string
       const row = match[1];
       const col = match[2];
       failureLineNumber = Number.parseInt(row);
@@ -281,5 +312,17 @@ export default function compile(
       diagnostics.push(new vscode.Diagnostic(failureRange, theerr, 0));
       diagnosticCollection.set(document.uri, diagnostics);
     }
+    errMessages.push(theerr);
+    return false;
+  }
+
+  function updateSaveHistory(): boolean {
+    saveHistoryService.addSaveResult({
+      fileName: parsers.getWholeFileName(document) || 'UKNOWN',
+      path: document.fileName,
+      success: errMessages.length === 0,
+      messages: errMessages,
+    });
+    return errMessages.length === 0;
   }
 }

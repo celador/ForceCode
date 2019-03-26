@@ -1,15 +1,15 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { QueryResult } from '../services/dxService';
 import { getAuraNameFromFileName } from '../parsers';
 import { getAuraDefTypeFromDocument } from '../commands/saveAura';
+import { QueryResult } from 'jsforce';
 // import ReferencesDocument from './referencesDocument';
 /**
  * Salesforce Content Provider class.
  * This class provides an easy way to retrieve files as a native VSCode.Uri
  */
 export default class ForceCodeContentProvider implements vscode.TextDocumentContentProvider {
-  public auraSource: vscode.TextDocument;
+  public auraSource: vscode.TextDocument | undefined;
   private static instance: ForceCodeContentProvider;
 
   public static getInstance() {
@@ -26,7 +26,7 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
   provideTextDocumentContent(uri: vscode.Uri): Thenable<string> {
     var uriParts: string[] = uri.path.split('/');
     let toolingType: string = uriParts[1];
-    var name: string = uriParts[2];
+    var name: string | undefined = uriParts[2];
     var toolingName: string = name.split('.')[0];
     var field: string = 'Body';
     var nsPrefix = `NamespacePrefix = '${
@@ -34,19 +34,18 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
     }' and Name='${toolingName}'`;
     if (toolingType === 'ApexComponent' || toolingType === 'ApexPage') {
       field = 'Markup';
-    } else if (toolingType === 'AuraDefinition') {
+    } else if (this.auraSource && toolingType === 'AuraDefinition') {
       field = 'Source';
       name = getAuraNameFromFileName(this.auraSource.fileName, 'aura');
-      const DefType: string = getAuraDefTypeFromDocument(this.auraSource);
+      const DefType: string | undefined = getAuraDefTypeFromDocument(this.auraSource);
       nsPrefix = `DefType='${DefType}' AND AuraDefinitionBundleId IN (SELECT Id FROM AuraDefinitionBundle WHERE DeveloperName='${name}')`;
-    } else if (toolingType === 'LightningComponentResource') {
+    } else if (this.auraSource && toolingType === 'LightningComponentResource') {
       field = 'Source';
       name = getAuraNameFromFileName(this.auraSource.fileName, 'lwc');
-      const FilePath: string = this.auraSource.fileName
+      var FilePath: string | undefined = this.auraSource.fileName
         .split(vscode.window.forceCode.projectRoot + path.sep)
-        .pop()
-        .split(path.sep)
-        .join('/');
+        .pop();
+      FilePath = FilePath ? FilePath.split(path.sep).join('/') : '';
       nsPrefix = `FilePath='${FilePath}' AND LightningComponentBundleId IN (SELECT Id FROM LightningComponentBundle WHERE DeveloperName='${name}')`;
     }
     return new Promise<string>((resolve, reject) => {
@@ -54,12 +53,12 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
       vscode.window.forceCode.conn.tooling.query(query).then(
         (results: QueryResult) => {
           if (results && results.totalSize === 1) {
-            resolve(results.records[0][field]);
+            return resolve(results.records[0][field]);
           } else {
-            reject('Object not found');
+            return reject('Data not found on server');
           }
         },
-        err => vscode.window.showErrorMessage(err.message)
+        (err: Error) => reject(vscode.window.showErrorMessage(err.message))
       );
     });
   }

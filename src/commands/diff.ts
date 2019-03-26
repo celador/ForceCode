@@ -8,8 +8,8 @@ export default function diff(document: vscode.TextDocument, auraSource?: boolean
   if (!document) {
     return;
   }
-  const toolingType: string = parsers.getToolingType(document);
-  const fileName: string = parsers.getWholeFileName(document);
+  const toolingType: string | undefined = parsers.getToolingType(document);
+  const fileName: string | undefined = parsers.getWholeFileName(document);
   if (auraSource) {
     ForceCodeContentProvider.getInstance().auraSource = document;
   }
@@ -23,7 +23,7 @@ export default function diff(document: vscode.TextDocument, auraSource?: boolean
   // =======================================================================================================================================
   // =======================================================================================================================================
   function diffFile() {
-    var command: Thenable<{}> = vscode.commands.executeCommand(
+    var command: Thenable<{} | undefined> = vscode.commands.executeCommand(
       'vscode.diff',
       buildSalesforceUriFromLocalUri(),
       document.uri,

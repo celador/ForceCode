@@ -4,7 +4,7 @@ import * as path from 'path';
 import { dxService } from '../services';
 import { apexTestResults } from '.';
 
-export default function getOverallCoverage() {
+export default function getOverallCoverage(): PromiseLike<vscode.TextEditor | undefined> {
   return apexTestResults().then(res => {
     if (res.records) {
       var outputString: string = 'Class/Trigger Name';
@@ -46,8 +46,12 @@ export default function getOverallCoverage() {
           return vscode.workspace
             .openTextDocument(filename)
             .then(doc => vscode.window.showTextDocument(doc, 3));
+        })
+        .catch(err => {
+          return undefined;
         });
+    } else {
+      return undefined;
     }
-    return undefined;
   });
 }

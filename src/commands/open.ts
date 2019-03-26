@@ -60,7 +60,7 @@ export function showFileOptions(promises: any[]) {
         .reduce((prev, curr) => {
           return prev.concat(curr);
         })
-        .map(record => {
+        .map((record: any) => {
           let toolingType: string = record.attributes[TYPEATTRIBUTE];
           let icon: string = getIcon(toolingType);
           let ext: string = getExtension(toolingType);
@@ -89,7 +89,7 @@ export function showFileOptions(promises: any[]) {
       if (!(opts instanceof Array)) {
         opts = [opts];
       }
-      opts.forEach(curOpt => {
+      opts.forEach((curOpt: any) => {
         var tType: string = curOpt.detail.split(' ')[0];
         var fName: string = curOpt.label.slice(curOpt.label.lastIndexOf(' ') + 1).split('.')[0];
         var index: number = getTTIndex(tType, files);
@@ -100,11 +100,11 @@ export function showFileOptions(promises: any[]) {
         }
       });
 
-      return retrieve.default({ types: files }).then(res => {
+      return retrieve.default({ types: files }).then((res: any) => {
         if (vscode.workspace.getConfiguration('force')['showFilesOnOpen']) {
           // open the files in the editor
           var filesOpened: number = 0;
-          return opts.forEach(curFile => {
+          return opts.forEach((curFile: any) => {
             if (filesOpened < vscode.workspace.getConfiguration('force')['showFilesOnOpenMax']) {
               var tType: string = curFile.detail.split(' ')[0];
               if (

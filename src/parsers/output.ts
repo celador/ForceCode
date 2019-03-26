@@ -16,7 +16,7 @@ export function outputToString(toConvert: any, depth?: number): string {
     retval = '\n' + brTabs + '{\n';
     level++;
     Object.keys(toConvert).forEach(key => {
-      retval += tabs + key + ': ' + this.outputToString(toConvert[key], level) + ',\n';
+      retval += tabs + key + ': ' + outputToString(toConvert[key], level) + ',\n';
     });
     level--;
     retval += brTabs + '}';

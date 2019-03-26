@@ -6,7 +6,8 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 const uuidv4 = require('uuid/v4');
 
-const fcVersion = vscode.extensions.getExtension('JohnAaronNelson.forcecode').packageJSON.version;
+const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
+const fcVersion = myExt ? myExt.packageJSON.version : undefined;
 const fcHomeFolder = path.join(operatingSystem.getHomeDir(), '.forceCode');
 const fcAnalyticsFile = path.join(fcHomeFolder, 'analytics.json');
 
@@ -70,5 +71,7 @@ function saveUUID(newUUID: string) {
 function optIn(): boolean {
   const debug = false; //vscode.env.machineId === 'someValue.machineId';
   // turn off analytics when we are debugging
-  return vscode.workspace.getConfiguration('force').get('allowAnonymousUsageTracking') && !debug;
+  return (
+    vscode.workspace.getConfiguration('force').get('allowAnonymousUsageTracking') == true && !debug
+  );
 }

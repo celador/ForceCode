@@ -39,8 +39,13 @@ export default function createFile() {
     vscode.window.showQuickPick(fileOptions, config).then(selection => {
       if (!selection) {
         reject();
+        return;
       }
       getFileName(selection.label).then(name => {
+        if (!name) {
+          resolve();
+          return;
+        }
         switch (selection.label) {
           case 'Aura Component': {
             createAura(name, resolve, reject);
@@ -68,6 +73,7 @@ export default function createFile() {
           }
           default: {
             reject();
+            return;
           }
         }
       });
@@ -82,14 +88,16 @@ export default function createFile() {
     return new Promise((resolve, reject) => {
       vscode.window.showInputBox(options).then(filename => {
         if (!filename) {
-          reject();
+          resolve();
+          return;
         } else {
-          resolve(
-            filename
-              .split('.')
-              .shift()
-              .trim()
-          );
+          const fnameShift = filename.split('.').shift();
+          if (fnameShift) {
+            resolve(fnameShift.trim());
+          } else {
+            reject();
+          }
+          return;
         }
       });
     });
@@ -128,15 +136,16 @@ export default function createFile() {
     fs.outputFileSync(metaFileName, metaFile);
   }
 
-  function createSrcFile(name: string, thePath: string, src: string, ext: string, resolve) {
+  function createSrcFile(name: string, thePath: string, src: string, ext: string, resolve: any) {
     const ofPath: string = path.join(thePath, name + '.' + ext);
     fs.outputFileSync(ofPath, src);
-    vscode.workspace.openTextDocument(ofPath).then(document => {
+    return vscode.workspace.openTextDocument(ofPath).then(document => {
       resolve(vscode.window.showTextDocument(document, vscode.ViewColumn.One));
+      return;
     });
   }
 
-  function createAura(name: string, resolve, reject) {
+  function createAura(name: string, resolve: any, reject: any) {
     // ask if the user wants an App, Event, or Component
     var auraOptions: vscode.QuickPickItem[] = [
       {
@@ -162,6 +171,7 @@ export default function createFile() {
     vscode.window.showQuickPick(auraOptions, config).then(type => {
       if (!type) {
         reject();
+        return;
       }
 
       if (type.label === 'App') {
@@ -176,7 +186,7 @@ export default function createFile() {
     });
   }
 
-  function createAuraEvent(name: string, resolve) {
+  function createAuraEvent(name: string, resolve: any) {
     const ext = 'evt';
     const folderPath = createFolder('aura', name);
     createMetaFile(name, 'AuraDefinitionBundle', folderPath, ext);
@@ -184,7 +194,7 @@ export default function createFile() {
     createSrcFile(name, folderPath, fileContents, ext, resolve);
   }
 
-  function createAuraInt(name: string, resolve) {
+  function createAuraInt(name: string, resolve: any) {
     const ext = 'intf';
     const folderPath = createFolder('aura', name);
     createMetaFile(name, 'AuraDefinitionBundle', folderPath, ext);
@@ -194,7 +204,7 @@ export default function createFile() {
     createSrcFile(name, folderPath, fileContents, ext, resolve);
   }
 
-  function createAuraCmpApp(name: string, resolve, ext: string) {
+  function createAuraCmpApp(name: string, resolve: any, ext: string) {
     // create the folder, cmp, and meta.xml
     const folderPath = createFolder('aura', name);
     createMetaFile(name, 'AuraDefinitionBundle', folderPath, ext);
@@ -261,7 +271,7 @@ export default function createFile() {
     createSrcFile(name, folderPath, fileContents, ext, resolve);
   }
 
-  function createLWC(name: string, resolve) {
+  function createLWC(name: string, resolve: any) {
     // create the folder, html, js, and js.meta.xml
     const folderPath = createFolder('lwc', name);
     createMetaFile(name, 'LightningComponentBundle', folderPath, 'js');
@@ -277,7 +287,7 @@ export default class ${jsClassName} extends LightningElement {}`;
     createSrcFile(name, folderPath, fileContents, 'html', resolve);
   }
 
-  function createTrigger(name: string, resolve) {
+  function createTrigger(name: string, resolve: any) {
     const ext = 'trigger';
     const folderPath = createFolder('triggers');
     createMetaFile(name, 'ApexTrigger', folderPath, ext);
@@ -298,7 +308,7 @@ export default class ${jsClassName} extends LightningElement {}`;
     });
   }
 
-  function createVFC(name: string, resolve) {
+  function createVFC(name: string, resolve: any) {
     // create the folder and component
     const ext = 'component';
     const folderPath = createFolder('components');
@@ -309,7 +319,7 @@ export default class ${jsClassName} extends LightningElement {}`;
     createSrcFile(name, folderPath, fileContents, ext, resolve);
   }
 
-  function createVFP(name: string, resolve) {
+  function createVFP(name: string, resolve: any) {
     // create the folder and page
     const ext = 'page';
     const folderPath = createFolder('pages');
@@ -320,7 +330,7 @@ export default class ${jsClassName} extends LightningElement {}`;
     createSrcFile(name, folderPath, fileContents, ext, resolve);
   }
 
-  function createClass(name: string, resolve) {
+  function createClass(name: string, resolve: any) {
     const ext = 'cls';
     const folderPath = createFolder('classes');
     createMetaFile(name, 'ApexClass', folderPath, ext);

@@ -29,7 +29,7 @@ export class SaveService {
   */
   public addFile(document: vscode.TextDocument): boolean {
     const thePath = document.fileName;
-    const existingFile: PreSaveFile = this.getFile(thePath);
+    const existingFile: PreSaveFile | undefined = this.getFile(thePath);
 
     if (existingFile) {
       return false;
@@ -45,7 +45,7 @@ export class SaveService {
 
   public compareContents(document: vscode.TextDocument, serverContents: string): boolean {
     serverContents = serverContents.trim();
-    const oldFileContents: PreSaveFile = this.getFile(document.fileName);
+    const oldFileContents: PreSaveFile | undefined = this.getFile(document.fileName);
 
     if (oldFileContents) {
       return oldFileContents.fileContents === serverContents;
@@ -57,16 +57,18 @@ export class SaveService {
   public saveFile(document: vscode.TextDocument, forceCompile: boolean): Promise<boolean> {
     // take the path and get the TextDocument, then hand it off to the compile() function
     return new Promise((resolve, reject) => {
-      compile(document, forceCompile).then(success => {
-        if (success) {
-          // update the file time for start up file change checks
-          var mTime: Date = new Date();
-          fs.utimesSync(document.fileName, mTime, mTime);
-          // remove the pre-save file version if successful
-          return resolve(this.removeFile(document.fileName));
-        }
-        return resolve(false);
-      });
+      compile(document, forceCompile)
+        .then(success => {
+          if (success) {
+            // update the file time for start up file change checks
+            var mTime: Date = new Date();
+            fs.utimesSync(document.fileName, mTime, mTime);
+            // remove the pre-save file version if successful
+            return resolve(this.removeFile(document.fileName));
+          }
+          return resolve(false);
+        })
+        .catch(reject);
     });
   }
 
@@ -81,7 +83,7 @@ export class SaveService {
     }
   }
 
-  private getFile(thePath: string): PreSaveFile {
+  private getFile(thePath: string): PreSaveFile | undefined {
     const fileIndex: number = this.getFileIndex(thePath);
     if (fileIndex > -1) {
       return this.preSaveFiles[fileIndex];

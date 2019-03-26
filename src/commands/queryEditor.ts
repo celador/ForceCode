@@ -5,8 +5,11 @@ import { outputToString, outputToCSV } from '../parsers/output';
 import { RecordResult } from 'jsforce';
 
 export default function queryEditor(): Promise<any> {
-  const myExtDir = vscode.extensions.getExtension('JohnAaronNelson.forcecode').extensionPath;
-  const QUERYEDITOR_FILE: string = path.join(myExtDir, 'pages', 'queryEditor.html');
+  const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
+  if (!myExt || !vscode.window.forceCode.config.username) {
+    return Promise.reject();
+  }
+  const QUERYEDITOR_FILE: string = path.join(myExt.extensionPath, 'pages', 'queryEditor.html');
   const panel = vscode.window.createWebviewPanel(
     'fcQueryEditor',
     'ForceCode Query Editor',
@@ -24,7 +27,7 @@ export default function queryEditor(): Promise<any> {
     'queryHistory.json'
   );
 
-  var curResults;
+  var curResults: any;
   var queryHistory: string[] = [];
   var curQuery: string;
 
@@ -47,16 +50,7 @@ export default function queryEditor(): Promise<any> {
       // save the results
       const csv: boolean = vscode.workspace.getConfiguration('force')['outputQueriesAsCSV'];
       var data: string = csv ? outputToCSV(curResults) : outputToString(curResults);
-      const defaultURI: vscode.Uri = {
-        scheme: 'file',
-        path: vscode.window.forceCode.projectRoot.split('\\').join('/'),
-        fsPath: vscode.window.forceCode.projectRoot,
-        authority: undefined,
-        query: undefined,
-        fragment: undefined,
-        with: undefined,
-        toJSON: undefined,
-      };
+      const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
       vscode.window
         .showSaveDialog({
           filters: csv ? { CSV: ['csv'] } : { JSON: ['json'] },
@@ -77,7 +71,7 @@ export default function queryEditor(): Promise<any> {
     } else if (message.update) {
       // push the update to the server here
       // get the type from the query
-      var toUpdateArray: [] = message.rows.map(row => {
+      var toUpdateArray: [] = message.rows.map((row: any) => {
         return row.value;
       });
       const lowerCaseQuery: string = curQuery.toLowerCase();
@@ -103,7 +97,7 @@ export default function queryEditor(): Promise<any> {
           };
           sendData(resToSend);
           // update the curResults array
-          message.rows.forEach(curRow => {
+          message.rows.forEach((curRow: any) => {
             Object.assign(curResults[curRow.key - 1], curRow.value);
           });
         })
@@ -125,7 +119,7 @@ export default function queryEditor(): Promise<any> {
 
   return sendQueryHistory();
 
-  function sendResults(results, records?: boolean) {
+  function sendResults(results: any, records?: boolean) {
     if (!records) {
       curResults = results.records;
     }
@@ -158,7 +152,7 @@ export default function queryEditor(): Promise<any> {
     sendQueryHistory();
   }
 
-  function onError(err) {
+  function onError(err: any) {
     var errToSend: {} = {
       success: false,
       results: err && err.message ? err.message : err,
@@ -166,7 +160,7 @@ export default function queryEditor(): Promise<any> {
     sendData(errToSend);
   }
 
-  function sendData(data) {
+  function sendData(data: any) {
     panel.webview.postMessage(data);
   }
 

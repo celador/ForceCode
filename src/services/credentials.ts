@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { fcConnection, dxService } from '.';
 import { FCOauth } from './fcConnection';
 import { Config } from '../forceCode';
-import { readConfigFile, saveConfigFile } from './configuration';
+import { readConfigFile, saveConfigFile, defaultOptions } from './configuration';
 import * as deepmerge from 'deepmerge';
 
 const quickPickOptions: vscode.QuickPickOptions = {
@@ -11,7 +11,7 @@ const quickPickOptions: vscode.QuickPickOptions = {
 export function enterCredentials(): Promise<FCOauth> {
   return fcConnection.getSavedUsernames().then(uNames => {
     return dxService.orgList().then(orgs => {
-      return new Promise(resolve => {
+      return new Promise<FCOauth>((resolve, reject) => {
         // ask if the user wants to log into a different account
         let opts: any[] = [
           {
@@ -30,7 +30,7 @@ export function enterCredentials(): Promise<FCOauth> {
         // add orgs that are authenticated, but not saved in the project
         if (orgs) {
           orgs
-            .filter(currentOrg => !uNames.includes(currentOrg.username))
+            .filter(currentOrg => !uNames.includes(currentOrg.username || ''))
             .forEach(filteredOrg => {
               opts.push({
                 title: filteredOrg.username,
@@ -52,11 +52,11 @@ export function enterCredentials(): Promise<FCOauth> {
         };
         return vscode.window
           .showQuickPick(options, theseOptions)
-          .then((res: vscode.QuickPickItem) => {
+          .then((res: vscode.QuickPickItem | undefined) => {
             if (!res || res.label === undefined) {
-              return undefined;
+              return reject(undefined);
             } else if (res.label === 'New Org') {
-              return resolve(setupNewUser({}));
+              return resolve(setupNewUser(defaultOptions));
             } else {
               const cfg = readConfigFile(res.label); //res.label.split(' ')[1]);
               return dxService
@@ -73,7 +73,7 @@ export function enterCredentials(): Promise<FCOauth> {
     });
   });
 
-  function setupNewUser(cfg): Promise<FCOauth> {
+  function setupNewUser(cfg: Config): Promise<FCOauth> {
     return checkConfig(cfg)
       .then(login)
       .then(orgInfo => {
@@ -82,7 +82,7 @@ export function enterCredentials(): Promise<FCOauth> {
       });
   }
 
-  function login(config): Promise<FCOauth> {
+  function login(config: Config): Promise<FCOauth> {
     return dxService.login(config.url);
   }
 }
@@ -91,7 +91,7 @@ export function checkConfig(cfg: Config): Promise<Config> {
   return getUrl(cfg).then(getAutoCompile);
 }
 
-function getUrl(config): Promise<Config> {
+function getUrl(config: Config): Promise<Config> {
   return new Promise(function(resolve, reject) {
     if (Object.keys(config).indexOf('url') === -1) {
       let opts: any = [
@@ -111,36 +111,38 @@ function getUrl(config): Promise<Config> {
           url: 'https://example.my.salesforce.com',
         },
       ];
-      let options: vscode.QuickPickItem[] = opts.map(res => {
+      let options: vscode.QuickPickItem[] = opts.map((res: any) => {
         return {
           description: `${res.url}`,
           // detail: `${'Detail'}`,
           label: `$(${res.icon}) ${res.title}`,
         };
       });
-      vscode.window.showQuickPick(options, quickPickOptions).then((res: vscode.QuickPickItem) => {
-        if (res && res.description === 'https://example.my.salesforce.com') {
-          vscode.window
-            .showInputBox({
-              ignoreFocusOut: true,
-              placeHolder: 'Enter your custom domain then press Enter...',
-            })
-            .then(cDomain => {
-              config.url = cDomain || 'https://login.salesforce.com';
-              resolve(config);
-            });
-        } else {
-          config.url = res.description || 'https://login.salesforce.com';
-          resolve(config);
-        }
-      });
+      vscode.window
+        .showQuickPick(options, quickPickOptions)
+        .then((res: vscode.QuickPickItem | undefined) => {
+          if (res && res.description === 'https://example.my.salesforce.com') {
+            vscode.window
+              .showInputBox({
+                ignoreFocusOut: true,
+                placeHolder: 'Enter your custom domain then press Enter...',
+              })
+              .then(cDomain => {
+                config.url = cDomain || 'https://login.salesforce.com';
+                resolve(config);
+              });
+          } else {
+            config.url = res && res.description ? res.description : 'https://login.salesforce.com';
+            resolve(config);
+          }
+        });
     } else {
       resolve(config);
     }
   });
 }
 
-function getAutoCompile(config): Promise<Config> {
+function getAutoCompile(config: Config): Promise<Config> {
   return new Promise(function(resolve, reject) {
     if (Object.keys(config).indexOf('autoCompile') === -1) {
       let options: vscode.QuickPickItem[] = [
@@ -155,8 +157,8 @@ function getAutoCompile(config): Promise<Config> {
       ];
       vscode.window
         .showQuickPick(options, { ignoreFocusOut: true })
-        .then((res: vscode.QuickPickItem) => {
-          config.autoCompile = res.label === 'Yes';
+        .then((res: vscode.QuickPickItem | undefined) => {
+          config.autoCompile = res && res.label === 'Yes';
           resolve(config);
         });
     } else {

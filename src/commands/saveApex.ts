@@ -11,12 +11,12 @@ const UPDATE: boolean = true;
 export function saveApex(
   document: vscode.TextDocument,
   toolingType: string,
-  Metadata?: {},
+  Metadata?: any,
   forceCompile?: boolean
 ): Promise<any> {
-  const fileName: string = parsers.getFileName(document);
+  const fileName: string | undefined = parsers.getFileName(document);
   const body: string = document.getText();
-  const name: string = parsers.getName(document, toolingType);
+  const name: string | undefined = parsers.getName(document, toolingType);
   var checkCount: number = 0;
   return Promise.resolve(vscode.window.forceCode)
     .then(addToContainer)
@@ -45,11 +45,11 @@ export function saveApex(
           .sobject(toolingType)
           .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' })
           .execute()
-          .then(records => addMember(records));
+          .then((records: any) => addMember(records));
       });
     }
 
-    function updateMember(records) {
+    function updateMember(records: any) {
       var member: {} = Metadata
         ? {
             Body: records.body,
@@ -60,15 +60,20 @@ export function saveApex(
             Body: body,
             Id: records.id,
           };
-      return fc.conn.tooling
-        .sobject(parsers.getToolingType(document, UPDATE))
-        .update(member)
-        .then(() => {
-          return fc;
-        });
+      const upToolType = parsers.getToolingType(document, UPDATE);
+      if (upToolType) {
+        return fc.conn.tooling
+          .sobject(upToolType)
+          .update(member)
+          .then(() => {
+            return fc;
+          });
+      } else {
+        return Promise.reject({ message: 'Unknown metadata type' });
+      }
     }
 
-    function shouldCompile(record) {
+    function shouldCompile(record: any) {
       const serverContents: string = record.Body ? record.Body : record.Markup;
       if (!forceCompile && !Metadata && !saveService.compareContents(document, serverContents)) {
         // throw up an alert
@@ -88,16 +93,16 @@ export function saveApex(
         return Promise.resolve(true);
       }
     }
-    function addMember(records) {
+    function addMember(records: any) {
       if (records.length > 0) {
         // Tooling Object already exists
         //  UPDATE it
         var record = records[0];
         // Get the modified date of the local file...
-        if (Metadata && Metadata['packageVersions']) {
+        if (Metadata && Metadata.packageVersions) {
           // this is an ApexPage...so we might need to edit packageVersions
-          if (!Array.isArray(Metadata['packageVersions'])) {
-            Metadata['packageVersions'] = [Metadata['packageVersions']];
+          if (!Array.isArray(Metadata.packageVersions)) {
+            Metadata.packageVersions = [Metadata.packageVersions];
           }
         }
 
@@ -109,11 +114,15 @@ export function saveApex(
           MetadataContainerId: fc.containerId,
         };
         return shouldCompile(record).then(should => {
-          if (should) {
+          const upToolType = parsers.getToolingType(document, UPDATE);
+          if (should && upToolType && name) {
             return fc.conn.tooling
-              .sobject(parsers.getToolingType(document, UPDATE))
+              .sobject(upToolType)
               .create(member)
               .then(res => {
+                if (!res.id) {
+                  throw { message: record.Name + ' not saved' };
+                }
                 fc.containerMembers.push({ name, id: res.id });
                 return fc;
               });
@@ -127,13 +136,15 @@ export function saveApex(
         // so we CREATE it
         return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot).then(
           () => {
+            const wholeFileName = parsers.getWholeFileName(document);
+            if (!wholeFileName || !fileName) {
+              return Promise.reject('Error reading file information');
+            }
             const files: string[] = [];
-            files.push(
-              path.join(parsers.getFolder(toolingType), parsers.getWholeFileName(document))
-            );
+            files.push(path.join(parsers.getFolder(toolingType), wholeFileName));
             if (Metadata) {
               // add the class/trigger/page/component
-              const codeFileName: string = parsers.getWholeFileName(document).split('-meta.xml')[0];
+              const codeFileName: string = wholeFileName.split('-meta.xml')[0];
               files.push(path.join(parsers.getFolder(toolingType), codeFileName));
             } else {
               // add the metadata
@@ -150,7 +161,7 @@ export function saveApex(
                 .sobject(toolingType)
                 .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' })
                 .execute()
-                .then(records => {
+                .then((records: any) => {
                   if (records.length > 0) {
                     var workspaceMember: forceCode.IWorkspaceMember = {
                       name: fileName,
@@ -171,7 +182,11 @@ export function saveApex(
   // =======================================================================================================================================
   function requestCompile() {
     if (vscode.window.forceCode.containerMembers.length === 0) {
-      return undefined; // we don't need new container stuff on new file creation
+      return {
+        async then(callback: any) {
+          return callback(undefined);
+        },
+      };
     }
     return vscode.window.forceCode.conn.tooling
       .sobject('ContainerAsyncRequest')
@@ -191,7 +206,7 @@ export function saveApex(
       return Promise.resolve({}); // we don't need new container stuff on new file creation
     }
     return nextStatus();
-    function nextStatus() {
+    function nextStatus(): any {
       checkCount += 1;
       // Set a timeout to auto fail the compile after 60 seconds
       return getStatus().then(res => {
@@ -219,10 +234,10 @@ export function saveApex(
           }'`
       );
     }
-    function isFinished(res) {
+    function isFinished(res: any) {
       // Here, we're checking whether the Container Async Request, is Queued, or in some other state
       if (res.records && res.records[0]) {
-        if (res.records.some(record => record.State === 'Queued')) {
+        if (res.records.some((record: any) => record.State === 'Queued')) {
           return false;
         } else {
           // Completed, Failed, Invalidated, Error, Aborted

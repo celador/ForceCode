@@ -15,8 +15,11 @@ interface SFDXProjectJson {
 }
 
 export default function settings(): Promise<any> {
-  const myExtDir = vscode.extensions.getExtension('JohnAaronNelson.forcecode').extensionPath;
-  const SETTINGS_FILE: string = path.join(myExtDir, 'pages', 'settings.html');
+  const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
+  if (!myExt) {
+    return Promise.reject();
+  }
+  const SETTINGS_FILE: string = path.join(myExt.extensionPath, 'pages', 'settings.html');
   const panel = vscode.window.createWebviewPanel(
     'fcSettings',
     'ForceCode Settings',
@@ -27,18 +30,21 @@ export default function settings(): Promise<any> {
     }
   );
 
-  var tempSettings = {};
+  var tempSettings: any;
   var currentSettings = vscode.window.forceCode.config;
   var userNames: string[];
 
   // And set its HTML content
   panel.webview.html = getSettingsPage();
 
-  const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
+  const overwriteMerge = (destinationArray: any, sourceArray: any, options: any) => sourceArray;
 
   // handle settings changes
   panel.webview.onDidReceiveMessage(message => {
     if (message.save) {
+      if (!currentSettings.username) {
+        return;
+      }
       // if the src folder is changed, then update in packageDirectories in sfdx-config.json as well
       const sfdxProjJsonPath = path.join(
         vscode.window.forceCode.workspaceRoot,

@@ -5,9 +5,10 @@ import { Connection } from 'jsforce';
 import * as fs from 'fs-extra';
 import { Config } from '../forceCode';
 import { readConfigFile } from './configuration';
+import { SFDX } from './dxService';
 
 export interface FCOauth {
-  username?: string;
+  username: string;
   loginUrl?: string;
   userId?: string;
   accessToken?: string;
@@ -21,16 +22,17 @@ export interface FCOauth {
 
 export class FCConnection extends vscode.TreeItem {
   private readonly parent: FCConnectionService;
-  public connection: Connection;
-  public orgInfo: FCOauth;
+  public connection: Connection | undefined;
+  public orgInfo: FCOauth | SFDX;
   public isLoggedIn: boolean;
-  public prevContext: string;
+  public prevContext: string | undefined;
 
-  constructor(parent: FCConnectionService, orgInfo: FCOauth) {
+  constructor(parent: FCConnectionService, orgInfo: FCOauth | SFDX) {
     super(orgInfo.username, vscode.TreeItemCollapsibleState.None);
 
     this.parent = parent;
     this.orgInfo = orgInfo;
+    this.isLoggedIn = false;
   }
 
   public disconnect(): Promise<any> {
@@ -46,15 +48,17 @@ export class FCConnection extends vscode.TreeItem {
       this.isLoggedIn = false;
       if (this.isCurrentConnection()) {
         this.parent.currentConnection = undefined;
-        vscode.window.forceCode.conn = undefined;
+        //vscode.window.forceCode.conn = undefined;
       }
       return this.parent.refreshConnections();
+    } else {
+      return Promise.resolve();
     }
   }
 
   public isCurrentConnection(): boolean {
     return (
-      this.parent.currentConnection &&
+      this.parent.currentConnection !== undefined &&
       this.parent.currentConnection.orgInfo.username === this.orgInfo.username
     );
   }

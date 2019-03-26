@@ -15,6 +15,11 @@ export function getMembers(
   metadataTypes: string[],
   retrieveManaged?: boolean
 ): Promise<PXMLMember[]> {
+  if (!vscode.window.forceCode.describe) {
+    return Promise.reject(
+      'Metadata describe error. Please try logging out of and back into the org.'
+    );
+  }
   var metadataObjects: IMetadataObject[] = vscode.window.forceCode.describe.metadataObjects;
   if (!(metadataTypes.length === 1 && metadataTypes[0] === '*')) {
     metadataObjects = metadataObjects.filter(type => metadataTypes.includes(type.xmlName));
@@ -44,7 +49,7 @@ export function getMembers(
               .then(folderList => {
                 folderList = toArray(folderList);
                 var members = folders.filter(f => f !== undefined).map(f => f.fullName);
-                members = [].concat(...members, ...folderList);
+                members = members.concat(...folderList);
                 resolve({ name: r.xmlName, members: members });
               })
               .catch(reject);
@@ -129,6 +134,9 @@ export function getFolderContents(type: string, folder: string): Promise<string[
 
 export default function packageBuilder(buildPackage?: boolean): Promise<any> {
   return new Promise((resolve, reject) => {
+    if (!vscode.window.forceCode.describe) {
+      return reject('Metadata describe error. Please try logging out of and back into the org.');
+    }
     var options: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
       return {
         label: r.xmlName,
@@ -167,16 +175,7 @@ export default function packageBuilder(buildPackage?: boolean): Promise<any> {
               .buildObject(packObj)
               .replace('<Package>', '<Package xmlns="http://soap.sforce.com/2006/04/metadata">')
               .replace(' standalone="yes"', '');
-            const defaultURI: vscode.Uri = {
-              scheme: 'file',
-              path: vscode.window.forceCode.projectRoot.split('\\').join('/'),
-              fsPath: vscode.window.forceCode.projectRoot,
-              authority: undefined,
-              query: undefined,
-              fragment: undefined,
-              with: undefined,
-              toJSON: undefined,
-            };
+            const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
             vscode.window
               .showSaveDialog({ filters: { XML: ['xml'] }, defaultUri: defaultURI })
               .then(uri => {

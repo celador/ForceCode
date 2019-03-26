@@ -18,7 +18,7 @@ import { FCFile } from '../services/codeCovView';
 import { ToolingType } from '../commands/retrieve';
 import { getAnyNameFromUri } from '../parsers/open';
 import { FCCommand } from '../services/commandView';
-import { Config } from '../forceCode';
+import { Config, IWorkspaceMember } from '../forceCode';
 import { readConfigFile, removeConfigFolder } from '../services/configuration';
 import { createScratchOrg } from '../commands/createScratchOrg';
 
@@ -174,7 +174,10 @@ export const fcCommands: FCCommand[] = [
       if (!vscode.window.activeTextEditor) {
         return;
       }
-      const ttype: string = getToolingType(vscode.window.activeTextEditor.document);
+      const ttype: string | undefined = getToolingType(vscode.window.activeTextEditor.document);
+      if (!ttype) {
+        throw { message: 'Metadata type not supported for diffing' };
+      }
       return commands.diff(
         vscode.window.activeTextEditor.document,
         ttype === 'AuraDefinition' || ttype === 'LightningComponentResource'
@@ -400,12 +403,12 @@ export const fcCommands: FCCommand[] = [
             if (curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
               return getAnyNameFromUri(curRes);
             } else {
-              reject({
+              throw {
                 message:
                   "Only files/folders within the current org's src folder (" +
                   vscode.window.forceCode.projectRoot +
                   ') can be retrieved/refreshed.',
-              });
+              };
             }
           });
           Promise.all(proms).then(theNames => {
@@ -478,12 +481,15 @@ export const fcCommands: FCCommand[] = [
     commandName: 'ForceCode.openFileInOrg',
     hidden: true,
     command: function(context, selectedResource?) {
-      var id: string;
+      var id: string | undefined;
       if (context) {
         if (context.fsPath) {
           var filePath = context.fsPath;
-          const fcfile: FCFile = codeCovViewService.findByPath(filePath);
-          id = fcfile && fcfile.getWsMember() ? fcfile.getWsMember().id : undefined;
+          const fcfile: FCFile | undefined = codeCovViewService.findByPath(filePath);
+          const member: IWorkspaceMember | undefined = fcfile ? fcfile.getWsMember() : undefined;
+          if (member) {
+            id = member.id;
+          }
         } else {
           id = context;
         }
@@ -634,7 +640,7 @@ export const fcCommands: FCCommand[] = [
           }
         })
         .then(() => {
-          const conn: FCConnection = fcConnection.getConnByUsername(username);
+          const conn: FCConnection | undefined = fcConnection.getConnByUsername(username);
           return fcConnection.disconnect(conn);
         });
     },
