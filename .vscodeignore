@@ -6,7 +6,7 @@ test/**
 tsconfig.json
 vsc-extension-quickstart.md
 src/**/*
-out/test/**
+dist/test/**
 **/*.js.map
 *.vsix
 .vscode-test/**

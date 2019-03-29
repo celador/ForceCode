@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { fcConnection, FCOauth } from '.';
-import alm = require('salesforce-alm');
+const alm = require('salesforce-alm');
 import { outputToString } from '../parsers/output';
 
 export interface SFDX {

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { dxService } from '../services';
-import alm = require('salesforce-alm');
+const alm = require('salesforce-alm');
 import { outputToString } from '../parsers/output';
 
 export default function runDX() {

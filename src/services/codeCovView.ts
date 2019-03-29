@@ -174,20 +174,19 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
               curEd.uri.scheme === 'file'
             ) {
               const fName = curEd.fileName.split(path.sep).pop();
-              if (!fName) {
-                return [];
+              if (fName) {
+                var newFCFile: FCFile = new FCFile(fName, TreeItemCollapsibleState.None, this);
+                newFCFile.setType(ClassType.NotInSrc);
+                newFCFile.command = {
+                  command: 'ForceCode.openOnClick',
+                  title: '',
+                  arguments: [curEd.fileName],
+                };
+                newFCFile.tooltip = `WARNING: This file isn\'t located in the current PROJECT PATH\n(${
+                  window.forceCode.projectRoot
+                })`;
+                fcFiles.push(newFCFile);
               }
-              var newFCFile: FCFile = new FCFile(fName, TreeItemCollapsibleState.None, this);
-              newFCFile.setType(ClassType.NotInSrc);
-              newFCFile.command = {
-                command: 'ForceCode.openOnClick',
-                title: '',
-                arguments: [curEd.fileName],
-              };
-              newFCFile.tooltip = `WARNING: This file isn\'t located in the current PROJECT PATH\n(${
-                window.forceCode.projectRoot
-              })`;
-              fcFiles.push(newFCFile);
             }
           });
         }
@@ -244,7 +243,6 @@ export class FCFile extends TreeItem {
 
     this.collapsibleState = collapsibleState;
     this.parent = parent;
-    this.type = ClassType.NoShow;
     this.setWsMember(wsMember);
   }
 
