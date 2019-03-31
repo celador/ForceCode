@@ -22,10 +22,11 @@ import { FCFile } from './services/codeCovView';
 import { IWorkspaceMember } from './forceCode';
 import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
 import { getToolingTypeFromFolder, getAnyTTFromFolder } from './parsers/open';
-import { trackEvent } from './services/fcAnalytics';
+import { trackEvent, FCTimer } from './services/fcAnalytics';
 import * as fs from 'fs-extra';
 
 export function activate(context: vscode.ExtensionContext): any {
+  const startupTimer: FCTimer = new FCTimer('extension.activate');
   context.subscriptions.push(
     vscode.commands.registerCommand('ForceCode.createProject', () => {
       vscode.window
@@ -245,4 +246,5 @@ export function activate(context: vscode.ExtensionContext): any {
   }
   vscode.commands.executeCommand('setContext', 'ForceCodeShowMenu', true);
   trackEvent('Extension starts', 'Started');
+  startupTimer.stopTimer();
 }

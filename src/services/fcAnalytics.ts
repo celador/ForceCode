@@ -16,6 +16,30 @@ export interface FCAnalytics {
   uuid: string;
 }
 
+export class FCTimer {
+  private startTime: number;
+  private stopTime: number;
+  private name: string;
+
+  constructor(name: string) {
+    this.name = name;
+    this.startTime = Date.now();
+  }
+
+  public stopTimer() {
+    this.stopTime = Date.now();
+
+    // send the time to GA
+    const totalTimeMS = this.stopTime - this.startTime;
+    const totalHours = Math.floor(totalTimeMS / (60 * 60 * 1000));
+    const totalMinutes = Math.floor((totalTimeMS % (60 * 60 * 1000)) / (60 * 1000));
+    const totalSeconds = Math.floor(((totalTimeMS % (60 * 60 * 1000)) % (60 * 1000)) / 1000);
+    const totalMS = Math.floor(((totalTimeMS % (60 * 60 * 1000)) % (60 * 1000)) % 1000);
+
+    trackEvent(this.name, `${totalHours}:${totalMinutes}:${totalSeconds}:${totalMS}`);
+  }
+}
+
 /*
  * This will send tracking info to GA
  *  Each time it will send the FC version + category param as the category, the OS as the event action,
