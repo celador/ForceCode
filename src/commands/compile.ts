@@ -83,7 +83,7 @@ export default function compile(
       })
       .then(finished)
       .catch(onError)
-      .finally(updateSaveHistory);
+      .then(updateSaveHistory);
   } else if (folderToolingType && toolingType === undefined) {
     // This process uses the Metadata API to deploy specific files
     // This is where we extend it to create any kind of metadata
@@ -94,7 +94,7 @@ export default function compile(
       .then(reportMetadataResults)
       .then(finished)
       .catch(onError)
-      .finally(updateSaveHistory);
+      .then(updateSaveHistory);
   } else if (toolingType === undefined) {
     return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
   } else if (toolingType === 'AuraDefinition') {
@@ -102,12 +102,12 @@ export default function compile(
     return saveAura(document, toolingType, Metadata, forceCompile)
       .then(finished)
       .catch(onError)
-      .finally(updateSaveHistory);
+      .then(updateSaveHistory);
   } else if (toolingType === 'LightningComponentResource') {
     return saveLWC(document, toolingType, forceCompile)
       .then(finished)
       .catch(onError)
-      .finally(updateSaveHistory);
+      .then(updateSaveHistory);
   } else {
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
     return saveApex(document, toolingType, Metadata, forceCompile)
@@ -118,7 +118,7 @@ export default function compile(
         });
       })
       .catch(onError)
-      .finally(updateSaveHistory);
+      .then(updateSaveHistory);
   }
 
   // =======================================================================================================================================
@@ -252,8 +252,8 @@ export default function compile(
           res.records[0].DeployDetails.componentSuccesses[0].id
         );
         if (fcfile) {
-          var fcMem: forceCode.IWorkspaceMember | undefined = fcfile.getWsMember();
-          if (fcMem) {
+          var fcMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
+          if (fcMem.coverage) {
             fcMem.coverage = undefined;
             fcfile.updateWsMember(fcMem);
           }

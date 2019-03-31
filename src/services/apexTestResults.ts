@@ -33,17 +33,15 @@ export default function getApexTestResults(testClassIds?: string[]): Promise<Que
       res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
         const fcfile: FCFile | undefined = codeCovViewService.findById(curRes.ApexClassOrTriggerId);
         if (fcfile && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
-          var wsMem: forceCode.IWorkspaceMember | undefined = fcfile.getWsMember();
-          if (wsMem) {
-            wsMem.coverage = curRes;
-            var total: number = curRes.NumLinesCovered + curRes.NumLinesUncovered;
-            var percent = Math.floor((curRes.NumLinesCovered / total) * 100);
-            if (percent > highestCov) {
-              highestCov = percent;
-              highestClass = fcfile;
-            }
-            fcfile.updateWsMember(wsMem);
+          var wsMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
+          wsMem.coverage = curRes;
+          var total: number = curRes.NumLinesCovered + curRes.NumLinesUncovered;
+          var percent = Math.floor((curRes.NumLinesCovered / total) * 100);
+          if (percent > highestCov) {
+            highestCov = percent;
+            highestClass = fcfile;
           }
+          fcfile.updateWsMember(wsMem);
         }
       });
       // update the current editor
