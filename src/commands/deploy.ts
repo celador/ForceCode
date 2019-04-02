@@ -225,12 +225,12 @@ export function deployFiles(files: string[], lwcPackageXML?: string): Promise<an
         return result;
       }
     })
-    .catch(finished)
-    .then(finished);
+    .then(finished)
+    .catch(finished);
 
   // =======================================================================================================================================
   function finished(res: any) /*Promise<any>*/ {
-    if (res.status !== 'Failed') {
+    if (res.status && res.status !== 'Failed') {
       vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
     } else if (res.status === 'Failed') {
       vscode.window
@@ -246,30 +246,32 @@ export function deployFiles(files: string[], lwcPackageXML?: string): Promise<an
         });
     } else {
       var depId: string;
+      const message: string = res.message ? res.message : res;
       if (res.id) {
         depId = res.id;
       } else {
-        const message: string = res.message ? res.message : res;
-        if (!message.startsWith('Polling time out')) {
-          throw res; // we don't know what happened so just throw it
-        }
         depId = (res.message ? res.message : res).split(' = ').pop();
-        vscode.window
-          .showErrorMessage(
-            'ForceCode: Deployment timed out. View details status in the org?',
-            'Yes',
-            'No'
-          )
-          .then(choice => {
-            if (choice === 'Yes') {
-              commandService.runCommand(
-                'ForceCode.openFileInOrg',
-                'changemgmt/monitorDeploymentsDetails.apexp?retURL=/changemgmt/monitorDeployment.apexp&asyncId=' +
-                  depId
-              );
-            }
-          });
       }
+      res = { status: 'Failed', message: message };
+      if (!message.startsWith('Polling time out')) {
+        return res; // we don't know what happened so just throw it
+      }
+
+      vscode.window
+        .showErrorMessage(
+          'ForceCode: Deployment timed out. View details status in the org?',
+          'Yes',
+          'No'
+        )
+        .then(choice => {
+          if (choice === 'Yes') {
+            commandService.runCommand(
+              'ForceCode.openFileInOrg',
+              'changemgmt/monitorDeploymentsDetails.apexp?retURL=/changemgmt/monitorDeployment.apexp&asyncId=' +
+                depId
+            );
+          }
+        });
     }
     vscode.window.forceCode.outputChannel.append(
       outputToString(res)

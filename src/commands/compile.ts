@@ -243,6 +243,16 @@ export default function compile(
     } else if (res.State === 'Error') {
       onError(res);
       failures++;
+    } else if (res.status === 'Failed') {
+      if (res.message) {
+        errMessages.push(res.message);
+      } else {
+        // capture a failed deployment there is no message returned, so guide user to view in Salesforce
+        errMessages.push(
+          'Deployment failed. Please view the details in the deployment status section in Salesforce.'
+        );
+      }
+      return false; // don't show the failed build error
     }
 
     if (failures === 0) {
@@ -318,7 +328,7 @@ export default function compile(
 
   function updateSaveHistory(): boolean {
     saveHistoryService.addSaveResult({
-      fileName: parsers.getWholeFileName(document) || 'UKNOWN',
+      fileName: parsers.getWholeFileName(document) || 'UNKNOWN',
       path: document.fileName,
       success: errMessages.length === 0,
       messages: errMessages,

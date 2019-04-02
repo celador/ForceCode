@@ -217,7 +217,7 @@ export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
     vscode.workspace
       .createFileSystemWatcher(
-        path.join(vscode.window.forceCode.projectRoot, '**', '*.{cls,trigger,page,component,cmp}')
+        path.join(vscode.window.forceCode.projectRoot, '**', '*.{cls,trigger,page,component}')
       )
       .onDidDelete(uri => {
         const fcfile: FCFile | undefined = codeCovViewService.findByPath(uri.fsPath);

@@ -23,12 +23,12 @@ export function saveLWC(
     .then(getLWCBundle)
     .then(ensureLWCBundle)
     .then(bundle => {
-      if (bundle !== true) {
+      if (Array.isArray(bundle)) {
         return getLWCDefinition(bundle).then((definitions: any) =>
           upsertLWCDefinition(definitions, bundle)
         );
       } else {
-        return Promise.resolve();
+        return Promise.resolve(bundle);
       }
     });
 
@@ -46,10 +46,7 @@ export function saveLWC(
         const files: string[] = [];
         files.push(path.join('lwc', name));
         files.push('package.xml');
-        return deployFiles(files, vscode.window.forceCode.storageRoot)
-          .then(() => {
-            return true;
-          });
+        return deployFiles(files, vscode.window.forceCode.storageRoot);
       });
     } else {
       return results;
