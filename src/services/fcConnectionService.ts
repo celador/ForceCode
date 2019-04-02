@@ -92,6 +92,9 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
           })
           .on('end', function() {
             resolve(usernames);
+          })
+          .on('error', (err, item) => {
+            console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
           });
       } else {
         resolve(usernames);

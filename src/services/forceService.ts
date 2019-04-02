@@ -232,6 +232,9 @@ export default class ForceService implements forceCode.IForceService {
         })
         .on('end', function() {
           resolve(types);
+        })
+        .on('error', (err, item) => {
+          console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
         });
     });
   }

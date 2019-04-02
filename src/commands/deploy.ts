@@ -101,6 +101,9 @@ export default function deploy(context: vscode.ExtensionContext) {
         })
         .on('end', () => {
           resolve(fileList.sort());
+        })
+        .on('error', (err, item) => {
+          console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
         });
     });
   }
