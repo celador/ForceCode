@@ -1,5 +1,8 @@
 ## Change Log
 
+* 3.16.0
+    * Fix issue #264 (s.saveApex(...).then(...).then(...).catch(...).finally is not a function)
+    * Fix deploy errors not being reported on first save after file creation
 * 3.15.2
     * Fix issue with first save of LWC or Aura components after creation. Users were being shown the file change notification.
     * Fix issue with hanging task after cancelling creating a file
