@@ -3,6 +3,8 @@
 * 3.16.0
     * Fix issue #264 (s.saveApex(...).then(...).then(...).catch(...).finally is not a function)
     * Fix deploy errors not being reported on first save after file creation
+    * Fix "Always prompt for overwrite on save" issue #267
+    * Fix "Setting org src as root causes `AuraDefinitionBundle metadata type not found in org`" issue #265
 * 3.15.2
     * Fix issue with first save of LWC or Aura components after creation. Users were being shown the file change notification.
     * Fix issue with hanging task after cancelling creating a file

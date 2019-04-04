@@ -38,7 +38,7 @@ function getNameFromClassBody(document: vscode.TextDocument): string | undefined
 }
 export function getAuraNameFromFileName(fileName: string, folderName: string): string | undefined {
   const fnSplit = fileName
-    .split(`${vscode.window.forceCode.config.src}${path.sep}${folderName}${path.sep}`)
+    .split(`${vscode.window.forceCode.projectRoot}${path.sep}${folderName}${path.sep}`)
     .pop();
   return fnSplit ? fnSplit.split(path.sep).shift() : '';
 }
