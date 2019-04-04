@@ -51,7 +51,7 @@ export class SaveService {
       return oldFileContents.fileContents === serverContents;
     }
     // no data to compare to
-    return false;
+    return true;
   }
 
   public saveFile(document: vscode.TextDocument, forceCompile: boolean): Promise<boolean> {
@@ -65,8 +65,9 @@ export class SaveService {
             fs.utimesSync(document.fileName, mTime, mTime);
             // remove the pre-save file version if successful
             return resolve(this.removeFile(document.fileName));
+          } else {
+            return resolve(false);
           }
-          return resolve(false);
         })
         .catch(reject);
     });
