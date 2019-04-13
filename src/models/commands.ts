@@ -160,7 +160,7 @@ export const fcCommands: FCCommand[] = [
   },
   // Diff Files
   {
-    commandName: 'ForceCode.diff',
+    commandName: 'ForceCode.diffMenu',
     name: 'Diffing file', //+ getFileName(vscode.window.activeTextEditor.document),
     hidden: false,
     description: 'Diff the current file with what is on the server',
@@ -182,6 +182,20 @@ export const fcCommands: FCCommand[] = [
         vscode.window.activeTextEditor.document,
         ttype === 'AuraDefinition' || ttype === 'LightningComponentResource'
       );
+    },
+  },
+  {
+    commandName: 'ForceCode.diff',
+    hidden: true,
+    command: function(context, selectedResource?) {
+      return commandService.runCommand('ForceCode.diffMenu', context, selectedResource);
+    },
+  },
+  {
+    commandName: 'ForceCode.toolingQuery',
+    hidden: true,
+    command: function(context, selectedResource?) {
+      return vscode.window.forceCode.conn.tooling.query(context);
     },
   },
   // Compile/Deploy
