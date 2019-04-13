@@ -58,7 +58,7 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
             return reject('Data not found on server');
           }
         },
-        (err: Error) => reject(vscode.window.showErrorMessage(err.message))
+        (err: Error) => reject(err)
       );
     });
   }
