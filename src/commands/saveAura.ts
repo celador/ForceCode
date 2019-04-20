@@ -88,7 +88,7 @@ export function saveAura(
     currentObjectDefinition = def.length > 0 ? def[0] : undefined;
     if (currentObjectDefinition !== undefined) {
       const serverContents: string = currentObjectDefinition.Source;
-      if (!forceCompile && !saveService.compareContents(document, serverContents)) {
+      if (!forceCompile && !saveService.compareContents(document.fileName, serverContents)) {
         return vscode.window
           .showWarningMessage('Someone has changed this file!', 'Diff', 'Overwrite')
           .then(s => {

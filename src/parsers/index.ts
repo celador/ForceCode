@@ -1,4 +1,3 @@
-/* tslint:disable:no-unused-variable */
 import { getCoverageType } from './getToolingType';
 import getToolingType from './getToolingType';
 import getName from './getName';

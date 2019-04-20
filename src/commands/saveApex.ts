@@ -75,7 +75,11 @@ export function saveApex(
 
     function shouldCompile(record: any) {
       const serverContents: string = record.Body ? record.Body : record.Markup;
-      if (!forceCompile && !Metadata && !saveService.compareContents(document, serverContents)) {
+      if (
+        !forceCompile &&
+        !Metadata &&
+        !saveService.compareContents(document.fileName, serverContents)
+      ) {
         // throw up an alert
         return vscode.window
           .showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite')

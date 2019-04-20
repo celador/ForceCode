@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import { compile } from '../commands';
+import klaw = require('klaw');
 
 interface PreSaveFile {
   path: string;
@@ -27,25 +28,51 @@ export class SaveService {
     This needs to be in place for those who don't use autoCompile and for
     unsuccessful saves to the server...mainly for file comparison
   */
-  public addFile(document: vscode.TextDocument): boolean {
-    const thePath = document.fileName;
-    const existingFile: PreSaveFile | undefined = this.getFile(thePath);
+  public addFile(documentPath: string): boolean {
+    const existingFile: PreSaveFile | undefined = this.getFile(documentPath);
 
     if (existingFile) {
       return false;
     } else {
+      // we need to read the file since the document has unsaved content
       const fileContents: string = fs
-        .readFileSync(thePath)
+        .readFileSync(documentPath)
         .toString()
         .trim();
-      this.preSaveFiles.push({ path: thePath, fileContents: fileContents });
+      this.preSaveFiles.push({ path: documentPath, fileContents: fileContents });
       return true;
     }
   }
 
-  public compareContents(document: vscode.TextDocument, serverContents: string): boolean {
+  public addFilesInFolder(folder: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      klaw(folder)
+        .on('data', file => {
+          if (file.stats.isFile()) this.addFile(file.path);
+        })
+        .on('end', () => {
+          resolve(true);
+        })
+        .on('error', (err, item) => {
+          console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
+          reject(false);
+        });
+    });
+  }
+
+  public removeFilesInFolder(folder: string): boolean {
+    const psFilesToRemove: PreSaveFile[] = this.getFilesInFolder(folder);
+    if (psFilesToRemove.length > 0) {
+      psFilesToRemove.forEach(f => this.removeFile(f.path));
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public compareContents(documentPath: string, serverContents: string): boolean {
     serverContents = serverContents.trim();
-    const oldFileContents: PreSaveFile | undefined = this.getFile(document.fileName);
+    const oldFileContents: PreSaveFile | undefined = this.getFile(documentPath);
 
     if (oldFileContents) {
       return oldFileContents.fileContents === serverContents;
@@ -91,6 +118,10 @@ export class SaveService {
     } else {
       return undefined;
     }
+  }
+
+  private getFilesInFolder(folder: string): PreSaveFile[] {
+    return this.preSaveFiles.filter(psFile => psFile.path.indexOf(folder) !== -1);
   }
 
   private getFileIndex(thePath: string): number {

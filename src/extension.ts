@@ -128,7 +128,7 @@ export function activate(context: vscode.ExtensionContext): any {
   // get the pre-save document contents and store them so we can diff with the server
   context.subscriptions.push(
     vscode.workspace.onWillSaveTextDocument((event: vscode.TextDocumentWillSaveEvent) => {
-      saveService.addFile(event.document);
+      saveService.addFile(event.document.fileName);
     })
   );
 
