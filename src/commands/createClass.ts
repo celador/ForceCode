@@ -35,6 +35,7 @@ export default function createFile() {
     ];
     let config: {} = {
       placeHolder: 'Choose a file type...',
+      ignoreFocusOut: true,
     };
     vscode.window.showQuickPick(fileOptions, config).then(selection => {
       if (!selection) {
@@ -84,6 +85,7 @@ export default function createFile() {
     let options: vscode.InputBoxOptions = {
       placeHolder: 'File name',
       prompt: `Enter ${type} name`,
+      ignoreFocusOut: true,
     };
     return new Promise((resolve, reject) => {
       vscode.window.showInputBox(options).then(filename => {
@@ -167,6 +169,7 @@ export default function createFile() {
     ];
     let config: {} = {
       placeHolder: 'Choose a type...',
+      ignoreFocusOut: true,
     };
     vscode.window.showQuickPick(auraOptions, config).then(type => {
       if (!type) {
@@ -295,6 +298,7 @@ export default class ${jsClassName} extends LightningElement {}`;
     let options: vscode.InputBoxOptions = {
       placeHolder: 'Object name',
       prompt: `Enter the name of the object the trigger will fire on.`,
+      ignoreFocusOut: true,
     };
     vscode.window.showInputBox(options).then(objname => {
       if (!objname) {
