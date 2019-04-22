@@ -56,7 +56,7 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
           if (results && results.totalSize === 1) {
             return resolve(results.records[0][field]);
           } else {
-            return reject('Data not found on server');
+            return resolve('The current file could NOT be found in the org');
           }
         },
         (err: Error) => reject(err)
