@@ -8,6 +8,7 @@
     * Fix diffing returning expired access/refresh token #270
     * Fix "Error while saving LWC with field definition imports" #269
     * Fix ignoreFocusOut when creating a new file
+    * Fix error while trying to diff when the file doesn't exist on the server
 * 3.15.2
     * Fix issue with first save of LWC or Aura components after creation. Users were being shown the file change notification.
     * Fix issue with hanging task after cancelling creating a file
