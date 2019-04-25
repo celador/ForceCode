@@ -1,4 +1,4 @@
-// 
+//
 // Note: This example test is leveraging the Mocha test framework.
 // Please refer to their documentation on https://mochajs.org/ for help.
 //
@@ -13,19 +13,15 @@ import * as vscode from 'vscode';
 // import * as myExtension from '../src/extension';
 
 suite('Extension Tests', () => {
-
-    test('Shows an Error with Message', () => {
-        // Arrange
-        // Create an Error Message
-        var errorMessage: string = 'A random error occurred';
-        // Act
-        // Show the error Message
-        vscode.window.showErrorMessage(errorMessage);
-        // Assert
-        // Assert the error Message Showed up
-        assert.equal(false, false);
-    });
-
+  test('Shows an Error with Message', () => {
+    // Arrange
+    // Create an Error Message
+    var errorMessage: string = 'A random error occurred';
+    // Act
+    // Show the error Message
+    vscode.window.showErrorMessage(errorMessage);
+    // Assert
+    // Assert the error Message Showed up
+    assert.equal(false, false);
+  });
 });
-
-

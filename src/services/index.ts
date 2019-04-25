@@ -1,9 +1,9 @@
 /* tslint:disable:no-unused-variable */
-import ForceService from './forceService';
 import * as operatingSystem from './operatingSystem';
+import ForceService from './forceService';
 import configuration from './configuration';
 
-export {ForceService, operatingSystem, configuration};
+export { ForceService, operatingSystem, configuration };
 import DXService from './dxService';
 export const dxService = DXService.getInstance();
 import { FCOauth, FCConnection } from './fcConnection';
@@ -17,4 +17,8 @@ import { CommandService } from './commandService';
 export const commandService = CommandService.getInstance();
 import { CodeCovViewService } from './codeCovView';
 export const codeCovViewService = CodeCovViewService.getInstance();
+import { SaveService } from './saveService';
+export const saveService = SaveService.getInstance();
+import { SaveHistoryService } from './saveHistoryService';
+export const saveHistoryService = SaveHistoryService.getInstance();
 export * from './fcZip';

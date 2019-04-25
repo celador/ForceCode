@@ -5,10 +5,12 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+export { FauxClassGenerator } from './fauxClassGenerator';
 export {
+  ChildRelationship,
+  Field,
+  SObject,
   SObjectCategory,
   SObjectDescribe,
-  SObject,
-  ChildRelationship,
-  Field
 } from './sObjectDescribe';
+export const CLIENT_ID = 'sfdx-vscode';

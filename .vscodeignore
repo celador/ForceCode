@@ -10,5 +10,13 @@ out/test/**
 **/*.js.map
 *.vsix
 .vscode-test/**
-needscopied/**
 .sfdx/**
+.github/**
+.prettierignore
+webpack.config.js
+analytics.json
+package.xml
+forcecode-**.vsix
+wallaby.js
+book.json
+prettier.config.js

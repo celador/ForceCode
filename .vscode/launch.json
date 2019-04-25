@@ -10,7 +10,8 @@
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "stopOnEntry": false,
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/out/src/**/*.js"]
+      "preLaunchTask": "npm: webpack",
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "name": "Launch Tests",
@@ -23,6 +24,15 @@
       ],
       "stopOnEntry": false,
       "sourceMaps": true,
+      "linux": {
+        "preLaunchTask": "npm"
+      },
+      "windows": {
+        "preLaunchTask": "npm"
+      },
+      "osx": {
+        "preLaunchTask": "npm"
+      },
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
     },
     {

@@ -6,7 +6,14 @@ import { getAuraNameFromFileName, getFileName, getWholeFileName } from './getNam
 import { getIcon, getExtension, getFolder, getFileExtension } from './open';
 
 export {
-    getToolingType, getCoverageType, getName, getWholeFileName, getIcon,
-    getExtension, getFolder, getFileExtension,
-    getFileName, getAuraNameFromFileName
+  getToolingType,
+  getCoverageType,
+  getName,
+  getWholeFileName,
+  getIcon,
+  getExtension,
+  getFolder,
+  getFileExtension,
+  getFileName,
+  getAuraNameFromFileName,
 };
