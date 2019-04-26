@@ -6,31 +6,28 @@ const PROVIDER: string = 'forcecode://salesforce.com';
 
 export default function diff(document: vscode.TextDocument, auraSource?: boolean) {
   if (!document) {
-    return;
+    return Promise.reject('No document open to diff with the server.');
   }
   const toolingType: string | undefined = parsers.getToolingType(document);
   const fileName: string | undefined = parsers.getWholeFileName(document);
   if (auraSource) {
     ForceCodeContentProvider.getInstance().auraSource = document;
   }
-  try {
-    diffFile();
-  } catch (err) {
-    vscode.window.showErrorMessage(err.message);
-  }
-  return;
-  // .then(finished)
+  return diffFile();
   // =======================================================================================================================================
   // =======================================================================================================================================
   function diffFile() {
-    var command: Thenable<{} | undefined> = vscode.commands.executeCommand(
-      'vscode.diff',
-      buildSalesforceUriFromLocalUri(),
-      document.uri,
-      `${fileName} (REMOTE) <~> ${fileName} (LOCAL)`,
-      { preview: false }
-    );
-    return command;
+    try {
+      return vscode.commands.executeCommand(
+        'vscode.diff',
+        buildSalesforceUriFromLocalUri(),
+        document.uri,
+        `${fileName} (REMOTE) <~> ${fileName} (LOCAL)`,
+        { preview: false }
+      );
+    } catch (e) {
+      return Promise.reject(e);
+    }
   }
 
   function buildSalesforceUriFromLocalUri(): vscode.Uri {

@@ -1,4 +1,3 @@
-/* tslint:disable:no-unused-variable */
 import * as operatingSystem from './operatingSystem';
 import ForceService from './forceService';
 import configuration from './configuration';

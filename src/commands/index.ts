@@ -1,4 +1,3 @@
-/* tslint:disable:no-unused-variable */
 import apexTest from './apexTest';
 import apexTestResults from '../services/apexTestResults';
 import codeCompletionRefresh from './codeCompletionRefresh';

@@ -18,10 +18,10 @@ export default function getToolingTypeFromBody(
   if (fileName.endsWith('.page')) {
     return member ? 'ApexPageMember' : 'ApexPage';
   }
-  if (fileName.indexOf(`${vscode.window.forceCode.config.src}${path.sep}aura`) >= 0) {
+  if (fileName.indexOf(`${vscode.window.forceCode.projectRoot}${path.sep}aura`) >= 0) {
     return 'AuraDefinition';
   }
-  if (fileName.indexOf(`${vscode.window.forceCode.config.src}${path.sep}lwc`) >= 0) {
+  if (fileName.indexOf(`${vscode.window.forceCode.projectRoot}${path.sep}lwc`) >= 0) {
     return 'LightningComponentResource';
   }
   return undefined;

@@ -8,7 +8,7 @@
 import * as vscode from 'vscode';
 import { fcConnection } from '.';
 import { EventEmitter } from 'events';
-import { trackEvent } from './fcAnalytics';
+import { trackEvent, FCTimer } from './fcAnalytics';
 
 export interface FCCommand {
   commandName: string;
@@ -118,6 +118,7 @@ export class Task extends vscode.TreeItem {
   private readonly taskViewProvider: CommandViewService;
   private readonly context: any;
   private readonly selectedResource: any;
+  private readonly commandTimer: FCTimer;
 
   constructor(
     taskViewProvider: CommandViewService,
@@ -127,6 +128,7 @@ export class Task extends vscode.TreeItem {
   ) {
     super(execution.name || '', vscode.TreeItemCollapsibleState.None);
 
+    this.commandTimer = new FCTimer(execution.commandName);
     this.taskViewProvider = taskViewProvider;
     this.execution = execution;
     this.context = context;
@@ -159,6 +161,7 @@ export class Task extends vscode.TreeItem {
           return this.run(SECOND_TRY);
         } else {
           this.taskViewProvider.removeEmitter.emit('removeTask', this);
+          this.commandTimer.stopTimer();
           return finalRes;
         }
       });

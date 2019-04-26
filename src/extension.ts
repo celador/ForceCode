@@ -22,10 +22,11 @@ import { FCFile } from './services/codeCovView';
 import { IWorkspaceMember } from './forceCode';
 import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
 import { getToolingTypeFromFolder, getAnyTTFromFolder } from './parsers/open';
-import { trackEvent } from './services/fcAnalytics';
+import { trackEvent, FCTimer } from './services/fcAnalytics';
 import * as fs from 'fs-extra';
 
 export function activate(context: vscode.ExtensionContext): any {
+  const startupTimer: FCTimer = new FCTimer('extension.activate');
   context.subscriptions.push(
     vscode.commands.registerCommand('ForceCode.createProject', () => {
       vscode.window
@@ -127,7 +128,7 @@ export function activate(context: vscode.ExtensionContext): any {
   // get the pre-save document contents and store them so we can diff with the server
   context.subscriptions.push(
     vscode.workspace.onWillSaveTextDocument((event: vscode.TextDocumentWillSaveEvent) => {
-      saveService.addFile(event.document);
+      saveService.addFile(event.document.fileName);
     })
   );
 
@@ -216,7 +217,7 @@ export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
     vscode.workspace
       .createFileSystemWatcher(
-        path.join(vscode.window.forceCode.projectRoot, '**', '*.{cls,trigger,page,component,cmp}')
+        path.join(vscode.window.forceCode.projectRoot, '**', '*.{cls,trigger,page,component}')
       )
       .onDidDelete(uri => {
         const fcfile: FCFile | undefined = codeCovViewService.findByPath(uri.fsPath);
@@ -245,4 +246,5 @@ export function activate(context: vscode.ExtensionContext): any {
   }
   vscode.commands.executeCommand('setContext', 'ForceCodeShowMenu', true);
   trackEvent('Extension starts', 'Started');
+  startupTimer.stopTimer();
 }

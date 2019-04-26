@@ -34,6 +34,13 @@ const ClassType: IClassType = {
   NoShow: 'NoShow',
 };
 
+const folderWSMember: IWorkspaceMember = {
+  name: 'FOLDER',
+  path: '',
+  type: ClassType.NoShow,
+  id: '',
+};
+
 export class CodeCovViewService implements TreeDataProvider<FCFile> {
   private static instance: CodeCovViewService;
   private classes: Array<FCFile> = new Array<FCFile>();
@@ -63,8 +70,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
   public addClass(wsMember: IWorkspaceMember) {
     const index: number = this.classes.findIndex(curClass => {
-      const wsMem: IWorkspaceMember | undefined = curClass.getWsMember();
-      return wsMem !== undefined && wsMem.path === wsMember.path;
+      return curClass.getWsMember().path === wsMember.path;
     });
     if (index !== -1) {
       this.classes[index].setWsMember(wsMember);
@@ -85,8 +91,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       return undefined;
     }
     return this.classes.find(cur => {
-      const wsMem: IWorkspaceMember | undefined = cur.getWsMember();
-      return wsMem !== undefined && wsMem.name === name && wsMem.type === type;
+      return cur.getWsMember().name === name && cur.getWsMember().type === type;
     });
   }
 
@@ -95,8 +100,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       return undefined;
     }
     return this.classes.filter(cur => {
-      const wsMem: IWorkspaceMember | undefined = cur.getWsMember();
-      return wsMem !== undefined && wsMem.type === type;
+      return cur.getWsMember().type === type;
     });
   }
 
@@ -105,8 +109,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       return undefined;
     }
     return this.classes.find(cur => {
-      const wsMem: IWorkspaceMember | undefined = cur.getWsMember();
-      return wsMem !== undefined && wsMem.path === pa;
+      return cur.getWsMember().path === pa;
     });
   }
 
@@ -115,8 +118,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       return undefined;
     }
     return this.classes.find(cur => {
-      const wsMem: IWorkspaceMember | undefined = cur.getWsMember();
-      return wsMem !== undefined && wsMem.id === id;
+      return cur.getWsMember().id === id;
     });
   }
 
@@ -155,7 +157,8 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
           var newFCFile: FCFile = new FCFile(
             ClassType[val],
             TreeItemCollapsibleState.Collapsed,
-            this
+            this,
+            folderWSMember
           );
           newFCFile.setType(ClassType[val]);
           fcFiles.push(newFCFile);
@@ -164,7 +167,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       //fcFiles.sort(this.sortFunc);
 
       return fcFiles;
-    } else if (!element.getWsMember()) {
+    } else if (element.getWsMember().type === ClassType.NoShow) {
       if (element.label === ClassType.NotInSrc) {
         var fcFiles: FCFile[] = [];
         if (workspace.textDocuments) {
@@ -174,20 +177,24 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
               curEd.uri.scheme === 'file'
             ) {
               const fName = curEd.fileName.split(path.sep).pop();
-              if (!fName) {
-                return [];
+              if (fName) {
+                var newFCFile: FCFile = new FCFile(
+                  fName,
+                  TreeItemCollapsibleState.None,
+                  this,
+                  folderWSMember
+                );
+                newFCFile.setType(ClassType.NotInSrc);
+                newFCFile.command = {
+                  command: 'ForceCode.openOnClick',
+                  title: '',
+                  arguments: [curEd.fileName],
+                };
+                newFCFile.tooltip = `WARNING: This file isn\'t located in the current PROJECT PATH\n(${
+                  window.forceCode.projectRoot
+                })`;
+                fcFiles.push(newFCFile);
               }
-              var newFCFile: FCFile = new FCFile(fName, TreeItemCollapsibleState.None, this);
-              newFCFile.setType(ClassType.NotInSrc);
-              newFCFile.command = {
-                command: 'ForceCode.openOnClick',
-                title: '',
-                arguments: [curEd.fileName],
-              };
-              newFCFile.tooltip = `WARNING: This file isn\'t located in the current PROJECT PATH\n(${
-                window.forceCode.projectRoot
-              })`;
-              fcFiles.push(newFCFile);
             }
           });
         }
@@ -204,13 +211,13 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public getParent(element: FCFile): any {
-    const wsMem: IWorkspaceMember | undefined = element.getWsMember();
-    if (wsMem && wsMem.id) {
+    if (element.getWsMember().id !== '') {
       // there's a bug in vscode, so for future use
       var newFCFile: FCFile = new FCFile(
         element.getType(),
         TreeItemCollapsibleState.Expanded,
-        this
+        this,
+        folderWSMember
       );
       newFCFile.setType(element.getType());
       return newFCFile;
@@ -231,31 +238,27 @@ export class FCFile extends TreeItem {
   public readonly collapsibleState: TreeItemCollapsibleState;
 
   private parent: CodeCovViewService;
-  private wsMember: IWorkspaceMember | undefined;
+  private wsMember: IWorkspaceMember;
   private type: string;
 
   constructor(
     name: string,
     collapsibleState: TreeItemCollapsibleState,
     parent: CodeCovViewService,
-    wsMember?: IWorkspaceMember
+    wsMember: IWorkspaceMember
   ) {
     super(name, collapsibleState);
 
     this.collapsibleState = collapsibleState;
     this.parent = parent;
-    this.type = ClassType.NoShow;
     this.setWsMember(wsMember);
   }
 
-  public setWsMember(newMem: IWorkspaceMember | undefined) {
+  public setWsMember(newMem: IWorkspaceMember) {
     this.wsMember = newMem;
 
     // we only want classes and triggers
-    if (
-      !this.wsMember ||
-      (this.wsMember.type !== 'ApexClass' && this.wsMember.type !== 'ApexTrigger')
-    ) {
+    if (this.wsMember.type !== 'ApexClass' && this.wsMember.type !== 'ApexTrigger') {
       this.type = ClassType.NoShow;
       return undefined;
     }
@@ -315,7 +318,7 @@ export class FCFile extends TreeItem {
     this.parent.addClass(newMem);
   }
 
-  public getWsMember(): IWorkspaceMember | undefined {
+  public getWsMember(): IWorkspaceMember {
     return this.wsMember;
   }
 

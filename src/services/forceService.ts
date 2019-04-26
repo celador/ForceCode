@@ -169,22 +169,20 @@ export default class ForceService implements forceCode.IForceService {
               key.type
             );
             if (curFCFile) {
-              var curMem: forceCode.IWorkspaceMember | undefined = curFCFile.getWsMember();
-              if (curMem) {
-                curMem.id = key.id;
-                if (
-                  curFCFile.compareDates(key.lastModifiedDate) ||
-                  !vscode.workspace.getConfiguration('force')['checkForFileChanges']
-                ) {
-                  curFCFile.updateWsMember(curMem);
-                } else {
-                  curFCFile.updateWsMember(curMem);
-                  commandService.runCommand(
-                    'ForceCode.fileModified',
-                    curMem.path,
-                    key.lastModifiedByName
-                  );
-                }
+              var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
+              curMem.id = key.id;
+              if (
+                curFCFile.compareDates(key.lastModifiedDate) ||
+                !vscode.workspace.getConfiguration('force')['checkForFileChanges']
+              ) {
+                curFCFile.updateWsMember(curMem);
+              } else {
+                curFCFile.updateWsMember(curMem);
+                commandService.runCommand(
+                  'ForceCode.fileModified',
+                  curMem.path,
+                  key.lastModifiedByName
+                );
               }
             }
           });
@@ -234,6 +232,9 @@ export default class ForceService implements forceCode.IForceService {
         })
         .on('end', function() {
           resolve(types);
+        })
+        .on('error', (err, item) => {
+          console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
         });
     });
   }

@@ -26,7 +26,7 @@ export function saveAura(
     .then(getAuraBundle)
     .then(ensureAuraBundle)
     .then(bundle => {
-      if (bundle !== true) {
+      if (Array.isArray(bundle)) {
         if (Metadata) {
           return updateMetaData(bundle);
         } else {
@@ -35,7 +35,7 @@ export function saveAura(
           );
         }
       } else {
-        return Promise.resolve();
+        return Promise.resolve(bundle);
       }
     });
 
@@ -53,10 +53,7 @@ export function saveAura(
         const files: string[] = [];
         files.push(path.join('aura', name));
         files.push('package.xml');
-        return deployFiles(files, vscode.window.forceCode.storageRoot)
-          .then(() => {
-            return true;
-          });
+        return deployFiles(files, vscode.window.forceCode.storageRoot);
       });
     } else {
       return results;
@@ -91,7 +88,7 @@ export function saveAura(
     currentObjectDefinition = def.length > 0 ? def[0] : undefined;
     if (currentObjectDefinition !== undefined) {
       const serverContents: string = currentObjectDefinition.Source;
-      if (!forceCompile && !saveService.compareContents(document, serverContents)) {
+      if (!forceCompile && !saveService.compareContents(document.fileName, serverContents)) {
         return vscode.window
           .showWarningMessage('Someone has changed this file!', 'Diff', 'Overwrite')
           .then(s => {

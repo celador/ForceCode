@@ -71,9 +71,9 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
   var uncoveredLineDec: vscode.DecorationOptions[] = [];
   const fcfile: FCFile | undefined = codeCovViewService.findByPath(document.fileName);
   if (fcfile) {
-    const wsMem: forceCode.IWorkspaceMember | undefined = fcfile.getWsMember();
+    const wsMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
 
-    if (wsMem && wsMem.id && wsMem.coverage) {
+    if (wsMem.coverage) {
       uncoveredLineDec = getUncoveredLineOptionsFor(wsMem);
     }
   }

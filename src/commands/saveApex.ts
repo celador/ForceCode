@@ -75,7 +75,11 @@ export function saveApex(
 
     function shouldCompile(record: any) {
       const serverContents: string = record.Body ? record.Body : record.Markup;
-      if (!forceCompile && !Metadata && !saveService.compareContents(document, serverContents)) {
+      if (
+        !forceCompile &&
+        !Metadata &&
+        !saveService.compareContents(document.fileName, serverContents)
+      ) {
         // throw up an alert
         return vscode.window
           .showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite')
@@ -157,6 +161,9 @@ export function saveApex(
             }
             files.push('package.xml');
             return deployFiles(files, vscode.window.forceCode.storageRoot).then(foo => {
+              if (foo.status === 'Failed') {
+                return foo;
+              }
               return fc.conn.tooling
                 .sobject(toolingType)
                 .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' })
@@ -170,7 +177,7 @@ export function saveApex(
                       type: toolingType,
                     };
                     codeCovViewService.addClass(workspaceMember);
-                    return fc;
+                    return foo;
                   }
                 });
             });
@@ -180,11 +187,11 @@ export function saveApex(
     }
   }
   // =======================================================================================================================================
-  function requestCompile() {
+  function requestCompile(retval: any) {
     if (vscode.window.forceCode.containerMembers.length === 0) {
       return {
         async then(callback: any) {
-          return callback(undefined);
+          return callback(retval);
         },
       };
     }
@@ -201,9 +208,9 @@ export function saveApex(
       });
   }
   // =======================================================================================================================================
-  function getCompileStatus(): Promise<any> {
+  function getCompileStatus(retval: any): Promise<any> {
     if (vscode.window.forceCode.containerMembers.length === 0) {
-      return Promise.resolve({}); // we don't need new container stuff on new file creation
+      return Promise.resolve(retval); // we don't need new container stuff on new file creation
     }
     return nextStatus();
     function nextStatus(): any {
