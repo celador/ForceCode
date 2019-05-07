@@ -180,7 +180,7 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
           resolve({ name: tType, members: contents });
         });
       } else {
-        getMembers([tType]).then(members => {
+        getMembers([tType], true).then(members => {
           resolve(members[0]);
         });
       }

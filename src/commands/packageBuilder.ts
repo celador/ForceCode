@@ -156,7 +156,7 @@ export default function packageBuilder(buildPackage?: boolean): Promise<any> {
       }
       const typesArray: string[] = toArray(types).map(r => r.label);
 
-      getMembers(typesArray)
+      getMembers(typesArray, true)
         .then(mappedTypes => {
           if (!buildPackage) {
             resolve(mappedTypes);
