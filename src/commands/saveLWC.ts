@@ -3,6 +3,7 @@ import * as parsers from './../parsers';
 import { saveService } from '../services';
 import * as path from 'path';
 import { createPackageXML, deployFiles } from './deploy';
+import diff from './diff';
 
 // =======================================================================================================================================
 // ================================                Lightning Web Components               ================================================
@@ -59,7 +60,20 @@ export function saveLWC(
         !saveService.compareContents(path.join(filePath, def.FilePath.split('/').pop()), def.Source)
     );
 
-    if (changedFiles.length !== 0) {
+    if (!forceCompile && changedFiles.length === 1) {
+      return vscode.window
+        .showWarningMessage('Someone has changed this file!', 'Diff', 'Overwrite')
+        .then(s => {
+          if (s === 'Diff') {
+            diff(document, true);
+            return {};
+          }
+          if (s === 'Overwrite') {
+            return saveLWCPackage();
+          }
+          return {};
+        });
+    } else if (!forceCompile && changedFiles.length > 1) {
       var changedFileNames: string = changedFiles
         .map(file => file.FilePath.split('/').pop())
         .join(',');

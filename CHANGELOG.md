@@ -2,6 +2,7 @@
 
 * 3.16.1
     * Allow retrieval of managed package reports/dashboards/etc.
+    * Fix "Never prompts for diff/overwrite on save for Lightning Web Components" #280
 * 3.16.0
     * Fix issue #264 (s.saveApex(...).then(...).then(...).catch(...).finally is not a function)
     * Fix deploy errors not being reported on first save after file creation
