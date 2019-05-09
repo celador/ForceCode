@@ -49,10 +49,9 @@ export function saveLWC(
     });
   }
   function upsertLWCDefinition(definitions: any, bundle: any) {
-    const filePath: string | undefined = document.fileName.split(path.sep).shift();
-    if (!filePath) {
-      return undefined;
-    }
+    const docPath = document.fileName;
+    const filePath: string = docPath.substring(0, docPath.lastIndexOf(path.sep));
+
     // add files in the folder to PreSaveFiles so we can compare content
     saveService.addFilesInFolder(filePath);
     var changedFiles: any[] = definitions.filter(
