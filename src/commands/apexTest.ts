@@ -12,17 +12,27 @@ export default function apexTest(toTest: string, classOrMethod: string): Promise
   } else {
     toRun = '-t ' + toTest;
   }
-  return dxService.runCommand('apex:test:run', toRun + ' -w 3 -y').then((dxRes: QueryResult) => {
-    // get the test class Ids from the result
-    var testClassIds: string[] = new Array<string>();
-    dxRes.tests.forEach(tRes => {
-      testClassIds.push(tRes.ApexClass.Id);
-    });
+  // TODO: Update this command to be in dxService
+  return dxService
+    .runCommand(
+      'apex:test:run',
+      toRun +
+        ' -w 3 -y' +
+        (fcConnection.currentConnection
+          ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
+          : '')
+    )
+    .then((dxRes: QueryResult) => {
+      // get the test class Ids from the result
+      var testClassIds: string[] = new Array<string>();
+      dxRes.tests.forEach(tRes => {
+        testClassIds.push(tRes.ApexClass.Id);
+      });
 
-    return apexTestResults(testClassIds)
-      .then(() => showResult(dxRes))
-      .then(showLog);
-  });
+      return apexTestResults(testClassIds)
+        .then(() => showResult(dxRes))
+        .then(showLog);
+    });
 
   // =======================================================================================================================================
   function showResult(dxRes: QueryResult) {

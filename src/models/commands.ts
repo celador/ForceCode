@@ -298,18 +298,6 @@ export const fcCommands: FCCommand[] = [
     },
   },
   {
-    commandName: 'ForceCode.dx',
-    name: 'Running DX command',
-    hidden: false,
-    description: 'Salesforce DX Commands',
-    detail: 'Run DX commands, just like on a command line.',
-    icon: 'broadcast',
-    label: 'Salesforce DX',
-    command: function(context, selectedResource?) {
-      return commands.dx();
-    },
-  },
-  {
     commandName: 'ForceCode.codeCompletionRefresh',
     name: 'Refreshing Code Completion',
     hidden: false,

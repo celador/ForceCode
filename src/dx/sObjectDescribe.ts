@@ -181,9 +181,14 @@ export class SObjectDescribe {
 
   public describeGlobal(type: SObjectCategory): Promise<string[]> {
     try {
+      // TODO: Make this command part of dxService
       return dxService.runCommand(
         'schema:sobject:list',
-        '--sobjecttypecategory ' + type.toString()
+        '--sobjecttypecategory ' +
+          type.toString() +
+          (fcConnection.currentConnection
+            ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
+            : '')
       );
     } catch (e) {
       return Promise.reject(e);

@@ -12,6 +12,10 @@ This extension is a companion for SFDC (Salesforce.com) development with Visual 
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.  
 There's no complicated setup process or project configurations, no external apps to keep open, and no jarring errors knocking you out of your flow.
 
+## IMPORTANT
+
+As of version 3.17.0, you will be required to install the SFDX-CLI on your system in order for this extension to function! The ability to run a DX command via the ForceCode menu has also been removed because of this change.
+
 ## Slack
 
 ForceCode now has a Slack channel! Click [here](https://join.slack.com/t/forcecodeworkspace/shared_invite/enQtNDczMDg3Nzg2ODcxLWRhYWM2NmI3MGNmMmE1MmRkOTFkMGQzZmQ1YjlhMDhjY2YzNmU0NDEyNDU4OGM1NzdlZjU2NTg3Y2FkNTdhMjA) to join us! 

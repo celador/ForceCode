@@ -5,7 +5,6 @@ import compile from './compile';
 import createClass from './createClass';
 import deploy from './deploy';
 import diff from './diff';
-import dx from './dx';
 import executeAnonymous from './executeAnonymous';
 import find from './find';
 import getLog from './getLog';
@@ -29,7 +28,6 @@ export {
   createClass,
   deploy,
   diff,
-  dx,
   executeAnonymous,
   find,
   getLog,

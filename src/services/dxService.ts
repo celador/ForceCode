@@ -2,8 +2,11 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { fcConnection, FCOauth } from '.';
-const alm = require('salesforce-alm');
-import { outputToString } from '../parsers/output';
+//const alm = require('salesforce-alm');
+//import { outputToString } from '../parsers/output';
+import { runCommand } from '../dx/sfdx';
+
+// TODO: Get rid of all unused and commented out code
 
 export interface SFDX {
   username: string;
@@ -28,6 +31,7 @@ export interface ExecuteAnonymousResult {
   logs: string;
 }
 
+/*
 interface Topic {
   name: string;
   description: string;
@@ -40,6 +44,7 @@ interface Context {
   command: Command;
   flags: {};
 }
+*/
 
 interface Flag {
   default: string;
@@ -86,7 +91,7 @@ export interface QueryResult {
 }
 
 export interface DXCommands {
-  getCommand(cmd: string): Command;
+  //getCommand(cmd: string): Command;
   runCommand(cmdString: string, arg: string): Promise<any>;
   login(url: string): Promise<any>;
   //logout(username: string): Promise<any>;
@@ -113,11 +118,13 @@ export default class DXService implements DXCommands {
     return DXService.instance;
   }
 
+  /*
   public getCommand(cmd: string): Command {
     return alm.commands.filter(c => {
       return c.topic + ':' + c.command === cmd;
     })[0];
   }
+  */
 
   public isEmptyUndOrNull(param: any): boolean {
     return (
@@ -151,6 +158,20 @@ export default class DXService implements DXCommands {
    *   Takes a command as an argument and a string for the command's arguments.
    */
   public runCommand(cmdString: string, arg: string): Promise<any> {
+    if (fcConnection.currentConnection) {
+      return runCommand(
+        'sfdx force:' +
+          cmdString +
+          ' ' +
+          arg /*+
+          (arg.includes('--targetusername')
+            ? ''
+            : ' -u ' + fcConnection.currentConnection.orgInfo.username)*/
+      );
+    } else {
+      return Promise.reject();
+    }
+    /*
     arg += ' --json';
     var cmd: Command = this.getCommand(cmdString);
     var topic: Topic = alm.topics.filter(t => {
@@ -220,6 +241,7 @@ export default class DXService implements DXCommands {
     function getErrLog(data: any) {
       errlog = data;
     }
+    */
   }
 
   public execAnon(file: string): Promise<ExecuteAnonymousResult> {
@@ -265,7 +287,13 @@ export default class DXService implements DXCommands {
     if (logid) {
       theLogId += '--logid ' + logid;
     }
-    return this.runCommand('apex:log:get', theLogId).then(log => {
+    return this.runCommand(
+      'apex:log:get',
+      theLogId +
+        (fcConnection.currentConnection
+          ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
+          : '')
+    ).then(log => {
       return Promise.resolve(log.log);
     });
   }
