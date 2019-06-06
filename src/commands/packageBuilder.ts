@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { toArray, dxService, PXML, PXMLMember } from '../services';
+import { toArray, dxService, PXML, PXMLMember, SObjectCategory } from '../services';
 import { IMetadataObject } from '../forceCode';
-import { SObjectDescribe, SObjectCategory } from '../dx';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
+import { isEmptyUndOrNull } from '../util';
 
 function sortFunc(a: any, b: any): number {
   var aStr = a.label.toUpperCase();
@@ -27,7 +27,7 @@ export function getMembers(
   var proms: Promise<PXMLMember>[] = metadataObjects.map(r => {
     return new Promise<PXMLMember>((resolve, reject) => {
       if (r.xmlName === 'CustomObject') {
-        new SObjectDescribe()
+        dxService
           .describeGlobal(SObjectCategory.ALL)
           .then(objs => {
             resolve({ name: r.xmlName, members: objs });
@@ -151,7 +151,7 @@ export default function packageBuilder(buildPackage?: boolean): Promise<any> {
       canPickMany: true,
     };
     vscode.window.showQuickPick(options, config).then(types => {
-      if (dxService.isEmptyUndOrNull(types)) {
+      if (isEmptyUndOrNull(types)) {
         reject();
       }
       const typesArray: string[] = toArray(types).map(r => r.label);

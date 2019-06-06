@@ -1,12 +1,6 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import {
-  configuration,
-  commandService,
-  codeCovViewService,
-  dxService,
-  fcConnection,
-} from './../services';
+import { configuration, commandService, codeCovViewService, fcConnection } from './../services';
 import constants from './../models/constants';
 import * as path from 'path';
 import { FCFile } from './codeCovView';
@@ -17,6 +11,7 @@ import { getUUID, FCAnalytics } from './fcAnalytics';
 import klaw = require('klaw');
 import { QueryResult } from 'jsforce';
 import { defaultOptions } from './configuration';
+import { isEmptyUndOrNull } from '../util';
 
 export default class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
@@ -138,7 +133,7 @@ export default class ForceService implements forceCode.IForceService {
   }
 
   private parseMembers(mems: any) {
-    if (dxService.isEmptyUndOrNull(mems)) {
+    if (isEmptyUndOrNull(mems)) {
       return Promise.resolve({});
     }
     var types: { [key: string]: Array<any> } = {};

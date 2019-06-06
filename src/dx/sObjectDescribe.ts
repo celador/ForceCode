@@ -7,7 +7,7 @@
 
 import * as vscode from 'vscode';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
-import { FCOauth, fcConnection, dxService } from '../services';
+import { FCOauth, fcConnection } from '../services';
 import { CLIENT_ID } from './';
 
 export interface SObject {
@@ -154,12 +154,6 @@ export interface DescribeSObjectResult {
   result: SObject;
 }
 
-export enum SObjectCategory {
-  ALL = 'ALL',
-  STANDARD = 'STANDARD',
-  CUSTOM = 'CUSTOM',
-}
-
 type SubRequest = { method: string; url: string };
 type BatchRequest = { batchRequests: SubRequest[] };
 
@@ -177,22 +171,6 @@ export class SObjectDescribe {
   private getVersion(): string {
     return `${this.versionPrefix}${vscode.window.forceCode.config.apiVersion ||
       vscode.workspace.getConfiguration('force')['defaultApiVersion']}`;
-  }
-
-  public describeGlobal(type: SObjectCategory): Promise<string[]> {
-    try {
-      // TODO: Make this command part of dxService
-      return dxService.runCommand(
-        'schema:sobject:list',
-        '--sobjecttypecategory ' +
-          type.toString() +
-          (fcConnection.currentConnection
-            ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
-            : '')
-      );
-    } catch (e) {
-      return Promise.reject(e);
-    }
   }
 
   public async describeSObjectBatch(types: string[], nextToProcess: number): Promise<SObject[]> {

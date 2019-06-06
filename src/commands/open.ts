@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as retrieve from './retrieve';
 import { getIcon, getExtension, getFolder } from './../parsers';
 import * as path from 'path';
-import { dxService } from '../services';
+import { isEmptyUndOrNull } from '../util';
 const TYPEATTRIBUTE: string = 'type';
 
 export function open(context: vscode.ExtensionContext) {
@@ -82,7 +82,7 @@ export function showFileOptions(promises: any[]) {
     })
     .then(opt => {
       var opts: any = opt;
-      if (dxService.isEmptyUndOrNull(opts)) {
+      if (isEmptyUndOrNull(opts)) {
         return Promise.resolve();
       }
       var files: retrieve.ToolingType[] = [];

@@ -4,35 +4,17 @@ import apexTestResults from '../services/apexTestResults';
 import { QueryResult } from '../services/dxService';
 
 export default function apexTest(toTest: string, classOrMethod: string): Promise<any> {
-  // Start doing stuff
-  // remove test coverage stuff
-  var toRun: string;
-  if (classOrMethod === 'class') {
-    toRun = '-n ' + toTest;
-  } else {
-    toRun = '-t ' + toTest;
-  }
-  // TODO: Update this command to be in dxService
-  return dxService
-    .runCommand(
-      'apex:test:run',
-      toRun +
-        ' -w 3 -y' +
-        (fcConnection.currentConnection
-          ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
-          : '')
-    )
-    .then((dxRes: QueryResult) => {
-      // get the test class Ids from the result
-      var testClassIds: string[] = new Array<string>();
-      dxRes.tests.forEach(tRes => {
-        testClassIds.push(tRes.ApexClass.Id);
-      });
-
-      return apexTestResults(testClassIds)
-        .then(() => showResult(dxRes))
-        .then(showLog);
+  return dxService.runTest(toTest, classOrMethod).then((dxRes: QueryResult) => {
+    // get the test class Ids from the result
+    var testClassIds: string[] = new Array<string>();
+    dxRes.tests.forEach(tRes => {
+      testClassIds.push(tRes.ApexClass.Id);
     });
+
+    return apexTestResults(testClassIds)
+      .then(() => showResult(dxRes))
+      .then(showLog);
+  });
 
   // =======================================================================================================================================
   function showResult(dxRes: QueryResult) {

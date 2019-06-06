@@ -5,6 +5,8 @@ import configuration from './configuration';
 export { ForceService, operatingSystem, configuration };
 import DXService from './dxService';
 export const dxService = DXService.getInstance();
+import { SObjectCategory } from './dxService';
+export { SObjectCategory };
 import { FCOauth, FCConnection } from './fcConnection';
 import { FCConnectionService } from './fcConnectionService';
 export const fcConnection = FCConnectionService.getInstance();

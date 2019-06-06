@@ -1,11 +1,18 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
-import { commandService, codeCovViewService, fcConnection, FCOauth, toArray } from '../services';
+import {
+  commandService,
+  codeCovViewService,
+  fcConnection,
+  FCOauth,
+  toArray,
+  dxService,
+  SObjectCategory,
+} from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
 import { getAnyTTFromFolder, getAnyNameFromUri } from '../parsers/open';
-import { SObjectDescribe, SObjectCategory } from '../dx';
 const mime = require('mime-types');
 import * as compress from 'compressing';
 import { parseString } from 'xml2js';
@@ -295,7 +302,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
       }
 
       function getObjects(type: SObjectCategory) {
-        new SObjectDescribe().describeGlobal(type).then(objs => {
+        dxService.describeGlobal(type).then(objs => {
           retrieveComponents(resolve, reject, { types: [{ name: 'CustomObject', members: objs }] });
         });
       }

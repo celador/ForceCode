@@ -8,7 +8,8 @@ import * as vscode from 'vscode';
 import { EOL } from 'os';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { ChildRelationship, Field, SObject, SObjectCategory, SObjectDescribe } from './';
+import { ChildRelationship, Field, SObject, SObjectDescribe } from './';
+import { dxService, SObjectCategory } from '../services';
 
 const SFDX_DIR = '.sfdx';
 const TOOLS_DIR = 'tools';
@@ -80,7 +81,7 @@ export class FauxClassGenerator {
     let fetchedSObjects: SObject[] = [];
     let sobjects: string[] = [];
     try {
-      sobjects = await describe.describeGlobal(type);
+      sobjects = await dxService.describeGlobal(type);
     } catch (e) {
       throw 'Failure fetching list of sObjects from org ' + e;
     }

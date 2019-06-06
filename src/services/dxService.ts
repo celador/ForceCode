@@ -1,12 +1,7 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs-extra';
-import * as path from 'path';
 import { fcConnection, FCOauth } from '.';
-//const alm = require('salesforce-alm');
-//import { outputToString } from '../parsers/output';
-import { runCommand } from '../dx/sfdx';
-
-// TODO: Get rid of all unused and commented out code
+import { isWindows } from './operatingSystem';
+import { SpawnOptions, spawn } from 'child_process';
 
 export interface SFDX {
   username: string;
@@ -31,47 +26,6 @@ export interface ExecuteAnonymousResult {
   logs: string;
 }
 
-/*
-interface Topic {
-  name: string;
-  description: string;
-  hidden: boolean;
-  commands: Command[];
-}
-
-interface Context {
-  topic: Topic;
-  command: Command;
-  flags: {};
-}
-*/
-
-interface Flag {
-  default: string;
-  description: string;
-  hasValue: boolean;
-  hidden: boolean;
-  longDescription: string;
-  name: string;
-  required: boolean;
-  type: string;
-  char: string;
-}
-
-export interface Command {
-  command: string;
-  description: string;
-  flags: Flag[];
-  help: string;
-  longDescription: string;
-  requiresWorkspace: boolean;
-  run: (ctx: any) => Promise<any>;
-  supportsTargetDevHubUsername: boolean;
-  supportsTargetUsername: boolean;
-  topic: string;
-  usage: string;
-}
-
 interface ApexTestResult {
   StackTrace: string;
   Message: string;
@@ -90,22 +44,24 @@ export interface QueryResult {
   tests: ApexTestResult[];
 }
 
+export enum SObjectCategory {
+  ALL = 'ALL',
+  STANDARD = 'STANDARD',
+  CUSTOM = 'CUSTOM',
+}
+
 export interface DXCommands {
-  //getCommand(cmd: string): Command;
-  runCommand(cmdString: string, arg: string): Promise<any>;
   login(url: string): Promise<any>;
-  //logout(username: string): Promise<any>;
   getOrgInfo(username: string): Promise<SFDX>;
-  isEmptyUndOrNull(param: any): boolean;
   getDebugLog(logid?: string): Promise<string>;
-  saveToFile(data: any, fileName: string): Promise<string>;
   getAndShowLog(id?: string): Thenable<vscode.TextEditor | undefined>;
   execAnon(file: string): Promise<ExecuteAnonymousResult>;
-  removeFile(fileName: string): Promise<any>;
   openOrg(): Promise<any>;
   openOrgPage(url: string): Promise<any>;
   orgList(): Promise<FCOauth[]>;
   createScratchOrg(edition: string): Promise<any>;
+  runTest(classOrMethodName: string, classOrMethod: string): Promise<any>;
+  describeGlobal(type: SObjectCategory): Promise<string[]>;
 }
 
 export default class DXService implements DXCommands {
@@ -119,129 +75,68 @@ export default class DXService implements DXCommands {
   }
 
   /*
-  public getCommand(cmd: string): Command {
-    return alm.commands.filter(c => {
-      return c.topic + ':' + c.command === cmd;
-    })[0];
-  }
-  */
-
-  public isEmptyUndOrNull(param: any): boolean {
-    return (
-      param == undefined ||
-      param == null ||
-      (Array.isArray(param) && param.length === 0) ||
-      Object.keys(param).length === 0
-    );
-  }
-
-  public saveToFile(data: any, fileName: string): Promise<string> {
-    try {
-      fs.outputFileSync(vscode.window.forceCode.projectRoot + path.sep + fileName, data);
-      return Promise.resolve(vscode.window.forceCode.projectRoot + path.sep + fileName);
-    } catch (e) {
-      return Promise.reject(undefined);
-    }
-  }
-
-  public removeFile(fileName: string): Promise<any> {
-    try {
-      fs.removeSync(vscode.window.forceCode.projectRoot + path.sep + fileName);
-      return Promise.resolve(undefined);
-    } catch (e) {
-      return Promise.reject(undefined);
-    }
-  }
-
-  /*
    *   This does all the work. It will run a cli command through the built in dx.
    *   Takes a command as an argument and a string for the command's arguments.
    */
-  public runCommand(cmdString: string, arg: string): Promise<any> {
-    if (fcConnection.currentConnection) {
-      return runCommand(
-        'sfdx force:' +
-          cmdString +
-          ' ' +
-          arg /*+
-          (arg.includes('--targetusername')
-            ? ''
-            : ' -u ' + fcConnection.currentConnection.orgInfo.username)*/
-      );
-    } else {
-      return Promise.reject();
-    }
-    /*
-    arg += ' --json';
-    var cmd: Command = this.getCommand(cmdString);
-    var topic: Topic = alm.topics.filter(t => {
-      return t.name === cmd.topic;
-    })[0];
+  private runCommand(cmdString: string, arg: string): Promise<any> {
+    var fullCommand = 'sfdx force:' + cmdString + ' ' + arg;
 
-    var cliContext: Context = {
-      command: cmd,
-      topic: topic,
-      flags: {},
+    // TODO: get rid of debug console lines
+    console.log(fullCommand);
+    if (isWindows()) {
+      fullCommand = 'cmd /c' + fullCommand;
+    }
+    const error = new Error(); // Get stack here to use for later
+
+    if (!fullCommand.includes('--json')) {
+      fullCommand += ' --json';
+    }
+
+    const parts = fullCommand.split(' ');
+    const commandName = parts[0];
+    const args = parts.slice(1);
+
+    const spawnOpt: SpawnOptions = {
+      // Always use json in stdout
+      env: Object.assign({ SFDX_JSON_TO_STDOUT: 'true' }, process.env),
     };
 
-    if (arg !== undefined && arg !== '') {
-      // this helps solve a bug when we have '-' in commands and queries and stuff
-      arg = ' ' + arg;
-      var replaceString: string;
-      do {
-        replaceString = '}@FC$' + Date.now() + '$FC@{';
-      } while (arg.includes(replaceString));
-      arg = arg.replace(/\s--/gm, replaceString).replace(/\s-/gm, replaceString);
-      var theArgsArray = arg.trim().split(replaceString);
-      theArgsArray.forEach(function(i) {
-        if (i.length > 0) {
-          var curCmd = new Array();
-          curCmd = i.trim().split(' ');
-          var flagName = curCmd.shift();
-          if (flagName.length === 1) {
-            // this means we need to search for the argument name
-            const flag = cmd.flags.find(fl => {
-              return fl.char === flagName;
-            });
-            flagName = flag ? flag.name : undefined;
-          }
-          if (curCmd.length > 0) cliContext.flags[flagName] = curCmd.join(' ').trim();
-          else cliContext.flags[flagName] = true;
-        }
-      });
-    }
-    // add in targetusername so we can stay logged in
-    if (
-      cmd.supportsTargetUsername &&
-      cliContext.flags['targetusername'] === undefined &&
-      cmdString !== 'auth:web:login' &&
-      fcConnection.currentConnection
-    ) {
-      cliContext.flags['targetusername'] = fcConnection.currentConnection.orgInfo.username;
-    }
-    // get error output from SFDX
-    var errlog: any;
-    var oldConsole = console.log;
-    console.log = getErrLog;
-    return cmd.run(cliContext).then(res => {
-      console.log = oldConsole;
-      if (!this.isEmptyUndOrNull(res)) {
-        return res;
-      }
-      try {
-        console.log(errlog);
-        errlog = JSON.parse(errlog);
-        errlog = errlog.message ? errlog.message : errlog;
-      } catch (e) {}
-      return Promise.reject(
-        errlog || 'Failed to execute command: ' + cmdString + outputToString(theArgsArray)
-      );
-    });
+    return new Promise((resolve, reject) => {
+      const cmd = spawn(commandName, args, spawnOpt);
+      if (cmd === null || cmd.stdout === null || cmd.stderr === null) {
+        return reject();
+      } else {
+        let stdout = '';
+        cmd.stdout.on('data', data => {
+          stdout += data;
+        });
 
-    function getErrLog(data: any) {
-      errlog = data;
-    }
-    */
+        cmd.stderr.on('data', data => {
+          console.warn('srderr', data);
+        });
+
+        cmd.on('error', data => {
+          console.error('err', data);
+        });
+
+        cmd.on('close', code => {
+          let json;
+          try {
+            json = JSON.parse(stdout);
+          } catch (e) {
+            console.warn(`No parsable results from command "${fullCommand}"`);
+          }
+          if (code > 0) {
+            // Get non-promise stack for extra help
+            console.warn(error);
+            reject(error);
+          } else {
+            console.log(json.result);
+            resolve(json.result);
+          }
+        });
+      }
+    });
   }
 
   public execAnon(file: string): Promise<ExecuteAnonymousResult> {
@@ -251,18 +146,6 @@ export default class DXService implements DXCommands {
   public login(url: string | undefined): Promise<any> {
     return this.runCommand('auth:web:login', '--instanceurl ' + url);
   }
-
-  // this command isn't working so for now get rid of it
-  /*
-    public logout(username: string): Promise<any> {
-        const conn: FCConnection = fcConnection.getConnByUsername(username);
-        if(conn && conn.isLoggedIn) {
-            return Promise.resolve(this.runCommand('auth:logout', '--noprompt --targetusername ' + username));
-        } else {
-            return Promise.resolve();
-        }
-    }
-    */
 
   public getOrgInfo(username: string | undefined): Promise<SFDX> {
     return this.runCommand('org:display', '--targetusername ' + username);
@@ -335,5 +218,34 @@ export default class DXService implements DXCommands {
     } else {
       return Promise.reject('Forcecode is not currently connected to an org');
     }
+  }
+
+  public runTest(classOrMethodName: string, classOrMethod: string): Promise<any> {
+    var toRun: string;
+    if (classOrMethod === 'class') {
+      toRun = '-n ' + classOrMethodName;
+    } else {
+      toRun = '-t ' + classOrMethodName;
+    }
+
+    return this.runCommand(
+      'apex:test:run',
+      toRun +
+        ' -w 3 -y' +
+        (fcConnection.currentConnection
+          ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
+          : '')
+    );
+  }
+
+  public describeGlobal(type: SObjectCategory): Promise<string[]> {
+    return this.runCommand(
+      'schema:sobject:list',
+      '--sobjecttypecategory ' +
+        type.toString() +
+        (fcConnection.currentConnection
+          ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
+          : '')
+    );
   }
 }

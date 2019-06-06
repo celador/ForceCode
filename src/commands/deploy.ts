@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { dxService, toArray, PXML, PXMLMember, commandService } from '../services';
+import { toArray, PXML, PXMLMember, commandService } from '../services';
 import { getFileListFromPXML, zipFiles } from './../services';
 import * as path from 'path';
 import klaw = require('klaw');
@@ -8,6 +8,7 @@ import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
 import { getAnyTTFromPath } from '../parsers/open';
 import { outputToString } from '../parsers/output';
+import { isEmptyUndOrNull } from '../util';
 
 var deployOptions: any = {
   checkOnly: true,
@@ -127,7 +128,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         canPickMany: true,
       };
       vscode.window.showQuickPick(options, config).then(files => {
-        if (dxService.isEmptyUndOrNull(files)) {
+        if (isEmptyUndOrNull(files)) {
           resolve();
         }
         var theFiles: string[] = [];
@@ -213,7 +214,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
 
 export function deployFiles(files: string[], lwcPackageXML?: string): Promise<any> {
   const deployPath: string = vscode.window.forceCode.projectRoot;
-  if (dxService.isEmptyUndOrNull(files)) {
+  if (isEmptyUndOrNull(files)) {
     return Promise.resolve();
   }
   var zip = zipFiles(files, deployPath, lwcPackageXML);

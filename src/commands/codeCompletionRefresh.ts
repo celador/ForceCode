@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { FauxClassGenerator, SObjectCategory } from '../dx';
+import { FauxClassGenerator } from '../dx';
+import { SObjectCategory } from '../services';
 
 export default async function codeCompletionRefresh(): Promise<any> {
   let options: vscode.QuickPickItem[] = [

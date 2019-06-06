@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { SObjectDescribe, SObjectCategory } from '../dx';
+import { dxService, SObjectCategory } from '../services';
 
 export default function bulkLoader(): Promise<any> {
   const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
@@ -100,7 +100,7 @@ export default function bulkLoader(): Promise<any> {
     }
   }, undefined);
 
-  return new SObjectDescribe().describeGlobal(SObjectCategory.ALL).then(sObjects => {
+  return dxService.describeGlobal(SObjectCategory.ALL).then(sObjects => {
     return panel.webview.postMessage({ sObjects: sObjects });
   });
 

@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
 import * as path from 'path';
-import { dxService } from '../services';
 import { apexTestResults } from '.';
+import { saveToFile } from '../util';
 
 export default function getOverallCoverage(): PromiseLike<vscode.TextEditor | undefined> {
   return apexTestResults().then(res => {
@@ -39,8 +39,10 @@ export default function getOverallCoverage(): PromiseLike<vscode.TextEditor | un
         orgTotalCoveredLines +
         '/' +
         orgTotalLines;
-      return dxService
-        .saveToFile(outputString, 'coverage' + path.sep + 'ApexCoverage-' + Date.now() + '.acov')
+      return saveToFile(
+        outputString,
+        'coverage' + path.sep + 'ApexCoverage-' + Date.now() + '.acov'
+      )
         .then(filename => {
           vscode.window.forceCode.showStatus('ForceCode: Code coverage retrieval complete!');
           return vscode.workspace

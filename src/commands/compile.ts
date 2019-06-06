@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, dxService, saveHistoryService } from '../services';
+import { codeCovViewService, saveHistoryService } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
@@ -9,6 +9,7 @@ import { parseString } from 'xml2js';
 import * as path from 'path';
 import { saveLWC } from './saveLWC';
 import { createPackageXML, deployFiles } from './deploy';
+import { isEmptyUndOrNull } from '../util';
 
 export default function compile(
   document: vscode.TextDocument,
@@ -200,7 +201,7 @@ export default function compile(
 
   // =======================================================================================================================================
   function finished(res: any): boolean {
-    if (dxService.isEmptyUndOrNull(res)) {
+    if (isEmptyUndOrNull(res)) {
       vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
       return true;
     }
