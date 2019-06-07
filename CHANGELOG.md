@@ -5,6 +5,7 @@
     * Fix "Never prompts for diff/overwrite on save for Lightning Web Components" #280
     * Remove salesforce-alm dependency. Users are now REQUIRED to install the SFDX-CLI
     * Because of salesforce-alm removal, the run DX command menu option has been removed.
+    * Switched back to using webpack to pack the extension
 * 3.16.0
     * Fix issue #264 (s.saveApex(...).then(...).then(...).catch(...).finally is not a function)
     * Fix deploy errors not being reported on first save after file creation

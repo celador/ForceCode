@@ -382,7 +382,7 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                   // this will work for most other things...
                   var theData: any;
                   if (ContentType.includes('image') || ContentType.includes('shockwave-flash')) {
-                    theData = new Buffer(actualResData.toString('base64'), 'base64');
+                    theData = Buffer.from(actualResData.toString('base64'), 'base64');
                   } else {
                     theData = actualResData.toString(mime.charset(ContentType) || 'UTF-8');
                   }

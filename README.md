@@ -14,7 +14,7 @@ There's no complicated setup process or project configurations, no external apps
 
 ## IMPORTANT
 
-As of version 3.17.0, you will be required to install the SFDX-CLI on your system in order for this extension to function! The ability to run a DX command via the ForceCode menu has also been removed because of this change.
+As of version 3.17.0, you will be required to install the SFDX-CLI on your system in order for this extension to function! The ability to run a DX command via the ForceCode menu has also been removed because of this change. The extension size has been dramatically reduced because of this change (Went from ~50MB unpackaged to under 2MB!).
 
 ## Slack
 
