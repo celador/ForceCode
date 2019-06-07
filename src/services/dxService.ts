@@ -78,8 +78,13 @@ export default class DXService implements DXCommands {
    *   This does all the work. It will run a cli command through the built in dx.
    *   Takes a command as an argument and a string for the command's arguments.
    */
-  private runCommand(cmdString: string, arg: string): Promise<any> {
-    var fullCommand = 'sfdx force:' + cmdString + ' ' + arg;
+  private runCommand(cmdString: string, targetusername: boolean): Promise<any> {
+    var fullCommand =
+      'sfdx force:' +
+      cmdString +
+      (targetusername && fcConnection.currentConnection
+        ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
+        : '');
 
     // TODO: get rid of debug console lines
     console.log(fullCommand);
@@ -140,19 +145,19 @@ export default class DXService implements DXCommands {
   }
 
   public execAnon(file: string): Promise<ExecuteAnonymousResult> {
-    return this.runCommand('apex:execute', '--apexcodefile ' + file);
+    return this.runCommand('apex:execute --apexcodefile ' + file, true);
   }
 
   public login(url: string | undefined): Promise<any> {
-    return this.runCommand('auth:web:login', '--instanceurl ' + url);
+    return this.runCommand('auth:web:login --instanceurl ' + url, false);
   }
 
   public getOrgInfo(username: string | undefined): Promise<SFDX> {
-    return this.runCommand('org:display', '--targetusername ' + username);
+    return this.runCommand('org:display --targetusername ' + username, false);
   }
 
   public orgList(): Promise<FCOauth[]> {
-    return this.runCommand('org:list', '--clean --noprompt')
+    return this.runCommand('org:list --clean --noprompt', false)
       .then(res => {
         return res.nonScratchOrgs.concat(res.scratchOrgs);
       })
@@ -170,13 +175,7 @@ export default class DXService implements DXCommands {
     if (logid) {
       theLogId += '--logid ' + logid;
     }
-    return this.runCommand(
-      'apex:log:get',
-      theLogId +
-        (fcConnection.currentConnection
-          ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
-          : '')
-    ).then(log => {
+    return this.runCommand('apex:log:get ' + theLogId, true).then(log => {
       return Promise.resolve(log.log);
     });
   }
@@ -201,19 +200,19 @@ export default class DXService implements DXCommands {
   }
 
   public openOrg(): Promise<any> {
-    return this.runCommand('org:open', '');
+    return this.runCommand('org:open', true);
   }
 
   public openOrgPage(url: string): Promise<any> {
-    return this.runCommand('org:open', '-p ' + url);
+    return this.runCommand('org:open -p ' + url, true);
   }
 
   public createScratchOrg(options: string): Promise<any> {
     const curConnection = fcConnection.currentConnection;
     if (curConnection) {
       return this.runCommand(
-        'org:create',
-        options + ' --targetdevhubusername ' + curConnection.orgInfo.username
+        'org:create ' + options + ' --targetdevhubusername ' + curConnection.orgInfo.username,
+        false
       );
     } else {
       return Promise.reject('Forcecode is not currently connected to an org');
@@ -228,24 +227,10 @@ export default class DXService implements DXCommands {
       toRun = '-t ' + classOrMethodName;
     }
 
-    return this.runCommand(
-      'apex:test:run',
-      toRun +
-        ' -w 3 -y' +
-        (fcConnection.currentConnection
-          ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
-          : '')
-    );
+    return this.runCommand('apex:test:run ' + toRun + ' -w 3 -y', true);
   }
 
   public describeGlobal(type: SObjectCategory): Promise<string[]> {
-    return this.runCommand(
-      'schema:sobject:list',
-      '--sobjecttypecategory ' +
-        type.toString() +
-        (fcConnection.currentConnection
-          ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
-          : '')
-    );
+    return this.runCommand('schema:sobject:list --sobjecttypecategory ' + type.toString(), true);
   }
 }
