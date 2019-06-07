@@ -34,7 +34,7 @@ interface ApexTestResult {
   };
 }
 
-export interface QueryResult {
+export interface ApexTestQueryResult {
   done: boolean; // Flag if the query is fetched all records or not
   nextRecordsUrl?: string; // URL locator for next record set, (available when done = false)
   totalSize: number; // Total size for query

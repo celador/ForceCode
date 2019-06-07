@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { fcConnection, dxService, QueryResult, apexTestResults } from './../services';
+import { fcConnection, dxService, ApexTestQueryResult, apexTestResults } from './../services';
 
 export default function apexTest(toTest: string, classOrMethod: string): Promise<any> {
-  return dxService.runTest(toTest, classOrMethod).then((dxRes: QueryResult) => {
+  return dxService.runTest(toTest, classOrMethod).then((dxRes: ApexTestQueryResult) => {
     // get the test class Ids from the result
     var testClassIds: string[] = new Array<string>();
     dxRes.tests.forEach(tRes => {
@@ -15,7 +15,7 @@ export default function apexTest(toTest: string, classOrMethod: string): Promise
   });
 
   // =======================================================================================================================================
-  function showResult(dxRes: QueryResult) {
+  function showResult(dxRes: ApexTestQueryResult) {
     if (dxRes.summary.failing && dxRes.summary.failing > 0) {
       let errorMessage: string = 'FAILED: ';
       dxRes.tests.forEach(curTest => {
