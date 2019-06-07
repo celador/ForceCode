@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
-import { fcConnection, dxService } from './../services';
-import apexTestResults from '../services/apexTestResults';
-import { QueryResult } from '../services/dxService';
+import { fcConnection, dxService, QueryResult, apexTestResults } from './../services';
 
 export default function apexTest(toTest: string, classOrMethod: string): Promise<any> {
   return dxService.runTest(toTest, classOrMethod).then((dxRes: QueryResult) => {

@@ -51,8 +51,6 @@ export function open(context: vscode.ExtensionContext) {
 }
 
 export function showFileOptions(promises: any[]) {
-  // TODO: Objects
-  // TODO: Generic Metadata retrieve
   return Promise.all(promises)
     .then(results => {
       let options: vscode.QuickPickItem[] = results

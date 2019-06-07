@@ -6,7 +6,7 @@ const jsforce: any = require('jsforce');
 import klaw = require('klaw');
 import { saveConfigFile, readConfigFile } from './configuration';
 import { checkConfig, enterCredentials } from './credentials';
-import { SFDX } from './dxService';
+import { SFDX } from '.';
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 

@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { toArray, dxService, PXML, PXMLMember, SObjectCategory } from '../services';
+import { dxService, PXML, PXMLMember, SObjectCategory } from '../services';
 import { IMetadataObject } from '../forceCode';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
-import { isEmptyUndOrNull } from '../util';
+import { isEmptyUndOrNull, toArray } from '../util';
 
 function sortFunc(a: any, b: any): number {
   var aStr = a.label.toUpperCase();

@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as logging from './../providers/LogProvider';
-import { ExecuteAnonymousResult } from '../services/dxService';
-import { dxService } from '../services';
+import { dxService, ExecuteAnonymousResult } from '../services';
 import { saveToFile, removeFile } from '../util';
 
 export default function executeAnonymous(document: vscode.TextDocument): any {
@@ -57,7 +56,6 @@ export default function executeAnonymous(document: vscode.TextDocument): any {
       diagnostics.push(new vscode.Diagnostic(failureRange, res.compileProblem));
     }
     diagnosticCollection.set(document.uri, diagnostics);
-    // TODO: Make the Success message derive from the componentSuccesses, maybe similar to above code for failures
     if (diagnostics.length > 0) {
       vscode.window.showErrorMessage(`ForceCode: Execute Anonymous Errors`);
       diagnostics.forEach(d =>

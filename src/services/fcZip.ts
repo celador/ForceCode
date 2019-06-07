@@ -4,6 +4,7 @@ import * as fs from 'fs-extra';
 import * as vscode from 'vscode';
 import { getAnyFolderNameFromTT, getAnyExtNameFromTT } from '../parsers/open';
 import { parseString } from 'xml2js';
+import { toArray } from '../util';
 
 /**
  * @private zipFiles
@@ -90,12 +91,4 @@ export function getFileListFromPXML(): Promise<string[]> {
       }
     });
   });
-}
-
-export function toArray(toConvert: any): any[] {
-  if (!Array.isArray(toConvert)) {
-    return [toConvert];
-  } else {
-    return toConvert;
-  }
 }

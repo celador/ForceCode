@@ -28,3 +28,11 @@ export function removeFile(fileName: string): Promise<any> {
     return Promise.reject(undefined);
   }
 }
+
+export function toArray(toConvert: any): any[] {
+  if (!Array.isArray(toConvert)) {
+    return [toConvert];
+  } else {
+    return toConvert;
+  }
+}

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { toArray, PXML, PXMLMember, commandService } from '../services';
+import { PXML, PXMLMember, commandService } from '../services';
 import { getFileListFromPXML, zipFiles } from './../services';
 import * as path from 'path';
 import klaw = require('klaw');
@@ -8,7 +8,7 @@ import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
 import { getAnyTTFromPath } from '../parsers/open';
 import { outputToString } from '../parsers/output';
-import { isEmptyUndOrNull } from '../util';
+import { isEmptyUndOrNull, toArray } from '../util';
 
 var deployOptions: any = {
   checkOnly: true,

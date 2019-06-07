@@ -6,7 +6,6 @@ import {
   codeCovViewService,
   fcConnection,
   FCOauth,
-  toArray,
   dxService,
   SObjectCategory,
 } from '../services';
@@ -20,6 +19,7 @@ import { outputToString } from '../parsers/output';
 import { packageBuilder } from '.';
 import { getMembers } from './packageBuilder';
 import { XHROptions, xhr } from 'request-light';
+import { toArray } from '../util';
 
 export interface ToolingType {
   name: string;
