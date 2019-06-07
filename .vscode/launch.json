@@ -10,7 +10,7 @@
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "stopOnEntry": false,
       "sourceMaps": true,
-      "preLaunchTask": "npm: watch",
+      "preLaunchTask": "npm: webpack",
       "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {

@@ -15,7 +15,7 @@ const config = {
   entry: './src/extension.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
   output: {
     // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'dist', 'src'),
     filename: 'extension.js',
     libraryTarget: 'commonjs2',
     devtoolModuleFilenameTemplate: '../[resource-path]',
@@ -23,11 +23,6 @@ const config = {
   devtool: 'source-map',
   externals: [
     { vscode: 'commonjs vscode' }, // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
-    // This dependency can't be webpacked, so it needs to be left as-is, all others are packed into extension.js
-    // This creates a smaller package (about 1.5MB smaller). salesforce-alm is the memory hog, coming in at a whopping
-    // 53MB by itself. If someone can figure out how to use webpack with dynamic-relative requires
-    // (e.g. require(path.join(__dirname, 'thisdir', 'thatdir'))) then salesforce-alm could be packed as well
-    { 'salesforce-alm': 'salesforce-alm' },
   ],
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
