@@ -4,11 +4,12 @@ import { FCOauth } from './fcConnection';
 import { Config } from '../forceCode';
 import { readConfigFile, saveConfigFile, defaultOptions } from './configuration';
 import * as deepmerge from 'deepmerge';
+import { EventEmitter } from 'events';
 
 const quickPickOptions: vscode.QuickPickOptions = {
   ignoreFocusOut: true,
 };
-export function enterCredentials(): Promise<FCOauth> {
+export function enterCredentials(cancellationToken: EventEmitter): Promise<FCOauth> {
   return fcConnection.getSavedUsernames().then(uNames => {
     return dxService.orgList().then(orgs => {
       return new Promise<FCOauth>((resolve, reject) => {
@@ -83,7 +84,7 @@ export function enterCredentials(): Promise<FCOauth> {
   }
 
   function login(config: Config): Promise<FCOauth> {
-    return dxService.login(config.url);
+    return dxService.login(config.url, cancellationToken);
   }
 }
 

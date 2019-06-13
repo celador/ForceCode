@@ -80,8 +80,11 @@ export default class ForceService implements forceCode.IForceService {
           resolve();
         }
       }).then(() => {
-        fcConnection
-          .connect(config.username ? { username: config.username } : undefined)
+        commandService
+          .runCommand(
+            'ForceCode.switchUserText',
+            config.username ? { username: config.username } : undefined
+          )
           .then(res => {
             if (res === false && !fcConnection.isLoggedIn()) {
               this.statusBarItem.hide();

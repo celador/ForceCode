@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { fcConnection, FCOauth } from '.';
 import { isWindows } from './operatingSystem';
 import { SpawnOptions, spawn } from 'child_process';
+import { EventEmitter } from 'events';
+const kill = require('tree-kill');
 
 export interface SFDX {
   username: string;
@@ -50,21 +52,7 @@ export enum SObjectCategory {
   CUSTOM = 'CUSTOM',
 }
 
-export interface DXCommands {
-  login(url: string): Promise<any>;
-  getOrgInfo(username: string): Promise<SFDX>;
-  getDebugLog(logid?: string): Promise<string>;
-  getAndShowLog(id?: string): Thenable<vscode.TextEditor | undefined>;
-  execAnon(file: string): Promise<ExecuteAnonymousResult>;
-  openOrg(): Promise<any>;
-  openOrgPage(url: string): Promise<any>;
-  orgList(): Promise<FCOauth[]>;
-  createScratchOrg(edition: string): Promise<any>;
-  runTest(classOrMethodName: string, classOrMethod: string): Promise<any>;
-  describeGlobal(type: SObjectCategory): Promise<string[]>;
-}
-
-export default class DXService implements DXCommands {
+export default class DXService {
   private static instance: DXService;
 
   public static getInstance() {
@@ -78,7 +66,11 @@ export default class DXService implements DXCommands {
    *   This does all the work. It will run a cli command through the built in dx.
    *   Takes a command as an argument and a string for the command's arguments.
    */
-  private runCommand(cmdString: string, targetusername: boolean): Promise<any> {
+  private runCommand(
+    cmdString: string,
+    targetusername: boolean,
+    cancellationEmitter?: EventEmitter
+  ): Promise<any> {
     var fullCommand =
       'sfdx force:' +
       cmdString +
@@ -86,8 +78,6 @@ export default class DXService implements DXCommands {
         ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
         : '');
 
-    // TODO: get rid of debug console lines
-    console.log(fullCommand);
     if (isWindows()) {
       fullCommand = 'cmd /c' + fullCommand;
     }
@@ -106,11 +96,17 @@ export default class DXService implements DXCommands {
       env: Object.assign({ SFDX_JSON_TO_STDOUT: 'true' }, process.env),
     };
 
+    var pid;
+
     return new Promise((resolve, reject) => {
       const cmd = spawn(commandName, args, spawnOpt);
       if (cmd === null || cmd.stdout === null || cmd.stderr === null) {
         return reject();
       } else {
+        if (cancellationEmitter) {
+          pid = cmd.pid;
+          cancellationEmitter.on('cancelled', killPromise);
+        }
         let stdout = '';
         cmd.stdout.on('data', data => {
           stdout += data;
@@ -136,20 +132,31 @@ export default class DXService implements DXCommands {
             console.warn(error);
             reject(error);
           } else {
-            console.log(json.result);
             resolve(json.result);
           }
         });
       }
     });
+
+    async function killPromise() {
+      console.log('Cancelling task...');
+      return new Promise((resolve, reject) => {
+        kill(pid, 'SIGKILL', (err: {}) => {
+          err ? reject(err) : resolve();
+        });
+      });
+    }
   }
 
-  public execAnon(file: string): Promise<ExecuteAnonymousResult> {
-    return this.runCommand('apex:execute --apexcodefile ' + file, true);
+  public execAnon(
+    file: string,
+    cancellationEmitter: EventEmitter
+  ): Promise<ExecuteAnonymousResult> {
+    return this.runCommand('apex:execute --apexcodefile ' + file, true, cancellationEmitter);
   }
 
-  public login(url: string | undefined): Promise<any> {
-    return this.runCommand('auth:web:login --instanceurl ' + url, false);
+  public login(url: string | undefined, cancellationEmitter: EventEmitter): Promise<any> {
+    return this.runCommand('auth:web:login --instanceurl ' + url, false, cancellationEmitter);
   }
 
   public getOrgInfo(username: string | undefined): Promise<SFDX> {
@@ -170,7 +177,7 @@ export default class DXService implements DXCommands {
       });
   }
 
-  public getDebugLog(logid?: string): Promise<string> {
+  public getDebugLog(logid: string | undefined): Promise<string> {
     var theLogId: string = '';
     if (logid) {
       theLogId += '--logid ' + logid;
@@ -180,7 +187,7 @@ export default class DXService implements DXCommands {
     });
   }
 
-  public getAndShowLog(id?: string): Thenable<vscode.TextEditor | undefined> {
+  public getAndShowLog(id: string | undefined): Thenable<vscode.TextEditor | undefined> {
     if (!id) {
       id = 'debugLog';
     }
@@ -207,19 +214,24 @@ export default class DXService implements DXCommands {
     return this.runCommand('org:open -p ' + url, true);
   }
 
-  public createScratchOrg(options: string): Promise<any> {
+  public createScratchOrg(options: string, cancellationEmitter: EventEmitter): Promise<any> {
     const curConnection = fcConnection.currentConnection;
     if (curConnection) {
       return this.runCommand(
         'org:create ' + options + ' --targetdevhubusername ' + curConnection.orgInfo.username,
-        false
+        false,
+        cancellationEmitter
       );
     } else {
       return Promise.reject('Forcecode is not currently connected to an org');
     }
   }
 
-  public runTest(classOrMethodName: string, classOrMethod: string): Promise<any> {
+  public runTest(
+    classOrMethodName: string,
+    classOrMethod: string,
+    cancellationEmitter: EventEmitter
+  ): Promise<any> {
     var toRun: string;
     if (classOrMethod === 'class') {
       toRun = '-n ' + classOrMethodName;
@@ -227,7 +239,7 @@ export default class DXService implements DXCommands {
       toRun = '-t ' + classOrMethodName;
     }
 
-    return this.runCommand('apex:test:run ' + toRun + ' -w 3 -y', true);
+    return this.runCommand('apex:test:run ' + toRun + ' -w 3 -y', true, cancellationEmitter);
   }
 
   public describeGlobal(type: SObjectCategory): Promise<string[]> {

@@ -3,50 +3,65 @@ import * as retrieve from './retrieve';
 import { getIcon, getExtension, getFolder } from './../parsers';
 import * as path from 'path';
 import { isEmptyUndOrNull } from '../util';
+import { ForcecodeCommand } from './forcecodeCommand';
 const TYPEATTRIBUTE: string = 'type';
 
-export function open(context: vscode.ExtensionContext) {
-  return Promise.resolve(vscode.window.forceCode)
-    .then(getFileList)
-    .then(proms => showFileOptions(proms));
+export class Open extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.openMenu';
+    this.name = 'Opening file';
+    this.hidden = false;
+    this.description =
+      'Open Classes, Pages, Triggers, Components, Lightning Components, and Static Resources';
+    this.detail = 'Retrieve a file from Salesforce.';
+    this.icon = 'desktop-download';
+    this.label = 'Open Salesforce File';
+  }
 
-  // =======================================================================================================================================
-  // =======================================================================================================================================
-  // =======================================================================================================================================
-  function getFileList() {
-    var metadataTypes: string[] = [
-      'ApexClass',
-      'ApexTrigger',
-      'ApexPage',
-      'ApexComponent',
-      'StaticResource',
-    ];
-    var predicate: string = `WHERE NamespacePrefix = '${
-      vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''
-    }'`;
-    var promises: any[] = metadataTypes.map(t => {
-      var sResource = t === 'StaticResource' ? ', ContentType' : '';
-      var q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;
-      return vscode.window.forceCode.conn.tooling.query(q);
-    });
-    promises.push(
-      vscode.window.forceCode.conn.tooling.query(
-        'SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' +
-          predicate
-      )
-    );
-    if (
-      vscode.window.forceCode.config.apiVersion &&
-      parseInt(vscode.window.forceCode.config.apiVersion) >= 45
-    ) {
+  public command(context: any, selectedResource: any): any {
+    return Promise.resolve(vscode.window.forceCode)
+      .then(getFileList)
+      .then(proms => showFileOptions(proms));
+
+    // =======================================================================================================================================
+    // =======================================================================================================================================
+    // =======================================================================================================================================
+    function getFileList() {
+      var metadataTypes: string[] = [
+        'ApexClass',
+        'ApexTrigger',
+        'ApexPage',
+        'ApexComponent',
+        'StaticResource',
+      ];
+      var predicate: string = `WHERE NamespacePrefix = '${
+        vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''
+      }'`;
+      var promises: any[] = metadataTypes.map(t => {
+        var sResource = t === 'StaticResource' ? ', ContentType' : '';
+        var q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;
+        return vscode.window.forceCode.conn.tooling.query(q);
+      });
       promises.push(
         vscode.window.forceCode.conn.tooling.query(
-          'SELECT Id, DeveloperName, NamespacePrefix, Description FROM LightningComponentBundle ' +
+          'SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' +
             predicate
         )
       );
+      if (
+        vscode.window.forceCode.config.apiVersion &&
+        parseInt(vscode.window.forceCode.config.apiVersion) >= 45
+      ) {
+        promises.push(
+          vscode.window.forceCode.conn.tooling.query(
+            'SELECT Id, DeveloperName, NamespacePrefix, Description FROM LightningComponentBundle ' +
+              predicate
+          )
+        );
+      }
+      return promises;
     }
-    return promises;
   }
 }
 

@@ -17,157 +17,86 @@ import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
 import { ToolingType } from '../commands/retrieve';
 import { getAnyNameFromUri } from '../parsers/open';
-import { FCCommand } from '../services/commandView';
 import { Config, IWorkspaceMember } from '../forceCode';
 import { readConfigFile, removeConfigFolder } from '../services/configuration';
-import { createScratchOrg } from '../commands/createScratchOrg';
+import { CreateScratchOrg } from '../commands/createScratchOrg';
+import { ForcecodeCommand } from '../commands/forcecodeCommand';
+import { Find } from '../commands/find';
+import { Open } from '../commands/open';
+import { CreateClass } from '../commands/createClass';
+import { ExecuteAnonymous } from '../commands/executeAnonymous';
+import { GetLog } from '../commands/getLog';
+import { OverallCoverage } from '../commands/overallCoverage';
+import { QueryEditor } from '../commands/queryEditor';
+import { CodeCompletionRefresh } from '../commands/codeCompletionRefresh';
+import { BulkLoader } from '../commands/bulkLoader';
+import { Settings } from '../commands/settings';
+import { ForceCodeMenu } from '../commands/menu';
+import { ApexTest } from '../commands/apexTest';
 
-export const fcCommands: FCCommand[] = [
-  {
-    commandName: 'ForceCode.openOrg',
-    name: 'Opening org in browser',
-    hidden: false,
-    description: 'Open project org',
-    detail: 'Open the org this project is associated with in a browser.',
-    icon: 'browser',
-    label: 'Open Org in browser',
-    command: function(context, selectedResource?) {
+// TODO: Classify all commands and place them in their proper files...even the small ones for the context menu
+
+export const fcCommands: ForcecodeCommand[] = [
+  new (class OpenOrg extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.openOrg';
+      this.name = 'Opening org in browser';
+      this.hidden = false;
+      this.description = 'Open project org';
+      this.detail = 'Open the org this project is associated with in a browser.';
+      this.icon = 'browser';
+      this.label = 'Open Org in browser';
+    }
+
+    public command(context, selectedResource?) {
       return dxService.openOrg();
-    },
-  },
-  {
-    commandName: 'ForceCode.find',
-    name: 'Finding in files',
-    hidden: false,
-    description: 'Find in files',
-    detail: 'Search salesforce source files for a string.',
-    icon: 'search',
-    label: 'Find',
-    command: function(context, selectedResource?) {
-      return commands.find();
-    },
-  },
-  // Open File
-  {
-    commandName: 'ForceCode.openMenu',
-    name: 'Opening file',
-    hidden: false,
-    description:
-      'Open Classes, Pages, Triggers, Components, Lightning Components, and Static Resources',
-    detail: 'Retrieve a file from Salesforce.',
-    icon: 'desktop-download',
-    label: 'Open Salesforce File',
-    command: function(context, selectedResource?) {
-      return commands.open(context);
-    },
-  },
-  {
-    commandName: 'ForceCode.open',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new Find(),
+  new Open(),
+  new (class OpenContext extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.open';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return commandService.runCommand('ForceCode.openMenu', context, selectedResource);
-    },
-  },
-  // Create Classes
-  {
-    commandName: 'ForceCode.createClass',
-    name: 'Creating file',
-    hidden: false,
-    description: 'Create an Aura Component, Class, LWC, Trigger, or Visualforce page/component',
-    detail: 'Creates a new file',
-    icon: 'plus',
-    label: 'New...',
-    command: function(context, selectedResource?) {
-      return commands.createClass();
-    },
-  },
-  // Execute Anonymous
-  // Execute Selected Code
-  {
-    commandName: 'ForceCode.executeAnonymousMenu',
-    name: 'Executing anonymous code',
-    hidden: false,
-    description: 'Execute code and get the debug log',
-    detail:
-      'Select some code to run before using this option. You can also right-click after selecting the code.',
-    icon: 'terminal',
-    label: 'Execute Anonymous',
-    command: function(context, selectedResource?) {
-      if (!vscode.window.activeTextEditor) {
-        return;
-      }
-      return commands.executeAnonymous(vscode.window.activeTextEditor.document);
-    },
-  },
-  {
-    commandName: 'ForceCode.executeAnonymous',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new CreateClass(),
+  new ExecuteAnonymous(),
+  new (class ExecuteAnonymousContext extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.executeAnonymous';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return commandService.runCommand('ForceCode.executeAnonymousMenu', context, selectedResource);
-    },
-  },
-  // Get Log(s)
-  {
-    commandName: 'ForceCode.getLogs',
-    name: 'Retrieving logs',
-    hidden: false,
-    description: 'Display a list of the last ten logs.',
-    detail: 'Get recent logs',
-    icon: 'unfold',
-    label: 'Get Logs',
-    command: function(context, selectedResource?) {
-      return commands.getLog();
-    },
-  },
-  {
-    commandName: 'ForceCode.getOverallCoverage',
-    name: 'Retrieving code coverage',
-    hidden: false,
-    description: 'Get overall code coverage',
-    detail:
-      'Retrieve the current code coverage for all files in the org and save in the coverage folder as a txt file.',
-    icon: 'checklist',
-    label: 'Get current overall code coverage',
-    command: function(context, selectedResource?) {
-      return commands.getOverallCoverage();
-    },
-  },
-  // Run SOQL/TOQL
-  {
-    commandName: 'ForceCode.queryEditor',
-    name: 'Opening Query Editor',
-    hidden: false,
-    description: 'Run a SOQL/TOQL query',
-    detail: 'The SOQL/TOQL query results will be shown in the window with the option to save',
-    icon: 'telescope',
-    label: 'SOQL/TOQL Query',
-    command: function(context, selectedResource?) {
-      return commands.queryEditor();
-    },
-  },
-  {
-    commandName: 'ForceCode.createScratchOrg',
-    name: 'Creating scratch org',
-    description: 'Create a scratch org associated with the current DevHub org',
-    detail:
-      'A scratch org will be created and added to the list of current usernames in the Forcecode view',
-    icon: 'beaker',
-    label: 'Create a scratch org',
-    hidden: false,
-    command: function(context, selectedResource?) {
-      return createScratchOrg.command();
-    },
-  },
-  // Diff Files
-  {
-    commandName: 'ForceCode.diffMenu',
-    name: 'Diffing file', //+ getFileName(vscode.window.activeTextEditor.document),
-    hidden: false,
-    description: 'Diff the current file with what is on the server',
-    detail: 'Diff the file',
-    icon: 'diff',
-    label: 'Diff',
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new GetLog(),
+  new OverallCoverage(),
+  new QueryEditor(),
+  new CreateScratchOrg(),
+  // TODO: Classify diff.ts
+  new (class DiffMenu extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.diffMenu';
+      this.name = 'Diffing file'; //+ getFileName(vscode.window.activeTextEditor.document),
+      this.hidden = false;
+      this.description = 'Diff the current file with what is on the server';
+      this.detail = 'Diff the file';
+      this.icon = 'diff';
+      this.label = 'Diff';
+    }
+
+    public command(context, selectedResource?) {
       if (selectedResource && selectedResource.path) {
         return vscode.workspace.openTextDocument(selectedResource).then(doc => commands.diff(doc));
       }
@@ -182,33 +111,44 @@ export const fcCommands: FCCommand[] = [
         vscode.window.activeTextEditor.document,
         ttype === 'AuraDefinition' || ttype === 'LightningComponentResource'
       );
-    },
-  },
-  {
-    commandName: 'ForceCode.diff',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class DiffContext extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.diff';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return commandService.runCommand('ForceCode.diffMenu', context, selectedResource);
-    },
-  },
-  {
-    commandName: 'ForceCode.toolingQuery',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class ToolingQuery extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.toolingQuery';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return vscode.window.forceCode.conn.tooling.query(context);
-    },
-  },
-  // Compile/Deploy
-  {
-    commandName: 'ForceCode.compileMenu',
-    name: 'Saving ',
-    hidden: false,
-    description: 'Save the active file to your org.',
-    detail:
-      'If there is an error, you will get notified. To automatically compile Salesforce files on save, set the autoCompile flag to true in your settings file',
-    icon: 'rocket',
-    label: 'Compile/Deploy',
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class CompileMenu extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.compileMenu';
+      this.name = 'Saving ';
+      this.hidden = false;
+      this.description = 'Save the active file to your org.';
+      this.detail =
+        'If there is an error, you will get notified. To automatically compile Salesforce files on save, set the autoCompile flag to true in your settings file';
+      this.icon = 'rocket';
+      this.label = 'Compile/Deploy';
+    }
+
+    public command(context, selectedResource?) {
       if (context) {
         if (context.uri) {
           context = context.uri;
@@ -221,154 +161,162 @@ export const fcCommands: FCCommand[] = [
         return;
       }
       return saveService.saveFile(vscode.window.activeTextEditor.document, selectedResource);
-    },
-  },
-  {
-    commandName: 'ForceCode.compile',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class CompileContext extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.compile';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return commandService.runCommand('ForceCode.compileMenu', context, false);
-    },
-  },
-  {
-    commandName: 'ForceCode.forceCompile',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class ForceCompile extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.forceCompile';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return commandService.runCommand('ForceCode.compileMenu', context, true);
-    },
-  },
-  // Build/Deploy Resource Bundle(s)
-  {
-    commandName: 'ForceCode.staticResourceMenu',
-    name: 'Retrieving static resource',
-    hidden: false,
-    description: 'Build and Deploy a resource bundle.',
-    detail: 'Create the Static Resource from the resource-bundle folder and deploy it to your org.',
-    icon: 'file-zip',
-    label: 'Build Resource Bundle',
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  // TODO: Classify static resource commands (2 of them)
+  new (class StaticResourceBundle extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.staticResourceMenu';
+      this.name = 'Retrieving static resource';
+      this.hidden = false;
+      this.description = 'Build and Deploy a resource bundle.';
+      this.detail =
+        'Create the Static Resource from the resource-bundle folder and deploy it to your org.';
+      this.icon = 'file-zip';
+      this.label = 'Build Resource Bundle';
+    }
+
+    public command(context, selectedResource?) {
       return commands.staticResource(context);
-    },
-  },
-  {
-    commandName: 'ForceCode.staticResource',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class StaticResourceBundleContext extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.staticResource';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return commandService.runCommand('ForceCode.staticResourceMenu', context, selectedResource);
-    },
-  },
-  {
-    commandName: 'ForceCode.buildPackage',
-    name: 'Building package.xml',
-    hidden: false,
-    description: 'Build a package.xml file and choose where to save it.',
-    detail:
-      'You will be able to choose the types to include in your package.xml (Only does * for members)',
-    icon: 'jersey',
-    label: 'Build package.xml file',
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  // TODO: Classify packageBuilder
+  new (class StaticResourceBundleContext extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.buildPackage';
+      this.name = 'Building package.xml';
+      this.hidden = false;
+      this.description = 'Build a package.xml file and choose where to save it.';
+      this.detail =
+        'You will be able to choose the types to include in your package.xml (Only does * for members)';
+      this.icon = 'jersey';
+      this.label = 'Build package.xml file';
+    }
+
+    public command(context, selectedResource?) {
       return commands.packageBuilder(true);
-    },
-  },
-  // Retrieve Package
-  {
-    commandName: 'ForceCode.retrievePackage',
-    name: 'Retrieving package',
-    hidden: false,
-    description: 'Retrieve metadata to your src directory.',
-    detail:
-      'You can choose to retrieve by your package.xml, retrieve all metadata, or choose which types to retrieve.',
-    icon: 'cloud-download',
-    label: 'Retrieve Package/Metadata',
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  // TODO: Classify retrieve (It is used a lot of places)
+  new (class RetrieveBundle extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.retrievePackage';
+      this.name = 'Retrieving package';
+      this.hidden = false;
+      this.description = 'Retrieve metadata to your src directory.';
+      this.detail =
+        'You can choose to retrieve by your package.xml, retrieve all metadata, or choose which types to retrieve.';
+      this.icon = 'cloud-download';
+      this.label = 'Retrieve Package/Metadata';
+    }
+
+    public command(context, selectedResource?) {
       return commands.retrieve(context);
-    },
-  },
-  // Export Package (Deploy via Metadata API, using Package.xml)
-  {
-    commandName: 'ForceCode.deployPackage',
-    name: 'Deploying package',
-    hidden: false,
-    description: 'Deploy your package.',
-    detail: 'Deploy from a package.xml file or choose files to deploy',
-    icon: 'package',
-    label: 'Deploy Package',
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  // TODO: Classify deploy
+  new (class DeployPackage extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.deployPackage';
+      this.name = 'Deploying package';
+      this.hidden = false;
+      this.description = 'Deploy your package.';
+      this.detail = 'Deploy from a package.xml file or choose files to deploy';
+      this.icon = 'package';
+      this.label = 'Deploy Package';
+    }
+
+    public command(context, selectedResource?) {
       return commands.deploy(context);
-    },
-  },
-  {
-    commandName: 'ForceCode.codeCompletionRefresh',
-    name: 'Refreshing Code Completion',
-    hidden: false,
-    description: 'Refresh objects from org',
-    detail:
-      'Generate faux sObject classes for apex code completion using the Salesforce apex plugin.',
-    icon: 'code',
-    label: 'Code Completion Refresh',
-    command: function(context, selectedResource?) {
-      return commands.codeCompletionRefresh();
-    },
-  },
-  {
-    commandName: 'ForceCode.bulkLoader',
-    name: 'Opening Bulk Loader',
-    hidden: false,
-    description: 'Perform bulk CRUD operations',
-    detail: 'Insert, update, or delete records in bulk by uploading a CSV file.',
-    icon: 'file',
-    label: 'Bulk Loader',
-    command: function(context, selectedResource?) {
-      return commands.bulkLoader();
-    },
-  },
-  {
-    commandName: 'ForceCode.settings',
-    name: 'Opening settings',
-    hidden: false,
-    description: 'Settings',
-    detail: 'Change project settings specific to each org.',
-    icon: 'gear',
-    label: 'Org Settings',
-    command: function(context, selectedResource?) {
-      return commands.settings();
-    },
-  },
-  {
-    commandName: 'ForceCode.createProjectMenu',
-    name: 'Creating new project',
-    hidden: false,
-    description: 'Create new project',
-    detail: 'Create a new Forcecode project in a folder you select.',
-    icon: 'file-directory',
-    label: 'New Project',
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new CodeCompletionRefresh(),
+  new BulkLoader(),
+  new Settings(),
+  // TODO we can't classify this at the moment because it lives in extension.ts
+  new (class CreateProject extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.createProjectMenu';
+      this.name = 'Creating new project';
+      this.hidden = false;
+      this.description = 'Create new project';
+      this.detail = 'Create a new Forcecode project in a folder you select.';
+      this.icon = 'file-directory';
+      this.label = 'New Project';
+    }
+
+    public command(context, selectedResource?) {
       return vscode.commands.executeCommand('ForceCode.createProject');
-    },
-  },
-  {
-    commandName: 'ForceCode.logout',
-    name: 'Logging out',
-    hidden: false,
-    description: 'Log out from current org',
-    detail: 'Log out of the current org in this project.',
-    icon: 'x',
-    label: 'Log out of Salesforce',
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class Logout extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.logout';
+      this.name = 'Logging out';
+      this.hidden = false;
+      this.description = 'Log out from current org';
+      this.detail = 'Log out of the current org in this project.';
+      this.icon = 'x';
+      this.label = 'Log out of Salesforce';
+    }
+
+    public command(context, selectedResource?) {
       var conn = context ? context : fcConnection.currentConnection;
       return fcConnection.disconnect(conn);
-    },
-  },
-  // Enter Salesforce Credentials
-  {
-    commandName: 'ForceCode.switchUserText',
-    name: 'Logging in',
-    hidden: false,
-    description: 'Enter the credentials you wish to use.',
-    detail: 'Log into an org not in the saved usernames list.',
-    icon: 'key',
-    label: 'Log in to Salesforce',
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class SwitchUser extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.switchUserText';
+      this.name = 'Logging in';
+      this.hidden = false;
+      this.description = 'Enter the credentials you wish to use.';
+      this.detail = 'Log into an org not in the saved usernames list.';
+      this.icon = 'key';
+      this.label = 'Log in to Salesforce';
+    }
+
+    public command(context, selectedResource?) {
       codeCovViewService.clear();
       var orgInfo: FCOauth;
       if (context instanceof FCConnection) {
@@ -376,28 +324,40 @@ export const fcCommands: FCCommand[] = [
       } else {
         orgInfo = context;
       }
-      return fcConnection.connect(orgInfo);
-    },
-  },
-  {
-    commandName: 'ForceCode.switchUser',
-    hidden: true,
-    command: function(context, selectedResource?) {
+      return fcConnection.connect(orgInfo, this.cancellationToken);
+    }
+  })(),
+  new (class SwitchUserContext extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.switchUser';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return commandService.runCommand('ForceCode.switchUserText', context, selectedResource);
-    },
-  },
-  {
-    commandName: 'ForceCode.refresh',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class RefreshContext extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.refresh';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return commandService.runCommand('ForceCode.refreshContext', context, selectedResource);
-    },
-  },
-  {
-    commandName: 'ForceCode.refreshContext',
-    name: 'Retrieving ',
-    hidden: true,
-    command: async function(context, selectedResource?) {
+    }
+  })(),
+  new (class Refresh extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.refreshContext';
+      this.name = 'Retrieving ';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       if (selectedResource && selectedResource instanceof Array) {
         return new Promise((resolve, reject) => {
           var files: PXMLMember[] = [];
@@ -443,46 +403,56 @@ export const fcCommands: FCCommand[] = [
           return cur.name === toolType && cur.members !== ['*'];
         });
       }
-    },
-  },
-  {
-    commandName: 'ForceCode.showMenu',
-    hidden: true,
-    command: function(context, selectedResource?) {
-      return commands.showMenu(context);
-    },
-  },
-  {
-    commandName: 'ForceCode.toggleCoverage',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new ForceCodeMenu(),
+  new (class ToggleCoverage extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.toggleCoverage';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       vscode.window.forceCode.config.showTestCoverage = !vscode.window.forceCode.config
         .showTestCoverage;
       return updateDecorations();
-    },
-  },
-  {
-    commandName: 'ForceCode.previewVF',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class PreviewVisualforce extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.previewVF';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       var vfFileNameSplit = context.fsPath.split(path.sep);
       var vfFileName = vfFileNameSplit[vfFileNameSplit.length - 1].split('.')[0];
       return dxService.openOrgPage('/apex/' + vfFileName);
-    },
-  },
-  {
-    commandName: 'ForceCode.previewApp',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class PreviewApp extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.previewApp';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       var appFileNameSplit = context.fsPath.split(path.sep);
       var appFileName = appFileNameSplit[appFileNameSplit.length - 1];
       return dxService.openOrgPage('/c/' + appFileName);
-    },
-  },
-  {
-    commandName: 'ForceCode.openFileInOrg',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class OpenFileInOrg extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.openFileInOrg';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       var id: string | undefined;
       if (context) {
         if (context.fsPath) {
@@ -501,29 +471,30 @@ export const fcCommands: FCCommand[] = [
       } else {
         return Promise.resolve();
       }
-    },
-  },
-  {
-    commandName: 'ForceCode.showFileOptions',
-    name: 'Opening file',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class ShowFileOptions extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.showFileOptions';
+      this.name = 'Opening file';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return commands.showFileOptions(context);
-    },
-  },
-  {
-    commandName: 'ForceCode.apexTest',
-    name: 'Running apex test',
-    hidden: true,
-    command: function(context, selectedResource?) {
-      return commands.apexTest(context, selectedResource);
-    },
-  },
-  {
-    commandName: 'ForceCode.fileModified',
-    name: 'Modified file',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new ApexTest(),
+  new (class FileModified extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.fileModified';
+      this.name = 'Modified file';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return vscode.workspace.openTextDocument(context).then(theDoc => {
         return vscode.window
           .showWarningMessage(
@@ -540,64 +511,92 @@ export const fcCommands: FCCommand[] = [
             }
           });
       });
-    },
-  },
-  {
-    commandName: 'ForceCode.staticResourceDeployFromFile',
-    name: 'Saving static resource',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class StaticResourceDeployFile extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.staticResourceDeployFromFile';
+      this.name = 'Saving static resource';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return commands.staticResourceDeployFromFile(selectedResource, context);
-    },
-  },
-  {
-    commandName: 'ForceCode.checkForFileChanges',
-    name: 'Getting workspace information',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class CheckForFileChanges extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.checkForFileChanges';
+      this.name = 'Getting workspace information';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return vscode.window.forceCode.checkForFileChanges();
-    },
-  },
-  {
-    commandName: 'ForceCode.showTasks',
-    name: 'Show tasks',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class ShowTasks extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.showTasks';
+      this.name = 'Show tasks';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       var treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {
         treeDataProvider: commandViewService,
       });
       return treePro.reveal(commandViewService.getChildren()[0]);
-    },
-  },
-  {
-    commandName: 'ForceCode.openOnClick',
-    name: 'Open From TestCov view',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class OpenOnClick extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.openOnClick';
+      this.name = 'Open From TestCov view';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return vscode.workspace
         .openTextDocument(context)
         .then(doc => vscode.window.showTextDocument(doc, { preview: false }));
-    },
-  },
-  {
-    commandName: 'ForceCode.getCodeCoverage',
-    name: 'Retrieving code coverage',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class GetCodeCoverage extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.getCodeCoverage';
+      this.name = 'Retrieving code coverage';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return commands.apexTestResults();
-    },
-  },
-  {
-    commandName: 'ForceCode.runTests', //'sfdx.force.apex.test.class.run.delegate',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class RunTests extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.runTests';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       return commandService.runCommand('ForceCode.apexTest', context.name, context.type);
-    },
-  },
-  {
-    commandName: 'ForceCode.login',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class Login extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.login';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       var orgInfo: FCOauth;
       if (context instanceof FCConnection) {
         orgInfo = context.orgInfo;
@@ -605,15 +604,19 @@ export const fcCommands: FCCommand[] = [
         orgInfo = context;
       }
       const cfg: Config = readConfigFile(orgInfo.username);
-      return dxService.login(cfg.url).then(res => {
+      return dxService.login(cfg.url, this.cancellationToken).then(res => {
         return commandService.runCommand('ForceCode.switchUserText', res);
       });
-    },
-  },
-  {
-    commandName: 'ForceCode.removeConfig',
-    hidden: true,
-    command: function(context, selectedResource?) {
+    }
+  })(),
+  new (class RemoveConfig extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.removeConfig';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
       var username: string;
       if (context instanceof FCConnection) {
         username = context.orgInfo.username;
@@ -645,6 +648,18 @@ export const fcCommands: FCCommand[] = [
           const conn: FCConnection | undefined = fcConnection.getConnByUsername(username);
           return fcConnection.disconnect(conn);
         });
-    },
-  },
+    }
+  })(),
+  new (class CancelCommand extends ForcecodeCommand {
+    constructor() {
+      super();
+      this.commandName = 'ForceCode.cancelCommand';
+      this.hidden = true;
+    }
+
+    public command(context, selectedResource?) {
+      console.log(context);
+      return context.execution.cancel();
+    }
+  })(),
 ];

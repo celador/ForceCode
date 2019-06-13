@@ -10,6 +10,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import { ChildRelationship, Field, SObject, SObjectDescribe } from './';
 import { dxService, SObjectCategory } from '../services';
+import { EventEmitter } from 'events';
 
 const SFDX_DIR = '.sfdx';
 const TOOLS_DIR = 'tools';
@@ -56,7 +57,11 @@ export class FauxClassGenerator {
     return decl.substr(decl.indexOf(' ') + 1);
   }
 
-  public async generate(projectPath: string, type: SObjectCategory): Promise<string> {
+  public async generate(
+    projectPath: string,
+    type: SObjectCategory,
+    cancellationToken: EventEmitter
+  ): Promise<string> {
     vscode.window.forceCode.outputChannel.appendLine(
       '===================Starting refresh of ' + type + ' objects from org====================='
     );
