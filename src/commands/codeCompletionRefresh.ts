@@ -38,6 +38,7 @@ export class CodeCompletionRefresh extends ForcecodeCommand {
       placeHolder: 'Choose an option...',
     };
     var objectsToGet: SObjectCategory;
+    const cancellationToken = this.cancellationToken;
     await vscode.window
       .showQuickPick(options, config)
       .then((res: vscode.QuickPickItem | undefined) => {
@@ -61,7 +62,11 @@ export class CodeCompletionRefresh extends ForcecodeCommand {
         var gen = new FauxClassGenerator();
         try {
           var startTime = new Date().getTime();
-          await gen.generate(vscode.window.forceCode.workspaceRoot, objectsToGet);
+          await gen.generate(
+            vscode.window.forceCode.workspaceRoot,
+            objectsToGet,
+            cancellationToken
+          );
           var endTime = new Date().getTime();
           vscode.window.forceCode.outputChannel.appendLine(
             'Refresh took ' + Math.round((endTime - startTime) / (1000 * 60)) + ' minutes.'

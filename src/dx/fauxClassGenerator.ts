@@ -62,6 +62,10 @@ export class FauxClassGenerator {
     type: SObjectCategory,
     cancellationToken: EventEmitter
   ): Promise<string> {
+    var isCancelled = false;
+    cancellationToken.on('cancelled', function() {
+      isCancelled = true;
+    });
     vscode.window.forceCode.outputChannel.appendLine(
       '===================Starting refresh of ' + type + ' objects from org====================='
     );
@@ -92,6 +96,9 @@ export class FauxClassGenerator {
     }
     let j = 0;
     while (j < sobjects.length) {
+      if (isCancelled) {
+        return Promise.reject('Cancelled');
+      }
       try {
         fetchedSObjects = fetchedSObjects.concat(await describe.describeSObjectBatch(sobjects, j));
         j = fetchedSObjects.length;
