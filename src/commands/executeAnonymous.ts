@@ -1,8 +1,20 @@
 import * as vscode from 'vscode';
 import * as logging from './../providers/LogProvider';
-import { dxService, ExecuteAnonymousResult } from '../services';
+import { dxService, ExecuteAnonymousResult, commandService } from '../services';
 import { saveToFile, removeFile } from '../util';
 import { ForcecodeCommand } from './forcecodeCommand';
+
+export class ExecuteAnonymousContext extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.executeAnonymous';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return commandService.runCommand('ForceCode.executeAnonymousMenu', context, selectedResource);
+  }
+}
 
 export class ExecuteAnonymous extends ForcecodeCommand {
   constructor() {

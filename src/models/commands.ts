@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as commands from './../commands';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
-import { getFileName, getToolingType } from './../parsers';
+import { getFileName } from './../parsers';
 import {
   commandService,
   commandViewService,
@@ -10,21 +10,18 @@ import {
   dxService,
   FCOauth,
   FCConnection,
-  PXMLMember,
-  saveService,
 } from './../services';
 import * as path from 'path';
 import { FCFile } from '../services/codeCovView';
-import { ToolingType } from '../commands/retrieve';
-import { getAnyNameFromUri } from '../parsers/open';
+import { RetrieveBundle, RefreshContext, Refresh } from '../commands/retrieve';
 import { Config, IWorkspaceMember } from '../forceCode';
 import { readConfigFile, removeConfigFolder } from '../services/configuration';
 import { CreateScratchOrg } from '../commands/createScratchOrg';
 import { ForcecodeCommand } from '../commands/forcecodeCommand';
 import { Find } from '../commands/find';
-import { Open } from '../commands/open';
+import { Open, OpenContext, ShowFileOptions } from '../commands/open';
 import { CreateClass } from '../commands/createClass';
-import { ExecuteAnonymous } from '../commands/executeAnonymous';
+import { ExecuteAnonymous, ExecuteAnonymousContext } from '../commands/executeAnonymous';
 import { GetLog } from '../commands/getLog';
 import { OverallCoverage } from '../commands/overallCoverage';
 import { QueryEditor } from '../commands/queryEditor';
@@ -32,9 +29,18 @@ import { CodeCompletionRefresh } from '../commands/codeCompletionRefresh';
 import { BulkLoader } from '../commands/bulkLoader';
 import { Settings } from '../commands/settings';
 import { ForceCodeMenu } from '../commands/menu';
-import { ApexTest } from '../commands/apexTest';
+import { ApexTest, RunTests } from '../commands/apexTest';
+import { DiffMenu, DiffContext } from '../commands/diff';
+import { CompileMenu, CompileContext, ForceCompile } from '../commands/compile';
+import {
+  StaticResourceBundle,
+  StaticResourceBundleContext,
+  StaticResourceDeployFile,
+} from '../commands/staticResource';
+import { PackageBuilder } from '../commands/packageBuilder';
+import { DeployPackage } from '../commands/deploy';
 
-// TODO: Classify all commands and place them in their proper files...even the small ones for the context menu
+// TODO: Find proper homes for the rest of the commands defined in this file
 
 export const fcCommands: ForcecodeCommand[] = [
   new (class OpenOrg extends ForcecodeCommand {
@@ -55,75 +61,16 @@ export const fcCommands: ForcecodeCommand[] = [
   })(),
   new Find(),
   new Open(),
-  new (class OpenContext extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.open';
-      this.hidden = true;
-    }
-
-    public command(context, selectedResource?) {
-      return commandService.runCommand('ForceCode.openMenu', context, selectedResource);
-    }
-  })(),
+  new OpenContext(),
   new CreateClass(),
   new ExecuteAnonymous(),
-  new (class ExecuteAnonymousContext extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.executeAnonymous';
-      this.hidden = true;
-    }
-
-    public command(context, selectedResource?) {
-      return commandService.runCommand('ForceCode.executeAnonymousMenu', context, selectedResource);
-    }
-  })(),
+  new ExecuteAnonymousContext(),
   new GetLog(),
   new OverallCoverage(),
   new QueryEditor(),
   new CreateScratchOrg(),
-  // TODO: Classify diff.ts
-  new (class DiffMenu extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.diffMenu';
-      this.name = 'Diffing file'; //+ getFileName(vscode.window.activeTextEditor.document),
-      this.hidden = false;
-      this.description = 'Diff the current file with what is on the server';
-      this.detail = 'Diff the file';
-      this.icon = 'diff';
-      this.label = 'Diff';
-    }
-
-    public command(context, selectedResource?) {
-      if (selectedResource && selectedResource.path) {
-        return vscode.workspace.openTextDocument(selectedResource).then(doc => commands.diff(doc));
-      }
-      if (!vscode.window.activeTextEditor) {
-        return;
-      }
-      const ttype: string | undefined = getToolingType(vscode.window.activeTextEditor.document);
-      if (!ttype) {
-        throw { message: 'Metadata type not supported for diffing' };
-      }
-      return commands.diff(
-        vscode.window.activeTextEditor.document,
-        ttype === 'AuraDefinition' || ttype === 'LightningComponentResource'
-      );
-    }
-  })(),
-  new (class DiffContext extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.diff';
-      this.hidden = true;
-    }
-
-    public command(context, selectedResource?) {
-      return commandService.runCommand('ForceCode.diffMenu', context, selectedResource);
-    }
-  })(),
+  new DiffMenu(),
+  new DiffContext(),
   new (class ToolingQuery extends ForcecodeCommand {
     constructor() {
       super();
@@ -135,141 +82,14 @@ export const fcCommands: ForcecodeCommand[] = [
       return vscode.window.forceCode.conn.tooling.query(context);
     }
   })(),
-  new (class CompileMenu extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.compileMenu';
-      this.cancelable = true;
-      this.name = 'Saving ';
-      this.hidden = false;
-      this.description = 'Save the active file to your org.';
-      this.detail =
-        'If there is an error, you will get notified. To automatically compile Salesforce files on save, set the autoCompile flag to true in your settings file';
-      this.icon = 'rocket';
-      this.label = 'Compile/Deploy';
-    }
-
-    public command(context, selectedResource?) {
-      if (context) {
-        if (context.uri) {
-          context = context.uri;
-        }
-        return vscode.workspace.openTextDocument(context).then(doc => {
-          return saveService.saveFile(doc, selectedResource, this.cancellationToken);
-        });
-      }
-      if (!vscode.window.activeTextEditor) {
-        return;
-      }
-      return saveService.saveFile(vscode.window.activeTextEditor.document, selectedResource, this.cancellationToken);
-    }
-  })(),
-  new (class CompileContext extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.compile';
-      this.hidden = true;
-    }
-
-    public command(context, selectedResource?) {
-      return commandService.runCommand('ForceCode.compileMenu', context, false);
-    }
-  })(),
-  new (class ForceCompile extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.forceCompile';
-      this.hidden = true;
-    }
-
-    public command(context, selectedResource?) {
-      return commandService.runCommand('ForceCode.compileMenu', context, true);
-    }
-  })(),
-  // TODO: Classify static resource commands (2 of them)
-  new (class StaticResourceBundle extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.staticResourceMenu';
-      this.name = 'Retrieving static resource';
-      this.hidden = false;
-      this.description = 'Build and Deploy a resource bundle.';
-      this.detail =
-        'Create the Static Resource from the resource-bundle folder and deploy it to your org.';
-      this.icon = 'file-zip';
-      this.label = 'Build Resource Bundle';
-    }
-
-    public command(context, selectedResource?) {
-      return commands.staticResource(context);
-    }
-  })(),
-  new (class StaticResourceBundleContext extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.staticResource';
-      this.hidden = true;
-    }
-
-    public command(context, selectedResource?) {
-      return commandService.runCommand('ForceCode.staticResourceMenu', context, selectedResource);
-    }
-  })(),
-  // TODO: Classify packageBuilder
-  new (class StaticResourceBundleContext extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.buildPackage';
-      this.name = 'Building package.xml';
-      this.hidden = false;
-      this.description = 'Build a package.xml file and choose where to save it.';
-      this.detail =
-        'You will be able to choose the types to include in your package.xml (Only does * for members)';
-      this.icon = 'jersey';
-      this.label = 'Build package.xml file';
-    }
-
-    public command(context, selectedResource?) {
-      return commands.packageBuilder(true);
-    }
-  })(),
-  // TODO: Classify retrieve (It is used a lot of places)
-  new (class RetrieveBundle extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.retrievePackage';
-      this.cancelable = true;
-      this.name = 'Retrieving package';
-      this.hidden = false;
-      this.description = 'Retrieve metadata to your src directory.';
-      this.detail =
-        'You can choose to retrieve by your package.xml, retrieve all metadata, or choose which types to retrieve.';
-      this.icon = 'cloud-download';
-      this.label = 'Retrieve Package/Metadata';
-    }
-
-    public command(context, selectedResource?) {
-      return commands.retrieve(context, this.cancellationToken);
-    }
-  })(),
-  // TODO: Classify deploy
-  new (class DeployPackage extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.deployPackage';
-      this.cancelable = true;
-      this.name = 'Deploying package';
-      this.hidden = false;
-      this.description = 'Deploy your package.';
-      this.detail = 'Deploy from a package.xml file or choose files to deploy';
-      this.icon = 'package';
-      this.label = 'Deploy Package';
-    }
-
-    public command(context, selectedResource?) {
-      return commands.deploy(context, this.cancellationToken);
-    }
-  })(),
+  new CompileMenu(),
+  new CompileContext(),
+  new ForceCompile(),
+  new StaticResourceBundle(),
+  new StaticResourceBundleContext(),
+  new PackageBuilder(),
+  new RetrieveBundle(),
+  new DeployPackage(),
   new CodeCompletionRefresh(),
   new BulkLoader(),
   new Settings(),
@@ -342,74 +162,8 @@ export const fcCommands: ForcecodeCommand[] = [
       return commandService.runCommand('ForceCode.switchUserText', context, selectedResource);
     }
   })(),
-  new (class RefreshContext extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.refresh';
-      this.hidden = true;
-    }
-
-    public command(context, selectedResource?) {
-      return commandService.runCommand('ForceCode.refreshContext', context, selectedResource);
-    }
-  })(),
-  new (class Refresh extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.refreshContext';
-      this.cancelable = true;
-      this.name = 'Retrieving ';
-      this.hidden = true;
-    }
-
-    public command(context, selectedResource?) {
-      if (selectedResource && selectedResource instanceof Array) {
-        return new Promise((resolve, reject) => {
-          var files: PXMLMember[] = [];
-          var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => {
-            if (curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
-              return getAnyNameFromUri(curRes);
-            } else {
-              throw {
-                message:
-                  "Only files/folders within the current org's src folder (" +
-                  vscode.window.forceCode.projectRoot +
-                  ') can be retrieved/refreshed.',
-              };
-            }
-          });
-          Promise.all(proms).then(theNames => {
-            theNames.forEach(curName => {
-              var index: number = getTTIndex(curName.name, files);
-              if (index >= 0) {
-                if (curName.members === ['*']) {
-                  files[index].members = ['*'];
-                } else {
-                  files[index].members.push(...curName.members);
-                }
-              } else {
-                files.push(curName);
-              }
-            });
-            resolve(commands.retrieve({ types: files }, this.cancellationToken));
-          });
-        });
-      }
-      if (context) {
-        return commands.retrieve(context, this.cancellationToken);
-      }
-      if (!vscode.window.activeTextEditor) {
-        return undefined;
-      }
-      return commands.retrieve(vscode.window.activeTextEditor.document.uri, this.cancellationToken);
-
-      function getTTIndex(toolType: string, arr: ToolingType[]): number {
-        return arr.findIndex(cur => {
-          return cur.name === toolType && cur.members !== ['*'];
-        });
-      }
-    }
-  })(),
+  new RefreshContext(),
+  new Refresh(),
   new ForceCodeMenu(),
   new (class ToggleCoverage extends ForcecodeCommand {
     constructor() {
@@ -478,19 +232,7 @@ export const fcCommands: ForcecodeCommand[] = [
       }
     }
   })(),
-  new (class ShowFileOptions extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.showFileOptions';
-      this.cancelable = true;
-      this.name = 'Opening file';
-      this.hidden = true;
-    }
-
-    public command(context, selectedResource?) {
-      return commands.showFileOptions(context, this.cancellationToken);
-    }
-  })(),
+  new ShowFileOptions(),
   new ApexTest(),
   new (class FileModified extends ForcecodeCommand {
     constructor() {
@@ -520,18 +262,7 @@ export const fcCommands: ForcecodeCommand[] = [
       });
     }
   })(),
-  new (class StaticResourceDeployFile extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.staticResourceDeployFromFile';
-      this.name = 'Saving static resource';
-      this.hidden = true;
-    }
-
-    public command(context, selectedResource?) {
-      return commands.staticResourceDeployFromFile(selectedResource, context);
-    }
-  })(),
+  new StaticResourceDeployFile(),
   new (class CheckForFileChanges extends ForcecodeCommand {
     constructor() {
       super();
@@ -585,17 +316,7 @@ export const fcCommands: ForcecodeCommand[] = [
       return commands.apexTestResults();
     }
   })(),
-  new (class RunTests extends ForcecodeCommand {
-    constructor() {
-      super();
-      this.commandName = 'ForceCode.runTests';
-      this.hidden = true;
-    }
-
-    public command(context, selectedResource?) {
-      return commandService.runCommand('ForceCode.apexTest', context.name, context.type);
-    }
-  })(),
+  new RunTests(),
   new (class Login extends ForcecodeCommand {
     constructor() {
       super();

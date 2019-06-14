@@ -4,6 +4,25 @@ import { IMetadataObject } from '../forceCode';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
 import { isEmptyUndOrNull, toArray } from '../util';
+import { ForcecodeCommand } from './forcecodeCommand';
+
+export class PackageBuilder extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.buildPackage';
+    this.name = 'Building package.xml';
+    this.hidden = false;
+    this.description = 'Build a package.xml file and choose where to save it.';
+    this.detail =
+      'You will be able to choose the types to include in your package.xml (Only does * for members)';
+    this.icon = 'jersey';
+    this.label = 'Build package.xml file';
+  }
+
+  public command(context, selectedResource?) {
+    return packageBuilder(true);
+  }
+}
 
 function sortFunc(a: any, b: any): number {
   var aStr = a.label.toUpperCase();

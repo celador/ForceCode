@@ -1,6 +1,24 @@
 import * as vscode from 'vscode';
-import { fcConnection, dxService, ApexTestQueryResult, apexTestResults } from './../services';
+import {
+  fcConnection,
+  dxService,
+  ApexTestQueryResult,
+  apexTestResults,
+  commandService,
+} from './../services';
 import { ForcecodeCommand } from './forcecodeCommand';
+
+export class RunTests extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.runTests';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return commandService.runCommand('ForceCode.apexTest', context.name, context.type);
+  }
+}
 
 export class ApexTest extends ForcecodeCommand {
   constructor() {

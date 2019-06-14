@@ -10,7 +10,25 @@ import { getAnyTTFromPath } from '../parsers/open';
 import { outputToString } from '../parsers/output';
 import { isEmptyUndOrNull, toArray } from '../util';
 import { DeployResult } from 'jsforce';
-import { FCCancellationToken } from './forcecodeCommand';
+import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
+
+export class DeployPackage extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.deployPackage';
+    this.cancelable = true;
+    this.name = 'Deploying package';
+    this.hidden = false;
+    this.description = 'Deploy your package.';
+    this.detail = 'Deploy from a package.xml file or choose files to deploy';
+    this.icon = 'package';
+    this.label = 'Deploy Package';
+  }
+
+  public command(context, selectedResource?) {
+    return deploy(context, this.cancellationToken);
+  }
+}
 
 var deployOptions: any = {
   checkOnly: true,

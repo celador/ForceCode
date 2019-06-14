@@ -8,6 +8,7 @@ import {
   FCOauth,
   dxService,
   SObjectCategory,
+  PXMLMember,
 } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
@@ -20,7 +21,96 @@ import { packageBuilder } from '.';
 import { getMembers } from './packageBuilder';
 import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
-import { FCCancellationToken } from './forcecodeCommand';
+import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
+
+export class Refresh extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.refreshContext';
+    this.cancelable = true;
+    this.name = 'Retrieving ';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    if (selectedResource && selectedResource instanceof Array) {
+      return new Promise((resolve, reject) => {
+        var files: PXMLMember[] = [];
+        var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => {
+          if (curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
+            return getAnyNameFromUri(curRes);
+          } else {
+            throw {
+              message:
+                "Only files/folders within the current org's src folder (" +
+                vscode.window.forceCode.projectRoot +
+                ') can be retrieved/refreshed.',
+            };
+          }
+        });
+        Promise.all(proms).then(theNames => {
+          theNames.forEach(curName => {
+            var index: number = getTTIndex(curName.name, files);
+            if (index >= 0) {
+              if (curName.members === ['*']) {
+                files[index].members = ['*'];
+              } else {
+                files[index].members.push(...curName.members);
+              }
+            } else {
+              files.push(curName);
+            }
+          });
+          resolve(retrieve({ types: files }, this.cancellationToken));
+        });
+      });
+    }
+    if (context) {
+      return retrieve(context, this.cancellationToken);
+    }
+    if (!vscode.window.activeTextEditor) {
+      return undefined;
+    }
+    return retrieve(vscode.window.activeTextEditor.document.uri, this.cancellationToken);
+
+    function getTTIndex(toolType: string, arr: ToolingType[]): number {
+      return arr.findIndex(cur => {
+        return cur.name === toolType && cur.members !== ['*'];
+      });
+    }
+  }
+}
+
+export class RefreshContext extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.refresh';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return commandService.runCommand('ForceCode.refreshContext', context, selectedResource);
+  }
+}
+
+export class RetrieveBundle extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.retrievePackage';
+    this.cancelable = true;
+    this.name = 'Retrieving package';
+    this.hidden = false;
+    this.description = 'Retrieve metadata to your src directory.';
+    this.detail =
+      'You can choose to retrieve by your package.xml, retrieve all metadata, or choose which types to retrieve.';
+    this.icon = 'cloud-download';
+    this.label = 'Retrieve Package/Metadata';
+  }
+
+  public command(context, selectedResource?) {
+    return retrieve(context, this.cancellationToken);
+  }
+}
 
 export interface ToolingType {
   name: string;
@@ -31,7 +121,10 @@ export interface ToolingTypes {
   types: ToolingType[];
 }
 
-export default function retrieve(resource: vscode.Uri | ToolingTypes | undefined, cancellationToken: FCCancellationToken) {
+export default function retrieve(
+  resource: vscode.Uri | ToolingTypes | undefined,
+  cancellationToken: FCCancellationToken
+) {
   const errMessage: string =
     "Either the file/metadata type doesn't exist in the current org or you're trying to retrieve outside of " +
     vscode.window.forceCode.projectRoot;
@@ -189,7 +282,7 @@ export default function retrieve(resource: vscode.Uri | ToolingTypes | undefined
             'Cannot retrieve more than 10,000 files at a time. Please select "Choose Types..." from the retrieve menu and try to download without Reports selected first.',
         });
       }
-      if(cancellationToken.isCanceled) {
+      if (cancellationToken.isCanceled) {
         reject();
       }
       var theStream = vscode.window.forceCode.conn.metadata.retrieve({
@@ -289,8 +382,8 @@ export default function retrieve(resource: vscode.Uri | ToolingTypes | undefined
                   message: 'package.xml file contains a type element without a name element',
                 });
               }
-            } 
-            if(cancellationToken.isCanceled) {
+            }
+            if (cancellationToken.isCanceled) {
               reject();
             }
             try {

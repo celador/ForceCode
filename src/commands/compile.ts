@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, saveHistoryService } from '../services';
+import { codeCovViewService, saveHistoryService, saveService, commandService } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
@@ -10,7 +10,65 @@ import * as path from 'path';
 import { saveLWC } from './saveLWC';
 import { createPackageXML, deployFiles } from './deploy';
 import { isEmptyUndOrNull } from '../util';
-import { FCCancellationToken } from './forcecodeCommand';
+import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
+
+export class CompileMenu extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.compileMenu';
+    this.cancelable = true;
+    this.name = 'Saving ';
+    this.hidden = false;
+    this.description = 'Save the active file to your org.';
+    this.detail =
+      'If there is an error, you will get notified. To automatically compile Salesforce files on save, set the autoCompile flag to true in your settings file';
+    this.icon = 'rocket';
+    this.label = 'Compile/Deploy';
+  }
+
+  public command(context, selectedResource?) {
+    if (context) {
+      if (context.uri) {
+        context = context.uri;
+      }
+      return vscode.workspace.openTextDocument(context).then(doc => {
+        return saveService.saveFile(doc, selectedResource, this.cancellationToken);
+      });
+    }
+    if (!vscode.window.activeTextEditor) {
+      return;
+    }
+    return saveService.saveFile(
+      vscode.window.activeTextEditor.document,
+      selectedResource,
+      this.cancellationToken
+    );
+  }
+}
+
+export class CompileContext extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.compile';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return commandService.runCommand('ForceCode.compileMenu', context, false);
+  }
+}
+
+export class ForceCompile extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.forceCompile';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return commandService.runCommand('ForceCode.compileMenu', context, true);
+  }
+}
 
 export default function compile(
   document: vscode.TextDocument,

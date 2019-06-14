@@ -4,7 +4,34 @@ import { getIcon, getExtension, getFolder } from './../parsers';
 import * as path from 'path';
 import { isEmptyUndOrNull } from '../util';
 import { ForcecodeCommand, FCCancellationToken } from './forcecodeCommand';
+import { commandService } from '../services';
 const TYPEATTRIBUTE: string = 'type';
+
+export class ShowFileOptions extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.showFileOptions';
+    this.cancelable = true;
+    this.name = 'Opening file';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return showFileOptions(context, this.cancellationToken);
+  }
+}
+
+export class OpenContext extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.open';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return commandService.runCommand('ForceCode.openMenu', context, selectedResource);
+  }
+}
 
 export class Open extends ForcecodeCommand {
   constructor() {
@@ -119,7 +146,10 @@ export function showFileOptions(promises: any[], cancellationToken: FCCancellati
           // open the files in the editor
           var filesOpened: number = 0;
           return opts.forEach((curFile: any) => {
-            if (!cancellationToken.isCanceled && filesOpened < vscode.workspace.getConfiguration('force')['showFilesOnOpenMax']) {
+            if (
+              !cancellationToken.isCanceled &&
+              filesOpened < vscode.workspace.getConfiguration('force')['showFilesOnOpenMax']
+            ) {
               var tType: string = curFile.detail.split(' ')[0];
               if (
                 tType !== 'AuraDefinitionBundle' &&
