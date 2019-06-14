@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import { compile } from '../commands';
 import klaw = require('klaw');
+import { FCCancellationToken } from '../commands/forcecodeCommand';
 
 interface PreSaveFile {
   path: string;
@@ -81,10 +82,10 @@ export class SaveService {
     return true;
   }
 
-  public saveFile(document: vscode.TextDocument, forceCompile: boolean): Promise<boolean> {
+  public saveFile(document: vscode.TextDocument, forceCompile: boolean, cancellationToken: FCCancellationToken): Promise<boolean> {
     // take the path and get the TextDocument, then hand it off to the compile() function
     return new Promise((resolve, reject) => {
-      compile(document, forceCompile)
+      compile(document, forceCompile, cancellationToken)
         .then(success => {
           if (success) {
             // update the file time for start up file change checks

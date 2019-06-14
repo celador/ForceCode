@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { fcConnection, FCOauth } from '.';
 import { isWindows } from './operatingSystem';
 import { SpawnOptions, spawn } from 'child_process';
-import { EventEmitter } from 'events';
+import { FCCancellationToken } from '../commands/forcecodeCommand';
 const kill = require('tree-kill');
 
 export interface SFDX {
@@ -69,7 +69,7 @@ export default class DXService {
   private runCommand(
     cmdString: string,
     targetusername: boolean,
-    cancellationEmitter?: EventEmitter
+    cancellationToken?: FCCancellationToken
   ): Promise<any> {
     var fullCommand =
       'sfdx force:' +
@@ -103,9 +103,9 @@ export default class DXService {
       if (cmd === null || cmd.stdout === null || cmd.stderr === null) {
         return reject();
       } else {
-        if (cancellationEmitter) {
+        if (cancellationToken) {
           pid = cmd.pid;
-          cancellationEmitter.on('cancelled', killPromise);
+          cancellationToken.cancellationEmitter.on('cancelled', killPromise);
         }
         let stdout = '';
         cmd.stdout.on('data', data => {
@@ -150,13 +150,13 @@ export default class DXService {
 
   public execAnon(
     file: string,
-    cancellationEmitter: EventEmitter
+    cancellationToken: FCCancellationToken
   ): Promise<ExecuteAnonymousResult> {
-    return this.runCommand('apex:execute --apexcodefile ' + file, true, cancellationEmitter);
+    return this.runCommand('apex:execute --apexcodefile ' + file, true, cancellationToken);
   }
 
-  public login(url: string | undefined, cancellationEmitter: EventEmitter): Promise<any> {
-    return this.runCommand('auth:web:login --instanceurl ' + url, false, cancellationEmitter);
+  public login(url: string | undefined, cancellationToken: FCCancellationToken): Promise<any> {
+    return this.runCommand('auth:web:login --instanceurl ' + url, false, cancellationToken);
   }
 
   public getOrgInfo(username: string | undefined): Promise<SFDX> {
@@ -214,13 +214,13 @@ export default class DXService {
     return this.runCommand('org:open -p ' + url, true);
   }
 
-  public createScratchOrg(options: string, cancellationEmitter: EventEmitter): Promise<any> {
+  public createScratchOrg(options: string, cancellationToken: FCCancellationToken): Promise<any> {
     const curConnection = fcConnection.currentConnection;
     if (curConnection) {
       return this.runCommand(
         'org:create ' + options + ' --targetdevhubusername ' + curConnection.orgInfo.username,
         false,
-        cancellationEmitter
+        cancellationToken
       );
     } else {
       return Promise.reject('Forcecode is not currently connected to an org');
@@ -230,7 +230,7 @@ export default class DXService {
   public runTest(
     classOrMethodName: string,
     classOrMethod: string,
-    cancellationEmitter: EventEmitter
+    cancellationToken: FCCancellationToken
   ): Promise<any> {
     var toRun: string;
     if (classOrMethod === 'class') {
@@ -239,7 +239,7 @@ export default class DXService {
       toRun = '-t ' + classOrMethodName;
     }
 
-    return this.runCommand('apex:test:run ' + toRun + ' -w 3 -y', true, cancellationEmitter);
+    return this.runCommand('apex:test:run ' + toRun + ' -w 3 -y', true, cancellationToken);
   }
 
   public describeGlobal(type: SObjectCategory): Promise<string[]> {

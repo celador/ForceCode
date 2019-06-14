@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import { ChildRelationship, Field, SObject, SObjectDescribe } from './';
 import { dxService, SObjectCategory } from '../services';
-import { EventEmitter } from 'events';
+import { FCCancellationToken } from '../commands/forcecodeCommand';
 
 const SFDX_DIR = '.sfdx';
 const TOOLS_DIR = 'tools';
@@ -60,12 +60,8 @@ export class FauxClassGenerator {
   public async generate(
     projectPath: string,
     type: SObjectCategory,
-    cancellationToken: EventEmitter
+    cancellationToken: FCCancellationToken
   ): Promise<string> {
-    var isCancelled = false;
-    cancellationToken.on('cancelled', function() {
-      isCancelled = true;
-    });
     vscode.window.forceCode.outputChannel.appendLine(
       '===================Starting refresh of ' + type + ' objects from org====================='
     );
@@ -96,7 +92,7 @@ export class FauxClassGenerator {
     }
     let j = 0;
     while (j < sobjects.length) {
-      if (isCancelled) {
+      if (cancellationToken.isCanceled) {
         return Promise.reject('Cancelled');
       }
       try {

@@ -7,6 +7,7 @@ import { ForcecodeCommand } from './forcecodeCommand';
 export class CreateScratchOrg extends ForcecodeCommand {
   constructor() {
     super();
+    this.cancelable = true;
     this.commandName = 'ForceCode.createScratchOrg';
     this.name = 'Creating scratch org';
     this.description = 'Create a scratch org associated with the current DevHub org';

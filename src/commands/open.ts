@@ -3,13 +3,14 @@ import * as retrieve from './retrieve';
 import { getIcon, getExtension, getFolder } from './../parsers';
 import * as path from 'path';
 import { isEmptyUndOrNull } from '../util';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand, FCCancellationToken } from './forcecodeCommand';
 const TYPEATTRIBUTE: string = 'type';
 
 export class Open extends ForcecodeCommand {
   constructor() {
     super();
     this.commandName = 'ForceCode.openMenu';
+    this.cancelable = true;
     this.name = 'Opening file';
     this.hidden = false;
     this.description =
@@ -22,7 +23,7 @@ export class Open extends ForcecodeCommand {
   public command(context: any, selectedResource: any): any {
     return Promise.resolve(vscode.window.forceCode)
       .then(getFileList)
-      .then(proms => showFileOptions(proms));
+      .then(proms => showFileOptions(proms, this.cancellationToken));
 
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -65,7 +66,7 @@ export class Open extends ForcecodeCommand {
   }
 }
 
-export function showFileOptions(promises: any[]) {
+export function showFileOptions(promises: any[], cancellationToken: FCCancellationToken) {
   return Promise.all(promises)
     .then(results => {
       let options: vscode.QuickPickItem[] = results
@@ -113,12 +114,12 @@ export function showFileOptions(promises: any[]) {
         }
       });
 
-      return retrieve.default({ types: files }).then((res: any) => {
+      return retrieve.default({ types: files }, cancellationToken).then((res: any) => {
         if (vscode.workspace.getConfiguration('force')['showFilesOnOpen']) {
           // open the files in the editor
           var filesOpened: number = 0;
           return opts.forEach((curFile: any) => {
-            if (filesOpened < vscode.workspace.getConfiguration('force')['showFilesOnOpenMax']) {
+            if (!cancellationToken.isCanceled && filesOpened < vscode.workspace.getConfiguration('force')['showFilesOnOpenMax']) {
               var tType: string = curFile.detail.split(' ')[0];
               if (
                 tType !== 'AuraDefinitionBundle' &&

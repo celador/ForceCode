@@ -10,10 +10,12 @@ import * as path from 'path';
 import { saveLWC } from './saveLWC';
 import { createPackageXML, deployFiles } from './deploy';
 import { isEmptyUndOrNull } from '../util';
+import { FCCancellationToken } from './forcecodeCommand';
 
 export default function compile(
   document: vscode.TextDocument,
-  forceCompile: boolean
+  forceCompile: boolean,
+  cancellationToken: FCCancellationToken
 ): Promise<boolean> {
   if (!document) {
     return Promise.resolve(false);
@@ -77,7 +79,7 @@ export default function compile(
           files.push(path.join(pathSplit, foldName));
           files.push(path.join(pathSplit, foldName + '-meta.xml'));
           files.push('package.xml');
-          return deployFiles(files, vscode.window.forceCode.storageRoot);
+          return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
         } else {
           return Promise.reject(false);
         }
@@ -100,18 +102,18 @@ export default function compile(
     return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
   } else if (toolingType === 'AuraDefinition') {
     DefType = getAuraDefTypeFromDocument(document);
-    return saveAura(document, toolingType, Metadata, forceCompile)
+    return saveAura(document, toolingType, cancellationToken, Metadata, forceCompile)
       .then(finished)
       .catch(onError)
       .then(updateSaveHistory);
   } else if (toolingType === 'LightningComponentResource') {
-    return saveLWC(document, toolingType, forceCompile)
+    return saveLWC(document, toolingType, cancellationToken, forceCompile)
       .then(finished)
       .catch(onError)
       .then(updateSaveHistory);
   } else {
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-    return saveApex(document, toolingType, Metadata, forceCompile)
+    return saveApex(document, toolingType, cancellationToken, Metadata, forceCompile)
       .then(finished)
       .then(res => {
         return vscode.window.forceCode.newContainer(res).then(() => {

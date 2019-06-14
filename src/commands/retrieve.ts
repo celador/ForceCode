@@ -20,6 +20,7 @@ import { packageBuilder } from '.';
 import { getMembers } from './packageBuilder';
 import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
+import { FCCancellationToken } from './forcecodeCommand';
 
 export interface ToolingType {
   name: string;
@@ -30,7 +31,7 @@ export interface ToolingTypes {
   types: ToolingType[];
 }
 
-export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
+export default function retrieve(resource: vscode.Uri | ToolingTypes | undefined, cancellationToken: FCCancellationToken) {
   const errMessage: string =
     "Either the file/metadata type doesn't exist in the current org or you're trying to retrieve outside of " +
     vscode.window.forceCode.projectRoot;
@@ -188,6 +189,9 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
             'Cannot retrieve more than 10,000 files at a time. Please select "Choose Types..." from the retrieve menu and try to download without Reports selected first.',
         });
       }
+      if(cancellationToken.isCanceled) {
+        reject();
+      }
       var theStream = vscode.window.forceCode.conn.metadata.retrieve({
         unpackaged: retrieveTypes,
         apiVersion:
@@ -285,6 +289,9 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
                   message: 'package.xml file contains a type element without a name element',
                 });
               }
+            } 
+            if(cancellationToken.isCanceled) {
+              reject();
             }
             try {
               resolve(
@@ -311,6 +318,10 @@ export default function retrieve(resource?: vscode.Uri | ToolingTypes) {
 
   function processResult(stream: fs.ReadStream): Promise<any> {
     return new Promise(function(resolve, reject) {
+      cancellationToken.cancellationEmitter.on('cancelled', function() {
+        stream.pause();
+        reject(stream.emit('end'));
+      });
       var resBundleNames: string[] = [];
       const destDir: string = vscode.window.forceCode.projectRoot;
       new compress.zip.UncompressStream({ source: stream })

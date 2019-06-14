@@ -139,6 +139,7 @@ export const fcCommands: ForcecodeCommand[] = [
     constructor() {
       super();
       this.commandName = 'ForceCode.compileMenu';
+      this.cancelable = true;
       this.name = 'Saving ';
       this.hidden = false;
       this.description = 'Save the active file to your org.';
@@ -154,13 +155,13 @@ export const fcCommands: ForcecodeCommand[] = [
           context = context.uri;
         }
         return vscode.workspace.openTextDocument(context).then(doc => {
-          return saveService.saveFile(doc, selectedResource);
+          return saveService.saveFile(doc, selectedResource, this.cancellationToken);
         });
       }
       if (!vscode.window.activeTextEditor) {
         return;
       }
-      return saveService.saveFile(vscode.window.activeTextEditor.document, selectedResource);
+      return saveService.saveFile(vscode.window.activeTextEditor.document, selectedResource, this.cancellationToken);
     }
   })(),
   new (class CompileContext extends ForcecodeCommand {
@@ -237,6 +238,7 @@ export const fcCommands: ForcecodeCommand[] = [
     constructor() {
       super();
       this.commandName = 'ForceCode.retrievePackage';
+      this.cancelable = true;
       this.name = 'Retrieving package';
       this.hidden = false;
       this.description = 'Retrieve metadata to your src directory.';
@@ -247,7 +249,7 @@ export const fcCommands: ForcecodeCommand[] = [
     }
 
     public command(context, selectedResource?) {
-      return commands.retrieve(context);
+      return commands.retrieve(context, this.cancellationToken);
     }
   })(),
   // TODO: Classify deploy
@@ -255,6 +257,7 @@ export const fcCommands: ForcecodeCommand[] = [
     constructor() {
       super();
       this.commandName = 'ForceCode.deployPackage';
+      this.cancelable = true;
       this.name = 'Deploying package';
       this.hidden = false;
       this.description = 'Deploy your package.';
@@ -264,7 +267,7 @@ export const fcCommands: ForcecodeCommand[] = [
     }
 
     public command(context, selectedResource?) {
-      return commands.deploy(context);
+      return commands.deploy(context, this.cancellationToken);
     }
   })(),
   new CodeCompletionRefresh(),
@@ -308,6 +311,7 @@ export const fcCommands: ForcecodeCommand[] = [
     constructor() {
       super();
       this.commandName = 'ForceCode.switchUserText';
+      this.cancelable = true;
       this.name = 'Logging in';
       this.hidden = false;
       this.description = 'Enter the credentials you wish to use.';
@@ -353,6 +357,7 @@ export const fcCommands: ForcecodeCommand[] = [
     constructor() {
       super();
       this.commandName = 'ForceCode.refreshContext';
+      this.cancelable = true;
       this.name = 'Retrieving ';
       this.hidden = true;
     }
@@ -386,17 +391,17 @@ export const fcCommands: ForcecodeCommand[] = [
                 files.push(curName);
               }
             });
-            resolve(commands.retrieve({ types: files }));
+            resolve(commands.retrieve({ types: files }, this.cancellationToken));
           });
         });
       }
       if (context) {
-        return commands.retrieve(context);
+        return commands.retrieve(context, this.cancellationToken);
       }
       if (!vscode.window.activeTextEditor) {
         return undefined;
       }
-      return commands.retrieve(vscode.window.activeTextEditor.document.uri);
+      return commands.retrieve(vscode.window.activeTextEditor.document.uri, this.cancellationToken);
 
       function getTTIndex(toolType: string, arr: ToolingType[]): number {
         return arr.findIndex(cur => {
@@ -477,12 +482,13 @@ export const fcCommands: ForcecodeCommand[] = [
     constructor() {
       super();
       this.commandName = 'ForceCode.showFileOptions';
+      this.cancelable = true;
       this.name = 'Opening file';
       this.hidden = true;
     }
 
     public command(context, selectedResource?) {
-      return commands.showFileOptions(context);
+      return commands.showFileOptions(context, this.cancellationToken);
     }
   })(),
   new ApexTest(),
@@ -490,6 +496,7 @@ export const fcCommands: ForcecodeCommand[] = [
     constructor() {
       super();
       this.commandName = 'ForceCode.fileModified';
+      this.cancelable = true;
       this.name = 'Modified file';
       this.hidden = true;
     }
@@ -505,7 +512,7 @@ export const fcCommands: ForcecodeCommand[] = [
           )
           .then(s => {
             if (s === 'Refresh') {
-              return commands.retrieve(theDoc.uri);
+              return commands.retrieve(theDoc.uri, this.cancellationToken);
             } else if (s === 'Diff') {
               return commands.diff(theDoc);
             }
@@ -593,6 +600,8 @@ export const fcCommands: ForcecodeCommand[] = [
     constructor() {
       super();
       this.commandName = 'ForceCode.login';
+      this.name = 'Logging in';
+      this.cancelable = true;
       this.hidden = true;
     }
 
@@ -658,7 +667,6 @@ export const fcCommands: ForcecodeCommand[] = [
     }
 
     public command(context, selectedResource?) {
-      console.log(context);
       return context.execution.cancel();
     }
   })(),

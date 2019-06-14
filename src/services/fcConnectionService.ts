@@ -7,7 +7,7 @@ import klaw = require('klaw');
 import { saveConfigFile, readConfigFile } from './configuration';
 import { checkConfig, enterCredentials } from './credentials';
 import { SFDX } from '.';
-import { EventEmitter } from 'events';
+import { FCCancellationToken } from '../commands/forcecodeCommand';
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 
@@ -135,7 +135,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
   }
 
   // this is a check that will refresh the orgs and check if logged in. if not, it asks to log in
-  public checkLoginStatus(reason: any, cancellationToken: EventEmitter): Promise<boolean> {
+  public checkLoginStatus(reason: any, cancellationToken: FCCancellationToken): Promise<boolean> {
     const message = reason && reason.message ? reason.message : reason;
     return this.refreshConnections().then(() => {
       if (
@@ -157,7 +157,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
   public connect(
     orgInfo: FCOauth | SFDX | undefined,
-    cancellationToken: EventEmitter
+    cancellationToken: FCCancellationToken
   ): Promise<boolean> {
     if (!this.loggingIn) {
       this.loggingIn = true;
@@ -188,7 +188,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
   private setupConn(
     service: FCConnectionService,
     username: string | undefined,
-    cancellationToken: EventEmitter
+    cancellationToken: FCCancellationToken
   ): Promise<boolean> {
     service.currentConnection = service.getConnByUsername(username);
     if (!service.isLoggedIn()) {

@@ -4,13 +4,16 @@ import { saveService } from '../services';
 import * as path from 'path';
 import { createPackageXML, deployFiles } from './deploy';
 import diff from './diff';
+import { FCCancellationToken } from './forcecodeCommand';
 
 // =======================================================================================================================================
 // ================================                Lightning Web Components               ================================================
 // =======================================================================================================================================
+// TODO: Add cancellation token to updates. Updates with LCs are quick, so is this possible??
 export function saveLWC(
   document: vscode.TextDocument,
   toolingType: string,
+  cancellationToken: FCCancellationToken,
   forceCompile?: boolean
 ): Promise<any> {
   const name: string | undefined = parsers.getName(document, toolingType);
@@ -102,7 +105,7 @@ export function saveLWC(
       const files: string[] = [];
       files.push(path.join('lwc', name));
       files.push('package.xml');
-      return deployFiles(files, vscode.window.forceCode.storageRoot);
+      return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
     });
   }
 }

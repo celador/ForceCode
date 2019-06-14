@@ -138,7 +138,7 @@ export class Task extends vscode.TreeItem {
       resolve(this.execution.run(this.context, this.selectedResource));
     })
       .catch(reason => {
-        if (this.execution.isCanceled) {
+        if (this.execution.cancellationToken.isCanceled) {
           return Promise.resolve();
         }
         return fcConnection
