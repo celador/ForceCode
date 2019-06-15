@@ -49,9 +49,9 @@ export class ApexTest extends ForcecodeCommand {
       if (dxRes.summary.failing && dxRes.summary.failing > 0) {
         let errorMessage: string = 'FAILED: ';
         dxRes.tests.forEach(curTest => {
-          if (curTest.StackTrace && curTest.Message) {
-            errorMessage += curTest.StackTrace + '\n' + curTest.Message + '\n';
-          }
+          //if (/*curTest.StackTrace && */curTest.Message) {
+            errorMessage += (curTest.StackTrace ? curTest.StackTrace + '\n' : '') + (curTest.Message ? curTest.Message + '\n' : '');
+          //}
         });
         vscode.window.showErrorMessage(errorMessage);
       } else {

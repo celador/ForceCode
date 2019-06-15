@@ -97,6 +97,7 @@ export default class DXService {
     };
 
     var pid;
+    var sfdxNotFound = false;
 
     return new Promise((resolve, reject) => {
       const cmd = spawn(commandName, args, spawnOpt);
@@ -118,6 +119,7 @@ export default class DXService {
 
         cmd.on('error', data => {
           console.error('err', data);
+          sfdxNotFound = data.message.indexOf('ENOENT') > -1;
         });
 
         cmd.on('close', code => {
@@ -127,12 +129,19 @@ export default class DXService {
           } catch (e) {
             console.warn(`No parsable results from command "${fullCommand}"`);
           }
-          if (code > 0) {
+          if (sfdxNotFound) {
+            // show the user a message that the SFDX CLI isn't installed
+            vscode.window.showErrorMessage(
+              'ForceCode: The SFDX CLI could not be found. Please download from [https://developer.salesforce.com/tools/sfdxcli](https://developer.salesforce.com/tools/sfdxcli) and install, then restart Visual Studio Code.'
+            );
+          }
+          // We want to resolve if there's an error with parsable results
+          if (code > 0 && !json) {
             // Get non-promise stack for extra help
             console.warn(error);
-            reject(error);
+            return reject(error);
           } else {
-            resolve(json.result);
+            return resolve(json ? json.result : undefined);
           }
         });
       }
