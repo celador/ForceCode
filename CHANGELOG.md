@@ -3,10 +3,12 @@
 * 3.17.0
     * Allow retrieval of managed package reports/dashboards/etc.
     * Fix "Never prompts for diff/overwrite on save for Lightning Web Components" #280
+    * Fix "3.16.0 not able to save LWC" #277
+    * Fix "Forcecode hangs when there is a failed login attempt." #275
     * Remove salesforce-alm dependency. Users are now REQUIRED to install the SFDX-CLI
     * Because of salesforce-alm removal, the run DX command menu option has been removed.
     * Switched back to using webpack to pack the extension
-    * Added ability to cancel running ForceCode Tasks!
+    * Added ability to cancel running ForceCode Tasks! #186
     * Show error message with a link to download if the SFDX CLI isn't installed.
 * 3.16.0
     * Fix issue #264 (s.saveApex(...).then(...).then(...).catch(...).finally is not a function)

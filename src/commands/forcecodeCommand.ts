@@ -45,3 +45,15 @@ export abstract class ForcecodeCommand {
     }
   }
 }
+
+export class CancelCommand extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.cancelCommand';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return context.execution.cancel();
+  }
+}

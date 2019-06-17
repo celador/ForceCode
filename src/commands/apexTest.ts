@@ -7,6 +7,34 @@ import {
   commandService,
 } from './../services';
 import { ForcecodeCommand } from './forcecodeCommand';
+import { updateDecorations } from '../decorators/testCoverageDecorator';
+
+export class ToggleCoverage extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.toggleCoverage';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    vscode.window.forceCode.config.showTestCoverage = !vscode.window.forceCode.config
+      .showTestCoverage;
+    return updateDecorations();
+  }
+}
+
+export class GetCodeCoverage extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.getCodeCoverage';
+    this.name = 'Retrieving code coverage';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return apexTestResults();
+  }
+}
 
 export class RunTests extends ForcecodeCommand {
   constructor() {
@@ -50,7 +78,9 @@ export class ApexTest extends ForcecodeCommand {
         let errorMessage: string = 'FAILED: ';
         dxRes.tests.forEach(curTest => {
           //if (/*curTest.StackTrace && */curTest.Message) {
-            errorMessage += (curTest.StackTrace ? curTest.StackTrace + '\n' : '') + (curTest.Message ? curTest.Message + '\n' : '');
+          errorMessage +=
+            (curTest.StackTrace ? curTest.StackTrace + '\n' : '') +
+            (curTest.Message ? curTest.Message + '\n' : '');
           //}
         });
         vscode.window.showErrorMessage(errorMessage);
