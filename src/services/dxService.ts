@@ -136,7 +136,7 @@ export default class DXService {
             );
           }
           // We want to resolve if there's an error with parsable results
-          if (code > 0 && !json) {
+          if ((code > 0 && !json) || (json && json.status > 0 && !json.result)) {
             // Get non-promise stack for extra help
             console.warn(error);
             return reject(error);
