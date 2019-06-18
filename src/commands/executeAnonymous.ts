@@ -38,9 +38,9 @@ export class ExecuteAnonymous extends ForcecodeCommand {
       );
       return;
     }
-    var document: vscode.TextDocument = context;
+    var document: vscode.TextDocument = editor.document;
     var selection = editor.selection;
-    var text = editor.document.getText(selection);
+    var text = document.getText(selection);
     if (text === '') {
       vscode.window.showErrorMessage('No text selected to execute, please select code to run...');
       return;
@@ -69,7 +69,6 @@ export class ExecuteAnonymous extends ForcecodeCommand {
         vscode.window.forceCode.fcDiagnosticCollection;
       diagnosticCollection.delete(document.uri);
       var diagnostics: vscode.Diagnostic[] = [];
-      // var header: any = res.header;
       if (res.compiled === false) {
         const lineNumber: number = Number(res.line) - 1 + selection.start.line;
         var col = 0;
