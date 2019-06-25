@@ -44,7 +44,6 @@ Please note that the following permissions are required to develop on the Force.
 * Open org in the browser. No more need to open a browser and login to salesforce.
 * Preview Visualforce pages/Lightning apps.
     * Either right click and select preview or click the icon that appears in the upper right.
-* Run Salesforce CLI commands (DX in the menu)
 * Task view. See what ForceCode is up to and execute multiple commands at the same time.
 * Code Coverage view. Will show the coverage on files open in your project.
     * You can even have this view revealed after running an apex test.
@@ -201,11 +200,6 @@ Menu: &gt;Force: Get Logs
 
 Menu: &gt;ForceCode Menu ... Create Class  
 This will automatically create classes based on `apiVersion` else it defaults to '44.0'.
-
-**SPECIAL NOTE**  
-You can create Classes, Triggers, Components, and Pages by simply creating the file anywhere in your project structure.  
-When you save it, it'll create the file if it doesn't exist, and update it if it does.  
-The manual process doesn't automatically create the meta.xml file, so doesn't work seamlessly with CI.  However there's no easier way to connect to your org, open a file, modify it and save it back to your org.  This means working with multiple orgs is easier than ever.
 
 ### Open org
 
