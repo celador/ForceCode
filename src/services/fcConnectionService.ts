@@ -6,7 +6,8 @@ const jsforce: any = require('jsforce');
 import klaw = require('klaw');
 import { saveConfigFile, readConfigFile } from './configuration';
 import { checkConfig, enterCredentials } from './credentials';
-import { SFDX } from './dxService';
+import { SFDX } from '.';
+import { FCCancellationToken } from '../commands/forcecodeCommand';
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 
@@ -134,7 +135,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
   }
 
   // this is a check that will refresh the orgs and check if logged in. if not, it asks to log in
-  public checkLoginStatus(reason: any): Promise<boolean> {
+  public checkLoginStatus(reason: any, cancellationToken: FCCancellationToken): Promise<boolean> {
     const message = reason && reason.message ? reason.message : reason;
     return this.refreshConnections().then(() => {
       if (
@@ -144,21 +145,27 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         if (this.currentConnection) {
           this.currentConnection.isLoggedIn = false;
         }
-        return this.connect(this.currentConnection ? this.currentConnection.orgInfo : undefined);
+        return this.connect(
+          this.currentConnection ? this.currentConnection.orgInfo : undefined,
+          cancellationToken
+        );
       } else {
         return true;
       }
     });
   }
 
-  public connect(orgInfo: FCOauth | SFDX | undefined): Promise<boolean> {
+  public connect(
+    orgInfo: FCOauth | SFDX | undefined,
+    cancellationToken: FCCancellationToken
+  ): Promise<boolean> {
     if (!this.loggingIn) {
       this.loggingIn = true;
       var username: string | undefined;
       if (orgInfo) {
         username = orgInfo.username;
       }
-      return this.setupConn(this, username)
+      return this.setupConn(this, username, cancellationToken)
         .then(res => {
           return this.login(this, res).then(loginRes => {
             return vscode.window.forceCode.connect().then(() => {
@@ -178,7 +185,11 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
   }
 
-  private setupConn(service: FCConnectionService, username: string | undefined): Promise<boolean> {
+  private setupConn(
+    service: FCConnectionService,
+    username: string | undefined,
+    cancellationToken: FCCancellationToken
+  ): Promise<boolean> {
     service.currentConnection = service.getConnByUsername(username);
     if (!service.isLoggedIn()) {
       return dxService
@@ -187,7 +198,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
           if (service.currentConnection) {
             service.currentConnection.connection = undefined;
           }
-          return enterCredentials();
+          return enterCredentials(cancellationToken);
         })
         .then(orgInf => {
           service.currentConnection = service.addConnection(orgInf, true);

@@ -1,0 +1,35 @@
+image: node:10.15.3
+
+stages:
+  - build
+  - release
+
+buildFC:
+  stage: build
+  tags:
+    - docker
+  script:
+    - npm install --unsafe-perm
+    - npm run package
+  cache:
+    key: fcCache
+    untracked: true
+    policy: push
+  artifacts:
+    paths:
+      - '*.vsix'
+
+releaseFC:
+  stage: release
+  only:
+    - master
+  tags:
+    - docker
+  cache:
+    key: fcCache
+    untracked: true
+    policy: pull
+  script:
+    - $(npm bin)/vsce publish -p $VSC_PUBKEY
+  dependencies:
+    - buildFC

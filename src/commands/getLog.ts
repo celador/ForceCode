@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { fcConnection, dxService } from '../services';
 import { QueryResult } from 'jsforce';
+import { ForcecodeCommand } from './forcecodeCommand';
 
 interface LogRecord {
   Id: string;
@@ -12,43 +13,58 @@ interface LogRecord {
   Location: string;
 }
 
-export default function getLog() {
-  // Login, then get Identity info,
-  //  then get info about the logs and ask the user which one to open,
-  //  then get the log and show it
-  return getLast10Logs()
-    .then(displayOptions)
-    .then(showLog);
-
-  function getLast10Logs(): Promise<QueryResult> {
-    if (!fcConnection.currentConnection) {
-      return Promise.reject('No org info found');
-    }
-    var queryString: string =
-      `SELECT Id, LogLength, Request, Status, DurationMilliseconds, StartTime, Location FROM ApexLog` +
-      ` WHERE LogUserId='${fcConnection.currentConnection.orgInfo.userId}'` +
-      // ` AND Request = 'API' AND Location = 'SystemLog'` +
-      // ` AND Operation like '%executeAnonymous%'`
-      ` ORDER BY StartTime DESC, Id DESC LIMIT 10`;
-
-    return vscode.window.forceCode.conn.tooling.query(queryString);
+export class GetLog extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.getLogs';
+    this.name = 'Retrieving logs';
+    this.hidden = false;
+    this.description = 'Display a list of the last ten logs.';
+    this.detail = 'Get recent logs';
+    this.icon = 'unfold';
+    this.label = 'Get Logs';
   }
 
-  function displayOptions(results: QueryResult): Thenable<vscode.QuickPickItem | undefined> {
-    var options: vscode.QuickPickItem[] = results.records.map((record: LogRecord) => {
-      return {
-        label: `Status: ${record.Status}`,
-        detail: `Start: ${new Date(record.StartTime).toLocaleString()}, Bytes: ${record.LogLength}`,
-        description: record.Id,
-      };
-    });
-    return vscode.window.showQuickPick(options);
-  }
+  public command(context: any, selectedResource: any): any {
+    // Login, then get Identity info,
+    //  then get info about the logs and ask the user which one to open,
+    //  then get the log and show it
+    return getLast10Logs()
+      .then(displayOptions)
+      .then(showLog);
 
-  function showLog(res: any) {
-    if (res) {
-      return dxService.getAndShowLog(res.description);
+    function getLast10Logs(): Promise<QueryResult> {
+      if (!fcConnection.currentConnection) {
+        return Promise.reject('No org info found');
+      }
+      var queryString: string =
+        `SELECT Id, LogLength, Request, Status, DurationMilliseconds, StartTime, Location FROM ApexLog` +
+        ` WHERE LogUserId='${fcConnection.currentConnection.orgInfo.userId}'` +
+        // ` AND Request = 'API' AND Location = 'SystemLog'` +
+        // ` AND Operation like '%executeAnonymous%'`
+        ` ORDER BY StartTime DESC, Id DESC LIMIT 10`;
+
+      return vscode.window.forceCode.conn.tooling.query(queryString);
     }
-    return res;
+
+    function displayOptions(results: QueryResult): Thenable<vscode.QuickPickItem | undefined> {
+      var options: vscode.QuickPickItem[] = results.records.map((record: LogRecord) => {
+        return {
+          label: `Status: ${record.Status}`,
+          detail: `Start: ${new Date(record.StartTime).toLocaleString()}, Bytes: ${
+            record.LogLength
+          }`,
+          description: record.Id,
+        };
+      });
+      return vscode.window.showQuickPick(options);
+    }
+
+    function showLog(res: any) {
+      if (res) {
+        return dxService.getAndShowLog(res.description);
+      }
+      return res;
+    }
   }
 }

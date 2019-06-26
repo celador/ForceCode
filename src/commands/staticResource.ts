@@ -2,8 +2,52 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
 import globule = require('globule');
-import { zipFiles } from './../services';
+import { zipFiles, commandService } from './../services';
+import { ForcecodeCommand } from './forcecodeCommand';
 const mime = require('mime-types');
+
+export class StaticResourceDeployFile extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.staticResourceDeployFromFile';
+    this.name = 'Saving static resource';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return staticResourceDeployFromFile(selectedResource, context);
+  }
+}
+
+export class StaticResourceBundle extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.staticResourceMenu';
+    this.name = 'Deploying static resource';
+    this.hidden = false;
+    this.description = 'Build and Deploy a resource bundle.';
+    this.detail =
+      'Create the Static Resource from the resource-bundle folder and deploy it to your org.';
+    this.icon = 'file-zip';
+    this.label = 'Build Resource Bundle';
+  }
+
+  public command(context, selectedResource?) {
+    return staticResourceBundleDeploy(context);
+  }
+}
+
+export class StaticResourceBundleContext extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.staticResource';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return commandService.runCommand('ForceCode.staticResourceMenu', context, selectedResource);
+  }
+}
 
 export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
   // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging

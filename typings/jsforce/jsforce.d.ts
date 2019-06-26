@@ -97,6 +97,7 @@ declare module 'jsforce/index' {
       numberComponentErrors: number;
       numberComponentsDeployed: number;
       numberTestsCompleted: number;
+      check(callback: (err: any, result: any) => any): any;
       complete(callback: (err: any, result: any) => any): any;
     }
     interface RetrieveResult {

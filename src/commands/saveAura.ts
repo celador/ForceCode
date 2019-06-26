@@ -4,13 +4,16 @@ import { saveService } from '../services';
 import diff from './diff';
 import * as path from 'path';
 import { deployFiles, createPackageXML } from './deploy';
+import { FCCancellationToken } from './forcecodeCommand';
 
 // =======================================================================================================================================
 // ================================                Lightning Components               ===========================================
 // =======================================================================================================================================
+// TODO: Add cancellation token to updates. Updates with LCs are quick, so is this possible??
 export function saveAura(
   document: vscode.TextDocument,
   toolingType: string,
+  cancellationToken: FCCancellationToken,
   Metadata?: {},
   forceCompile?: boolean
 ): Promise<any> {
@@ -53,7 +56,7 @@ export function saveAura(
         const files: string[] = [];
         files.push(path.join('aura', name));
         files.push('package.xml');
-        return deployFiles(files, vscode.window.forceCode.storageRoot);
+        return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
       });
     } else {
       return results;

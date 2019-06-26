@@ -5,12 +5,14 @@ import { saveService, codeCovViewService } from '../services';
 import diff from './diff';
 import { createPackageXML, deployFiles } from './deploy';
 import * as path from 'path';
+import { FCCancellationToken } from './forcecodeCommand';
 
 const UPDATE: boolean = true;
 
 export function saveApex(
   document: vscode.TextDocument,
   toolingType: string,
+  cancellationToken: FCCancellationToken,
   Metadata?: any,
   forceCompile?: boolean
 ): Promise<any> {
@@ -21,7 +23,7 @@ export function saveApex(
   return Promise.resolve(vscode.window.forceCode)
     .then(addToContainer)
     .then(requestCompile)
-    .then(getCompileStatus);
+    .then(asyncRequest => getCompileStatus(asyncRequest));
 
   // =======================================================================================================================================
   // =================================  Tooling Objects (Class, Page, Component, Trigger)  =================================================
@@ -61,7 +63,9 @@ export function saveApex(
             Id: records.id,
           };
       const upToolType = parsers.getToolingType(document, UPDATE);
-      if (upToolType) {
+      if(cancellationToken.isCanceled) {
+        return Promise.reject();
+      } else if (upToolType) {
         return fc.conn.tooling
           .sobject(upToolType)
           .update(member)
@@ -119,7 +123,9 @@ export function saveApex(
         };
         return shouldCompile(record).then(should => {
           const upToolType = parsers.getToolingType(document, UPDATE);
-          if (should && upToolType && name) {
+          if(cancellationToken.isCanceled) {
+            return Promise.reject();
+          } else if (should && upToolType && name) {
             return fc.conn.tooling
               .sobject(upToolType)
               .create(member)
@@ -160,7 +166,7 @@ export function saveApex(
               );
             }
             files.push('package.xml');
-            return deployFiles(files, vscode.window.forceCode.storageRoot).then(foo => {
+            return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot).then(foo => {
               if (foo.status === 'Failed') {
                 return foo;
               }
@@ -188,7 +194,7 @@ export function saveApex(
   }
   // =======================================================================================================================================
   function requestCompile(retval: any) {
-    if (vscode.window.forceCode.containerMembers.length === 0) {
+    if (vscode.window.forceCode.containerMembers.length === 0 || cancellationToken.isCanceled) {
       return {
         async then(callback: any) {
           return callback(retval);
@@ -209,11 +215,17 @@ export function saveApex(
   }
   // =======================================================================================================================================
   function getCompileStatus(retval: any): Promise<any> {
+    if(cancellationToken.isCanceled) {
+      return Promise.reject();
+    }
     if (vscode.window.forceCode.containerMembers.length === 0) {
       return Promise.resolve(retval); // we don't need new container stuff on new file creation
     }
     return nextStatus();
     function nextStatus(): any {
+      if(cancellationToken.isCanceled) {
+        return cancelRequest().catch(err => Promise.reject()).then(res => Promise.reject());
+      }
       checkCount += 1;
       // Set a timeout to auto fail the compile after 60 seconds
       return getStatus().then(res => {
@@ -231,6 +243,14 @@ export function saveApex(
             setTimeout(() => resolve(), vscode.window.forceCode.config.poll || 2000);
           }).then(nextStatus);
         }
+      });
+    }
+    function cancelRequest(): Promise<any> {
+      return vscode.window.forceCode.conn.tooling
+      .sobject('ContainerAsyncRequest')
+      .update({ Id: vscode.window.forceCode.containerAsyncRequestId, State: 'Aborted'}).then(res => {
+        console.log(res);
+        return res;
       });
     }
     function getStatus(): Promise<any> {

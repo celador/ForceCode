@@ -2,57 +2,98 @@ import * as vscode from 'vscode';
 import * as retrieve from './retrieve';
 import { getIcon, getExtension, getFolder } from './../parsers';
 import * as path from 'path';
-import { dxService } from '../services';
+import { isEmptyUndOrNull } from '../util';
+import { ForcecodeCommand, FCCancellationToken } from './forcecodeCommand';
+import { commandService } from '../services';
 const TYPEATTRIBUTE: string = 'type';
 
-export function open(context: vscode.ExtensionContext) {
-  return Promise.resolve(vscode.window.forceCode)
-    .then(getFileList)
-    .then(proms => showFileOptions(proms));
+export class ShowFileOptions extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.showFileOptions';
+    this.cancelable = true;
+    this.name = 'Opening file';
+    this.hidden = true;
+  }
 
-  // =======================================================================================================================================
-  // =======================================================================================================================================
-  // =======================================================================================================================================
-  function getFileList() {
-    var metadataTypes: string[] = [
-      'ApexClass',
-      'ApexTrigger',
-      'ApexPage',
-      'ApexComponent',
-      'StaticResource',
-    ];
-    var predicate: string = `WHERE NamespacePrefix = '${
-      vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''
-    }'`;
-    var promises: any[] = metadataTypes.map(t => {
-      var sResource = t === 'StaticResource' ? ', ContentType' : '';
-      var q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;
-      return vscode.window.forceCode.conn.tooling.query(q);
-    });
-    promises.push(
-      vscode.window.forceCode.conn.tooling.query(
-        'SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' +
-          predicate
-      )
-    );
-    if (
-      vscode.window.forceCode.config.apiVersion &&
-      parseInt(vscode.window.forceCode.config.apiVersion) >= 45
-    ) {
-      promises.push(
-        vscode.window.forceCode.conn.tooling.query(
-          'SELECT Id, DeveloperName, NamespacePrefix, Description FROM LightningComponentBundle ' +
-            predicate
-        )
-      );
-    }
-    return promises;
+  public command(context, selectedResource?) {
+    return showFileOptions(context, this.cancellationToken);
   }
 }
 
-export function showFileOptions(promises: any[]) {
-  // TODO: Objects
-  // TODO: Generic Metadata retrieve
+export class OpenContext extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.open';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return commandService.runCommand('ForceCode.openMenu', context, selectedResource);
+  }
+}
+
+export class Open extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.openMenu';
+    this.cancelable = true;
+    this.name = 'Opening file';
+    this.hidden = false;
+    this.description =
+      'Open Classes, Pages, Triggers, Components, Lightning Components, and Static Resources';
+    this.detail = 'Retrieve a file from Salesforce.';
+    this.icon = 'desktop-download';
+    this.label = 'Open Salesforce File';
+  }
+
+  public command(context: any, selectedResource: any): any {
+    return Promise.resolve(vscode.window.forceCode)
+      .then(getFileList)
+      .then(proms => showFileOptions(proms, this.cancellationToken));
+
+    // =======================================================================================================================================
+    // =======================================================================================================================================
+    // =======================================================================================================================================
+    function getFileList() {
+      var metadataTypes: string[] = [
+        'ApexClass',
+        'ApexTrigger',
+        'ApexPage',
+        'ApexComponent',
+        'StaticResource',
+      ];
+      var predicate: string = `WHERE NamespacePrefix = '${
+        vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''
+      }'`;
+      var promises: any[] = metadataTypes.map(t => {
+        var sResource = t === 'StaticResource' ? ', ContentType' : '';
+        var q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;
+        return vscode.window.forceCode.conn.tooling.query(q);
+      });
+      promises.push(
+        vscode.window.forceCode.conn.tooling.query(
+          'SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' +
+            predicate
+        )
+      );
+      if (
+        vscode.window.forceCode.config.apiVersion &&
+        parseInt(vscode.window.forceCode.config.apiVersion) >= 45
+      ) {
+        promises.push(
+          vscode.window.forceCode.conn.tooling.query(
+            'SELECT Id, DeveloperName, NamespacePrefix, Description FROM LightningComponentBundle ' +
+              predicate
+          )
+        );
+      }
+      return promises;
+    }
+  }
+}
+
+export function showFileOptions(promises: any[], cancellationToken: FCCancellationToken) {
   return Promise.all(promises)
     .then(results => {
       let options: vscode.QuickPickItem[] = results
@@ -82,7 +123,7 @@ export function showFileOptions(promises: any[]) {
     })
     .then(opt => {
       var opts: any = opt;
-      if (dxService.isEmptyUndOrNull(opts)) {
+      if (isEmptyUndOrNull(opts)) {
         return Promise.resolve();
       }
       var files: retrieve.ToolingType[] = [];
@@ -100,12 +141,15 @@ export function showFileOptions(promises: any[]) {
         }
       });
 
-      return retrieve.default({ types: files }).then((res: any) => {
+      return retrieve.default({ types: files }, cancellationToken).then((res: any) => {
         if (vscode.workspace.getConfiguration('force')['showFilesOnOpen']) {
           // open the files in the editor
           var filesOpened: number = 0;
           return opts.forEach((curFile: any) => {
-            if (filesOpened < vscode.workspace.getConfiguration('force')['showFilesOnOpenMax']) {
+            if (
+              !cancellationToken.isCanceled &&
+              filesOpened < vscode.workspace.getConfiguration('force')['showFilesOnOpenMax']
+            ) {
               var tType: string = curFile.detail.split(' ')[0];
               if (
                 tType !== 'AuraDefinitionBundle' &&

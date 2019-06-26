@@ -3,13 +3,17 @@ import * as parsers from './../parsers';
 import { saveService } from '../services';
 import * as path from 'path';
 import { createPackageXML, deployFiles } from './deploy';
+import diff from './diff';
+import { FCCancellationToken } from './forcecodeCommand';
 
 // =======================================================================================================================================
 // ================================                Lightning Web Components               ================================================
 // =======================================================================================================================================
+// TODO: Add cancellation token to updates. Updates with LCs are quick, so is this possible??
 export function saveLWC(
   document: vscode.TextDocument,
   toolingType: string,
+  cancellationToken: FCCancellationToken,
   forceCompile?: boolean
 ): Promise<any> {
   const name: string | undefined = parsers.getName(document, toolingType);
@@ -49,10 +53,9 @@ export function saveLWC(
     });
   }
   function upsertLWCDefinition(definitions: any, bundle: any) {
-    const filePath: string | undefined = document.fileName.split(path.sep).shift();
-    if (!filePath) {
-      return undefined;
-    }
+    const docPath = document.fileName;
+    const filePath: string = docPath.substring(0, docPath.lastIndexOf(path.sep));
+
     // add files in the folder to PreSaveFiles so we can compare content
     saveService.addFilesInFolder(filePath);
     var changedFiles: any[] = definitions.filter(
@@ -60,7 +63,20 @@ export function saveLWC(
         !saveService.compareContents(path.join(filePath, def.FilePath.split('/').pop()), def.Source)
     );
 
-    if (changedFiles.length !== 0) {
+    if (!forceCompile && changedFiles.length === 1) {
+      return vscode.window
+        .showWarningMessage('Someone has changed this file!', 'Diff', 'Overwrite')
+        .then(s => {
+          if (s === 'Diff') {
+            diff(document, true);
+            return {};
+          }
+          if (s === 'Overwrite') {
+            return saveLWCPackage();
+          }
+          return {};
+        });
+    } else if (!forceCompile && changedFiles.length > 1) {
       var changedFileNames: string = changedFiles
         .map(file => file.FilePath.split('/').pop())
         .join(',');
@@ -89,7 +105,7 @@ export function saveLWC(
       const files: string[] = [];
       files.push(path.join('lwc', name));
       files.push('package.xml');
-      return deployFiles(files, vscode.window.forceCode.storageRoot);
+      return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
     });
   }
 }

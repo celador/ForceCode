@@ -1,12 +1,6 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import {
-  configuration,
-  commandService,
-  codeCovViewService,
-  dxService,
-  fcConnection,
-} from './../services';
+import { configuration, commandService, codeCovViewService, fcConnection } from './../services';
 import constants from './../models/constants';
 import * as path from 'path';
 import { FCFile } from './codeCovView';
@@ -17,6 +11,7 @@ import { getUUID, FCAnalytics } from './fcAnalytics';
 import klaw = require('klaw');
 import { QueryResult } from 'jsforce';
 import { defaultOptions } from './configuration';
+import { isEmptyUndOrNull } from '../util';
 
 export default class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
@@ -85,8 +80,11 @@ export default class ForceService implements forceCode.IForceService {
           resolve();
         }
       }).then(() => {
-        fcConnection
-          .connect(config.username ? { username: config.username } : undefined)
+        commandService
+          .runCommand(
+            'ForceCode.switchUserText',
+            config.username ? { username: config.username } : undefined
+          )
           .then(res => {
             if (res === false && !fcConnection.isLoggedIn()) {
               this.statusBarItem.hide();
@@ -138,7 +136,7 @@ export default class ForceService implements forceCode.IForceService {
   }
 
   private parseMembers(mems: any) {
-    if (dxService.isEmptyUndOrNull(mems)) {
+    if (isEmptyUndOrNull(mems)) {
       return Promise.resolve({});
     }
     var types: { [key: string]: Array<any> } = {};

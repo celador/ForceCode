@@ -11,7 +11,7 @@ import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import constants from './../models/constants';
-import { dxService } from '.';
+import { isEmptyUndOrNull } from '../util';
 
 interface IClassType {
   CoveredClass: string;
@@ -87,7 +87,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public findByNameAndType(name: string, type: string): FCFile | undefined {
-    if (dxService.isEmptyUndOrNull(this.classes)) {
+    if (isEmptyUndOrNull(this.classes)) {
       return undefined;
     }
     return this.classes.find(cur => {
@@ -96,7 +96,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public findByType(type: string): FCFile[] | undefined {
-    if (dxService.isEmptyUndOrNull(this.classes)) {
+    if (isEmptyUndOrNull(this.classes)) {
       return undefined;
     }
     return this.classes.filter(cur => {
@@ -105,7 +105,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public findByPath(pa: string): FCFile | undefined {
-    if (dxService.isEmptyUndOrNull(this.classes)) {
+    if (isEmptyUndOrNull(this.classes)) {
       return undefined;
     }
     return this.classes.find(cur => {
@@ -114,7 +114,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public findById(id: string): FCFile | undefined {
-    if (dxService.isEmptyUndOrNull(this.classes)) {
+    if (isEmptyUndOrNull(this.classes)) {
       return undefined;
     }
     return this.classes.find(cur => {

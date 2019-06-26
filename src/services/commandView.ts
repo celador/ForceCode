@@ -9,17 +9,7 @@ import * as vscode from 'vscode';
 import { fcConnection } from '.';
 import { EventEmitter } from 'events';
 import { trackEvent, FCTimer } from './fcAnalytics';
-
-export interface FCCommand {
-  commandName: string;
-  name?: string;
-  hidden: boolean;
-  description?: string;
-  detail?: string;
-  icon?: string;
-  label?: string;
-  command: (context: any, selectedResource: any) => any;
-}
+import { ForcecodeCommand } from '../commands/forcecodeCommand';
 
 const FIRST_TRY = 1;
 const SECOND_TRY = 2;
@@ -50,7 +40,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     return CommandViewService.instance;
   }
 
-  public addCommandExecution(execution: FCCommand, context: any, selectedResource?: any) {
+  public addCommandExecution(execution: ForcecodeCommand, context: any, selectedResource?: any) {
     if (execution.commandName === 'ForceCode.fileModified') {
       this.fileModCommands++;
       if (
@@ -114,7 +104,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
 }
 
 export class Task extends vscode.TreeItem {
-  public readonly execution: FCCommand;
+  public readonly execution: ForcecodeCommand;
   private readonly taskViewProvider: CommandViewService;
   private readonly context: any;
   private readonly selectedResource: any;
@@ -122,7 +112,7 @@ export class Task extends vscode.TreeItem {
 
   constructor(
     taskViewProvider: CommandViewService,
-    execution: FCCommand,
+    execution: ForcecodeCommand,
     context: any,
     selectedResource?: any
   ) {
@@ -133,27 +123,40 @@ export class Task extends vscode.TreeItem {
     this.execution = execution;
     this.context = context;
     this.selectedResource = selectedResource;
+    if (this.execution.cancelable) {
+      this.contextValue = 'forceCodeTask';
+      this.command = {
+        command: 'ForceCode.cancelCommand',
+        title: '',
+        arguments: [this],
+      };
+    }
   }
 
   public run(attempt: number): Promise<any> {
     return new Promise(resolve => {
-      resolve(this.execution.command(this.context, this.selectedResource));
+      resolve(this.execution.run(this.context, this.selectedResource));
     })
       .catch(reason => {
-        return fcConnection.checkLoginStatus(reason).then(loggedIn => {
-          if (loggedIn || attempt === SECOND_TRY) {
-            if (reason) {
-              vscode.window.showErrorMessage(reason.message ? reason.message : reason, 'OK');
-              return trackEvent('Error Thrown', reason.message ? reason.message : reason).then(
-                () => {
-                  return reason;
-                }
-              );
+        if (this.execution.cancellationToken.isCanceled) {
+          return Promise.resolve();
+        }
+        return fcConnection
+          .checkLoginStatus(reason, this.execution.cancellationToken)
+          .then(loggedIn => {
+            if (loggedIn || attempt === SECOND_TRY) {
+              if (reason) {
+                vscode.window.showErrorMessage(reason.message ? reason.message : reason, 'OK');
+                return trackEvent('Error Thrown', reason.message ? reason.message : reason).then(
+                  () => {
+                    return reason;
+                  }
+                );
+              }
+            } else {
+              return 'FC:AGAIN';
             }
-          } else {
-            return 'FC:AGAIN';
-          }
-        });
+          });
       })
       .then(finalRes => {
         if (finalRes === 'FC:AGAIN') {

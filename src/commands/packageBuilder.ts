@@ -1,9 +1,28 @@
 import * as vscode from 'vscode';
-import { toArray, dxService, PXML, PXMLMember } from '../services';
+import { dxService, PXML, PXMLMember, SObjectCategory } from '../services';
 import { IMetadataObject } from '../forceCode';
-import { SObjectDescribe, SObjectCategory } from '../dx';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
+import { isEmptyUndOrNull, toArray } from '../util';
+import { ForcecodeCommand } from './forcecodeCommand';
+
+export class PackageBuilder extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.buildPackage';
+    this.name = 'Building package.xml';
+    this.hidden = false;
+    this.description = 'Build a package.xml file and choose where to save it.';
+    this.detail =
+      'You will be able to choose the types to include in your package.xml (Only does * for members)';
+    this.icon = 'jersey';
+    this.label = 'Build package.xml file';
+  }
+
+  public command(context, selectedResource?) {
+    return packageBuilder(true);
+  }
+}
 
 function sortFunc(a: any, b: any): number {
   var aStr = a.label.toUpperCase();
@@ -27,7 +46,7 @@ export function getMembers(
   var proms: Promise<PXMLMember>[] = metadataObjects.map(r => {
     return new Promise<PXMLMember>((resolve, reject) => {
       if (r.xmlName === 'CustomObject') {
-        new SObjectDescribe()
+        dxService
           .describeGlobal(SObjectCategory.ALL)
           .then(objs => {
             resolve({ name: r.xmlName, members: objs });
@@ -151,12 +170,12 @@ export default function packageBuilder(buildPackage?: boolean): Promise<any> {
       canPickMany: true,
     };
     vscode.window.showQuickPick(options, config).then(types => {
-      if (dxService.isEmptyUndOrNull(types)) {
+      if (isEmptyUndOrNull(types)) {
         reject();
       }
       const typesArray: string[] = toArray(types).map(r => r.label);
 
-      getMembers(typesArray)
+      getMembers(typesArray, true)
         .then(mappedTypes => {
           if (!buildPackage) {
             resolve(mappedTypes);

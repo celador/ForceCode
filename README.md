@@ -12,6 +12,10 @@ This extension is a companion for SFDC (Salesforce.com) development with Visual 
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.  
 There's no complicated setup process or project configurations, no external apps to keep open, and no jarring errors knocking you out of your flow.
 
+## IMPORTANT
+
+As of version 3.17.0, you will be required to install the SFDX-CLI on your system in order for this extension to function! The ability to run a DX command via the ForceCode menu has also been removed because of this change. The extension size has been dramatically reduced because of this change (Went from ~50MB unpackaged to under 2MB!).
+
 ## Slack
 
 ForceCode now has a Slack channel! Click [here](https://join.slack.com/t/forcecodeworkspace/shared_invite/enQtNDczMDg3Nzg2ODcxLWRhYWM2NmI3MGNmMmE1MmRkOTFkMGQzZmQ1YjlhMDhjY2YzNmU0NDEyNDU4OGM1NzdlZjU2NTg3Y2FkNTdhMjA) to join us! 
@@ -40,7 +44,6 @@ Please note that the following permissions are required to develop on the Force.
 * Open org in the browser. No more need to open a browser and login to salesforce.
 * Preview Visualforce pages/Lightning apps.
     * Either right click and select preview or click the icon that appears in the upper right.
-* Run Salesforce CLI commands (DX in the menu)
 * Task view. See what ForceCode is up to and execute multiple commands at the same time.
 * Code Coverage view. Will show the coverage on files open in your project.
     * You can even have this view revealed after running an apex test.
@@ -197,11 +200,6 @@ Menu: &gt;Force: Get Logs
 
 Menu: &gt;ForceCode Menu ... Create Class  
 This will automatically create classes based on `apiVersion` else it defaults to '44.0'.
-
-**SPECIAL NOTE**  
-You can create Classes, Triggers, Components, and Pages by simply creating the file anywhere in your project structure.  
-When you save it, it'll create the file if it doesn't exist, and update it if it does.  
-The manual process doesn't automatically create the meta.xml file, so doesn't work seamlessly with CI.  However there's no easier way to connect to your org, open a file, modify it and save it back to your org.  This means working with multiple orgs is easier than ever.
 
 ### Open org
 

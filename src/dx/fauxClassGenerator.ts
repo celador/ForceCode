@@ -8,7 +8,9 @@ import * as vscode from 'vscode';
 import { EOL } from 'os';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { ChildRelationship, Field, SObject, SObjectCategory, SObjectDescribe } from './';
+import { ChildRelationship, Field, SObject, SObjectDescribe } from './';
+import { dxService, SObjectCategory } from '../services';
+import { FCCancellationToken } from '../commands/forcecodeCommand';
 
 const SFDX_DIR = '.sfdx';
 const TOOLS_DIR = 'tools';
@@ -55,7 +57,11 @@ export class FauxClassGenerator {
     return decl.substr(decl.indexOf(' ') + 1);
   }
 
-  public async generate(projectPath: string, type: SObjectCategory): Promise<string> {
+  public async generate(
+    projectPath: string,
+    type: SObjectCategory,
+    cancellationToken: FCCancellationToken
+  ): Promise<string> {
     vscode.window.forceCode.outputChannel.appendLine(
       '===================Starting refresh of ' + type + ' objects from org====================='
     );
@@ -80,12 +86,15 @@ export class FauxClassGenerator {
     let fetchedSObjects: SObject[] = [];
     let sobjects: string[] = [];
     try {
-      sobjects = await describe.describeGlobal(type);
+      sobjects = await dxService.describeGlobal(type);
     } catch (e) {
       throw 'Failure fetching list of sObjects from org ' + e;
     }
     let j = 0;
     while (j < sobjects.length) {
+      if (cancellationToken.isCanceled) {
+        return Promise.reject('Cancelled');
+      }
       try {
         fetchedSObjects = fetchedSObjects.concat(await describe.describeSObjectBatch(sobjects, j));
         j = fetchedSObjects.length;

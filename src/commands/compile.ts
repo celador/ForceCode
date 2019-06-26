@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, dxService, saveHistoryService } from '../services';
+import { codeCovViewService, saveHistoryService, saveService, commandService } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
@@ -9,10 +9,71 @@ import { parseString } from 'xml2js';
 import * as path from 'path';
 import { saveLWC } from './saveLWC';
 import { createPackageXML, deployFiles } from './deploy';
+import { isEmptyUndOrNull } from '../util';
+import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
+
+export class CompileMenu extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.compileMenu';
+    this.cancelable = true;
+    this.name = 'Saving ';
+    this.hidden = false;
+    this.description = 'Save the active file to your org.';
+    this.detail =
+      'If there is an error, you will get notified. To automatically compile Salesforce files on save, set the autoCompile flag to true in your settings file';
+    this.icon = 'rocket';
+    this.label = 'Compile/Deploy';
+  }
+
+  public command(context, selectedResource?) {
+    if (context) {
+      if (context.uri) {
+        context = context.uri;
+      }
+      return vscode.workspace.openTextDocument(context).then(doc => {
+        return saveService.saveFile(doc, selectedResource, this.cancellationToken);
+      });
+    }
+    if (!vscode.window.activeTextEditor) {
+      return;
+    }
+    return saveService.saveFile(
+      vscode.window.activeTextEditor.document,
+      selectedResource,
+      this.cancellationToken
+    );
+  }
+}
+
+export class CompileContext extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.compile';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return commandService.runCommand('ForceCode.compileMenu', context, false);
+  }
+}
+
+export class ForceCompile extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.forceCompile';
+    this.hidden = true;
+  }
+
+  public command(context, selectedResource?) {
+    return commandService.runCommand('ForceCode.compileMenu', context, true);
+  }
+}
 
 export default function compile(
   document: vscode.TextDocument,
-  forceCompile: boolean
+  forceCompile: boolean,
+  cancellationToken: FCCancellationToken
 ): Promise<boolean> {
   if (!document) {
     return Promise.resolve(false);
@@ -76,7 +137,7 @@ export default function compile(
           files.push(path.join(pathSplit, foldName));
           files.push(path.join(pathSplit, foldName + '-meta.xml'));
           files.push('package.xml');
-          return deployFiles(files, vscode.window.forceCode.storageRoot);
+          return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
         } else {
           return Promise.reject(false);
         }
@@ -99,18 +160,18 @@ export default function compile(
     return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
   } else if (toolingType === 'AuraDefinition') {
     DefType = getAuraDefTypeFromDocument(document);
-    return saveAura(document, toolingType, Metadata, forceCompile)
+    return saveAura(document, toolingType, cancellationToken, Metadata, forceCompile)
       .then(finished)
       .catch(onError)
       .then(updateSaveHistory);
   } else if (toolingType === 'LightningComponentResource') {
-    return saveLWC(document, toolingType, forceCompile)
+    return saveLWC(document, toolingType, cancellationToken, forceCompile)
       .then(finished)
       .catch(onError)
       .then(updateSaveHistory);
   } else {
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-    return saveApex(document, toolingType, Metadata, forceCompile)
+    return saveApex(document, toolingType, cancellationToken, Metadata, forceCompile)
       .then(finished)
       .then(res => {
         return vscode.window.forceCode.newContainer(res).then(() => {
@@ -200,7 +261,7 @@ export default function compile(
 
   // =======================================================================================================================================
   function finished(res: any): boolean {
-    if (dxService.isEmptyUndOrNull(res)) {
+    if (isEmptyUndOrNull(res)) {
       vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
       return true;
     }

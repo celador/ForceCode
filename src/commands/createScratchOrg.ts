@@ -2,10 +2,23 @@ import * as vscode from 'vscode';
 import { dxService, fcConnection } from '../services';
 import { Config } from '../forceCode';
 import { defaultOptions, saveConfigFile } from '../services/configuration';
+import { ForcecodeCommand } from './forcecodeCommand';
 
-export class CreateScratchOrg {
-  private static instance: CreateScratchOrg;
-  public command(): Promise<any> {
+export class CreateScratchOrg extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.cancelable = true;
+    this.commandName = 'ForceCode.createScratchOrg';
+    this.name = 'Creating scratch org';
+    this.description = 'Create a scratch org associated with the current DevHub org';
+    this.detail =
+      'A scratch org will be created and added to the list of current usernames in the Forcecode view';
+    this.icon = 'beaker';
+    this.label = 'Create a scratch org';
+    this.hidden = false;
+  }
+
+  public command(context: any, selectedResource: any): Promise<any> {
     // add option to select org def file or just create an org
     // ...
     // ...
@@ -79,7 +92,7 @@ export class CreateScratchOrg {
                     ' --definitionjson ' +
                     JSON.stringify(optsObj);
                   return dxService
-                    .createScratchOrg(theOptions)
+                    .createScratchOrg(theOptions, this.cancellationToken)
                     .then(res => {
                       var scratchConfig: Config = defaultOptions;
                       scratchConfig.username = res.username;
@@ -94,13 +107,4 @@ export class CreateScratchOrg {
         });
     });
   }
-
-  public static getInstance() {
-    if (!CreateScratchOrg.instance) {
-      CreateScratchOrg.instance = new CreateScratchOrg();
-    }
-    return CreateScratchOrg.instance;
-  }
 }
-
-export const createScratchOrg = CreateScratchOrg.getInstance();

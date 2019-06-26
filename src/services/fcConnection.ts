@@ -5,7 +5,7 @@ import { Connection } from 'jsforce';
 import * as fs from 'fs-extra';
 import { Config } from '../forceCode';
 import { readConfigFile } from './configuration';
-import { SFDX } from './dxService';
+import { SFDX } from '.';
 
 export interface FCOauth {
   username: string;

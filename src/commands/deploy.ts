@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { dxService, toArray, PXML, PXMLMember, commandService } from '../services';
+import { PXML, PXMLMember, commandService } from '../services';
 import { getFileListFromPXML, zipFiles } from './../services';
 import * as path from 'path';
 import klaw = require('klaw');
@@ -8,6 +8,27 @@ import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
 import { getAnyTTFromPath } from '../parsers/open';
 import { outputToString } from '../parsers/output';
+import { isEmptyUndOrNull, toArray } from '../util';
+import { DeployResult } from 'jsforce';
+import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
+
+export class DeployPackage extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.deployPackage';
+    this.cancelable = true;
+    this.name = 'Deploying package';
+    this.hidden = false;
+    this.description = 'Deploy your package.';
+    this.detail = 'Deploy from a package.xml file or choose files to deploy';
+    this.icon = 'package';
+    this.label = 'Deploy Package';
+  }
+
+  public command(context, selectedResource?) {
+    return deploy(context, this.cancellationToken);
+  }
+}
 
 var deployOptions: any = {
   checkOnly: true,
@@ -17,7 +38,10 @@ var deployOptions: any = {
   allowMissingFiles: true,
 };
 
-export default function deploy(context: vscode.ExtensionContext) {
+export default function deploy(
+  context: vscode.ExtensionContext,
+  cancellationToken: FCCancellationToken
+) {
   vscode.window.forceCode.outputChannel.clear();
 
   let options: vscode.QuickPickItem[] = [
@@ -46,9 +70,13 @@ export default function deploy(context: vscode.ExtensionContext) {
         .then(showFileList)
         .then(createPackageXML)
         .then(getFileListFromPXML)
-        .then(deployFiles);
+        .then(files => {
+          return deployFiles(files, cancellationToken);
+        });
     } else {
-      return getFileListFromPXML().then(deployFiles);
+      return getFileListFromPXML().then(files => {
+        return deployFiles(files, cancellationToken);
+      });
     }
   });
 
@@ -127,7 +155,7 @@ export default function deploy(context: vscode.ExtensionContext) {
         canPickMany: true,
       };
       vscode.window.showQuickPick(options, config).then(files => {
-        if (dxService.isEmptyUndOrNull(files)) {
+        if (isEmptyUndOrNull(files)) {
           resolve();
         }
         var theFiles: string[] = [];
@@ -211,28 +239,57 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
   }
 }
 
-export function deployFiles(files: string[], lwcPackageXML?: string): Promise<any> {
+export function deployFiles(
+  files: string[],
+  cancellationToken: FCCancellationToken,
+  lwcPackageXML?: string
+): Promise<any> {
   const deployPath: string = vscode.window.forceCode.projectRoot;
-  if (dxService.isEmptyUndOrNull(files)) {
+  if (isEmptyUndOrNull(files)) {
     return Promise.resolve();
   }
   var zip = zipFiles(files, deployPath, lwcPackageXML);
   Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
   vscode.window.forceCode.outputChannel.show();
-  return vscode.window.forceCode.conn.metadata
-    .deploy(zip, deployOptions)
-    .complete(function(err, result) {
-      if (err) {
-        return err;
-      } else {
-        return result;
-      }
-    })
+  return new Promise((resolve, reject) => {
+    return checkDeployStatus(
+      vscode.window.forceCode.conn.metadata.deploy(zip, deployOptions),
+      resolve,
+      reject
+    );
+  })
     .then(finished)
     .catch(finished);
 
   // =======================================================================================================================================
+  function checkDeployStatus(deployResult: DeployResult, resolveFunction, rejectFunction) {
+    if (cancellationToken.isCanceled) {
+      // TODO: Find a way to cancel the deployment here. Currently, the deployment still occurs in the background
+      return rejectFunction();
+    } else {
+      return deployResult.check(function(err, res) {
+        if (err) {
+          return rejectFunction(err);
+        }
+        if (res.done) {
+          return deployResult.complete(function(err, res) {
+            if (err) {
+              return rejectFunction(err);
+            } else {
+              return resolveFunction(res);
+            }
+          });
+        } else {
+          setTimeout(checkDeployStatus(deployResult, resolveFunction, rejectFunction), 2000);
+        }
+      });
+    }
+  }
+
   function finished(res: any) /*Promise<any>*/ {
+    if (cancellationToken.isCanceled) {
+      return Promise.reject();
+    }
     if (res.status && res.status !== 'Failed') {
       vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
     } else if (res.status === 'Failed') {
