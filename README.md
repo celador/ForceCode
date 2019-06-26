@@ -8,6 +8,13 @@
 
 ## Overview
 
+I am continuing development of this extension and make updates to it pretty regularly. The original
+plugin source can be found [here](https://github.com/celador/ForceCode). I have added a ton of extra
+functionality, by implementing almost all of the features that the developer console has and a lot of
+functionality that surpasses the developer console. This readme is nowhere near complete from what all
+I've added to the sourcecode, but I will work on updating it here and there. My main focus has been on
+creating functionality, as I use this plugin every day at work.
+
 This extension is a companion for SFDC (Salesforce.com) development with Visual Studio Code.  
 It is targeted at developers who want a lightweight and fast way to work with their Salesforce files.  
 There's no complicated setup process or project configurations, no external apps to keep open, and no jarring errors knocking you out of your flow.
@@ -18,7 +25,7 @@ As of version 3.17.0, you will be required to install the SFDX-CLI on your syste
 
 ## Slack
 
-ForceCode now has a Slack channel! Click [here](https://join.slack.com/t/forcecodeworkspace/shared_invite/enQtNDczMDg3Nzg2ODcxLWRhYWM2NmI3MGNmMmE1MmRkOTFkMGQzZmQ1YjlhMDhjY2YzNmU0NDEyNDU4OGM1NzdlZjU2NTg3Y2FkNTdhMjA) to join us! 
+ForceCode now has a Slack channel! Click [here](https://join.slack.com/t/forcecodeworkspace/shared_invite/enQtNDczMDg3Nzg2ODcxLWRhYWM2NmI3MGNmMmE1MmRkOTFkMGQzZmQ1YjlhMDhjY2YzNmU0NDEyNDU4OGM1NzdlZjU2NTg3Y2FkNTdhMjA) to join us!
 Use this to ask question and receive updates on upcoming features!
 
 ### Permissions
@@ -104,15 +111,15 @@ Please note that the following permissions are required to develop on the Force.
 
 ## FAQ
 
-* Where did the ForceCode: Show Menu command go?
-    * To create a project with Forcecode, you should now use the ForceCode: Create Project command.
-* Why do I get an error when trying to login about a localhost connection failure?
-    * This means your network is either on a proxy or vpn and you will need to go [here](https://salesforce.stackexchange.com/questions/194719/salesforce-dx-proxy-issues) to set up Forcecode to work with this type of connection.
+- Where did the ForceCode: Show Menu command go?
+  - To create a project with Forcecode, you should now use the ForceCode: Create Project command.
+- Why do I get an error when trying to login about a localhost connection failure?
+  - This means your network is either on a proxy or vpn and you will need to go [here](https://salesforce.stackexchange.com/questions/194719/salesforce-dx-proxy-issues) to set up Forcecode to work with this type of connection.
 
 ## Issues
 
 Before submitting an issue, please read the FAQ section above to make sure that your issue isn't answered already.
-Please submit any issues or feature requests to [https://github.com/celador/ForceCode/issues](https://github.com/celador/ForceCode/issues)  
+Please submit any issues or feature requests to [https://github.com/celador/ForceCode/issues](https://github.com/celador/ForceCode/issues)
 
 ## Commands
 
@@ -125,7 +132,7 @@ Mac: alt + cmd + s
 Win/Linux: ctrl + shift + s  
 To automatically compile/save your changes to Salesforce when the file is saved locally, you can set the `autoCompile` setting to `true`.  
 Otherwise, you will need to use the keyboard shortcut or menu option to save/compile your file.
-The `pollTimeout` setting is used to determine how long you should wait for the retrieve command to complete.  This should usually take less than a minute, but can take longer with large packages.
+The `pollTimeout` setting is used to determine how long you should wait for the retrieve command to complete. This should usually take less than a minute, but can take longer with large packages.
 
 #### Get errors as you type
 
@@ -159,15 +166,15 @@ Mac: alt + cmd + b
 Win/Linux: alt + shift + b
 You can also save a file in a resource-bundle folder and it will deploy
 
-ForceCode looks for Static Resources in two places.  The first is `resource-bundles`, the second is `spa`.  Typically, static resources go in the resource-bundles folder, and the resource is named something like `foo.resource` where foo is the name of the static resource.
-So, to create a new Static Resource, ensure the resource-bundles folder exists in the src folder of your project.  Then create a new folder named how you want your static resource to be named with `.resource.RESOURCETYPE` at the end of the name(E.G. bootstrap.resource.application.x-zip-compressed).  IF YOU ARE DEPLOYING A SINGLE FILE, SUCH AS A JAVASCRIPT FILE, THEN THE FOLDER NAME NEEDS TO BE EXACTLY THE SAME AS THE JAVASCRIPT FILE (E.G. myResource.resource.application.javascript will be the folder name and myResource.js will be the only file that can live in this folder!!!!!!!!!!!!!!!!!!!!!!!!!!) If you do it any differently then simply put, it won't work!! You can now Bundle and Deploy this Static Resource.
-Whenever you save a file that lives in a resource bundles folder, the resource will automatically bundle and deploy to your org.  Use this in conjunction with autoRefresh flag and browser property to get a browsersync-like experience
+ForceCode looks for Static Resources in two places. The first is `resource-bundles`, the second is `spa`. Typically, static resources go in the resource-bundles folder, and the resource is named something like `foo.resource` where foo is the name of the static resource.
+So, to create a new Static Resource, ensure the resource-bundles folder exists in the src folder of your project. Then create a new folder named how you want your static resource to be named with `.resource.RESOURCETYPE` at the end of the name(E.G. bootstrap.resource.application.x-zip-compressed). IF YOU ARE DEPLOYING A SINGLE FILE, SUCH AS A JAVASCRIPT FILE, THEN THE FOLDER NAME NEEDS TO BE EXACTLY THE SAME AS THE JAVASCRIPT FILE (E.G. myResource.resource.application.javascript will be the folder name and myResource.js will be the only file that can live in this folder!!!!!!!!!!!!!!!!!!!!!!!!!!) If you do it any differently then simply put, it won't work!! You can now Bundle and Deploy this Static Resource.
+Whenever you save a file that lives in a resource bundles folder, the resource will automatically bundle and deploy to your org. Use this in conjunction with autoRefresh flag and browser property to get a browsersync-like experience
 
 If you build SPAs, typically you will have a `spa` folder, then another folder named for your static resource, like `spa/foo`.
 This folder is your Javascript project, where your package.json lives.
 You will build your distribution files to a 'dist' folder or another folder determined by the `spaDist` config property. This folder will live inside `spa/foo` directory, so you will end up with `spa/foo/dist` folder structure. One last note, the spa folder NEEDS to be in your `src` folder!!!
 
-SPA folders do not automatically deploy.  We typically run these offline with `jsr-mocks` and webpack and only deploy when we want to publish.
+SPA folders do not automatically deploy. We typically run these offline with `jsr-mocks` and webpack and only deploy when we want to publish.
 
 ### Deploy Package
 
@@ -177,11 +184,11 @@ Deploy your package based on your configured deploy options and the package.xml 
 
 **Options**:
 
-* checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.  This will generate a `.validationId` file.
-* ignoreWarnings:  Indicates whether a warning should allow a deployment to complete successfully \(true\) or not \(false\).
-* rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
-* runAllTests:     Run all tests in org
-* runTests:        An array of test names to be run [TestClass1, TestClass2,...]
+- checkOnly: Validation only deploy. Don't actually deploy your code, just make sure it all compiles as a package. This will generate a `.validationId` file.
+- ignoreWarnings: Indicates whether a warning should allow a deployment to complete successfully \(true\) or not \(false\).
+- rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
+- runAllTests: Run all tests in org
+- runTests: An array of test names to be run [TestClass1, TestClass2,...]
 
 If you want destructive changes as part of the deploy, put a `destructiveChanges.xml` file in your src folder
 
@@ -190,7 +197,7 @@ Derived from [https://jsforce.github.io/blog/posts/20151106-jsforce-metadata-too
 ### Retrieve Package
 
 Menu: &gt;ForceCode Menu ... Retrieve Package  
-The `apiVersion` setting is used to retrieve your package \(this setting is important in CI setups\) comes directly from your org.  When you want to override your Salesforce org version, set the `apiVersion` setting manually.  This is a string, with the decimal.  
+The `apiVersion` setting is used to retrieve your package \(this setting is important in CI setups\) comes directly from your org. When you want to override your Salesforce org version, set the `apiVersion` setting manually. This is a string, with the decimal.
 
 ### Get Log
 
@@ -215,8 +222,7 @@ Using this option, you can create Aura components, classes, LWC components, trig
 
 ### Build package.xml file
 
-This will present to you a list of all the non-foldered types that you want to include in your package.xml. Once you choose the types, you will be asked where you want to save the file. 
-    * Reports, documents, etc are foldered and currently not supported
+This will present to you a list of all the non-foldered types that you want to include in your package.xml. Once you choose the types, you will be asked where you want to save the file. \* Reports, documents, etc are foldered and currently not supported
 
 ### Get overall org test coverage
 
@@ -232,7 +238,7 @@ This will open a ForceCode Settings window where you can change all of the optio
 
 ### Bulk Loader
 
-Select this menu option to be taken to a screen where you will be able to upload a CSV file full of record data that you will be able to perform CRUD operations on. Simply select an sObject name, CRUD operation, and upload a CSV. Then click "Execute" and watch the magic happen! If you get a file format error it will be shown on the screen. If there are errors during the CRUD operation then Forcecode will show you a save dialog box asking where you want to save the error file. The error file currently isn't as fancy as dataloader, as the results returned from errors aren't much, but it will tell you the line number(s) in Excel that have the errors, along with what the error was. 
+Select this menu option to be taken to a screen where you will be able to upload a CSV file full of record data that you will be able to perform CRUD operations on. Simply select an sObject name, CRUD operation, and upload a CSV. Then click "Execute" and watch the magic happen! If you get a file format error it will be shown on the screen. If there are errors during the CRUD operation then Forcecode will show you a save dialog box asking where you want to save the error file. The error file currently isn't as fancy as dataloader, as the results returned from errors aren't much, but it will tell you the line number(s) in Excel that have the errors, along with what the error was.
 
 ### New Project
 
@@ -241,7 +247,7 @@ Selecting this option will allow you to create a new Forcecode project in a diff
 ## Configuration
 
 To create a Forcecode project, open Visual Studio Code then open the command pallet (Ctrl + Shift + p) and run the `ForceCode: Create Project` command. Select the folder you wish to create a project in then Forcecode will open the folder and ask you to log in.
-You can then select if you want to log into a production org or test org. A browser will then open to the Salesforce login where you can enter your credentials. A configuration file will then be auto generated for you for each of your orgs in the .forceCode folder called `settings.json`.  
+You can then select if you want to log into a production org or test org. A browser will then open to the Salesforce login where you can enter your credentials. A configuration file will then be auto generated for you for each of your orgs in the .forceCode folder called `settings.json`.
 
 The configuration file will look like the following. You can either edit this file to change the settings or you can use the settings option in the ForceCode menu (Recommended)!
 
@@ -267,101 +273,100 @@ The configuration file will look like the following. You can either edit this fi
     "src": "src",
     "staticResourceCacheControl": "Private",
     "username": "MonsterMike@Salesforce.com",
-    "url": "https://login.salesforce.com"    
+    "url": "https://login.salesforce.com"
 }
-``` 
+```
 
 ### Options
 
-* alias: When set, the alias is what will show in the saved usernames section of the Forcecode view instead of the username. This makes keeping track of orgs easier than remembering each username
-* apiVersion: This is the default api version that all your files will be saved with. ForceCode will not change the version of an existing file.  This is also the version used for package retrieval and deploy.
-* autoCompile: When a supported file is saved \(works with VSCode's autosave feature\) the file is saved/compiled on the server.  Otherwise, use `cmd + opt + s` (Mac) or `ctrl + shift + s` (Win/Linux) to save the file to the server.
-* deployOptions: Deploy your package based on your configured deploy options and the package.xml in your src folder.
-  * allowMissingFiles: Specifies whether a deploy succeeds even if files that are specified in package.xml but are not in the .zip file or not.
-  * checkOnly:       Validation only deploy.  Don't actually deploy your code, just make sure it all compiles as a package.
-  * ignoreWarnings:  Indicates whether a warning should allow a deployment to complete successfully \(true\) or not \(false\).
-  * purgeOnDelete: If true, the deleted components in the destructiveChanges.xml manifest file aren't stored in the Recycle Bin.
-  * rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
-  * runTests:        A list of Apex tests to run during deployment \(comma separated list\)
-  * testLevel:       Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
-* overwritePackageXML: if set to true, will overwrite package.xml file upon opening or retrieving files
-* poll: When compiling, this is the interval \(in milliseconds\) at which we poll the server for status updates.  This is only applicable to Classes, Pages, Triggers, and Components.
-* pollTimeout: When retrieving packages, or other long running tasks, this is the maximum amount of time \(in seconds\) it will wait before the process times out.  If you're having trouble retrieving your package, try increasing this number.  Default is 600 \(10 minutes\).
-* prefix: This is the namespace prefix defined in your package settings for your org.  Set this if you have a namespaced org.  Otherwise ForceCode will attempt to infer a prefix from your Salesforce Org.  If you have a namespaced org and do not set this setting, you may have problems, especially if working on an out of date Org.  This should be automatic as of Salesforce 38
-* showTestCoverage: This flag determines if Apex code coverage highlighting should be shown or hidden in the editor.  This can be toggled for the open editor by clicking the colorful icon in the editor bar.
-* spaDist: When working with SPAs we usually have a "distribution" folder where we build our files to.  If this string is set, and a SPA is bundled and deployed, this folder will be used as the distribution folder, otherwise the spa project will be deployed.
-* src: This will tell ForceCode where to store the project files for this org.
-* staticResourceCacheControl: You can select Public or Private and your static resources will save with the cacheControl set to what this option is set to.
-* username: DO NOT TOUCH THIS
-* url: DO NOT TOUCH THIS
-
+- alias: When set, the alias is what will show in the saved usernames section of the Forcecode view instead of the username. This makes keeping track of orgs easier than remembering each username
+- apiVersion: This is the default api version that all your files will be saved with. ForceCode will not change the version of an existing file. This is also the version used for package retrieval and deploy.
+- autoCompile: When a supported file is saved \(works with VSCode's autosave feature\) the file is saved/compiled on the server. Otherwise, use `cmd + opt + s` (Mac) or `ctrl + shift + s` (Win/Linux) to save the file to the server.
+- deployOptions: Deploy your package based on your configured deploy options and the package.xml in your src folder.
+  - allowMissingFiles: Specifies whether a deploy succeeds even if files that are specified in package.xml but are not in the .zip file or not.
+  - checkOnly: Validation only deploy. Don't actually deploy your code, just make sure it all compiles as a package.
+  - ignoreWarnings: Indicates whether a warning should allow a deployment to complete successfully \(true\) or not \(false\).
+  - purgeOnDelete: If true, the deleted components in the destructiveChanges.xml manifest file aren't stored in the Recycle Bin.
+  - rollbackOnError: Indicates whether any failure causes a complete rollback \(true\) or not \(false\)
+  - runTests: A list of Apex tests to run during deployment \(comma separated list\)
+  - testLevel: Specifies which tests are run as part of a deployment Options are: NoTestRun / RunSpecifiedTests / RunLocalTests / RunAllTestsInOrg
+- overwritePackageXML: if set to true, will overwrite package.xml file upon opening or retrieving files
+- poll: When compiling, this is the interval \(in milliseconds\) at which we poll the server for status updates. This is only applicable to Classes, Pages, Triggers, and Components.
+- pollTimeout: When retrieving packages, or other long running tasks, this is the maximum amount of time \(in seconds\) it will wait before the process times out. If you're having trouble retrieving your package, try increasing this number. Default is 600 \(10 minutes\).
+- prefix: This is the namespace prefix defined in your package settings for your org. Set this if you have a namespaced org. Otherwise ForceCode will attempt to infer a prefix from your Salesforce Org. If you have a namespaced org and do not set this setting, you may have problems, especially if working on an out of date Org. This should be automatic as of Salesforce 38
+- showTestCoverage: This flag determines if Apex code coverage highlighting should be shown or hidden in the editor. This can be toggled for the open editor by clicking the colorful icon in the editor bar.
+- spaDist: When working with SPAs we usually have a "distribution" folder where we build our files to. If this string is set, and a SPA is bundled and deployed, this folder will be used as the distribution folder, otherwise the spa project will be deployed.
+- src: This will tell ForceCode where to store the project files for this org.
+- staticResourceCacheControl: You can select Public or Private and your static resources will save with the cacheControl set to what this option is set to.
+- username: DO NOT TOUCH THIS
+- url: DO NOT TOUCH THIS
 
 There's also workspace configuration options that are not included in the settings.json, but rather in your vscode settings.json file. The reasoning for separating the files is for portability reasons; to make it easier to share this configuration with others and yourself across projects.  
-If you open up your settings.json file, or go to Code &gt; Preferences &gt; Workspace Settings and create a new preference, starting with `force` you should see the defaultApiVersion and filesExclude preferences. The defaultApiVersion will be what ForceCode uses as the API version when creating new projects or logging into new orgs. 
-The filesExclude property allows you to have certain files ignored \(excluded\) from Static Resources when bundled/deployed.  This allows you to create a modern SPA project in a "spa" folder instead of keeping it in your "resource-bundles" directory.  
+If you open up your settings.json file, or go to Code &gt; Preferences &gt; Workspace Settings and create a new preference, starting with `force` you should see the defaultApiVersion and filesExclude preferences. The defaultApiVersion will be what ForceCode uses as the API version when creating new projects or logging into new orgs.
+The filesExclude property allows you to have certain files ignored \(excluded\) from Static Resources when bundled/deployed. This allows you to create a modern SPA project in a "spa" folder instead of keeping it in your "resource-bundles" directory.  
 However, when we build these SPAs we generally have a ton of preference and source files that we don't want to deploy to Salesforce, both for security and size reasons.  
 So, you can create Node glob patterns to ignore. The default configuration is shown below.  
 Glob patterns can be tricky... so a little research and trial and error may be required to get your bundle just right.
 
 ```json
 {
-    ".gitignore": true,
-    ".DS_Store": true,
-    ".org_metadata": true,
-    "**/*.map": true,
-    "node_modules/**": true,
-    "bower_modules/**": true,
-    "**.tmp": true,
-    "**/*-meta.xml": true,
-    ".log": true
+  ".gitignore": true,
+  ".DS_Store": true,
+  ".org_metadata": true,
+  "**/*.map": true,
+  "node_modules/**": true,
+  "bower_modules/**": true,
+  "**.tmp": true,
+  "**/*-meta.xml": true,
+  ".log": true
 }
 ```
 
 The following settings have been migrated to the workspace settings as well:
-* allowAnonymousUsageTracking: Checking this will allow the Forcecode team to track anonymous usage data so that we can improve your overall experience.
-* autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on \(and you're working on a Mac\), the currently active tab in Google Chrome Canary \(or your configured browser\) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
-* browser: Define which browser you want to reload when the static resource refreshes \(this only works with Macs at the moment\)
-* bulkLoaderPollInterval: The amount of time in milliseconds between updates when doing bulk CRUD operations.
-* checkForFileChanges: This option, when checked, will allow ForceCode to check for file changes against the server on startup of ForceCode.
-* debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
-* debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.
-* maxFileChangeNotifications: The maximum number of file change notifications that will be shown on startup of the extension
-* maxQueryHistory: The maximum number of queries to store in the query history of the query editor
-* maxQueryResultsPerPage: The maximum number of results to show per page when executing a query in the query editor
-* maxSaveHistory: The maximum number of save history results to show in the Forcecode view. The default is 10.
-* onlyShowProjectUsernames: If checked, Forcecode will only show the usernames in use in each project instead of every one that has been authenticated on your machine.
-* outputQueriesAsCSV: If checked, will retrieve soql/toql results in csv form. If false, json will be returned
-* revealTestedClass: When checked, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed.
-* setDefaultUsernameOnLogin: When checked, Forcecode will update the SFDX CLI default username to the current logged in org each time you switch usernames. This allows you to use Forcecode alongside of the Salesforce extensions, so you don't need to worry about changing the default username each time you switch orgs.
-* showFilesOnOpen: If checked, will open files in the editor when opened from Salesforce
-* showFilesOnOpenMax: The maximum number of files to open in the editor. More than 3 usually causes problems or doesn't work.
-* showTestLog: This flag determines if the Log file for the last test run should show up after the tests are complete.  This is nice for debugging tests.  Use this in conjunction with the other debug flags to keep your output tidy. The log file will only show if it's not empty (Because of filtering).
 
-## Help Develop ForceCode 
+- allowAnonymousUsageTracking: Checking this will allow the Forcecode team to track anonymous usage data so that we can improve your overall experience.
+- autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org. If autoRefresh is on \(and you're working on a Mac\), the currently active tab in Google Chrome Canary \(or your configured browser\) will be refreshed. This provides a simple browsersync-like experience without the overhead of browsersync
+- browser: Define which browser you want to reload when the static resource refreshes \(this only works with Macs at the moment\)
+- bulkLoaderPollInterval: The amount of time in milliseconds between updates when doing bulk CRUD operations.
+- checkForFileChanges: This option, when checked, will allow ForceCode to check for file changes against the server on startup of ForceCode.
+- debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
+- debugOnly: When executing anonymous, we can either show all the output or only the debug lines. This makes it easier to debug your code. Turn if on for the important stuff, and turn it off to get all the detail.
+- maxFileChangeNotifications: The maximum number of file change notifications that will be shown on startup of the extension
+- maxQueryHistory: The maximum number of queries to store in the query history of the query editor
+- maxQueryResultsPerPage: The maximum number of results to show per page when executing a query in the query editor
+- maxSaveHistory: The maximum number of save history results to show in the Forcecode view. The default is 10.
+- onlyShowProjectUsernames: If checked, Forcecode will only show the usernames in use in each project instead of every one that has been authenticated on your machine.
+- outputQueriesAsCSV: If checked, will retrieve soql/toql results in csv form. If false, json will be returned
+- revealTestedClass: When checked, this will reveal the class (In the code coverage view) that received the highest amount of coverage from running a test. I say this because if you don't have the tested class in your src folder then it will show the next highest covered class in your project. If none are found then it won't be revealed.
+- setDefaultUsernameOnLogin: When checked, Forcecode will update the SFDX CLI default username to the current logged in org each time you switch usernames. This allows you to use Forcecode alongside of the Salesforce extensions, so you don't need to worry about changing the default username each time you switch orgs.
+- showFilesOnOpen: If checked, will open files in the editor when opened from Salesforce
+- showFilesOnOpenMax: The maximum number of files to open in the editor. More than 3 usually causes problems or doesn't work.
+- showTestLog: This flag determines if the Log file for the last test run should show up after the tests are complete. This is nice for debugging tests. Use this in conjunction with the other debug flags to keep your output tidy. The log file will only show if it's not empty (Because of filtering).
+
+## Help Develop ForceCode
 
 ### Clone the repo
 
-Step 1.  Clone this repo to your local machine, like you would with any other Git repository.
+Step 1. Clone this repo to your local machine, like you would with any other Git repository.
 
 ### Open the folder
 
-Step 2.  Open the folder you just created when you cloned the repo in VSCode.
+Step 2. Open the folder you just created when you cloned the repo in VSCode.
 
 ### Install the dependencies
 
-Step 3.  Open the terminal by pressing `ctrl` + `~` and install the dependencies by running `npm ci`.
+Step 3. Open the terminal by pressing `ctrl` + `~` and install the dependencies by running `npm ci`.
 
 ### Run the extension
 
-Step 4.  Press F5 to start debugging the extension. Another VSCode window will open up, which will host your extension.  Open your Salesforce project and start working.
+Step 4. Press F5 to start debugging the extension. Another VSCode window will open up, which will host your extension. Open your Salesforce project and start working.
 
 ### Debug the extension
 
-Step 5.  Find the file for the command you want to run and debug, and put in a breakpoint. Run the command to hit the breakpoint and start exploring the variables.  
+Step 5. Find the file for the command you want to run and debug, and put in a breakpoint. Run the command to hit the breakpoint and start exploring the variables.
 
-Step 6.  Have Fun!
-
+Step 6. Have Fun!
 
 ## Change Log
 
-* The change log has been moved to the CHANGELOG.md file. You should be able to view this information on the extension's home page.
+- The change log has been moved to the CHANGELOG.md file. You should be able to view this information on the extension's home page.
