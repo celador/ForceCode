@@ -1,29 +1,12 @@
 image: node:10.15.3
 
 stages:
-  - install
   - build
   - release
 
 cache:
   key: fcCache
-  paths:
-    - node_modules/
-
-installModules:
-  stage: install
-  only:
-    changes:
-      - package.json
-  tags:
-    - docker
-  script:
-    - npm install --unsafe-perm
-  cache:
-    key: fcCache
-    paths:
-      - node_modules/
-    policy: push
+  untracked: true
 
 buildFC:
   stage: build
@@ -33,27 +16,29 @@ buildFC:
   tags:
     - docker
   script:
+    - npm install --unsafe-perm
     - npm run package
   cache:
     key: fcCache
-    paths:
-      - node_modules/
-    policy: pull
+    untracked: true
+    policy: push
   artifacts:
-    name: '$CI_COMMIT_REF_SLUG'
+    name: '$CI_COMMIT_TITLE'
     paths:
-      - '*.vsix'
+      - '*.vsix'  
 
 releaseFC:
   stage: release
   only:
-    - master
+    refs:
+      - master
+    changes:
+      - package.json
   tags:
     - docker
   cache:
     key: fcCache
-    paths:
-      - node_modules/
+    untracked: true
     policy: pull
   script:
     - $(npm bin)/vsce publish -p $VSC_PUBKEY
