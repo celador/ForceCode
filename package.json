@@ -546,10 +546,10 @@
     }
   },
   "scripts": {
-    "major": "npm version major && git push && git push --tags",
-    "minor": "npm version minor && git push && git push --tags",
-    "patch": "npm version patch && git push && git push --tags",
-    "prerelease": "npm version prerelease && git push && git push --tags",
+    "major": "npm version major && git push",
+    "minor": "npm version minor && git push",
+    "patch": "npm version patch && git push",
+    "prerelease": "npm version prerelease && git push",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
