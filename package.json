@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.17.0",
+  "version": "3.17.1-0",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -546,20 +546,22 @@
     }
   },
   "scripts": {
-    "bump": "npm version patch && git push && git push --tags && vsce publish",
+    "major": "npm version major && git push",
+    "minor": "npm version minor && git push",
+    "patch": "npm version patch && git push",
+    "prerelease": "npm version prerelease && git push",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "clean": "rimraf ./dist && rimraf ./node_modules/",
     "test": "node ./node_modules/vscode/bin/test",
-    "package": "vsce package",
-    "vscode:prepublish": "rimraf ./dist && webpack --mode production",
+    "package": "rimraf ./dist && webpack --mode production && vsce package",
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch"
   },
   "devDependencies": {
     "@types/deepmerge": "2.2.0",
-    "@types/fs-extra": "7.0.0",
+    "@types/fs-extra": "8.0.0",
     "@types/globule": "1.1.3",
     "@types/klaw": "3.0.0",
     "@types/mocha": "5.2.7",
@@ -584,7 +586,7 @@
     "universal-analytics": "0.4.20",
     "uuid": "3.3.2",
     "vsce": "1.64.0",
-    "vscode": "1.1.34",
+    "vscode": "1.1.35",
     "webpack": "4.35.0",
     "webpack-cli": "3.3.5",
     "xml2js": "0.4.19"
