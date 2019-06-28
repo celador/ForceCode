@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.17.1
+    * Fix users not receiving error message when SFDX wasn't installed on startup.
 * 3.17.0
     * Allow retrieval of managed package reports/dashboards/etc.
     * Fix "Never prompts for diff/overwrite on save for Lightning Web Components" #280

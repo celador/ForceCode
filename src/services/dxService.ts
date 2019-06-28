@@ -79,7 +79,7 @@ export default class DXService {
         : '');
 
     if (isWindows()) {
-      fullCommand = 'cmd /c' + fullCommand;
+      fullCommand = 'cmd /c ' + fullCommand;
     }
     const error = new Error(); // Get stack here to use for later
 
@@ -114,7 +114,13 @@ export default class DXService {
         });
 
         cmd.stderr.on('data', data => {
-          console.warn('srderr', data);
+          var theErr: string = data.toString();
+          console.warn('srderr', theErr);
+          if (theErr) {
+            theErr = theErr.toLowerCase();
+            sfdxNotFound =
+              theErr.indexOf('not found') > -1 || theErr.indexOf('not recognized') > -1;
+          }
         });
 
         cmd.on('error', data => {
