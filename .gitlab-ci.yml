@@ -21,11 +21,10 @@ buildFC:
   cache:
     key: fcCache
     untracked: true
-    policy: push
   artifacts:
     name: '$CI_COMMIT_TITLE'
     paths:
-      - '*.vsix'  
+      - '*.vsix'
 
 releaseFC:
   stage: release
