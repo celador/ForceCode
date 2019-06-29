@@ -4,8 +4,15 @@ stages:
   - build
   - release
 
+cache:
+  key: fcCache
+  untracked: true
+
 buildFC:
   stage: build
+  only:
+    changes:
+      - package.json
   tags:
     - docker
   script:
@@ -14,15 +21,18 @@ buildFC:
   cache:
     key: fcCache
     untracked: true
-    policy: push
   artifacts:
+    name: '$CI_COMMIT_TITLE'
     paths:
       - '*.vsix'
 
 releaseFC:
   stage: release
   only:
-    - master
+    refs:
+      - master
+    changes:
+      - package.json
   tags:
     - docker
   cache:
@@ -31,5 +41,3 @@ releaseFC:
     policy: pull
   script:
     - $(npm bin)/vsce publish -p $VSC_PUBKEY
-  dependencies:
-    - buildFC

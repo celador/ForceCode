@@ -3,6 +3,7 @@ test/**
 **/*.map
 .vscode/**/*
 .gitignore
+.gitlab-ci.yml
 tsconfig.json
 vsc-extension-quickstart.md
 src/**/*
