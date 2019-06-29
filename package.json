@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.17.1-0",
+  "version": "3.17.1",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -570,7 +570,7 @@
     "@types/xml2js": "0.4.4",
     "compressing": "1.4.0",
     "deepmerge": "3.3.0",
-    "fs-extra": "8.0.1",
+    "fs-extra": "8.1.0",
     "globule": "1.2.1",
     "jsforce": "1.8.5",
     "klaw": "3.0.0",
