@@ -555,7 +555,7 @@
     "postinstall": "node ./node_modules/vscode/bin/install",
     "clean": "rimraf ./dist && rimraf ./node_modules/",
     "test": "node ./node_modules/vscode/bin/test",
-    "package": "rimraf ./dist && webpack --mode production && vsce package",
+    "package": "rimraf ./dist && rimraf ./*.vsix && webpack --mode production && vsce package",
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch"
   },
