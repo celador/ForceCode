@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.17.2
+    * Fix issue with logging in when clicking on an org in the saved usernames list with a yellow circle
 * 3.17.1
     * Fix users not receiving error message when SFDX wasn't installed on startup.
 * 3.17.0

@@ -1,4 +1,4 @@
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand, FCCancellationToken } from './forcecodeCommand';
 import * as vscode from 'vscode';
 import {
   fcConnection,
@@ -83,7 +83,7 @@ export class SwitchUser extends ForcecodeCommand {
     } else {
       orgInfo = context;
     }
-    return fcConnection.connect(orgInfo, this.cancellationToken);
+    return fcConnection.connect(orgInfo, new FCCancellationToken());
   }
 }
 
@@ -119,7 +119,7 @@ export class FileModified extends ForcecodeCommand {
         )
         .then(s => {
           if (s === 'Refresh') {
-            return retrieve(theDoc.uri, this.cancellationToken);
+            return retrieve(theDoc.uri, new FCCancellationToken());
           } else if (s === 'Diff') {
             return diff(theDoc);
           }
@@ -189,7 +189,7 @@ export class Login extends ForcecodeCommand {
       orgInfo = context;
     }
     const cfg: Config = readConfigFile(orgInfo.username);
-    return dxService.login(cfg.url, this.cancellationToken).then(res => {
+    return dxService.login(cfg.url, new FCCancellationToken()).then(res => {
       return commandService.runCommand('ForceCode.switchUserText', res);
     });
   }

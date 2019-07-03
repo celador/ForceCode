@@ -1,8 +1,12 @@
 import { EventEmitter } from 'events';
 
-export interface FCCancellationToken {
-  isCanceled: boolean;
-  cancellationEmitter: EventEmitter;
+export class FCCancellationToken {
+  public isCanceled: boolean;
+  public cancellationEmitter: EventEmitter;
+  constructor() {
+    this.isCanceled = false;
+    this.cancellationEmitter = new EventEmitter();
+  }
 }
 
 export abstract class ForcecodeCommand {
@@ -17,15 +21,14 @@ export abstract class ForcecodeCommand {
   public cancellationToken: FCCancellationToken;
 
   constructor() {
-    this.cancellationToken = { isCanceled: false, cancellationEmitter: new EventEmitter() };
+    this.cancellationToken = new FCCancellationToken();
   }
 
   public abstract command(context: any, selectedResource: any): any;
 
   public run(context: any, selectedResource: any): any {
     // reset the variables
-    this.cancellationToken.cancellationEmitter.removeAllListeners();
-    this.cancellationToken.isCanceled = false;
+    this.cancellationToken = new FCCancellationToken();
     try {
       return this.command(context, selectedResource);
     } catch (e) {
