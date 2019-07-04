@@ -1,6 +1,7 @@
 ## Change Log
 
 * 3.17.2
+    * Open Lightning when checking deployment status or opening file in org
     * Fix issue with receiving error about not being able to find the SFDX CLI when trying to view deployment error details
     * Fix issue with logging in when clicking on an org in the saved usernames list with a yellow circle
 * 3.17.1

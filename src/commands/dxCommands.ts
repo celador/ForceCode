@@ -64,13 +64,19 @@ export class OpenFileInOrg extends ForcecodeCommand {
         const fcfile: FCFile | undefined = codeCovViewService.findByPath(filePath);
         const member: IWorkspaceMember | undefined = fcfile ? fcfile.getWsMember() : undefined;
         if (member) {
-          id = member.id;
+          var type = member.type;
+          if (type === 'ApexClass') {
+            type += 'e';
+          }
+          type += 's';
+          id = `lightning/setup/${type}/page?address=%2F${member.id}`;
         }
       } else {
         id = context;
       }
     }
     if (id) {
+      // lightning/setup/ApexTriggers/page?address=%2F + id
       return dxService.openOrgPage('/' + id);
     } else {
       return Promise.resolve();
