@@ -1,10 +1,10 @@
-import { RetrieveBundle, RefreshContext, Refresh } from '../commands/retrieve';
+import { RetrieveBundle, Refresh } from '../commands/retrieve';
 import { CreateScratchOrg } from '../commands/createScratchOrg';
 import { ForcecodeCommand, CancelCommand } from '../commands/forcecodeCommand';
 import { Find } from '../commands/find';
-import { Open, OpenContext, ShowFileOptions } from '../commands/open';
+import { Open, ShowFileOptions } from '../commands/open';
 import { CreateClass } from '../commands/createClass';
-import { ExecuteAnonymous, ExecuteAnonymousContext } from '../commands/executeAnonymous';
+import { ExecuteAnonymous } from '../commands/executeAnonymous';
 import { GetLog } from '../commands/getLog';
 import { OverallCoverage } from '../commands/overallCoverage';
 import { QueryEditor } from '../commands/queryEditor';
@@ -13,13 +13,9 @@ import { BulkLoader } from '../commands/bulkLoader';
 import { Settings } from '../commands/settings';
 import { ForceCodeMenu } from '../commands/menu';
 import { ApexTest, RunTests, GetCodeCoverage, ToggleCoverage } from '../commands/apexTest';
-import { DiffMenu, DiffContext } from '../commands/diff';
-import { CompileMenu, CompileContext, ForceCompile } from '../commands/compile';
-import {
-  StaticResourceBundle,
-  StaticResourceBundleContext,
-  StaticResourceDeployFile,
-} from '../commands/staticResource';
+import { DiffMenu } from '../commands/diff';
+import { CompileMenu, ForceCompile } from '../commands/compile';
+import { StaticResourceBundle, StaticResourceDeployFile } from '../commands/staticResource';
 import { PackageBuilder } from '../commands/packageBuilder';
 import { DeployPackage } from '../commands/deploy';
 import { OpenOrg, PreviewVisualforce, PreviewApp, OpenFileInOrg } from '../commands/dxCommands';
@@ -28,7 +24,6 @@ import {
   CreateProject,
   Logout,
   SwitchUser,
-  SwitchUserContext,
   FileModified,
   CheckForFileChanges,
   ShowTasks,
@@ -63,13 +58,6 @@ export const fcCommands: ForcecodeCommand[] = [
   // End visible menu items
   new ToolingQuery(),
   new ForceCompile(),
-  new StaticResourceBundleContext(),
-  new CompileContext(),
-  new DiffContext(),
-  new ExecuteAnonymousContext(),
-  new OpenContext(),
-  new SwitchUserContext(),
-  new RefreshContext(),
   new Refresh(),
   new ForceCodeMenu(),
   new ToggleCoverage(),

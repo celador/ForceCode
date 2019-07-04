@@ -21,10 +21,10 @@ export class CommandService {
     });
 
     if (!theCommand) {
-      return Promise.reject('Invalid command');
+      return Promise.reject('Invalid command: ' + command);
     }
     if (
-      ['ForceCode.compileMenu', 'ForceCode.refreshContext'].find(c => {
+      ['ForceCode.compile', 'ForceCode.refresh'].find(c => {
         return theCommand !== undefined && c === theCommand.commandName;
       })
     ) {
@@ -40,7 +40,7 @@ export class CommandService {
           message: 'Please open a file before trying to save through the ForceCode menu!',
         });
       }
-      if (theCommand.commandName === 'ForceCode.compileMenu') {
+      if (theCommand.commandName === 'ForceCode.compile') {
         theCommand.name = 'Saving ';
       } else {
         theCommand.name = 'Refreshing ';

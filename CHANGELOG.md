@@ -1,6 +1,7 @@
 ## Change Log
 
 * 3.17.2
+    * Fix issue with receiving error about not being able to find the SFDX CLI when trying to view deployment error details
     * Fix issue with logging in when clicking on an org in the saved usernames list with a yellow circle
 * 3.17.1
     * Fix users not receiving error message when SFDX wasn't installed on startup.

@@ -15,7 +15,7 @@ import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
 export class CompileMenu extends ForcecodeCommand {
   constructor() {
     super();
-    this.commandName = 'ForceCode.compileMenu';
+    this.commandName = 'ForceCode.compile';
     this.cancelable = true;
     this.name = 'Saving ';
     this.hidden = false;
@@ -46,18 +46,6 @@ export class CompileMenu extends ForcecodeCommand {
   }
 }
 
-export class CompileContext extends ForcecodeCommand {
-  constructor() {
-    super();
-    this.commandName = 'ForceCode.compile';
-    this.hidden = true;
-  }
-
-  public command(context, selectedResource?) {
-    return commandService.runCommand('ForceCode.compileMenu', context, false);
-  }
-}
-
 export class ForceCompile extends ForcecodeCommand {
   constructor() {
     super();
@@ -66,7 +54,7 @@ export class ForceCompile extends ForcecodeCommand {
   }
 
   public command(context, selectedResource?) {
-    return commandService.runCommand('ForceCode.compileMenu', context, true);
+    return commandService.runCommand('ForceCode.compile', context, true);
   }
 }
 

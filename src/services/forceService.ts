@@ -82,7 +82,7 @@ export default class ForceService implements forceCode.IForceService {
       }).then(() => {
         commandService
           .runCommand(
-            'ForceCode.switchUserText',
+            'ForceCode.switchUser',
             config.username ? { username: config.username } : undefined
           )
           .then(res => {

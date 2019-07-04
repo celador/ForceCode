@@ -4,7 +4,6 @@ import { getIcon, getExtension, getFolder } from './../parsers';
 import * as path from 'path';
 import { isEmptyUndOrNull } from '../util';
 import { ForcecodeCommand, FCCancellationToken } from './forcecodeCommand';
-import { commandService } from '../services';
 const TYPEATTRIBUTE: string = 'type';
 
 export class ShowFileOptions extends ForcecodeCommand {
@@ -21,22 +20,10 @@ export class ShowFileOptions extends ForcecodeCommand {
   }
 }
 
-export class OpenContext extends ForcecodeCommand {
-  constructor() {
-    super();
-    this.commandName = 'ForceCode.open';
-    this.hidden = true;
-  }
-
-  public command(context, selectedResource?) {
-    return commandService.runCommand('ForceCode.openMenu', context, selectedResource);
-  }
-}
-
 export class Open extends ForcecodeCommand {
   constructor() {
     super();
-    this.commandName = 'ForceCode.openMenu';
+    this.commandName = 'ForceCode.open';
     this.cancelable = true;
     this.name = 'Opening file';
     this.hidden = false;

@@ -53,9 +53,13 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
 
     var theTask: Task = new Task(this, execution, context, selectedResource);
     this.tasks.push(theTask);
-    this.runningTasksStatus.text = 'ForceCode: Executing ' + this.getChildren().length + ' Task(s)';
-    this.runningTasksStatus.show();
-    this.runningTasksStatus.command = 'ForceCode.showTasks';
+    const visibleTasks = this.getChildren().length;
+    if (visibleTasks > 0) {
+      this.runningTasksStatus.text =
+        'ForceCode: Executing ' + visibleTasks + ' Task(s)';
+      this.runningTasksStatus.show();
+      this.runningTasksStatus.command = 'ForceCode.showTasks';
+    }
 
     this._onDidChangeTreeData.fire();
     return theTask.run(FIRST_TRY);

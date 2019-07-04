@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
 import globule = require('globule');
-import { zipFiles, commandService } from './../services';
+import { zipFiles } from './../services';
 import { ForcecodeCommand } from './forcecodeCommand';
 const mime = require('mime-types');
 
@@ -22,7 +22,7 @@ export class StaticResourceDeployFile extends ForcecodeCommand {
 export class StaticResourceBundle extends ForcecodeCommand {
   constructor() {
     super();
-    this.commandName = 'ForceCode.staticResourceMenu';
+    this.commandName = 'ForceCode.staticResource';
     this.name = 'Deploying static resource';
     this.hidden = false;
     this.description = 'Build and Deploy a resource bundle.';
@@ -34,18 +34,6 @@ export class StaticResourceBundle extends ForcecodeCommand {
 
   public command(context, selectedResource?) {
     return staticResourceBundleDeploy(context);
-  }
-}
-
-export class StaticResourceBundleContext extends ForcecodeCommand {
-  constructor() {
-    super();
-    this.commandName = 'ForceCode.staticResource';
-    this.hidden = true;
-  }
-
-  public command(context, selectedResource?) {
-    return commandService.runCommand('ForceCode.staticResourceMenu', context, selectedResource);
   }
 }
 

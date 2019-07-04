@@ -26,7 +26,7 @@ import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
 export class Refresh extends ForcecodeCommand {
   constructor() {
     super();
-    this.commandName = 'ForceCode.refreshContext';
+    this.commandName = 'ForceCode.refresh';
     this.cancelable = true;
     this.name = 'Retrieving ';
     this.hidden = true;
@@ -78,18 +78,6 @@ export class Refresh extends ForcecodeCommand {
         return cur.name === toolType && cur.members !== ['*'];
       });
     }
-  }
-}
-
-export class RefreshContext extends ForcecodeCommand {
-  constructor() {
-    super();
-    this.commandName = 'ForceCode.refresh';
-    this.hidden = true;
-  }
-
-  public command(context, selectedResource?) {
-    return commandService.runCommand('ForceCode.refreshContext', context, selectedResource);
   }
 }
 

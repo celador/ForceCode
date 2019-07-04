@@ -91,7 +91,16 @@ export function activate(context: vscode.ExtensionContext): any {
   }
 
   commands.fcCommands.forEach(cur => {
-    context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
+    context.subscriptions.push(
+      vscode.commands.registerCommand(cur.commandName, function(
+        context: any,
+        selectedResource: any
+      ): any {
+        return commandService.runCommand(cur.commandName, context, selectedResource);
+        // or
+        //return commandViewService.addCommandExecution(cur, context, selectedResource);
+      })
+    );
   });
 
   vscode.window.forceCode = new ForceService(context);
@@ -148,7 +157,7 @@ export function activate(context: vscode.ExtensionContext): any {
             );
           }
           if (toolingType) {
-            return commandService.runCommand('ForceCode.compileMenu', textDocument);
+            return commandService.runCommand('ForceCode.compile', textDocument);
           }
         } else if (isResource || toolingType) {
           vscode.window.showErrorMessage(
