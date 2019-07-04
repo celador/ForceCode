@@ -5,7 +5,6 @@ import {
   codeCovViewService,
   FCOauth,
   FCConnection,
-  commandService,
   commandViewService,
   dxService,
 } from '../services';
@@ -176,7 +175,7 @@ export class Login extends ForcecodeCommand {
     }
     const cfg: Config = readConfigFile(orgInfo.username);
     return dxService.login(cfg.url, this.cancellationToken).then(res => {
-      return commandService.runCommand('ForceCode.switchUser', res);
+      return vscode.commands.executeCommand('ForceCode.switchUser', res);
     });
   }
 }

@@ -3,7 +3,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as deepmerge from 'deepmerge';
 import { saveConfigFile, readConfigFile } from '../services/configuration';
-import { configuration, fcConnection, commandService } from '../services';
+import { configuration, fcConnection } from '../services';
 import { ForcecodeCommand } from './forcecodeCommand';
 
 interface PDir {
@@ -100,7 +100,7 @@ export class Settings extends ForcecodeCommand {
         currentSettings = readConfigFile(message.username);
         sendSettings();
       } else if (message.removeConfig) {
-        commandService.runCommand('ForceCode.removeConfig', message.username).then(() => {
+        vscode.commands.executeCommand('ForceCode.removeConfig', message.username).then(() => {
           currentSettings = vscode.window.forceCode.config;
           refreshUsernames();
         });

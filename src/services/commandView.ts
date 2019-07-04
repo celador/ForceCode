@@ -10,6 +10,7 @@ import { fcConnection } from '.';
 import { EventEmitter } from 'events';
 import { trackEvent, FCTimer } from './fcAnalytics';
 import { ForcecodeCommand } from '../commands/forcecodeCommand';
+import * as path from 'path';
 
 const FIRST_TRY = 1;
 const SECOND_TRY = 2;
@@ -41,6 +42,32 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   }
 
   public addCommandExecution(execution: ForcecodeCommand, context: any, selectedResource?: any) {
+    if (
+      ['ForceCode.compile', 'ForceCode.refresh'].find(c => {
+        return execution !== undefined && c === execution.commandName;
+      })
+    ) {
+      var splitPath;
+      if (context && context.fsPath) {
+        splitPath = context.fsPath.split(path.sep);
+      } else if (context) {
+        splitPath = context.fileName.split(path.sep);
+      } else if (vscode.window.activeTextEditor) {
+        splitPath = vscode.window.activeTextEditor.document.fileName.split(path.sep);
+      } else {
+        return Promise.reject({
+          message: 'Please open a file before trying to save through the ForceCode menu!',
+        });
+      }
+      if (execution.commandName === 'ForceCode.compile') {
+        execution.name = 'Saving ';
+      } else {
+        execution.name = 'Refreshing ';
+      }
+
+      execution.name += splitPath[splitPath.length - 1].split('.')[0];
+    }
+
     if (execution.commandName === 'ForceCode.fileModified') {
       this.fileModCommands++;
       if (
@@ -55,8 +82,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     this.tasks.push(theTask);
     const visibleTasks = this.getChildren().length;
     if (visibleTasks > 0) {
-      this.runningTasksStatus.text =
-        'ForceCode: Executing ' + visibleTasks + ' Task(s)';
+      this.runningTasksStatus.text = 'ForceCode: Executing ' + visibleTasks + ' Task(s)';
       this.runningTasksStatus.show();
       this.runningTasksStatus.command = 'ForceCode.showTasks';
     }

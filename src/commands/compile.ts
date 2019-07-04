@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, saveHistoryService, saveService, commandService } from '../services';
+import { codeCovViewService, saveHistoryService, saveService } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
@@ -54,7 +54,7 @@ export class ForceCompile extends ForcecodeCommand {
   }
 
   public command(context, selectedResource?) {
-    return commandService.runCommand('ForceCode.compile', context, true);
+    return vscode.commands.executeCommand('ForceCode.compile', context, true);
   }
 }
 

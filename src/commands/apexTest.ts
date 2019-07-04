@@ -1,11 +1,5 @@
 import * as vscode from 'vscode';
-import {
-  fcConnection,
-  dxService,
-  ApexTestQueryResult,
-  apexTestResults,
-  commandService,
-} from './../services';
+import { fcConnection, dxService, ApexTestQueryResult, apexTestResults } from './../services';
 import { ForcecodeCommand } from './forcecodeCommand';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 
@@ -44,7 +38,7 @@ export class RunTests extends ForcecodeCommand {
   }
 
   public command(context, selectedResource?) {
-    return commandService.runCommand('ForceCode.apexTest', context.name, context.type);
+    return vscode.commands.executeCommand('ForceCode.apexTest', context.name, context.type);
   }
 }
 

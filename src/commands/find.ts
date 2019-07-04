@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { commandService } from '../services';
 import { ForcecodeCommand } from './forcecodeCommand';
 
 export class Find extends ForcecodeCommand {
@@ -40,7 +39,7 @@ export class Find extends ForcecodeCommand {
           var resArray: any[] = new Array();
           resArray.push({ records: searchResult.searchRecords });
 
-          return commandService.runCommand('ForceCode.showFileOptions', resArray);
+          return vscode.commands.executeCommand('ForceCode.showFileOptions', resArray);
         }
       );
     });

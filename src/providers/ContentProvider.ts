@@ -3,8 +3,7 @@ import * as path from 'path';
 import { getAuraNameFromFileName } from '../parsers';
 import { getAuraDefTypeFromDocument } from '../commands/saveAura';
 import { QueryResult } from 'jsforce';
-import { commandService } from '../services';
-// import ReferencesDocument from './referencesDocument';
+
 /**
  * Salesforce Content Provider class.
  * This class provides an easy way to retrieve files as a native VSCode.Uri
@@ -51,7 +50,7 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
     }
     return new Promise<string>((resolve, reject) => {
       var query: string = `SELECT ${field} FROM ${toolingType} WHERE ${nsPrefix}`;
-      commandService.runCommand('ForceCode.toolingQuery', query).then(
+      vscode.commands.executeCommand('ForceCode.toolingQuery', query).then(
         (results: QueryResult) => {
           if (results && results.totalSize === 1) {
             return resolve(results.records[0][field]);

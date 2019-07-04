@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { fcCommands } from './../models/commands';
-import { commandService, fcConnection } from '../services';
+import { fcConnection } from '../services';
 import { ForcecodeCommand } from './forcecodeCommand';
 
 export class ForceCodeMenu extends ForcecodeCommand {
@@ -13,7 +13,7 @@ export class ForceCodeMenu extends ForcecodeCommand {
   public command(context: any, selectedResource: any): any {
     var quickpick: any[] = [];
     if (!fcConnection.isLoggedIn()) {
-      return commandService.runCommand('ForceCode.switchUser', undefined);
+      return vscode.commands.executeCommand('ForceCode.switchUser', undefined);
     }
     return Promise.resolve(vscode.window.forceCode)
       .then(displayMenu)
@@ -52,7 +52,7 @@ export class ForceCodeMenu extends ForcecodeCommand {
     }
     function processResult(result: any) {
       if (result !== undefined && result.description !== undefined) {
-        return commandService.runCommand(
+        return vscode.commands.executeCommand(
           quickpick.find(cur => {
             return result.description === cur.description;
           }).commandName,

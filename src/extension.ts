@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import {
   ForceService,
   commandViewService,
-  commandService,
   codeCovViewService,
   configuration,
   fcConnection,
@@ -96,9 +95,7 @@ export function activate(context: vscode.ExtensionContext): any {
         context: any,
         selectedResource: any
       ): any {
-        return commandService.runCommand(cur.commandName, context, selectedResource);
-        // or
-        //return commandViewService.addCommandExecution(cur, context, selectedResource);
+        return commandViewService.addCommandExecution(cur, context, selectedResource);
       })
     );
   });
@@ -150,14 +147,14 @@ export function activate(context: vscode.ExtensionContext): any {
         const toolingType: string | undefined = getAnyTTFromFolder(textDocument.uri);
         if (textDocument.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot) !== -1) {
           if (isResource && isResource.index) {
-            return commandService.runCommand(
+            return vscode.commands.executeCommand(
               'ForceCode.staticResourceDeployFromFile',
               context,
               textDocument
             );
           }
           if (toolingType) {
-            return commandService.runCommand('ForceCode.compile', textDocument);
+            return vscode.commands.executeCommand('ForceCode.compile', textDocument);
           }
         } else if (isResource || toolingType) {
           vscode.window.showErrorMessage(

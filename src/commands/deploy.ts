@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { PXML, PXMLMember, commandService } from '../services';
+import { PXML, PXMLMember } from '../services';
 import { getFileListFromPXML, zipFiles } from './../services';
 import * as path from 'path';
 import klaw = require('klaw');
@@ -297,7 +297,7 @@ export function deployFiles(
         .showErrorMessage('ForceCode: Deploy Errors. View Details?', 'Yes', 'No')
         .then(choice => {
           if (choice === 'Yes') {
-            commandService.runCommand(
+            vscode.commands.executeCommand(
               'ForceCode.openFileInOrg',
               'changemgmt/monitorDeploymentsDetails.apexp?retURL=/changemgmt/monitorDeployment.apexp&asyncId=' +
                 res.id
@@ -325,7 +325,7 @@ export function deployFiles(
         )
         .then(choice => {
           if (choice === 'Yes') {
-            commandService.runCommand(
+            vscode.commands.executeCommand(
               'ForceCode.openFileInOrg',
               'changemgmt/monitorDeploymentsDetails.apexp?retURL=/changemgmt/monitorDeployment.apexp&asyncId=' +
                 depId

@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import {
-  commandService,
   codeCovViewService,
   fcConnection,
   FCOauth,
@@ -538,7 +537,7 @@ export default function retrieve(
         }
       }
 
-      function parseRecords(recs: any[]): Promise<any> {
+      function parseRecords(recs: any[]): Thenable<any> {
         console.log('Done retrieving metadata records');
         recs.some(curSet => {
           return toArray(curSet).some(key => {
@@ -558,8 +557,8 @@ export default function retrieve(
         });
         console.log('Done updating/adding metadata');
         if (getCodeCov) {
-          return commandService
-            .runCommand('ForceCode.getCodeCoverage', undefined, undefined)
+          return vscode.commands
+            .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
             .then(() => {
               console.log('Done retrieving code coverage');
               return Promise.resolve();
