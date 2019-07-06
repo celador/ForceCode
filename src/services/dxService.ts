@@ -97,7 +97,7 @@ export default class DXService {
         } catch (e) {
           console.warn(`No parsable results from command "${fullCommand}"`);
         }
-        const theErr = stderr.toLowerCase();
+        const theErr = (stderr ? stderr.toLowerCase() : '');
         sfdxNotFound =
           theErr.indexOf('not found') > -1 ||
           theErr.indexOf('not recognized') > -1 ||
@@ -112,6 +112,7 @@ export default class DXService {
         const code = error ? (error.code ? error.code : 0) : 0;
         if ((code > 0 && !json) || (json && json.status > 0 && !json.result)) {
           // Get non-promise stack for extra help
+          console.warn(theErr);
           console.warn(error);
           return reject(error);
         } else {

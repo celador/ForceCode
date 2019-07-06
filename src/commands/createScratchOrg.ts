@@ -82,15 +82,10 @@ export class CreateScratchOrg extends ForcecodeCommand {
 
                   const sData: boolean = sampleData.label === 'Yes';
 
-                  const optsObj = {
-                    edition: edition.label,
-                    hasSampleData: sData,
-                  };
                   const theOptions: string =
                     '--durationdays ' +
                     duration.label +
-                    ' --definitionjson ' +
-                    JSON.stringify(optsObj);
+                    ` edition=${edition.label} hasSampleData=${sData}`;
                   return dxService
                     .createScratchOrg(theOptions, this.cancellationToken)
                     .then(res => {
