@@ -9,6 +9,7 @@ vsc-extension-quickstart.md
 src/**/*
 coverage/**
 coverconfig.json
+azure-pipelines.yml
 dist/test/**
 **/*.js.map
 *.vsix
