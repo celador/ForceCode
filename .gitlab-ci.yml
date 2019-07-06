@@ -1,15 +1,17 @@
 image: node:10.15.3
 
 stages:
+  - install
   - build
+  - package
   - release
 
 cache:
   key: fcCache
   untracked: true
 
-buildFC:
-  stage: build
+installDependencies:
+  stage: install
   only:
     changes:
       - package.json
@@ -17,6 +19,28 @@ buildFC:
     - docker
   script:
     - npm install --unsafe-perm
+  cache:
+    key: fcCache
+    untracked: true
+
+buildFC:
+  stage: build
+  tags:
+    - docker
+  script:
+    - npm run build
+  cache:
+    key: fcCache
+    untracked: true
+
+packageFC:
+  stage: package
+  only:
+    changes:
+      - package.json
+  tags:
+    - docker
+  script:
     - npm run package
   cache:
     key: fcCache
