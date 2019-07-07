@@ -91,14 +91,13 @@ jobs:
           echo ">>> Started xvfb"
         displayName: Start xvfb
         condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
+      - download: current
+          artifact: ForceCodeBuild
       - bash: |
-          npm install
-          echo ">>> Webpack Forcecode"
-          npm run build
-          echo ">>> Build package"
-          npm run package
+          echo ">>> Download vsce"
+          npm i -g vsce
           echo ">>> Publishing extension"
-          $(npm bin)/vsce publish -p $(VSC_PUBKEY)
+          vsce publish -p $(VSC_PUBKEY)
         displayName: Publish extension
         env:
           DISPLAY: ':99.0'
