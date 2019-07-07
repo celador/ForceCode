@@ -91,7 +91,8 @@ jobs:
           echo ">>> Started xvfb"
         displayName: Start xvfb
         condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
-      - download: current
+      - task: DownloadPipelineArtifact@2
+        inputs:
           artifact: ForceCodeBuild
       - bash: |
           echo ">>> Download vsce"
