@@ -20,20 +20,12 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test"
+        "--extensionTestsPath=${workspaceFolder}/dist/test/suite/index"
       ],
       "stopOnEntry": false,
       "sourceMaps": true,
-      "linux": {
-        "preLaunchTask": "npm"
-      },
-      "windows": {
-        "preLaunchTask": "npm"
-      },
-      "osx": {
-        "preLaunchTask": "npm"
-      },
-      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
+      "preLaunchTask": "npm",
+      "outFiles": ["${workspaceFolder}/dist/test/**/*.js"]
     },
     {
       "name": "Debug Mocha",

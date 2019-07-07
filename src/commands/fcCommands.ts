@@ -5,7 +5,6 @@ import {
   codeCovViewService,
   FCOauth,
   FCConnection,
-  commandService,
   commandViewService,
   dxService,
 } from '../services';
@@ -65,7 +64,7 @@ export class Logout extends ForcecodeCommand {
 export class SwitchUser extends ForcecodeCommand {
   constructor() {
     super();
-    this.commandName = 'ForceCode.switchUserText';
+    this.commandName = 'ForceCode.switchUser';
     this.cancelable = true;
     this.name = 'Logging in';
     this.hidden = false;
@@ -84,18 +83,6 @@ export class SwitchUser extends ForcecodeCommand {
       orgInfo = context;
     }
     return fcConnection.connect(orgInfo, this.cancellationToken);
-  }
-}
-
-export class SwitchUserContext extends ForcecodeCommand {
-  constructor() {
-    super();
-    this.commandName = 'ForceCode.switchUser';
-    this.hidden = true;
-  }
-
-  public command(context, selectedResource?) {
-    return commandService.runCommand('ForceCode.switchUserText', context, selectedResource);
   }
 }
 
@@ -176,8 +163,6 @@ export class Login extends ForcecodeCommand {
   constructor() {
     super();
     this.commandName = 'ForceCode.login';
-    this.name = 'Logging in';
-    this.cancelable = true;
     this.hidden = true;
   }
 
@@ -190,7 +175,7 @@ export class Login extends ForcecodeCommand {
     }
     const cfg: Config = readConfigFile(orgInfo.username);
     return dxService.login(cfg.url, this.cancellationToken).then(res => {
-      return commandService.runCommand('ForceCode.switchUserText', res);
+      return vscode.commands.executeCommand('ForceCode.switchUser', res);
     });
   }
 }

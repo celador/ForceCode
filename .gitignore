@@ -17,6 +17,7 @@ _book
 
 /**/*.private
 out
+coverage
 dist
 node_modules
 settings.json

@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import {
   ForceService,
   commandViewService,
-  commandService,
   codeCovViewService,
   configuration,
   fcConnection,
@@ -91,7 +90,14 @@ export function activate(context: vscode.ExtensionContext): any {
   }
 
   commands.fcCommands.forEach(cur => {
-    context.subscriptions.push(vscode.commands.registerCommand(cur.commandName, cur.command));
+    context.subscriptions.push(
+      vscode.commands.registerCommand(cur.commandName, function(
+        context: any,
+        selectedResource: any
+      ): any {
+        return commandViewService.addCommandExecution(cur, context, selectedResource);
+      })
+    );
   });
 
   vscode.window.forceCode = new ForceService(context);
@@ -141,14 +147,14 @@ export function activate(context: vscode.ExtensionContext): any {
         const toolingType: string | undefined = getAnyTTFromFolder(textDocument.uri);
         if (textDocument.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot) !== -1) {
           if (isResource && isResource.index) {
-            return commandService.runCommand(
+            return vscode.commands.executeCommand(
               'ForceCode.staticResourceDeployFromFile',
               context,
               textDocument
             );
           }
           if (toolingType) {
-            return commandService.runCommand('ForceCode.compileMenu', textDocument);
+            return vscode.commands.executeCommand('ForceCode.compile', textDocument);
           }
         } else if (isResource || toolingType) {
           vscode.window.showErrorMessage(

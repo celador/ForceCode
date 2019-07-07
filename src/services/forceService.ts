@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { configuration, commandService, codeCovViewService, fcConnection } from './../services';
+import { configuration, codeCovViewService, fcConnection } from './../services';
 import constants from './../models/constants';
 import * as path from 'path';
 import { FCFile } from './codeCovView';
@@ -80,9 +80,9 @@ export default class ForceService implements forceCode.IForceService {
           resolve();
         }
       }).then(() => {
-        commandService
-          .runCommand(
-            'ForceCode.switchUserText',
+        vscode.commands
+          .executeCommand(
+            'ForceCode.switchUser',
             config.username ? { username: config.username } : undefined
           )
           .then(res => {
@@ -153,7 +153,7 @@ export default class ForceService implements forceCode.IForceService {
       return parseRecords(rets);
     });
 
-    function parseRecords(recs: any[]): Promise<any> {
+    function parseRecords(recs: any[]): Thenable<any> {
       if (!Array.isArray(recs)) {
         Promise.resolve();
       }
@@ -176,7 +176,7 @@ export default class ForceService implements forceCode.IForceService {
                 curFCFile.updateWsMember(curMem);
               } else {
                 curFCFile.updateWsMember(curMem);
-                commandService.runCommand(
+                vscode.commands.executeCommand(
                   'ForceCode.fileModified',
                   curMem.path,
                   key.lastModifiedByName
@@ -187,8 +187,8 @@ export default class ForceService implements forceCode.IForceService {
         }
       });
       console.log('Done getting workspace info');
-      return commandService
-        .runCommand('ForceCode.getCodeCoverage', undefined, undefined)
+      return vscode.commands
+        .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
         .then(() => {
           console.log('Done retrieving code coverage');
           return Promise.resolve();
@@ -278,7 +278,7 @@ export default class ForceService implements forceCode.IForceService {
     }
 
     function checkForChanges(svc: forceCode.IForceService) {
-      commandService.runCommand('ForceCode.checkForFileChanges', undefined, undefined);
+      vscode.commands.executeCommand('ForceCode.checkForFileChanges', undefined, undefined);
       return svc;
     }
 

@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import {
-  commandService,
   codeCovViewService,
   fcConnection,
   FCOauth,
@@ -26,7 +25,7 @@ import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
 export class Refresh extends ForcecodeCommand {
   constructor() {
     super();
-    this.commandName = 'ForceCode.refreshContext';
+    this.commandName = 'ForceCode.refresh';
     this.cancelable = true;
     this.name = 'Retrieving ';
     this.hidden = true;
@@ -78,18 +77,6 @@ export class Refresh extends ForcecodeCommand {
         return cur.name === toolType && cur.members !== ['*'];
       });
     }
-  }
-}
-
-export class RefreshContext extends ForcecodeCommand {
-  constructor() {
-    super();
-    this.commandName = 'ForceCode.refresh';
-    this.hidden = true;
-  }
-
-  public command(context, selectedResource?) {
-    return commandService.runCommand('ForceCode.refreshContext', context, selectedResource);
   }
 }
 
@@ -550,7 +537,7 @@ export default function retrieve(
         }
       }
 
-      function parseRecords(recs: any[]): Promise<any> {
+      function parseRecords(recs: any[]): Thenable<any> {
         console.log('Done retrieving metadata records');
         recs.some(curSet => {
           return toArray(curSet).some(key => {
@@ -570,8 +557,8 @@ export default function retrieve(
         });
         console.log('Done updating/adding metadata');
         if (getCodeCov) {
-          return commandService
-            .runCommand('ForceCode.getCodeCoverage', undefined, undefined)
+          return vscode.commands
+            .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
             .then(() => {
               console.log('Done retrieving code coverage');
               return Promise.resolve();
