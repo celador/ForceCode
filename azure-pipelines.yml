@@ -1,6 +1,9 @@
 trigger:
   - '*'
 
+variables:
+  - group: FC-Build-Vars
+
 jobs:
   - job: Test
     strategy:
@@ -68,4 +71,10 @@ jobs:
     pool:
       vmImage: 'ubuntu-16.04'
     steps:
-      # TODO: Define variables and add publish script
+      # TODO: Define variables and add to this script
+      - bash: |
+          echo ">>> Publishing extension"
+          $(npm bin)/vsce publish -p $(VSC_PUBKEY)
+        displayName: Publish extension
+        env:
+          DISPLAY: ':99.0'
