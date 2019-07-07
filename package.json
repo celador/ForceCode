@@ -554,8 +554,7 @@
     "watch": "tsc -watch -p ./",
     "clean": "rimraf ./dist && rimraf ./node_modules/",
     "test": "node ./dist/test/runTest.js",
-    "build": "rimraf ./dist && rimraf ./*.vsix && webpack --mode production",
-    "package": "vsce package",
+    "package": "rimraf ./dist && rimraf ./*.vsix && webpack --mode production && vsce package",
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch"
   },

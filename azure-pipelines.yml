@@ -59,8 +59,6 @@ jobs:
         condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
       - bash: |
           npm install
-          echo ">>> Webpack Forcecode"
-          npm run build
           echo ">>> Build package"
           npm run package
         displayName: Build package
