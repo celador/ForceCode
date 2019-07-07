@@ -69,11 +69,13 @@ jobs:
       # Upload vsix file
       - task: CopyFiles@2
         inputs:
-          SourceFolder: '$(System.DefaultWorkingDirectory)'
-          Contents: |
+          contents: |
             **\*.vsix
-          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+          targetFolder: '$(Build.ArtifactStagingDirectory)'
       - task: PublishBuildArtifacts@1
+        inputs:
+          pathToPublish: $(Build.ArtifactStagingDirectory)
+          artifactName: ForceCodeBuild
 
   - job: Deploy
     dependsOn: Build
