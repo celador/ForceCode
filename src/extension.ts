@@ -23,57 +23,12 @@ import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
 import { getToolingTypeFromFolder, getAnyTTFromFolder } from './parsers/open';
 import { trackEvent, FCTimer } from './services/fcAnalytics';
 import * as fs from 'fs-extra';
+import { createProject } from './commands/createProject';
 
 export function activate(context: vscode.ExtensionContext): any {
   const startupTimer: FCTimer = new FCTimer('extension.activate');
   context.subscriptions.push(
-    vscode.commands.registerCommand('ForceCode.createProject', () => {
-      vscode.window
-        .showOpenDialog({
-          canSelectFiles: false,
-          canSelectFolders: true,
-          canSelectMany: false,
-          openLabel: `Create Project`,
-        })
-        .then(folder => {
-          if (!folder) {
-            return;
-          }
-          // create default src folder so sfdx doesn't complain about a bad dir
-          const projFolder: string = folder[0].fsPath;
-          if (!fs.existsSync(path.join(projFolder, 'src'))) {
-            fs.mkdirpSync(path.join(projFolder, 'src'));
-          }
-
-          // make a dummy sfdx-project.json file so the Salesforce extensions are activated when we open the project folder
-          if (!fs.existsSync(path.join(projFolder, 'sfdx-project.json'))) {
-            const sfdxProj: {} = {
-              namespace: '',
-              packageDirectories: [
-                {
-                  path: 'src',
-                  default: true,
-                },
-              ],
-              sfdcLoginUrl: 'https://login.salesforce.com',
-              sourceApiVersion: vscode.workspace.getConfiguration('force')['defaultApiVersion'],
-            };
-
-            fs.outputFileSync(
-              path.join(projFolder, 'sfdx-project.json'),
-              JSON.stringify(sfdxProj, undefined, 4)
-            );
-          }
-
-          // make a dummy force.json to activate Forcecode
-          fs.outputFileSync(
-            path.join(projFolder, 'force.json'),
-            JSON.stringify({ lastUsername: '' }, undefined, 4)
-          );
-          // open the folder
-          vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(projFolder));
-        });
-    })
+    vscode.commands.registerCommand('ForceCode.createProject', createProject)
   );
 
   if (!vscode.workspace.workspaceFolders) {
