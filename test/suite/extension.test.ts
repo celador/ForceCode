@@ -1,46 +1,30 @@
-//
-// Note: This example test is leveraging the Mocha test framework.
-// Please refer to their documentation on https://mochajs.org/ for help.
-//
-
-// The module 'assert' provides assertion methods from node
 import * as assert from 'assert';
-// import compile from '../src/commands/compile';
-
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as vscode from 'vscode';
-// import * as myExtension from '../src/extension';
-
 import * as sinon from 'sinon';
 import { dxService } from '../../src/services';
-import { FCCancellationToken } from '../../src/commands/forcecodeCommand';
-import sfdxRetValsTest from './sfdxRetVals.test';
-import mock = require('mock-fs');
+import { before, after } from 'mocha';
+import { createForceJson, removeProjectFiles, executeSFDXCommand } from '../testUtils/utils.test';
 
 suite('Extension Tests', () => {
-  var theStub = sinon
-    .stub(dxService as any, 'runCommand')
-    .callsFake(function(
-      cmdString: string,
-      targetusername: boolean,
-      cancellationToken?: FCCancellationToken
-    ): Promise<any> {
-      var command = cmdString.split('force:').pop();
-      command = command ? command.split(' ').shift() : undefined;
-      return Promise.resolve(command ? sfdxRetValsTest[command] : undefined);
-    });
-  mock({
-    'force.json': `{ lastUsername: ${sfdxRetValsTest['org:display'].username} }`,
+  const sandbox = sinon.createSandbox();
+  before(() => {
+    sandbox.stub(dxService, 'runCommand').callsFake(executeSFDXCommand);
+    createForceJson();
   });
-  test('Activates the extension', () => {
+  after(() => {
+    sandbox.restore();
+    removeProjectFiles();
+  });
+  test('Activates the extension', async () => {
     // test extension load
-    vscode.commands.executeCommand('ForceCode.showMenu').then(res => {
-      console.log('Activated');
-      console.log(res);
-      assert.strictEqual(true, true);
-    });
+    const ext = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
+    if (ext) {
+      // TODO: add connection to dev org to test login
+      await ext.activate().then(async () => {
+        assert.strictEqual(true, true);
+      });
+    } else {
+      assert.strictEqual(true, false);
+    }
   });
-  mock.restore();
-  theStub.restore();
 });

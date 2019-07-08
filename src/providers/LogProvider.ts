@@ -4,7 +4,9 @@ import { dxService } from '../services';
 export default class ForceCodeLogProvider implements vscode.TextDocumentContentProvider {
   provideTextDocumentContent(uri: vscode.Uri): Thenable<string> {
     var logId: string | undefined = uri.path.substring(1, 19);
-    if (logId === 'debugLog') {
+
+    const debugString = logId.substr(0, 'debugLog'.length);
+    if (debugString === 'debugLog') {
       logId = undefined;
     }
     return dxService.getDebugLog(logId).then(filterLog);

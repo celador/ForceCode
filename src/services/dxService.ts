@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { fcConnection, FCOauth } from '.';
-import { exec, ExecOptions } from 'child_process';
+import { isWindows } from './operatingSystem';
+import { SpawnOptions, spawn } from 'child_process';
 import { FCCancellationToken } from '../commands/forcecodeCommand';
 const kill = require('tree-kill');
 
@@ -65,7 +66,7 @@ export default class DXService {
    *   This does all the work. It will run a cli command through the shell.
    *   Takes a string for the command and the command's arguments.
    */
-  private runCommand(
+  public runCommand(
     cmdString: string,
     targetusername: boolean,
     cancellationToken?: FCCancellationToken
@@ -77,11 +78,20 @@ export default class DXService {
         ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
         : '');
 
+    if (isWindows()) {
+      fullCommand = 'cmd /c ' + fullCommand;
+    }
+    const error = new Error(); // Get stack here to use for later
+
     if (!fullCommand.includes('--json')) {
       fullCommand += ' --json';
     }
 
-    const spawnOpt: ExecOptions = {
+    const parts = fullCommand.split(' ');
+    const commandName = parts[0];
+    const args = parts.slice(1);
+
+    const spawnOpt: SpawnOptions = {
       // Always use json in stdout
       env: Object.assign({ SFDX_JSON_TO_STDOUT: 'true' }, process.env),
     };
@@ -90,35 +100,7 @@ export default class DXService {
     var sfdxNotFound = false;
 
     return new Promise((resolve, reject) => {
-      const cmd = exec(fullCommand, spawnOpt, function(error, stdout, stderr) {
-        let json;
-        try {
-          json = JSON.parse(stdout);
-        } catch (e) {
-          console.warn(`No parsable results from command "${fullCommand}"`);
-        }
-        const theErr = (stderr ? stderr.toLowerCase() : '');
-        sfdxNotFound =
-          theErr.indexOf('not found') > -1 ||
-          theErr.indexOf('not recognized') > -1 ||
-          (error ? error.message.indexOf('ENOENT') > -1 : false);
-        if (sfdxNotFound) {
-          // show the user a message that the SFDX CLI isn't installed
-          vscode.window.showErrorMessage(
-            'ForceCode: The SFDX CLI could not be found. Please download from [https://developer.salesforce.com/tools/sfdxcli](https://developer.salesforce.com/tools/sfdxcli) and install, then restart Visual Studio Code.'
-          );
-        }
-        // We want to resolve if there's an error with parsable results
-        const code = error ? (error.code ? error.code : 0) : 0;
-        if ((code > 0 && !json) || (json && json.status > 0 && !json.result)) {
-          // Get non-promise stack for extra help
-          console.warn(theErr);
-          console.warn(error);
-          return reject(error);
-        } else {
-          return resolve(json ? json.result : undefined);
-        }
-      });
+      const cmd = spawn(commandName, args, spawnOpt);
       if (cmd === null || cmd.stdout === null || cmd.stderr === null) {
         return reject();
       } else {
@@ -126,6 +108,49 @@ export default class DXService {
           pid = cmd.pid;
           cancellationToken.cancellationEmitter.on('cancelled', killPromise);
         }
+        let stdout = '';
+        cmd.stdout.on('data', data => {
+          stdout += data;
+        });
+
+        cmd.stderr.on('data', data => {
+          var theErr: string = data.toString();
+          console.log(theErr);
+          if (theErr) {
+            theErr = theErr.toLowerCase();
+            sfdxNotFound =
+              theErr.indexOf('not found') > -1 || theErr.indexOf('not recognized') > -1;
+          }
+        });
+
+        cmd.on('error', data => {
+          console.log(data);
+          sfdxNotFound = data.message.indexOf('ENOENT') > -1;
+        });
+
+        cmd.on('close', code => {
+          let json;
+          try {
+            json = JSON.parse(stdout);
+          } catch (e) {
+            console.warn(`No parsable results from command "${fullCommand}"`);
+          }
+          if (sfdxNotFound) {
+            // show the user a message that the SFDX CLI isn't installed
+            vscode.window.showErrorMessage(
+              'ForceCode: The SFDX CLI could not be found. Please download from [https://developer.salesforce.com/tools/sfdxcli](https://developer.salesforce.com/tools/sfdxcli) and install, then restart Visual Studio Code.'
+            );
+          }
+          // We want to resolve if there's an error with parsable results
+          if ((code > 0 && !json) || (json && json.status > 0 && !json.result)) {
+            // Get non-promise stack for extra help
+            console.log(error);
+            console.log(json);
+            return reject(error);
+          } else {
+            return resolve(json ? json.result : undefined);
+          }
+        });
       }
     });
 
@@ -171,9 +196,10 @@ export default class DXService {
   public getDebugLog(logid: string | undefined): Promise<string> {
     var theLogId: string = '';
     if (logid) {
-      theLogId += '--logid ' + logid;
+      theLogId += ' --logid ' + logid;
     }
-    return this.runCommand('apex:log:get ' + theLogId, true).then(log => {
+    return this.runCommand('apex:log:get' + theLogId, true).then(log => {
+      log = log[0] ? log[0] : log;
       return Promise.resolve(log.log);
     });
   }
