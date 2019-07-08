@@ -582,7 +582,6 @@
     "klaw": "3.0.0",
     "mime-types": "2.1.24",
     "mocha": "^6.1.4",
-    "mock-fs": "4.10.1",
     "os": "0.1.1",
     "remap-istanbul": "^0.13.0",
     "request-light": "0.2.4",

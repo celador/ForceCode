@@ -65,7 +65,7 @@ export default class DXService {
    *   This does all the work. It will run a cli command through the shell.
    *   Takes a string for the command and the command's arguments.
    */
-  private runCommand(
+  public runCommand(
     cmdString: string,
     targetusername: boolean,
     cancellationToken?: FCCancellationToken
@@ -97,7 +97,7 @@ export default class DXService {
         } catch (e) {
           console.warn(`No parsable results from command "${fullCommand}"`);
         }
-        const theErr = (stderr ? stderr.toLowerCase() : '');
+        const theErr = stderr ? stderr.toLowerCase() : '';
         sfdxNotFound =
           theErr.indexOf('not found') > -1 ||
           theErr.indexOf('not recognized') > -1 ||

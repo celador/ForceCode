@@ -19,12 +19,11 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
+        "${workspaceFolder}/dist/test",
         "--extensionDevelopmentPath=${workspaceFolder}",
         "--extensionTestsPath=${workspaceFolder}/dist/test/suite/index"
       ],
-      "stopOnEntry": false,
-      "sourceMaps": true,
-      "preLaunchTask": "npm",
+      "preLaunchTask": "npm: compile",
       "outFiles": ["${workspaceFolder}/dist/test/**/*.js"]
     },
     {
