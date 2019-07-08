@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.17.3
+    * Fix issues retrieving debug logs
 * 3.17.2
     * Fix being able to create a scratch org
     * Open Lightning when checking deployment status or opening file in org
