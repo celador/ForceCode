@@ -1,6 +1,7 @@
 ## Change Log
 
 * 3.17.3
+    * Fix issue with extension not loading
     * Fix issues retrieving debug logs
 * 3.17.2
     * Fix being able to create a scratch org
