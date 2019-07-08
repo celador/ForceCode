@@ -1,5 +1,5 @@
 trigger:
-  - '*'
+  - "*"
 
 variables:
   - group: FC-Build-Vars
@@ -9,18 +9,18 @@ jobs:
     strategy:
       matrix:
         linux:
-          imageName: 'ubuntu-16.04'
+          imageName: "ubuntu-16.04"
         mac:
-          imageName: 'macos-10.13'
+          imageName: "macos-10.13"
         windows:
-          imageName: 'vs2017-win2016'
+          imageName: "vs2017-win2016"
     pool:
       vmImage: $(imageName)
     steps:
       - task: NodeTool@0
         inputs:
-          versionSpec: '8.x'
-        displayName: 'Install Node.js'
+          versionSpec: "8.x"
+        displayName: "Install Node.js"
       - bash: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo ">>> Started xvfb"
@@ -35,23 +35,23 @@ jobs:
           npm run test
         displayName: Run Tests
         env:
-          DISPLAY: ':99.0'
+          DISPLAY: ":99.0"
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: Cobertura
-          summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
-          reportDirectory: '$(System.DefaultWorkingDirectory)/**/coverage'
+          summaryFileLocation: "$(System.DefaultWorkingDirectory)/**/*coverage.xml"
+          reportDirectory: "$(System.DefaultWorkingDirectory)/**/coverage"
 
   - job: Build
     dependsOn: Test
     condition: succeeded()
     pool:
-      vmImage: 'ubuntu-16.04'
+      vmImage: "ubuntu-16.04"
     steps:
       - task: NodeTool@0
         inputs:
-          versionSpec: '8.x'
-        displayName: 'Install Node.js'
+          versionSpec: "8.x"
+        displayName: "Install Node.js"
       - bash: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo ">>> Started xvfb"
@@ -63,12 +63,12 @@ jobs:
           npm run package
         displayName: Build package
         env:
-          DISPLAY: ':99.0'
+          DISPLAY: ":99.0"
       # Upload vsix file
       - task: CopyFiles@2
         inputs:
-          contents: '*.vsix'
-          targetFolder: '$(Build.ArtifactStagingDirectory)'
+          contents: "*.vsix"
+          targetFolder: "$(Build.ArtifactStagingDirectory)"
       - task: PublishBuildArtifacts@1
         inputs:
           pathToPublish: $(Build.ArtifactStagingDirectory)
@@ -78,25 +78,25 @@ jobs:
     dependsOn: Build
     condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
     pool:
-      vmImage: 'ubuntu-16.04'
+      vmImage: "ubuntu-16.04"
     steps:
       - task: NodeTool@0
         inputs:
-          versionSpec: '8.x'
-        displayName: 'Install Node.js'
+          versionSpec: "8.x"
+        displayName: "Install Node.js"
       - bash: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo ">>> Started xvfb"
         displayName: Start xvfb
         condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
-      - task: DownloadPipelineArtifact@2
-        inputs:
-          artifact: ForceCodeBuild
       - bash: |
+          npm install
+          echo ">>> Build package"
+          npm run package
           echo ">>> Download vsce"
           npm i -g vsce
           echo ">>> Publishing extension"
           vsce publish -p $(VSC_PUBKEY)
         displayName: Publish extension
         env:
-          DISPLAY: ':99.0'
+          DISPLAY: ":99.0"
