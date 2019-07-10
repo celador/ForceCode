@@ -135,19 +135,12 @@ export default class ForceService implements forceCode.IForceService {
     });
   }
 
-  private parseMembers(mems: any) {
+  private parseMembers(mems: Array<Array<{}>>) {
     if (isEmptyUndOrNull(mems)) {
       return Promise.resolve({});
     }
-    var types: { [key: string]: Array<any> } = {};
-    types['type0'] = mems;
-    if (types['type0'].length > 3) {
-      for (var i = 1; types['type0'].length > 3; i++) {
-        types['type' + i] = types['type0'].splice(0, 3);
-      }
-    }
-    let proms = Object.keys(types).map(curTypes => {
-      return vscode.window.forceCode.conn.metadata.list(types[curTypes]);
+    let proms = mems.map(curTypes => {
+      return vscode.window.forceCode.conn.metadata.list(curTypes);
     });
     return Promise.all(proms).then(rets => {
       return parseRecords(rets);
@@ -157,7 +150,6 @@ export default class ForceService implements forceCode.IForceService {
       if (!Array.isArray(recs)) {
         Promise.resolve();
       }
-      //return Promise.all(recs).then(records => {
       console.log('Done retrieving metadata records');
       recs.forEach(curSet => {
         if (Array.isArray(curSet)) {
@@ -198,10 +190,11 @@ export default class ForceService implements forceCode.IForceService {
 
   // Get files in src folder..
   // Match them up with ContainerMembers
-  private getWorkspaceMembers(): Promise<any> {
+  private getWorkspaceMembers(): Promise<Array<Array<{}>>> {
     return new Promise(resolve => {
-      var types: Array<{}> = [];
+      var types: Array<Array<{}>> = [[]];
       var typeNames: Array<string> = [];
+      var index = 0;
       klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
         .on('data', function(item) {
           // Check to see if the file represents an actual member...
@@ -213,7 +206,11 @@ export default class ForceService implements forceCode.IForceService {
               var filename: string = pathParts[pathParts.length - 1].split('.')[0];
               if (!typeNames.includes(type)) {
                 typeNames.push(type);
-                types.push({ type: type });
+                if (types[index].length > 2) {
+                  index++;
+                  types.push([]);
+                }
+                types[index].push({ type: type });
               }
 
               if (!codeCovViewService.findByPath(item.path)) {
