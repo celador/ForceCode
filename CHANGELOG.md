@@ -1,6 +1,7 @@
 ## Change Log
 
 * 3.17.5
+    * Add time saved to end of SUCCESS! in save history view
     * Add option to cancel Apex save when it times out. This avoids receiving the container request error.
 * 3.17.4
     * Fix issue with extension not loading

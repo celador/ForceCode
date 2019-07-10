@@ -136,7 +136,7 @@ export default class ForceService implements forceCode.IForceService {
   }
 
   private parseMembers(mems: Array<Array<{}>>) {
-    if (isEmptyUndOrNull(mems)) {
+    if (isEmptyUndOrNull(mems) || isEmptyUndOrNull(mems[0])) {
       return Promise.resolve({});
     }
     let proms = mems.map(curTypes => {
