@@ -281,6 +281,7 @@ export class FCFile extends TreeItem {
     if (this.wsMember.coverage) {
       var fileCoverage: ICodeCoverage = this.wsMember.coverage;
       var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
+      this.tooltip = fileCoverage.NumLinesCovered + '/' + total + ' lines covered';
       var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
       this.label = percent + '% ' + this.label;
       const imagePath: string = path.join(window.forceCode.storageRoot, 'images');
