@@ -135,6 +135,52 @@ export default class ForceService implements forceCode.IForceService {
     });
   }
 
+  // Get files in src folder..
+  // Match them up with ContainerMembers
+  private getWorkspaceMembers(): Promise<Array<Array<{}>>> {
+    return new Promise(resolve => {
+      var types: Array<Array<{}>> = [[]];
+      var typeNames: Array<string> = [];
+      var index = 0;
+      klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
+        .on('data', function(item) {
+          // Check to see if the file represents an actual member...
+          if (item.stats.isFile()) {
+            var type: string | undefined = getToolingTypeFromExt(item.path);
+
+            if (type) {
+              var pathParts: string[] = item.path.split(path.sep);
+              var filename: string = pathParts[pathParts.length - 1].split('.')[0];
+              if (!typeNames.includes(type)) {
+                typeNames.push(type);
+                if (types[index].length > 2) {
+                  index++;
+                  types.push([]);
+                }
+                types[index].push({ type: type });
+              }
+
+              if (!codeCovViewService.findByPath(item.path)) {
+                var workspaceMember: forceCode.IWorkspaceMember = {
+                  name: filename,
+                  path: item.path,
+                  id: '', //metadataFileProperties.id,
+                  type: type,
+                };
+                codeCovViewService.addClass(workspaceMember);
+              }
+            }
+          }
+        })
+        .on('end', function() {
+          resolve(types);
+        })
+        .on('error', (err, item) => {
+          console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
+        });
+    });
+  }
+
   private parseMembers(mems: Array<Array<{}>>) {
     if (isEmptyUndOrNull(mems) || isEmptyUndOrNull(mems[0])) {
       return Promise.resolve({});
@@ -186,52 +232,6 @@ export default class ForceService implements forceCode.IForceService {
           return Promise.resolve();
         });
     }
-  }
-
-  // Get files in src folder..
-  // Match them up with ContainerMembers
-  private getWorkspaceMembers(): Promise<Array<Array<{}>>> {
-    return new Promise(resolve => {
-      var types: Array<Array<{}>> = [[]];
-      var typeNames: Array<string> = [];
-      var index = 0;
-      klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
-        .on('data', function(item) {
-          // Check to see if the file represents an actual member...
-          if (item.stats.isFile()) {
-            var type: string | undefined = getToolingTypeFromExt(item.path);
-
-            if (type) {
-              var pathParts: string[] = item.path.split(path.sep);
-              var filename: string = pathParts[pathParts.length - 1].split('.')[0];
-              if (!typeNames.includes(type)) {
-                typeNames.push(type);
-                if (types[index].length > 2) {
-                  index++;
-                  types.push([]);
-                }
-                types[index].push({ type: type });
-              }
-
-              if (!codeCovViewService.findByPath(item.path)) {
-                var workspaceMember: forceCode.IWorkspaceMember = {
-                  name: filename,
-                  path: item.path,
-                  id: '', //metadataFileProperties.id,
-                  type: type,
-                };
-                codeCovViewService.addClass(workspaceMember);
-              }
-            }
-          }
-        })
-        .on('end', function() {
-          resolve(types);
-        })
-        .on('error', (err, item) => {
-          console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
-        });
-    });
   }
 
   public connect(): Promise<forceCode.IForceService> {

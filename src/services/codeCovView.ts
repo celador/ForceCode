@@ -310,6 +310,7 @@ export class FCFile extends TreeItem {
       } catch (e) {}
       if (testFile) {
         this.type = ClassType.TestClass;
+        this.contextValue = 'fcTestClass';
       } else {
         this.type = ClassType.NoCoverageData;
       }

@@ -159,6 +159,14 @@
       {
         "command": "ForceCode.cancelCommand",
         "title": "Cancel Task"
+      },
+      {
+        "command": "ForceCode.runTests",
+        "title": "Run Test",
+        "icon": {
+          "light": "./images/runTest.svg",
+          "dark": "./images/runTest.svg"
+        }
       }
     ],
     "keybindings": [
@@ -484,6 +492,11 @@
         {
           "when": "viewItem == forceCodeTask && ForceCodeActive",
           "command": "ForceCode.cancelCommand"
+        },
+        {
+          "when": "viewItem == fcTestClass && ForceCodeActive",
+          "command": "ForceCode.runTests",
+          "group": "inline"
         }
       ],
       "commandPalette": [
