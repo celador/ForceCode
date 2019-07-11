@@ -137,10 +137,12 @@ export class ShowTasks extends ForcecodeCommand {
   }
 
   public command(context, selectedResource?) {
-    var treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {
-      treeDataProvider: commandViewService,
-    });
-    return treePro.reveal(commandViewService.getChildren()[0]);
+    if (fcConnection.isLoggedIn()) {
+      var treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {
+        treeDataProvider: commandViewService,
+      });
+      return treePro.reveal(commandViewService.getChildren()[0]);
+    }
   }
 }
 
