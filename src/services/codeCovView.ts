@@ -278,6 +278,7 @@ export class FCFile extends TreeItem {
     }
 
     this.type = ClassType.UncoveredClass;
+    this.tooltip = this.label;
     if (this.wsMember.coverage) {
       var fileCoverage: ICodeCoverage = this.wsMember.coverage;
       var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
