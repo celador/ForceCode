@@ -5,7 +5,7 @@ import constants from './../models/constants';
 import * as path from 'path';
 import { FCFile } from './codeCovView';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
-import { Connection } from 'jsforce';
+import { Connection, IMetadataFileProperties } from 'jsforce';
 import { getUUID, FCAnalytics } from './fcAnalytics';
 
 import klaw = require('klaw');
@@ -137,11 +137,12 @@ export default class ForceService implements forceCode.IForceService {
 
   // Get files in src folder..
   // Match them up with ContainerMembers
-  private getWorkspaceMembers(): Promise<Array<Array<{}>>> {
+  private getWorkspaceMembers(): Promise<Array<Promise<IMetadataFileProperties[]>>> {
     return new Promise(resolve => {
       var types: Array<Array<{}>> = [[]];
       var typeNames: Array<string> = [];
-      var index = 0;
+      var proms: Array<Promise<IMetadataFileProperties[]>> = [];
+      const index = 0;
       klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
         .on('data', function(item) {
           // Check to see if the file represents an actual member...
@@ -149,18 +150,19 @@ export default class ForceService implements forceCode.IForceService {
             var type: string | undefined = getToolingTypeFromExt(item.path);
 
             if (type) {
-              var pathParts: string[] = item.path.split(path.sep);
-              var filename: string = pathParts[pathParts.length - 1].split('.')[0];
-              if (!typeNames.includes(type)) {
-                typeNames.push(type);
-                if (types[index].length > 2) {
-                  index++;
-                  types.push([]);
-                }
-                types[index].push({ type: type });
-              }
-
               if (!codeCovViewService.findByPath(item.path)) {
+                if (!typeNames.includes(type)) {
+                  typeNames.push(type);
+                  if (types[index].length > 2) {
+                    //index++;
+                    proms.push(vscode.window.forceCode.conn.metadata.list(types.splice(0, 1)));
+                    types.push([]);
+                  }
+                  types[index].push({ type: type });
+                }
+
+                var thePath: string | undefined = item.path.split(path.sep).pop();
+                var filename: string = thePath ? thePath.split('.')[0] : '';
                 var workspaceMember: forceCode.IWorkspaceMember = {
                   name: filename,
                   path: item.path,
@@ -173,7 +175,10 @@ export default class ForceService implements forceCode.IForceService {
           }
         })
         .on('end', function() {
-          resolve(types);
+          if (types[index].length > 0) {
+            proms.push(vscode.window.forceCode.conn.metadata.list(types.splice(0, 1)));
+          }
+          resolve(proms);
         })
         .on('error', (err, item) => {
           console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
@@ -181,14 +186,11 @@ export default class ForceService implements forceCode.IForceService {
     });
   }
 
-  private parseMembers(mems: Array<Array<{}>>) {
+  private parseMembers(mems: Array<Promise<IMetadataFileProperties[]>>) {
     if (isEmptyUndOrNull(mems) || isEmptyUndOrNull(mems[0])) {
       return Promise.resolve({});
     }
-    let proms = mems.map(curTypes => {
-      return vscode.window.forceCode.conn.metadata.list(curTypes);
-    });
-    return Promise.all(proms).then(rets => {
+    return Promise.all(mems).then(rets => {
       return parseRecords(rets);
     });
 
