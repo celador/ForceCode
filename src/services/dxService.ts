@@ -209,7 +209,9 @@ export default class DXService {
       id = 'debugLog';
     }
     return vscode.workspace
-      .openTextDocument(vscode.Uri.parse(`sflog://salesforce.com/${id}.log?q=${new Date()}`))
+      .openTextDocument(
+        vscode.Uri.parse(`sflog://salesforce.com/${new Date().toISOString()}.log?q=${id}`)
+      )
       .then(function(_document: vscode.TextDocument) {
         if (_document.getText() !== '') {
           return vscode.window.showTextDocument(_document, 3, true);

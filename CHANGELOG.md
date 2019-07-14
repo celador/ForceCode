@@ -4,6 +4,7 @@
     * Performance improvements on startup
     * Execute anonymous output is now shown in a document link Apex test logs
     * Logging output is now shown in the Forcecode output panel
+    * Show debug logs with dated names
     * Fix error related to ForceCode.treeDataProvider
     * Add inline run test button to test classes listed in the Code Coverage view
     * Add number of lines covered in Forcecode Code Coverage view hovers

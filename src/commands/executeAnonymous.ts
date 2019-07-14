@@ -83,18 +83,23 @@ export class ExecuteAnonymous extends ForcecodeCommand {
     }
 
     function showResult(res: ExecuteAnonymousResult) {
+      const newDocURI: vscode.Uri = vscode.Uri.parse(`untitled:${new Date().toISOString()}.log`);
+      const filteredLog: string = logging.filterLog(res.logs);
+      if (filteredLog === '') {
+        return {
+          async then(callback) {
+            return callback(res);
+          },
+        };
+      }
       return vscode.workspace
-        .openTextDocument({ content: logging.filterLog(res.logs) })
+        .openTextDocument(newDocURI)
         .then(function(_document: vscode.TextDocument) {
-          if (_document.getText() !== '') {
-            return vscode.window.showTextDocument(_document, 3, true);
-          } else {
-            return {
-              async then(callback) {
-                return callback(res);
-              },
-            };
-          }
+          return vscode.window.showTextDocument(_document, 3, true).then(editor => {
+            editor.edit(edit => {
+              return edit.insert(new vscode.Position(0, 0), filteredLog);
+            });
+          });
         })
         .then(() => {
           return res;
