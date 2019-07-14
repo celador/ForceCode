@@ -36,11 +36,7 @@ export const defaultOptions: Config = {
 export default function getSetConfig(service?: ForceService): Promise<Config> {
   var self: forceCode.IForceService = service || vscode.window.forceCode;
   const projPath = self.workspaceRoot;
-  var lastUsername: string | undefined;
-  if (fs.existsSync(path.join(projPath, 'force.json'))) {
-    var forceFile = fs.readJsonSync(path.join(projPath, 'force.json'));
-    lastUsername = forceFile.lastUsername;
-  }
+  var lastUsername: string | undefined = readForceJson();
   self.config = readConfigFile(lastUsername, service);
 
   self.projectRoot = path.join(projPath, self.config.src || 'src');
@@ -123,6 +119,16 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
   return fcConnection.refreshConnections().then(() => {
     return Promise.resolve(self.config);
   });
+}
+
+export function readForceJson() {
+  const projPath = vscode.window.forceCode.workspaceRoot;
+  var lastUsername: string | undefined;
+  if (fs.existsSync(path.join(projPath, 'force.json'))) {
+    var forceFile = fs.readJsonSync(path.join(projPath, 'force.json'));
+    lastUsername = forceFile.lastUsername;
+  }
+  return lastUsername;
 }
 
 export function saveConfigFile(userName: string | undefined, config: Config) {

@@ -1,6 +1,7 @@
 ## Change Log
 
 * 3.17.5
+    * Performance improvements on startup
     * Fix error related to ForceCode.treeDataProvider
     * Add inline run test button to test classes listed in the Code Coverage view
     * Add number of lines covered in Forcecode Code Coverage view hovers

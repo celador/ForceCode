@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { configuration, codeCovViewService, fcConnection } from './../services';
+import { codeCovViewService, fcConnection } from './../services';
 import constants from './../models/constants';
 import * as path from 'path';
 import { FCFile } from './codeCovView';
@@ -10,7 +10,7 @@ import { getUUID, FCAnalytics } from './fcAnalytics';
 
 import klaw = require('klaw');
 import { QueryResult } from 'jsforce';
-import { defaultOptions } from './configuration';
+import { defaultOptions, readForceJson } from './configuration';
 import { isEmptyUndOrNull } from '../util';
 
 export default class ForceService implements forceCode.IForceService {
@@ -50,47 +50,43 @@ export default class ForceService implements forceCode.IForceService {
     this.uuid = uuidRes.uuid;
 
     console.log('Starting ForceCode service');
-    configuration(this).then(config => {
-      return new Promise(resolve => {
-        if (uuidRes.firstTime) {
-          // ask the user to opt-in
-          return vscode.window
-            .showInformationMessage(
-              'The ForceCode Team would like to collect anonymous usage data so we can improve your experience. Is this OK?',
-              'Yes',
-              'No'
-            )
-            .then(choice => {
-              if (choice === 'Yes') {
-                vsConfig.update(
-                  'allowAnonymousUsageTracking',
-                  true,
-                  vscode.ConfigurationTarget.Global
-                );
-              } else {
-                vsConfig.update(
-                  'allowAnonymousUsageTracking',
-                  false,
-                  vscode.ConfigurationTarget.Global
-                );
-              }
-              resolve();
-            });
-        } else {
-          resolve();
-        }
-      }).then(() => {
-        vscode.commands
-          .executeCommand(
-            'ForceCode.switchUser',
-            config.username ? { username: config.username } : undefined
+    new Promise(resolve => {
+      if (uuidRes.firstTime) {
+        // ask the user to opt-in
+        return vscode.window
+          .showInformationMessage(
+            'The ForceCode Team would like to collect anonymous usage data so we can improve your experience. Is this OK?',
+            'Yes',
+            'No'
           )
-          .then(res => {
-            if (res === false && !fcConnection.isLoggedIn()) {
-              this.statusBarItem.hide();
+          .then(choice => {
+            if (choice === 'Yes') {
+              vsConfig.update(
+                'allowAnonymousUsageTracking',
+                true,
+                vscode.ConfigurationTarget.Global
+              );
+            } else {
+              vsConfig.update(
+                'allowAnonymousUsageTracking',
+                false,
+                vscode.ConfigurationTarget.Global
+              );
             }
+            resolve();
           });
-      });
+      } else {
+        resolve();
+      }
+    }).then(() => {
+      const username = readForceJson();
+      vscode.commands
+        .executeCommand('ForceCode.switchUser', username ? { username: username } : undefined)
+        .then(res => {
+          if (res === false && !fcConnection.isLoggedIn()) {
+            this.statusBarItem.hide();
+          }
+        });
     });
   }
 
