@@ -60,20 +60,17 @@ export default class ForceService implements forceCode.IForceService {
             'No'
           )
           .then(choice => {
+            var option: boolean = false;
             if (choice === 'Yes') {
-              vsConfig.update(
-                'allowAnonymousUsageTracking',
-                true,
-                vscode.ConfigurationTarget.Global
-              );
-            } else {
-              vsConfig.update(
-                'allowAnonymousUsageTracking',
-                false,
-                vscode.ConfigurationTarget.Global
-              );
+              option = true;
             }
-            resolve();
+            resolve(
+              vsConfig.update(
+                'allowAnonymousUsageTracking',
+                option,
+                vscode.ConfigurationTarget.Global
+              )
+            );
           });
       } else {
         resolve();
