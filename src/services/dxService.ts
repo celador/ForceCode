@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { fcConnection, FCOauth } from '.';
+import { fcConnection, FCOauth, notifications } from '.';
 import { isWindows } from './operatingSystem';
 import { SpawnOptions, spawn } from 'child_process';
 import { FCCancellationToken } from '../commands/forcecodeCommand';
@@ -115,7 +115,7 @@ export default class DXService {
 
         cmd.stderr.on('data', data => {
           var theErr: string = data.toString();
-          console.log(theErr);
+          notifications.writeLog(theErr);
           if (theErr) {
             theErr = theErr.toLowerCase();
             sfdxNotFound =
@@ -124,7 +124,7 @@ export default class DXService {
         });
 
         cmd.on('error', data => {
-          console.log(data);
+          notifications.writeLog(data);
           sfdxNotFound = data.message.indexOf('ENOENT') > -1;
         });
 
@@ -133,19 +133,19 @@ export default class DXService {
           try {
             json = JSON.parse(stdout);
           } catch (e) {
-            console.warn(`No parsable results from command "${fullCommand}"`);
+            notifications.writeLog(`No parsable results from command "${fullCommand}"`);
           }
           if (sfdxNotFound) {
             // show the user a message that the SFDX CLI isn't installed
-            vscode.window.showErrorMessage(
+            notifications.showError(
               'ForceCode: The SFDX CLI could not be found. Please download from [https://developer.salesforce.com/tools/sfdxcli](https://developer.salesforce.com/tools/sfdxcli) and install, then restart Visual Studio Code.'
             );
           }
           // We want to resolve if there's an error with parsable results
           if ((code > 0 && !json) || (json && json.status > 0 && !json.result)) {
             // Get non-promise stack for extra help
-            console.log(error);
-            console.log(json);
+            notifications.writeLog(error);
+            notifications.writeLog(json);
             return reject(error);
           } else {
             return resolve(json ? json.result : undefined);
@@ -155,7 +155,7 @@ export default class DXService {
     });
 
     async function killPromise() {
-      console.log('Cancelling task...');
+      notifications.writeLog('Cancelling task...');
       return new Promise((resolve, reject) => {
         kill(pid, 'SIGKILL', (err: {}) => {
           err ? reject(err) : resolve();

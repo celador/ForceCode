@@ -1,5 +1,11 @@
 import * as vscode from 'vscode';
-import { fcConnection, dxService, ApexTestQueryResult, apexTestResults } from './../services';
+import {
+  fcConnection,
+  dxService,
+  ApexTestQueryResult,
+  apexTestResults,
+  notifications,
+} from './../services';
 import { ForcecodeCommand } from './forcecodeCommand';
 import { updateDecorations } from '../decorators/testCoverageDecorator';
 import { FCFile } from '../services/codeCovView';
@@ -82,9 +88,9 @@ export class ApexTest extends ForcecodeCommand {
             (curTest.Message ? curTest.Message + '\n' : '');
           //}
         });
-        vscode.window.showErrorMessage(errorMessage);
+        notifications.showError(errorMessage);
       } else {
-        vscode.window.showInformationMessage('ForceCode: All Tests Passed!', 'Ok');
+        notifications.showInfo('ForceCode: All Tests Passed!', 'Ok');
       }
       return dxRes;
     }

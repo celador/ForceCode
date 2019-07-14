@@ -7,7 +7,7 @@
 
 import * as vscode from 'vscode';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
-import { FCOauth, fcConnection } from '../services';
+import { FCOauth, fcConnection, notifications } from '../services';
 import { CLIENT_ID } from './';
 
 export interface SObject {
@@ -177,7 +177,7 @@ export class SObjectDescribe {
     const batchSize = 25;
     const batchRequest: BatchRequest = { batchRequests: [] };
     for (let i = nextToProcess; i < nextToProcess + batchSize && i < types.length; i++) {
-      vscode.window.forceCode.outputChannel.appendLine('Processing decription for ' + types[i]);
+      notifications.writeLog('Processing decription for ' + types[i]);
       const urlElements = [this.getVersion(), this.sobjectsPart, types[i], 'describe'];
       const requestUrl = urlElements.join('/');
 
@@ -215,7 +215,7 @@ export class SObjectDescribe {
       for (const sr of batchResponse.results) {
         if (sr.result instanceof Array) {
           if (sr.result[0].errorCode && sr.result[0].message) {
-            console.log(`Error: ${sr.result[0].message} - ${types[i]}`);
+            notifications.writeLog(`Error: ${sr.result[0].message} - ${types[i]}`);
           }
         }
         i++;

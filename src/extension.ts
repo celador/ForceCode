@@ -8,6 +8,7 @@ import {
   operatingSystem,
   saveService,
   saveHistoryService,
+  notifications,
 } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
@@ -112,7 +113,7 @@ export function activate(context: vscode.ExtensionContext): any {
             return vscode.commands.executeCommand('ForceCode.compile', textDocument);
           }
         } else if (isResource || toolingType) {
-          vscode.window.showErrorMessage(
+          notifications.showError(
             "The file you are trying to save to the server isn't in the current org's source folder (" +
               vscode.window.forceCode.projectRoot +
               ')'

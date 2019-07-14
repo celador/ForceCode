@@ -12,6 +12,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import constants from './../models/constants';
 import { isEmptyUndOrNull } from '../util';
+import { notifications } from '.';
 
 interface IClassType {
   CoveredClass: string;
@@ -52,7 +53,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
   public static getInstance() {
     if (!CodeCovViewService.instance) {
-      console.log('Starting Code Coverage Service...');
+      notifications.writeLog('Starting Code Coverage Service...');
       CodeCovViewService.instance = new CodeCovViewService();
     }
     return CodeCovViewService.instance;
@@ -346,7 +347,7 @@ export class FCFile extends TreeItem {
       return true;
     }
 
-    console.log('Time difference between file changes: ' + (serverMS - localMS));
+    notifications.writeLog('Time difference between file changes: ' + (serverMS - localMS));
     return false;
   }
 }

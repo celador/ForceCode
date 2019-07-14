@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, saveHistoryService, saveService } from '../services';
+import { codeCovViewService, saveHistoryService, saveService, notifications } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
 import { getAnyTTFromFolder } from '../parsers/open';
@@ -67,7 +67,7 @@ export default function compile(
     return Promise.resolve(false);
   }
   if (document.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot + path.sep) === -1) {
-    vscode.window.showErrorMessage(
+    notifications.showError(
       "The file you are trying to save to the server isn't in the current org's source folder (" +
         vscode.window.forceCode.projectRoot +
         ')'
@@ -227,7 +227,7 @@ export default function compile(
 
   function reportMetadataResults(result: any) {
     if (Array.isArray(result) && result.length && !result.some(i => !i.success)) {
-      vscode.window.forceCode.showStatus('Successfully deployed ' + result[0].fullName);
+      notifications.showStatus('Successfully deployed ' + result[0].fullName);
       return result;
     } else if (Array.isArray(result) && result.length && result.some(i => !i.success)) {
       let error: string =
@@ -235,14 +235,14 @@ export default function compile(
           .filter(i => !i.success)
           .map(i => i.fullName)
           .join(', ') + ' Failed';
-      vscode.window.showErrorMessage(error);
+      notifications.showError(error);
       throw { message: error };
     } else if (typeof result === 'object' && result.success) {
-      vscode.window.forceCode.showStatus('Successfully deployed ' + result.fullName);
+      notifications.showStatus('Successfully deployed ' + result.fullName);
       return result;
     } else {
       var error: any = result.errors ? result.errors[0] : 'Unknown Error';
-      vscode.window.showErrorMessage(error);
+      notifications.showError(error);
       throw { message: error };
     }
   }
@@ -250,7 +250,7 @@ export default function compile(
   // =======================================================================================================================================
   function finished(res: any): boolean {
     if (isEmptyUndOrNull(res)) {
-      vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
+      notifications.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
       return true;
     }
     var failures: number = 0;
@@ -318,12 +318,12 @@ export default function compile(
           }
         }
       }
-      vscode.window.forceCode.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
+      notifications.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
       return true;
     } else if (diagnostics.length === 0) {
-      vscode.window.showErrorMessage(res.message ? res.message : res);
+      notifications.showError(res.message ? res.message : res);
     }
-    vscode.window.showErrorMessage(
+    notifications.showError(
       'File not saved due to build errors. Please open the Problems panel for more details.'
     );
     return false;

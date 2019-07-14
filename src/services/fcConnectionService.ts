@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { dxService, FCOauth, FCConnection, operatingSystem } from '.';
+import { dxService, FCOauth, FCConnection, operatingSystem, notifications } from '.';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
 import { saveConfigFile, readConfigFile } from './configuration';
@@ -25,7 +25,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
   public connections: FCConnection[];
 
   public constructor() {
-    console.log('Starting connection service...');
+    notifications.writeLog('Starting connection service...');
     this.connections = [];
   }
 
@@ -95,7 +95,9 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             resolve(usernames);
           })
           .on('error', (err, item) => {
-            console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
+            notifications.writeLog(
+              `ForceCode: Error reading ${item.path}. Message: ${err.message}`
+            );
           });
       } else {
         resolve(usernames);
@@ -124,7 +126,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
           }
           // tell the connections to refresh their text/icons
           this.refreshConnsStatus();
-          console.log('Orgs refreshed');
+          notifications.writeLog('Orgs refreshed');
           this.refreshingConns = false;
           return true;
         });

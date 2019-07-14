@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as logging from './../providers/LogProvider';
-import { dxService, ExecuteAnonymousResult } from '../services';
+import { dxService, ExecuteAnonymousResult, notifications } from '../services';
 import { saveToFile, removeFile } from '../util';
 import { ForcecodeCommand } from './forcecodeCommand';
 
@@ -21,7 +21,7 @@ export class ExecuteAnonymous extends ForcecodeCommand {
   public command(context: any, selectedResource: any): any {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
-      vscode.window.showErrorMessage(
+      notifications.showError(
         'A text editor needs to be open with Apex code selected in order to user Execute Anonymous'
       );
       return;
@@ -30,7 +30,7 @@ export class ExecuteAnonymous extends ForcecodeCommand {
     var selection = editor.selection;
     var text = document.getText(selection);
     if (text === '') {
-      vscode.window.showErrorMessage('No text selected to execute, please select code to run...');
+      notifications.showError('No text selected to execute, please select code to run...');
       return;
     }
 
@@ -72,21 +72,33 @@ export class ExecuteAnonymous extends ForcecodeCommand {
       }
       diagnosticCollection.set(document.uri, diagnostics);
       if (diagnostics.length > 0) {
-        vscode.window.showErrorMessage(`ForceCode: Execute Anonymous Errors`);
-        diagnostics.forEach(d =>
-          vscode.window.forceCode.outputChannel.appendLine(`Line ${Number(res.line)}: ${d.message}`)
-        );
+        notifications.showError(`ForceCode: Execute Anonymous Errors`);
+        diagnostics.forEach(d => {
+          notifications.writeLog(`Line ${Number(res.line)}: ${d.message}`);
+        });
       } else {
-        vscode.window.forceCode.showStatus(`ForceCode: Execute Anonymous Success $(check)`);
+        notifications.showStatus(`ForceCode: Execute Anonymous Success $(check)`);
       }
       return res;
     }
 
     function showResult(res: ExecuteAnonymousResult) {
-      vscode.window.forceCode.outputChannel.clear();
-      vscode.window.forceCode.outputChannel.appendLine(logging.filterLog(res.logs));
-      vscode.window.forceCode.outputChannel.show();
-      return res;
+      return vscode.workspace
+        .openTextDocument({ content: logging.filterLog(res.logs) })
+        .then(function(_document: vscode.TextDocument) {
+          if (_document.getText() !== '') {
+            return vscode.window.showTextDocument(_document, 3, true);
+          } else {
+            return {
+              async then(callback) {
+                return callback(res);
+              },
+            };
+          }
+        })
+        .then(() => {
+          return res;
+        });
     }
   }
 }

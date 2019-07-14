@@ -8,6 +8,7 @@ import {
   dxService,
   SObjectCategory,
   PXMLMember,
+  notifications,
 } from '../services';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
 import { IWorkspaceMember } from '../forceCode';
@@ -499,13 +500,13 @@ export default function retrieve(
   function finished(res: any): Promise<any> {
     if (res.success) {
       var getCodeCov: boolean = false;
-      console.log('Done retrieving files');
+      notifications.writeLog('Done retrieving files');
       // check the metadata and add the new members
       return updateWSMems().then(() => {
         if (option) {
-          vscode.window.forceCode.showStatus(`Retrieve ${option.description} $(thumbsup)`);
+          notifications.showStatus(`Retrieve ${option.description} $(thumbsup)`);
         } else {
-          vscode.window.forceCode.showStatus(`Retrieve $(thumbsup)`);
+          notifications.showStatus(`Retrieve $(thumbsup)`);
         }
         return Promise.resolve(res);
       });
@@ -538,7 +539,7 @@ export default function retrieve(
       }
 
       function parseRecords(recs: any[]): Thenable<any> {
-        console.log('Done retrieving metadata records');
+        notifications.writeLog('Done retrieving metadata records');
         recs.some(curSet => {
           return toArray(curSet).some(key => {
             if (key && newWSMembers.length > 0) {
@@ -555,12 +556,12 @@ export default function retrieve(
             }
           });
         });
-        console.log('Done updating/adding metadata');
+        notifications.writeLog('Done updating/adding metadata');
         if (getCodeCov) {
           return vscode.commands
             .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
             .then(() => {
-              console.log('Done retrieving code coverage');
+              notifications.writeLog('Done retrieving code coverage');
               return Promise.resolve();
             });
         } else {
@@ -568,9 +569,9 @@ export default function retrieve(
         }
       }
     } else {
-      vscode.window.showErrorMessage('Retrieve Errors');
+      notifications.showError('Retrieve Errors');
     }
-    vscode.window.forceCode.outputChannel.append(
+    notifications.writeLog(
       outputToString(res)
         .replace(/{/g, '')
         .replace(/}/g, '')

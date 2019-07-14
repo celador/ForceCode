@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { FauxClassGenerator } from '../dx';
-import { SObjectCategory } from '../services';
+import { SObjectCategory, notifications } from '../services';
 import { ForcecodeCommand } from './forcecodeCommand';
 
 export class CodeCompletionRefresh extends ForcecodeCommand {
@@ -57,8 +57,7 @@ export class CodeCompletionRefresh extends ForcecodeCommand {
         if (!objectsToGet) {
           return Promise.resolve();
         }
-        vscode.window.forceCode.outputChannel.clear();
-        vscode.window.forceCode.outputChannel.show();
+        notifications.showLog();
         var gen = new FauxClassGenerator();
         try {
           var startTime = new Date().getTime();
@@ -68,10 +67,10 @@ export class CodeCompletionRefresh extends ForcecodeCommand {
             cancellationToken
           );
           var endTime = new Date().getTime();
-          vscode.window.forceCode.outputChannel.appendLine(
+          notifications.writeLog(
             'Refresh took ' + Math.round((endTime - startTime) / (1000 * 60)) + ' minutes.'
           );
-          vscode.window.showInformationMessage('ForceCode: Retrieval of objects complete!!!', 'OK');
+          notifications.showInfo('ForceCode: Retrieval of objects complete!!!');
           return Promise.resolve();
         } catch (e) {
           return Promise.reject();

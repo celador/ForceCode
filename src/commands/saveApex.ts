@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { saveService, codeCovViewService } from '../services';
+import { saveService, codeCovViewService, notifications } from '../services';
 import diff from './diff';
 import { createPackageXML, deployFiles } from './deploy';
 import * as path from 'path';
@@ -238,8 +238,8 @@ export function saveApex(
           return res;
         } else if (checkCount > 30) {
           checkCount = 0;
-          return vscode.window
-            .showErrorMessage(fileName + ' timed out while saving. Cancel save?', 'Yes', 'No')
+          return notifications
+            .showError(fileName + ' timed out while saving. Cancel save?', 'Yes', 'No')
             .then(choice => {
               if (choice === 'No') {
                 return new Promise(function(resolve) {
@@ -265,7 +265,6 @@ export function saveApex(
         .sobject('ContainerAsyncRequest')
         .update({ Id: vscode.window.forceCode.containerAsyncRequestId, State: 'Aborted' })
         .then(res => {
-          console.log(res);
           return res;
         });
     }

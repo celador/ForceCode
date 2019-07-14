@@ -7,6 +7,7 @@ import {
   FCConnection,
   commandViewService,
   dxService,
+  notifications,
 } from '../services';
 import retrieve from './retrieve';
 import diff from './diff';
@@ -205,15 +206,12 @@ export class RemoveConfig extends ForcecodeCommand {
       .then(s => {
         if (s === 'Yes') {
           if (removeConfigFolder(username)) {
-            return vscode.window.showInformationMessage(
+            return notifications.showInfo(
               '.forceCode/' + username + ' folder removed successfully',
               'OK'
             );
           } else {
-            return vscode.window.showInformationMessage(
-              '.forceCode/' + username + ' folder not found',
-              'OK'
-            );
+            return notifications.showInfo('.forceCode/' + username + ' folder not found', 'OK');
           }
         }
       })

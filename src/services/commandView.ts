@@ -6,7 +6,7 @@
  */
 
 import * as vscode from 'vscode';
-import { fcConnection } from '.';
+import { fcConnection, notifications } from '.';
 import { EventEmitter } from 'events';
 import { trackEvent, FCTimer } from './fcAnalytics';
 import { ForcecodeCommand } from '../commands/forcecodeCommand';
@@ -176,7 +176,7 @@ export class Task extends vscode.TreeItem {
           .then(loggedIn => {
             if (loggedIn || attempt === SECOND_TRY) {
               if (reason) {
-                vscode.window.showErrorMessage(reason.message ? reason.message : reason, 'OK');
+                notifications.showError(reason.message ? reason.message : reason, 'OK');
                 return trackEvent('Error Thrown', reason.message ? reason.message : reason).then(
                   () => {
                     return reason;

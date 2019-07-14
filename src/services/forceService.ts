@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { codeCovViewService, fcConnection } from './../services';
-import constants from './../models/constants';
+import { codeCovViewService, fcConnection, notifications } from './../services';
 import * as path from 'path';
 import { FCFile } from './codeCovView';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
@@ -21,16 +20,13 @@ export default class ForceService implements forceCode.IForceService {
   public containerMembers: forceCode.IContainerMember[];
   public describe: forceCode.IMetadataDescribe | undefined;
   public containerAsyncRequestId: string | undefined;
-  public statusBarItem: vscode.StatusBarItem;
-  public outputChannel: vscode.OutputChannel;
   public projectRoot: string;
   public workspaceRoot: string;
   public storageRoot: string;
-  public statusTimeout: any;
   public uuid: string;
 
   constructor(context: vscode.ExtensionContext) {
-    console.log('Initializing ForceCode service');
+    notifications.writeLog('Initializing ForceCode service');
     if (!vscode.workspace.workspaceFolders) {
       throw 'A folder needs to be open before Forcecode can be activated';
     }
@@ -38,10 +34,7 @@ export default class ForceService implements forceCode.IForceService {
     this.projectRoot = path.join(this.workspaceRoot, 'src');
     this.config = defaultOptions;
     this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
-    this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
-    this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 6);
-    this.statusBarItem.text = `ForceCode Loading...`;
-    this.statusBarItem.show();
+    notifications.setStatusText(`ForceCode Loading...`);
     this.containerMembers = [];
     this.storageRoot = context.extensionPath;
 
@@ -49,12 +42,12 @@ export default class ForceService implements forceCode.IForceService {
     const uuidRes: FCAnalytics = getUUID();
     this.uuid = uuidRes.uuid;
 
-    console.log('Starting ForceCode service');
+    notifications.writeLog('Starting ForceCode service');
     new Promise(resolve => {
       if (uuidRes.firstTime) {
         // ask the user to opt-in
-        return vscode.window
-          .showInformationMessage(
+        return notifications
+          .showInfo(
             'The ForceCode Team would like to collect anonymous usage data so we can improve your experience. Is this OK?',
             'Yes',
             'No'
@@ -81,28 +74,10 @@ export default class ForceService implements forceCode.IForceService {
         .executeCommand('ForceCode.switchUser', username ? { username: username } : undefined)
         .then(res => {
           if (res === false && !fcConnection.isLoggedIn()) {
-            this.statusBarItem.hide();
+            notifications.hideStatus();
           }
         });
     });
-  }
-
-  public clearLog() {
-    this.outputChannel.clear();
-  }
-
-  public showStatus(message: string) {
-    this.statusBarItem.show();
-    vscode.window.forceCode.statusBarItem.text = message;
-    this.resetStatus();
-  }
-
-  public resetStatus() {
-    // for status bar updates. resets after 5 seconds
-    clearTimeout(vscode.window.forceCode.statusTimeout);
-    vscode.window.forceCode.statusTimeout = setTimeout(function() {
-      vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
-    }, 5000);
   }
 
   public newContainer(force: Boolean): Promise<forceCode.IForceService> {
@@ -174,7 +149,7 @@ export default class ForceService implements forceCode.IForceService {
           resolve(proms);
         })
         .on('error', (err, item) => {
-          console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
+          notifications.writeLog(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
         });
     });
   }
@@ -191,7 +166,7 @@ export default class ForceService implements forceCode.IForceService {
       if (!Array.isArray(recs)) {
         Promise.resolve();
       }
-      console.log('Done retrieving metadata records');
+      notifications.writeLog('Done retrieving metadata records');
       recs.forEach(curSet => {
         if (Array.isArray(curSet)) {
           curSet.forEach(key => {
@@ -219,11 +194,11 @@ export default class ForceService implements forceCode.IForceService {
           });
         }
       });
-      console.log('Done getting workspace info');
+      notifications.writeLog('Done getting workspace info');
       return vscode.commands
         .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
         .then(() => {
-          console.log('Done retrieving code coverage');
+          notifications.writeLog('Done retrieving code coverage');
           return Promise.resolve();
         });
     }
@@ -233,7 +208,7 @@ export default class ForceService implements forceCode.IForceService {
     var self: forceCode.IForceService = vscode.window.forceCode;
     var config = self.config;
     if (!config.username) {
-      vscode.window.showErrorMessage(
+      notifications.showError(
         `ForceCode: No username found. Please try to login to the org again.`
       );
       throw { message: '$(alert) Missing Credentials $(alert)' };
@@ -276,9 +251,9 @@ export default class ForceService implements forceCode.IForceService {
 
     function connectionSuccess(svc: forceCode.IForceService) {
       vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
-      svc.statusBarItem.command = 'ForceCode.showMenu';
-      svc.statusBarItem.tooltip = 'Open the ForceCode Menu';
-      svc.showStatus('ForceCode Ready!');
+      notifications.setStatusCommand('ForceCode.showMenu');
+      notifications.setStatusTooltip('Open the ForceCode Menu');
+      notifications.showStatus('ForceCode Ready!');
 
       return svc;
     }
@@ -291,8 +266,7 @@ export default class ForceService implements forceCode.IForceService {
       });
     }
     function connectionError(err: any) {
-      vscode.window.showErrorMessage(`ForceCode: Connection Error`);
-      //vscode.window.forceCode.statusBarItem.hide();
+      notifications.showError(`ForceCode: Connection Error`);
       throw err;
     }
   }

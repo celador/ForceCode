@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import { notifications } from '../services';
 
 export class FCCancellationToken {
   public isCanceled: boolean;
@@ -33,9 +34,9 @@ export abstract class ForcecodeCommand {
       return this.command(context, selectedResource);
     } catch (e) {
       if (this.cancellationToken.isCanceled) {
-        console.warn(e);
         return;
       } else {
+        notifications.writeLog(e);
         throw e;
       }
     }

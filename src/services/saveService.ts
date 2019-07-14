@@ -3,6 +3,7 @@ import * as fs from 'fs-extra';
 import { compile } from '../commands';
 import klaw = require('klaw');
 import { FCCancellationToken } from '../commands/forcecodeCommand';
+import { notifications } from '.';
 
 interface PreSaveFile {
   path: string;
@@ -55,7 +56,7 @@ export class SaveService {
           resolve(true);
         })
         .on('error', (err, item) => {
-          console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
+          notifications.writeLog(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
           reject(false);
         });
     });
@@ -82,7 +83,11 @@ export class SaveService {
     return true;
   }
 
-  public saveFile(document: vscode.TextDocument, forceCompile: boolean, cancellationToken: FCCancellationToken): Promise<boolean> {
+  public saveFile(
+    document: vscode.TextDocument,
+    forceCompile: boolean,
+    cancellationToken: FCCancellationToken
+  ): Promise<boolean> {
     // take the path and get the TextDocument, then hand it off to the compile() function
     return new Promise((resolve, reject) => {
       compile(document, forceCompile, cancellationToken)
