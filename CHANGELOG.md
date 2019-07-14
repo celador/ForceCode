@@ -1,14 +1,14 @@
 ## Change Log
 
-* 3.17.5
+* 3.18.0
     * Performance improvements on startup
-    * Execute anonymous output is now shown in a document link Apex test logs
+    * Execute anonymous output is now shown in a document like Apex test logs
     * Logging output is now shown in the Forcecode output panel
     * Show debug logs with dated names
     * Fix error related to ForceCode.treeDataProvider
     * Add inline run test button to test classes listed in the Code Coverage view
     * Add number of lines covered in Forcecode Code Coverage view hovers
-    * Add time saved to end of SUCCESS! in save history view
+    * Add time saved to end of SUCCESS! in save history view tooltip
     * Add option to cancel Apex save when it times out. This avoids receiving the container request error.
 * 3.17.4
     * Fix issue with extension not loading
