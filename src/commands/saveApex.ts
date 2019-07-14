@@ -85,8 +85,8 @@ export function saveApex(
         !saveService.compareContents(document.fileName, serverContents)
       ) {
         // throw up an alert
-        return vscode.window
-          .showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite')
+        return notifications
+          .showWarning('Someone else has changed this file!', 'Diff', 'Overwrite')
           .then(s => {
             if (s === 'Diff') {
               diff(document);

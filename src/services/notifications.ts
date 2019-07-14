@@ -61,6 +61,11 @@ export class Notifications {
     return vscode.window.showErrorMessage(message, ...items);
   }
 
+  public showWarning(message: string, ...items: string[]) {
+    this.writeLog(message);
+    return vscode.window.showWarningMessage(message, ...items);
+  }
+
   public showInfo(message: string, ...items: string[]) {
     this.writeLog(message);
     return vscode.window.showInformationMessage(message, ...items);

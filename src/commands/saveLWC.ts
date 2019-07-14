@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import { saveService } from '../services';
+import { saveService, notifications } from '../services';
 import * as path from 'path';
 import { createPackageXML, deployFiles } from './deploy';
 import diff from './diff';
@@ -64,8 +64,8 @@ export function saveLWC(
     );
 
     if (!forceCompile && changedFiles.length === 1) {
-      return vscode.window
-        .showWarningMessage('Someone has changed this file!', 'Diff', 'Overwrite')
+      return notifications
+        .showWarning('Someone has changed this file!', 'Diff', 'Overwrite')
         .then(s => {
           if (s === 'Diff') {
             diff(document, true);
@@ -80,8 +80,8 @@ export function saveLWC(
       var changedFileNames: string = changedFiles
         .map(file => file.FilePath.split('/').pop())
         .join(',');
-      return vscode.window
-        .showWarningMessage(
+      return notifications
+        .showWarning(
           `Someone has changed ${changedFileNames} in this bundle! Overwrite?`,
           'Yes',
           'No'

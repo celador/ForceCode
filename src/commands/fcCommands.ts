@@ -98,8 +98,8 @@ export class FileModified extends ForcecodeCommand {
 
   public command(context, selectedResource?) {
     return vscode.workspace.openTextDocument(context).then(theDoc => {
-      return vscode.window
-        .showWarningMessage(
+      return notifications
+        .showWarning(
           selectedResource + ' has changed ' + getFileName(theDoc),
           'Refresh',
           'Diff',
@@ -197,8 +197,8 @@ export class RemoveConfig extends ForcecodeCommand {
     } else {
       username = context;
     }
-    return vscode.window
-      .showWarningMessage(
+    return notifications
+      .showWarning(
         'This will remove the .forceCode/' + username + ' folder and all contents. Continue?',
         'Yes',
         'No'
