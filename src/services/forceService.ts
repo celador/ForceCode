@@ -113,32 +113,29 @@ export default class ForceService implements forceCode.IForceService {
       const index = 0;
       klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
         .on('data', function(item) {
-          // Check to see if the file represents an actual member...
-          if (item.stats.isFile()) {
-            var type: string | undefined = getToolingTypeFromExt(item.path);
+          var type: string | undefined = getToolingTypeFromExt(item.path);
 
-            if (type) {
-              if (!codeCovViewService.findByPath(item.path)) {
-                if (!typeNames.includes(type)) {
-                  typeNames.push(type);
-                  if (types[index].length > 2) {
-                    //index++;
-                    proms.push(vscode.window.forceCode.conn.metadata.list(types.splice(0, 1)));
-                    types.push([]);
-                  }
-                  types[index].push({ type: type });
+          if (type) {
+            if (!codeCovViewService.findByPath(item.path)) {
+              if (!typeNames.includes(type)) {
+                typeNames.push(type);
+                if (types[index].length > 2) {
+                  //index++;
+                  proms.push(vscode.window.forceCode.conn.metadata.list(types.splice(0, 1)));
+                  types.push([]);
                 }
-
-                var thePath: string | undefined = item.path.split(path.sep).pop();
-                var filename: string = thePath ? thePath.split('.')[0] : '';
-                var workspaceMember: forceCode.IWorkspaceMember = {
-                  name: filename,
-                  path: item.path,
-                  id: '', //metadataFileProperties.id,
-                  type: type,
-                };
-                codeCovViewService.addClass(workspaceMember);
+                types[index].push({ type: type });
               }
+
+              var thePath: string | undefined = item.path.split(path.sep).pop();
+              var filename: string = thePath ? thePath.split('.')[0] : '';
+              var workspaceMember: forceCode.IWorkspaceMember = {
+                name: filename,
+                path: item.path,
+                id: '', //metadataFileProperties.id,
+                type: type,
+              };
+              codeCovViewService.addClass(workspaceMember);
             }
           }
         })

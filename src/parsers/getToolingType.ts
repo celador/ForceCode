@@ -40,8 +40,8 @@ export function getCoverageType(document: vscode.TextDocument): string | undefin
   return undefined;
 }
 
-export function getToolingTypeFromExt(path: string) {
-  switch (path.split('.').pop()) {
+export function getToolingTypeFromExt(thePath: string) {
+  switch (path.extname(thePath)) {
     case 'cls':
       return 'ApexClass';
     case 'trigger':
