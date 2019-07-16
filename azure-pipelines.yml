@@ -19,7 +19,7 @@ jobs:
     steps:
       - task: NodeTool@0
         inputs:
-          versionSpec: "8.x"
+          versionSpec: "10.x"
         displayName: "Install Node.js"
       - bash: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
@@ -27,7 +27,7 @@ jobs:
         displayName: Start xvfb
         condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
       - bash: |
-          npm install
+          npm ci
           echo ">>> Compile vscode-test"
           npm run compile
           echo ">>> Compiled vscode-test"
@@ -50,7 +50,7 @@ jobs:
     steps:
       - task: NodeTool@0
         inputs:
-          versionSpec: "8.x"
+          versionSpec: "10.x"
         displayName: "Install Node.js"
       - bash: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
@@ -58,7 +58,7 @@ jobs:
         displayName: Start xvfb
         condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
       - bash: |
-          npm install
+          npm ci
           echo ">>> Build package"
           npm run package
         displayName: Build package
@@ -82,7 +82,7 @@ jobs:
     steps:
       - task: NodeTool@0
         inputs:
-          versionSpec: "8.x"
+          versionSpec: "10.x"
         displayName: "Install Node.js"
       - bash: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
@@ -90,7 +90,7 @@ jobs:
         displayName: Start xvfb
         condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
       - bash: |
-          npm install
+          npm ci
           echo ">>> Build package"
           npm run package
           echo ">>> Download vsce"
