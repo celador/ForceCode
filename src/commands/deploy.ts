@@ -90,7 +90,8 @@ export default function deploy(
               vscode.window.forceCode.config.spaDist !== '' &&
               file.path.indexOf(vscode.window.forceCode.config.spaDist) !== -1
             ) &&
-            !file.path.endsWith('-meta.xml')
+            !file.path.endsWith('-meta.xml') &&
+            path.dirname(file.path) !== vscode.window.forceCode.projectRoot
           ) {
             if (file.path.indexOf(path.join(vscode.window.forceCode.projectRoot, 'aura')) !== -1) {
               const auraName = getAuraNameFromFileName(file.path, 'aura');
