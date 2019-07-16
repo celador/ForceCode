@@ -146,7 +146,9 @@ export default class DXService {
             // Get non-promise stack for extra help
             notifications.writeLog(error);
             notifications.writeLog(json);
-            return reject(error);
+            return reject(
+              json && json.message ? json.message : error && error.message ? error.message : error
+            );
           } else {
             return resolve(json ? json.result : undefined);
           }
