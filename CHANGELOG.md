@@ -6,7 +6,9 @@
     * Logging output is now shown in the Forcecode output panel
     * Show debug logs with dated names
     * Fix error related to ForceCode.treeDataProvider
+    * Fix not catching some SFDX CLI errors
     * Add inline run test button to test classes listed in the Code Coverage view
+    * Add inline cancel task button on cancellable running tasks
     * Add number of lines covered in Forcecode Code Coverage view hovers
     * Add time saved to end of SUCCESS! in save history view tooltip
     * Add option to cancel Apex save when it times out. This avoids receiving the container request error.

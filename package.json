@@ -158,7 +158,11 @@
       },
       {
         "command": "ForceCode.cancelCommand",
-        "title": "Cancel Task"
+        "title": "Cancel Task",
+        "icon": {
+          "light": "./images/cancel.svg",
+          "dark": "./images/cancel.svg"
+        }
       },
       {
         "command": "ForceCode.runTests",
@@ -492,6 +496,11 @@
         {
           "when": "viewItem == forceCodeTask && ForceCodeActive",
           "command": "ForceCode.cancelCommand"
+        },
+        {
+          "when": "viewItem == forceCodeTask && ForceCodeActive",
+          "command": "ForceCode.cancelCommand",
+          "group": "inline"
         },
         {
           "when": "viewItem == fcTestClass && ForceCodeActive",
