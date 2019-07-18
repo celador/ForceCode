@@ -7,6 +7,9 @@
     * Show debug logs with dated names
     * Fix error related to ForceCode.treeDataProvider
     * Fix not catching some SFDX CLI errors
+    * Fix Execute Anonymous functionality
+    * Fix window not reloading when creating a project in a folder that's already open in VSCode
+    * Fix various menus throwing errors when the user canceled or didn't make a selection
     * Add inline run test button to test classes listed in the Code Coverage view
     * Add inline cancel task button on cancellable running tasks
     * Add number of lines covered in Forcecode Code Coverage view hovers

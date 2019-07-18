@@ -91,7 +91,7 @@ export class FauxClassGenerator {
     }
     let j = 0;
     while (j < sobjects.length) {
-      if (cancellationToken.isCanceled) {
+      if (cancellationToken.isCanceled()) {
         return Promise.reject('Cancelled');
       }
       try {

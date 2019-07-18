@@ -63,7 +63,7 @@ export function saveApex(
             Id: records.id,
           };
       const upToolType = parsers.getToolingType(document, UPDATE);
-      if (cancellationToken.isCanceled) {
+      if (cancellationToken.isCanceled()) {
         return Promise.reject();
       } else if (upToolType) {
         return fc.conn.tooling
@@ -123,7 +123,7 @@ export function saveApex(
         };
         return shouldCompile(record).then(should => {
           const upToolType = parsers.getToolingType(document, UPDATE);
-          if (cancellationToken.isCanceled) {
+          if (cancellationToken.isCanceled()) {
             return Promise.reject();
           } else if (should && upToolType && name) {
             return fc.conn.tooling
@@ -196,7 +196,7 @@ export function saveApex(
   }
   // =======================================================================================================================================
   function requestCompile(retval: any) {
-    if (vscode.window.forceCode.containerMembers.length === 0 || cancellationToken.isCanceled) {
+    if (vscode.window.forceCode.containerMembers.length === 0 || cancellationToken.isCanceled()) {
       return {
         async then(callback: any) {
           return callback(retval);
@@ -217,7 +217,7 @@ export function saveApex(
   }
   // =======================================================================================================================================
   function getCompileStatus(retval: any): Promise<any> {
-    if (cancellationToken.isCanceled) {
+    if (cancellationToken.isCanceled()) {
       return Promise.reject();
     }
     if (vscode.window.forceCode.containerMembers.length === 0) {
@@ -225,7 +225,7 @@ export function saveApex(
     }
     return nextStatus();
     function nextStatus(): any {
-      if (cancellationToken.isCanceled) {
+      if (cancellationToken.isCanceled()) {
         return cancelRequest()
           .catch(err => Promise.reject())
           .then(res => Promise.reject());
@@ -246,7 +246,7 @@ export function saveApex(
                   setTimeout(() => resolve(), vscode.window.forceCode.config.poll || 2000);
                 }).then(nextStatus);
               } else {
-                cancellationToken.isCanceled = true;
+                cancellationToken.cancel();
                 return cancelRequest()
                   .catch(err => Promise.reject())
                   .then(res => Promise.reject());

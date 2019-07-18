@@ -136,7 +136,7 @@ export default function deploy(
   }
 
   function showFileList(files: string[]): Promise<string[]> {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       let options: vscode.QuickPickItem[] = files
         .map(file => {
           const fname = file.split(path.sep).pop();
@@ -155,7 +155,7 @@ export default function deploy(
       };
       vscode.window.showQuickPick(options, config).then(files => {
         if (isEmptyUndOrNull(files)) {
-          resolve();
+          reject(cancellationToken.cancel());
         }
         var theFiles: string[] = [];
         toArray(files).forEach(file => {
@@ -262,7 +262,7 @@ export function deployFiles(
 
   // =======================================================================================================================================
   function checkDeployStatus(deployResult: DeployResult, resolveFunction, rejectFunction) {
-    if (cancellationToken.isCanceled) {
+    if (cancellationToken.isCanceled()) {
       // TODO: Find a way to cancel the deployment here. Currently, the deployment still occurs in the background
       return rejectFunction();
     } else {
@@ -286,7 +286,7 @@ export function deployFiles(
   }
 
   function finished(res: any) /*Promise<any>*/ {
-    if (cancellationToken.isCanceled) {
+    if (cancellationToken.isCanceled()) {
       return Promise.reject();
     }
     if (res.status && res.status !== 'Failed') {

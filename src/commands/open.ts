@@ -134,7 +134,7 @@ export function showFileOptions(promises: any[], cancellationToken: FCCancellati
           var filesOpened: number = 0;
           return opts.forEach((curFile: any) => {
             if (
-              !cancellationToken.isCanceled &&
+              !cancellationToken.isCanceled() &&
               filesOpened < vscode.workspace.getConfiguration('force')['showFilesOnOpenMax']
             ) {
               var tType: string = curFile.detail.split(' ')[0];

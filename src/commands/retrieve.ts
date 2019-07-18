@@ -225,7 +225,7 @@ export default function retrieve(
       };
       return vscode.window.showQuickPick(options, config).then(res => {
         if (!res) {
-          return Promise.reject();
+          return Promise.reject(cancellationToken.cancel());
         }
         return res;
       });
@@ -270,7 +270,7 @@ export default function retrieve(
             'Cannot retrieve more than 10,000 files at a time. Please select "Choose Types..." from the retrieve menu and try to download without Reports selected first.',
         });
       }
-      if (cancellationToken.isCanceled) {
+      if (cancellationToken.isCanceled()) {
         reject();
       }
       var theStream = vscode.window.forceCode.conn.metadata.retrieve({
@@ -371,7 +371,7 @@ export default function retrieve(
                 });
               }
             }
-            if (cancellationToken.isCanceled) {
+            if (cancellationToken.isCanceled()) {
               reject();
             }
             try {
