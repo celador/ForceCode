@@ -27,7 +27,6 @@ import * as fs from 'fs-extra';
 import { createProject } from './commands/createProject';
 
 export function activate(context: vscode.ExtensionContext): any {
-  const startupTimer: FCTimer = new FCTimer('extension.activate');
   context.subscriptions.push(
     vscode.commands.registerCommand('ForceCode.createProject', createProject)
   );
@@ -44,6 +43,8 @@ export function activate(context: vscode.ExtensionContext): any {
       return;
     }
   }
+
+  const startupTimer: FCTimer = new FCTimer('extension.activate');
 
   commands.fcCommands.forEach(cur => {
     context.subscriptions.push(
