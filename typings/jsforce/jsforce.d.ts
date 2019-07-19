@@ -137,6 +137,8 @@ declare module 'jsforce/index' {
       upsert(foo: string, bar: any): Promise<any>;
     }
     interface Bulk {
+      pollInterval: number;
+      pollTimeout: number;
       load(
         type: string,
         operation: string,

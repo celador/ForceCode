@@ -234,6 +234,11 @@
           "default": 2000,
           "description": "The amount of time in milliseconds between updates when doing bulk CRUD operations."
         },
+        "force.bulkLoaderPollTimeout": {
+          "type": "number",
+          "default": 60000,
+          "description": "The amount of time in milliseconds until a bulk load times out."
+        },
         "force.checkForFileChanges": {
           "type": "boolean",
           "default": false,
@@ -596,10 +601,9 @@
     "decache": "^4.5.1",
     "deepmerge": "4.0.0",
     "fs-extra": "8.1.0",
-    "glob": "^7.1.4",
     "globule": "1.2.1",
     "istanbul": "^0.4.5",
-    "jsforce": "1.8.5",
+    "jsforce": "1.9.2",
     "klaw": "3.0.0",
     "mime-types": "2.1.24",
     "mocha": "^6.1.4",
