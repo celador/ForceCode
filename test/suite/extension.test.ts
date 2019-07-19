@@ -9,7 +9,7 @@ suite('Extension Tests', () => {
   const sandbox = sinon.createSandbox();
   before(() => {
     sandbox.stub(dxService, 'runCommand').callsFake(executeSFDXCommand);
-    createForceJson();
+    createForceJson(process.env.SF_USERNAME);
   });
   after(() => {
     sandbox.restore();

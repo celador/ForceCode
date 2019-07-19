@@ -26,12 +26,12 @@ export function createProjectDir(): vscode.Uri[] | undefined {
   return folderUri;
 }
 
-export function createForceJson() {
+export function createForceJson(username: string | undefined) {
   if (vscode.workspace.workspaceFolders) {
     var thePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     thePath = path.join(thePath, 'force.json');
     const forceData = {
-      lastUsername: sfdxRetValsTest['org:display'].username,
+      lastUsername: username ? username : sfdxRetValsTest['org:display'].username,
     };
     fs.writeFileSync(thePath, JSON.stringify(forceData));
   }
