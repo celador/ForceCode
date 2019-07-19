@@ -93,7 +93,7 @@ function saveUUID(newUUID: string) {
 }
 
 function optIn(): boolean {
-  const debug = false; //vscode.env.machineId === 'someValue.machineId';
+  const debug = vscode.env.machineId === 'someValue.machineId';
   // turn off analytics when we are debugging
   return (
     vscode.workspace.getConfiguration('force').get('allowAnonymousUsageTracking') == true && !debug

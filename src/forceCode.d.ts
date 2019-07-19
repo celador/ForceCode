@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import { Connection } from 'jsforce';
+import { ForceService } from './services';
 
 declare module 'vscode' {
   export namespace window {
-    export let forceCode: IForceService;
+    export let forceCode: ForceService;
   }
 }
 
