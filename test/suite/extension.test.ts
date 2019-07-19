@@ -46,12 +46,6 @@ suite('Extension Tests', () => {
       assert.strictEqual(true, true);
     });
   });
-  test('Gets overall coverage', async () => {
-    await vscode.commands.executeCommand('ForceCode.getOverallCoverage').then(res => {
-      var output = path.join(vscode.window.forceCode.projectRoot, 'coverage');
-      assert.strictEqual(fs.existsSync(output), true);
-    });
-  });
   test('Creates new class', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
       return {
@@ -152,6 +146,63 @@ suite('Extension Tests', () => {
     await vscode.commands.executeCommand('ForceCode.deployPackage').then(res => {
       assert.strictEqual(true, true);
       sandbox.restore();
+    });
+  });
+  test('Retrieve via package.xml', async () => {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+      return {
+        async then(callback) {
+          return callback({ description: 'packaged' }); // apex class
+        },
+      };
+    });
+    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(res => {
+      assert.strictEqual(true, true);
+      sandbox.restore();
+    });
+  });
+  test('Open a file', async () => {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+      return {
+        async then(callback) {
+          return callback(items[0]); // apex class
+        },
+      };
+    });
+    await vscode.commands.executeCommand('ForceCode.open').then(res => {
+      assert.strictEqual(true, true);
+      sandbox.restore();
+    });
+  });
+  test('Save a file', async () => {
+    await vscode.commands.executeCommand('ForceCode.compile').then(res => {
+      assert.strictEqual(true, true);
+      sandbox.restore();
+    });
+  });
+  test('Refresh code completion', async () => {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+      return {
+        async then(callback) {
+          return callback(items[0]); // refresh all
+        },
+      };
+    });
+    await vscode.commands.executeCommand('ForceCode.codeCompletionRefresh').then(res => {
+      assert.strictEqual(true, true);
+      sandbox.restore();
+    });
+  });
+  test('Diff a file', async () => {
+    await vscode.commands.executeCommand('ForceCode.diff').then(res => {
+      assert.strictEqual(true, true);
+      sandbox.restore();
+    });
+  });
+  test('Gets overall coverage', async () => {
+    await vscode.commands.executeCommand('ForceCode.getOverallCoverage').then(res => {
+      var output = path.join(vscode.window.forceCode.projectRoot, 'coverage');
+      assert.strictEqual(fs.existsSync(output), true);
     });
   });
 });
