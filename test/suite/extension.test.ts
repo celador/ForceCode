@@ -20,7 +20,9 @@ suite('Extension Tests', () => {
     const ext = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
     if (ext) {
       // TODO: add connection to dev org to test login
-      await ext.activate().then(async () => {
+      await ext.activate();
+      await vscode.commands.executeCommand('ForceCode.showMenu').then(res => {
+        console.log(res);
         assert.strictEqual(true, true);
       });
     } else {

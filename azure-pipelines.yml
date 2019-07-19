@@ -6,7 +6,6 @@ variables:
 
 jobs:
   - job: Test
-    strategy:
     pool:
       vmImage: "ubuntu-16.04"
     steps:

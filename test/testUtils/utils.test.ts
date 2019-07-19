@@ -3,6 +3,7 @@ import * as fs from 'fs-extra';
 import * as vscode from 'vscode';
 import sfdxRetValsTest from './sfdxRetVals.test';
 import { FCCancellationToken } from '../../src/commands/forcecodeCommand';
+import { defaultOptions } from '../../src/services';
 
 export function createProjectDir(): vscode.Uri[] | undefined {
   var folder = '.';
@@ -28,12 +29,23 @@ export function createProjectDir(): vscode.Uri[] | undefined {
 
 export function createForceJson(username: string | undefined) {
   if (vscode.workspace.workspaceFolders) {
-    var thePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    thePath = path.join(thePath, 'force.json');
+    removeProjectFiles();
+    var thePathOrg = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    var thePath = path.join(thePathOrg, 'force.json');
     const forceData = {
       lastUsername: username ? username : sfdxRetValsTest['org:display'].username,
     };
     fs.writeFileSync(thePath, JSON.stringify(forceData));
+    if (username) {
+      const fcPath = path.join(thePathOrg, '.forceCode', username);
+      fs.mkdirpSync(fcPath);
+      var settings = Object.assign(defaultOptions, {
+        url: 'https://login.salesforce.com',
+        autoCompile: true,
+        username: username,
+      });
+      fs.writeFileSync(path.join(fcPath, 'settings.json'), JSON.stringify(settings));
+    }
   }
 }
 
