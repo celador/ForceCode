@@ -8,7 +8,9 @@ import { createForceJson, removeProjectFiles, executeSFDXCommand } from '../test
 suite('Extension Tests', () => {
   const sandbox = sinon.createSandbox();
   before(() => {
-    sandbox.stub(dxService, 'runCommand').callsFake(executeSFDXCommand);
+    if (!process.env.SF_USERNAME) {
+      sandbox.stub(dxService, 'runCommand').callsFake(executeSFDXCommand);
+    }
     createForceJson(process.env.SF_USERNAME);
   });
   after(() => {

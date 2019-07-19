@@ -3,7 +3,7 @@ import * as fs from 'fs-extra';
 import * as vscode from 'vscode';
 import sfdxRetValsTest from './sfdxRetVals.test';
 import { FCCancellationToken } from '../../src/commands/forcecodeCommand';
-import { defaultOptions, dxService } from '../../src/services';
+import { defaultOptions } from '../../src/services';
 
 export function createProjectDir(): vscode.Uri[] | undefined {
   var folder = '.';
@@ -66,15 +66,10 @@ export function executeSFDXCommand(
   targetusername: boolean,
   cancellationToken?: FCCancellationToken
 ): Promise<any> {
-  const username = process.env.SF_USERNAME;
-  if (username) {
-    return dxService.runCommand(cmdString, targetusername, cancellationToken);
-  } else {
-    var command = cmdString.split('force:').pop();
-    command = command ? command.split(' ').shift() : undefined;
-    console.log(command + ' SFDX command invoked');
-    return Promise.resolve(command ? sfdxRetValsTest[command] : undefined);
-  }
+  var command = cmdString.split('force:').pop();
+  command = command ? command.split(' ').shift() : undefined;
+  console.log(command + ' SFDX command invoked');
+  return Promise.resolve(command ? sfdxRetValsTest[command] : undefined);
 }
 
 function removeDirOrFile(thePath: string) {
