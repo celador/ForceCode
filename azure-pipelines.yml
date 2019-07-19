@@ -20,14 +20,16 @@ jobs:
           mkdir sfdx
           wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz | tar xJ -C sfdx --strip-components 1
           "./sfdx/install"
-          /usr/local/bin/sfdx --version
-          /usr/local/bin/sfdx plugins --core
-          /usr/local/bin/sfdx force:auth:jwt:grant --clientid $(SF_CONSUMER_KEY) --jwtkeyfile assets/server.key --username $(SF_USERNAME)
+          export PATH=/usr/local/bin/sfdx/:$PATH
+          sfdx --version
+          sfdx plugins --core
+          sfdx force:auth:jwt:grant --clientid $(SF_CONSUMER_KEY) --jwtkeyfile assets/server.key --username $(SF_USERNAME)
           npm ci
           echo ">>> Compile vscode-test"
           npm run compile
           echo ">>> Compiled vscode-test"
           echo ">>> Run integration test"
+          export SF_USERNAME=$(SF_USERNAME)
           npm run test
         displayName: Run Tests
         env:

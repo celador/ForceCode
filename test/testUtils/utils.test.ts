@@ -14,7 +14,6 @@ export function createProjectDir(): vscode.Uri[] | undefined {
     folder = path.join(folder, 'test');
     removeDirOrFile(folder);
     fs.mkdirpSync(folder);
-    console.log('Folder opened: ' + folder);
     var folderUriPre = vscode.Uri.file(folder);
     folderUri = [
       Object.assign({}, wsUri, {

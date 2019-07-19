@@ -7,7 +7,7 @@ import { before, after } from 'mocha';
 import { createProject } from '../../../src/commands/createProject';
 import { createProjectDir, removeProjectFiles } from '../../testUtils/utils.test';
 
-suite('Extension Tests', () => {
+suite('Create Project Tests', () => {
   const sandbox = sinon.createSandbox();
   before(() => {
     sandbox
