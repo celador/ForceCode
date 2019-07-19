@@ -49,7 +49,109 @@ suite('Extension Tests', () => {
   test('Gets overall coverage', async () => {
     await vscode.commands.executeCommand('ForceCode.getOverallCoverage').then(res => {
       var output = path.join(vscode.window.forceCode.projectRoot, 'coverage');
-      assert.strictEqual(true, fs.existsSync(output));
+      assert.strictEqual(fs.existsSync(output), true);
+    });
+  });
+  test('Creates new class', async () => {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+      return {
+        async then(callback) {
+          return callback(items[1]); // apex class
+        },
+      };
+    });
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(options) {
+      return {
+        async then(callback) {
+          return callback('testerson'); // name of class
+        },
+      };
+    });
+    await vscode.commands.executeCommand('ForceCode.createClass').then(res => {
+      var output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
+      assert.strictEqual(fs.existsSync(output), true);
+      sandbox.restore();
+    });
+  });
+  test('Creates Visualforce Page', async () => {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+      return {
+        async then(callback) {
+          return callback(items[4]); // apex class
+        },
+      };
+    });
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(options) {
+      return {
+        async then(callback) {
+          return callback('testerson'); // name of class
+        },
+      };
+    });
+    await vscode.commands.executeCommand('ForceCode.createClass').then(res => {
+      var output = path.join(vscode.window.forceCode.projectRoot, 'pages', 'testerson.page');
+      assert.strictEqual(fs.existsSync(output), true);
+      sandbox.restore();
+    });
+  });
+  test('Creates Visualforce Component', async () => {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+      return {
+        async then(callback) {
+          return callback(items[5]); // apex class
+        },
+      };
+    });
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(options) {
+      return {
+        async then(callback) {
+          return callback('testerson'); // name of class
+        },
+      };
+    });
+    await vscode.commands.executeCommand('ForceCode.createClass').then(res => {
+      var output = path.join(
+        vscode.window.forceCode.projectRoot,
+        'components',
+        'testerson.component'
+      );
+      assert.strictEqual(fs.existsSync(output), true);
+      sandbox.restore();
+    });
+  });
+  test('Builds package.xml', async () => {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+      return {
+        async then(callback) {
+          return callback(items); // apex class
+        },
+      };
+    });
+    sandbox.stub(vscode.window, 'showSaveDialog').callsFake(function(items) {
+      return {
+        async then(callback) {
+          var output = path.join(vscode.window.forceCode.projectRoot, 'package.xml');
+          return callback(vscode.Uri.file(output)); // apex class
+        },
+      };
+    });
+    await vscode.commands.executeCommand('ForceCode.buildPackage').then(res => {
+      var output = path.join(vscode.window.forceCode.projectRoot, 'package.xml');
+      assert.strictEqual(fs.existsSync(output), true);
+      sandbox.restore();
+    });
+  });
+  test('Deploys a file', async () => {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+      return {
+        async then(callback) {
+          return callback(items[1]); // apex class
+        },
+      };
+    });
+    await vscode.commands.executeCommand('ForceCode.deployPackage').then(res => {
+      assert.strictEqual(true, true);
+      sandbox.restore();
     });
   });
 });
