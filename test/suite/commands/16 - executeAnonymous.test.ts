@@ -16,10 +16,10 @@ suite('executeAnonymous.ts', () => {
             new vscode.Position(0, 0),
             new vscode.Position(0, testText.length - 1)
           );
+          return vscode.commands.executeCommand('ForceCode.executeAnonymous').then(res => {
+            assert.strictEqual(true, true);
+          });
         });
       });
-    await vscode.commands.executeCommand('ForceCode.executeAnonymous').then(res => {
-      assert.strictEqual(true, true);
-    });
   });
 });
