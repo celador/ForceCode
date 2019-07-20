@@ -3,7 +3,6 @@ import { fcConnection, FCOauth, notifications } from '.';
 import { isWindows } from './operatingSystem';
 import { SpawnOptions, spawn } from 'child_process';
 import { FCCancellationToken } from '../commands/forcecodeCommand';
-import { inDebug } from './fcAnalytics';
 const kill = require('tree-kill');
 
 export interface SFDX {
@@ -268,10 +267,6 @@ export default class DXService {
   }
 
   public describeGlobal(type: SObjectCategory): Promise<string[]> {
-    if (inDebug()) {
-      // to save limits during unit testing the extension, as we use a live org to test
-      return Promise.resolve(['Account', 'Contact']);
-    }
     return this.runCommand('schema:sobject:list --sobjecttypecategory ' + type.toString(), true);
   }
 }

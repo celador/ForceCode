@@ -10,6 +10,7 @@ import * as fs from 'fs-extra';
 import { ChildRelationship, Field, SObject, SObjectDescribe } from './';
 import { dxService, SObjectCategory, notifications } from '../services';
 import { FCCancellationToken } from '../commands/forcecodeCommand';
+import { inDebug } from '../services/fcAnalytics';
 
 const SFDX_DIR = '.sfdx';
 const TOOLS_DIR = 'tools';
@@ -85,7 +86,12 @@ export class FauxClassGenerator {
     let fetchedSObjects: SObject[] = [];
     let sobjects: string[] = [];
     try {
-      sobjects = await dxService.describeGlobal(type);
+      if (inDebug()) {
+        // to save limits during unit testing the extension, as we use a live org to test
+        sobjects = ['Account', 'Contact'];
+      } else {
+        sobjects = await dxService.describeGlobal(type);
+      }
     } catch (e) {
       throw 'Failure fetching list of sObjects from org ' + e;
     }
