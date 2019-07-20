@@ -5,9 +5,9 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import { before, after } from 'mocha';
 import { createProject } from '../../../src/commands/createProject';
-import { createProjectDir, removeProjectFiles } from '../../testUtils/utils.test';
+import { createProjectDir } from '../../testUtils/utils.test';
 
-suite('Create Project Tests', () => {
+suite('createProject.ts', () => {
   const sandbox = sinon.createSandbox();
   before(() => {
     sandbox
@@ -35,7 +35,6 @@ suite('Create Project Tests', () => {
   });
   after(() => {
     sandbox.restore();
-    removeProjectFiles();
   });
   test('Creates a project', async () => {
     // test extension load
