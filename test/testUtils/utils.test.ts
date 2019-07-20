@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as vscode from 'vscode';
-import sfdxRetValsTest from './sfdxRetVals.test';
 import { defaultOptions } from '../../src/services';
 
 export function createProjectDir(): vscode.Uri[] | undefined {
@@ -25,13 +24,13 @@ export function createProjectDir(): vscode.Uri[] | undefined {
   return folderUri;
 }
 
-export function createForceJson(username: string | undefined) {
+export function createForceJson(username: string) {
   if (vscode.workspace.workspaceFolders) {
     removeProjectFiles();
     var thePathOrg = vscode.workspace.workspaceFolders[0].uri.fsPath;
     var thePath = path.join(thePathOrg, 'force.json');
     const forceData = {
-      lastUsername: username ? username : sfdxRetValsTest['org:display'].username,
+      lastUsername: username,
     };
     fs.writeFileSync(thePath, JSON.stringify(forceData));
     if (username) {

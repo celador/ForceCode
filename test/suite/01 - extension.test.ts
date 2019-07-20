@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import { fcConnection } from '../../src/services';
 
 suite('extension.ts', () => {
   test('Activates the extension', async () => {
@@ -7,11 +8,19 @@ suite('extension.ts', () => {
     const ext = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
     if (ext) {
       await ext.activate();
-      await vscode.commands.executeCommand('ForceCode.showMenu').then(res => {
-        assert.strictEqual(true, true);
+      return await vscode.commands.executeCommand('ForceCode.showMenu').then(async res => {
+        return await checkLogin();
       });
     } else {
-      assert.strictEqual(true, false);
+      return assert.strictEqual(true, false);
+    }
+
+    function checkLogin() {
+      if (fcConnection.isLoggedIn()) {
+        assert.strictEqual(true, true);
+      } else {
+        setTimeout(checkLogin, 1000);
+      }
     }
   });
 });

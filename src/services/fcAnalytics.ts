@@ -92,7 +92,7 @@ function saveUUID(newUUID: string) {
   fs.outputFileSync(fcAnalyticsFile, JSON.stringify({ uuid: newUUID }, undefined, 4));
 }
 
-function inDebug(): boolean {
+export function inDebug(): boolean {
   return vscode.env.machineId === 'someValue.machineId';
 }
 
