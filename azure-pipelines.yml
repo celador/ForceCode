@@ -6,16 +6,8 @@ variables:
 
 jobs:
   - job: Test
-    strategy:
-      matrix:
-        linux:
-          imageName: "ubuntu-16.04"
-        mac:
-          imageName: "macos-10.13"
-        windows:
-          imageName: "vs2017-win2016"
     pool:
-      vmImage: $(imageName)
+      vmImage: "ubuntu-16.04"
     steps:
       - task: NodeTool@0
         inputs:
@@ -24,14 +16,20 @@ jobs:
       - bash: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo ">>> Started xvfb"
-        displayName: Start xvfb
-        condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
-      - bash: |
+          openssl aes-256-cbc -d -in assets/server.key.enc -out assets/server.key -k $(SERVER_KEY_PASSWORD)
+          mkdir sfdx
+          wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz | tar xJ -C sfdx --strip-components 1
+          "./sfdx/install"
+          export PATH=/usr/local/bin/sfdx/:$PATH
+          sfdx --version
+          sfdx plugins --core
+          sfdx force:auth:jwt:grant --clientid $(SF_CONSUMER_KEY) --jwtkeyfile assets/server.key --username $(SF_USERNAME)
           npm ci
           echo ">>> Compile vscode-test"
           npm run compile
           echo ">>> Compiled vscode-test"
           echo ">>> Run integration test"
+          export SF_USERNAME=$(SF_USERNAME)
           npm run test
         displayName: Run Tests
         env:

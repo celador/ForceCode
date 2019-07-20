@@ -279,7 +279,9 @@ export function deployFiles(
             }
           });
         } else {
-          setTimeout(checkDeployStatus(deployResult, resolveFunction, rejectFunction), 2000);
+          setTimeout(() => {
+            checkDeployStatus(deployResult, resolveFunction, rejectFunction);
+          }, 2000);
         }
       });
     }

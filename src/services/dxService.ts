@@ -89,7 +89,9 @@ export default class DXService {
 
     const parts = fullCommand.split(' ');
     const commandName = parts[0];
-    const args = parts.slice(1);
+    const args = parts.slice(1).map(arg => {
+      return arg.split('#FC*SPACE*#').join(' ');
+    });
 
     const spawnOpt: SpawnOptions = {
       // Always use json in stdout
@@ -170,6 +172,7 @@ export default class DXService {
     file: string,
     cancellationToken: FCCancellationToken
   ): Promise<ExecuteAnonymousResult> {
+    file = file.split(' ').join('#FC*SPACE*#');
     return this.runCommand('apex:execute --apexcodefile ' + file, true, cancellationToken);
   }
 
