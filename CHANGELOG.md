@@ -5,6 +5,7 @@
     * Execute anonymous output is now shown in a document like Apex test logs
     * Logging output is now shown in the Forcecode output panel
     * Show debug logs with dated names
+    * Fix execute anonymous when project folder contains a space
     * Fix error related to ForceCode.treeDataProvider
     * Fix not catching some SFDX CLI errors
     * Fix Execute Anonymous functionality

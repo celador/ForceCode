@@ -59,7 +59,7 @@ export function enterCredentials(cancellationToken: FCCancellationToken): Promis
             } else if (res.label === 'New Org') {
               return resolve(setupNewUser(defaultOptions));
             } else {
-              const cfg = readConfigFile(res.label); //res.label.split(' ')[1]);
+              const cfg = readConfigFile(res.label);
               return dxService
                 .getOrgInfo(cfg.username)
                 .then(orgInfo => {
