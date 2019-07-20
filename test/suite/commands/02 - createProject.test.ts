@@ -26,7 +26,7 @@ suite('createProject.ts', () => {
         return {
           async then(callback) {
             if (command === 'vscode.openFolder') {
-              callback();
+              return callback();
             }
             return vscode.commands.executeCommand(command, rest);
           },

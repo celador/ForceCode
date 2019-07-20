@@ -12,10 +12,12 @@ suite('executeAnonymous.ts', () => {
           editor.edit(edit => {
             edit.insert(new vscode.Position(0, 0), testText);
           });
-          editor.selection = new vscode.Selection(
-            new vscode.Position(0, 0),
-            new vscode.Position(0, testText.length - 1)
-          );
+          editor.selections = [
+            new vscode.Selection(
+              new vscode.Position(0, 0),
+              new vscode.Position(0, testText.length - 1)
+            ),
+          ];
           return vscode.commands.executeCommand('ForceCode.executeAnonymous').then(res => {
             assert.strictEqual(true, true);
           });
