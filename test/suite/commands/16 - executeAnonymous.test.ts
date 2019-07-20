@@ -16,6 +16,7 @@ suite('executeAnonymous.ts', () => {
             new vscode.Position(0, 0),
             new vscode.Position(0, testText.length - 1)
           );
+          vscode.window.activeTextEditor = editor;
           return vscode.commands.executeCommand('ForceCode.executeAnonymous').then(res => {
             assert.strictEqual(true, true);
           });
