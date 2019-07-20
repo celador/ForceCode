@@ -7,7 +7,7 @@ suite('executeAnonymous.ts', () => {
     await vscode.workspace
       .openTextDocument(newDocURI)
       .then(function(_document: vscode.TextDocument) {
-        return vscode.window.showTextDocument(_document, 3, true).then(editor => {
+        return vscode.window.showTextDocument(_document, 3, false).then(editor => {
           const testText = "System.debug('hello');";
           editor.edit(edit => {
             edit.insert(new vscode.Position(0, 0), testText);
@@ -16,7 +16,6 @@ suite('executeAnonymous.ts', () => {
             new vscode.Position(0, 0),
             new vscode.Position(0, testText.length - 1)
           );
-          vscode.window.activeTextEditor = editor;
           return vscode.commands.executeCommand('ForceCode.executeAnonymous').then(res => {
             assert.strictEqual(true, true);
           });
