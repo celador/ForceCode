@@ -4,7 +4,7 @@ import * as sinon from 'sinon';
 import * as path from 'path';
 import * as fs from 'fs';
 import { afterEach, beforeEach } from 'mocha';
-import { commandViewService } from '../../../src/services';
+import { commandViewService, codeCovViewService } from '../../../src/services';
 
 suite('createClass.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -191,5 +191,8 @@ suite('createClass.ts', () => {
         }
       });
     });
+  });
+  test('Verify Code Coverage view now has contents', async () => {
+    assert.strictEqual(codeCovViewService.getChildren().length > 0, true);
   });
 });
