@@ -3,10 +3,18 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as path from 'path';
 import * as fs from 'fs';
-import { afterEach } from 'mocha';
+import { afterEach, beforeEach } from 'mocha';
+import { commandViewService } from '../../../src/services';
 
 suite('createClass.ts', () => {
   const sandbox = sinon.createSandbox();
+  beforeEach(() => {
+    sandbox.stub(vscode.window, 'showWarningMessage').returns({
+      async then(callback) {
+        return callback('Overwrite'); // LWC component
+      },
+    });
+  });
   afterEach(() => {
     sandbox.restore();
   });
@@ -154,9 +162,33 @@ suite('createClass.ts', () => {
       };
     });
     await vscode.commands.executeCommand('ForceCode.createClass').then(async res => {
-      await vscode.commands.executeCommand('ForceCode.compile').then(res => {
-        var output = path.join(vscode.window.forceCode.projectRoot, 'lwc', 'testersonLWC');
-        assert.strictEqual(fs.existsSync(output), true);
+      var editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        return assert.strictEqual(true, false);
+      }
+      const length = editor.document.getText().length;
+      const position = editor.document.positionAt(length);
+      editor.edit(edit => {
+        edit.insert(position, ' ');
+      });
+      // use auto-compile
+      await editor.document.save().then(async res => {
+        return await new Promise((resolve, reject) => {
+          return setTimeout(function() {
+            return checkSave(resolve);
+          }, 3000);
+        });
+
+        function checkSave(resolve) {
+          if (commandViewService.getChildren().length === 0) {
+            var output = path.join(vscode.window.forceCode.projectRoot, 'lwc', 'testersonLWC');
+            return resolve(assert.strictEqual(fs.existsSync(output), true));
+          } else {
+            return setTimeout(function() {
+              return checkSave(resolve);
+            }, 3000);
+          }
+        }
       });
     });
   });
