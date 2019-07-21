@@ -53,7 +53,7 @@ export class CreateClass extends ForcecodeCommand {
       };
       vscode.window.showQuickPick(fileOptions, config).then(selection => {
         if (!selection) {
-          reject();
+          reject(this.cancellationToken.cancel());
           return;
         }
         getFileName(selection.label).then(name => {
@@ -316,7 +316,7 @@ export default class ${jsClassName} extends LightningElement {}`;
       };
       vscode.window.showInputBox(options).then(objname => {
         if (!objname) {
-          objname = '';
+          return resolve();
         }
 
         const fileContents = `trigger ${name} on ${objname} (before insert, before update, before delete, after insert, after update, after delete, after undelete) {

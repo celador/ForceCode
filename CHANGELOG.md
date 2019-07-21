@@ -1,6 +1,23 @@
 ## Change Log
 
-* 3.17.3
+* 3.18.0
+    * Performance improvements on startup
+    * Execute anonymous output is now shown in a document like Apex test logs
+    * Logging output is now shown in the Forcecode output panel
+    * Show debug logs with dated names
+    * Fix execute anonymous when project folder contains a space
+    * Fix error related to ForceCode.treeDataProvider
+    * Fix not catching some SFDX CLI errors
+    * Fix Execute Anonymous functionality
+    * Fix window not reloading when creating a project in a folder that's already open in VSCode
+    * Fix various menus throwing errors when the user canceled or didn't make a selection
+    * Add `bulkLoaderPollTimeout` setting in workspace settings to control the bulk load timeout. Default is 60000 (1 minute)
+    * Add inline run test button to test classes listed in the Code Coverage view
+    * Add inline cancel task button on cancellable running tasks
+    * Add number of lines covered in Forcecode Code Coverage view hovers
+    * Add time saved to end of SUCCESS! in save history view tooltip
+    * Add option to cancel Apex save when it times out. This avoids receiving the container request error.
+* 3.17.4
     * Fix issue with extension not loading
     * Fix issues retrieving debug logs
 * 3.17.2

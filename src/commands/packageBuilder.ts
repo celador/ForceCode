@@ -171,7 +171,7 @@ export default function packageBuilder(buildPackage?: boolean): Promise<any> {
     };
     vscode.window.showQuickPick(options, config).then(types => {
       if (isEmptyUndOrNull(types)) {
-        reject();
+        return reject();
       }
       const typesArray: string[] = toArray(types).map(r => r.label);
 

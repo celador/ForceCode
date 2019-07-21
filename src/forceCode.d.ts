@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import { Connection } from 'jsforce';
+import { ForceService } from './services';
 
 declare module 'vscode' {
   export namespace window {
-    export let forceCode: IForceService;
+    export let forceCode: ForceService;
   }
 }
 
@@ -151,19 +152,13 @@ export interface IForceService {
   storageRoot: string;
   describe?: IMetadataDescribe;
   containerId?: string;
-  statusTimeout: any;
   containerMembers: IContainerMember[];
   containerAsyncRequestId?: string;
   conn: Connection;
-  outputChannel: vscode.OutputChannel;
-  statusBarItem: vscode.StatusBarItem;
   fcDiagnosticCollection: vscode.DiagnosticCollection;
   uuid: string;
   connect(): Promise<IForceService>;
   newContainer(force: Boolean): Promise<IForceService>;
-  showStatus(message: string): void;
-  clearLog(): void;
-  resetStatus(): void;
   checkForFileChanges(): any;
 }
 

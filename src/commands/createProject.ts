@@ -46,6 +46,12 @@ export function createProject(): Thenable<void> {
         JSON.stringify({ lastUsername: '' }, undefined, 4)
       );
       // open the folder
-      vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(projFolder));
+      if (!vscode.workspace.getWorkspaceFolder(folder[0])) {
+        vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(projFolder));
+      } else {
+        // reload to start
+        console.log('reloading...');
+        vscode.commands.executeCommand('workbench.action.reloadWindow');
+      }
     });
 }

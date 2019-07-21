@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
-import { saveService } from '../services';
+import { saveService, notifications } from '../services';
 import diff from './diff';
 import * as path from 'path';
 import { deployFiles, createPackageXML } from './deploy';
@@ -92,8 +92,8 @@ export function saveAura(
     if (currentObjectDefinition !== undefined) {
       const serverContents: string = currentObjectDefinition.Source;
       if (!forceCompile && !saveService.compareContents(document.fileName, serverContents)) {
-        return vscode.window
-          .showWarningMessage('Someone has changed this file!', 'Diff', 'Overwrite')
+        return notifications
+          .showWarning('Someone has changed this file!', 'Diff', 'Overwrite')
           .then(s => {
             if (s === 'Diff') {
               diff(document, true);

@@ -12,6 +12,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import constants from './../models/constants';
 import { isEmptyUndOrNull } from '../util';
+import { notifications } from '.';
 
 interface IClassType {
   CoveredClass: string;
@@ -52,7 +53,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
   public static getInstance() {
     if (!CodeCovViewService.instance) {
-      console.log('Starting Code Coverage Service...');
+      notifications.writeLog('Starting Code Coverage Service...');
       CodeCovViewService.instance = new CodeCovViewService();
     }
     return CodeCovViewService.instance;
@@ -278,11 +279,13 @@ export class FCFile extends TreeItem {
     }
 
     this.type = ClassType.UncoveredClass;
+    this.tooltip = this.label;
     if (this.wsMember.coverage) {
       var fileCoverage: ICodeCoverage = this.wsMember.coverage;
       var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
       var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
       this.label = percent + '% ' + this.label;
+      this.tooltip = this.label + ' - ' + fileCoverage.NumLinesCovered + '/' + total + ' lines covered';
       const imagePath: string = path.join(window.forceCode.storageRoot, 'images');
       if (percent >= 75) {
         this.type = ClassType.CoveredClass;
@@ -308,6 +311,7 @@ export class FCFile extends TreeItem {
       } catch (e) {}
       if (testFile) {
         this.type = ClassType.TestClass;
+        this.contextValue = 'fcTestClass';
       } else {
         this.type = ClassType.NoCoverageData;
       }
@@ -343,7 +347,7 @@ export class FCFile extends TreeItem {
       return true;
     }
 
-    console.log('Time difference between file changes: ' + (serverMS - localMS));
+    notifications.writeLog('Time difference between file changes: ' + (serverMS - localMS));
     return false;
   }
 }

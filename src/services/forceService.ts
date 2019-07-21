@@ -1,16 +1,15 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
-import { configuration, codeCovViewService, fcConnection } from './../services';
-import constants from './../models/constants';
+import { codeCovViewService, fcConnection, notifications } from './../services';
 import * as path from 'path';
 import { FCFile } from './codeCovView';
 import { getToolingTypeFromExt } from '../parsers/getToolingType';
-import { Connection } from 'jsforce';
+import { Connection, IMetadataFileProperties } from 'jsforce';
 import { getUUID, FCAnalytics } from './fcAnalytics';
 
 import klaw = require('klaw');
 import { QueryResult } from 'jsforce';
-import { defaultOptions } from './configuration';
+import { defaultOptions, readForceJson } from './configuration';
 import { isEmptyUndOrNull } from '../util';
 
 export default class ForceService implements forceCode.IForceService {
@@ -21,16 +20,13 @@ export default class ForceService implements forceCode.IForceService {
   public containerMembers: forceCode.IContainerMember[];
   public describe: forceCode.IMetadataDescribe | undefined;
   public containerAsyncRequestId: string | undefined;
-  public statusBarItem: vscode.StatusBarItem;
-  public outputChannel: vscode.OutputChannel;
   public projectRoot: string;
   public workspaceRoot: string;
   public storageRoot: string;
-  public statusTimeout: any;
   public uuid: string;
 
   constructor(context: vscode.ExtensionContext) {
-    console.log('Initializing ForceCode service');
+    notifications.writeLog('Initializing ForceCode service');
     if (!vscode.workspace.workspaceFolders) {
       throw 'A folder needs to be open before Forcecode can be activated';
     }
@@ -38,10 +34,7 @@ export default class ForceService implements forceCode.IForceService {
     this.projectRoot = path.join(this.workspaceRoot, 'src');
     this.config = defaultOptions;
     this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
-    this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
-    this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 6);
-    this.statusBarItem.text = `ForceCode Loading...`;
-    this.statusBarItem.show();
+    notifications.setStatusText(`ForceCode Loading...`);
     this.containerMembers = [];
     this.storageRoot = context.extensionPath;
 
@@ -49,67 +42,42 @@ export default class ForceService implements forceCode.IForceService {
     const uuidRes: FCAnalytics = getUUID();
     this.uuid = uuidRes.uuid;
 
-    console.log('Starting ForceCode service');
-    configuration(this).then(config => {
-      return new Promise(resolve => {
-        if (uuidRes.firstTime) {
-          // ask the user to opt-in
-          return vscode.window
-            .showInformationMessage(
-              'The ForceCode Team would like to collect anonymous usage data so we can improve your experience. Is this OK?',
-              'Yes',
-              'No'
-            )
-            .then(choice => {
-              if (choice === 'Yes') {
-                vsConfig.update(
-                  'allowAnonymousUsageTracking',
-                  true,
-                  vscode.ConfigurationTarget.Global
-                );
-              } else {
-                vsConfig.update(
-                  'allowAnonymousUsageTracking',
-                  false,
-                  vscode.ConfigurationTarget.Global
-                );
-              }
-              resolve();
-            });
-        } else {
-          resolve();
-        }
-      }).then(() => {
-        vscode.commands
-          .executeCommand(
-            'ForceCode.switchUser',
-            config.username ? { username: config.username } : undefined
+    notifications.writeLog('Starting ForceCode service');
+    new Promise(resolve => {
+      if (uuidRes.firstTime) {
+        // ask the user to opt-in
+        return notifications
+          .showInfo(
+            'The ForceCode Team would like to collect anonymous usage data so we can improve your experience. Is this OK?',
+            'Yes',
+            'No'
           )
-          .then(res => {
-            if (res === false && !fcConnection.isLoggedIn()) {
-              this.statusBarItem.hide();
+          .then(choice => {
+            var option: boolean = false;
+            if (choice === 'Yes') {
+              option = true;
             }
+            resolve(
+              vsConfig.update(
+                'allowAnonymousUsageTracking',
+                option,
+                vscode.ConfigurationTarget.Global
+              )
+            );
           });
-      });
+      } else {
+        resolve();
+      }
+    }).then(() => {
+      const username = readForceJson();
+      vscode.commands
+        .executeCommand('ForceCode.switchUser', username ? { username: username } : undefined)
+        .then(res => {
+          if (res === false && !fcConnection.isLoggedIn()) {
+            notifications.hideStatus();
+          }
+        });
     });
-  }
-
-  public clearLog() {
-    this.outputChannel.clear();
-  }
-
-  public showStatus(message: string) {
-    this.statusBarItem.show();
-    vscode.window.forceCode.statusBarItem.text = message;
-    this.resetStatus();
-  }
-
-  public resetStatus() {
-    // for status bar updates. resets after 5 seconds
-    clearTimeout(vscode.window.forceCode.statusTimeout);
-    vscode.window.forceCode.statusTimeout = setTimeout(function() {
-      vscode.window.forceCode.statusBarItem.text = `ForceCode Menu`;
-    }, 5000);
   }
 
   public newContainer(force: Boolean): Promise<forceCode.IForceService> {
@@ -135,21 +103,59 @@ export default class ForceService implements forceCode.IForceService {
     });
   }
 
-  private parseMembers(mems: any) {
-    if (isEmptyUndOrNull(mems)) {
+  // Get files in src folder..
+  // Match them up with ContainerMembers
+  private getWorkspaceMembers(): Promise<Array<Promise<IMetadataFileProperties[]>>> {
+    return new Promise(resolve => {
+      var types: Array<Array<{}>> = [[]];
+      var typeNames: Array<string> = [];
+      var proms: Array<Promise<IMetadataFileProperties[]>> = [];
+      const index = 0;
+      klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
+        .on('data', function(item) {
+          var type: string | undefined = getToolingTypeFromExt(item.path);
+
+          if (type) {
+            if (!codeCovViewService.findByPath(item.path)) {
+              if (!typeNames.includes(type)) {
+                typeNames.push(type);
+                if (types[index].length > 2) {
+                  //index++;
+                  proms.push(vscode.window.forceCode.conn.metadata.list(types.splice(0, 1)));
+                  types.push([]);
+                }
+                types[index].push({ type: type });
+              }
+
+              var thePath: string | undefined = item.path.split(path.sep).pop();
+              var filename: string = thePath ? thePath.split('.')[0] : '';
+              var workspaceMember: forceCode.IWorkspaceMember = {
+                name: filename,
+                path: item.path,
+                id: '', //metadataFileProperties.id,
+                type: type,
+              };
+              codeCovViewService.addClass(workspaceMember);
+            }
+          }
+        })
+        .on('end', function() {
+          if (types[index].length > 0) {
+            proms.push(vscode.window.forceCode.conn.metadata.list(types.splice(0, 1)));
+          }
+          resolve(proms);
+        })
+        .on('error', (err, item) => {
+          notifications.writeLog(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
+        });
+    });
+  }
+
+  private parseMembers(mems: Array<Promise<IMetadataFileProperties[]>>) {
+    if (isEmptyUndOrNull(mems) || isEmptyUndOrNull(mems[0])) {
       return Promise.resolve({});
     }
-    var types: { [key: string]: Array<any> } = {};
-    types['type0'] = mems;
-    if (types['type0'].length > 3) {
-      for (var i = 1; types['type0'].length > 3; i++) {
-        types['type' + i] = types['type0'].splice(0, 3);
-      }
-    }
-    let proms = Object.keys(types).map(curTypes => {
-      return vscode.window.forceCode.conn.metadata.list(types[curTypes]);
-    });
-    return Promise.all(proms).then(rets => {
+    return Promise.all(mems).then(rets => {
       return parseRecords(rets);
     });
 
@@ -157,8 +163,7 @@ export default class ForceService implements forceCode.IForceService {
       if (!Array.isArray(recs)) {
         Promise.resolve();
       }
-      //return Promise.all(recs).then(records => {
-      console.log('Done retrieving metadata records');
+      notifications.writeLog('Done retrieving metadata records');
       recs.forEach(curSet => {
         if (Array.isArray(curSet)) {
           curSet.forEach(key => {
@@ -186,62 +191,21 @@ export default class ForceService implements forceCode.IForceService {
           });
         }
       });
-      console.log('Done getting workspace info');
+      notifications.writeLog('Done getting workspace info');
       return vscode.commands
         .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
         .then(() => {
-          console.log('Done retrieving code coverage');
+          notifications.writeLog('Done retrieving code coverage');
           return Promise.resolve();
         });
     }
-  }
-
-  // Get files in src folder..
-  // Match them up with ContainerMembers
-  private getWorkspaceMembers(): Promise<any> {
-    return new Promise(resolve => {
-      var types: Array<{}> = [];
-      var typeNames: Array<string> = [];
-      klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
-        .on('data', function(item) {
-          // Check to see if the file represents an actual member...
-          if (item.stats.isFile()) {
-            var type: string | undefined = getToolingTypeFromExt(item.path);
-
-            if (type) {
-              var pathParts: string[] = item.path.split(path.sep);
-              var filename: string = pathParts[pathParts.length - 1].split('.')[0];
-              if (!typeNames.includes(type)) {
-                typeNames.push(type);
-                types.push({ type: type });
-              }
-
-              if (!codeCovViewService.findByPath(item.path)) {
-                var workspaceMember: forceCode.IWorkspaceMember = {
-                  name: filename,
-                  path: item.path,
-                  id: '', //metadataFileProperties.id,
-                  type: type,
-                };
-                codeCovViewService.addClass(workspaceMember);
-              }
-            }
-          }
-        })
-        .on('end', function() {
-          resolve(types);
-        })
-        .on('error', (err, item) => {
-          console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
-        });
-    });
   }
 
   public connect(): Promise<forceCode.IForceService> {
     var self: forceCode.IForceService = vscode.window.forceCode;
     var config = self.config;
     if (!config.username) {
-      vscode.window.showErrorMessage(
+      notifications.showError(
         `ForceCode: No username found. Please try to login to the org again.`
       );
       throw { message: '$(alert) Missing Credentials $(alert)' };
@@ -284,9 +248,9 @@ export default class ForceService implements forceCode.IForceService {
 
     function connectionSuccess(svc: forceCode.IForceService) {
       vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
-      svc.statusBarItem.command = 'ForceCode.showMenu';
-      svc.statusBarItem.tooltip = 'Open the ForceCode Menu';
-      svc.showStatus('ForceCode Ready!');
+      notifications.setStatusCommand('ForceCode.showMenu');
+      notifications.setStatusTooltip('Open the ForceCode Menu');
+      notifications.showStatus('ForceCode Ready!');
 
       return svc;
     }
@@ -299,8 +263,7 @@ export default class ForceService implements forceCode.IForceService {
       });
     }
     function connectionError(err: any) {
-      vscode.window.showErrorMessage(`ForceCode: Connection Error`);
-      //vscode.window.forceCode.statusBarItem.hide();
+      notifications.showError(`ForceCode: Connection Error`);
       throw err;
     }
   }

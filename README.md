@@ -322,6 +322,7 @@ The following settings have been migrated to the workspace settings as well:
 * autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on \(and you're working on a Mac\), the currently active tab in Google Chrome Canary \(or your configured browser\) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
 * browser: Define which browser you want to reload when the static resource refreshes \(this only works with Macs at the moment\)
 * bulkLoaderPollInterval: The amount of time in milliseconds between updates when doing bulk CRUD operations.
+* bulkLoaderPollTimeout: The amount of time, in milliseconds, to wait for a bulk load operation to complete before timing out. Default is 60000 (1 minute
 * checkForFileChanges: This option, when checked, will allow ForceCode to check for file changes against the server on startup of ForceCode.
 * debugFilter: A regular expression used to match a line for display. The default is to show debug and error lines, so you can filter out the log noise.
 * debugOnly: When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail.

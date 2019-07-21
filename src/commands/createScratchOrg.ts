@@ -47,7 +47,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
         .showQuickPick(options, config)
         .then((edition: vscode.QuickPickItem | undefined) => {
           if (!edition) {
-            return Promise.resolve();
+            return reject(this.cancellationToken.cancel());
           }
 
           let durOpts: vscode.QuickPickItem[] = [];
@@ -60,7 +60,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
             .showQuickPick(durOpts, config)
             .then((duration: vscode.QuickPickItem | undefined) => {
               if (!duration) {
-                return Promise.resolve();
+                return reject(this.cancellationToken.cancel());
               }
 
               let sDataOptions: vscode.QuickPickItem[] = [
@@ -77,7 +77,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
                 .showQuickPick(sDataOptions, config)
                 .then((sampleData: vscode.QuickPickItem | undefined) => {
                   if (!sampleData) {
-                    return Promise.resolve();
+                    return reject(this.cancellationToken.cancel());
                   }
 
                   const sData: boolean = sampleData.label === 'Yes';

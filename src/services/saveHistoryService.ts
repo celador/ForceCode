@@ -77,7 +77,9 @@ export class SaveResult extends vscode.TreeItem {
         light: path.join(imagePath, 'redEx.svg'),
       };
     }
-    this.tooltip = this.result.success ? 'SUCCESS!' : 'FAILED:\n' + this.result.messages.join('\n');
+    this.tooltip = this.result.success
+      ? 'SUCCESS! - ' + new Date().toLocaleTimeString()
+      : 'FAILED:\n' + this.result.messages.join('\n');
     this.command = {
       command: 'ForceCode.openOnClick',
       title: '',

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as parsers from './../parsers';
 import * as forceCode from './../forceCode';
-import { saveService, codeCovViewService } from '../services';
+import { saveService, codeCovViewService, notifications } from '../services';
 import diff from './diff';
 import { createPackageXML, deployFiles } from './deploy';
 import * as path from 'path';
@@ -63,7 +63,7 @@ export function saveApex(
             Id: records.id,
           };
       const upToolType = parsers.getToolingType(document, UPDATE);
-      if(cancellationToken.isCanceled) {
+      if (cancellationToken.isCanceled()) {
         return Promise.reject();
       } else if (upToolType) {
         return fc.conn.tooling
@@ -85,8 +85,8 @@ export function saveApex(
         !saveService.compareContents(document.fileName, serverContents)
       ) {
         // throw up an alert
-        return vscode.window
-          .showWarningMessage('Someone else has changed this file!', 'Diff', 'Overwrite')
+        return notifications
+          .showWarning('Someone else has changed this file!', 'Diff', 'Overwrite')
           .then(s => {
             if (s === 'Diff') {
               diff(document);
@@ -123,7 +123,7 @@ export function saveApex(
         };
         return shouldCompile(record).then(should => {
           const upToolType = parsers.getToolingType(document, UPDATE);
-          if(cancellationToken.isCanceled) {
+          if (cancellationToken.isCanceled()) {
             return Promise.reject();
           } else if (should && upToolType && name) {
             return fc.conn.tooling
@@ -166,27 +166,29 @@ export function saveApex(
               );
             }
             files.push('package.xml');
-            return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot).then(foo => {
-              if (foo.status === 'Failed') {
-                return foo;
+            return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot).then(
+              foo => {
+                if (foo.status === 'Failed') {
+                  return foo;
+                }
+                return fc.conn.tooling
+                  .sobject(toolingType)
+                  .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' })
+                  .execute()
+                  .then((records: any) => {
+                    if (records.length > 0) {
+                      var workspaceMember: forceCode.IWorkspaceMember = {
+                        name: fileName,
+                        path: document.fileName,
+                        id: records[0].Id,
+                        type: toolingType,
+                      };
+                      codeCovViewService.addClass(workspaceMember);
+                      return foo;
+                    }
+                  });
               }
-              return fc.conn.tooling
-                .sobject(toolingType)
-                .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' })
-                .execute()
-                .then((records: any) => {
-                  if (records.length > 0) {
-                    var workspaceMember: forceCode.IWorkspaceMember = {
-                      name: fileName,
-                      path: document.fileName,
-                      id: records[0].Id,
-                      type: toolingType,
-                    };
-                    codeCovViewService.addClass(workspaceMember);
-                    return foo;
-                  }
-                });
-            });
+            );
           }
         );
       }
@@ -194,7 +196,7 @@ export function saveApex(
   }
   // =======================================================================================================================================
   function requestCompile(retval: any) {
-    if (vscode.window.forceCode.containerMembers.length === 0 || cancellationToken.isCanceled) {
+    if (vscode.window.forceCode.containerMembers.length === 0 || cancellationToken.isCanceled()) {
       return {
         async then(callback: any) {
           return callback(retval);
@@ -215,7 +217,7 @@ export function saveApex(
   }
   // =======================================================================================================================================
   function getCompileStatus(retval: any): Promise<any> {
-    if(cancellationToken.isCanceled) {
+    if (cancellationToken.isCanceled()) {
       return Promise.reject();
     }
     if (vscode.window.forceCode.containerMembers.length === 0) {
@@ -223,8 +225,10 @@ export function saveApex(
     }
     return nextStatus();
     function nextStatus(): any {
-      if(cancellationToken.isCanceled) {
-        return cancelRequest().catch(err => Promise.reject()).then(res => Promise.reject());
+      if (cancellationToken.isCanceled()) {
+        return cancelRequest()
+          .catch(err => Promise.reject())
+          .then(res => Promise.reject());
       }
       checkCount += 1;
       // Set a timeout to auto fail the compile after 60 seconds
@@ -234,9 +238,20 @@ export function saveApex(
           return res;
         } else if (checkCount > 30) {
           checkCount = 0;
-          throw {
-            message: fileName + ' timed out while saving. It might not be saved on the server.',
-          };
+          return notifications
+            .showError(fileName + ' timed out while saving. Cancel save?', 'Yes', 'No')
+            .then(choice => {
+              if (choice === 'No') {
+                return new Promise(function(resolve) {
+                  setTimeout(() => resolve(), vscode.window.forceCode.config.poll || 2000);
+                }).then(nextStatus);
+              } else {
+                cancellationToken.cancel();
+                return cancelRequest()
+                  .catch(err => Promise.reject())
+                  .then(res => Promise.reject());
+              }
+            });
         } else {
           // Throttle the ReCheck of the compile status, to use fewer http requests (reduce effects on SFDC limits)
           return new Promise(function(resolve) {
@@ -247,11 +262,11 @@ export function saveApex(
     }
     function cancelRequest(): Promise<any> {
       return vscode.window.forceCode.conn.tooling
-      .sobject('ContainerAsyncRequest')
-      .update({ Id: vscode.window.forceCode.containerAsyncRequestId, State: 'Aborted'}).then(res => {
-        console.log(res);
-        return res;
-      });
+        .sobject('ContainerAsyncRequest')
+        .update({ Id: vscode.window.forceCode.containerAsyncRequestId, State: 'Aborted' })
+        .then(res => {
+          return res;
+        });
     }
     function getStatus(): Promise<any> {
       return vscode.window.forceCode.conn.tooling.query(

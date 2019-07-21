@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as forceCode from './../forceCode';
 import { FCFile } from '../services/codeCovView';
-import { codeCovViewService } from '../services';
+import { codeCovViewService, notifications } from '../services';
 
 // create a decorator type that we use to decorate small numbers
 const uncoveredLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(
@@ -93,7 +93,7 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
       });
       var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
       var percent = ((fileCoverage.NumLinesCovered / total) * 100).toFixed(2) + '% covered';
-      vscode.window.forceCode.showStatus(fileCoverage.ApexClassOrTrigger.Name + ' ' + percent);
+      notifications.showStatus(fileCoverage.ApexClassOrTrigger.Name + ' ' + percent);
     }
     return uncoveredLineDecorations;
   }

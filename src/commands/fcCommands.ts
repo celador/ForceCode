@@ -7,6 +7,7 @@ import {
   FCConnection,
   commandViewService,
   dxService,
+  notifications,
 } from '../services';
 import retrieve from './retrieve';
 import diff from './diff';
@@ -97,8 +98,8 @@ export class FileModified extends ForcecodeCommand {
 
   public command(context, selectedResource?) {
     return vscode.workspace.openTextDocument(context).then(theDoc => {
-      return vscode.window
-        .showWarningMessage(
+      return notifications
+        .showWarning(
           selectedResource + ' has changed ' + getFileName(theDoc),
           'Refresh',
           'Diff',
@@ -137,10 +138,12 @@ export class ShowTasks extends ForcecodeCommand {
   }
 
   public command(context, selectedResource?) {
-    var treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {
-      treeDataProvider: commandViewService,
-    });
-    return treePro.reveal(commandViewService.getChildren()[0]);
+    if (fcConnection.isLoggedIn()) {
+      var treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {
+        treeDataProvider: commandViewService,
+      });
+      return treePro.reveal(commandViewService.getChildren()[0]);
+    }
   }
 }
 
@@ -194,8 +197,8 @@ export class RemoveConfig extends ForcecodeCommand {
     } else {
       username = context;
     }
-    return vscode.window
-      .showWarningMessage(
+    return notifications
+      .showWarning(
         'This will remove the .forceCode/' + username + ' folder and all contents. Continue?',
         'Yes',
         'No'
@@ -203,15 +206,12 @@ export class RemoveConfig extends ForcecodeCommand {
       .then(s => {
         if (s === 'Yes') {
           if (removeConfigFolder(username)) {
-            return vscode.window.showInformationMessage(
+            return notifications.showInfo(
               '.forceCode/' + username + ' folder removed successfully',
               'OK'
             );
           } else {
-            return vscode.window.showInformationMessage(
-              '.forceCode/' + username + ' folder not found',
-              'OK'
-            );
+            return notifications.showInfo('.forceCode/' + username + ' folder not found', 'OK');
           }
         }
       })

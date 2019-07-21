@@ -5,9 +5,9 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import { before, after } from 'mocha';
 import { createProject } from '../../../src/commands/createProject';
-import { createProjectDir, removeProjectFiles } from '../../testUtils/utils.test';
+import { createProjectDir } from '../../testUtils/utils.test';
 
-suite('Extension Tests', () => {
+suite('createProject.ts', () => {
   const sandbox = sinon.createSandbox();
   before(() => {
     sandbox
@@ -26,7 +26,7 @@ suite('Extension Tests', () => {
         return {
           async then(callback) {
             if (command === 'vscode.openFolder') {
-              callback();
+              return callback();
             }
             return vscode.commands.executeCommand(command, rest);
           },
@@ -35,7 +35,6 @@ suite('Extension Tests', () => {
   });
   after(() => {
     sandbox.restore();
-    removeProjectFiles();
   });
   test('Creates a project', async () => {
     // test extension load

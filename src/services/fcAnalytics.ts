@@ -81,7 +81,7 @@ export function getUUID(): FCAnalytics {
   } else {
     const uuid = uuidv4();
     saveUUID(uuid);
-    return { firstTime: true, uuid: uuid };
+    return { firstTime: !inDebug(), uuid: uuid };
   }
 }
 
@@ -92,8 +92,12 @@ function saveUUID(newUUID: string) {
   fs.outputFileSync(fcAnalyticsFile, JSON.stringify({ uuid: newUUID }, undefined, 4));
 }
 
+export function inDebug(): boolean {
+  return vscode.env.machineId === 'someValue.machineId';
+}
+
 function optIn(): boolean {
-  const debug = false; //vscode.env.machineId === 'someValue.machineId';
+  const debug = inDebug();
   // turn off analytics when we are debugging
   return (
     vscode.workspace.getConfiguration('force').get('allowAnonymousUsageTracking') == true && !debug

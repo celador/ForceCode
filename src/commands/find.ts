@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ForcecodeCommand } from './forcecodeCommand';
+import { notifications } from '../services';
 
 export class Find extends ForcecodeCommand {
   constructor() {
@@ -31,9 +32,9 @@ export class Find extends ForcecodeCommand {
           'ApexTrigger(Id, Name, NamespacePrefix), ApexPage(Id, Name, NamespacePrefix), ApexComponent(Id, Name, NamespacePrefix), ' +
           'StaticResource(Id, Name, NamespacePrefix, ContentType)',
         function(err, searchResult) {
-          vscode.window.forceCode.showStatus('ForceCode: Search complete');
+          notifications.showStatus('ForceCode: Search complete');
           if (err) {
-            vscode.window.showErrorMessage(err.message);
+            notifications.showError(err.message);
             return;
           }
           var resArray: any[] = new Array();

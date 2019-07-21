@@ -6,25 +6,28 @@ export default function getToolingTypeFromBody(
   member = false
 ): string | undefined {
   var fileName: string = document.fileName.split('-meta.xml')[0];
-  if (fileName.endsWith('.cls')) {
-    return member ? 'ApexClassMember' : 'ApexClass';
+  switch (fileName.split('.').pop()) {
+    case 'cls':
+      return member ? 'ApexClassMember' : 'ApexClass';
+    case 'trigger':
+      return member ? 'ApexTriggerMember' : 'ApexTrigger';
+    case 'component':
+      return member ? 'ApexComponentMember' : 'ApexComponent';
+    case 'page':
+      return member ? 'ApexPageMember' : 'ApexPage';
+    default: {
+      if (
+        fileName.indexOf(`${vscode.window.forceCode.projectRoot}${path.sep}aura${path.sep}`) >= 0
+      ) {
+        return 'AuraDefinition';
+      } else if (
+        fileName.indexOf(`${vscode.window.forceCode.projectRoot}${path.sep}lwc${path.sep}`) >= 0
+      ) {
+        return 'LightningComponentResource';
+      }
+      return undefined;
+    }
   }
-  if (fileName.endsWith('.trigger')) {
-    return member ? 'ApexTriggerMember' : 'ApexTrigger';
-  }
-  if (fileName.endsWith('.component')) {
-    return member ? 'ApexComponentMember' : 'ApexComponent';
-  }
-  if (fileName.endsWith('.page')) {
-    return member ? 'ApexPageMember' : 'ApexPage';
-  }
-  if (fileName.indexOf(`${vscode.window.forceCode.projectRoot}${path.sep}aura`) >= 0) {
-    return 'AuraDefinition';
-  }
-  if (fileName.indexOf(`${vscode.window.forceCode.projectRoot}${path.sep}lwc`) >= 0) {
-    return 'LightningComponentResource';
-  }
-  return undefined;
 }
 
 export function getCoverageType(document: vscode.TextDocument): string | undefined {
@@ -37,15 +40,17 @@ export function getCoverageType(document: vscode.TextDocument): string | undefin
   return undefined;
 }
 
-export function getToolingTypeFromExt(path: string) {
-  if (path.endsWith('.cls')) {
-    return 'ApexClass';
-  } else if (path.endsWith('.trigger')) {
-    return 'ApexTrigger';
-  } else if (path.endsWith('.component')) {
-    return 'ApexComponent';
-  } else if (path.endsWith('.page')) {
-    return 'ApexPage';
+export function getToolingTypeFromExt(thePath: string) {
+  switch (path.extname(thePath)) {
+    case '.cls':
+      return 'ApexClass';
+    case '.trigger':
+      return 'ApexTrigger';
+    case '.component':
+      return 'ApexComponent';
+    case '.page':
+      return 'ApexPage';
+    default:
+      return undefined;
   }
-  return undefined;
 }

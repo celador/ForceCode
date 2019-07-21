@@ -1,11 +1,21 @@
 import { EventEmitter } from 'events';
+import { notifications } from '../services';
 
 export class FCCancellationToken {
-  public isCanceled: boolean;
-  public cancellationEmitter: EventEmitter;
+  private isItCanceled: boolean;
+  public readonly cancellationEmitter: EventEmitter;
   constructor() {
-    this.isCanceled = false;
+    this.isItCanceled = false;
     this.cancellationEmitter = new EventEmitter();
+  }
+
+  public isCanceled() {
+    return this.isItCanceled;
+  }
+
+  public cancel() {
+    this.isItCanceled = true;
+    this.cancellationEmitter.emit('cancelled');
   }
 }
 
@@ -32,10 +42,10 @@ export abstract class ForcecodeCommand {
     try {
       return this.command(context, selectedResource);
     } catch (e) {
-      if (this.cancellationToken.isCanceled) {
-        console.warn(e);
+      if (this.cancellationToken.isCanceled()) {
         return;
       } else {
+        notifications.writeLog(e);
         throw e;
       }
     }
@@ -43,8 +53,7 @@ export abstract class ForcecodeCommand {
 
   public cancel() {
     if (this.cancelable) {
-      this.cancellationToken.isCanceled = true;
-      this.cancellationToken.cancellationEmitter.emit('cancelled');
+      this.cancellationToken.cancel();
     }
   }
 }

@@ -4,13 +4,13 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import * as vscode from 'vscode';
 import { EOL } from 'os';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { ChildRelationship, Field, SObject, SObjectDescribe } from './';
-import { dxService, SObjectCategory } from '../services';
+import { dxService, SObjectCategory, notifications } from '../services';
 import { FCCancellationToken } from '../commands/forcecodeCommand';
+import { inDebug } from '../services/fcAnalytics';
 
 const SFDX_DIR = '.sfdx';
 const TOOLS_DIR = 'tools';
@@ -62,7 +62,7 @@ export class FauxClassGenerator {
     type: SObjectCategory,
     cancellationToken: FCCancellationToken
   ): Promise<string> {
-    vscode.window.forceCode.outputChannel.appendLine(
+    notifications.writeLog(
       '===================Starting refresh of ' + type + ' objects from org====================='
     );
     const sobjectsFolderPath = path.join(projectPath, SFDX_DIR, TOOLS_DIR, SOBJECTS_DIR);
@@ -86,13 +86,18 @@ export class FauxClassGenerator {
     let fetchedSObjects: SObject[] = [];
     let sobjects: string[] = [];
     try {
-      sobjects = await dxService.describeGlobal(type);
+      if (inDebug()) {
+        // to save limits during unit testing the extension, as we use a live org to test
+        sobjects = ['Account', 'Contact'];
+      } else {
+        sobjects = await dxService.describeGlobal(type);
+      }
     } catch (e) {
       throw 'Failure fetching list of sObjects from org ' + e;
     }
     let j = 0;
     while (j < sobjects.length) {
-      if (cancellationToken.isCanceled) {
+      if (cancellationToken.isCanceled()) {
         return Promise.reject('Cancelled');
       }
       try {
@@ -116,7 +121,7 @@ export class FauxClassGenerator {
     this.generateFauxClasses(standardSObjects, standardSObjectsFolderPath);
     this.generateFauxClasses(customSObjects, customSObjectsFolderPath);
 
-    vscode.window.forceCode.outputChannel.appendLine(
+    notifications.writeLog(
       '=========================================DONE!!!========================================='
     );
     return 'Success!!!';
@@ -130,7 +135,7 @@ export class FauxClassGenerator {
 
   // VisibleForTesting
   public generateFauxClass(folderPath: string, sobject: SObject): string {
-    vscode.window.forceCode.outputChannel.appendLine('Generating faux class for ' + sobject.name);
+    notifications.writeLog('Generating faux class for ' + sobject.name);
     if (!fs.existsSync(folderPath)) {
       fs.mkdirpSync(folderPath);
     }
@@ -194,7 +199,7 @@ export class FauxClassGenerator {
 
   private generateFauxClasses(sobjects: SObject[], targetFolder: string): void {
     if (!fs.existsSync(targetFolder)) {
-      vscode.window.forceCode.outputChannel.appendLine('Creating output folder in ' + targetFolder);
+      notifications.writeLog('Creating output folder in ' + targetFolder);
       fs.mkdirpSync(targetFolder);
     }
     for (const sobject of sobjects) {
@@ -277,16 +282,14 @@ export class FauxClassGenerator {
 
   private cleanupSObjectFolders(baseSObjectsFolder: string) {
     if (fs.existsSync(baseSObjectsFolder)) {
-      vscode.window.forceCode.outputChannel.appendLine(
-        'Cleaning previously downloaded objects in ' + baseSObjectsFolder
-      );
+      notifications.writeLog('Cleaning previously downloaded objects in ' + baseSObjectsFolder);
       fs.removeSync(baseSObjectsFolder);
     }
   }
 
   private logSObjects(sobjectKind: string, fetchedLength: number) {
     if (fetchedLength > 0) {
-      vscode.window.forceCode.outputChannel.appendLine(
+      notifications.writeLog(
         'Fetched ' + fetchedLength + ' ' + sobjectKind + ' sObjects from the org\n'
       );
     }

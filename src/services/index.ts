@@ -1,3 +1,6 @@
+import { Notifications } from './notifications';
+export const notifications = Notifications.getInstance();
+
 import * as operatingSystem from './operatingSystem';
 import ForceService from './forceService';
 import configuration from './configuration';

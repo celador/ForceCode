@@ -5,7 +5,7 @@ declare var global: any;
 /* tslint:disable no-require-imports */
 
 import * as fs from 'fs';
-import * as glob from 'glob';
+import * as globule from 'globule';
 import * as paths from 'path';
 
 const istanbul = require('istanbul');
@@ -24,7 +24,7 @@ if (!tty.getWindowSize) {
 let mocha = new Mocha({
   ui: 'tdd',
   color: true,
-  timeout: 10000,
+  timeout: 180000, // 3 minutes...code completion can take a while
 });
 
 function configure(mochaOpts: any): void {
@@ -59,26 +59,22 @@ export function run(): Promise<void> {
 
   return new Promise((c, e) => {
     // Glob test files
-    glob('**/**.test.js', { cwd: testsRoot }, (error, files) => {
-      if (error) {
-        return e(error);
-      }
-      try {
-        // Fill into Mocha
-        files.forEach((f): Mocha => mocha.addFile(paths.join(testsRoot, f)));
-        // Run the tests
+    var files = globule.find('**/**.test.js', { cwd: testsRoot });
+    try {
+      // Fill into Mocha
+      files.forEach((f): Mocha => mocha.addFile(paths.join(testsRoot, f)));
+      // Run the tests
 
-        mocha.run(failures => {
-          if (failures > 0) {
-            e(new Error(`${failures} tests failed.`));
-          } else {
-            c();
-          }
-        });
-      } catch (error) {
-        return e(error);
-      }
-    });
+      mocha.run(failures => {
+        if (failures > 0) {
+          e(new Error(`${failures} tests failed.`));
+        } else {
+          c();
+        }
+      });
+    } catch (error) {
+      return e(error);
+    }
   });
 }
 exports.run = run;
@@ -112,7 +108,7 @@ class CoverageRunner {
     const sourceRoot = paths.join(self.testsRoot, self.options.relativeSourcePath);
 
     // Glob source files
-    const srcFiles = glob.sync('**/**.js', {
+    const srcFiles = globule.find('**/**.js', {
       cwd: sourceRoot,
       ignore: self.options.ignorePatterns,
     });

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { PXML, PXMLMember } from '../services';
+import { PXML, PXMLMember, notifications } from '../services';
 import { getFileListFromPXML, zipFiles } from './../services';
 import * as path from 'path';
 import klaw = require('klaw');
@@ -42,8 +42,6 @@ export default function deploy(
   context: vscode.ExtensionContext,
   cancellationToken: FCCancellationToken
 ) {
-  vscode.window.forceCode.outputChannel.clear();
-
   let options: vscode.QuickPickItem[] = [
     {
       label: 'Deploy from package.xml',
@@ -92,7 +90,8 @@ export default function deploy(
               vscode.window.forceCode.config.spaDist !== '' &&
               file.path.indexOf(vscode.window.forceCode.config.spaDist) !== -1
             ) &&
-            !file.path.endsWith('-meta.xml')
+            !file.path.endsWith('-meta.xml') &&
+            path.dirname(file.path) !== vscode.window.forceCode.projectRoot
           ) {
             if (file.path.indexOf(path.join(vscode.window.forceCode.projectRoot, 'aura')) !== -1) {
               const auraName = getAuraNameFromFileName(file.path, 'aura');
@@ -131,13 +130,13 @@ export default function deploy(
           resolve(fileList.sort());
         })
         .on('error', (err, item) => {
-          console.log(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
+          notifications.writeLog(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
         });
     });
   }
 
   function showFileList(files: string[]): Promise<string[]> {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       let options: vscode.QuickPickItem[] = files
         .map(file => {
           const fname = file.split(path.sep).pop();
@@ -156,7 +155,7 @@ export default function deploy(
       };
       vscode.window.showQuickPick(options, config).then(files => {
         if (isEmptyUndOrNull(files)) {
-          resolve();
+          reject(cancellationToken.cancel());
         }
         var theFiles: string[] = [];
         toArray(files).forEach(file => {
@@ -250,7 +249,7 @@ export function deployFiles(
   }
   var zip = zipFiles(files, deployPath, lwcPackageXML);
   Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
-  vscode.window.forceCode.outputChannel.show();
+  notifications.showLog();
   return new Promise((resolve, reject) => {
     return checkDeployStatus(
       vscode.window.forceCode.conn.metadata.deploy(zip, deployOptions),
@@ -263,7 +262,7 @@ export function deployFiles(
 
   // =======================================================================================================================================
   function checkDeployStatus(deployResult: DeployResult, resolveFunction, rejectFunction) {
-    if (cancellationToken.isCanceled) {
+    if (cancellationToken.isCanceled()) {
       // TODO: Find a way to cancel the deployment here. Currently, the deployment still occurs in the background
       return rejectFunction();
     } else {
@@ -280,21 +279,23 @@ export function deployFiles(
             }
           });
         } else {
-          setTimeout(checkDeployStatus(deployResult, resolveFunction, rejectFunction), 2000);
+          setTimeout(() => {
+            checkDeployStatus(deployResult, resolveFunction, rejectFunction);
+          }, 2000);
         }
       });
     }
   }
 
   function finished(res: any) /*Promise<any>*/ {
-    if (cancellationToken.isCanceled) {
+    if (cancellationToken.isCanceled()) {
       return Promise.reject();
     }
     if (res.status && res.status !== 'Failed') {
-      vscode.window.forceCode.showStatus('ForceCode: Deployed $(thumbsup)');
+      notifications.showStatus('ForceCode: Deployed $(thumbsup)');
     } else if (res.status === 'Failed') {
-      vscode.window
-        .showErrorMessage('ForceCode: Deploy Errors. View Details?', 'Yes', 'No')
+      notifications
+        .showError('ForceCode: Deploy Errors. View Details?', 'Yes', 'No')
         .then(choice => {
           if (choice === 'Yes') {
             vscode.commands.executeCommand(
@@ -318,12 +319,8 @@ export function deployFiles(
         return res; // we don't know what happened so just throw it
       }
 
-      vscode.window
-        .showErrorMessage(
-          'ForceCode: Deployment timed out. View details status in the org?',
-          'Yes',
-          'No'
-        )
+      notifications
+        .showError('ForceCode: Deployment timed out. View details status in the org?', 'Yes', 'No')
         .then(choice => {
           if (choice === 'Yes') {
             vscode.commands.executeCommand(
@@ -333,7 +330,7 @@ export function deployFiles(
           }
         });
     }
-    vscode.window.forceCode.outputChannel.append(
+    notifications.writeLog(
       outputToString(res)
         .replace(/{/g, '')
         .replace(/}/g, '')

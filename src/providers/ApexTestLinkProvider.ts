@@ -15,8 +15,11 @@ export class ApexTestLinkProvider implements vscode.HoverProvider {
     wordPosition = wordPosition.with(
       wordPosition.start.with(wordPosition.start.line, wordPosition.start.character - 1)
     );
-    const word = document.getText(wordPosition).trim();
-    if (word.toLowerCase() === '@istest' || word.toLowerCase() === 'testmethod') {
+    const word = document
+      .getText(wordPosition)
+      .trim()
+      .toLowerCase();
+    if (word === '@istest' || word === 'testmethod') {
       var fileContents = document.getText();
       var fileName = getFileName(document);
       var runText: string = 'all tests in ' + fileName + '.' + getFileExtension(document);

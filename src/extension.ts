@@ -8,6 +8,7 @@ import {
   operatingSystem,
   saveService,
   saveHistoryService,
+  notifications,
 } from './services';
 import ForceCodeContentProvider from './providers/ContentProvider';
 import ForceCodeLogProvider from './providers/LogProvider';
@@ -26,7 +27,6 @@ import * as fs from 'fs-extra';
 import { createProject } from './commands/createProject';
 
 export function activate(context: vscode.ExtensionContext): any {
-  const startupTimer: FCTimer = new FCTimer('extension.activate');
   context.subscriptions.push(
     vscode.commands.registerCommand('ForceCode.createProject', createProject)
   );
@@ -43,6 +43,8 @@ export function activate(context: vscode.ExtensionContext): any {
       return;
     }
   }
+
+  const startupTimer: FCTimer = new FCTimer('extension.activate');
 
   commands.fcCommands.forEach(cur => {
     context.subscriptions.push(
@@ -112,7 +114,7 @@ export function activate(context: vscode.ExtensionContext): any {
             return vscode.commands.executeCommand('ForceCode.compile', textDocument);
           }
         } else if (isResource || toolingType) {
-          vscode.window.showErrorMessage(
+          notifications.showError(
             "The file you are trying to save to the server isn't in the current org's source folder (" +
               vscode.window.forceCode.projectRoot +
               ')'

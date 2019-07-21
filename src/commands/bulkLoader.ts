@@ -67,6 +67,12 @@ export class BulkLoader extends ForcecodeCommand {
           });
       } else {
         var csvFileIn = fs.createReadStream(csvPath);
+        vscode.window.forceCode.conn.bulk.pollInterval = vscode.workspace.getConfiguration('force')[
+          'bulkLoaderPollInterval'
+        ];
+        vscode.window.forceCode.conn.bulk.pollTimeout = vscode.workspace.getConfiguration('force')[
+          'bulkLoaderPollTimeout'
+        ];
         batch = vscode.window.forceCode.conn.bulk.load(
           message.object,
           message.operation,

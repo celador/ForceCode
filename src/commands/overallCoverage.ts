@@ -4,6 +4,7 @@ import * as path from 'path';
 import { apexTestResults } from '.';
 import { saveToFile } from '../util';
 import { ForcecodeCommand } from './forcecodeCommand';
+import { notifications } from '../services';
 
 export class OverallCoverage extends ForcecodeCommand {
   constructor() {
@@ -58,7 +59,7 @@ export class OverallCoverage extends ForcecodeCommand {
           'coverage' + path.sep + 'ApexCoverage-' + Date.now() + '.acov'
         )
           .then(filename => {
-            vscode.window.forceCode.showStatus('ForceCode: Code coverage retrieval complete!');
+            notifications.showStatus('ForceCode: Code coverage retrieval complete!');
             return vscode.workspace
               .openTextDocument(filename)
               .then(doc => vscode.window.showTextDocument(doc, 3));

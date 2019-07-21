@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
 import globule = require('globule');
-import { zipFiles } from './../services';
+import { zipFiles, notifications } from './../services';
 import { ForcecodeCommand } from './forcecodeCommand';
 const mime = require('mime-types');
 
@@ -135,7 +135,7 @@ function onError(err: any) {
   var mess =
     'Invalid static resource folder or file name. Name must be in the form of ResourceName.resource.type.subtype\nEXAMPLE: ' +
     'MyResource.resource.application.javascript\nThis folder would then contain one file, named MyResource.js';
-  vscode.window.showErrorMessage(mess + '\n' + (err.message ? err.message : err));
+  notifications.showError(mess + '\n' + (err.message ? err.message : err));
 }
 
 function bundleAndDeploy(option: any) {
@@ -208,7 +208,7 @@ function getFileList(root: string) {
   // Perform the recursive file search
   return (function innerGetFileList(localPath) {
     var fileslist: any[] = []; // List of files
-    var files: any = fs.readdirSync(localPath); // Files in current'sfdc' directory
+    var files: any = fs.readdirSync(localPath); // Files in current 'sfdc' directory
     var ignoreFiles: any = vscode.workspace.getConfiguration('force')['filesExclude'] || {
       '.gitignore': true,
       '.DS_Store': true,
@@ -286,7 +286,7 @@ function makeResourceMetadata(bundleName: string, cont: any, contType: string) {
 }
 
 function deployComplete(results: any) {
-  vscode.window.forceCode.showStatus(`ForceCode: Deployed ${results.fullName} $(check)`);
+  notifications.showStatus(`ForceCode: Deployed ${results.fullName} $(check)`);
   if (
     vscode.workspace.getConfiguration('force')['autoRefresh'] &&
     vscode.workspace.getConfiguration('force')['browser']
@@ -301,7 +301,7 @@ function deployComplete(results: any) {
 }
 
 function deployAllComplete(results: any) {
-  vscode.window.forceCode.showStatus(`ForceCode: Deployed ${results.length} Resources $(check)`);
+  notifications.showStatus(`ForceCode: Deployed ${results.length} Resources $(check)`);
   if (
     vscode.workspace.getConfiguration('force')['autoRefresh'] &&
     vscode.workspace.getConfiguration('force')['browser']

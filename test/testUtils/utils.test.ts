@@ -1,8 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as vscode from 'vscode';
-import sfdxRetValsTest from './sfdxRetVals.test';
-import { FCCancellationToken } from '../../src/commands/forcecodeCommand';
+import { defaultOptions } from '../../src/services';
 
 export function createProjectDir(): vscode.Uri[] | undefined {
   var folder = '.';
@@ -13,7 +12,6 @@ export function createProjectDir(): vscode.Uri[] | undefined {
     folder = path.join(folder, 'test');
     removeDirOrFile(folder);
     fs.mkdirpSync(folder);
-    console.log('Folder opened: ' + folder);
     var folderUriPre = vscode.Uri.file(folder);
     folderUri = [
       Object.assign({}, wsUri, {
@@ -26,14 +24,25 @@ export function createProjectDir(): vscode.Uri[] | undefined {
   return folderUri;
 }
 
-export function createForceJson() {
+export function createForceJson(username: string) {
   if (vscode.workspace.workspaceFolders) {
-    var thePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    thePath = path.join(thePath, 'force.json');
+    removeProjectFiles();
+    var thePathOrg = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    var thePath = path.join(thePathOrg, 'force.json');
     const forceData = {
-      lastUsername: sfdxRetValsTest['org:display'].username,
+      lastUsername: username,
     };
     fs.writeFileSync(thePath, JSON.stringify(forceData));
+    if (username) {
+      const fcPath = path.join(thePathOrg, '.forceCode', username);
+      fs.mkdirpSync(fcPath);
+      var settings = Object.assign(defaultOptions, {
+        url: 'https://login.salesforce.com',
+        autoCompile: true,
+        username: username,
+      });
+      fs.writeFileSync(path.join(fcPath, 'settings.json'), JSON.stringify(settings));
+    }
   }
 }
 
@@ -47,17 +56,6 @@ export function removeProjectFiles() {
     removeDirOrFile(path.join(thePath, 'src'));
     removeDirOrFile(path.join(thePath, 'test'));
   }
-}
-
-export function executeSFDXCommand(
-  cmdString: string,
-  targetusername: boolean,
-  cancellationToken?: FCCancellationToken
-): Promise<any> {
-  var command = cmdString.split('force:').pop();
-  command = command ? command.split(' ').shift() : undefined;
-  console.log(command + ' SFDX command invoked');
-  return Promise.resolve(command ? sfdxRetValsTest[command] : undefined);
 }
 
 function removeDirOrFile(thePath: string) {
