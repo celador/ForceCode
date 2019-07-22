@@ -50,6 +50,15 @@ suite('createClass.ts', () => {
     await removeErrorOnDoc(sandbox);
   });
 
+  test('Refresh class', async () => {
+    var output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
+    return await vscode.workspace.openTextDocument(output).then(doc => {
+      return vscode.commands.executeCommand('ForceCode.refresh', undefined, [doc.uri]).then(res => {
+        return assert.strictEqual(true, true);
+      });
+    });
+  });
+
   test('Open file (class) in the org', async () => {
     var output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
     return await vscode.workspace.openTextDocument(output).then(doc => {
