@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as vscode from 'vscode';
 import { defaultOptions } from '../../src/services';
+import * as assert from 'assert';
 
 export function createProjectDir(): vscode.Uri[] | undefined {
   var folder = '.';
@@ -38,7 +39,7 @@ export function createForceJson(username: string) {
       fs.mkdirpSync(fcPath);
       var settings = Object.assign(defaultOptions, {
         url: 'https://login.salesforce.com',
-        autoCompile: true,
+        autoCompile: false,
         username: username,
       });
       fs.writeFileSync(path.join(fcPath, 'settings.json'), JSON.stringify(settings));
@@ -62,4 +63,52 @@ function removeDirOrFile(thePath: string) {
   if (fs.existsSync(thePath)) {
     fs.removeSync(thePath);
   }
+}
+
+export function addErrorToDoc(sandbox) {
+  var editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return {
+      async then(callback) {
+        return callback(assert.strictEqual(true, false));
+      },
+    };
+  }
+  const length = editor.document.getText().length;
+  const position = editor.document.positionAt(length);
+  editor.edit(edit => {
+    edit.insert(position, '{'); // add a syntax error
+  });
+  const spy = sandbox.spy(vscode.window, 'showErrorMessage');
+  return editor.document.save().then(res => {
+    return vscode.commands.executeCommand('ForceCode.compile').then(res2 => {
+      return assert.strictEqual(spy.calledOnce, true);
+    });
+  });
+}
+
+export function removeErrorOnDoc(sandbox, dontRemove?) {
+  var editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return {
+      async then(callback) {
+        return callback(assert.strictEqual(true, false));
+      },
+    };
+  }
+  if (!dontRemove) {
+    const length = editor.document.getText().length;
+    const position = editor.document.positionAt(length - 1);
+    const position2 = editor.document.positionAt(length);
+    const range: vscode.Range = new vscode.Range(position, position2);
+    editor.edit(edit => {
+      edit.delete(range); // remove syntax error
+    });
+  }
+  const spy = sandbox.spy(vscode.window, 'showErrorMessage');
+  return editor.document.save().then(res => {
+    return vscode.commands.executeCommand('ForceCode.compile').then(res2 => {
+      return assert.strictEqual(spy.called, false);
+    });
+  });
 }
