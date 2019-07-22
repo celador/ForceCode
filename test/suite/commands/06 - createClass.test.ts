@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { afterEach, beforeEach } from 'mocha';
 import { codeCovViewService } from '../../../src/services';
-import { addErrorToDoc, removeErrorOnDoc } from '../../testUtils/utils.test';
+import { addErrorToDoc, removeErrorOnDoc, createForceJson } from '../../testUtils/utils.test';
 
 suite('createClass.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -216,18 +216,20 @@ suite('createClass.ts', () => {
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function(options) {
       return {
         async then(callback) {
-          return callback('theLWCTest'); // name of component
+          return callback('theLWCTest2'); // name of component
         },
       };
     });
+    createForceJson(process.env.SF_USERNAME || '', true); // turn on autoCompile
     return await vscode.commands.executeCommand('ForceCode.createClass').then(res => {
-      var output = path.join(vscode.window.forceCode.projectRoot, 'lwc', 'theLWCTest');
+      var output = path.join(vscode.window.forceCode.projectRoot, 'lwc', 'theLWCTest2');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
 
   test('Save LWC pass', async () => {
-    await removeErrorOnDoc(sandbox, true);
+    // indicate we shouldn't try and remove an error, and that autoCompile is on
+    await removeErrorOnDoc(sandbox, true, true);
   });
 
   test('Verify Code Coverage view now has contents', async () => {

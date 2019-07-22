@@ -25,9 +25,11 @@ export function createProjectDir(): vscode.Uri[] | undefined {
   return folderUri;
 }
 
-export function createForceJson(username: string) {
+export function createForceJson(username: string, autoCompile?: boolean) {
   if (vscode.workspace.workspaceFolders) {
-    removeProjectFiles();
+    if (!autoCompile) {
+      removeProjectFiles();
+    }
     var thePathOrg = vscode.workspace.workspaceFolders[0].uri.fsPath;
     var thePath = path.join(thePathOrg, 'force.json');
     const forceData = {
@@ -39,7 +41,7 @@ export function createForceJson(username: string) {
       fs.mkdirpSync(fcPath);
       var settings = Object.assign(defaultOptions, {
         url: 'https://login.salesforce.com',
-        autoCompile: false,
+        autoCompile: autoCompile ? autoCompile : false,
         username: username,
       });
       fs.writeFileSync(path.join(fcPath, 'settings.json'), JSON.stringify(settings));
@@ -87,7 +89,7 @@ export function addErrorToDoc(sandbox) {
   });
 }
 
-export function removeErrorOnDoc(sandbox, dontRemove?) {
+export function removeErrorOnDoc(sandbox, dontRemove?, autoCompile?) {
   var editor = vscode.window.activeTextEditor;
   if (!editor) {
     return {
@@ -104,11 +106,21 @@ export function removeErrorOnDoc(sandbox, dontRemove?) {
     editor.edit(edit => {
       edit.delete(range); // remove syntax error
     });
+  } else {
+    const length = editor.document.getText().length;
+    const position = editor.document.positionAt(length);
+    editor.edit(edit => {
+      edit.insert(position, ' '); // add a syntax error
+    });
   }
   const spy = sandbox.spy(vscode.window, 'showErrorMessage');
-  return editor.document.save().then(res => {
-    return vscode.commands.executeCommand('ForceCode.compile').then(res2 => {
+  return editor.document.save().then(async res => {
+    if (!autoCompile) {
+      await vscode.commands.executeCommand('ForceCode.compile');
       return assert.strictEqual(spy.called, false);
-    });
+    } else {
+      // TODO: Find a way to wait for the save to be done
+      return assert.strictEqual(spy.called, false);
+    }
   });
 }
