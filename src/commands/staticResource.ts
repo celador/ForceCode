@@ -50,7 +50,8 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
       } else {
         return bundleAndDeploy(option).then(deployComplete);
       }
-    });
+    })
+    .catch(onError);
   // =======================================================================================================================================
   function getPackageName(): any {
     let bundleDirectories: any[] = [];
@@ -138,17 +139,18 @@ function onError(err: any) {
   notifications.showError(mess + '\n' + (err.message ? err.message : err));
 }
 
-function bundleAndDeploy(option: any) {
+function bundleAndDeploy(option: vscode.QuickPickItem) {
   let root: string = getPackagePath(option);
-  if (option.detail.includes('zip') || option.detail === 'SPA') {
+  var detail = option.detail ? option.detail : '';
+  if (detail.includes('zip') || detail === 'SPA') {
     let zip: any = zipFiles(getFileList(root), root);
-    return deploy(zip, option.label, option.detail).then(deployComplete);
+    return deploy(zip, option.label, detail);
   } else {
     var ext = '.' + mime.extension(option.detail);
     var data = fs.readFileSync(root + path.sep + option.label + ext).toString('base64');
     return vscode.window.forceCode.conn.metadata.upsert(
       'StaticResource',
-      makeResourceMetadata(option.label, data, option.detail)
+      makeResourceMetadata(option.label, data, detail)
     );
   }
 }
