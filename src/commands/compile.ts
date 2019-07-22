@@ -58,7 +58,7 @@ export class ForceCompile extends ForcecodeCommand {
   }
 }
 
-export default function compile(
+export default async function compile(
   document: vscode.TextDocument,
   forceCompile: boolean,
   cancellationToken: FCCancellationToken
@@ -97,15 +97,30 @@ export default function compile(
   }
 
   if (document.fileName.endsWith('-meta.xml')) {
-    parseString(document.getText(), { explicitArray: false }, function(err, dom) {
-      if (err) {
-        return Promise.reject(err);
-      } else {
-        const metadataType: string = Object.keys(dom)[0];
-        delete dom[metadataType].$;
-        Metadata = dom[metadataType];
+    var tmpMeta = await new Promise((resolve, reject) => {
+      parseString(document.getText(), { explicitArray: false }, function(err, dom) {
+        if (err) {
+          return reject(err);
+        } else {
+          const metadataType: string = Object.keys(dom)[0];
+          delete dom[metadataType].$;
+          Metadata = dom[metadataType];
+          return resolve(Metadata);
+        }
+      });
+    }).then(
+      res => {
+        return res;
+      },
+      reason => {
+        return reason;
       }
-    });
+    );
+    if (tmpMeta instanceof Error) {
+      return Promise.resolve(tmpMeta)
+        .then(finished)
+        .then(updateSaveHistory);
+    }
   }
 
   // Start doing stuff
@@ -131,7 +146,7 @@ export default function compile(
         }
       })
       .then(finished)
-      .catch(onError)
+      .catch(finished)
       .then(updateSaveHistory);
   } else if (folderToolingType && toolingType === undefined) {
     // This process uses the Metadata API to deploy specific files
@@ -142,7 +157,7 @@ export default function compile(
       .then(compileMetadata)
       .then(reportMetadataResults)
       .then(finished)
-      .catch(onError)
+      .catch(finished)
       .then(updateSaveHistory);
   } else if (toolingType === undefined) {
     return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
@@ -150,12 +165,12 @@ export default function compile(
     DefType = getAuraDefTypeFromDocument(document);
     return saveAura(document, toolingType, cancellationToken, Metadata, forceCompile)
       .then(finished)
-      .catch(onError)
+      .catch(finished)
       .then(updateSaveHistory);
   } else if (toolingType === 'LightningComponentResource') {
     return saveLWC(document, toolingType, cancellationToken, forceCompile)
       .then(finished)
-      .catch(onError)
+      .catch(finished)
       .then(updateSaveHistory);
   } else {
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
@@ -166,7 +181,7 @@ export default function compile(
           return true;
         });
       })
-      .catch(onError)
+      .catch(finished)
       .then(updateSaveHistory);
   }
 
@@ -179,14 +194,12 @@ export default function compile(
 
     return new Promise(function(resolve, reject) {
       if (Metadata) {
-        resolve(Metadata);
-        return;
+        return resolve(Metadata);
       }
       if (!folderToolingType) {
-        reject({
+        return reject({
           message: 'Unknown metadata type. Make sure your project folders are set up properly.',
         });
-        return;
       }
       const ffNameParts: string[] = document.fileName
         .split(vscode.window.forceCode.projectRoot + path.sep)[1]
@@ -199,19 +212,16 @@ export default function compile(
       }
       parseString(text, { explicitArray: false, async: true }, function(err, result) {
         if (err) {
-          reject(err);
-          return;
+          return reject(err);
         }
         var metadata: any = result[folderToolingType];
         if (metadata) {
           delete metadata['$'];
           delete metadata['_'];
           metadata.fullName = folderedName ? folderedName : fileName;
-          resolve(metadata);
-          return;
+          return resolve(metadata);
         }
-        reject({ message: folderToolingType + ' metadata type not found in org' });
-        return;
+        return reject({ message: folderToolingType + ' metadata type not found in org' });
       });
     });
   }
@@ -254,7 +264,10 @@ export default function compile(
       return true;
     }
     var failures: number = 0;
-    if (res.records && res.records.length > 0) {
+    if (res instanceof Error) {
+      onError(res);
+      failures++;
+    } else if (res.records && res.records.length > 0) {
       res.records
         .filter((r: any) => r.State !== 'Error')
         .forEach((containerAsyncRequest: any) => {
@@ -338,24 +351,29 @@ export default function compile(
     if (errMsg.indexOf('expired access/refresh token') !== -1) {
       throw err;
     }
-    const matchRegex = /:(\d+),(\d+):|:(\d+),(\d+) :|\[(\d+),(\d+)\]/; // this will match :12,3432: :12,3432 : and [12,3432]
-    var errSplit = errMsg.split('Message:').pop();
-    var theerr: string = errSplit ? errSplit : errMsg;
-    errSplit = theerr.split(': Source').shift();
-    theerr = errSplit ? errSplit : theerr;
-    var match = errMsg.match(matchRegex);
+    var theerr: string;
     var failureLineNumber: number = 1;
     var failureColumnNumber: number = 0;
-    if (match) {
-      match = match.filter(mat => mat); // eliminate all undefined elements
-      errSplit = theerr.split(match[0]).pop();
-      theerr = (errSplit ? errSplit : theerr).trim(); // remove the line information from the error message if 'Message:' wasn't part of the string
-      const row = match[1];
-      const col = match[2];
-      failureLineNumber = Number.parseInt(row);
-      failureLineNumber =
-        failureLineNumber < 1 || failureLineNumber > document.lineCount ? 1 : failureLineNumber;
-      failureColumnNumber = Number.parseInt(col);
+    try {
+      const matchRegex = /:(\d+),(\d+):|:(\d+),(\d+) :|\[(\d+),(\d+)\]/; // this will match :12,3432: :12,3432 : and [12,3432]
+      var errSplit = errMsg.split('Message:').pop();
+      theerr = errSplit ? errSplit : errMsg;
+      errSplit = theerr.split(': Source').shift();
+      theerr = errSplit ? errSplit : theerr;
+      var match = errMsg.match(matchRegex);
+      if (match) {
+        match = match.filter(mat => mat); // eliminate all undefined elements
+        errSplit = theerr.split(match[0]).pop();
+        theerr = (errSplit ? errSplit : theerr).trim(); // remove the line information from the error message if 'Message:' wasn't part of the string
+        const row = match[1];
+        const col = match[2];
+        failureLineNumber = Number.parseInt(row);
+        failureLineNumber =
+          failureLineNumber < 1 || failureLineNumber > document.lineCount ? 1 : failureLineNumber;
+        failureColumnNumber = Number.parseInt(col);
+      }
+    } catch (e) {
+      theerr = errMsg;
     }
     var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
     if (failureColumnNumber - 1 >= 0) {

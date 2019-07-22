@@ -50,6 +50,26 @@ suite('createClass.ts', () => {
     await removeErrorOnDoc(sandbox);
   });
 
+  test('Saves class metadata fail', async () => {
+    // open the testerson class metadata
+    var output = path.join(
+      vscode.window.forceCode.projectRoot,
+      'classes',
+      'testerson.cls-meta.xml'
+    );
+    await vscode.workspace.openTextDocument(output).then(doc => {
+      return vscode.window.showTextDocument(doc).then(() => {
+        // edit the doc to fail
+        return addErrorToDoc(sandbox);
+      });
+    });
+  });
+
+  test('Saves class metadata pass', async () => {
+    // doc will already be active from the above test
+    await removeErrorOnDoc(sandbox);
+  });
+
   test('Creates Visualforce Page', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
       return {

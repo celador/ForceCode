@@ -76,10 +76,9 @@ export function addErrorToDoc(sandbox) {
       },
     };
   }
-  const length = editor.document.getText().length;
-  const position = editor.document.positionAt(length);
+  const position = editor.document.positionAt(0);
   editor.edit(edit => {
-    edit.insert(position, '{'); // add a syntax error
+    edit.insert(position, '<'); // add a syntax error
   });
   const spy = sandbox.spy(vscode.window, 'showErrorMessage');
   return editor.document.save().then(res => {
@@ -99,16 +98,14 @@ export function removeErrorOnDoc(sandbox, dontRemove?, autoCompile?) {
     };
   }
   if (!dontRemove) {
-    const length = editor.document.getText().length;
-    const position = editor.document.positionAt(length - 1);
-    const position2 = editor.document.positionAt(length);
+    const position = editor.document.positionAt(0);
+    const position2 = editor.document.positionAt(1);
     const range: vscode.Range = new vscode.Range(position, position2);
     editor.edit(edit => {
       edit.delete(range); // remove syntax error
     });
   } else {
-    const length = editor.document.getText().length;
-    const position = editor.document.positionAt(length);
+    const position = editor.document.positionAt(0);
     editor.edit(edit => {
       edit.insert(position, ' '); // add a syntax error
     });

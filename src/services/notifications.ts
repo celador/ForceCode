@@ -53,7 +53,7 @@ export class Notifications {
   }
 
   public showLog() {
-    this.outputChannel.show();
+    this.outputChannel.show(true);
   }
 
   public showError(message: string, ...items: string[]) {
