@@ -107,7 +107,7 @@ export function removeErrorOnDoc(sandbox, dontRemove?, autoCompile?) {
   } else {
     const position = editor.document.positionAt(0);
     editor.edit(edit => {
-      edit.insert(position, ' '); // add a syntax error
+      edit.insert(position, ' ');
     });
   }
   const spy = sandbox.spy(vscode.window, 'showErrorMessage');
