@@ -50,6 +50,15 @@ suite('createClass.ts', () => {
     await removeErrorOnDoc(sandbox);
   });
 
+  test('Open file (class) in the org', async () => {
+    var output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
+    return await vscode.workspace.openTextDocument(output).then(doc => {
+      return vscode.commands.executeCommand('ForceCode.openFileInOrg', doc.uri).then(res => {
+        return assert.strictEqual(true, true);
+      });
+    });
+  });
+
   test('Saves class metadata fail', async () => {
     // open the testerson class metadata
     var output = path.join(
@@ -97,6 +106,21 @@ suite('createClass.ts', () => {
 
   test('Save VF page pass', async () => {
     await removeErrorOnDoc(sandbox);
+  });
+
+  test('Opens org', async () => {
+    return await vscode.commands.executeCommand('ForceCode.openOrg').then(res => {
+      return assert.strictEqual(true, true);
+    });
+  });
+
+  test('Preview VF', async () => {
+    var output = path.join(vscode.window.forceCode.projectRoot, 'pages', 'testerson.page');
+    return await vscode.workspace.openTextDocument(output).then(doc => {
+      return vscode.commands.executeCommand('ForceCode.previewVF', doc.uri).then(res => {
+        return assert.strictEqual(true, true);
+      });
+    });
   });
 
   test('Creates Visualforce Component', async () => {
@@ -159,6 +183,20 @@ suite('createClass.ts', () => {
 
   test('Save Aura app pass', async () => {
     await removeErrorOnDoc(sandbox);
+  });
+
+  test('Preview Aura app', async () => {
+    var output = path.join(
+      vscode.window.forceCode.projectRoot,
+      'aura',
+      'testersonAura',
+      'testersonAura.app'
+    );
+    return await vscode.workspace.openTextDocument(output).then(doc => {
+      return vscode.commands.executeCommand('ForceCode.previewApp', doc.uri).then(res => {
+        return assert.strictEqual(true, true);
+      });
+    });
   });
 
   test('Creates Trigger on Account', async () => {
