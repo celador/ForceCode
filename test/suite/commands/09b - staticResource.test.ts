@@ -4,7 +4,7 @@ import * as path from 'path';
 import { afterEach } from 'mocha';
 import { removeErrorOnDoc } from '../../testUtils/utils.test';
 
-suite('retrieve.ts', () => {
+suite('staticResource.ts', () => {
   const sandbox = sinon.createSandbox();
   afterEach(() => {
     sandbox.restore();
