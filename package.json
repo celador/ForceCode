@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.18.1-1",
+  "version": "3.18.1-2",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -617,9 +617,9 @@
     "typescript": "^3.5.3",
     "universal-analytics": "0.4.20",
     "uuid": "3.3.2",
-    "vsce": "^1.65.0",
+    "vsce": "^1.66.0",
     "vscode-test": "^1.0.2",
-    "webpack": "^4.36.1",
+    "webpack": "^4.38.0",
     "webpack-cli": "^3.3.6",
     "xml2js": "0.4.19"
   }
