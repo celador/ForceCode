@@ -135,8 +135,9 @@ export function staticResourceDeployFromFile(
 function onError(err: any) {
   var mess =
     'Invalid static resource folder or file name. Name must be in the form of ResourceName.resource.type.subtype\nEXAMPLE: ' +
-    'MyResource.resource.application.javascript\nThis folder would then contain one file, named MyResource.js';
-  notifications.showError(mess + '\n' + (err.message ? err.message : err));
+    'MyResource.resource.application.javascript\nThis folder would then contain one file, named MyResource.js.\nSee the ' +
+    'ForceCode output panel for more detail.';
+  throw mess + '\n$#FC_LOG_ONLY_#*' + (err.message ? err.message : err);
 }
 
 function bundleAndDeploy(option: vscode.QuickPickItem) {

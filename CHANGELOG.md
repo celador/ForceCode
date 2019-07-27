@@ -2,6 +2,7 @@
 
 * 3.18.1
     * Fix not showing errors when metadata has a syntax error
+    * Fix not refreshing an expired access token when saving a static resource
 * 3.18.0
     * Performance improvements on startup
     * Execute anonymous output is now shown in a document like Apex test logs

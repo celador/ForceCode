@@ -57,8 +57,16 @@ export class Notifications {
   }
 
   public showError(message: string, ...items: string[]) {
-    this.writeLog(message);
-    return vscode.window.showErrorMessage(message, ...items);
+    var mParts = message.split('$#FC_LOG_ONLY_#*');
+    var logMess = message;
+    var theMess = message;
+    if (mParts.length === 2) {
+      // omit the split string
+      logMess = mParts.join('');
+      theMess = mParts[0];
+    }
+    this.writeLog(logMess);
+    return vscode.window.showErrorMessage(theMess, ...items);
   }
 
   public showWarning(message: string, ...items: string[]) {
