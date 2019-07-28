@@ -16,21 +16,27 @@ jobs:
       - bash: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo ">>> Started xvfb"
+        displayName: Start xvfb
+        env:
+          DISPLAY: ":99.0"
+      - bash: |
           openssl aes-256-cbc -d -in assets/server.key.enc -out assets/server.key -k $(SERVER_KEY_PASSWORD)
           echo ">>> Installing SFDX CLI"
           npm install -g sfdx-cli
           sfdx --version
           sfdx plugins --core
+        displayName: Install SFDX CLI
+      - bash: |
           sfdx force:auth:jwt:grant --clientid $(SF_CONSUMER_KEY) --jwtkeyfile assets/server.key --username $(SF_USERNAME)
           npm ci
           echo ">>> Compiling"
           npm run compile
+        displayName: Compile
+      - bash:
           echo ">>> Run integration test"
           export SF_USERNAME=$(SF_USERNAME)
           npm run test
         displayName: Run Tests
-        env:
-          DISPLAY: ":99.0"
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: Cobertura

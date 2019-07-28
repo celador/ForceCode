@@ -2,38 +2,37 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { afterEach } from 'mocha';
-import { CodeCompletionRefresh } from '../../../src/commands/codeCompletionRefresh';
+import { RetrieveBundle } from '../../../src/commands/retrieve';
 
 suite('forcecodeCommand.ts', () => {
   const sandbox = sinon.createSandbox();
   afterEach(() => {
     sandbox.restore();
   });
-  test('Cancel Refresh code completion', async () => {
+  test('Cancel Retrieve all', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
       return {
         async then(callback) {
-          return callback(items[0]); // refresh all
+          return callback({ description: 'unpackaged' }); // retrieve everything
         },
       };
     });
-    var ccr = new CodeCompletionRefresh();
 
     return await new Promise((resolve, reject) => {
-      Promise.resolve(ccr.run(undefined, undefined)).then(
-        () => {
-          // should not resolve
-          resolve(assert.strictEqual(true, false));
+      var ccr = new RetrieveBundle();
+      setTimeout(cancelTask, 3000);
+      return ccr.run(undefined, undefined).then(
+        res => {
+          resolve(assert.strictEqual(true, true));
         },
-        () => {
+        rej => {
           resolve(assert.strictEqual(true, true));
         }
       );
-      setTimeout(cancelTask, 2000);
-    });
 
-    function cancelTask() {
-      ccr.cancel();
-    }
+      function cancelTask() {
+        ccr.cancel();
+      }
+    });
   });
 });
