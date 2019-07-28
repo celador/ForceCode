@@ -40,4 +40,18 @@ suite('staticResource.ts', () => {
       return assert.strictEqual(true, true);
     });
   });
+
+  test('Static resource deploy first', async () => {
+    // call 'ForceCode.staticResource', stub choice to be the last (all)
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+      return {
+        async then(callback) {
+          return callback(items[0]);
+        },
+      };
+    });
+    return await vscode.commands.executeCommand('ForceCode.staticResource').then(res => {
+      return assert.strictEqual(true, true);
+    });
+  });
 });
