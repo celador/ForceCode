@@ -7,7 +7,7 @@ import { afterEach, beforeEach } from 'mocha';
 import { codeCovViewService } from '../../../src/services';
 import { addErrorToDoc, removeErrorOnDoc, createForceJson } from '../../testUtils/utils.test';
 
-suite('createClass.ts/compile.ts', () => {
+suite('createClass.ts and compile.ts', () => {
   const sandbox = sinon.createSandbox();
   beforeEach(() => {
     sandbox.stub(vscode.window, 'showWarningMessage').returns({

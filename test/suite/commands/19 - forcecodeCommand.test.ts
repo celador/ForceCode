@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { afterEach } from 'mocha';
-import { commandViewService } from '../../../src/services';
+import { CodeCompletionRefresh } from '../../../src/commands/codeCompletionRefresh';
 
 suite('forcecodeCommand.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -17,16 +17,23 @@ suite('forcecodeCommand.ts', () => {
         },
       };
     });
-    vscode.commands.executeCommand('ForceCode.codeCompletionRefresh');
+    var ccr = new CodeCompletionRefresh();
 
-    return await setTimeout(cancelTask, 2000);
+    return await new Promise((resolve, reject) => {
+      Promise.resolve(ccr.run(undefined, undefined)).then(
+        () => {
+          // should not resolve
+          resolve(assert.strictEqual(true, false));
+        },
+        () => {
+          resolve(assert.strictEqual(true, true));
+        }
+      );
+      setTimeout(cancelTask, 2000);
+    });
 
     function cancelTask() {
-      vscode.commands
-        .executeCommand('ForceCode.cancelCommand', commandViewService.getChildren()[0])
-        .then(() => {
-          assert.strictEqual(true, true);
-        });
+      ccr.cancel();
     }
   });
 });
