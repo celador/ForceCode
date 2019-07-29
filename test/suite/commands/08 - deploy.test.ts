@@ -12,7 +12,7 @@ suite('deploy.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
       return {
         async then(callback) {
-          return callback(items[1]); // apex class
+          return callback(items[1]); // deploy second file in list
         },
       };
     });

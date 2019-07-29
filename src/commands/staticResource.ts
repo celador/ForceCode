@@ -50,7 +50,8 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
       } else {
         return bundleAndDeploy(option).then(deployComplete);
       }
-    });
+    })
+    .catch(onError);
   // =======================================================================================================================================
   function getPackageName(): any {
     let bundleDirectories: any[] = [];
@@ -134,21 +135,23 @@ export function staticResourceDeployFromFile(
 function onError(err: any) {
   var mess =
     'Invalid static resource folder or file name. Name must be in the form of ResourceName.resource.type.subtype\nEXAMPLE: ' +
-    'MyResource.resource.application.javascript\nThis folder would then contain one file, named MyResource.js';
-  notifications.showError(mess + '\n' + (err.message ? err.message : err));
+    'MyResource.resource.application.javascript\nThis folder would then contain one file, named MyResource.js.\nSee the ' +
+    'ForceCode output panel for more detail.';
+  throw mess + '\n$#FC_LOG_ONLY_#*' + (err.message ? err.message : err);
 }
 
-function bundleAndDeploy(option: any) {
+function bundleAndDeploy(option: vscode.QuickPickItem) {
   let root: string = getPackagePath(option);
-  if (option.detail.includes('zip') || option.detail === 'SPA') {
+  var detail = option.detail ? option.detail : '';
+  if (detail.includes('zip') || detail === 'SPA') {
     let zip: any = zipFiles(getFileList(root), root);
-    return deploy(zip, option.label, option.detail).then(deployComplete);
+    return deploy(zip, option.label, detail);
   } else {
     var ext = '.' + mime.extension(option.detail);
     var data = fs.readFileSync(root + path.sep + option.label + ext).toString('base64');
     return vscode.window.forceCode.conn.metadata.upsert(
       'StaticResource',
-      makeResourceMetadata(option.label, data, option.detail)
+      makeResourceMetadata(option.label, data, detail)
     );
   }
 }

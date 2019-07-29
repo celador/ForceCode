@@ -5,6 +5,8 @@
 [![Version](https://vsmarketplacebadge.apphb.com/version/JohnAaronNelson.ForceCode.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 [![Installs](https://vsmarketplacebadge.apphb.com/installs/JohnAaronNelson.ForceCode.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
 [![Ratings](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.png)](https://vsmarketplacebadge.apphb.com/rating/JohnAaronNelson.ForceCode.svg)
+[![Build Status](https://daishi4u.visualstudio.com/Forcecode/_apis/build/status/ForceCodeOrig)](https://daishi4u.visualstudio.com/Forcecode/_build?definitionId=2)
+![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/daishi4u/Forcecode/2.svg)
 
 ## Overview
 

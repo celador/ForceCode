@@ -4,10 +4,11 @@ import * as path from 'path';
 
 export function isEmptyUndOrNull(param: any): boolean {
   return (
-    param == undefined ||
-    param == null ||
-    (Array.isArray(param) && param.length === 0) ||
-    Object.keys(param).length === 0
+    !(param instanceof Error) &&
+    (param == undefined ||
+      param == null ||
+      (Array.isArray(param) && param.length === 0) ||
+      Object.keys(param).length === 0)
   );
 }
 
