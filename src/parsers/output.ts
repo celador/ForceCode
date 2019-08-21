@@ -47,31 +47,31 @@ export function outputToCSV(arr: ObjArr[]): string {
   return csvContent;
 }
 
-function getKeys(value: string | object, theArr?: string[], prevName?: string): string[] {
+function getKeys(value: string | any, theArr?: string[], prevName?: string): string[] {
   var curArr: string[] = theArr ? theArr : [];
   if (value === null) {
     if (prevName) {
       curArr.push(prevName);
     }
-  } else if (typeof value !== 'object') {
-    curArr.push(value);
-  } else {
+  } else if (typeof value === 'object') {
     Object.keys(value)
       .filter(value => value !== 'attributes')
       .forEach(val => {
         var curName = prevName ? prevName + '.' + val : val;
-        if (typeof value[val] === 'object') {
+        if (value[val] === 'object') {
           getKeys(value[val], curArr, curName);
         } else {
           curArr.push(curName);
         }
       });
+  } else {
+    curArr.push(value);
   }
   return curArr;
 }
 
-function getValue(obj: object, val: string): string {
-  var curObj = obj;
+function getValue(obj: ObjArr, val: string): string {
+  var curObj: any = obj;
   var valSplit = val.split('.');
   for (var i = 0; i < valSplit.length; i++) {
     curObj = curObj[valSplit[i]];
