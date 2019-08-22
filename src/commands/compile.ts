@@ -333,7 +333,7 @@ export default async function compile(
       }
       notifications.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
       return true;
-    } else if (diagnostics.length === 0) {
+    } else if (diagnostics.length === 0 && errMessages.length === 0) {
       notifications.showError(res.message ? res.message : res);
     }
     notifications.showError(

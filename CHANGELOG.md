@@ -2,6 +2,7 @@
 
 * 3.18.2
     * Fix `Relationship fields not displayed` #306
+    * Fix `e.split is not a function` #307
 * 3.18.1
     * Fix not showing errors when metadata has a syntax error
     * Fix not refreshing an expired access token when saving a static resource
