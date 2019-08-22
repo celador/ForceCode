@@ -56,7 +56,8 @@ export class Notifications {
     this.outputChannel.show(true);
   }
 
-  public showError(message: string, ...items: string[]) {
+  public showError(message: any, ...items: string[]) {
+    message = outputToString(message);
     var mParts = message.split('$#FC_LOG_ONLY_#*');
     var logMess = message;
     var theMess = message;
@@ -70,11 +71,13 @@ export class Notifications {
   }
 
   public showWarning(message: string, ...items: string[]) {
+    message = outputToString(message);
     this.writeLog(message);
     return vscode.window.showWarningMessage(message, ...items);
   }
 
   public showInfo(message: string, ...items: string[]) {
+    message = outputToString(message);
     this.writeLog(message);
     return vscode.window.showInformationMessage(message, ...items);
   }

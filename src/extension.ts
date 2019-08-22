@@ -109,18 +109,18 @@ export function activate(context: vscode.ExtensionContext): any {
               context,
               textDocument
             );
-          }
-          if (toolingType) {
+          } else if (toolingType) {
             return vscode.commands.executeCommand('ForceCode.compile', textDocument);
           }
         } else if (isResource || toolingType) {
-          notifications.showError(
+          return notifications.showError(
             "The file you are trying to save to the server isn't in the current org's source folder (" +
               vscode.window.forceCode.projectRoot +
               ')'
           );
         }
       }
+      return undefined;
     })
   );
 
@@ -149,7 +149,7 @@ export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
     vscode.workspace
       .createFileSystemWatcher(path.join(vscode.window.forceCode.workspaceRoot, 'force.json'))
-      .onDidChange(uri => {
+      .onDidChange(_uri => {
         configuration();
       })
   );
@@ -160,7 +160,7 @@ export function activate(context: vscode.ExtensionContext): any {
       .createFileSystemWatcher(
         path.join(vscode.window.forceCode.workspaceRoot, 'sfdx-project.json')
       )
-      .onDidChange(uri => {
+      .onDidChange(_uri => {
         if (vscode.window.forceCode.config.username) {
           fs.copyFileSync(
             path.join(vscode.window.forceCode.workspaceRoot, 'sfdx-project.json'),

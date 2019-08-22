@@ -27,19 +27,17 @@ export function outputToString(toConvert: any, depth?: number): string {
 }
 
 interface ObjArr {
-  [key: string]: string;
+  [key: string]: string | object;
 }
 
 export function outputToCSV(arr: ObjArr[]): string {
   delete arr[0].attributes;
-  var csvContent = '"' + Object.keys(arr[0]).join('","') + '"\n';
+  var csvContent = '"' + getKeys(arr[0]).join('","') + '"\n';
   for (var i = 0; i < arr.length; i++) {
     const curItem = arr[i];
     var curItemArr: string[] = [];
-    Object.keys(curItem).forEach(key => {
-      if (key != 'attributes') {
-        curItemArr.push('"' + (curItem[key] === null ? '' : curItem[key]) + '"');
-      }
+    getKeys(curItem).forEach(key => {
+      curItemArr.push(curItem[key] === null ? '""' : getValue(curItem, key));
     });
     csvContent += curItemArr.join(',');
     if (i !== arr.length - 1) {
@@ -47,4 +45,36 @@ export function outputToCSV(arr: ObjArr[]): string {
     }
   }
   return csvContent;
+}
+
+function getKeys(value: string | any, theArr?: string[], prevName?: string): string[] {
+  var curArr: string[] = theArr ? theArr : [];
+  if (value === null) {
+    if (prevName) {
+      curArr.push(prevName);
+    }
+  } else if (typeof value === 'object') {
+    Object.keys(value)
+      .filter(value => value !== 'attributes')
+      .forEach(val => {
+        var curName = prevName ? prevName + '.' + val : val;
+        if (value[val] === 'object') {
+          getKeys(value[val], curArr, curName);
+        } else {
+          curArr.push(curName);
+        }
+      });
+  } else {
+    curArr.push(value);
+  }
+  return curArr;
+}
+
+function getValue(obj: ObjArr, val: string): string {
+  var curObj: any = obj;
+  var valSplit = val.split('.');
+  for (var i = 0; i < valSplit.length; i++) {
+    curObj = curObj[valSplit[i]];
+  }
+  return `"${curObj ? curObj : ''}"`;
 }
