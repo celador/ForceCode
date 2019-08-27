@@ -308,7 +308,29 @@ export default function retrieve(
       } else if (option.description === 'user-choice') {
         builder();
       } else {
-        reject();
+        packaged();
+      }
+
+      function packaged() {
+        // option.description is the package name
+        if (cancellationToken.isCanceled()) {
+          reject();
+        }
+        var theStream = vscode.window.forceCode.conn.metadata.retrieve({
+          packageNames: [option.description],
+          apiVersion:
+            vscode.window.forceCode.config.apiVersion ||
+            vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+        });
+        theStream.on('error', error => {
+          reject(
+            error || {
+              message:
+                'There was an error retrieving ' + option.description,
+            }
+          );
+        });
+        resolve(theStream.stream()).catch(reject);
       }
 
       function builder() {
