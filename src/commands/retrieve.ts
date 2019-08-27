@@ -120,6 +120,7 @@ export default function retrieve(
   var newWSMembers: IWorkspaceMember[] = [];
   var toolTypes: Array<{}> = [];
   var typeNames: Array<string> = [];
+  var packageName: string | undefined;
 
   return Promise.resolve(vscode.window.forceCode)
     .then(showPackageOptions)
@@ -308,7 +309,12 @@ export default function retrieve(
       } else if (option.description === 'user-choice') {
         builder();
       } else {
-        packaged();
+        packageName = option.description;
+        if (packageName) {
+          packaged();
+        } else {
+          reject();
+        }
       }
 
       function packaged() {
@@ -433,7 +439,8 @@ export default function retrieve(
         })
         .on('entry', function(header: any, stream: any, next: any) {
           stream.on('end', next);
-          const name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
+          var name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
+          name = packageName ? name.replace(packageName + path.sep, '') : name;
           if (header.type === 'file') {
             const tType: string | undefined = getToolingTypeFromExt(name);
             const fullName = name.split(path.sep).pop();
