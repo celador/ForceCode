@@ -202,7 +202,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       } else {
         member = file.split(path.sep).pop();
       }
-      member = member ? member.split('.').shift() : member;
+      member = member ? member.substring(0, member.lastIndexOf('.')) : member;
       if (member) {
         const index: number = findMDTIndex(packObj, fileTT);
         if (index !== -1) {
@@ -300,9 +300,7 @@ export function deployFiles(
           if (choice === 'Yes') {
             vscode.commands.executeCommand(
               'ForceCode.openFileInOrg',
-              `lightning/setup/DeployStatus/page?address=%2Fchangemgmt%2FmonitorDeploymentsDetails.apexp%3FasyncId%3D${
-                res.id
-              }%26retURL%3D%252Fchangemgmt%252FmonitorDeployment.apexp`
+              `lightning/setup/DeployStatus/page?address=%2Fchangemgmt%2FmonitorDeploymentsDetails.apexp%3FasyncId%3D${res.id}%26retURL%3D%252Fchangemgmt%252FmonitorDeployment.apexp`
             );
           }
         });

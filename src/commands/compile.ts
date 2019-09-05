@@ -83,7 +83,6 @@ export default async function compile(
 
   const toolingType: string | undefined = parsers.getToolingType(document);
   const folderToolingType: string | undefined = getAnyTTFromFolder(document.uri);
-  const fileName: string | undefined = parsers.getFileName(document);
   const name: string | undefined = parsers.getName(document, toolingType);
 
   var DefType: string | undefined;
@@ -149,13 +148,15 @@ export default async function compile(
       .catch(finished)
       .then(updateSaveHistory);
   } else if (folderToolingType && toolingType === undefined) {
-    // This process uses the Metadata API to deploy specific files
-    // This is where we extend it to create any kind of metadata
-    // Currently only Objects and Permission sets ...
-    return Promise.resolve(vscode.window.forceCode)
-      .then(createMetaData)
-      .then(compileMetadata)
-      .then(reportMetadataResults)
+    return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot)
+      .then(() => {
+        const files: string[] = [];
+        var pathSplit: string[] = document.fileName.split(path.sep);
+        //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
+        files.push(path.join(pathSplit[pathSplit.length - 2], pathSplit[pathSplit.length - 1]));
+        files.push('package.xml');
+        return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
+      })
       .then(finished)
       .catch(finished)
       .then(updateSaveHistory);
@@ -185,79 +186,6 @@ export default async function compile(
       .then(updateSaveHistory);
   }
 
-  // =======================================================================================================================================
-  // ================================                  All Metadata                  ===========================================
-  // =======================================================================================================================================
-
-  function createMetaData() {
-    let text: string = document.getText();
-
-    return new Promise(function(resolve, reject) {
-      if (Metadata) {
-        return resolve(Metadata);
-      }
-      if (!folderToolingType) {
-        return reject({
-          message: 'Unknown metadata type. Make sure your project folders are set up properly.',
-        });
-      }
-      const ffNameParts: string[] = document.fileName
-        .split(vscode.window.forceCode.projectRoot + path.sep)[1]
-        .split(path.sep);
-      var folderedName: string;
-      if (ffNameParts.length > 2) {
-        // we have foldered metadata
-        ffNameParts.shift();
-        folderedName = ffNameParts.join('/').split('.')[0];
-      }
-      parseString(text, { explicitArray: false, async: true }, function(err, result) {
-        if (err) {
-          return reject(err);
-        }
-        var metadata: any = result[folderToolingType];
-        if (metadata) {
-          delete metadata['$'];
-          delete metadata['_'];
-          metadata.fullName = folderedName ? folderedName : fileName;
-          return resolve(metadata);
-        }
-        return reject({ message: folderToolingType + ' metadata type not found in org' });
-      });
-    });
-  }
-
-  function compileMetadata(metadata: any) {
-    if (!folderToolingType) {
-      return Promise.reject({
-        message: 'Unknown metadata type. Make sure your project folders are set up properly.',
-      });
-    }
-    return vscode.window.forceCode.conn.metadata.upsert(folderToolingType, [metadata]);
-  }
-
-  function reportMetadataResults(result: any) {
-    if (Array.isArray(result) && result.length && !result.some(i => !i.success)) {
-      notifications.showStatus('Successfully deployed ' + result[0].fullName);
-      return result;
-    } else if (Array.isArray(result) && result.length && result.some(i => !i.success)) {
-      let error: string =
-        result
-          .filter(i => !i.success)
-          .map(i => i.fullName)
-          .join(', ') + ' Failed';
-      notifications.showError(error);
-      throw { message: error };
-    } else if (typeof result === 'object' && result.success) {
-      notifications.showStatus('Successfully deployed ' + result.fullName);
-      return result;
-    } else {
-      var error: any = result.errors ? result.errors[0] : 'Unknown Error';
-      notifications.showError(error);
-      throw { message: error };
-    }
-  }
-
-  // =======================================================================================================================================
   function finished(res: any): boolean {
     if (isEmptyUndOrNull(res)) {
       notifications.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
