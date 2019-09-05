@@ -1,5 +1,8 @@
 ## Change Log
 
+* 3.18.3
+    * Fix `Package not retrieved via Retrieve Package menu option` #312
+    * Fix deploying certain metadata types.
 * 3.18.2
     * Fix `Relationship fields not displayed` #306
     * Fix `e.split is not a function` #307

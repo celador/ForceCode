@@ -120,6 +120,7 @@ export default function retrieve(
   var newWSMembers: IWorkspaceMember[] = [];
   var toolTypes: Array<{}> = [];
   var typeNames: Array<string> = [];
+  var packageName: string | undefined;
 
   return Promise.resolve(vscode.window.forceCode)
     .then(showPackageOptions)
@@ -308,7 +309,34 @@ export default function retrieve(
       } else if (option.description === 'user-choice') {
         builder();
       } else {
-        reject();
+        packageName = option.description;
+        if (packageName) {
+          packaged();
+        } else {
+          reject();
+        }
+      }
+
+      function packaged() {
+        // option.description is the package name
+        if (cancellationToken.isCanceled()) {
+          reject();
+        }
+        var theStream = vscode.window.forceCode.conn.metadata.retrieve({
+          packageNames: [option.description],
+          apiVersion:
+            vscode.window.forceCode.config.apiVersion ||
+            vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+        });
+        theStream.on('error', error => {
+          reject(
+            error || {
+              message:
+                'There was an error retrieving ' + option.description,
+            }
+          );
+        });
+        resolve(theStream.stream()).catch(reject);
       }
 
       function builder() {
@@ -411,7 +439,8 @@ export default function retrieve(
         })
         .on('entry', function(header: any, stream: any, next: any) {
           stream.on('end', next);
-          const name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
+          var name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
+          name = packageName ? name.replace(packageName + path.sep, '') : name;
           if (header.type === 'file') {
             const tType: string | undefined = getToolingTypeFromExt(name);
             const fullName = name.split(path.sep).pop();
