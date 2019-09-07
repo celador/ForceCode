@@ -16,7 +16,7 @@ suite('executeAnonymous.ts', () => {
               new vscode.Position(0, testText.length)
             ),
           ];
-          return vscode.commands.executeCommand('ForceCode.executeAnonymous').then(res => {
+          return vscode.commands.executeCommand('ForceCode.executeAnonymous').then(_res => {
             assert.strictEqual(true, true);
           });
         });
@@ -35,7 +35,7 @@ suite('executeAnonymous.ts', () => {
               new vscode.Position(0, testText.length)
             ),
           ];
-          return vscode.commands.executeCommand('ForceCode.executeAnonymous').then(res => {
+          return vscode.commands.executeCommand('ForceCode.executeAnonymous').then(_res => {
             assert.strictEqual(true, true);
           });
         });

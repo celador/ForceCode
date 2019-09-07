@@ -9,14 +9,14 @@ suite('codeCompletionRefresh.ts', () => {
     sandbox.restore();
   });
   test('Refresh code completion', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
           return callback(items[0]); // refresh all
         },
       };
     });
-    await vscode.commands.executeCommand('ForceCode.codeCompletionRefresh').then(res => {
+    await vscode.commands.executeCommand('ForceCode.codeCompletionRefresh').then(_res => {
       assert.strictEqual(true, true);
     });
   });

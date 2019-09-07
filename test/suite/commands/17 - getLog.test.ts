@@ -9,14 +9,14 @@ suite('getLog.ts', () => {
     sandbox.restore();
   });
   test('Retrieve log file', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
           return callback(items[0]);
         },
       };
     });
-    await vscode.commands.executeCommand('ForceCode.getLogs').then(res => {
+    await vscode.commands.executeCommand('ForceCode.getLogs').then(_res => {
       assert.strictEqual(true, true);
     });
   });

@@ -8,7 +8,7 @@ suite('extension.ts', () => {
     const ext = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
     if (ext) {
       await ext.activate();
-      return await vscode.commands.executeCommand('ForceCode.showMenu').then(async res => {
+      return await vscode.commands.executeCommand('ForceCode.showMenu').then(async _res => {
         return await checkLogin();
       });
     } else {

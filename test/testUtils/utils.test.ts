@@ -81,8 +81,8 @@ export function addErrorToDoc(sandbox: sinon.SinonSandbox) {
     edit.insert(position, '<'); // add a syntax error
   });
   const spy = sandbox.spy(vscode.window, 'showErrorMessage');
-  return editor.document.save().then(res => {
-    return vscode.commands.executeCommand('ForceCode.compile').then(res2 => {
+  return editor.document.save().then(_res => {
+    return vscode.commands.executeCommand('ForceCode.compile').then(_res2 => {
       return assert.strictEqual(spy.calledOnce, true);
     });
   });
@@ -115,7 +115,7 @@ export function removeErrorOnDoc(
     });
   }
   const spy = sandbox.spy(vscode.window, 'showErrorMessage');
-  return editor.document.save().then(async res => {
+  return editor.document.save().then(async _res => {
     if (!autoCompile) {
       await vscode.commands.executeCommand('ForceCode.compile');
       return assert.strictEqual(spy.called, false);

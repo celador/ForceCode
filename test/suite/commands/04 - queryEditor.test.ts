@@ -3,7 +3,7 @@ import * as assert from 'assert';
 
 suite('queryEditor.ts', () => {
   test('Opens query editor', async () => {
-    await vscode.commands.executeCommand('ForceCode.queryEditor').then(res => {
+    await vscode.commands.executeCommand('ForceCode.queryEditor').then(_res => {
       assert.strictEqual(true, true);
     });
   });

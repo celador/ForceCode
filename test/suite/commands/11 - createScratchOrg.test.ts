@@ -23,7 +23,7 @@ suite('createScratchOrg.ts', () => {
         }
       });
       */
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
           return callback(items[0]);
@@ -36,7 +36,7 @@ suite('createScratchOrg.ts', () => {
   });
 
   test('Calls to create scratch org', async () => {
-    await vscode.commands.executeCommand('ForceCode.createScratchOrg').then(res => {
+    await vscode.commands.executeCommand('ForceCode.createScratchOrg').then(_res => {
       assert.strictEqual(true, true);
     });
   });
