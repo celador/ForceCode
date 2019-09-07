@@ -18,7 +18,7 @@ export class ExecuteAnonymous extends ForcecodeCommand {
     this.label = 'Execute Anonymous';
   }
 
-  public command(_context: any, _selectedResource: any): any {
+  public command(): any {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       notifications.showError(
@@ -94,8 +94,8 @@ export class ExecuteAnonymous extends ForcecodeCommand {
       }
       return vscode.workspace
         .openTextDocument(newDocURI)
-        .then(function(_document: vscode.TextDocument) {
-          return vscode.window.showTextDocument(_document, 3, true).then(editor => {
+        .then(function(document: vscode.TextDocument) {
+          return vscode.window.showTextDocument(document, 3, true).then(editor => {
             editor.edit(edit => {
               return edit.insert(new vscode.Position(0, 0), filteredLog);
             });

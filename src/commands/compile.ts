@@ -53,7 +53,7 @@ export class ForceCompile extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context: any, _selectedResource?: any) {
+  public command(context: any) {
     return vscode.commands.executeCommand('ForceCode.compile', context, true);
   }
 }

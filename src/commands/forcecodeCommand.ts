@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { notifications } from '../services';
+import { notifications, Task } from '../services';
 
 export class FCCancellationToken {
   private isItCanceled: boolean;
@@ -65,7 +65,7 @@ export class CancelCommand extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context: any, selectedResource?: any) {
+  public command(context: Task) {
     return context.execution.cancel();
   }
 }

@@ -17,7 +17,7 @@ export class QueryEditor extends ForcecodeCommand {
     this.label = 'SOQL/TOQL Query';
   }
 
-  public command(_context: any, _selectedResource: any): any {
+  public command(): any {
     const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
     if (!myExt || !vscode.window.forceCode.config.username) {
       return Promise.reject();

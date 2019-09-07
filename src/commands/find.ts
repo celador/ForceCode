@@ -14,7 +14,7 @@ export class Find extends ForcecodeCommand {
     this.label = 'Find';
   }
 
-  public command(_context: any, _selectedResource: any): any {
+  public command(): any {
     // need to ask for a search string then pass off to open
 
     let options: vscode.InputBoxOptions = {

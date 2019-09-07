@@ -25,7 +25,7 @@ export class GetLog extends ForcecodeCommand {
     this.label = 'Get Logs';
   }
 
-  public command(_context: any, _selectedResource: any): any {
+  public command(): any {
     // Login, then get Identity info,
     //  then get info about the logs and ask the user which one to open,
     //  then get the log and show it

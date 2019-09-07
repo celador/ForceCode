@@ -34,7 +34,7 @@ export class Refresh extends ForcecodeCommand {
 
   public command(context: any, selectedResource?: any) {
     if (selectedResource && selectedResource instanceof Array) {
-      return new Promise((resolve, reject) => {
+      return new Promise(resolve => {
         var files: PXMLMember[] = [];
         var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => {
           if (curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
@@ -95,7 +95,7 @@ export class RetrieveBundle extends ForcecodeCommand {
     this.label = 'Retrieve Package/Metadata';
   }
 
-  public command(context: vscode.Uri | ToolingTypes | undefined, _selectedResource?: any) {
+  public command(context: vscode.Uri | ToolingTypes | undefined) {
     return retrieve(context, this.cancellationToken);
   }
 }

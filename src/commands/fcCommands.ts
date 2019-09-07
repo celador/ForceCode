@@ -22,7 +22,7 @@ export class ToolingQuery extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context: string, _selectedResource?: any) {
+  public command(context: string) {
     return vscode.window.forceCode.conn.tooling.query(context);
   }
 }
@@ -39,7 +39,7 @@ export class CreateProject extends ForcecodeCommand {
     this.label = 'New Project';
   }
 
-  public command(_context: any, _selectedResource?: any) {
+  public command() {
     return vscode.commands.executeCommand('ForceCode.createProject');
   }
 }
@@ -56,7 +56,7 @@ export class Logout extends ForcecodeCommand {
     this.label = 'Log out of Salesforce';
   }
 
-  public command(context: FCConnection | undefined, _selectedResource?: any) {
+  public command(context: FCConnection | undefined) {
     var conn = context ? context : fcConnection.currentConnection;
     return fcConnection.disconnect(conn);
   }
@@ -75,7 +75,7 @@ export class SwitchUser extends ForcecodeCommand {
     this.label = 'Log in to Salesforce';
   }
 
-  public command(context: FCOauth | FCConnection, _selectedResource?: any) {
+  public command(context: FCOauth | FCConnection) {
     codeCovViewService.clear();
     var orgInfo: FCOauth;
     if (context instanceof FCConnection) {
@@ -124,7 +124,7 @@ export class CheckForFileChanges extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(_context: any, _selectedResource?: any) {
+  public command() {
     return vscode.window.forceCode.checkForFileChanges();
   }
 }
@@ -137,7 +137,7 @@ export class ShowTasks extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(_context: any, _selectedResource?: any) {
+  public command() {
     if (fcConnection.isLoggedIn()) {
       var treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {
         treeDataProvider: commandViewService,
@@ -155,7 +155,7 @@ export class OpenOnClick extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context: vscode.Uri, _selectedResource?: any) {
+  public command(context: vscode.Uri) {
     return vscode.workspace
       .openTextDocument(context)
       .then(doc => vscode.window.showTextDocument(doc, { preview: false }));
@@ -169,7 +169,7 @@ export class Login extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context: FCOauth | FCConnection, _selectedResource?: any) {
+  public command(context: FCOauth | FCConnection) {
     var orgInfo: FCOauth;
     if (context instanceof FCConnection) {
       orgInfo = context.orgInfo;
@@ -190,7 +190,7 @@ export class RemoveConfig extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context: string | FCConnection, _selectedResource?: any) {
+  public command(context: string | FCConnection) {
     var username: string;
     if (context instanceof FCConnection) {
       username = context.orgInfo.username;

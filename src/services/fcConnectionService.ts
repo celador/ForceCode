@@ -49,7 +49,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     return [];
   }
 
-  public getParent(element: FCConnection): any {
+  public getParent(_element: FCConnection): any {
     return null; // this is the parent
   }
 

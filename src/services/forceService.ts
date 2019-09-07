@@ -223,7 +223,7 @@ export default class ForceService implements forceCode.IForceService {
         vscode.window.forceCode.conn.tooling
           .sobject('MetadataContainer')
           .find({ Name: { $like: 'ForceCode-%' } })
-          .execute(function(err: any, records: any) {
+          .execute(function(_err: any, records: any) {
             var toDelete: string[] = new Array<string>();
             if (!records || records.length === 0) {
               resolve();

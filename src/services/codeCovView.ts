@@ -60,7 +60,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public constructor() {
-    window.onDidChangeActiveTextEditor(event => {
+    window.onDidChangeActiveTextEditor(_event => {
       this.refresh();
     });
   }

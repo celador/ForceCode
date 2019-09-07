@@ -227,8 +227,8 @@ export function saveApex(
     function nextStatus(): any {
       if (cancellationToken.isCanceled()) {
         return cancelRequest()
-          .catch(err => Promise.reject())
-          .then(res => Promise.reject());
+          .catch(_err => Promise.reject())
+          .then(_res => Promise.reject());
       }
       checkCount += 1;
       // Set a timeout to auto fail the compile after 60 seconds
@@ -248,8 +248,8 @@ export function saveApex(
               } else {
                 cancellationToken.cancel();
                 return cancelRequest()
-                  .catch(err => Promise.reject())
-                  .then(res => Promise.reject());
+                  .catch(_err => Promise.reject())
+                  .then(_res => Promise.reject());
               }
             });
         } else {
@@ -271,9 +271,7 @@ export function saveApex(
     function getStatus(): Promise<any> {
       return vscode.window.forceCode.conn.tooling.query(
         `SELECT Id, MetadataContainerId, MetadataContainerMemberId, State, IsCheckOnly, ` +
-          `DeployDetails, ErrorMsg FROM ContainerAsyncRequest WHERE Id='${
-            vscode.window.forceCode.containerAsyncRequestId
-          }'`
+          `DeployDetails, ErrorMsg FROM ContainerAsyncRequest WHERE Id='${vscode.window.forceCode.containerAsyncRequestId}'`
       );
     }
     function isFinished(res: any) {

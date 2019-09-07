@@ -18,7 +18,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
     this.hidden = false;
   }
 
-  public command(context: any, selectedResource: any): Promise<any> {
+  public command(): Promise<any> {
     // add option to select org def file or just create an org
     // ...
     // ...

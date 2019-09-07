@@ -218,9 +218,9 @@ export default class DXService {
       .openTextDocument(
         vscode.Uri.parse(`sflog://salesforce.com/${new Date().toISOString()}.log?q=${id}`)
       )
-      .then(function(_document: vscode.TextDocument) {
-        if (_document.getText() !== '') {
-          return vscode.window.showTextDocument(_document, 3, true);
+      .then(function(document: vscode.TextDocument) {
+        if (document.getText() !== '') {
+          return vscode.window.showTextDocument(document, 3, true);
         } else {
           return {
             async then(callback: any) {

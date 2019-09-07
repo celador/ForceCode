@@ -19,7 +19,7 @@ export class OverallCoverage extends ForcecodeCommand {
     this.label = 'Get current overall code coverage';
   }
 
-  public command(_context: any, _selectedResource: any): any {
+  public command(): any {
     return apexTestResults().then(res => {
       if (res.records) {
         var outputString: string = 'Class/Trigger Name';
@@ -64,7 +64,7 @@ export class OverallCoverage extends ForcecodeCommand {
               .openTextDocument(filename)
               .then(doc => vscode.window.showTextDocument(doc, 3));
           })
-          .catch(err => {
+          .catch(_err => {
             return undefined;
           });
       } else {

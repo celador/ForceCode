@@ -27,7 +27,7 @@ export class Settings extends ForcecodeCommand {
     this.label = 'Org Settings';
   }
 
-  public command(_context: any, _selectedResource: any): any {
+  public command(): any {
     const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
     if (!myExt) {
       return Promise.reject();
@@ -50,7 +50,7 @@ export class Settings extends ForcecodeCommand {
     // And set its HTML content
     panel.webview.html = getSettingsPage();
 
-    const overwriteMerge = (destinationArray: any, sourceArray: any, options: any) => sourceArray;
+    const overwriteMerge = (_destinationArray: any, sourceArray: any, _options: any) => sourceArray;
 
     // handle settings changes
     panel.webview.onDidReceiveMessage(message => {

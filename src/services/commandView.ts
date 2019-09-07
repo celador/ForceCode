@@ -128,7 +128,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     return [];
   }
 
-  public getParent(element: Task): any {
+  public getParent(_element: Task): any {
     return null; // this is the parent
   }
 }

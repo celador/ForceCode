@@ -10,7 +10,7 @@ export class ForceCodeMenu extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context: any, _selectedResource: any): any {
+  public command(context: any): any {
     var quickpick: any[] = [];
     if (!fcConnection.isLoggedIn()) {
       return vscode.commands.executeCommand('ForceCode.switchUser', undefined);

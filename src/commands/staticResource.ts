@@ -14,8 +14,8 @@ export class StaticResourceDeployFile extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(_context: any, selectedResource: vscode.TextDocument) {
-    return staticResourceDeployFromFile(selectedResource);
+  public command(context: vscode.TextDocument) {
+    return staticResourceDeployFromFile(context);
   }
 }
 
@@ -32,7 +32,7 @@ export class StaticResourceBundle extends ForcecodeCommand {
     this.label = 'Build Resource Bundle';
   }
 
-  public command(_context: any, _selectedResource?: any) {
+  public command() {
     return staticResourceBundleDeploy();
   }
 }
@@ -209,7 +209,7 @@ function getFileList(root: string) {
   return (function innerGetFileList(localPath) {
     var fileslist: any[] = []; // List of files
     var files: any = fs.readdirSync(localPath); // Files in current 'sfdc' directory
-    var ignoreFiles: any = vscode.workspace.getConfiguration('force')['filesExclude'] || {
+    var ignoreFilesSettings: any = vscode.workspace.getConfiguration('force')['filesExclude'] || {
       '.gitignore': true,
       '.DS_Store': true,
       '.org_metadata': true,
@@ -217,9 +217,9 @@ function getFileList(root: string) {
       'node_modules/**': true,
       'bower_modules/**': true,
     };
-    var _ignoreFiles: any[] = Object.keys(ignoreFiles)
+    var ignoreFiles: any[] = Object.keys(ignoreFilesSettings)
       .map(key => {
-        return { key: key, value: ignoreFiles[key] };
+        return { key: key, value: ignoreFilesSettings[key] };
       })
       .filter(setting => setting.value === true)
       .map(setting => root + path.sep + setting.key);
@@ -231,7 +231,7 @@ function getFileList(root: string) {
       // If file is a directory, recursively add it's children
       if (stat.isDirectory()) {
         fileslist = fileslist.concat(innerGetFileList(pathname));
-      } else if (!globule.isMatch(_ignoreFiles, pathname, { matchBase: true, dot: true })) {
+      } else if (!globule.isMatch(ignoreFiles, pathname, { matchBase: true, dot: true })) {
         fileslist.push(pathname.replace(root + path.sep, ''));
       }
     });

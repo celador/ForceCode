@@ -25,7 +25,7 @@ export class DeployPackage extends ForcecodeCommand {
     this.label = 'Deploy Package';
   }
 
-  public command(_context: any, _selectedResource?: any) {
+  public command() {
     return deploy(this.cancellationToken);
   }
 }
