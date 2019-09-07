@@ -15,7 +15,7 @@ import { isEmptyUndOrNull } from '../util';
 export default class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
   public config: forceCode.Config;
-  public conn: Connection;
+  public conn!: Connection;
   public containerId: string | undefined;
   public containerMembers: forceCode.IContainerMember[];
   public describe: forceCode.IMetadataDescribe | undefined;

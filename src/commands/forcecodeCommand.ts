@@ -20,10 +20,10 @@ export class FCCancellationToken {
 }
 
 export abstract class ForcecodeCommand {
-  public cancelable: boolean;
-  public commandName: string;
+  public cancelable?: boolean;
+  public commandName!: string;
   public name?: string;
-  public hidden: boolean;
+  public hidden?: boolean;
   public description?: string;
   public detail?: string;
   public icon?: string;

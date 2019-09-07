@@ -8,6 +8,11 @@
     "outDir": "dist",
     "noUnusedLocals": true,
     "strictNullChecks": true,
+    "noImplicitThis": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "alwaysStrict": true,
     "lib": ["dom", "es2016", "es6"],
     "sourceMap": true,
     "rootDir": "."
