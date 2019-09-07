@@ -1,6 +1,7 @@
 ## Change Log
 
 * 3.18.4
+    * Updated Forcecode view icon
     * Fix missed `typeof` in fix for `Relationship fields not displayed` #306
 * 3.18.3
     * Fix `Package not retrieved via Retrieve Package menu option` #312

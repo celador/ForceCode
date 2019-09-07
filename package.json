@@ -58,7 +58,7 @@
       "activitybar": [
         {
           "id": "fcView",
-          "icon": "./images/logo.svg",
+          "icon": "./images/fcView.svg",
           "title": "ForceCode"
         }
       ]
