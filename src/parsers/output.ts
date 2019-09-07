@@ -58,7 +58,7 @@ function getKeys(value: string | any, theArr?: string[], prevName?: string): str
       .filter(value => value !== 'attributes')
       .forEach(val => {
         var curName = prevName ? prevName + '.' + val : val;
-        if (value[val] === 'object') {
+        if (typeof value[val] === 'object') {
           getKeys(value[val], curArr, curName);
         } else {
           curArr.push(curName);
