@@ -99,7 +99,7 @@ export default class DXService {
       env: Object.assign({ SFDX_JSON_TO_STDOUT: 'true' }, process.env),
     };
 
-    var pid;
+    var pid: number;
     var sfdxNotFound = false;
 
     return new Promise((resolve, reject) => {
@@ -223,7 +223,7 @@ export default class DXService {
           return vscode.window.showTextDocument(_document, 3, true);
         } else {
           return {
-            async then(callback) {
+            async then(callback: any) {
               return callback(undefined);
             },
           };
