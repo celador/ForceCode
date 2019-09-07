@@ -29,9 +29,9 @@ suite('staticResource.ts', () => {
 
   test('Static resource deploy all', async () => {
     // call 'ForceCode.staticResource', stub choice to be the last (all)
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[toArray(items).length - 1]);
         },
       };
@@ -43,9 +43,9 @@ suite('staticResource.ts', () => {
 
   test('Static resource deploy first', async () => {
     // call 'ForceCode.staticResource', stub choice to be the last (all)
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[0]);
         },
       };

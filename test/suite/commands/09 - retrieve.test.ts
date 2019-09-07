@@ -12,7 +12,7 @@ suite('retrieve.ts', () => {
   test('Retrieve via package.xml', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback({ description: 'packaged' }); // retrieve from package.xml
         },
       };
@@ -25,7 +25,7 @@ suite('retrieve.ts', () => {
   test('Retrieve all Apex Classes', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback({ description: 'apexclasses' }); // retrieve everything
         },
       };
@@ -38,7 +38,7 @@ suite('retrieve.ts', () => {
   test('Retrieve all Custom Objects', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback({ description: 'customobj' }); // retrieve everything
         },
       };
@@ -51,7 +51,7 @@ suite('retrieve.ts', () => {
   test('Retrieve all', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback({ description: 'unpackaged' }); // retrieve everything
         },
       };

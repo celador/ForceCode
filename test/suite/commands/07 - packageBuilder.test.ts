@@ -13,14 +13,14 @@ suite('packageBuilder.ts', () => {
   test('Builds package.xml', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items); // apex class
         },
       };
     });
     sandbox.stub(vscode.window, 'showSaveDialog').callsFake(function(items) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           var output = path.join(vscode.window.forceCode.projectRoot, 'package.xml');
           return callback(vscode.Uri.file(output)); // apex class
         },

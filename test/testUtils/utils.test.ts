@@ -67,11 +67,11 @@ function removeDirOrFile(thePath: string) {
   }
 }
 
-export function addErrorToDoc(sandbox) {
+export function addErrorToDoc(sandbox: sinon.SinonSandbox) {
   var editor = vscode.window.activeTextEditor;
   if (!editor) {
     return {
-      async then(callback) {
+      async then(callback: any) {
         return callback(assert.strictEqual(true, false));
       },
     };
@@ -88,11 +88,15 @@ export function addErrorToDoc(sandbox) {
   });
 }
 
-export function removeErrorOnDoc(sandbox, dontRemove?, autoCompile?) {
+export function removeErrorOnDoc(
+  sandbox: sinon.SinonSandbox,
+  dontRemove?: boolean,
+  autoCompile?: boolean
+) {
   var editor = vscode.window.activeTextEditor;
   if (!editor) {
     return {
-      async then(callback) {
+      async then(callback: any) {
         return callback(assert.strictEqual(true, false));
       },
     };

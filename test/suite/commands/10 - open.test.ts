@@ -9,9 +9,9 @@ suite('open.ts', () => {
     sandbox.restore();
   });
   test('Open a file', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[0]); // apex class
         },
       };

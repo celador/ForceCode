@@ -23,9 +23,9 @@ suite('createScratchOrg.ts', () => {
         }
       });
       */
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[0]);
         },
       };

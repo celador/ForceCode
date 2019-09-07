@@ -65,7 +65,7 @@ export function run(): Promise<void> {
       files.forEach((f): Mocha => mocha.addFile(paths.join(testsRoot, f)));
       // Run the tests
 
-      mocha.run(failures => {
+      mocha.run((failures: any) => {
         if (failures > 0) {
           e(new Error(`${failures} tests failed.`));
         } else {

@@ -11,7 +11,7 @@ suite('createClass.ts and compile.ts', () => {
   const sandbox = sinon.createSandbox();
   beforeEach(() => {
     sandbox.stub(vscode.window, 'showWarningMessage').returns({
-      async then(callback) {
+      async then(callback: any) {
         return callback('Overwrite'); // LWC component
       },
     });
@@ -21,16 +21,16 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates new class', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[1]); // apex class
         },
       };
     });
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function(options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback('testerson'); // name of class
         },
       };
@@ -89,16 +89,16 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates Visualforce Page', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[4]); // VF page
         },
       };
     });
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function(options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback('testerson'); // name of VF page
         },
       };
@@ -133,16 +133,16 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates Visualforce Component', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[5]); // VF component
         },
       };
     });
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function(options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback('testerson'); // name of component
         },
       };
@@ -166,16 +166,16 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates Aura App', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[0]); // Aura, app
         },
       };
     });
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function(options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback('testersonAura'); // name of Aura app
         },
       };
@@ -209,9 +209,9 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates Trigger on Account', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[3]); // Trigger
         },
       };
@@ -221,14 +221,14 @@ suite('createClass.ts and compile.ts', () => {
       .onFirstCall()
       .callsFake(function(options) {
         return {
-          async then(callback) {
+          async then(callback: any) {
             return callback('testerson'); // name of Trigger
           },
         };
       });
     inputStub.onSecondCall().callsFake(function(options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback('Account'); // Trigger is on Object Account
         },
       };
@@ -248,16 +248,16 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates LWC Component', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[2]); // LWC component
         },
       };
     });
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function(options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback('theLWCTest'); // name of component
         },
       };
@@ -273,16 +273,16 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates LWC Component 2', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[2]); // LWC component
         },
       };
     });
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function(options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback('theLWCTest2'); // name of component
         },
       };

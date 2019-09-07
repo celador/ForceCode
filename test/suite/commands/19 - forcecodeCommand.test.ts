@@ -12,7 +12,7 @@ suite('forcecodeCommand.ts', () => {
   test('Cancel Retrieve all', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback({ description: 'unpackaged' }); // retrieve everything
         },
       };
@@ -22,10 +22,10 @@ suite('forcecodeCommand.ts', () => {
       var ccr = new RetrieveBundle();
       setTimeout(cancelTask, 3000);
       return ccr.run(undefined, undefined).then(
-        res => {
+        (res: any) => {
           resolve(assert.strictEqual(true, true));
         },
-        rej => {
+        (rej: any) => {
           resolve(assert.strictEqual(true, true));
         }
       );

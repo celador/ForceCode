@@ -9,16 +9,16 @@ suite('find.ts', () => {
     sandbox.restore();
   });
   test('Searches for and opens file', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[0]);
         },
       };
     });
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function(options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback('test');
         },
       };
