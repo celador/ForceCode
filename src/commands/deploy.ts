@@ -25,8 +25,8 @@ export class DeployPackage extends ForcecodeCommand {
     this.label = 'Deploy Package';
   }
 
-  public command(context, selectedResource?) {
-    return deploy(context, this.cancellationToken);
+  public command(_context: any, _selectedResource?: any) {
+    return deploy(this.cancellationToken);
   }
 }
 
@@ -38,10 +38,7 @@ var deployOptions: any = {
   allowMissingFiles: true,
 };
 
-export default function deploy(
-  context: vscode.ExtensionContext,
-  cancellationToken: FCCancellationToken
-) {
+export default function deploy(cancellationToken: FCCancellationToken) {
   let options: vscode.QuickPickItem[] = [
     {
       label: 'Deploy from package.xml',
@@ -129,7 +126,7 @@ export default function deploy(
         .on('end', () => {
           resolve(fileList.sort());
         })
-        .on('error', (err, item) => {
+        .on('error', (err: Error, item: klaw.Item) => {
           notifications.writeLog(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
         });
     });
@@ -261,7 +258,11 @@ export function deployFiles(
     .catch(finished);
 
   // =======================================================================================================================================
-  function checkDeployStatus(deployResult: DeployResult, resolveFunction, rejectFunction) {
+  function checkDeployStatus(
+    deployResult: DeployResult,
+    resolveFunction: any,
+    rejectFunction: any
+  ) {
     if (cancellationToken.isCanceled()) {
       // TODO: Find a way to cancel the deployment here. Currently, the deployment still occurs in the background
       return rejectFunction();

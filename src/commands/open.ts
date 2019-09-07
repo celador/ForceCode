@@ -15,7 +15,7 @@ export class ShowFileOptions extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
+  public command(context: any[], _selectedResource?: any) {
     return showFileOptions(context, this.cancellationToken);
   }
 }

@@ -14,8 +14,8 @@ export class StaticResourceDeployFile extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
-    return staticResourceDeployFromFile(selectedResource, context);
+  public command(_context: any, selectedResource: vscode.TextDocument) {
+    return staticResourceDeployFromFile(selectedResource);
   }
 }
 
@@ -32,12 +32,12 @@ export class StaticResourceBundle extends ForcecodeCommand {
     this.label = 'Build Resource Bundle';
   }
 
-  public command(context, selectedResource?) {
-    return staticResourceBundleDeploy(context);
+  public command(_context: any, _selectedResource?: any) {
+    return staticResourceBundleDeploy();
   }
 }
 
-export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
+export default function staticResourceBundleDeploy(): any {
   // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
   return Promise.resolve(vscode.window.forceCode)
     .then(getPackageName)
@@ -101,10 +101,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
   }
 }
 
-export function staticResourceDeployFromFile(
-  textDocument: vscode.TextDocument,
-  context: vscode.ExtensionContext
-): any {
+export function staticResourceDeployFromFile(textDocument: vscode.TextDocument): any {
   // This command is run when working in a file, and it's saved... It will auto bundle/deploy that static resource
   return Promise.resolve(vscode.window.forceCode)
     .then(getPackageName)
@@ -112,11 +109,11 @@ export function staticResourceDeployFromFile(
     .then(deployComplete)
     .catch(onError);
   // =======================================================================================================================================
-  function getPackageName() {
+  function getPackageName(): vscode.QuickPickItem {
     let bundlePath: string =
       vscode.window.forceCode.projectRoot + path.sep + 'resource-bundles' + path.sep;
     var resType;
-    var resourceName;
+    var resourceName = '';
     try {
       resourceName = textDocument.fileName.split(bundlePath)[1].split('.resource.')[0];
       resType = textDocument.fileName
@@ -250,9 +247,7 @@ function getFileList(root: string) {
  */
 function deploy(zip: any, packageName: string, conType: string) {
   return new Promise((resolve, reject) => {
-    var finalPath: string = `${vscode.window.forceCode.projectRoot}${path.sep}staticresources${
-      path.sep
-    }${packageName}.resource`;
+    var finalPath: string = `${vscode.window.forceCode.projectRoot}${path.sep}staticresources${path.sep}${packageName}.resource`;
     zip
       .pipe(fs.createWriteStream(finalPath))
       .on('finish', () => {

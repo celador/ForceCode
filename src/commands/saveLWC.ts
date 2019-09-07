@@ -59,7 +59,7 @@ export function saveLWC(
     // add files in the folder to PreSaveFiles so we can compare content
     saveService.addFilesInFolder(filePath);
     var changedFiles: any[] = definitions.filter(
-      def =>
+      (def: any) =>
         !saveService.compareContents(path.join(filePath, def.FilePath.split('/').pop()), def.Source)
     );
 

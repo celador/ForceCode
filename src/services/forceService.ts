@@ -145,7 +145,7 @@ export default class ForceService implements forceCode.IForceService {
           }
           resolve(proms);
         })
-        .on('error', (err, item) => {
+        .on('error', (err: Error, item: klaw.Item) => {
           notifications.writeLog(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
         });
     });

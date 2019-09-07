@@ -19,7 +19,7 @@ export class OverallCoverage extends ForcecodeCommand {
     this.label = 'Get current overall code coverage';
   }
 
-  public command(context: any, selectedResource: any): any {
+  public command(_context: any, _selectedResource: any): any {
     return apexTestResults().then(res => {
       if (res.records) {
         var outputString: string = 'Class/Trigger Name';

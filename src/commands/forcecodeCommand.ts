@@ -65,7 +65,7 @@ export class CancelCommand extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
+  public command(context: any, selectedResource?: any) {
     return context.execution.cancel();
   }
 }

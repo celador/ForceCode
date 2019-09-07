@@ -27,7 +27,7 @@ export class Settings extends ForcecodeCommand {
     this.label = 'Org Settings';
   }
 
-  public command(context: any, selectedResource: any): any {
+  public command(_context: any, _selectedResource: any): any {
     const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
     if (!myExt) {
       return Promise.reject();

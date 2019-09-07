@@ -19,7 +19,7 @@ export class PackageBuilder extends ForcecodeCommand {
     this.label = 'Build package.xml file';
   }
 
-  public command(context, selectedResource?) {
+  public command(_context: any, _selectedResource?: any) {
     return packageBuilder(true);
   }
 }

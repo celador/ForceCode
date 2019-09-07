@@ -17,7 +17,7 @@ export class ToggleCoverage extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
+  public command(_context: any, _selectedResource?: any) {
     vscode.window.forceCode.config.showTestCoverage = !vscode.window.forceCode.config
       .showTestCoverage;
     return updateDecorations();
@@ -32,7 +32,7 @@ export class GetCodeCoverage extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
+  public command(_context: any, _selectedResource?: any) {
     return apexTestResults();
   }
 }
@@ -44,7 +44,7 @@ export class RunTests extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
+  public command(context: any, _selectedResource?: any) {
     var ctv = context;
     if (context instanceof FCFile) {
       ctv = { name: context.getWsMember().name, type: 'class' };
