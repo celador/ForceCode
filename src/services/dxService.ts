@@ -3,7 +3,6 @@ import { fcConnection, FCOauth, notifications } from '.';
 import { isWindows } from './operatingSystem';
 import { SpawnOptions, spawn } from 'child_process';
 import { FCCancellationToken } from '../commands/forcecodeCommand';
-import { inDebug } from './fcAnalytics';
 const kill = require('tree-kill');
 
 export interface SFDX {
@@ -242,13 +241,6 @@ export default class DXService {
   public createScratchOrg(options: string, cancellationToken: FCCancellationToken): Promise<any> {
     const curConnection = fcConnection.currentConnection;
     if (curConnection) {
-      // TODO: Fix stubbing the call to create scratch org
-      if (inDebug()) {
-        return Promise.resolve({
-          orgId: '00D1N00000AAAAAAAA',
-          username: 'test@test.com',
-        });
-      }
       return this.runCommand(
         'org:create ' + options + ' --targetdevhubusername ' + curConnection.orgInfo.username,
         false,

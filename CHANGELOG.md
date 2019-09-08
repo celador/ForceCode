@@ -1,6 +1,7 @@
 ## Change Log
 
 * 3.18.4
+    * Added support to select a definition file when creating a scratch org
     * Updated Forcecode view icon
     * Start-up performance improvements when loading an existing project
     * Fix missed `typeof` in fix for `Relationship fields not displayed` #306
