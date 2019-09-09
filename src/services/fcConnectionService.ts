@@ -266,6 +266,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         path.join(vscode.window.forceCode.workspaceRoot, 'force.json'),
         JSON.stringify({ lastUsername: config.username }, undefined, 4)
       );
+      vscode.window.forceCode.projectRoot = path.join(vscode.window.forceCode.workspaceRoot, vscode.window.forceCode.config.src || 'src');
       return Promise.resolve(hadToLogIn);
     });
   }
