@@ -49,7 +49,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     return [];
   }
 
-  public getParent(element: FCConnection): any {
+  public getParent(_element: FCConnection): any {
     return null; // this is the parent
   }
 
@@ -94,7 +94,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
           .on('end', function() {
             resolve(usernames);
           })
-          .on('error', (err, item) => {
+          .on('error', (err: Error, item: klaw.Item) => {
             notifications.writeLog(
               `ForceCode: Error reading ${item.path}. Message: ${err.message}`
             );

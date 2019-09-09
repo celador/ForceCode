@@ -17,7 +17,7 @@ export class CodeCompletionRefresh extends ForcecodeCommand {
     this.label = 'Code Completion Refresh';
   }
 
-  public async command(context: any, selectedResource: any): Promise<any> {
+  public async command(): Promise<any> {
     let options: vscode.QuickPickItem[] = [
       {
         description: 'Generate faux classes for all objects',

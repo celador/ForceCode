@@ -51,9 +51,10 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
     return new Promise<string>((resolve, reject) => {
       var query: string = `SELECT ${field} FROM ${toolingType} WHERE ${nsPrefix}`;
       vscode.commands.executeCommand('ForceCode.toolingQuery', query).then(
-        (results: QueryResult) => {
-          if (results && results.totalSize === 1) {
-            return resolve(results.records[0][field]);
+        results => {
+          const theResults = results as QueryResult;
+          if (theResults && theResults.totalSize === 1) {
+            return resolve(theResults.records[0][field]);
           } else {
             return resolve('The current file could NOT be found in the org');
           }

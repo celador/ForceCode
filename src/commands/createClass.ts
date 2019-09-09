@@ -16,7 +16,7 @@ export class CreateClass extends ForcecodeCommand {
     this.label = 'New...';
   }
 
-  public command(context: any, selectedResource: any): any {
+  public command(): any {
     // ask what the user wants to create
 
     return new Promise((resolve, reject) => {

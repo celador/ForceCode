@@ -60,7 +60,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public constructor() {
-    window.onDidChangeActiveTextEditor(event => {
+    window.onDidChangeActiveTextEditor(_event => {
       this.refresh();
     });
   }
@@ -191,9 +191,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
                   title: '',
                   arguments: [curEd.fileName],
                 };
-                newFCFile.tooltip = `WARNING: This file isn\'t located in the current PROJECT PATH\n(${
-                  window.forceCode.projectRoot
-                })`;
+                newFCFile.tooltip = `WARNING: This file isn\'t located in the current PROJECT PATH\n(${window.forceCode.projectRoot})`;
                 fcFiles.push(newFCFile);
               }
             }
@@ -239,8 +237,8 @@ export class FCFile extends TreeItem {
   public readonly collapsibleState: TreeItemCollapsibleState;
 
   private parent: CodeCovViewService;
-  private wsMember: IWorkspaceMember;
-  private type: string;
+  private wsMember!: IWorkspaceMember;
+  private type!: string;
 
   constructor(
     name: string,
@@ -285,7 +283,8 @@ export class FCFile extends TreeItem {
       var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
       var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
       this.label = percent + '% ' + this.label;
-      this.tooltip = this.label + ' - ' + fileCoverage.NumLinesCovered + '/' + total + ' lines covered';
+      this.tooltip =
+        this.label + ' - ' + fileCoverage.NumLinesCovered + '/' + total + ' lines covered';
       const imagePath: string = path.join(window.forceCode.storageRoot, 'images');
       if (percent >= 75) {
         this.type = ClassType.CoveredClass;

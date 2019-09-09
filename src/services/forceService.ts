@@ -8,17 +8,16 @@ import { Connection, IMetadataFileProperties } from 'jsforce';
 import { getUUID, FCAnalytics } from './fcAnalytics';
 
 import klaw = require('klaw');
-import { QueryResult } from 'jsforce';
 import { defaultOptions, readForceJson } from './configuration';
 import { isEmptyUndOrNull } from '../util';
 
 export default class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
   public config: forceCode.Config;
-  public conn: Connection;
+  public conn!: Connection;
   public containerId: string | undefined;
   public containerMembers: forceCode.IContainerMember[];
-  public describe: forceCode.IMetadataDescribe | undefined;
+  public describe!: forceCode.IMetadataDescribe;
   public containerAsyncRequestId: string | undefined;
   public projectRoot: string;
   public workspaceRoot: string;
@@ -97,10 +96,7 @@ export default class ForceService implements forceCode.IForceService {
   }
 
   public checkForFileChanges() {
-    return vscode.window.forceCode.conn.metadata.describe().then(res => {
-      vscode.window.forceCode.describe = res;
-      return this.getWorkspaceMembers().then(this.parseMembers);
-    });
+    return this.getWorkspaceMembers().then(this.parseMembers);
   }
 
   // Get files in src folder..
@@ -145,7 +141,7 @@ export default class ForceService implements forceCode.IForceService {
           }
           resolve(proms);
         })
-        .on('error', (err, item) => {
+        .on('error', (err: Error, item: klaw.Item) => {
           notifications.writeLog(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
         });
     });
@@ -211,11 +207,13 @@ export default class ForceService implements forceCode.IForceService {
       throw { message: '$(alert) Missing Credentials $(alert)' };
     }
 
+    vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
+    notifications.setStatusCommand('ForceCode.showMenu');
+    notifications.setStatusTooltip('Open the ForceCode Menu');
+    notifications.showStatus('ForceCode Ready!');
+
     // get the current org info
-    return Promise.resolve(self)
-      .then(connectionSuccess)
-      .then(getNamespacePrefix)
-      .then(checkForChanges)
+    return checkForChanges()
       .then(cleanupContainers)
       .catch(connectionError);
 
@@ -225,46 +223,30 @@ export default class ForceService implements forceCode.IForceService {
         vscode.window.forceCode.conn.tooling
           .sobject('MetadataContainer')
           .find({ Name: { $like: 'ForceCode-%' } })
-          .execute(function(err: any, records: any) {
+          .execute(function(_err: any, records: any) {
             var toDelete: string[] = new Array<string>();
-            if (!records) {
+            if (!records || records.length === 0) {
               resolve();
             }
-            if (toDelete.length > 0) {
-              resolve(
-                vscode.window.forceCode.conn.tooling.sobject('MetadataContainer').del(toDelete)
-              );
-            } else {
-              resolve();
-            }
+            records.forEach((rec: any) => {
+              toDelete.push(rec.Id);
+            });
+            resolve(
+              vscode.window.forceCode.conn.tooling.sobject('MetadataContainer').del(toDelete)
+            );
           });
       });
     }
 
-    function checkForChanges(svc: forceCode.IForceService) {
-      vscode.commands.executeCommand('ForceCode.checkForFileChanges', undefined, undefined);
-      return svc;
+    function checkForChanges() {
+      return Promise.resolve(
+        vscode.commands.executeCommand('ForceCode.checkForFileChanges', undefined, undefined)
+      );
     }
 
-    function connectionSuccess(svc: forceCode.IForceService) {
-      vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
-      notifications.setStatusCommand('ForceCode.showMenu');
-      notifications.setStatusTooltip('Open the ForceCode Menu');
-      notifications.showStatus('ForceCode Ready!');
-
-      return svc;
-    }
-    function getNamespacePrefix(svc: forceCode.IForceService) {
-      return svc.conn.query('SELECT NamespacePrefix FROM Organization').then((res: QueryResult) => {
-        if (res && res.records.length && res.records[0].NamespacePrefix) {
-          svc.config.prefix = res.records[0].NamespacePrefix;
-        }
-        return svc;
-      });
-    }
     function connectionError(err: any) {
       notifications.showError(`ForceCode: Connection Error`);
-      throw err;
+      return Promise.reject(err);
     }
   }
 }

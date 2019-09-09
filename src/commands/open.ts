@@ -15,7 +15,7 @@ export class ShowFileOptions extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
+  public command(context: any[]) {
     return showFileOptions(context, this.cancellationToken);
   }
 }
@@ -34,7 +34,7 @@ export class Open extends ForcecodeCommand {
     this.label = 'Open Salesforce File';
   }
 
-  public command(context: any, selectedResource: any): any {
+  public command(): any {
     return Promise.resolve(vscode.window.forceCode)
       .then(getFileList)
       .then(proms => showFileOptions(proms, this.cancellationToken));

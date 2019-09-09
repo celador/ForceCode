@@ -3,7 +3,6 @@ import { fcConnection, FCOauth, notifications } from '.';
 import { isWindows } from './operatingSystem';
 import { SpawnOptions, spawn } from 'child_process';
 import { FCCancellationToken } from '../commands/forcecodeCommand';
-import { inDebug } from './fcAnalytics';
 const kill = require('tree-kill');
 
 export interface SFDX {
@@ -99,7 +98,7 @@ export default class DXService {
       env: Object.assign({ SFDX_JSON_TO_STDOUT: 'true' }, process.env),
     };
 
-    var pid;
+    var pid: number;
     var sfdxNotFound = false;
 
     return new Promise((resolve, reject) => {
@@ -218,12 +217,12 @@ export default class DXService {
       .openTextDocument(
         vscode.Uri.parse(`sflog://salesforce.com/${new Date().toISOString()}.log?q=${id}`)
       )
-      .then(function(_document: vscode.TextDocument) {
-        if (_document.getText() !== '') {
-          return vscode.window.showTextDocument(_document, 3, true);
+      .then(function(document: vscode.TextDocument) {
+        if (document.getText() !== '') {
+          return vscode.window.showTextDocument(document, 3, true);
         } else {
           return {
-            async then(callback) {
+            async then(callback: any) {
               return callback(undefined);
             },
           };
@@ -242,13 +241,6 @@ export default class DXService {
   public createScratchOrg(options: string, cancellationToken: FCCancellationToken): Promise<any> {
     const curConnection = fcConnection.currentConnection;
     if (curConnection) {
-      // TODO: Fix stubbing the call to create scratch org
-      if (inDebug()) {
-        return Promise.resolve({
-          orgId: '00D1N00000AAAAAAAA',
-          username: 'test@test.com',
-        });
-      }
       return this.runCommand(
         'org:create ' + options + ' --targetdevhubusername ' + curConnection.orgInfo.username,
         false,

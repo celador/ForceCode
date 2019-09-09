@@ -9,21 +9,21 @@ suite('find.ts', () => {
     sandbox.restore();
   });
   test('Searches for and opens file', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[0]);
         },
       };
     });
-    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(options) {
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(_options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback('test');
         },
       };
     });
-    await vscode.commands.executeCommand('ForceCode.find').then(res => {
+    await vscode.commands.executeCommand('ForceCode.find').then(_res => {
       assert.strictEqual(true, true);
     });
   });

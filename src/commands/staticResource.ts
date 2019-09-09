@@ -14,8 +14,8 @@ export class StaticResourceDeployFile extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
-    return staticResourceDeployFromFile(selectedResource, context);
+  public command(context: vscode.TextDocument) {
+    return staticResourceDeployFromFile(context);
   }
 }
 
@@ -32,12 +32,12 @@ export class StaticResourceBundle extends ForcecodeCommand {
     this.label = 'Build Resource Bundle';
   }
 
-  public command(context, selectedResource?) {
-    return staticResourceBundleDeploy(context);
+  public command() {
+    return staticResourceBundleDeploy();
   }
 }
 
-export default function staticResourceBundleDeploy(context: vscode.ExtensionContext): any {
+export default function staticResourceBundleDeploy(): any {
   // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
   return Promise.resolve(vscode.window.forceCode)
     .then(getPackageName)
@@ -101,10 +101,7 @@ export default function staticResourceBundleDeploy(context: vscode.ExtensionCont
   }
 }
 
-export function staticResourceDeployFromFile(
-  textDocument: vscode.TextDocument,
-  context: vscode.ExtensionContext
-): any {
+export function staticResourceDeployFromFile(textDocument: vscode.TextDocument): any {
   // This command is run when working in a file, and it's saved... It will auto bundle/deploy that static resource
   return Promise.resolve(vscode.window.forceCode)
     .then(getPackageName)
@@ -112,11 +109,11 @@ export function staticResourceDeployFromFile(
     .then(deployComplete)
     .catch(onError);
   // =======================================================================================================================================
-  function getPackageName() {
+  function getPackageName(): vscode.QuickPickItem {
     let bundlePath: string =
       vscode.window.forceCode.projectRoot + path.sep + 'resource-bundles' + path.sep;
     var resType;
-    var resourceName;
+    var resourceName = '';
     try {
       resourceName = textDocument.fileName.split(bundlePath)[1].split('.resource.')[0];
       resType = textDocument.fileName
@@ -212,7 +209,7 @@ function getFileList(root: string) {
   return (function innerGetFileList(localPath) {
     var fileslist: any[] = []; // List of files
     var files: any = fs.readdirSync(localPath); // Files in current 'sfdc' directory
-    var ignoreFiles: any = vscode.workspace.getConfiguration('force')['filesExclude'] || {
+    var ignoreFilesSettings: any = vscode.workspace.getConfiguration('force')['filesExclude'] || {
       '.gitignore': true,
       '.DS_Store': true,
       '.org_metadata': true,
@@ -220,9 +217,9 @@ function getFileList(root: string) {
       'node_modules/**': true,
       'bower_modules/**': true,
     };
-    var _ignoreFiles: any[] = Object.keys(ignoreFiles)
+    var ignoreFiles: any[] = Object.keys(ignoreFilesSettings)
       .map(key => {
-        return { key: key, value: ignoreFiles[key] };
+        return { key: key, value: ignoreFilesSettings[key] };
       })
       .filter(setting => setting.value === true)
       .map(setting => root + path.sep + setting.key);
@@ -234,7 +231,7 @@ function getFileList(root: string) {
       // If file is a directory, recursively add it's children
       if (stat.isDirectory()) {
         fileslist = fileslist.concat(innerGetFileList(pathname));
-      } else if (!globule.isMatch(_ignoreFiles, pathname, { matchBase: true, dot: true })) {
+      } else if (!globule.isMatch(ignoreFiles, pathname, { matchBase: true, dot: true })) {
         fileslist.push(pathname.replace(root + path.sep, ''));
       }
     });
@@ -250,9 +247,7 @@ function getFileList(root: string) {
  */
 function deploy(zip: any, packageName: string, conType: string) {
   return new Promise((resolve, reject) => {
-    var finalPath: string = `${vscode.window.forceCode.projectRoot}${path.sep}staticresources${
-      path.sep
-    }${packageName}.resource`;
+    var finalPath: string = `${vscode.window.forceCode.projectRoot}${path.sep}staticresources${path.sep}${packageName}.resource`;
     zip
       .pipe(fs.createWriteStream(finalPath))
       .on('finish', () => {

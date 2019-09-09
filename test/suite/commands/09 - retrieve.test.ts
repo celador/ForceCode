@@ -10,53 +10,53 @@ suite('retrieve.ts', () => {
   });
 
   test('Retrieve via package.xml', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(_items, _options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback({ description: 'packaged' }); // retrieve from package.xml
         },
       };
     });
-    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(res => {
+    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(_res => {
       assert.strictEqual(true, true);
     });
   });
 
   test('Retrieve all Apex Classes', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(_items, _options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback({ description: 'apexclasses' }); // retrieve everything
         },
       };
     });
-    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(res => {
+    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(_res => {
       assert.strictEqual(true, true);
     });
   });
 
   test('Retrieve all Custom Objects', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(_items, _options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback({ description: 'customobj' }); // retrieve everything
         },
       };
     });
-    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(res => {
+    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(_res => {
       assert.strictEqual(true, true);
     });
   });
 
   test('Retrieve all', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(_items, _options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback({ description: 'unpackaged' }); // retrieve everything
         },
       };
     });
-    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(res => {
+    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(_res => {
       assert.strictEqual(true, true);
     });
   });

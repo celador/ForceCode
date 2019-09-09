@@ -9,14 +9,14 @@ suite('open.ts', () => {
     sandbox.restore();
   });
   test('Open a file', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[0]); // apex class
         },
       };
     });
-    await vscode.commands.executeCommand('ForceCode.open').then(res => {
+    await vscode.commands.executeCommand('ForceCode.open').then(_res => {
       assert.strictEqual(true, true);
     });
   });

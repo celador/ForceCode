@@ -116,7 +116,7 @@ export function saveAura(
           Format,
           Source,
         })
-        .catch(err => {
+        .catch(_err => {
           return {
             State: 'Error',
             message:

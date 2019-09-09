@@ -106,7 +106,6 @@ export function activate(context: vscode.ExtensionContext): any {
           if (isResource && isResource.index) {
             return vscode.commands.executeCommand(
               'ForceCode.staticResourceDeployFromFile',
-              context,
               textDocument
             );
           } else if (toolingType) {

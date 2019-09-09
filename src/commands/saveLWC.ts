@@ -23,9 +23,7 @@ export function saveLWC(
     .then(ensureLWCBundle)
     .then(bundle => {
       if (Array.isArray(bundle)) {
-        return getLWCDefinition(bundle).then((definitions: any) =>
-          upsertLWCDefinition(definitions, bundle)
-        );
+        return getLWCDefinition(bundle).then(upsertLWCDefinition);
       } else {
         return Promise.resolve(bundle);
       }
@@ -52,14 +50,14 @@ export function saveLWC(
       LightningComponentBundleId: bundle[0].Id,
     });
   }
-  function upsertLWCDefinition(definitions: any, bundle: any) {
+  function upsertLWCDefinition(definitions: any) {
     const docPath = document.fileName;
     const filePath: string = docPath.substring(0, docPath.lastIndexOf(path.sep));
 
     // add files in the folder to PreSaveFiles so we can compare content
     saveService.addFilesInFolder(filePath);
     var changedFiles: any[] = definitions.filter(
-      def =>
+      (def: any) =>
         !saveService.compareContents(path.join(filePath, def.FilePath.split('/').pop()), def.Source)
     );
 

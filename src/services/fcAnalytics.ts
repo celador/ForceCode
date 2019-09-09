@@ -18,7 +18,6 @@ export interface FCAnalytics {
 
 export class FCTimer {
   private startTime: number;
-  private stopTime: number;
   private name: string;
 
   constructor(name: string) {
@@ -27,10 +26,8 @@ export class FCTimer {
   }
 
   public stopTimer() {
-    this.stopTime = Date.now();
-
     // send the time to GA
-    const totalTimeMS = this.stopTime - this.startTime;
+    const totalTimeMS = Date.now() - this.startTime;
     const totalHours = Math.floor(totalTimeMS / (60 * 60 * 1000));
     const totalMinutes = Math.floor((totalTimeMS % (60 * 60 * 1000)) / (60 * 1000));
     const totalSeconds = Math.floor(((totalTimeMS % (60 * 60 * 1000)) % (60 * 1000)) / 1000);

@@ -1,3 +1,4 @@
+import { Uri } from 'vscode';
 import { ForcecodeCommand } from './forcecodeCommand';
 import { dxService, codeCovViewService } from '../services';
 import * as path from 'path';
@@ -16,7 +17,7 @@ export class OpenOrg extends ForcecodeCommand {
     this.label = 'Open Org in browser';
   }
 
-  public command(context, selectedResource?) {
+  public command() {
     return dxService.openOrg();
   }
 }
@@ -28,7 +29,7 @@ export class PreviewVisualforce extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
+  public command(context: Uri) {
     var vfFileNameSplit = context.fsPath.split(path.sep);
     var vfFileName = vfFileNameSplit[vfFileNameSplit.length - 1].split('.')[0];
     return dxService.openOrgPage('/apex/' + vfFileName);
@@ -42,7 +43,7 @@ export class PreviewApp extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
+  public command(context: Uri) {
     var appFileNameSplit = context.fsPath.split(path.sep);
     var appFileName = appFileNameSplit[appFileNameSplit.length - 1];
     return dxService.openOrgPage('/c/' + appFileName);
@@ -56,7 +57,7 @@ export class OpenFileInOrg extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
+  public command(context: any) {
     var id: string | undefined;
     if (context) {
       if (context.fsPath) {

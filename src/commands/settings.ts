@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as deepmerge from 'deepmerge';
-import { saveConfigFile, readConfigFile } from '../services/configuration';
+import { saveConfigFile, readConfigFile, saveMetadata } from '../services/configuration';
 import { configuration, fcConnection, notifications } from '../services';
 import { ForcecodeCommand } from './forcecodeCommand';
 
@@ -27,7 +27,7 @@ export class Settings extends ForcecodeCommand {
     this.label = 'Org Settings';
   }
 
-  public command(context: any, selectedResource: any): any {
+  public command(): any {
     const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
     if (!myExt) {
       return Promise.reject();
@@ -50,7 +50,7 @@ export class Settings extends ForcecodeCommand {
     // And set its HTML content
     panel.webview.html = getSettingsPage();
 
-    const overwriteMerge = (destinationArray: any, sourceArray: any, options: any) => sourceArray;
+    const overwriteMerge = (_destinationArray: any, sourceArray: any, _options: any) => sourceArray;
 
     // handle settings changes
     panel.webview.onDidReceiveMessage(message => {
@@ -93,6 +93,7 @@ export class Settings extends ForcecodeCommand {
           vscode.window.forceCode.config = currentSettings;
         }
         configuration();
+        saveMetadata(currentSettings.username);
         notifications.showInfo('ForceCode settings saved successfully!', 'OK');
       } else if (message.switchUsername && message.username !== currentSettings.username) {
         // the user wants to change settings for another username

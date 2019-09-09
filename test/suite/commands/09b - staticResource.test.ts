@@ -29,28 +29,28 @@ suite('staticResource.ts', () => {
 
   test('Static resource deploy all', async () => {
     // call 'ForceCode.staticResource', stub choice to be the last (all)
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[toArray(items).length - 1]);
         },
       };
     });
-    return await vscode.commands.executeCommand('ForceCode.staticResource').then(res => {
+    return await vscode.commands.executeCommand('ForceCode.staticResource').then(_res => {
       return assert.strictEqual(true, true);
     });
   });
 
   test('Static resource deploy first', async () => {
     // call 'ForceCode.staticResource', stub choice to be the last (all)
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items, options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
-        async then(callback) {
+        async then(callback: any) {
           return callback(items[0]);
         },
       };
     });
-    return await vscode.commands.executeCommand('ForceCode.staticResource').then(res => {
+    return await vscode.commands.executeCommand('ForceCode.staticResource').then(_res => {
       return assert.strictEqual(true, true);
     });
   });

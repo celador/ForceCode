@@ -93,7 +93,7 @@ export function checkConfig(cfg: Config): Promise<Config> {
 }
 
 function getUrl(config: Config): Promise<Config> {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve) {
     if (Object.keys(config).indexOf('url') === -1) {
       let opts: any = [
         {
@@ -144,7 +144,7 @@ function getUrl(config: Config): Promise<Config> {
 }
 
 function getAutoCompile(config: Config): Promise<Config> {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve) {
     if (Object.keys(config).indexOf('autoCompile') === -1) {
       let options: vscode.QuickPickItem[] = [
         {

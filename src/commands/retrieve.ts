@@ -32,9 +32,9 @@ export class Refresh extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
+  public command(context: any, selectedResource?: any) {
     if (selectedResource && selectedResource instanceof Array) {
-      return new Promise((resolve, reject) => {
+      return new Promise(resolve => {
         var files: PXMLMember[] = [];
         var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => {
           if (curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
@@ -95,7 +95,7 @@ export class RetrieveBundle extends ForcecodeCommand {
     this.label = 'Retrieve Package/Metadata';
   }
 
-  public command(context, selectedResource?) {
+  public command(context: vscode.Uri | ToolingTypes | undefined) {
     return retrieve(context, this.cancellationToken);
   }
 }
@@ -331,8 +331,7 @@ export default function retrieve(
         theStream.on('error', error => {
           reject(
             error || {
-              message:
-                'There was an error retrieving ' + option.description,
+              message: 'There was an error retrieving ' + option.description,
             }
           );
         });

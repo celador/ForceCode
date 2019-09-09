@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.18.3",
+  "version": "3.18.4",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -58,7 +58,7 @@
       "activitybar": [
         {
           "id": "fcView",
-          "icon": "./images/logo.svg",
+          "icon": "./images/fcView.svg",
           "title": "ForceCode"
         }
       ]
@@ -595,7 +595,7 @@
     "@types/sinon": "^7.0.13",
     "@types/universal-analytics": "0.4.3",
     "@types/vscode": "1.36.0",
-    "@types/xml2js": "0.4.4",
+    "@types/xml2js": "0.4.5",
     "compressing": "1.4.0",
     "decache": "^4.5.1",
     "deepmerge": "4.0.0",
@@ -620,7 +620,7 @@
     "vsce": "^1.66.0",
     "vscode-test": "^1.2.0",
     "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.7",
+    "webpack-cli": "^3.3.8",
     "xml2js": "0.4.22"
   }
 }

@@ -7,7 +7,7 @@ export class ApexTestLinkProvider implements vscode.HoverProvider {
   public provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken
+    _token: vscode.CancellationToken
   ): vscode.ProviderResult<vscode.Hover> {
     var wordPosition = document.getWordRangeAtPosition(position);
     if (!wordPosition || wordPosition.start.character === 0)

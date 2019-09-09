@@ -5,7 +5,7 @@ import * as fs from 'fs';
 
 suite('overallCoverage.ts', () => {
   test('Gets overall coverage', async () => {
-    await vscode.commands.executeCommand('ForceCode.getOverallCoverage').then(res => {
+    await vscode.commands.executeCommand('ForceCode.getOverallCoverage').then(_res => {
       var output = path.join(vscode.window.forceCode.projectRoot, 'coverage');
       assert.strictEqual(fs.existsSync(output), true);
     });

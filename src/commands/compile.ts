@@ -26,7 +26,7 @@ export class CompileMenu extends ForcecodeCommand {
     this.label = 'Compile/Deploy';
   }
 
-  public command(context, selectedResource?) {
+  public command(context: any, selectedResource?: any) {
     if (context) {
       if (context.uri) {
         context = context.uri;
@@ -53,7 +53,7 @@ export class ForceCompile extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context, selectedResource?) {
+  public command(context: any) {
     return vscode.commands.executeCommand('ForceCode.compile', context, true);
   }
 }

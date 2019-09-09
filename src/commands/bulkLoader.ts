@@ -16,7 +16,7 @@ export class BulkLoader extends ForcecodeCommand {
     this.label = 'Bulk Loader';
   }
 
-  public command(context: any, selectedResource: any): any {
+  public command(): any {
     const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
     if (!myExt) {
       return Promise.reject('Error loading extension info');

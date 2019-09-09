@@ -50,7 +50,7 @@ export class SaveHistoryService implements vscode.TreeDataProvider<SaveResult> {
     return [];
   }
 
-  public getParent(element: SaveResult): any {
+  public getParent(_element: SaveResult): any {
     return null; // this is the parent
   }
 }
