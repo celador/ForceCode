@@ -1,7 +1,9 @@
 ## Change Log
 
+* 3.18.6
+    * Fix `"Retrieve Package/Metadata" commands result in "Metadata describe error"` #315 
 * 3.18.5
-   * Fix project root not being assigned correctly, leading to the extension not functioning
+    * Fix project root not being assigned correctly, leading to the extension not functioning
 * 3.18.4
     * Added support to select a definition file when creating a scratch org
     * Updated Forcecode view icon

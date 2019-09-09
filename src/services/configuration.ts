@@ -3,7 +3,7 @@ import { Config } from './../forceCode';
 import * as forceCode from './../forceCode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { fcConnection, ForceService } from '.';
+import { fcConnection, ForceService, notifications } from '.';
 import * as deepmerge from 'deepmerge';
 import { existsSync } from 'fs-extra';
 
@@ -68,7 +68,12 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
       fs.unlinkSync(sfdxPath);
     } else {
       // not a symbolic link, so move it because it's an SFDX proj folder
-      fs.moveSync(sfdxPath, forceSfdxPath, { overwrite: true });
+      try {
+        fs.copySync(sfdxPath, forceSfdxPath, { overwrite: true });
+        fs.removeSync(sfdxPath);
+      } catch (e) {
+        notifications.writeLog(e);
+      }
 
       // if the sfdx-project.json file exists, move it into the .forceCode folder
       if (fs.existsSync(sfdxProjectJson)) {
@@ -116,8 +121,6 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
     sfdxConfig.defaultusername = self.config.username;
     fs.outputFileSync(sfdxConfigPath, JSON.stringify(sfdxConfig, undefined, 4));
   }
-
-  readMetadata(self.config.username);
 
   return fcConnection.refreshConnections().then(() => {
     return Promise.resolve(self.config);
@@ -195,7 +198,7 @@ export function saveMetadata(userName: string | undefined) {
   });
 }
 
-function readMetadata(userName: string) {
+export function getMetadata(userName: string) {
   const metadataFile: string = path.join(
     vscode.window.forceCode.workspaceRoot,
     '.forceCode',
