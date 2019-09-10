@@ -57,6 +57,7 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
   const sfdxProjectJson = path.join(projPath, 'sfdx-project.json');
   const forceSFDXProjJson = path.join(forceConfigPath, 'sfdx-project.json');
   var sfdxStat;
+  var requiresRestart = false;
 
   try {
     sfdxStat = fs.lstatSync(sfdxPath);
@@ -73,6 +74,7 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
         fs.removeSync(sfdxPath);
       } catch (e) {
         notifications.writeLog(e);
+        requiresRestart = true;
       }
 
       // if the sfdx-project.json file exists, move it into the .forceCode folder
@@ -89,7 +91,12 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
   }
 
   // link to the newly logged in org's sfdx folder in .forceCode/USERNAME/.sfdx
-  fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
+  try {
+    fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
+  } catch (e) {
+    notifications.writeLog(e);
+    requiresRestart = true;
+  }
 
   if (!fs.existsSync(forceSFDXProjJson)) {
     // add in a bare sfdx-project.json file for language support from official salesforce extensions
@@ -120,6 +127,20 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
     }
     sfdxConfig.defaultusername = self.config.username;
     fs.outputFileSync(sfdxConfigPath, JSON.stringify(sfdxConfig, undefined, 4));
+  }
+
+  if (requiresRestart) {
+    notifications
+      .showWarning(
+        'Existing SFDX project found. In order to make use of the SFDX extensions a restart of VSCode is required. Restart Now?',
+        'Yes',
+        'No'
+      )
+      .then(choice => {
+        if (choice === 'Yes') {
+          vscode.commands.executeCommand('workbench.action.reloadWindow');
+        }
+      });
   }
 
   return fcConnection.refreshConnections().then(() => {
@@ -194,6 +215,7 @@ export function saveMetadata(userName: string | undefined) {
     fs.outputFileSync(metadataFile, JSON.stringify(res, undefined, 4));
     vscode.window.forceCode.describe = res;
     vscode.window.forceCode.config.prefix = res.organizationNamespace;
+    notifications.writeLog('Done retrieving metadata records');
     return Promise.resolve(res);
   });
 }
@@ -208,6 +230,7 @@ export function getMetadata(userName: string) {
   if (existsSync(metadataFile)) {
     vscode.window.forceCode.describe = fs.readJsonSync(metadataFile);
     vscode.window.forceCode.config.prefix = vscode.window.forceCode.describe.organizationNamespace;
+    notifications.writeLog('Done reading metadata records (JSON)');
     return Promise.resolve(vscode.window.forceCode.describe);
   } else {
     return saveMetadata(userName);

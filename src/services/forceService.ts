@@ -159,7 +159,6 @@ export default class ForceService implements forceCode.IForceService {
       if (!Array.isArray(recs)) {
         Promise.resolve();
       }
-      notifications.writeLog('Done retrieving metadata records');
       recs.forEach(curSet => {
         if (Array.isArray(curSet)) {
           curSet.forEach(key => {

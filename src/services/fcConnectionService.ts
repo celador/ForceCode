@@ -8,6 +8,7 @@ import { saveConfigFile, readConfigFile, getMetadata } from './configuration';
 import { checkConfig, enterCredentials } from './credentials';
 import { SFDX } from '.';
 import { FCCancellationToken } from '../commands/forcecodeCommand';
+import { jsforce, Connection } from 'jsforce';
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
 
@@ -161,21 +162,21 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     orgInfo: FCOauth | SFDX | undefined,
     cancellationToken: FCCancellationToken
   ): Promise<boolean> {
+    const service = this;
     if (!this.loggingIn) {
       this.loggingIn = true;
       var username: string | undefined;
       if (orgInfo) {
         username = orgInfo.username;
       }
-      return this.setupConn(this, username, cancellationToken)
-        .then(res => {
-          return this.login(this, res).then(loginRes => {
-            return vscode.window.forceCode.connect().then(() => {
-              return loginRes;
-            });
+      return setupConn()
+        .then(loginRes => {
+          return vscode.window.forceCode.connect().then(() => {
+            return loginRes;
           });
         })
-        .catch(() => {
+        .catch(err => {
+          notifications.writeLog(err);
           return false;
         })
         .then(finalRes => {
@@ -185,96 +186,102 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     } else {
       return Promise.resolve(false);
     }
-  }
 
-  private setupConn(
-    service: FCConnectionService,
-    username: string | undefined,
-    cancellationToken: FCCancellationToken
-  ): Promise<boolean> {
-    service.currentConnection = service.getConnByUsername(username);
-    if (!service.isLoggedIn()) {
+    function setupConn(): Promise<boolean> {
+      service.currentConnection = service.getConnByUsername(username);
+
+      if (service.isLoggedIn()) {
+        vscode.window.forceCode.config = readConfigFile(username);
+        return Promise.resolve(true);
+      }
+
       return dxService
         .getOrgInfo(username)
-        .catch(() => {
-          if (service.currentConnection) {
-            service.currentConnection.connection = undefined;
-          }
-          return enterCredentials(cancellationToken);
-        })
-        .then(orgInf => {
-          service.currentConnection = service.addConnection(orgInf, true);
+        .catch(getCredentials)
+        .then(setOrgInfo)
+        .then(getUserId)
+        .then(login);
+    }
+
+    function getCredentials() {
+      if (service.currentConnection) {
+        service.currentConnection.connection = undefined;
+      }
+      return enterCredentials(cancellationToken);
+    }
+
+    function setOrgInfo(orgInf: FCOauth | SFDX): Promise<Connection | undefined> {
+      service.currentConnection = service.addConnection(orgInf, true);
+      if (!service.currentConnection) {
+        return Promise.reject('Error setting up connection');
+      }
+      vscode.window.forceCode.config = readConfigFile(orgInf.username);
+
+      const sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInf.username + '.json');
+      const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
+      service.currentConnection.connection = new jsforce.Connection({
+        oauth2: {
+          clientId: service.currentConnection.orgInfo.clientId || 'SalesforceDevelopmentExperience',
+        },
+        instanceUrl: service.currentConnection.orgInfo.instanceUrl,
+        accessToken: service.currentConnection.orgInfo.accessToken,
+        refreshToken: refreshToken,
+        version:
+          vscode.window.forceCode &&
+          vscode.window.forceCode.config &&
+          vscode.window.forceCode.config.apiVersion
+            ? vscode.window.forceCode.config.apiVersion
+            : vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+      });
+
+      return Promise.resolve(service.currentConnection.connection);
+    }
+
+    function getUserId(connection: Connection | undefined): Promise<boolean> {
+      if (connection) {
+        return connection.identity().then((res: any) => {
           if (!service.currentConnection) {
             return Promise.reject('Error setting up connection');
           }
-          vscode.window.forceCode.config = readConfigFile(orgInf.username);
-
-          const sfdxPath = path.join(
-            operatingSystem.getHomeDir(),
-            '.sfdx',
-            orgInf.username + '.json'
-          );
-          const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
-          service.currentConnection.connection = new jsforce.Connection({
-            oauth2: {
-              clientId:
-                service.currentConnection.orgInfo.clientId || 'SalesforceDevelopmentExperience',
-            },
-            instanceUrl: service.currentConnection.orgInfo.instanceUrl,
-            accessToken: service.currentConnection.orgInfo.accessToken,
-            refreshToken: refreshToken,
-            version:
-              vscode.window.forceCode &&
-              vscode.window.forceCode.config &&
-              vscode.window.forceCode.config.apiVersion
-                ? vscode.window.forceCode.config.apiVersion
-                : vscode.workspace.getConfiguration('force')['defaultApiVersion'],
-          });
-
-          if (service.currentConnection.connection) {
-            return service.currentConnection.connection.identity().then((res: any) => {
-              if (!service.currentConnection) {
-                return Promise.reject('Error setting up connection');
-              }
-              service.currentConnection.orgInfo.userId = res.user_id;
-              service.currentConnection.isLoggedIn = true;
-              vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
-              return Promise.resolve(false);
-            });
-          }
+          service.currentConnection.orgInfo.userId = res.user_id;
+          service.currentConnection.isLoggedIn = true;
+          vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
+          return Promise.resolve(false);
         });
-    } else {
-      vscode.window.forceCode.config = readConfigFile(username);
-      return Promise.resolve(true);
+      } else {
+        return Promise.reject('Error setting up connection');
+      }
+    }
+
+    function login(hadToLogIn: boolean): Promise<boolean> {
+      vscode.window.forceCode.containerAsyncRequestId = undefined;
+      vscode.window.forceCode.containerId = undefined;
+      vscode.window.forceCode.containerMembers = [];
+      return checkConfig(vscode.window.forceCode.config).then(config => {
+        saveConfigFile(config.username, config);
+        if (!service.currentConnection || !service.currentConnection.connection) {
+          return Promise.reject('Error setting up connection');
+        }
+        vscode.window.forceCode.conn = service.currentConnection.connection;
+
+        // writing to force.json will trigger the file watcher. this, in turn, will call configuration()
+        // which will finish setting up the login process
+        fs.outputFileSync(
+          path.join(vscode.window.forceCode.workspaceRoot, 'force.json'),
+          JSON.stringify({ lastUsername: config.username }, undefined, 4)
+        );
+        vscode.window.forceCode.projectRoot = path.join(
+          vscode.window.forceCode.workspaceRoot,
+          vscode.window.forceCode.config.src || 'src'
+        );
+        return getMetadata(service.currentConnection.orgInfo.username).then(() =>
+          Promise.resolve(hadToLogIn)
+        );
+      });
     }
   }
 
-  private login(service: FCConnectionService, hadToLogIn: boolean): Promise<boolean> {
-    vscode.window.forceCode.containerAsyncRequestId = undefined;
-    vscode.window.forceCode.containerId = undefined;
-    vscode.window.forceCode.containerMembers = [];
-    return checkConfig(vscode.window.forceCode.config).then(config => {
-      saveConfigFile(config.username, config);
-      if (!service.currentConnection || !service.currentConnection.connection) {
-        return Promise.reject('Error setting up connection');
-      }
-      vscode.window.forceCode.conn = service.currentConnection.connection;
-
-      // writing to force.json will trigger the file watcher. this, in turn, will call configuration()
-      // which will finish setting up the login process
-      fs.outputFileSync(
-        path.join(vscode.window.forceCode.workspaceRoot, 'force.json'),
-        JSON.stringify({ lastUsername: config.username }, undefined, 4)
-      );
-      vscode.window.forceCode.projectRoot = path.join(
-        vscode.window.forceCode.workspaceRoot,
-        vscode.window.forceCode.config.src || 'src'
-      );
-      return getMetadata(service.currentConnection.orgInfo.username).then(() =>
-        Promise.resolve(hadToLogIn)
-      );
-    });
-  }
+  // END connect() =====================================================================
 
   public disconnect(conn: FCConnection | undefined): Promise<any> {
     if (!conn) {

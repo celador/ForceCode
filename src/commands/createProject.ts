@@ -20,26 +20,6 @@ export function createProject(): Thenable<void> {
         fs.mkdirpSync(path.join(projFolder, 'src'));
       }
 
-      // make a dummy sfdx-project.json file so the Salesforce extensions are activated when we open the project folder
-      if (!fs.existsSync(path.join(projFolder, 'sfdx-project.json'))) {
-        const sfdxProj: {} = {
-          namespace: '',
-          packageDirectories: [
-            {
-              path: 'src',
-              default: true,
-            },
-          ],
-          sfdcLoginUrl: 'https://login.salesforce.com',
-          sourceApiVersion: vscode.workspace.getConfiguration('force')['defaultApiVersion'],
-        };
-
-        fs.outputFileSync(
-          path.join(projFolder, 'sfdx-project.json'),
-          JSON.stringify(sfdxProj, undefined, 4)
-        );
-      }
-
       // make a dummy force.json to activate Forcecode
       fs.outputFileSync(
         path.join(projFolder, 'force.json'),
