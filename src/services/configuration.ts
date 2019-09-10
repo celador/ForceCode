@@ -3,7 +3,7 @@ import { Config } from './../forceCode';
 import * as forceCode from './../forceCode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { fcConnection, ForceService } from '.';
+import { fcConnection, ForceService, notifications } from '.';
 import * as deepmerge from 'deepmerge';
 import { existsSync } from 'fs-extra';
 
@@ -57,6 +57,7 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
   const sfdxProjectJson = path.join(projPath, 'sfdx-project.json');
   const forceSFDXProjJson = path.join(forceConfigPath, 'sfdx-project.json');
   var sfdxStat;
+  var requiresRestart = false;
 
   try {
     sfdxStat = fs.lstatSync(sfdxPath);
@@ -68,7 +69,13 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
       fs.unlinkSync(sfdxPath);
     } else {
       // not a symbolic link, so move it because it's an SFDX proj folder
-      fs.moveSync(sfdxPath, forceSfdxPath, { overwrite: true });
+      try {
+        fs.copySync(sfdxPath, forceSfdxPath, { overwrite: true });
+        fs.removeSync(sfdxPath);
+      } catch (e) {
+        notifications.writeLog(e);
+        requiresRestart = true;
+      }
 
       // if the sfdx-project.json file exists, move it into the .forceCode folder
       if (fs.existsSync(sfdxProjectJson)) {
@@ -84,7 +91,12 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
   }
 
   // link to the newly logged in org's sfdx folder in .forceCode/USERNAME/.sfdx
-  fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
+  try {
+    fs.symlinkSync(forceSfdxPath, sfdxPath, 'junction');
+  } catch (e) {
+    notifications.writeLog(e);
+    requiresRestart = true;
+  }
 
   if (!fs.existsSync(forceSFDXProjJson)) {
     // add in a bare sfdx-project.json file for language support from official salesforce extensions
@@ -117,7 +129,19 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
     fs.outputFileSync(sfdxConfigPath, JSON.stringify(sfdxConfig, undefined, 4));
   }
 
-  readMetadata(self.config.username);
+  if (requiresRestart) {
+    notifications
+      .showWarning(
+        'Existing SFDX project found. In order to make use of the SFDX extensions a restart of VSCode is required. Restart Now?',
+        'Yes',
+        'No'
+      )
+      .then(choice => {
+        if (choice === 'Yes') {
+          vscode.commands.executeCommand('workbench.action.reloadWindow');
+        }
+      });
+  }
 
   return fcConnection.refreshConnections().then(() => {
     return Promise.resolve(self.config);
@@ -191,11 +215,12 @@ export function saveMetadata(userName: string | undefined) {
     fs.outputFileSync(metadataFile, JSON.stringify(res, undefined, 4));
     vscode.window.forceCode.describe = res;
     vscode.window.forceCode.config.prefix = res.organizationNamespace;
+    notifications.writeLog('Done retrieving metadata records');
     return Promise.resolve(res);
   });
 }
 
-function readMetadata(userName: string) {
+export function getMetadata(userName: string) {
   const metadataFile: string = path.join(
     vscode.window.forceCode.workspaceRoot,
     '.forceCode',
@@ -205,6 +230,7 @@ function readMetadata(userName: string) {
   if (existsSync(metadataFile)) {
     vscode.window.forceCode.describe = fs.readJsonSync(metadataFile);
     vscode.window.forceCode.config.prefix = vscode.window.forceCode.describe.organizationNamespace;
+    notifications.writeLog('Done reading metadata records (JSON)');
     return Promise.resolve(vscode.window.forceCode.describe);
   } else {
     return saveMetadata(userName);
