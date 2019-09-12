@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.18.7
+    * Fix `New Lightning components not being deployed` #319
 * 3.18.6
     * Fix `"Retrieve Package/Metadata" commands result in "Metadata describe error"` #315 
 * 3.18.5

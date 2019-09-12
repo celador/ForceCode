@@ -130,17 +130,9 @@ export default function getSetConfig(service?: ForceService): Promise<Config> {
   }
 
   if (requiresRestart) {
-    notifications
-      .showWarning(
-        'Existing SFDX project found. In order to make use of the SFDX extensions a restart of VSCode is required. Restart Now?',
-        'Yes',
-        'No'
-      )
-      .then(choice => {
-        if (choice === 'Yes') {
-          vscode.commands.executeCommand('workbench.action.reloadWindow');
-        }
-      });
+    notifications.showWarning(
+      'Existing SFDX project found. Please close VSCode and open the project folder in a file explorer. Delete the .sfdx folder, then re-open VSCode'
+    );
   }
 
   return fcConnection.refreshConnections().then(() => {
