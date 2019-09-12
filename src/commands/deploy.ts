@@ -199,7 +199,8 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       } else {
         member = file.split(path.sep).pop();
       }
-      member = member ? member.substring(0, member.lastIndexOf('.')) : member;
+      const lIndexOfP = member ? member.lastIndexOf('.') : 0;
+      member = member && lIndexOfP > 0 ? member.substring(0, lIndexOfP) : member;
       if (member) {
         const index: number = findMDTIndex(packObj, fileTT);
         if (index !== -1) {
@@ -213,6 +214,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
         }
       }
     });
+    console.log(packObj);
     var xml: string = builder
       .buildObject(packObj)
       .replace('<Package>', '<Package xmlns="http://soap.sforce.com/2006/04/metadata">')
