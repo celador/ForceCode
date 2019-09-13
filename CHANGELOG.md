@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.18.8
+    * Fix `Orgs not properly switching in the Saved Usernames view` #321
 * 3.18.7
     * Fix `New Lightning components not being deployed` #319
 * 3.18.6

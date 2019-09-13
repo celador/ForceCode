@@ -170,6 +170,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         username = orgInfo.username;
       }
       return setupConn()
+        .then(login)
         .then(loginRes => {
           return vscode.window.forceCode.connect().then(() => {
             return loginRes;
@@ -199,8 +200,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         .getOrgInfo(username)
         .catch(getCredentials)
         .then(setOrgInfo)
-        .then(getUserId)
-        .then(login);
+        .then(getUserId);
     }
 
     function getCredentials() {
