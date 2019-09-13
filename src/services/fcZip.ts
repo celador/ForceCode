@@ -74,6 +74,7 @@ export function getFileListFromPXML(): Promise<string[]> {
               theExt = '';
             }
             toArray(curType.members).forEach(curMem => {
+              curMem = curMem.replace('/', path.sep);
               if (fs.existsSync(path.join(projectRoot, theFolder, curMem + theExt))) {
                 fileList.push(path.join(theFolder, curMem + theExt));
                 if (folder !== 'aura' && folder != 'lwc') {
