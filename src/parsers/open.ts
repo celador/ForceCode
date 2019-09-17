@@ -127,8 +127,9 @@ export function getAnyTTFromPath(thepath: string): string | undefined {
     return undefined;
   }
   var baseDirectoryName: string = fileName.split(path.sep)[0];
+  var ext: string | undefined = fileName.split('.').pop();
   var types: any[] = vscode.window.forceCode.describe.metadataObjects
-    .filter(o => o.directoryName === baseDirectoryName)
+    .filter(o => o.directoryName === baseDirectoryName && ((ext && o.suffix) ? ext === o.suffix : true))
     .map(r => {
       return r.xmlName;
     });
