@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.18.9
+    * Fix wrong slash being used in package xml files while trying to retrieve foldered metadata (Reports, Document, Dashboards, etc)
 * 3.18.8
     * Fix `Orgs not properly switching in the Saved Usernames view` #321
 * 3.18.7
