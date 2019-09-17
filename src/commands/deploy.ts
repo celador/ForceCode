@@ -178,12 +178,13 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       },
     };
     files.forEach(file => {
-      const fileTT: string | undefined = getAnyTTFromPath(file);
+      var fileTT: string | undefined = getAnyTTFromPath(file);
       if (!fileTT) {
         reject();
         return;
       }
       var member: string | undefined;
+      var foldered: boolean = false;
       if (fileTT === 'AuraDefinitionBundle') {
         member = getAuraNameFromFileName(file, 'aura');
       } else if (fileTT === 'LightningComponentBundle') {
@@ -196,6 +197,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       ) {
         const file2 = file.split(vscode.window.forceCode.projectRoot + path.sep).pop();
         member = file2 ? file2.substring(file2.indexOf(path.sep) + 1) : file2;
+        foldered = true;
       } else {
         member = file.split(path.sep).pop();
       }
@@ -204,13 +206,22 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       if (member) {
         member = member.replace('\\', '/');
         const index: number = findMDTIndex(packObj, fileTT);
+        const folderMeta = member.split('/')[0];
+        const memberIndex: number = index !== -1 ? findMemberIndex(packObj, index, folderMeta) : -1;
+        foldered = foldered && folderMeta !== 'unfiled$public';
         if (index !== -1) {
           packObj.Package.types[index].members.push(member);
+          if (foldered && memberIndex === -1) {
+            packObj.Package.types[index].members.push(folderMeta);
+          }
         } else {
           var newMem: PXMLMember = {
             members: [member],
             name: fileTT,
           };
+          if (foldered) {
+            newMem.members.push(folderMeta);
+          }
           packObj.Package.types.push(newMem);
         }
       }
@@ -233,6 +244,12 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
   function findMDTIndex(pxmlObj: PXML, type: string) {
     return pxmlObj.Package.types.findIndex(curType => {
       return curType.name === type;
+    });
+  }
+
+  function findMemberIndex(pxmlObj: PXML, index: number, member: string) {
+    return pxmlObj.Package.types[index].members.findIndex(curType => {
+      return curType === member;
     });
   }
 }
