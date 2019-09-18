@@ -28,7 +28,9 @@ export function getToolingTypeFromExt(thePath: string) {
 }
 
 export function getToolingTypeFromFolder(uri: vscode.Uri): string | undefined {
-  switch (uri.fsPath.split(path.sep).pop()) {
+  var dir: string | undefined = uri.fsPath.split(vscode.window.forceCode.projectRoot + path.sep).pop();
+  dir = dir ? dir.split(path.sep).shift() : undefined;
+  switch (dir) {
     case 'classes':
       return 'ApexClass';
     case 'pages':
@@ -36,11 +38,11 @@ export function getToolingTypeFromFolder(uri: vscode.Uri): string | undefined {
     case 'triggers':
       return 'ApexTrigger';
     case 'aura':
-      return 'AuraDefinitionBundle';
+      return 'AuraDefinition';
     case 'components':
       return 'ApexComponent';
     case 'lwc':
-      return 'LightningComponentBundle';
+      return 'LightningComponentResource';
     default:
       return undefined;
   }
