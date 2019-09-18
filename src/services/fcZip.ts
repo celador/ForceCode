@@ -66,7 +66,7 @@ export function getFileListFromPXML(): Promise<string[]> {
           resolve(fileList);
         }
         toArray(dom.Package.types).forEach(curType => {
-          const ttMeta: IMetadataObject | undefined = getToolingTypeMetadata(curType);
+          const ttMeta: IMetadataObject | undefined = getToolingTypeMetadata(curType.name);
           if (ttMeta) {
             var folder: string = ttMeta.directoryName;
             var ext: string = ttMeta.suffix;
