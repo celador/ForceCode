@@ -1,34 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-
-export default function getToolingTypeFromBody(
-  document: vscode.TextDocument,
-  member = false
-): string | undefined {
-  var fileName: string = document.fileName.split('-meta.xml')[0];
-  switch (fileName.split('.').pop()) {
-    case 'cls':
-      return member ? 'ApexClassMember' : 'ApexClass';
-    case 'trigger':
-      return member ? 'ApexTriggerMember' : 'ApexTrigger';
-    case 'component':
-      return member ? 'ApexComponentMember' : 'ApexComponent';
-    case 'page':
-      return member ? 'ApexPageMember' : 'ApexPage';
-    default: {
-      if (
-        fileName.indexOf(`${vscode.window.forceCode.projectRoot}${path.sep}aura${path.sep}`) >= 0
-      ) {
-        return 'AuraDefinition';
-      } else if (
-        fileName.indexOf(`${vscode.window.forceCode.projectRoot}${path.sep}lwc${path.sep}`) >= 0
-      ) {
-        return 'LightningComponentResource';
-      }
-      return undefined;
-    }
-  }
-}
+import { IMetadataObject } from '../forceCode';
 
 export function getCoverageType(document: vscode.TextDocument): string | undefined {
   if (document.fileName.endsWith('.cls')) {
@@ -53,4 +25,51 @@ export function getToolingTypeFromExt(thePath: string) {
     default:
       return undefined;
   }
+}
+
+export function getToolingTypeFromFolder(uri: vscode.Uri): string | undefined {
+  switch (uri.fsPath.split(path.sep).pop()) {
+    case 'classes':
+      return 'ApexClass';
+    case 'pages':
+      return 'ApexPage';
+    case 'triggers':
+      return 'ApexTrigger';
+    case 'aura':
+      return 'AuraDefinitionBundle';
+    case 'components':
+      return 'ApexComponent';
+    case 'lwc':
+      return 'LightningComponentBundle';
+    default:
+      return undefined;
+  }
+}
+
+export function getAnyTTMetadataFromPath(thepath: string): IMetadataObject | undefined {
+  if (thepath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
+    return undefined;
+  }
+  if (!vscode.window.forceCode.describe) {
+    return undefined;
+  }
+  var fileName: string | undefined = thepath
+    .split(vscode.window.forceCode.projectRoot + path.sep)
+    .pop();
+  if (!fileName) {
+    return undefined;
+  }
+  var baseDirectoryName: string = fileName.split(path.sep)[0];
+  var ext: string | undefined = fileName.split('.').pop();
+  ext = ext === baseDirectoryName ? undefined : ext;
+  return vscode.window.forceCode.describe.metadataObjects.find(
+    o => o.directoryName === baseDirectoryName && (ext && o.suffix ? ext === o.suffix : true)
+  );
+}
+
+export function getToolingTypeMetadata(tType: string): IMetadataObject | undefined {
+  if (!vscode.window.forceCode.describe) {
+    return undefined;
+  }
+  return vscode.window.forceCode.describe.metadataObjects.find(o => o.xmlName === tType);
 }

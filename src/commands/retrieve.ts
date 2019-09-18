@@ -10,15 +10,14 @@ import {
   PXMLMember,
   notifications,
 } from '../services';
-import { getToolingTypeFromExt } from '../parsers/getToolingType';
-import { IWorkspaceMember } from '../forceCode';
-import { getAnyTTFromFolder, getAnyNameFromUri } from '../parsers/open';
+import { getToolingTypeFromExt, getAnyTTMetadataFromPath } from '../parsers/getToolingType';
+import { IWorkspaceMember, IMetadataObject } from '../forceCode';
 const mime = require('mime-types');
 import * as compress from 'compressing';
 import { parseString } from 'xml2js';
 import { outputToString } from '../parsers/output';
 import { packageBuilder } from '.';
-import { getMembers } from './packageBuilder';
+import { getMembers, getFolderContents } from './packageBuilder';
 import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
 import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
@@ -34,7 +33,7 @@ export class Refresh extends ForcecodeCommand {
 
   public command(context: any, selectedResource?: any) {
     if (selectedResource && selectedResource instanceof Array) {
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
         var files: PXMLMember[] = [];
         var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => {
           if (curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
@@ -48,21 +47,23 @@ export class Refresh extends ForcecodeCommand {
             };
           }
         });
-        Promise.all(proms).then(theNames => {
-          theNames.forEach(curName => {
-            var index: number = getTTIndex(curName.name, files);
-            if (index >= 0) {
-              if (curName.members === ['*']) {
-                files[index].members = ['*'];
+        Promise.all(proms)
+          .then(theNames => {
+            theNames.forEach(curName => {
+              var index: number = getTTIndex(curName.name, files);
+              if (index >= 0) {
+                if (curName.members === ['*']) {
+                  files[index].members = ['*'];
+                } else {
+                  files[index].members.push(...curName.members);
+                }
               } else {
-                files[index].members.push(...curName.members);
+                files.push(curName);
               }
-            } else {
-              files.push(curName);
-            }
-          });
-          resolve(retrieve({ types: files }, this.cancellationToken));
-        });
+            });
+            resolve(retrieve({ types: files }, this.cancellationToken));
+          })
+          .catch(reject);
       });
     }
     if (context) {
@@ -113,9 +114,6 @@ export default function retrieve(
   resource: vscode.Uri | ToolingTypes | undefined,
   cancellationToken: FCCancellationToken
 ) {
-  const errMessage: string =
-    "Either the file/metadata type doesn't exist in the current org or you're trying to retrieve outside of " +
-    vscode.window.forceCode.projectRoot;
   let option: any;
   var newWSMembers: IWorkspaceMember[] = [];
   var toolTypes: Array<{}> = [];
@@ -245,13 +243,11 @@ export default function retrieve(
       return new Promise(function(resolve, reject) {
         // Get the Metadata Object type
         if (resource instanceof vscode.Uri) {
-          var toolingType: string | undefined = getAnyTTFromFolder(resource);
-          if (!toolingType) {
-            throw new Error(errMessage);
-          }
-          getAnyNameFromUri(resource).then(names => {
-            retrieveComponents(resolve, reject, { types: [names] });
-          });
+          getAnyNameFromUri(resource)
+            .then(names => {
+              retrieveComponents(resolve, reject, { types: [names] });
+            })
+            .catch(reject);
         } else {
           retrieveComponents(resolve, reject, resource);
         }
@@ -607,4 +603,45 @@ export default function retrieve(
     return Promise.resolve(res);
   }
   // =======================================================================================================================================
+}
+
+function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
+  return new Promise((resolve, reject) => {
+    const projRoot: string = vscode.window.forceCode.projectRoot + path.sep;
+    const ffNameParts: string[] = uri.fsPath.split(projRoot)[1].split(path.sep);
+    var baseDirectoryName: string = path.parse(uri.fsPath).name;
+    const isAura: boolean = ffNameParts[0] === 'aura' || ffNameParts[0] === 'lwc';
+    const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
+    const tType: IMetadataObject | undefined = getAnyTTMetadataFromPath(uri.fsPath);
+    if (!tType) {
+      return reject(
+        "Either the file/metadata type doesn't exist in the current org or you're trying to save/retrieve outside of " +
+          vscode.window.forceCode.projectRoot
+      );
+    }
+    var folderedName: string;
+    if (tType.inFolder && ffNameParts.length > 2) {
+      // we have foldered metadata
+      ffNameParts.shift();
+      folderedName = ffNameParts.join('/').split('.')[0];
+      resolve({ name: tType.xmlName, members: [folderedName] });
+    } else if (isDir) {
+      if (isAura) {
+        if (baseDirectoryName === 'aura' || baseDirectoryName === 'lwc') {
+          baseDirectoryName = '*';
+        }
+        resolve({ name: tType.xmlName, members: [baseDirectoryName] });
+      } else if (tType.inFolder && ffNameParts.length > 1) {
+        getFolderContents(tType.xmlName, ffNameParts[1]).then(contents => {
+          resolve({ name: tType.xmlName, members: contents });
+        });
+      } else {
+        getMembers([tType.xmlName], true).then(members => {
+          resolve(members[0]);
+        });
+      }
+    } else {
+      resolve({ name: tType.xmlName, members: [baseDirectoryName] });
+    }
+  });
 }

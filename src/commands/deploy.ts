@@ -6,11 +6,12 @@ import klaw = require('klaw');
 import { getAuraNameFromFileName } from '../parsers';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
-import { getAnyTTFromPath } from '../parsers/open';
 import { outputToString } from '../parsers/output';
 import { isEmptyUndOrNull, toArray } from '../util';
 import { DeployResult } from 'jsforce';
 import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
+import { IMetadataObject } from '../forceCode';
+import { getAnyTTMetadataFromPath } from '../parsers/getToolingType';
 
 export class DeployPackage extends ForcecodeCommand {
   constructor() {
@@ -178,26 +179,19 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       },
     };
     files.forEach(file => {
-      var fileTT: string | undefined = getAnyTTFromPath(file);
+      var fileTT: IMetadataObject | undefined = getAnyTTMetadataFromPath(file);
       if (!fileTT) {
         reject();
         return;
       }
       var member: string | undefined;
-      var foldered: boolean = false;
-      if (fileTT === 'AuraDefinitionBundle') {
+      if (fileTT.xmlName === 'AuraDefinitionBundle') {
         member = getAuraNameFromFileName(file, 'aura');
-      } else if (fileTT === 'LightningComponentBundle') {
+      } else if (fileTT.xmlName === 'LightningComponentBundle') {
         member = getAuraNameFromFileName(file, 'lwc');
-      } else if (
-        fileTT === 'Document' ||
-        fileTT === 'EmailTemplate' ||
-        fileTT === 'Report' ||
-        fileTT === 'Dashboard'
-      ) {
+      } else if (fileTT.inFolder) {
         const file2 = file.split(vscode.window.forceCode.projectRoot + path.sep).pop();
         member = file2 ? file2.substring(file2.indexOf(path.sep) + 1) : file2;
-        foldered = true;
       } else {
         member = file.split(path.sep).pop();
       }
@@ -205,10 +199,10 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       member = member && lIndexOfP > 0 ? member.substring(0, lIndexOfP) : member;
       if (member) {
         member = member.replace('\\', '/');
-        const index: number = findMDTIndex(packObj, fileTT);
+        const index: number = findMDTIndex(packObj, fileTT.xmlName);
         const folderMeta = member.split('/')[0];
         const memberIndex: number = index !== -1 ? findMemberIndex(packObj, index, folderMeta) : -1;
-        foldered = foldered && folderMeta !== 'unfiled$public';
+        const foldered = fileTT.inFolder && folderMeta !== 'unfiled$public';
         if (index !== -1) {
           packObj.Package.types[index].members.push(member);
           if (foldered && memberIndex === -1) {
@@ -217,7 +211,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
         } else {
           var newMem: PXMLMember = {
             members: [member],
-            name: fileTT,
+            name: fileTT.xmlName,
           };
           if (foldered) {
             newMem.members.push(folderMeta);

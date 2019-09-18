@@ -1,9 +1,4 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
-import * as fs from 'fs-extra';
-import { IMetadataObject } from '../forceCode';
-import { getFolderContents, getMembers } from '../commands/packageBuilder';
-import { PXMLMember } from '../services';
 
 export function getIcon(toolingType: string) {
   switch (toolingType) {
@@ -74,6 +69,7 @@ export function getExtension(toolingType: string) {
       throw toolingType + ' extension not defined';
   }
 }
+
 export function getFolder(toolingType: string) {
   switch (toolingType) {
     case 'ApexClass':
@@ -84,133 +80,7 @@ export function getFolder(toolingType: string) {
       return 'triggers';
     case 'ApexComponent':
       return 'components';
-    case 'ApexLog':
-      return 'logs';
-    case 'PermissionSet':
-      return 'permissionsets';
     default:
       return 'classes';
   }
-}
-export function getToolingTypeFromFolder(uri: vscode.Uri): string | undefined {
-  switch (uri.fsPath.split(path.sep).pop()) {
-    case 'classes':
-      return 'ApexClass';
-    case 'pages':
-      return 'ApexPage';
-    case 'triggers':
-      return 'ApexTrigger';
-    case 'aura':
-      return 'AuraDefinitionBundle';
-    case 'components':
-      return 'ApexComponent';
-    case 'lwc':
-      return 'LightningComponentBundle';
-    default:
-      return undefined;
-  }
-}
-export function getAnyTTFromFolder(uri: vscode.Uri): string | undefined {
-  return getAnyTTFromPath(uri.fsPath);
-}
-export function getAnyTTFromPath(thepath: string): string | undefined {
-  if (thepath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
-    return undefined;
-  }
-  if (!vscode.window.forceCode.describe) {
-    return undefined;
-  }
-  var fileName: string | undefined = thepath
-    .split(vscode.window.forceCode.projectRoot + path.sep)
-    .pop();
-  if (!fileName) {
-    return undefined;
-  }
-  var baseDirectoryName: string = fileName.split(path.sep)[0];
-  var ext: string | undefined = fileName.split('.').pop();
-  var types: any[] = vscode.window.forceCode.describe.metadataObjects
-    .filter(o => o.directoryName === baseDirectoryName && ((ext && o.suffix) ? ext === o.suffix : true))
-    .map(r => {
-      return r.xmlName;
-    });
-  return types[0];
-}
-
-function isFoldered(toolingType: string): boolean {
-  if (toolingType && toolingType.endsWith('Folder')) {
-    return true;
-  }
-  if (!vscode.window.forceCode.describe) {
-    return false;
-  }
-  const metadata:
-    | IMetadataObject
-    | undefined = vscode.window.forceCode.describe.metadataObjects.find(
-    mObject => mObject.xmlName === toolingType
-  );
-  return metadata ? metadata.inFolder : false;
-}
-
-export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
-  return new Promise((resolve, reject) => {
-    const projRoot: string = vscode.window.forceCode.projectRoot + path.sep;
-    const ffNameParts: string[] = uri.fsPath.split(projRoot)[1].split(path.sep);
-    var baseDirectoryName: string = path.parse(uri.fsPath).name;
-    const isAura: boolean = ffNameParts[0] === 'aura' || ffNameParts[0] === 'lwc';
-    const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
-    const tType: string | undefined = getAnyTTFromFolder(uri);
-    if (!tType) {
-      reject('Unknown tooling type');
-      return;
-    }
-    const isInFolder: boolean = isFoldered(tType);
-    var folderedName: string;
-    if (isInFolder && ffNameParts.length > 2) {
-      // we have foldered metadata
-      ffNameParts.shift();
-      folderedName = ffNameParts.join('/').split('.')[0];
-      resolve({ name: tType, members: [folderedName] });
-    } else if (isDir) {
-      if (isAura) {
-        if (baseDirectoryName === 'aura' || baseDirectoryName === 'lwc') {
-          baseDirectoryName = '*';
-        }
-        resolve({ name: tType, members: [baseDirectoryName] });
-      } else if (isInFolder && ffNameParts.length > 1) {
-        getFolderContents(tType, ffNameParts[1]).then(contents => {
-          resolve({ name: tType, members: contents });
-        });
-      } else {
-        getMembers([tType], true).then(members => {
-          resolve(members[0]);
-        });
-      }
-    } else {
-      resolve({ name: tType, members: [baseDirectoryName] });
-    }
-  });
-}
-export function getAnyFolderNameFromTT(tType: string): string | undefined {
-  if (!vscode.window.forceCode.describe) {
-    return undefined;
-  }
-  var folder: any[] = vscode.window.forceCode.describe.metadataObjects
-    .filter(o => o.xmlName === tType)
-    .map(r => {
-      return r.directoryName;
-    });
-
-  return folder[0];
-}
-export function getAnyExtNameFromTT(tType: string): any {
-  if (!vscode.window.forceCode.describe) {
-    return undefined;
-  }
-  var folder: any[] = vscode.window.forceCode.describe.metadataObjects
-    .filter(o => o.xmlName === tType)
-    .map(r => {
-      return r.suffix;
-    });
-
-  return folder[0];
 }
