@@ -4,7 +4,7 @@ import * as fs from 'fs-extra';
 import { dxService, FCOauth, FCConnection, operatingSystem, notifications } from '.';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
-import { saveConfigFile, readConfigFile, getMetadata } from './configuration';
+import { saveConfigFile, readConfigFile } from './configuration';
 import { checkConfig, enterCredentials } from './credentials';
 import { SFDX } from '.';
 import { FCCancellationToken } from '../commands/forcecodeCommand';
@@ -274,9 +274,12 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
           vscode.window.forceCode.workspaceRoot,
           vscode.window.forceCode.config.src || 'src'
         );
-        return getMetadata(service.currentConnection.orgInfo.username).then(() =>
-          Promise.resolve(hadToLogIn)
-        );
+        return vscode.window.forceCode.conn.metadata.describe().then(res => {
+          vscode.window.forceCode.describe = res;
+          vscode.window.forceCode.config.prefix = res.organizationNamespace;
+          notifications.writeLog('Done retrieving metadata records');
+          return Promise.resolve(hadToLogIn);
+        });
       });
     }
   }

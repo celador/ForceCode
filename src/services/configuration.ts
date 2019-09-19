@@ -5,7 +5,6 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { fcConnection, ForceService, notifications } from '.';
 import * as deepmerge from 'deepmerge';
-import { existsSync } from 'fs-extra';
 
 interface SFDXConfig {
   defaultusername?: string;
@@ -191,40 +190,4 @@ export function removeConfigFolder(userName: string): boolean {
     }
   }
   return false;
-}
-
-export function saveMetadata(userName: string | undefined) {
-  if (!userName) {
-    return Promise.resolve();
-  }
-  const metadataFile: string = path.join(
-    vscode.window.forceCode.workspaceRoot,
-    '.forceCode',
-    userName,
-    'metadataDescribe.json'
-  );
-  return vscode.window.forceCode.conn.metadata.describe().then(res => {
-    fs.outputFileSync(metadataFile, JSON.stringify(res, undefined, 4));
-    vscode.window.forceCode.describe = res;
-    vscode.window.forceCode.config.prefix = res.organizationNamespace;
-    notifications.writeLog('Done retrieving metadata records');
-    return Promise.resolve(res);
-  });
-}
-
-export function getMetadata(userName: string) {
-  const metadataFile: string = path.join(
-    vscode.window.forceCode.workspaceRoot,
-    '.forceCode',
-    userName,
-    'metadataDescribe.json'
-  );
-  if (existsSync(metadataFile)) {
-    vscode.window.forceCode.describe = fs.readJsonSync(metadataFile);
-    vscode.window.forceCode.config.prefix = vscode.window.forceCode.describe.organizationNamespace;
-    notifications.writeLog('Done reading metadata records (JSON)');
-    return Promise.resolve(vscode.window.forceCode.describe);
-  } else {
-    return saveMetadata(userName);
-  }
 }
