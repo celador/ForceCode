@@ -202,10 +202,9 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
         const index: number = findMDTIndex(packObj, fileTT.xmlName);
         const folderMeta = member.split('/')[0];
         const memberIndex: number = index !== -1 ? findMemberIndex(packObj, index, folderMeta) : -1;
-        const foldered = fileTT.inFolder && folderMeta !== 'unfiled$public';
         if (index !== -1) {
           packObj.Package.types[index].members.push(member);
-          if (foldered && memberIndex === -1) {
+          if (fileTT.inFolder && memberIndex === -1) {
             packObj.Package.types[index].members.push(folderMeta);
           }
         } else {
@@ -213,7 +212,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
             members: [member],
             name: fileTT.xmlName,
           };
-          if (foldered) {
+          if (fileTT.inFolder) {
             newMem.members.push(folderMeta);
           }
           packObj.Package.types.push(newMem);
