@@ -12,12 +12,11 @@ import { FCCancellationToken } from './forcecodeCommand';
 // TODO: Add cancellation token to updates. Updates with LCs are quick, so is this possible??
 export function saveAura(
   document: vscode.TextDocument,
-  toolingType: string,
+  name: string | undefined,
   cancellationToken: FCCancellationToken,
   Metadata?: {},
   forceCompile?: boolean
 ): Promise<any> {
-  const name: string | undefined = parsers.getName(document, toolingType);
   const ext: string | undefined = parsers.getFileExtension(document);
   var DefType: string | undefined = getAuraDefTypeFromDocument(document);
   var Format: string = getAuraFormatFromDocument();

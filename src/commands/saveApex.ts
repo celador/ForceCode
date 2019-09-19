@@ -7,18 +7,17 @@ import { createPackageXML, deployFiles } from './deploy';
 import * as path from 'path';
 import { FCCancellationToken } from './forcecodeCommand';
 
-const UPDATE: boolean = true;
-
 export function saveApex(
   document: vscode.TextDocument,
-  toolingType: string,
+  toolingType: forceCode.IMetadataObject,
   cancellationToken: FCCancellationToken,
   Metadata?: any,
   forceCompile?: boolean
 ): Promise<any> {
   const fileName: string | undefined = parsers.getFileName(document);
   const body: string = document.getText();
-  const name: string | undefined = parsers.getName(document, toolingType);
+  const name: string | undefined = parsers.getName(document, toolingType.xmlName);
+  const upToolType: string = toolingType.xmlName + 'Member';
   var checkCount: number = 0;
   return Promise.resolve(vscode.window.forceCode)
     .then(addToContainer)
@@ -44,7 +43,7 @@ export function saveApex(
         // Then Get the files info from the type, name, and prefix
         // Then Add the new member, updating the contents.
         return fc.conn.tooling
-          .sobject(toolingType)
+          .sobject(toolingType.xmlName)
           .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' })
           .execute()
           .then((records: any) => addMember(records));
@@ -62,18 +61,15 @@ export function saveApex(
             Body: body,
             Id: records.id,
           };
-      const upToolType = parsers.getToolingType(document, UPDATE);
       if (cancellationToken.isCanceled()) {
         return Promise.reject();
-      } else if (upToolType) {
+      } else {
         return fc.conn.tooling
           .sobject(upToolType)
           .update(member)
           .then(() => {
             return fc;
           });
-      } else {
-        return Promise.reject({ message: 'Unknown metadata type' });
       }
     }
 
@@ -122,10 +118,9 @@ export function saveApex(
           MetadataContainerId: fc.containerId,
         };
         return shouldCompile(record).then(should => {
-          const upToolType = parsers.getToolingType(document, UPDATE);
           if (cancellationToken.isCanceled()) {
             return Promise.reject();
-          } else if (should && upToolType && name) {
+          } else if (should && name) {
             return fc.conn.tooling
               .sobject(upToolType)
               .create(member)
@@ -151,16 +146,16 @@ export function saveApex(
               return Promise.reject('Error reading file information');
             }
             const files: string[] = [];
-            files.push(path.join(parsers.getFolder(toolingType), wholeFileName));
+            files.push(path.join(toolingType.directoryName, wholeFileName));
             if (Metadata) {
               // add the class/trigger/page/component
               const codeFileName: string = wholeFileName.split('-meta.xml')[0];
-              files.push(path.join(parsers.getFolder(toolingType), codeFileName));
+              files.push(path.join(toolingType.directoryName, codeFileName));
             } else {
               // add the metadata
               files.push(
                 path.join(
-                  parsers.getFolder(toolingType),
+                  toolingType.directoryName,
                   parsers.getWholeFileName(document) + '-meta.xml'
                 )
               );
@@ -172,7 +167,7 @@ export function saveApex(
                   return foo;
                 }
                 return fc.conn.tooling
-                  .sobject(toolingType)
+                  .sobject(toolingType.xmlName)
                   .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' })
                   .execute()
                   .then((records: any) => {
@@ -181,7 +176,7 @@ export function saveApex(
                         name: fileName,
                         path: document.fileName,
                         id: records[0].Id,
-                        type: toolingType,
+                        type: toolingType.xmlName,
                       };
                       codeCovViewService.addClass(workspaceMember);
                       return foo;

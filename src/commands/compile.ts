@@ -4,13 +4,13 @@ import * as forceCode from './../forceCode';
 import { codeCovViewService, saveHistoryService, saveService, notifications } from '../services';
 import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
 import { saveApex } from './saveApex';
-import { getAnyTTFromFolder } from '../parsers/open';
 import { parseString } from 'xml2js';
 import * as path from 'path';
 import { saveLWC } from './saveLWC';
 import { createPackageXML, deployFiles } from './deploy';
 import { isEmptyUndOrNull } from '../util';
 import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
+import { getAnyTTMetadataFromPath, getToolingTypeFromFolder } from '../parsers/getToolingType';
 
 export class CompileMenu extends ForcecodeCommand {
   constructor() {
@@ -81,8 +81,11 @@ export default async function compile(
   var diagnostics: vscode.Diagnostic[] = [];
   var exDiagnostics: vscode.Diagnostic[] = vscode.languages.getDiagnostics(document.uri);
 
-  const toolingType: string | undefined = parsers.getToolingType(document);
-  const folderToolingType: string | undefined = getAnyTTFromFolder(document.uri);
+  const toolingType: string | undefined = getToolingTypeFromFolder(document.uri);
+  const ttMeta: forceCode.IMetadataObject | undefined = getAnyTTMetadataFromPath(
+    document.uri.fsPath
+  );
+  const folderToolingType: string | undefined = ttMeta ? ttMeta.xmlName : undefined;
   const name: string | undefined = parsers.getName(document, toolingType);
 
   var DefType: string | undefined;
@@ -160,22 +163,20 @@ export default async function compile(
       .then(finished)
       .catch(finished)
       .then(updateSaveHistory);
-  } else if (toolingType === undefined) {
-    return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
   } else if (toolingType === 'AuraDefinition') {
     DefType = getAuraDefTypeFromDocument(document);
-    return saveAura(document, toolingType, cancellationToken, Metadata, forceCompile)
+    return saveAura(document, name, cancellationToken, Metadata, forceCompile)
       .then(finished)
       .catch(finished)
       .then(updateSaveHistory);
   } else if (toolingType === 'LightningComponentResource') {
-    return saveLWC(document, toolingType, cancellationToken, forceCompile)
+    return saveLWC(document, name, cancellationToken, forceCompile)
       .then(finished)
       .catch(finished)
       .then(updateSaveHistory);
-  } else {
+  } else if (ttMeta && toolingType) {
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-    return saveApex(document, toolingType, cancellationToken, Metadata, forceCompile)
+    return saveApex(document, ttMeta, cancellationToken, Metadata, forceCompile)
       .then(finished)
       .then(res => {
         return vscode.window.forceCode.newContainer(res).then(() => {
@@ -184,6 +185,8 @@ export default async function compile(
       })
       .catch(finished)
       .then(updateSaveHistory);
+  } else {
+    return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
   }
 
   function finished(res: any): boolean {

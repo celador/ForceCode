@@ -2,9 +2,10 @@ import * as compress from 'compressing';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as vscode from 'vscode';
-import { getAnyFolderNameFromTT, getAnyExtNameFromTT } from '../parsers/open';
 import { parseString } from 'xml2js';
 import { toArray } from '../util';
+import { IMetadataObject } from '../forceCode';
+import { getToolingTypeMetadata } from '../parsers/getToolingType';
 
 /**
  * @private zipFiles
@@ -65,9 +66,10 @@ export function getFileListFromPXML(): Promise<string[]> {
           resolve(fileList);
         }
         toArray(dom.Package.types).forEach(curType => {
-          var folder: string | undefined = getAnyFolderNameFromTT(curType.name);
-          var ext = getAnyExtNameFromTT(curType.name);
-          if (folder) {
+          const ttMeta: IMetadataObject | undefined = getToolingTypeMetadata(curType.name);
+          if (ttMeta) {
+            var folder: string = ttMeta.directoryName;
+            var ext: string = ttMeta.suffix;
             const theFolder = folder;
             var theExt: string = '.' + ext;
             if (folder === 'aura' || folder === 'lwc') {

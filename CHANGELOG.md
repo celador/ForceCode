@@ -1,5 +1,8 @@
 ## Change Log
 
+* 3.18.10
+    * Fix folder metadata not being included in package.xml
+    * Fix wrong tooling type detected by folder
 * 3.18.9
     * Fix wrong slash being used in package xml files while trying to retrieve foldered metadata (Reports, Document, Dashboards, etc)
 * 3.18.8

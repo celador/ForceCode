@@ -19,12 +19,12 @@ import {
 import * as commands from './models/commands';
 import * as path from 'path';
 import { FCFile } from './services/codeCovView';
-import { IWorkspaceMember } from './forceCode';
+import { IWorkspaceMember, IMetadataObject } from './forceCode';
 import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
-import { getToolingTypeFromFolder, getAnyTTFromFolder } from './parsers/open';
 import { trackEvent, FCTimer } from './services/fcAnalytics';
 import * as fs from 'fs-extra';
 import { createProject } from './commands/createProject';
+import { getAnyTTMetadataFromPath, getToolingTypeFromFolder } from './parsers/getToolingType';
 
 export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
@@ -101,7 +101,9 @@ export function activate(context: vscode.ExtensionContext): any {
         var isResource: RegExpMatchArray | null = textDocument.fileName.match(
           /resource\-bundles.*\.resource.*$/
         ); // We are in a resource-bundles folder, bundle and deploy the staticResource
-        const toolingType: string | undefined = getAnyTTFromFolder(textDocument.uri);
+        const toolingType: IMetadataObject | undefined = getAnyTTMetadataFromPath(
+          textDocument.uri.fsPath
+        );
         if (textDocument.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot) !== -1) {
           if (isResource && isResource.index) {
             return vscode.commands.executeCommand(

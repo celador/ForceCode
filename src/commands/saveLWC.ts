@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as parsers from './../parsers';
 import { saveService, notifications } from '../services';
 import * as path from 'path';
 import { createPackageXML, deployFiles } from './deploy';
@@ -12,12 +11,10 @@ import { FCCancellationToken } from './forcecodeCommand';
 // TODO: Add cancellation token to updates. Updates with LCs are quick, so is this possible??
 export function saveLWC(
   document: vscode.TextDocument,
-  toolingType: string,
+  name: string | undefined,
   cancellationToken: FCCancellationToken,
   forceCompile?: boolean
 ): Promise<any> {
-  const name: string | undefined = parsers.getName(document, toolingType);
-
   return Promise.resolve(vscode.window.forceCode)
     .then(getLWCBundle)
     .then(ensureLWCBundle)
