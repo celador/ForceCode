@@ -234,9 +234,15 @@ export function saveApex(
         } else if (checkCount > 30) {
           checkCount = 0;
           return notifications
-            .showError(fileName + ' timed out while saving. Cancel save?', 'Yes', 'No')
+            .showError(
+              'Timed out while requesting save status for ' +
+                fileName +
+                '. Continue checking for status updates?',
+              'Yes',
+              'No'
+            )
             .then(choice => {
-              if (choice === 'No') {
+              if (choice === 'Yes') {
                 return new Promise(function(resolve) {
                   setTimeout(() => resolve(), vscode.window.forceCode.config.poll || 2000);
                 }).then(nextStatus);
@@ -256,12 +262,13 @@ export function saveApex(
       });
     }
     function cancelRequest(): Promise<any> {
-      return vscode.window.forceCode.conn.tooling
-        .sobject('ContainerAsyncRequest')
-        .update({ Id: vscode.window.forceCode.containerAsyncRequestId, State: 'Aborted' })
-        .then(res => {
-          return res;
-        });
+      // toss the container member...it's in an unknown state
+      const containerId = vscode.window.forceCode.containerAsyncRequestId;
+      return vscode.window.forceCode.newContainer(true).then(_res => {
+        return vscode.window.forceCode.conn.tooling
+          .sobject('ContainerAsyncRequest')
+          .update({ Id: containerId, State: 'Aborted' });
+      });
     }
     function getStatus(): Promise<any> {
       return vscode.window.forceCode.conn.tooling.query(

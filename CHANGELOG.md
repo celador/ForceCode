@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.18.11
+    * Reworded save timeout for apex. User must choose `Yes` now to continue polling for a status update.
 * 3.18.10
     * Fix folder metadata not being included in package.xml
     * Fix wrong tooling type detected by folder
