@@ -68,22 +68,21 @@ export function getFileListFromPXML(): Promise<string[]> {
         toArray(dom.Package.types).forEach(curType => {
           const ttMeta: IMetadataObject | undefined = getToolingTypeMetadata(curType.name);
           if (ttMeta) {
-            var folder: string = ttMeta.directoryName;
+            const folder: string = ttMeta.directoryName;
             var ext: string = ttMeta.suffix;
-            const theFolder = folder;
             var theExt: string = '.' + ext;
             if (folder === 'aura' || folder === 'lwc') {
               theExt = '';
             }
             toArray(curType.members).forEach(curMem => {
               curMem = curMem.replace('/', path.sep);
-              if (fs.existsSync(path.join(projectRoot, theFolder, curMem + theExt))) {
-                fileList.push(path.join(theFolder, curMem + theExt));
+              if (fs.existsSync(path.join(projectRoot, folder, curMem + theExt))) {
+                fileList.push(path.join(folder, curMem + theExt));
                 if (folder !== 'aura' && folder != 'lwc') {
                   if (
-                    fs.existsSync(path.join(projectRoot, theFolder, curMem + theExt + '-meta.xml'))
+                    fs.existsSync(path.join(projectRoot, folder, curMem + theExt + '-meta.xml'))
                   ) {
-                    fileList.push(path.join(theFolder, curMem + theExt + '-meta.xml'));
+                    fileList.push(path.join(folder, curMem + theExt + '-meta.xml'));
                   }
                 }
               }
