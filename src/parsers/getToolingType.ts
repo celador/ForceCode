@@ -85,6 +85,6 @@ export function getToolingTypeMetadata(tType: string): IMetadataObject | undefin
     if (!isType && childTypes) {
       childType = childTypes.find(t => t === tType);
     }
-    return isType || childType;
+    return isType || childType !== undefined;
   });
 }
