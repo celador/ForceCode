@@ -1,5 +1,8 @@
 ## Change Log
 
+* 3.19.0
+    * Updated default API version for Winter release (47.0)
+    * Update vulnerabilities in dependencies
 * 3.18.11
     * Reworded save timeout for apex. User must choose `Yes` now to continue polling for a status update.
     * Fix deploying custom fields

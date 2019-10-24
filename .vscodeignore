@@ -24,3 +24,4 @@ forcecode-**.vsix
 wallaby.js
 book.json
 prettier.config.js
+assets/**
