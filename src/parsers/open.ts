@@ -65,6 +65,8 @@ export function getExtension(toolingType: string) {
       return 'tokens';
     case 'LightningComponentBundle':
       return 'lwc';
+    case 'LightningMessageChannel':
+      return 'messageChannel';
     default:
       throw toolingType + ' extension not defined';
   }

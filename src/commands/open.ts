@@ -75,6 +75,17 @@ export class Open extends ForcecodeCommand {
           )
         );
       }
+      if (
+        vscode.window.forceCode.config.apiVersion &&
+        parseInt(vscode.window.forceCode.config.apiVersion) >= 47
+      ) {
+        promises.push(
+          vscode.window.forceCode.conn.tooling.query(
+            'SELECT Id, DeveloperName, NamespacePrefix, Description FROM LightningMessageChannel ' +
+              predicate
+          )
+        );
+      }
       return promises;
     }
   }
@@ -141,7 +152,8 @@ export function showFileOptions(promises: any[], cancellationToken: FCCancellati
               if (
                 tType !== 'AuraDefinitionBundle' &&
                 tType !== 'StaticResource' &&
-                tType != 'LightningComponentBundle'
+                tType != 'LightningComponentBundle' &&
+                tType != 'LightningMessageChannel'
               ) {
                 filesOpened++;
                 var fName: string = curFile.label
