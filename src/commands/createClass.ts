@@ -30,6 +30,11 @@ export class CreateClass extends ForcecodeCommand {
           description: 'Create an Apex Class',
         },
         {
+          label: 'Lightning Message Channel',
+          description:
+            "Create a Lightning Message Channel. You can only save LMC's with API version >= 47.0",
+        },
+        {
           label: 'Lightning Web Component',
           description: "Create a LWC. You can only save LWC's with API version >= 45.0",
         },
@@ -68,6 +73,10 @@ export class CreateClass extends ForcecodeCommand {
             }
             case 'Class': {
               createClass(name, resolve);
+              break;
+            }
+            case 'Lightning Message Channel': {
+              createLMC(name, resolve);
               break;
             }
             case 'Lightning Web Component': {
@@ -302,6 +311,19 @@ export default class ${jsClassName} extends LightningElement {}`;
 
 </template>`;
       createSrcFile(name, folderPath, fileContents, 'html', resolve);
+    }
+
+    function createLMC(name: string, resolve: any) {
+      // create the folder and page
+      const ext = 'messageChannel';
+      const folderPath = createFolder('messageChannels');
+      const fileContents = `<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+  <description>This is a Lightning Message Channel.</description>
+  <isExposed>true</isExposed>
+  <masterLabel>${name}</masterLabel>
+</LightningMessageChannel>`;
+      createSrcFile(name, folderPath, fileContents, ext, resolve);
     }
 
     function createTrigger(name: string, resolve: any) {

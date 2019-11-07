@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.19.1
+    * Added Lightning Message Center metadata in `New` menu option as well as a type retrievable by the `Open` menu option
 * 3.19.0
     * Updated default API version for Winter release (47.0)
     * Update vulnerabilities in dependencies
