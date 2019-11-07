@@ -17,16 +17,16 @@ testFC:
     - npm install --unsafe-perm
     - /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
     - echo ">>> Started xvfb"
-    - openssl aes-256-cbc -d -in assets/server.key.enc -out assets/server.key -k $(SERVER_KEY_PASSWORD)
+    - openssl aes-256-cbc -d -in assets/server.key.enc -out assets/server.key -k $SERVER_KEY_PASSWORD
     - echo ">>> Installing SFDX CLI"
     - npm install -g sfdx-cli
     - sfdx --version
     - sfdx plugins --core
-    - sfdx force:auth:jwt:grant --clientid $(SF_CONSUMER_KEY) --jwtkeyfile assets/server.key --username $(SF_USERNAME)
+    - sfdx force:auth:jwt:grant --clientid $SF_CONSUMER_KEY --jwtkeyfile assets/server.key --username $SF_USERNAME
     - echo ">>> Compiling"
     - npm run compile
     - echo ">>> Run integration test"
-    - export SF_USERNAME=$(SF_USERNAME)
+    - export SF_USERNAME=$SF_USERNAME
     - npm run test
   cache:
     key: fcCache
