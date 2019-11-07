@@ -94,7 +94,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[4]); // VF page
+          return callback(items[5]); // VF page
         },
       };
     });
@@ -138,7 +138,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[5]); // VF component
+          return callback(items[6]); // VF component
         },
       };
     });
@@ -214,7 +214,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[3]); // Trigger
+          return callback(items[4]); // Trigger
         },
       };
     });
@@ -253,7 +253,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[2]); // LWC component
+          return callback(items[3]); // LWC component
         },
       };
     });
@@ -278,7 +278,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[2]); // LWC component
+          return callback(items[3]); // LWC component
         },
       };
     });
@@ -297,6 +297,66 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save LWC pass', async () => {
+    // indicate we shouldn't try and remove an error, and that autoCompile is on
+    await removeErrorOnDoc(sandbox, true, true);
+  });
+
+  test('Creates Lightning Message Channel', async () => {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+      return {
+        async then(callback: any) {
+          return callback(items[2]); // Lightning Message Channel
+        },
+      };
+    });
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(_options) {
+      return {
+        async then(callback: any) {
+          return callback('MyMessageChannel'); // name of component
+        },
+      };
+    });
+    return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
+      var output = path.join(
+        vscode.window.forceCode.projectRoot,
+        'messageChannels',
+        'MyMessageChannel.messageChannel'
+      );
+      return assert.strictEqual(fs.existsSync(output), true);
+    });
+  });
+
+  test('Save Lightning Message Channel fail', async () => {
+    await addErrorToDoc(sandbox);
+  });
+
+  test('Creates Lightning Message Channel 2', async () => {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+      return {
+        async then(callback: any) {
+          return callback(items[2]); // Lightning Message Channel
+        },
+      };
+    });
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(_options) {
+      return {
+        async then(callback: any) {
+          return callback('MyMessageChannel2'); // name of component
+        },
+      };
+    });
+    createForceJson(process.env.SF_USERNAME || '', true); // turn on autoCompile
+    return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
+      var output = path.join(
+        vscode.window.forceCode.projectRoot,
+        'messageChannels',
+        'MyMessageChannel2.messageChannel'
+      );
+      return assert.strictEqual(fs.existsSync(output), true);
+    });
+  });
+
+  test('Save Lightning Message Channel pass', async () => {
     // indicate we shouldn't try and remove an error, and that autoCompile is on
     await removeErrorOnDoc(sandbox, true, true);
   });
