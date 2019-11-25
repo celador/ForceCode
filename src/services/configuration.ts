@@ -23,6 +23,7 @@ export const defaultOptions: Config = {
     singlePackage: true,
     testLevel: 'NoTestRun',
   },
+  isDeveloperEdition: false,
   overwritePackageXML: false,
   poll: 2000,
   pollTimeout: 1200,

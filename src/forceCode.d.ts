@@ -12,12 +12,6 @@ export interface FCWorkspaceMembers {
   [key: string]: IWorkspaceMember;
 }
 
-export interface FCOrg {
-  username: string;
-  url: string;
-  src?: string;
-}
-
 export interface Config {
   alias: string;
   apiVersion: string;
@@ -32,6 +26,7 @@ export interface Config {
     singlePackage: boolean;
     testLevel: string;
   };
+  isDeveloperEdition: boolean;
   overwritePackageXML: boolean;
   poll: number;
   pollTimeout: number;

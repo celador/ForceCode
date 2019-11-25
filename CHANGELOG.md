@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.19.2
+    * Fix `LightningMessageChannel not supported` #336. The `Production / Developer` option when logging into a new org has been split into separate options. For existing projects, if you want to try out the LightningMessageCenter Beta feature, you will need to open your Org Settings in the Forcecode menu and check the isDeveloperEdition checkbox then save in order to open Lightning Message Center files. Only developer editions (NOT SANDBOXES) currently support this feature! You will get an error message having this checked with a sandbox using API version 47.0!
 * 3.19.1
     * Added Lightning Message Center metadata in `New` menu option as well as a type retrievable by the `Open` menu option
 * 3.19.0

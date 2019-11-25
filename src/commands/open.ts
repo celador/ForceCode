@@ -76,6 +76,7 @@ export class Open extends ForcecodeCommand {
         );
       }
       if (
+        vscode.window.forceCode.config.isDeveloperEdition &&
         vscode.window.forceCode.config.apiVersion &&
         parseInt(vscode.window.forceCode.config.apiVersion) >= 47
       ) {

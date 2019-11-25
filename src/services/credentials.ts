@@ -97,8 +97,13 @@ function getUrl(config: Config): Promise<Config> {
     if (Object.keys(config).indexOf('url') === -1) {
       let opts: any = [
         {
+          icon: 'file',
+          title: 'Production',
+          url: 'https://login.salesforce.com',
+        },
+        {
           icon: 'code',
-          title: 'Production / Developer',
+          title: 'Developer',
           url: 'https://login.salesforce.com',
         },
         {
@@ -134,6 +139,7 @@ function getUrl(config: Config): Promise<Config> {
               });
           } else {
             config.url = res && res.description ? res.description : 'https://login.salesforce.com';
+            config.isDeveloperEdition = res && res.label ? res.label.endsWith('Developer') : false;
             resolve(config);
           }
         });
