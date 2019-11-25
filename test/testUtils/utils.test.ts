@@ -83,7 +83,7 @@ export function addErrorToDoc(sandbox: sinon.SinonSandbox) {
   const spy = sandbox.spy(vscode.window, 'showErrorMessage');
   return editor.document.save().then(_res => {
     return vscode.commands.executeCommand('ForceCode.compile').then(_res2 => {
-      return assert.strictEqual(spy.calledOnce, true);
+      return assert.strictEqual(spy.called, true);
     });
   });
 }
