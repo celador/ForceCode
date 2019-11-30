@@ -11,7 +11,7 @@ import {
   notifications,
 } from '../services';
 import { getToolingTypeFromExt, getAnyTTMetadataFromPath } from '../parsers/getToolingType';
-import { IWorkspaceMember, IMetadataObject } from '../forceCode';
+import { IWorkspaceMember, IMetadataObject, ICodeCoverage } from '../forceCode';
 const mime = require('mime-types');
 import * as compress from 'compressing';
 import { parseString } from 'xml2js';
@@ -447,6 +447,7 @@ export default function retrieve(
                 path: `${vscode.window.forceCode.projectRoot}${path.sep}${name}`,
                 id: '', //metadataFileProperties.id,
                 type: tType,
+                coverage: new Map<string, ICodeCoverage>(),
               };
 
               newWSMembers.push(wsMem);

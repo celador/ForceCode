@@ -81,7 +81,10 @@ export function getUncoveredLineOptions(document: vscode.TextDocument) {
 
   function getUncoveredLineOptionsFor(workspaceMember: forceCode.IWorkspaceMember) {
     var uncoveredLineDecorations: vscode.DecorationOptions[] = [];
-    let fileCoverage: forceCode.ICodeCoverage | undefined = workspaceMember.coverage;
+    const wsMemCoverage = workspaceMember.selectedCoverage || 'overall';
+    let fileCoverage: forceCode.ICodeCoverage | undefined = workspaceMember.coverage.get(
+      wsMemCoverage
+    );
     if (fileCoverage) {
       fileCoverage.Coverage.uncoveredLines.forEach(notCovered => {
         let decorationRange: vscode.DecorationOptions = {

@@ -89,7 +89,8 @@ interface IWorkspaceMember {
   path: string;
   id: string;
   type: string;
-  coverage?: ICodeCoverage;
+  coverage: Map<string, ICodeCoverage>;
+  selectedCoverage?: string;
 }
 
 interface ICodeCoverage {
@@ -105,12 +106,21 @@ interface ICodeCoverage {
     };
     Name: string;
   };
-  NumLinesCovered: number;
-  NumLinesUncovered: number;
+  ApexTestClassId?: string;
+  ApexTestClass?: {
+    attributes: {
+      type: string;
+      url: string;
+    };
+    Name: string;
+  };
   Coverage: {
     coveredLines: number[];
     uncoveredLines: number[];
   };
+  NumLinesCovered: number;
+  NumLinesUncovered: number;
+  TestMethodName?: string;
 }
 interface ICodeCoverageWarning {
   id: string;

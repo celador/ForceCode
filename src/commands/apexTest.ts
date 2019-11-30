@@ -33,7 +33,7 @@ export class GetCodeCoverage extends ForcecodeCommand {
   }
 
   public command() {
-    return apexTestResults();
+    return apexTestResults().then(_res => apexTestResults(true));
   }
 }
 
@@ -66,13 +66,8 @@ export class ApexTest extends ForcecodeCommand {
     return dxService
       .runTest(context, selectedResource, this.cancellationToken)
       .then((dxRes: ApexTestQueryResult) => {
-        // get the test class Ids from the result
-        var testClassIds: string[] = new Array<string>();
-        dxRes.tests.forEach(tRes => {
-          testClassIds.push(tRes.ApexClass.Id);
-        });
-
-        return apexTestResults(testClassIds)
+        return vscode.commands
+          .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
           .then(() => showResult(dxRes))
           .then(showLog);
       });

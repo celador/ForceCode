@@ -22,6 +22,7 @@ interface IClassType {
   NotInOrg: string;
   NotInSrc: string;
   NoShow: string;
+  Subclass: string;
   [key: string]: string;
 }
 
@@ -33,6 +34,7 @@ const ClassType: IClassType = {
   NotInOrg: 'Not In Current Org',
   NotInSrc: 'Open Files Not In Src',
   NoShow: 'NoShow',
+  Subclass: 'Subclass',
 };
 
 const folderWSMember: IWorkspaceMember = {
@@ -40,6 +42,7 @@ const folderWSMember: IWorkspaceMember = {
   path: '',
   type: ClassType.NoShow,
   id: '',
+  coverage: new Map<string, ICodeCoverage>(),
 };
 
 export class CodeCovViewService implements TreeDataProvider<FCFile> {
@@ -154,7 +157,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       var fcFiles: FCFile[] = [];
       // This is the root node
       Object.keys(ClassType).forEach(val => {
-        if (val !== ClassType.NoShow) {
+        if (val !== ClassType.NoShow && val !== ClassType.Subclass) {
           var newFCFile: FCFile = new FCFile(
             ClassType[val],
             TreeItemCollapsibleState.Collapsed,
@@ -204,6 +207,30 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
           return res.getType() === element.getType();
         });
       }
+    } else if (
+      element.getType() === ClassType.CoveredClass ||
+      element.getType() === ClassType.UncoveredClass
+    ) {
+      var fcFiles: FCFile[] = [];
+      for (let [key, value] of element.getWsMember().coverage) {
+        var total: number = value.NumLinesCovered + value.NumLinesUncovered;
+        var percent = Math.floor((value.NumLinesCovered / total) * 100);
+        if (key !== 'overall' && value.ApexTestClass && percent !== 0) {
+          var newFCFile: FCFile = new FCFile(
+            `${percent}% - ${key}`,
+            TreeItemCollapsibleState.None,
+            this,
+            folderWSMember,
+            element
+          );
+          newFCFile.setType(ClassType.Subclass);
+          newFCFile.tooltip =
+            newFCFile.label + ' - ' + value.NumLinesCovered + '/' + total + ' lines covered';
+          fcFiles.push(newFCFile);
+        }
+      }
+
+      return fcFiles;
     }
 
     return [];
@@ -211,7 +238,6 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
   public getParent(element: FCFile): any {
     if (element.getWsMember().id !== '') {
-      // there's a bug in vscode, so for future use
       var newFCFile: FCFile = new FCFile(
         element.getType(),
         TreeItemCollapsibleState.Expanded,
@@ -239,36 +265,42 @@ export class FCFile extends TreeItem {
   private parent: CodeCovViewService;
   private wsMember!: IWorkspaceMember;
   private type!: string;
+  private parentFCFile?: FCFile;
 
   constructor(
     name: string,
     collapsibleState: TreeItemCollapsibleState,
     parent: CodeCovViewService,
-    wsMember: IWorkspaceMember
+    wsMember: IWorkspaceMember,
+    parentFCFile?: FCFile
   ) {
     super(name, collapsibleState);
 
     this.collapsibleState = collapsibleState;
     this.parent = parent;
+    this.parentFCFile = parentFCFile;
     this.setWsMember(wsMember);
   }
 
   public setWsMember(newMem: IWorkspaceMember) {
     this.wsMember = newMem;
 
+    this.command = {
+      command: 'ForceCode.changeCoverageDecoration',
+      title: '',
+      arguments: [this],
+    };
+
     // we only want classes and triggers
     if (this.wsMember.type !== 'ApexClass' && this.wsMember.type !== 'ApexTrigger') {
       this.type = ClassType.NoShow;
+      if (!this.parentFCFile) {
+        this.command = undefined;
+      }
       return undefined;
     }
 
     super.label = this.wsMember.path.split(path.sep).pop();
-
-    this.command = {
-      command: 'ForceCode.openOnClick',
-      title: '',
-      arguments: [this.wsMember.path],
-    };
 
     this.iconPath = undefined;
     if (!this.wsMember.id || this.wsMember.id === '') {
@@ -278,8 +310,8 @@ export class FCFile extends TreeItem {
 
     this.type = ClassType.UncoveredClass;
     this.tooltip = this.label;
-    if (this.wsMember.coverage) {
-      var fileCoverage: ICodeCoverage = this.wsMember.coverage;
+    var fileCoverage: ICodeCoverage | undefined = this.wsMember.coverage.get('overall');
+    if (fileCoverage) {
       var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
       var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
       this.label = percent + '% ' + this.label;
@@ -298,6 +330,8 @@ export class FCFile extends TreeItem {
           light: path.join(imagePath, 'redEx.svg'),
         };
       }
+      super.collapsibleState = TreeItemCollapsibleState.Collapsed;
+      this.setCoverageTestClass('overall');
       // this next check needs changed to something different, as there are problems reading the file
     } else {
       var testFile: boolean = false;
@@ -331,6 +365,25 @@ export class FCFile extends TreeItem {
 
   public setType(newType: string) {
     this.type = newType;
+  }
+
+  public getParentFCFile(): FCFile | undefined {
+    return this.parentFCFile;
+  }
+
+  public setCoverageTestClass(newCoverage: string | undefined) {
+    this.wsMember.selectedCoverage = newCoverage || 'overall';
+  }
+
+  public addCoverage(testClass: string, coverage: ICodeCoverage) {
+    this.wsMember.coverage.set(testClass, coverage);
+    this.updateWsMember(this.wsMember);
+  }
+
+  public clearCoverage() {
+    this.wsMember.coverage.clear();
+    super.collapsibleState = TreeItemCollapsibleState.None;
+    this.updateWsMember(this.wsMember);
   }
 
   // sometimes the times on the dates are a half second off, so this checks for within 2 seconds

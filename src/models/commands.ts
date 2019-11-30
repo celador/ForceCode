@@ -30,6 +30,7 @@ import {
   OpenOnClick,
   Login,
   RemoveConfig,
+  ChangeCoverageDecoration,
 } from '../commands/fcCommands';
 
 export const fcCommands: ForcecodeCommand[] = [
@@ -71,6 +72,7 @@ export const fcCommands: ForcecodeCommand[] = [
   new CheckForFileChanges(),
   new ShowTasks(),
   new OpenOnClick(),
+  new ChangeCoverageDecoration(),
   new GetCodeCoverage(),
   new RunTests(),
   new Login(),

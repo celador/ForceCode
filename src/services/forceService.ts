@@ -131,6 +131,7 @@ export default class ForceService implements forceCode.IForceService {
                 path: item.path,
                 id: '', //metadataFileProperties.id,
                 type: type,
+                coverage: new Map<string, forceCode.ICodeCoverage>(),
               };
               codeCovViewService.addClass(workspaceMember);
             }

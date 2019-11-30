@@ -49,6 +49,9 @@ Please note that the following permissions are required to develop on the Force.
 * Task view. See what ForceCode is up to and execute multiple commands at the same time.
 * Code Coverage view. Will show the coverage on files open in your project.
     * You can even have this view revealed after running an apex test.
+    * Breaks down coverage by classes with sufficient/insufficient coverage.
+    * Shows which classes/methods are covering your class
+        * Click on each to update line decorations for a visual representation of coverage provided by each test class/method.
 * Retrieves code coverage on startup of the extension.
 * Search in files. Works just like the developer console search in files feature.
 * Retrieve org-wide code coverage. This will show up in a file with all apex classes and their coverage listed.

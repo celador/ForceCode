@@ -19,7 +19,7 @@ import {
 import * as commands from './models/commands';
 import * as path from 'path';
 import { FCFile } from './services/codeCovView';
-import { IWorkspaceMember, IMetadataObject } from './forceCode';
+import { IMetadataObject } from './forceCode';
 import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
 import { trackEvent, FCTimer } from './services/fcAnalytics';
 import * as fs from 'fs-extra';
@@ -131,11 +131,9 @@ export function activate(context: vscode.ExtensionContext): any {
       var fileName = event.document.fileName;
       // get the id
       const fcfile: FCFile | undefined = codeCovViewService.findByPath(fileName);
-      var wsMem: IWorkspaceMember | undefined = fcfile ? fcfile.getWsMember() : undefined;
 
-      if (fcfile && wsMem && wsMem.coverage) {
-        wsMem.coverage = undefined;
-        fcfile.updateWsMember(wsMem);
+      if (fcfile) {
+        fcfile.clearCoverage();
         updateDecorations();
       }
     })
