@@ -255,11 +255,7 @@ export default async function compile(
           res.records[0].DeployDetails.componentSuccesses[0].id
         );
         if (fcfile) {
-          var fcMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
-          if (fcMem.coverage) {
-            fcMem.coverage = undefined;
-            fcfile.updateWsMember(fcMem);
-          }
+          fcfile.clearCoverage();
         }
       }
       notifications.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);

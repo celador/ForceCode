@@ -14,6 +14,8 @@ import diff from './diff';
 import { getFileName } from '../parsers';
 import { readConfigFile, removeConfigFolder } from '../services/configuration';
 import { Config } from '../forceCode';
+import { editorUpdateApexCoverageDecorator } from '../decorators/testCoverageDecorator';
+import { FCFile } from '../services/codeCovView';
 
 export class ToolingQuery extends ForcecodeCommand {
   constructor() {
@@ -155,10 +157,36 @@ export class OpenOnClick extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command(context: vscode.Uri) {
+  public command(context: string) {
     return vscode.workspace
       .openTextDocument(context)
       .then(doc => vscode.window.showTextDocument(doc, { preview: false }));
+  }
+}
+
+export class ChangeCoverageDecoration extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.changeCoverageDecoration';
+    this.name = 'Change Coverage Decoration';
+    this.hidden = true;
+  }
+
+  public command(context: FCFile) {
+    var parent = context.getParentFCFile() || context;
+    if (context.label) {
+      var newCoverage = context.label.split(' ').pop();
+      if (parent === context) {
+        newCoverage = 'overall';
+      }
+      return vscode.workspace
+        .openTextDocument(parent.getWsMember().path)
+        .then(doc => vscode.window.showTextDocument(doc, { preview: false }))
+        .then(_res => {
+          parent.setCoverageTestClass(newCoverage);
+          return editorUpdateApexCoverageDecorator(vscode.window.activeTextEditor);
+        });
+    }
   }
 }
 

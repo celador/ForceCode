@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.20.0
+    * Add test coverage broken down by test class/method. Now you can see which test classes and methods are covering your class! Click on the dropdown next to a class name in the `Sufficient Coverage` or `Insufficient Coverage` section and you will be presented with a list of test classes and methods that cover your class. Clicking on one of these will open the tested class and update the coverage decorations to show you visually which lines are covered by each. This addresses the issue `Show test classes covering my class.` #329. Thanks @Caio-Carvalho for the request for this!
 * 3.19.2
     * Fix `LightningMessageChannel not supported` #336. The `Production / Developer` option when logging into a new org has been split into separate options. For existing projects, if you want to try out the LightningMessageCenter Beta feature, you will need to open your Org Settings in the Forcecode menu and check the isDeveloperEdition checkbox then save in order to open Lightning Message Center files. Only developer editions (NOT SANDBOXES) currently support this feature! You will get an error message having this checked with a sandbox using API version 47.0!
 * 3.19.1

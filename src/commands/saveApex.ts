@@ -177,6 +177,7 @@ export function saveApex(
                         path: document.fileName,
                         id: records[0].Id,
                         type: toolingType.xmlName,
+                        coverage: new Map<string, forceCode.ICodeCoverage>(),
                       };
                       codeCovViewService.addClass(workspaceMember);
                       return foo;
