@@ -14,28 +14,16 @@ import constants from './../models/constants';
 import { isEmptyUndOrNull } from '../util';
 import { notifications } from '.';
 
-interface IClassType {
-  CoveredClass: string;
-  UncoveredClass: string;
-  NoCoverageData: string;
-  TestClass: string;
-  NotInOrg: string;
-  NotInSrc: string;
-  NoShow: string;
-  Subclass: string;
-  [key: string]: string;
+export enum ClassType {
+  CoveredClass = 'Sufficient Coverage',
+  UncoveredClass = 'Insufficient Coverage',
+  NoCoverageData = 'No Coverage Data',
+  TestClass = 'Test Classes',
+  NotInOrg = 'Not In Current Org',
+  NotInSrc = 'Open Files Not In Src',
+  NoShow = 'NoShow',
+  Subclass = 'Subclass',
 }
-
-const ClassType: IClassType = {
-  CoveredClass: 'Sufficient Coverage',
-  UncoveredClass: 'Insufficient Coverage',
-  NoCoverageData: 'No Coverage Data',
-  TestClass: 'Test Classes',
-  NotInOrg: 'Not In Current Org',
-  NotInSrc: 'Open Files Not In Src',
-  NoShow: 'NoShow',
-  Subclass: 'Subclass',
-};
 
 const folderWSMember: IWorkspaceMember = {
   name: 'FOLDER',
@@ -217,7 +205,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
         var percent = Math.floor((value.NumLinesCovered / total) * 100);
         if (key !== 'overall' && value.ApexTestClass && percent !== 0) {
           var newFCFile: FCFile = new FCFile(
-            `${percent}% - ${key}`,
+            `${percent}% ${key}`,
             TreeItemCollapsibleState.None,
             this,
             folderWSMember,
@@ -264,7 +252,7 @@ export class FCFile extends TreeItem {
 
   private parent: CodeCovViewService;
   private wsMember!: IWorkspaceMember;
-  private type!: string;
+  private type!: ClassType;
   private parentFCFile?: FCFile;
 
   constructor(
@@ -359,11 +347,11 @@ export class FCFile extends TreeItem {
     return this.wsMember;
   }
 
-  public getType(): string {
+  public getType(): ClassType {
     return this.type;
   }
 
-  public setType(newType: string) {
+  public setType(newType: ClassType) {
     this.type = newType;
   }
 

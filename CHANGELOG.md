@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.20.1
+    * Turn on line decorations when a class in the Code Coverage view is clicked.
 * 3.20.0
     * Add test coverage broken down by test class/method. Now you can see which test classes and methods are covering your class! Click on the dropdown next to a class name in the `Sufficient Coverage` or `Insufficient Coverage` section and you will be presented with a list of test classes and methods that cover your class. Clicking on one of these will open the tested class and update the coverage decorations to show you visually which lines are covered by each. This addresses the issue `Show test classes covering my class.` #329. Thanks @Caio-Carvalho for the request for this!
 * 3.19.2

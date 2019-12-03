@@ -15,7 +15,7 @@ import { getFileName } from '../parsers';
 import { readConfigFile, removeConfigFolder } from '../services/configuration';
 import { Config } from '../forceCode';
 import { editorUpdateApexCoverageDecorator } from '../decorators/testCoverageDecorator';
-import { FCFile } from '../services/codeCovView';
+import { FCFile, ClassType } from '../services/codeCovView';
 
 export class ToolingQuery extends ForcecodeCommand {
   constructor() {
@@ -178,6 +178,13 @@ export class ChangeCoverageDecoration extends ForcecodeCommand {
       var newCoverage = context.label.split(' ').pop();
       if (parent === context) {
         newCoverage = 'overall';
+      }
+      if (
+        parent.getType() === ClassType.CoveredClass ||
+        parent.getType() === ClassType.UncoveredClass
+      ) {
+        // turn on line decorations when user clicks the class
+        vscode.window.forceCode.config.showTestCoverage = true;
       }
       return vscode.workspace
         .openTextDocument(parent.getWsMember().path)

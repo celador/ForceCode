@@ -46,16 +46,7 @@ export function updateDecorations() {
   }
   var uncoveredLineOptions: vscode.DecorationOptions[] = [];
   var lineOpts: vscode.TextEditorDecorationType = uncoveredLineStyle;
-  if (activeEditor.document.languageId != 'apexCodeCoverage') {
-    if (
-      vscode.window.forceCode &&
-      vscode.window.forceCode.config &&
-      vscode.window.forceCode.config.showTestCoverage &&
-      activeEditor
-    ) {
-      uncoveredLineOptions = getUncoveredLineOptions(activeEditor.document);
-    }
-  } else {
+  if (activeEditor.document.languageId === 'apexCodeCoverage') {
     lineOpts = acovLineStyle;
     for (var i: number = 2; i < activeEditor.document.lineCount; i += 2) {
       let decorationRange: vscode.DecorationOptions = {
@@ -63,6 +54,12 @@ export function updateDecorations() {
       };
       uncoveredLineOptions.push(decorationRange);
     }
+  } else if (
+    vscode.window.forceCode &&
+    vscode.window.forceCode.config &&
+    vscode.window.forceCode.config.showTestCoverage
+  ) {
+    uncoveredLineOptions = getUncoveredLineOptions(activeEditor.document);
   }
   activeEditor.setDecorations(lineOpts, uncoveredLineOptions);
 }
