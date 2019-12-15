@@ -110,7 +110,7 @@ export function saveAura(
       return vscode.window.forceCode.conn.tooling
         .sobject('AuraDefinition')
         .create({
-          AuraDefinitionBundleId: bundle[0].Id ? bundle[0].Id : bundle[0].id,
+          AuraDefinitionBundleId: bundle[0].Id || bundle[0].id,
           DefType,
           Format,
           Source,
@@ -131,7 +131,7 @@ export function saveAura(
       .sobject('AuraDefinition')
       .update({ Id: currentObjectDefinition.Id, Source })
       .catch(err => {
-        return { State: 'Error', message: err.message ? err.message : err };
+        return { State: 'Error', message: err.message || err };
       });
   }
 

@@ -50,9 +50,8 @@ export class Open extends ForcecodeCommand {
         'ApexComponent',
         'StaticResource',
       ];
-      var predicate: string = `WHERE NamespacePrefix = '${
-        vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''
-      }'`;
+      var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ||
+        ''}'`;
       var promises: any[] = metadataTypes.map(t => {
         var sResource = t === 'StaticResource' ? ', ContentType' : '';
         var q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;

@@ -125,7 +125,7 @@ export default class ForceService implements forceCode.IForceService {
               }
 
               var thePath: string | undefined = item.path.split(path.sep).pop();
-              var filename: string = thePath ? thePath.split('.')[0] : '';
+              var filename: string = thePath?.split('.')[0] || '';
               var workspaceMember: forceCode.IWorkspaceMember = {
                 name: filename,
                 path: item.path,

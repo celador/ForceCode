@@ -7,7 +7,7 @@ import * as fs from 'fs-extra';
 const uuidv4 = require('uuid/v4');
 
 const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
-const fcVersion = myExt ? myExt.packageJSON.version : undefined;
+const fcVersion = myExt?.packageJSON?.version;
 const fcHomeFolder = path.join(operatingSystem.getHomeDir(), '.forceCode');
 const fcAnalyticsFile = path.join(fcHomeFolder, 'analytics.json');
 

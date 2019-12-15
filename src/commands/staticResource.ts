@@ -134,12 +134,12 @@ function onError(err: any) {
     'Invalid static resource folder or file name. Name must be in the form of ResourceName.resource.type.subtype\nEXAMPLE: ' +
     'MyResource.resource.application.javascript\nThis folder would then contain one file, named MyResource.js.\nSee the ' +
     'ForceCode output panel for more detail.';
-  throw mess + '\n$#FC_LOG_ONLY_#*' + (err.message ? err.message : err);
+  throw mess + '\n$#FC_LOG_ONLY_#*' + (err.message || err);
 }
 
 function bundleAndDeploy(option: vscode.QuickPickItem) {
   let root: string = getPackagePath(option);
-  var detail = option.detail ? option.detail : '';
+  var detail = option.detail || '';
   if (detail.includes('zip') || detail === 'SPA') {
     let zip: any = zipFiles(getFileList(root), root);
     return deploy(zip, option.label, detail);

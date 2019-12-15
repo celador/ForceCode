@@ -139,7 +139,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
   // this is a check that will refresh the orgs and check if logged in. if not, it asks to log in
   public checkLoginStatus(reason: any, cancellationToken: FCCancellationToken): Promise<boolean> {
-    const message = reason && reason.message ? reason.message : reason;
+    const message = reason?.message || reason;
     return this.refreshConnections().then(() => {
       if (
         !this.isLoggedIn() ||
@@ -148,10 +148,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         if (this.currentConnection) {
           this.currentConnection.isLoggedIn = false;
         }
-        return this.connect(
-          this.currentConnection ? this.currentConnection.orgInfo : undefined,
-          cancellationToken
-        );
+        return this.connect(this.currentConnection?.orgInfo, cancellationToken);
       } else {
         return true;
       }
@@ -227,11 +224,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         accessToken: service.currentConnection.orgInfo.accessToken,
         refreshToken: refreshToken,
         version:
-          vscode.window.forceCode &&
-          vscode.window.forceCode.config &&
-          vscode.window.forceCode.config.apiVersion
-            ? vscode.window.forceCode.config.apiVersion
-            : vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+          vscode.window.forceCode?.config?.apiVersion ||
+          vscode.workspace.getConfiguration('force')['defaultApiVersion'],
       });
 
       return Promise.resolve(service.currentConnection.connection);
@@ -339,8 +333,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
   }
 
   private sortFunc(a: FCConnection, b: FCConnection): number {
-    var aStr = a.label ? a.label.toUpperCase() : '';
-    var bStr = b.label ? b.label.toUpperCase() : '';
+    var aStr = a.label?.toUpperCase() || '';
+    var bStr = b.label?.toUpperCase() || '';
     return aStr.localeCompare(bStr);
   }
 }

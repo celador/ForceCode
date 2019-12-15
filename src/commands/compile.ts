@@ -85,7 +85,7 @@ export default async function compile(
   const ttMeta: forceCode.IMetadataObject | undefined = getAnyTTMetadataFromPath(
     document.uri.fsPath
   );
-  const folderToolingType: string | undefined = ttMeta ? ttMeta.xmlName : undefined;
+  const folderToolingType: string | undefined = ttMeta?.xmlName;
   const name: string | undefined = parsers.getName(document, toolingType);
 
   var DefType: string | undefined;
@@ -191,7 +191,7 @@ export default async function compile(
 
   function finished(res: any): boolean {
     if (isEmptyUndOrNull(res)) {
-      notifications.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
+      notifications.showStatus(`${name} ${DefType || ''} $(check)`);
       return true;
     }
     var failures: number = 0;
@@ -258,10 +258,10 @@ export default async function compile(
           fcfile.clearCoverage();
         }
       }
-      notifications.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
+      notifications.showStatus(`${name} ${DefType || ''} $(check)`);
       return true;
     } else if (diagnostics.length === 0 && errMessages.length === 0) {
-      notifications.showError(res.message ? res.message : res);
+      notifications.showError(res.message || res);
     }
     notifications.showError(
       'File not saved due to build errors. Please open the Problems panel for more details.'
@@ -270,7 +270,7 @@ export default async function compile(
   }
 
   function onError(err: any): boolean {
-    const errMsg: string = err.message ? err.message : err;
+    const errMsg: string = err.message || err;
     if (!errMsg) {
       return false;
     }
@@ -284,14 +284,14 @@ export default async function compile(
     try {
       const matchRegex = /:(\d+),(\d+):|:(\d+),(\d+) :|\[(\d+),(\d+)\]/; // this will match :12,3432: :12,3432 : and [12,3432]
       var errSplit = errMsg.split('Message:').pop();
-      theerr = errSplit ? errSplit : errMsg;
+      theerr = errSplit || errMsg;
       errSplit = theerr.split(': Source').shift();
-      theerr = errSplit ? errSplit : theerr;
+      theerr = errSplit || theerr;
       var match = errMsg.match(matchRegex);
       if (match) {
         match = match.filter(mat => mat); // eliminate all undefined elements
         errSplit = theerr.split(match[0]).pop();
-        theerr = (errSplit ? errSplit : theerr).trim(); // remove the line information from the error message if 'Message:' wasn't part of the string
+        theerr = (errSplit || theerr).trim(); // remove the line information from the error message if 'Message:' wasn't part of the string
         const row = match[1];
         const col = match[2];
         failureLineNumber = Number.parseInt(row);

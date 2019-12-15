@@ -63,7 +63,7 @@ export class OpenFileInOrg extends ForcecodeCommand {
       if (context.fsPath) {
         var filePath = context.fsPath;
         const fcfile: FCFile | undefined = codeCovViewService.findByPath(filePath);
-        const member: IWorkspaceMember | undefined = fcfile ? fcfile.getWsMember() : undefined;
+        const member: IWorkspaceMember | undefined = fcfile?.getWsMember();
         if (member) {
           var type = member.type;
           if (type === 'ApexClass') {

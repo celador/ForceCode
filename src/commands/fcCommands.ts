@@ -59,7 +59,7 @@ export class Logout extends ForcecodeCommand {
   }
 
   public command(context: FCConnection | undefined) {
-    var conn = context ? context : fcConnection.currentConnection;
+    var conn = context || fcConnection.currentConnection;
     return fcConnection.disconnect(conn);
   }
 }

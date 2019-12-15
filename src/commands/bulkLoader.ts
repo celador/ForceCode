@@ -82,7 +82,7 @@ export class BulkLoader extends ForcecodeCommand {
               clearTimeout(timeOut);
             }
             if (err) {
-              panel.webview.postMessage({ error: err.message ? err.message : err });
+              panel.webview.postMessage({ error: err.message || err });
               return;
             }
             var totalErrors: number = 0;

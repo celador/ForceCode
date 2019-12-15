@@ -176,12 +176,10 @@ export class Task extends vscode.TreeItem {
           .then(loggedIn => {
             if (loggedIn || attempt === SECOND_TRY) {
               if (reason) {
-                notifications.showError(reason.message ? reason.message : reason, 'OK');
-                return trackEvent('Error Thrown', reason.message ? reason.message : reason).then(
-                  () => {
-                    return reason;
-                  }
-                );
+                notifications.showError(reason.message || reason, 'OK');
+                return trackEvent('Error Thrown', reason.message || reason).then(() => {
+                  return reason;
+                });
               }
             } else {
               return 'FC:AGAIN';

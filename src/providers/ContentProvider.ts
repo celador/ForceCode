@@ -29,9 +29,8 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
     var name: string | undefined = uriParts[2];
     var toolingName: string = name.split('.')[0];
     var field: string = 'Body';
-    var nsPrefix = `NamespacePrefix = '${
-      vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''
-    }' and Name='${toolingName}'`;
+    var nsPrefix = `NamespacePrefix = '${vscode.window.forceCode.config.prefix ||
+      ''}' and Name='${toolingName}'`;
     if (toolingType === 'ApexComponent' || toolingType === 'ApexPage') {
       field = 'Markup';
     } else if (this.auraSource && toolingType === 'AuraDefinition') {
@@ -45,7 +44,7 @@ export default class ForceCodeContentProvider implements vscode.TextDocumentCont
       var FilePath: string | undefined = this.auraSource.fileName
         .split(vscode.window.forceCode.projectRoot + path.sep)
         .pop();
-      FilePath = FilePath ? FilePath.split(path.sep).join('/') : '';
+      FilePath = FilePath?.split(path.sep).join('/') || '';
       nsPrefix = `FilePath='${FilePath}' AND LightningComponentBundleId IN (SELECT Id FROM LightningComponentBundle WHERE DeveloperName='${name}')`;
     }
     return new Promise<string>((resolve, reject) => {

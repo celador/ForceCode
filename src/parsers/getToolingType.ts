@@ -31,7 +31,7 @@ export function getToolingTypeFromFolder(uri: vscode.Uri): string | undefined {
   var dir: string | undefined = uri.fsPath
     .split(vscode.window.forceCode.projectRoot + path.sep)
     .pop();
-  dir = dir ? dir.split(path.sep).shift() : undefined;
+  dir = dir?.split(path.sep).shift();
   switch (dir) {
     case 'classes':
       return 'ApexClass';

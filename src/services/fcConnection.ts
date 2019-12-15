@@ -115,9 +115,8 @@ export class FCConnection extends vscode.TreeItem {
         this.connection.limitInfo.apiUsage.limit;
     }
     const config: Config = readConfigFile(this.orgInfo.username);
-    super.label = config.alias && config.alias.trim() !== '' ? config.alias : config.username;
+    super.label = config.alias.trim() !== '' ? config.alias : config.username;
     this.tooltip +=
-      '\nPROJECT PATH - ' +
-      path.join(vscode.window.forceCode.workspaceRoot, config && config.src ? config.src : 'src');
+      '\nPROJECT PATH - ' + path.join(vscode.window.forceCode.workspaceRoot, config?.src || 'src');
   }
 }

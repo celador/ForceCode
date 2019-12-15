@@ -239,10 +239,16 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   private sortFunc(a: FCFile, b: FCFile): number {
-    var aStr = a.label ? a.label.split('% ').pop() : '';
-    aStr = aStr ? aStr.toUpperCase() : '';
-    var bStr = b.label ? b.label.split('% ').pop() : '';
-    bStr = bStr ? bStr.toUpperCase() : '';
+    var aStr =
+      a?.label
+        ?.split('% ')
+        .pop()
+        ?.toUpperCase() || '';
+    var bStr =
+      b?.label
+        ?.split('% ')
+        .pop()
+        ?.toUpperCase() || '';
     return aStr.localeCompare(bStr);
   }
 }

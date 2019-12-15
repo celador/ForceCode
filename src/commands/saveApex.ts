@@ -74,7 +74,7 @@ export function saveApex(
     }
 
     function shouldCompile(record: any) {
-      const serverContents: string = record.Body ? record.Body : record.Markup;
+      const serverContents: string = record.Body || record.Markup;
       if (
         !forceCompile &&
         !Metadata &&
@@ -111,7 +111,7 @@ export function saveApex(
         }
 
         var member: {} = {
-          Body: Metadata ? (record.Body ? record.Body : record.Markup) : body,
+          Body: Metadata ? record.Body || record.Markup : body,
           ContentEntityId: record.Id,
           Id: fc.containerId,
           Metadata: Metadata ? Object.assign({}, record.Metadata, Metadata) : record.Metadata,

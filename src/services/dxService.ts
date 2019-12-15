@@ -148,11 +148,9 @@ export default class DXService {
             // Get non-promise stack for extra help
             notifications.writeLog(error);
             notifications.writeLog(json);
-            return reject(
-              json && json.message ? json.message : error && error.message ? error.message : error
-            );
+            return reject(json?.message || error?.message || error);
           } else {
-            return resolve(json ? json.result : undefined);
+            return resolve(json?.result);
           }
         });
       }
@@ -204,7 +202,7 @@ export default class DXService {
       theLogId += ' --logid ' + logid;
     }
     return this.runCommand('apex:log:get' + theLogId, true).then(log => {
-      log = log[0] ? log[0] : log;
+      log = log[0] || log;
       return Promise.resolve(log.log);
     });
   }
