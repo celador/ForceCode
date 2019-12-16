@@ -3,7 +3,7 @@ import {
   ForceService,
   commandViewService,
   codeCovViewService,
-  configuration,
+  getSetConfig,
   fcConnection,
   isWindows,
   saveService,
@@ -144,7 +144,7 @@ export function activate(context: vscode.ExtensionContext): any {
     vscode.workspace
       .createFileSystemWatcher(path.join(vscode.window.forceCode.workspaceRoot, 'force.json'))
       .onDidChange(_uri => {
-        configuration();
+        getSetConfig();
       })
   );
 

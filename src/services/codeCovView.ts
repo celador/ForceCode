@@ -10,9 +10,8 @@ import {
 import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { constants } from '../models';
 import { isEmptyUndOrNull } from '../util';
-import { notifications } from '.';
+import { MAX_TIME_BETWEEN_FILE_CHANGES, notifications } from '.';
 
 export enum ClassType {
   CoveredClass = 'Sufficient Coverage',
@@ -389,7 +388,7 @@ export class FCFile extends TreeItem {
     var localMS: number = stat.mtime.getTime();
     var serverMS: number = new Date(serverDate).getTime();
 
-    if (localMS > serverMS || serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
+    if (localMS > serverMS || serverMS - localMS <= MAX_TIME_BETWEEN_FILE_CHANGES) {
       return true;
     }
 

@@ -1,4 +1,3 @@
-import ForceCodeContentProvider from './ContentProvider';
-import ForceCodeLogProvider, { filterLog } from './LogProvider';
-import { ApexTestLinkProvider } from './ApexTestLinkProvider';
-export { ForceCodeContentProvider, ForceCodeLogProvider, ApexTestLinkProvider, filterLog };
+export { ForceCodeContentProvider } from './ContentProvider';
+export { ForceCodeLogProvider, filterLog } from './LogProvider';
+export { ApexTestLinkProvider } from './ApexTestLinkProvider';

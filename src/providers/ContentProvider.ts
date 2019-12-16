@@ -8,7 +8,7 @@ import { QueryResult } from 'jsforce';
  * Salesforce Content Provider class.
  * This class provides an easy way to retrieve files as a native VSCode.Uri
  */
-export default class ForceCodeContentProvider implements vscode.TextDocumentContentProvider {
+export class ForceCodeContentProvider implements vscode.TextDocumentContentProvider {
   public auraSource: vscode.TextDocument | undefined;
   private static instance: ForceCodeContentProvider;
 

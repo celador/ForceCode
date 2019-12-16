@@ -17,7 +17,7 @@ import { Connection, IMetadataFileProperties } from 'jsforce';
 import klaw = require('klaw');
 import { isEmptyUndOrNull } from '../util';
 
-export default class ForceService implements forceCode.IForceService {
+export class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
   public config: forceCode.Config;
   public conn!: Connection;

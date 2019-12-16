@@ -67,7 +67,7 @@ export class ForceCompile extends ForcecodeCommand {
   }
 }
 
-export default async function compile(
+export async function compile(
   document: vscode.TextDocument,
   forceCompile: boolean,
   cancellationToken: FCCancellationToken

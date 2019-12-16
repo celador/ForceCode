@@ -1,15 +1,16 @@
 import { ForcecodeCommand, CancelCommand, FCCancellationToken } from './forcecodeCommand';
-import { apexTestResults } from '../services';
-import compile, { CompileMenu, ForceCompile } from './compile';
-import deploy, { DeployPackage, createPackageXML, deployFiles } from './deploy';
-import diff, { DiffMenu } from './diff';
+export { getApexTestResults } from '../services';
+import { compile, CompileMenu, ForceCompile } from './compile';
+import { deploy, DeployPackage, createPackageXML, deployFiles } from './deploy';
+import { diff, DiffMenu } from './diff';
 import { showFileOptions, Open, ShowFileOptions } from './open';
-import packageBuilder, { PackageBuilder, getMembers, getFolderContents } from './packageBuilder';
-import retrieve, { RetrieveBundle, Refresh, ToolingType } from './retrieve';
+import { packageBuilder, PackageBuilder, getMembers, getFolderContents } from './packageBuilder';
+import { retrieve, RetrieveBundle, Refresh, ToolingType } from './retrieve';
 import { getAuraDefTypeFromDocument, saveAura } from './saveAura';
 import { saveApex } from './saveApex';
 import { saveLWC } from './saveLWC';
-import staticResource, {
+import {
+  staticResourceBundleDeploy,
   StaticResourceBundle,
   StaticResourceDeployFile,
   staticResourceDeployFromFile,
@@ -44,7 +45,6 @@ import {
 } from './fcCommands';
 
 export {
-  apexTestResults,
   compile,
   deploy,
   diff,
@@ -54,7 +54,7 @@ export {
   saveAura,
   saveLWC,
   showFileOptions,
-  staticResource,
+  staticResourceBundleDeploy,
   staticResourceDeployFromFile,
   ForcecodeCommand,
   createProject,

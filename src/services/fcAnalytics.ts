@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import { constants } from '../models';
-import { getHomeDir, getOS } from '.';
+import { GA_TRACKING_ID, getHomeDir, getOS } from '.';
 import { Visitor } from 'universal-analytics';
 import * as path from 'path';
 import * as fs from 'fs-extra';
@@ -53,10 +52,7 @@ export function trackEvent(category: string, message: string): Promise<any> {
         ea: getOS(),
         el: message,
       };
-      const analytics: Visitor = new Visitor(
-        constants.GA_TRACKING_ID,
-        vscode.window.forceCode.uuid
-      );
+      const analytics: Visitor = new Visitor(GA_TRACKING_ID, vscode.window.forceCode.uuid);
       analytics
         .event(params, response => {
           if (!response) {

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-export default function getName(
+export function getName(
   document: vscode.TextDocument,
   toolingType: string | undefined
 ): string | undefined {

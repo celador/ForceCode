@@ -113,7 +113,7 @@ export interface ToolingTypes {
   types: ToolingType[];
 }
 
-export default function retrieve(
+export function retrieve(
   resource: vscode.Uri | ToolingTypes | undefined,
   cancellationToken: FCCancellationToken
 ) {

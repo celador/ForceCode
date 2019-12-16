@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { constants } from '../models';
+import { OUTPUT_CHANNEL_NAME } from '.';
 import { outputToString } from '../parsers';
 
 export class Notifications {
@@ -9,7 +9,7 @@ export class Notifications {
   private statusTimeout: any;
 
   constructor() {
-    this.outputChannel = vscode.window.createOutputChannel(constants.OUTPUT_CHANNEL_NAME);
+    this.outputChannel = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 6);
   }
 

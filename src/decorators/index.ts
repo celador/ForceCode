@@ -1,2 +1,1 @@
-import { updateDecorations, editorUpdateApexCoverageDecorator } from './testCoverageDecorator';
-export { updateDecorations, editorUpdateApexCoverageDecorator };
+export { updateDecorations, editorUpdateApexCoverageDecorator } from './testCoverageDecorator';

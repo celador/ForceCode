@@ -151,7 +151,7 @@ export function getFolderContents(type: string, folder: string): Promise<string[
   });
 }
 
-export default function packageBuilder(buildPackage?: boolean): Promise<any> {
+export function packageBuilder(buildPackage?: boolean): Promise<any> {
   return new Promise((resolve, reject) => {
     if (!vscode.window.forceCode.describe) {
       return reject('Metadata describe error. Please try logging out of and back into the org.');

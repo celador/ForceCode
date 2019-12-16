@@ -51,7 +51,7 @@ export enum SObjectCategory {
   CUSTOM = 'CUSTOM',
 }
 
-export default class DXService {
+export class DXService {
   private static instance: DXService;
 
   public static getInstance() {

@@ -33,7 +33,7 @@ export const defaultOptions: Config = {
   staticResourceCacheControl: 'Private',
 };
 
-export default function getSetConfig(service?: ForceService): Promise<Config> {
+export function getSetConfig(service?: ForceService): Promise<Config> {
   var self: IForceService = service || vscode.window.forceCode;
   const projPath = self.workspaceRoot;
   var lastUsername: string | undefined = readForceJson();

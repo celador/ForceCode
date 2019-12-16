@@ -37,7 +37,7 @@ export class DiffMenu extends ForcecodeCommand {
   }
 }
 
-export default function diff(document: vscode.TextDocument, auraSource?: boolean) {
+export function diff(document: vscode.TextDocument, auraSource?: boolean) {
   if (!document) {
     return Promise.reject('No document open to diff with the server.');
   }

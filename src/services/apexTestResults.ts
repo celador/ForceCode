@@ -4,7 +4,7 @@ import { editorUpdateApexCoverageDecorator } from '../decorators';
 import { codeCovViewService, FCFile } from '.';
 import { QueryResult } from 'jsforce';
 
-export default function getApexTestResults(singleClass?: boolean): Promise<QueryResult> {
+export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> {
   var fromWhere: string = singleClass ? ' ApexCodeCoverage ' : ' ApexCodeCoverageAggregate ';
   var selectMore = singleClass ? 'TestMethodName, ApexTestClassId, ApexTestClass.Name,' : '';
   var query =

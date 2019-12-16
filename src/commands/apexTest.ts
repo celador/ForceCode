@@ -3,7 +3,7 @@ import {
   fcConnection,
   dxService,
   ApexTestQueryResult,
-  apexTestResults,
+  getApexTestResults,
   FCFile,
   notifications,
 } from '../services';
@@ -33,7 +33,7 @@ export class GetCodeCoverage extends ForcecodeCommand {
   }
 
   public command() {
-    return apexTestResults().then(_res => apexTestResults(true));
+    return getApexTestResults().then(_res => getApexTestResults(true));
   }
 }
 

@@ -36,7 +36,7 @@ var deployOptions: any = {
   allowMissingFiles: true,
 };
 
-export default function deploy(cancellationToken: FCCancellationToken) {
+export function deploy(cancellationToken: FCCancellationToken) {
   let options: vscode.QuickPickItem[] = [
     {
       label: 'Deploy from package.xml',
