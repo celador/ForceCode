@@ -1,17 +1,23 @@
 import * as vscode from 'vscode';
-import * as forceCode from './../forceCode';
-import { codeCovViewService, fcConnection, notifications } from './../services';
+import * as forceCode from '../forceCode';
+import {
+  codeCovViewService,
+  fcConnection,
+  notifications,
+  FCFile,
+  getUUID,
+  FCAnalytics,
+  defaultOptions,
+  readForceJson,
+} from '.';
 import * as path from 'path';
-import { FCFile } from './codeCovView';
-import { getToolingTypeFromExt } from '../parsers/getToolingType';
+import { getToolingTypeFromExt } from '../parsers';
 import { Connection, IMetadataFileProperties } from 'jsforce';
-import { getUUID, FCAnalytics } from './fcAnalytics';
 
 import klaw = require('klaw');
-import { defaultOptions, readForceJson } from './configuration';
 import { isEmptyUndOrNull } from '../util';
 
-export default class ForceService implements forceCode.IForceService {
+export class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
   public config: forceCode.Config;
   public conn!: Connection;
@@ -125,7 +131,7 @@ export default class ForceService implements forceCode.IForceService {
               }
 
               var thePath: string | undefined = item.path.split(path.sep).pop();
-              var filename: string = thePath ? thePath.split('.')[0] : '';
+              var filename: string = thePath?.split('.')[0] || '';
               var workspaceMember: forceCode.IWorkspaceMember = {
                 name: filename,
                 path: item.path,

@@ -1,16 +1,25 @@
 import * as vscode from 'vscode';
-import * as parsers from './../parsers';
-import * as forceCode from './../forceCode';
+import * as forceCode from '../forceCode';
 import { codeCovViewService, saveHistoryService, saveService, notifications } from '../services';
-import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
-import { saveApex } from './saveApex';
+import {
+  saveAura,
+  saveApex,
+  saveLWC,
+  getAuraDefTypeFromDocument,
+  createPackageXML,
+  deployFiles,
+  FCCancellationToken,
+  ForcecodeCommand,
+} from '.';
 import { parseString } from 'xml2js';
 import * as path from 'path';
-import { saveLWC } from './saveLWC';
-import { createPackageXML, deployFiles } from './deploy';
 import { isEmptyUndOrNull } from '../util';
-import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
-import { getAnyTTMetadataFromPath, getToolingTypeFromFolder } from '../parsers/getToolingType';
+import {
+  getAnyTTMetadataFromPath,
+  getToolingTypeFromFolder,
+  getName,
+  getWholeFileName,
+} from '../parsers';
 
 export class CompileMenu extends ForcecodeCommand {
   constructor() {
@@ -58,7 +67,7 @@ export class ForceCompile extends ForcecodeCommand {
   }
 }
 
-export default async function compile(
+export async function compile(
   document: vscode.TextDocument,
   forceCompile: boolean,
   cancellationToken: FCCancellationToken
@@ -85,8 +94,8 @@ export default async function compile(
   const ttMeta: forceCode.IMetadataObject | undefined = getAnyTTMetadataFromPath(
     document.uri.fsPath
   );
-  const folderToolingType: string | undefined = ttMeta ? ttMeta.xmlName : undefined;
-  const name: string | undefined = parsers.getName(document, toolingType);
+  const folderToolingType: string | undefined = ttMeta?.xmlName;
+  const name: string | undefined = getName(document, toolingType);
 
   var DefType: string | undefined;
   var Metadata: {} | undefined;
@@ -191,7 +200,7 @@ export default async function compile(
 
   function finished(res: any): boolean {
     if (isEmptyUndOrNull(res)) {
-      notifications.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
+      notifications.showStatus(`${name} ${DefType || ''} $(check)`);
       return true;
     }
     var failures: number = 0;
@@ -258,10 +267,10 @@ export default async function compile(
           fcfile.clearCoverage();
         }
       }
-      notifications.showStatus(`${name} ${DefType ? DefType : ''} $(check)`);
+      notifications.showStatus(`${name} ${DefType || ''} $(check)`);
       return true;
     } else if (diagnostics.length === 0 && errMessages.length === 0) {
-      notifications.showError(res.message ? res.message : res);
+      notifications.showError(res.message || res);
     }
     notifications.showError(
       'File not saved due to build errors. Please open the Problems panel for more details.'
@@ -270,7 +279,7 @@ export default async function compile(
   }
 
   function onError(err: any): boolean {
-    const errMsg: string = err.message ? err.message : err;
+    const errMsg: string = err.message || err;
     if (!errMsg) {
       return false;
     }
@@ -284,14 +293,14 @@ export default async function compile(
     try {
       const matchRegex = /:(\d+),(\d+):|:(\d+),(\d+) :|\[(\d+),(\d+)\]/; // this will match :12,3432: :12,3432 : and [12,3432]
       var errSplit = errMsg.split('Message:').pop();
-      theerr = errSplit ? errSplit : errMsg;
+      theerr = errSplit || errMsg;
       errSplit = theerr.split(': Source').shift();
-      theerr = errSplit ? errSplit : theerr;
+      theerr = errSplit || theerr;
       var match = errMsg.match(matchRegex);
       if (match) {
         match = match.filter(mat => mat); // eliminate all undefined elements
         errSplit = theerr.split(match[0]).pop();
-        theerr = (errSplit ? errSplit : theerr).trim(); // remove the line information from the error message if 'Message:' wasn't part of the string
+        theerr = (errSplit || theerr).trim(); // remove the line information from the error message if 'Message:' wasn't part of the string
         const row = match[1];
         const col = match[2];
         failureLineNumber = Number.parseInt(row);
@@ -322,7 +331,7 @@ export default async function compile(
 
   function updateSaveHistory(): boolean {
     saveHistoryService.addSaveResult({
-      fileName: parsers.getWholeFileName(document) || 'UNKNOWN',
+      fileName: getWholeFileName(document) || 'UNKNOWN',
       path: document.fileName,
       success: errMessages.length === 0,
       messages: errMessages,

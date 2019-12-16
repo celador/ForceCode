@@ -1,14 +1,13 @@
 import * as vscode from 'vscode';
-import constants from '../models/constants';
-import { operatingSystem } from '.';
+import { GA_TRACKING_ID, getHomeDir, getOS } from '.';
 import { Visitor } from 'universal-analytics';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 const uuidv4 = require('uuid/v4');
 
 const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
-const fcVersion = myExt ? myExt.packageJSON.version : undefined;
-const fcHomeFolder = path.join(operatingSystem.getHomeDir(), '.forceCode');
+const fcVersion = myExt?.packageJSON?.version;
+const fcHomeFolder = path.join(getHomeDir(), '.forceCode');
 const fcAnalyticsFile = path.join(fcHomeFolder, 'analytics.json');
 
 export interface FCAnalytics {
@@ -50,13 +49,10 @@ export function trackEvent(category: string, message: string): Promise<any> {
     if (optIn()) {
       const params = {
         ec: fcVersion + ' - ' + category,
-        ea: operatingSystem.getOS(),
+        ea: getOS(),
         el: message,
       };
-      const analytics: Visitor = new Visitor(
-        constants.GA_TRACKING_ID,
-        vscode.window.forceCode.uuid
-      );
+      const analytics: Visitor = new Visitor(GA_TRACKING_ID, vscode.window.forceCode.uuid);
       analytics
         .event(params, response => {
           if (!response) {

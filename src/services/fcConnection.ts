@@ -1,11 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { FCConnectionService, operatingSystem } from '.';
+import { FCConnectionService, getHomeDir, readConfigFile, SFDX } from '.';
 import { Connection } from 'jsforce';
 import * as fs from 'fs-extra';
 import { Config } from '../forceCode';
-import { readConfigFile } from './configuration';
-import { SFDX } from '.';
 
 export interface FCOauth {
   username: string;
@@ -37,11 +35,7 @@ export class FCConnection extends vscode.TreeItem {
 
   public disconnect(): Promise<any> {
     if (this.isLoggedIn) {
-      const sfdxPath = path.join(
-        operatingSystem.getHomeDir(),
-        '.sfdx',
-        this.orgInfo.username + '.json'
-      );
+      const sfdxPath = path.join(getHomeDir(), '.sfdx', this.orgInfo.username + '.json');
       if (fs.existsSync(sfdxPath)) {
         fs.removeSync(sfdxPath);
       }
@@ -115,9 +109,8 @@ export class FCConnection extends vscode.TreeItem {
         this.connection.limitInfo.apiUsage.limit;
     }
     const config: Config = readConfigFile(this.orgInfo.username);
-    super.label = config.alias && config.alias.trim() !== '' ? config.alias : config.username;
+    super.label = config.alias.trim() !== '' ? config.alias : config.username;
     this.tooltip +=
-      '\nPROJECT PATH - ' +
-      path.join(vscode.window.forceCode.workspaceRoot, config && config.src ? config.src : 'src');
+      '\nPROJECT PATH - ' + path.join(vscode.window.forceCode.workspaceRoot, config?.src || 'src');
   }
 }

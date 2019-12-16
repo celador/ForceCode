@@ -4,7 +4,7 @@ import { IMetadataObject } from '../forceCode';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
 import { isEmptyUndOrNull, toArray } from '../util';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand } from '.';
 
 export class PackageBuilder extends ForcecodeCommand {
   constructor() {
@@ -151,7 +151,7 @@ export function getFolderContents(type: string, folder: string): Promise<string[
   });
 }
 
-export default function packageBuilder(buildPackage?: boolean): Promise<any> {
+export function packageBuilder(buildPackage?: boolean): Promise<any> {
   return new Promise((resolve, reject) => {
     if (!vscode.window.forceCode.describe) {
       return reject('Metadata describe error. Please try logging out of and back into the org.');

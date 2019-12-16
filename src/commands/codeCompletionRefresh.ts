@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { FauxClassGenerator } from '../dx';
 import { SObjectCategory, notifications } from '../services';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand } from '.';
 
 export class CodeCompletionRefresh extends ForcecodeCommand {
   constructor() {

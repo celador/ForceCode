@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
-import { compile } from '../commands';
+import { compile, FCCancellationToken } from '../commands';
 import klaw = require('klaw');
-import { FCCancellationToken } from '../commands/forcecodeCommand';
 import { notifications } from '.';
 
 interface PreSaveFile {

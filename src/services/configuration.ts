@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import { Config } from './../forceCode';
-import * as forceCode from './../forceCode';
+import { Config, IForceService } from '../forceCode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { fcConnection, ForceService, notifications } from '.';
@@ -34,8 +33,8 @@ export const defaultOptions: Config = {
   staticResourceCacheControl: 'Private',
 };
 
-export default function getSetConfig(service?: ForceService): Promise<Config> {
-  var self: forceCode.IForceService = service || vscode.window.forceCode;
+export function getSetConfig(service?: ForceService): Promise<Config> {
+  var self: IForceService = service || vscode.window.forceCode;
   const projPath = self.workspaceRoot;
   var lastUsername: string | undefined = readForceJson();
   self.config = readConfigFile(lastUsername, service);
@@ -160,7 +159,7 @@ export function saveConfigFile(userName: string | undefined, config: Config) {
 }
 
 export function readConfigFile(userName: string | undefined, service?: ForceService): Config {
-  var self: forceCode.IForceService = service || vscode.window.forceCode;
+  var self: IForceService = service || vscode.window.forceCode;
   var config: Config = defaultOptions;
   if (userName) {
     const configPath: string = path.join(

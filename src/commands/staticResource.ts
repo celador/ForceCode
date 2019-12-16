@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
 import globule = require('globule');
-import { zipFiles, notifications } from './../services';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { zipFiles, notifications } from '../services';
+import { ForcecodeCommand } from '.';
 const mime = require('mime-types');
 
 export class StaticResourceDeployFile extends ForcecodeCommand {
@@ -37,7 +37,7 @@ export class StaticResourceBundle extends ForcecodeCommand {
   }
 }
 
-export default function staticResourceBundleDeploy(): any {
+export function staticResourceBundleDeploy(): any {
   // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
   return Promise.resolve(vscode.window.forceCode)
     .then(getPackageName)
@@ -134,12 +134,12 @@ function onError(err: any) {
     'Invalid static resource folder or file name. Name must be in the form of ResourceName.resource.type.subtype\nEXAMPLE: ' +
     'MyResource.resource.application.javascript\nThis folder would then contain one file, named MyResource.js.\nSee the ' +
     'ForceCode output panel for more detail.';
-  throw mess + '\n$#FC_LOG_ONLY_#*' + (err.message ? err.message : err);
+  throw mess + '\n$#FC_LOG_ONLY_#*' + (err.message || err);
 }
 
 function bundleAndDeploy(option: vscode.QuickPickItem) {
   let root: string = getPackagePath(option);
-  var detail = option.detail ? option.detail : '';
+  var detail = option.detail || '';
   if (detail.includes('zip') || detail === 'SPA') {
     let zip: any = zipFiles(getFileList(root), root);
     return deploy(zip, option.label, detail);

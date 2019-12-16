@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand } from '.';
 
 export class CreateClass extends ForcecodeCommand {
   constructor() {

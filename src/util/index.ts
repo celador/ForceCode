@@ -1,2 +1,1 @@
-import { isEmptyUndOrNull, saveToFile, removeFile, toArray } from './util';
-export { isEmptyUndOrNull, saveToFile, removeFile, toArray };
+export { isEmptyUndOrNull, saveToFile, removeFile, toArray } from './utilities';

@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { outputToString, outputToCSV } from '../parsers/output';
+import { outputToString, outputToCSV } from '../parsers';
 import { RecordResult } from 'jsforce';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand } from '.';
 
 export class QueryEditor extends ForcecodeCommand {
   constructor() {
@@ -118,7 +118,7 @@ export class QueryEditor extends ForcecodeCommand {
             var resToSend = {
               saveResult: true,
               saveSuccess: false,
-              errors: [err.message ? err.message : err],
+              errors: [err.message || err],
             };
             sendData(resToSend);
           });
@@ -168,7 +168,7 @@ export class QueryEditor extends ForcecodeCommand {
     function onError(err: any) {
       var errToSend: {} = {
         success: false,
-        results: err && err.message ? err.message : err,
+        results: err?.message || err,
       };
       sendData(errToSend);
     }

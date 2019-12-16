@@ -1,10 +1,8 @@
 import * as vscode from 'vscode';
-import * as parsers from './../parsers';
+import * as parsers from '../parsers';
 import { saveService, notifications } from '../services';
-import diff from './diff';
 import * as path from 'path';
-import { deployFiles, createPackageXML } from './deploy';
-import { FCCancellationToken } from './forcecodeCommand';
+import { deployFiles, createPackageXML, diff, FCCancellationToken } from '.';
 
 // =======================================================================================================================================
 // ================================                Lightning Components               ===========================================
@@ -110,7 +108,7 @@ export function saveAura(
       return vscode.window.forceCode.conn.tooling
         .sobject('AuraDefinition')
         .create({
-          AuraDefinitionBundleId: bundle[0].Id ? bundle[0].Id : bundle[0].id,
+          AuraDefinitionBundleId: bundle[0].Id || bundle[0].id,
           DefType,
           Format,
           Source,
@@ -131,7 +129,7 @@ export function saveAura(
       .sobject('AuraDefinition')
       .update({ Id: currentObjectDefinition.Id, Source })
       .catch(err => {
-        return { State: 'Error', message: err.message ? err.message : err };
+        return { State: 'Error', message: err.message || err };
       });
   }
 

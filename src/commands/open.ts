@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
-import * as retrieve from './retrieve';
-import { getIcon, getExtension, getFolder } from './../parsers';
+import { getIcon, getExtension, getFolder } from '../parsers';
 import * as path from 'path';
 import { isEmptyUndOrNull } from '../util';
-import { ForcecodeCommand, FCCancellationToken } from './forcecodeCommand';
+import { ForcecodeCommand, FCCancellationToken, ToolingType, retrieve } from '.';
 const TYPEATTRIBUTE: string = 'type';
 
 export class ShowFileOptions extends ForcecodeCommand {
@@ -50,9 +49,8 @@ export class Open extends ForcecodeCommand {
         'ApexComponent',
         'StaticResource',
       ];
-      var predicate: string = `WHERE NamespacePrefix = '${
-        vscode.window.forceCode.config.prefix ? vscode.window.forceCode.config.prefix : ''
-      }'`;
+      var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ||
+        ''}'`;
       var promises: any[] = metadataTypes.map(t => {
         var sResource = t === 'StaticResource' ? ', ContentType' : '';
         var q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;
@@ -125,7 +123,7 @@ export function showFileOptions(promises: any[], cancellationToken: FCCancellati
       if (isEmptyUndOrNull(opts)) {
         return Promise.resolve();
       }
-      var files: retrieve.ToolingType[] = [];
+      var files: ToolingType[] = [];
       if (!(opts instanceof Array)) {
         opts = [opts];
       }
@@ -140,7 +138,7 @@ export function showFileOptions(promises: any[], cancellationToken: FCCancellati
         }
       });
 
-      return retrieve.default({ types: files }, cancellationToken).then((res: any) => {
+      return retrieve({ types: files }, cancellationToken).then((res: any) => {
         if (vscode.workspace.getConfiguration('force')['showFilesOnOpen']) {
           // open the files in the editor
           var filesOpened: number = 0;
@@ -174,7 +172,7 @@ export function showFileOptions(promises: any[], cancellationToken: FCCancellati
       });
     });
 
-  function getTTIndex(toolType: string, arr: retrieve.ToolingType[]): number {
+  function getTTIndex(toolType: string, arr: ToolingType[]): number {
     return arr.findIndex(cur => {
       return cur.name === toolType;
     });

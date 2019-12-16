@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { dxService, fcConnection } from '../services';
 import { Config } from '../forceCode';
-import { defaultOptions, saveConfigFile } from '../services/configuration';
-import { ForcecodeCommand, FCCancellationToken } from './forcecodeCommand';
+import { defaultOptions, saveConfigFile } from '../services';
+import { ForcecodeCommand, FCCancellationToken } from '.';
 
 interface ScratchOrgOptions {
   definitionFile?: string;
@@ -90,7 +90,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
         placeHolder: 'Choose an org edition to create...',
       };
       return vscode.window.showQuickPick(options, config).then(choice => {
-        return choice ? choice.label : choice;
+        return choice?.label;
       });
     }
 
@@ -104,7 +104,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
         placeHolder: 'Days until org expires...',
       };
       return vscode.window.showQuickPick(durOpts, config).then(choice => {
-        return choice ? choice.label : choice;
+        return choice?.label;
       });
     }
 
@@ -122,7 +122,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
         placeHolder: prompt,
       };
       return vscode.window.showQuickPick(sDataOptions, config).then(choice => {
-        return choice ? choice.label === 'Yes' : undefined;
+        return choice?.label === 'Yes';
       });
     }
 

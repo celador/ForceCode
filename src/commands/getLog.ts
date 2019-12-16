@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { fcConnection, dxService } from '../services';
 import { QueryResult } from 'jsforce';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand } from '.';
 
 interface LogRecord {
   Id: string;

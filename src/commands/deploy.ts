@@ -1,17 +1,14 @@
 import * as vscode from 'vscode';
-import { PXML, PXMLMember, notifications } from '../services';
-import { getFileListFromPXML, zipFiles } from './../services';
+import { PXML, PXMLMember, notifications, getFileListFromPXML, zipFiles } from '../services';
 import * as path from 'path';
 import klaw = require('klaw');
-import { getAuraNameFromFileName } from '../parsers';
+import { getAuraNameFromFileName, outputToString, getAnyTTMetadataFromPath } from '../parsers';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
-import { outputToString } from '../parsers/output';
 import { isEmptyUndOrNull, toArray } from '../util';
 import { DeployResult } from 'jsforce';
-import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
+import { FCCancellationToken, ForcecodeCommand } from '.';
 import { IMetadataObject } from '../forceCode';
-import { getAnyTTMetadataFromPath } from '../parsers/getToolingType';
 
 export class DeployPackage extends ForcecodeCommand {
   constructor() {
@@ -39,7 +36,7 @@ var deployOptions: any = {
   allowMissingFiles: true,
 };
 
-export default function deploy(cancellationToken: FCCancellationToken) {
+export function deploy(cancellationToken: FCCancellationToken) {
   let options: vscode.QuickPickItem[] = [
     {
       label: 'Deploy from package.xml',
@@ -139,7 +136,7 @@ export default function deploy(cancellationToken: FCCancellationToken) {
         .map(file => {
           const fname = file.split(path.sep).pop();
           return {
-            label: fname ? fname : '',
+            label: fname || '',
             detail: file,
           };
         })
@@ -191,12 +188,12 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
         member = getAuraNameFromFileName(file, 'lwc');
       } else if (fileTT.inFolder) {
         const file2 = file.split(vscode.window.forceCode.projectRoot + path.sep).pop();
-        member = file2 ? file2.substring(file2.indexOf(path.sep) + 1) : file2;
+        member = file2?.substring(file2.indexOf(path.sep) + 1);
       } else {
         member = file.split(path.sep).pop();
       }
-      const lIndexOfP = member ? member.lastIndexOf('.') : 0;
-      member = member && lIndexOfP > 0 ? member.substring(0, lIndexOfP) : member;
+      const lIndexOfP = member?.lastIndexOf('.') || 0;
+      member = lIndexOfP > 0 ? member?.substring(0, lIndexOfP) : member;
       if (member) {
         member = member.replace('\\', '/');
         const index: number = findMDTIndex(packObj, fileTT.xmlName);
@@ -225,10 +222,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       .replace(' standalone="yes"', '');
     resolve(
       fs.outputFileSync(
-        path.join(
-          lwcPackageXML ? lwcPackageXML : vscode.window.forceCode.projectRoot,
-          'package.xml'
-        ),
+        path.join(lwcPackageXML || vscode.window.forceCode.projectRoot, 'package.xml'),
         xml
       )
     );
@@ -319,11 +313,11 @@ export function deployFiles(
         });
     } else {
       var depId: string;
-      const message: string = res.message ? res.message : res;
+      const message: string = res.message || res;
       if (res.id) {
         depId = res.id;
       } else {
-        depId = (res.message ? res.message : res).split(' = ').pop();
+        depId = (res.message || res).split(' = ').pop();
       }
       res = { status: 'Failed', message: message };
       if (!message.startsWith('Polling time out')) {

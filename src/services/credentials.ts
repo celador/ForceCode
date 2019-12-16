@@ -1,10 +1,15 @@
 import * as vscode from 'vscode';
-import { fcConnection, dxService } from '.';
-import { FCOauth } from './fcConnection';
+import {
+  fcConnection,
+  dxService,
+  readConfigFile,
+  saveConfigFile,
+  defaultOptions,
+  FCOauth,
+} from '.';
 import { Config } from '../forceCode';
-import { readConfigFile, saveConfigFile, defaultOptions } from './configuration';
 import * as deepmerge from 'deepmerge';
-import { FCCancellationToken } from '../commands/forcecodeCommand';
+import { FCCancellationToken } from '../commands';
 
 const quickPickOptions: vscode.QuickPickOptions = {
   ignoreFocusOut: true,
@@ -138,8 +143,8 @@ function getUrl(config: Config): Promise<Config> {
                 resolve(config);
               });
           } else {
-            config.url = res && res.description ? res.description : 'https://login.salesforce.com';
-            config.isDeveloperEdition = res && res.label ? res.label.endsWith('Developer') : false;
+            config.url = res?.description || 'https://login.salesforce.com';
+            config.isDeveloperEdition = res?.label?.endsWith('Developer') || false;
             resolve(config);
           }
         });

@@ -1,4 +1,4 @@
-import { ForcecodeCommand } from './forcecodeCommand';
+import { diff, retrieve, ForcecodeCommand } from '.';
 import * as vscode from 'vscode';
 import {
   fcConnection,
@@ -8,14 +8,13 @@ import {
   commandViewService,
   dxService,
   notifications,
+  FCFile,
+  ClassType,
 } from '../services';
-import retrieve from './retrieve';
-import diff from './diff';
 import { getFileName } from '../parsers';
-import { readConfigFile, removeConfigFolder } from '../services/configuration';
+import { readConfigFile, removeConfigFolder } from '../services';
 import { Config } from '../forceCode';
-import { editorUpdateApexCoverageDecorator } from '../decorators/testCoverageDecorator';
-import { FCFile } from '../services/codeCovView';
+import { editorUpdateApexCoverageDecorator } from '../decorators';
 
 export class ToolingQuery extends ForcecodeCommand {
   constructor() {
@@ -59,7 +58,7 @@ export class Logout extends ForcecodeCommand {
   }
 
   public command(context: FCConnection | undefined) {
-    var conn = context ? context : fcConnection.currentConnection;
+    var conn = context || fcConnection.currentConnection;
     return fcConnection.disconnect(conn);
   }
 }
@@ -178,6 +177,13 @@ export class ChangeCoverageDecoration extends ForcecodeCommand {
       var newCoverage = context.label.split(' ').pop();
       if (parent === context) {
         newCoverage = 'overall';
+      }
+      if (
+        parent.getType() === ClassType.CoveredClass ||
+        parent.getType() === ClassType.UncoveredClass
+      ) {
+        // turn on line decorations when user clicks the class
+        vscode.window.forceCode.config.showTestCoverage = true;
       }
       return vscode.workspace
         .openTextDocument(parent.getWsMember().path)

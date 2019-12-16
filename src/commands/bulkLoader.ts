@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { dxService, SObjectCategory } from '../services';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand } from '.';
 
 export class BulkLoader extends ForcecodeCommand {
   constructor() {
@@ -82,7 +82,7 @@ export class BulkLoader extends ForcecodeCommand {
               clearTimeout(timeOut);
             }
             if (err) {
-              panel.webview.postMessage({ error: err.message ? err.message : err });
+              panel.webview.postMessage({ error: err.message || err });
               return;
             }
             var totalErrors: number = 0;

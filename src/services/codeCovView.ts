@@ -10,32 +10,19 @@ import {
 import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import constants from './../models/constants';
 import { isEmptyUndOrNull } from '../util';
-import { notifications } from '.';
+import { MAX_TIME_BETWEEN_FILE_CHANGES, notifications } from '.';
 
-interface IClassType {
-  CoveredClass: string;
-  UncoveredClass: string;
-  NoCoverageData: string;
-  TestClass: string;
-  NotInOrg: string;
-  NotInSrc: string;
-  NoShow: string;
-  Subclass: string;
-  [key: string]: string;
+export enum ClassType {
+  CoveredClass = 'Sufficient Coverage',
+  UncoveredClass = 'Insufficient Coverage',
+  NoCoverageData = 'No Coverage Data',
+  TestClass = 'Test Classes',
+  NotInOrg = 'Not In Current Org',
+  NotInSrc = 'Open Files Not In Src',
+  NoShow = 'NoShow',
+  Subclass = 'Subclass',
 }
-
-const ClassType: IClassType = {
-  CoveredClass: 'Sufficient Coverage',
-  UncoveredClass: 'Insufficient Coverage',
-  NoCoverageData: 'No Coverage Data',
-  TestClass: 'Test Classes',
-  NotInOrg: 'Not In Current Org',
-  NotInSrc: 'Open Files Not In Src',
-  NoShow: 'NoShow',
-  Subclass: 'Subclass',
-};
 
 const folderWSMember: IWorkspaceMember = {
   name: 'FOLDER',
@@ -217,7 +204,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
         var percent = Math.floor((value.NumLinesCovered / total) * 100);
         if (key !== 'overall' && value.ApexTestClass && percent !== 0) {
           var newFCFile: FCFile = new FCFile(
-            `${percent}% - ${key}`,
+            `${percent}% ${key}`,
             TreeItemCollapsibleState.None,
             this,
             folderWSMember,
@@ -251,10 +238,16 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   private sortFunc(a: FCFile, b: FCFile): number {
-    var aStr = a.label ? a.label.split('% ').pop() : '';
-    aStr = aStr ? aStr.toUpperCase() : '';
-    var bStr = b.label ? b.label.split('% ').pop() : '';
-    bStr = bStr ? bStr.toUpperCase() : '';
+    var aStr =
+      a?.label
+        ?.split('% ')
+        .pop()
+        ?.toUpperCase() || '';
+    var bStr =
+      b?.label
+        ?.split('% ')
+        .pop()
+        ?.toUpperCase() || '';
     return aStr.localeCompare(bStr);
   }
 }
@@ -264,7 +257,7 @@ export class FCFile extends TreeItem {
 
   private parent: CodeCovViewService;
   private wsMember!: IWorkspaceMember;
-  private type!: string;
+  private type!: ClassType;
   private parentFCFile?: FCFile;
 
   constructor(
@@ -359,11 +352,11 @@ export class FCFile extends TreeItem {
     return this.wsMember;
   }
 
-  public getType(): string {
+  public getType(): ClassType {
     return this.type;
   }
 
-  public setType(newType: string) {
+  public setType(newType: ClassType) {
     this.type = newType;
   }
 
@@ -395,7 +388,7 @@ export class FCFile extends TreeItem {
     var localMS: number = stat.mtime.getTime();
     var serverMS: number = new Date(serverDate).getTime();
 
-    if (localMS > serverMS || serverMS - localMS <= constants.MAX_TIME_BETWEEN_FILE_CHANGES) {
+    if (localMS > serverMS || serverMS - localMS <= MAX_TIME_BETWEEN_FILE_CHANGES) {
       return true;
     }
 

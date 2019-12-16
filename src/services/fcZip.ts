@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import { parseString } from 'xml2js';
 import { toArray } from '../util';
 import { IMetadataObject } from '../forceCode';
-import { getToolingTypeMetadata } from '../parsers/getToolingType';
+import { getToolingTypeMetadata } from '../parsers';
 
 /**
  * @private zipFiles

@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import { fcCommands } from './../models/commands';
+import { fcCommands, ForcecodeCommand } from '.';
 import { fcConnection } from '../services';
-import { ForcecodeCommand } from './forcecodeCommand';
 
 export class ForceCodeMenu extends ForcecodeCommand {
   constructor() {

@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import * as forceCode from './../forceCode';
-import { FCFile } from '../services/codeCovView';
-import { codeCovViewService, notifications } from '../services';
+import * as forceCode from '../forceCode';
+import { codeCovViewService, notifications, FCFile } from '../services';
 
 // create a decorator type that we use to decorate small numbers
 const uncoveredLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(
@@ -46,16 +45,7 @@ export function updateDecorations() {
   }
   var uncoveredLineOptions: vscode.DecorationOptions[] = [];
   var lineOpts: vscode.TextEditorDecorationType = uncoveredLineStyle;
-  if (activeEditor.document.languageId != 'apexCodeCoverage') {
-    if (
-      vscode.window.forceCode &&
-      vscode.window.forceCode.config &&
-      vscode.window.forceCode.config.showTestCoverage &&
-      activeEditor
-    ) {
-      uncoveredLineOptions = getUncoveredLineOptions(activeEditor.document);
-    }
-  } else {
+  if (activeEditor.document.languageId === 'apexCodeCoverage') {
     lineOpts = acovLineStyle;
     for (var i: number = 2; i < activeEditor.document.lineCount; i += 2) {
       let decorationRange: vscode.DecorationOptions = {
@@ -63,6 +53,12 @@ export function updateDecorations() {
       };
       uncoveredLineOptions.push(decorationRange);
     }
+  } else if (
+    vscode.window.forceCode &&
+    vscode.window.forceCode.config &&
+    vscode.window.forceCode.config.showTestCoverage
+  ) {
+    uncoveredLineOptions = getUncoveredLineOptions(activeEditor.document);
   }
   activeEditor.setDecorations(lineOpts, uncoveredLineOptions);
 }

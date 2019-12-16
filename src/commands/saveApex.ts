@@ -1,11 +1,9 @@
 import * as vscode from 'vscode';
-import * as parsers from './../parsers';
-import * as forceCode from './../forceCode';
+import * as parsers from '../parsers';
+import * as forceCode from '../forceCode';
 import { saveService, codeCovViewService, notifications } from '../services';
-import diff from './diff';
-import { createPackageXML, deployFiles } from './deploy';
+import { createPackageXML, deployFiles, FCCancellationToken, diff } from '.';
 import * as path from 'path';
-import { FCCancellationToken } from './forcecodeCommand';
 
 export function saveApex(
   document: vscode.TextDocument,
@@ -74,7 +72,7 @@ export function saveApex(
     }
 
     function shouldCompile(record: any) {
-      const serverContents: string = record.Body ? record.Body : record.Markup;
+      const serverContents: string = record.Body || record.Markup;
       if (
         !forceCompile &&
         !Metadata &&
@@ -111,7 +109,7 @@ export function saveApex(
         }
 
         var member: {} = {
-          Body: Metadata ? (record.Body ? record.Body : record.Markup) : body,
+          Body: Metadata ? record.Body || record.Markup : body,
           ContentEntityId: record.Id,
           Id: fc.containerId,
           Metadata: Metadata ? Object.assign({}, record.Metadata, Metadata) : record.Metadata,

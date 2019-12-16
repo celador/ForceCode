@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
-import * as forceCode from './../forceCode';
+import * as forceCode from '../forceCode';
 import * as path from 'path';
-import { apexTestResults } from '.';
 import { saveToFile } from '../util';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand, getApexTestResults } from '.';
 import { notifications } from '../services';
 
 export class OverallCoverage extends ForcecodeCommand {
@@ -20,7 +19,7 @@ export class OverallCoverage extends ForcecodeCommand {
   }
 
   public command(): any {
-    return apexTestResults().then(res => {
+    return getApexTestResults().then(res => {
       if (res.records) {
         var outputString: string = 'Class/Trigger Name';
         // use this for formatting

@@ -1,13 +1,21 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { dxService, FCOauth, FCConnection, operatingSystem, notifications } from '.';
+import {
+  dxService,
+  FCOauth,
+  FCConnection,
+  getHomeDir,
+  notifications,
+  saveConfigFile,
+  readConfigFile,
+  SFDX,
+  checkConfig,
+  enterCredentials,
+} from '.';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
-import { saveConfigFile, readConfigFile } from './configuration';
-import { checkConfig, enterCredentials } from './credentials';
-import { SFDX } from '.';
-import { FCCancellationToken } from '../commands/forcecodeCommand';
+import { FCCancellationToken } from '../commands';
 import { jsforce, Connection } from 'jsforce';
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
@@ -139,7 +147,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
   // this is a check that will refresh the orgs and check if logged in. if not, it asks to log in
   public checkLoginStatus(reason: any, cancellationToken: FCCancellationToken): Promise<boolean> {
-    const message = reason && reason.message ? reason.message : reason;
+    const message = reason?.message || reason;
     return this.refreshConnections().then(() => {
       if (
         !this.isLoggedIn() ||
@@ -148,10 +156,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         if (this.currentConnection) {
           this.currentConnection.isLoggedIn = false;
         }
-        return this.connect(
-          this.currentConnection ? this.currentConnection.orgInfo : undefined,
-          cancellationToken
-        );
+        return this.connect(this.currentConnection?.orgInfo, cancellationToken);
       } else {
         return true;
       }
@@ -217,7 +222,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
       }
       vscode.window.forceCode.config = readConfigFile(orgInf.username);
 
-      const sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInf.username + '.json');
+      const sfdxPath = path.join(getHomeDir(), '.sfdx', orgInf.username + '.json');
       const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
       service.currentConnection.connection = new jsforce.Connection({
         oauth2: {
@@ -227,11 +232,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         accessToken: service.currentConnection.orgInfo.accessToken,
         refreshToken: refreshToken,
         version:
-          vscode.window.forceCode &&
-          vscode.window.forceCode.config &&
-          vscode.window.forceCode.config.apiVersion
-            ? vscode.window.forceCode.config.apiVersion
-            : vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+          vscode.window.forceCode?.config?.apiVersion ||
+          vscode.workspace.getConfiguration('force')['defaultApiVersion'],
       });
 
       return Promise.resolve(service.currentConnection.connection);
@@ -339,8 +341,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
   }
 
   private sortFunc(a: FCConnection, b: FCConnection): number {
-    var aStr = a.label ? a.label.toUpperCase() : '';
-    var bStr = b.label ? b.label.toUpperCase() : '';
+    var aStr = a.label?.toUpperCase() || '';
+    var bStr = b.label?.toUpperCase() || '';
     return aStr.localeCompare(bStr);
   }
 }

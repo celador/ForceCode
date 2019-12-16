@@ -4,7 +4,7 @@ export function outputToString(toConvert: any, depth?: number): string {
   }
   var retval: string;
   if (typeof toConvert === 'object') {
-    var level: number = depth ? depth : 1;
+    var level: number = depth || 1;
     var tabs: string = '';
     var brTabs: string = '';
     for (var theTabs = 0; theTabs < level; theTabs++) {
@@ -48,7 +48,7 @@ export function outputToCSV(arr: ObjArr[]): string {
 }
 
 function getKeys(value: string | any, theArr?: string[], prevName?: string): string[] {
-  var curArr: string[] = theArr ? theArr : [];
+  var curArr: string[] = theArr || [];
   if (value === null) {
     if (prevName) {
       curArr.push(prevName);
@@ -76,5 +76,5 @@ function getValue(obj: ObjArr, val: string): string {
   for (var i = 0; i < valSplit.length; i++) {
     curObj = curObj[valSplit[i]];
   }
-  return `"${curObj ? curObj : ''}"`;
+  return `"${curObj || ''}"`;
 }

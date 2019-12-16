@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import * as logging from './../providers/LogProvider';
+import { filterLog } from '../providers';
 import { dxService, ExecuteAnonymousResult, notifications } from '../services';
 import { saveToFile, removeFile } from '../util';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand } from '.';
 
 export class ExecuteAnonymous extends ForcecodeCommand {
   constructor() {
@@ -84,7 +84,7 @@ export class ExecuteAnonymous extends ForcecodeCommand {
 
     function showResult(res: ExecuteAnonymousResult) {
       const newDocURI: vscode.Uri = vscode.Uri.parse(`untitled:${new Date().toISOString()}.log`);
-      const filteredLog: string = logging.filterLog(res.logs);
+      const filteredLog: string = filterLog(res.logs);
       if (filteredLog === '') {
         return {
           async then(callback: any) {

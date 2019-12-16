@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
-import { fcConnection, FCOauth, notifications } from '.';
-import { isWindows } from './operatingSystem';
+import { fcConnection, FCOauth, notifications, isWindows } from '.';
 import { SpawnOptions, spawn } from 'child_process';
-import { FCCancellationToken } from '../commands/forcecodeCommand';
+import { FCCancellationToken } from '../commands';
 const kill = require('tree-kill');
 
 export interface SFDX {
@@ -52,7 +51,7 @@ export enum SObjectCategory {
   CUSTOM = 'CUSTOM',
 }
 
-export default class DXService {
+export class DXService {
   private static instance: DXService;
 
   public static getInstance() {
@@ -148,11 +147,9 @@ export default class DXService {
             // Get non-promise stack for extra help
             notifications.writeLog(error);
             notifications.writeLog(json);
-            return reject(
-              json && json.message ? json.message : error && error.message ? error.message : error
-            );
+            return reject(json?.message || error?.message || error);
           } else {
-            return resolve(json ? json.result : undefined);
+            return resolve(json?.result);
           }
         });
       }
@@ -204,7 +201,7 @@ export default class DXService {
       theLogId += ' --logid ' + logid;
     }
     return this.runCommand('apex:log:get' + theLogId, true).then(log => {
-      log = log[0] ? log[0] : log;
+      log = log[0] || log;
       return Promise.resolve(log.log);
     });
   }

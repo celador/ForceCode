@@ -1,8 +1,7 @@
 import { Uri } from 'vscode';
-import { ForcecodeCommand } from './forcecodeCommand';
-import { dxService, codeCovViewService } from '../services';
+import { ForcecodeCommand } from '.';
+import { dxService, codeCovViewService, FCFile } from '../services';
 import * as path from 'path';
-import { FCFile } from '../services/codeCovView';
 import { IWorkspaceMember } from '../forceCode';
 
 export class OpenOrg extends ForcecodeCommand {
@@ -63,7 +62,7 @@ export class OpenFileInOrg extends ForcecodeCommand {
       if (context.fsPath) {
         var filePath = context.fsPath;
         const fcfile: FCFile | undefined = codeCovViewService.findByPath(filePath);
-        const member: IWorkspaceMember | undefined = fcfile ? fcfile.getWsMember() : undefined;
+        const member: IWorkspaceMember | undefined = fcfile?.getWsMember();
         if (member) {
           var type = member.type;
           if (type === 'ApexClass') {

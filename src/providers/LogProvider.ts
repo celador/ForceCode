@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { dxService } from '../services';
 
-export default class ForceCodeLogProvider implements vscode.TextDocumentContentProvider {
+export class ForceCodeLogProvider implements vscode.TextDocumentContentProvider {
   provideTextDocumentContent(uri: vscode.Uri): Thenable<string> {
     var logId: string | undefined = uri.query.substring(2, 20);
 

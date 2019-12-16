@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-export default function getName(
+export function getName(
   document: vscode.TextDocument,
   toolingType: string | undefined
 ): string | undefined {
@@ -19,7 +19,7 @@ export function getFileName(document: vscode.TextDocument) {
     .substring(0, document.fileName.lastIndexOf('.'))
     .split(path.sep)
     .pop();
-  fileName = fileName ? fileName.split('.')[0] : undefined;
+  fileName = fileName?.split('.')[0];
   return fileName;
 }
 export function getWholeFileName(document: vscode.TextDocument) {
@@ -40,5 +40,5 @@ export function getAuraNameFromFileName(fileName: string, folderName: string): s
   const fnSplit = fileName
     .split(`${vscode.window.forceCode.projectRoot}${path.sep}${folderName}${path.sep}`)
     .pop();
-  return fnSplit ? fnSplit.split(path.sep).shift() : '';
+  return fnSplit?.split(path.sep).shift() || '';
 }

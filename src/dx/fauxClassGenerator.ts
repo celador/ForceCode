@@ -7,10 +7,9 @@
 import { EOL } from 'os';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { ChildRelationship, Field, SObject, SObjectDescribe } from './';
-import { dxService, SObjectCategory, notifications } from '../services';
-import { FCCancellationToken } from '../commands/forcecodeCommand';
-import { inDebug } from '../services/fcAnalytics';
+import { ChildRelationship, Field, SObject, SObjectDescribe } from '.';
+import { dxService, SObjectCategory, notifications, inDebug } from '../services';
+import { FCCancellationToken } from '../commands';
 
 const SFDX_DIR = '.sfdx';
 const TOOLS_DIR = 'tools';
@@ -160,11 +159,11 @@ export class FauxClassGenerator {
 
   private getTargetType(describeType: string): string {
     const gentype = FauxClassGenerator.typeMapping.get(describeType) as string;
-    return gentype ? gentype : this.capitalize(describeType);
+    return gentype || this.capitalize(describeType);
   }
 
   private getReferenceName(relationshipName: string, name: string): string {
-    return relationshipName ? relationshipName : this.stripId(name);
+    return relationshipName || this.stripId(name);
   }
 
   private generateChildRelationship(rel: ChildRelationship): string {
@@ -247,20 +246,16 @@ export class FauxClassGenerator {
   private generateFauxClassTextFromDecls(className: string, declarations: string[]): string {
     // sort, but filter out duplicates
     // which can happen due to childRelationships w/o a relationshipName
-    declarations.sort(
-      (first: string, second: string): number => {
-        return FauxClassGenerator.fieldName(first) > FauxClassGenerator.fieldName(second) ? 1 : -1;
-      }
-    );
+    declarations.sort((first: string, second: string): number => {
+      return FauxClassGenerator.fieldName(first) > FauxClassGenerator.fieldName(second) ? 1 : -1;
+    });
 
-    declarations = declarations.filter(
-      (value: string, index: number, array: string[]): boolean => {
-        return (
-          !index ||
-          FauxClassGenerator.fieldName(value) !== FauxClassGenerator.fieldName(array[index - 1])
-        );
-      }
-    );
+    declarations = declarations.filter((value: string, index: number, array: string[]): boolean => {
+      return (
+        !index ||
+        FauxClassGenerator.fieldName(value) !== FauxClassGenerator.fieldName(array[index - 1])
+      );
+    });
 
     const indentAndModifier = '    global ';
     const classDeclaration = `global class ${className} {${EOL}`;

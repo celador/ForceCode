@@ -6,10 +6,9 @@
  */
 
 import * as vscode from 'vscode';
-import { fcConnection, notifications } from '.';
+import { fcConnection, notifications, trackEvent, FCTimer } from '.';
 import { EventEmitter } from 'events';
-import { trackEvent, FCTimer } from './fcAnalytics';
-import { ForcecodeCommand } from '../commands/forcecodeCommand';
+import { ForcecodeCommand } from '../commands';
 import * as path from 'path';
 
 const FIRST_TRY = 1;
@@ -176,12 +175,10 @@ export class Task extends vscode.TreeItem {
           .then(loggedIn => {
             if (loggedIn || attempt === SECOND_TRY) {
               if (reason) {
-                notifications.showError(reason.message ? reason.message : reason, 'OK');
-                return trackEvent('Error Thrown', reason.message ? reason.message : reason).then(
-                  () => {
-                    return reason;
-                  }
-                );
+                notifications.showError(reason.message || reason, 'OK');
+                return trackEvent('Error Thrown', reason.message || reason).then(() => {
+                  return reason;
+                });
               }
             } else {
               return 'FC:AGAIN';

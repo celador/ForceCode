@@ -2,9 +2,14 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as deepmerge from 'deepmerge';
-import { saveConfigFile, readConfigFile } from '../services/configuration';
-import { configuration, fcConnection, notifications } from '../services';
-import { ForcecodeCommand } from './forcecodeCommand';
+import {
+  getSetConfig,
+  fcConnection,
+  notifications,
+  saveConfigFile,
+  readConfigFile,
+} from '../services';
+import { ForcecodeCommand } from '.';
 
 interface PDir {
   default: boolean;
@@ -92,7 +97,7 @@ export class Settings extends ForcecodeCommand {
         if (currentSettings.username === vscode.window.forceCode.config.username) {
           vscode.window.forceCode.config = currentSettings;
         }
-        configuration();
+        getSetConfig();
         notifications.showInfo('ForceCode settings saved successfully!', 'OK');
       } else if (message.switchUsername && message.username !== currentSettings.username) {
         // the user wants to change settings for another username
