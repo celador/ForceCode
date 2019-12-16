@@ -6,10 +6,9 @@
  */
 
 import * as vscode from 'vscode';
-import { fcConnection, notifications } from '.';
+import { fcConnection, notifications, trackEvent, FCTimer } from '.';
 import { EventEmitter } from 'events';
-import { trackEvent, FCTimer } from './fcAnalytics';
-import { ForcecodeCommand } from '../commands/forcecodeCommand';
+import { ForcecodeCommand } from '../commands';
 import * as path from 'path';
 
 const FIRST_TRY = 1;

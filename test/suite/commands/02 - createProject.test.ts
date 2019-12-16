@@ -4,7 +4,7 @@ import * as sinon from 'sinon';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { before, after } from 'mocha';
-import { createProject } from '../../../src/commands/createProject';
+import { createProject } from '../../../src/commands';
 import { createProjectDir } from '../../testUtils/utils.test';
 
 suite('createProject.ts', () => {

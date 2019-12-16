@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
 import globule = require('globule');
-import { zipFiles, notifications } from './../services';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { zipFiles, notifications } from '../services';
+import { ForcecodeCommand } from '.';
 const mime = require('mime-types');
 
 export class StaticResourceDeployFile extends ForcecodeCommand {

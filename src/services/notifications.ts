@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import constants from '../models/constants';
-import { outputToString } from '../parsers/output';
+import { constants } from '../models';
+import { outputToString } from '../parsers';
 
 export class Notifications {
   private static instance: Notifications;

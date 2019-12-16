@@ -1,13 +1,21 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { dxService, FCOauth, FCConnection, operatingSystem, notifications } from '.';
+import {
+  dxService,
+  FCOauth,
+  FCConnection,
+  getHomeDir,
+  notifications,
+  saveConfigFile,
+  readConfigFile,
+  SFDX,
+  checkConfig,
+  enterCredentials,
+} from '.';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
-import { saveConfigFile, readConfigFile } from './configuration';
-import { checkConfig, enterCredentials } from './credentials';
-import { SFDX } from '.';
-import { FCCancellationToken } from '../commands/forcecodeCommand';
+import { FCCancellationToken } from '../commands';
 import { jsforce, Connection } from 'jsforce';
 
 export const REFRESH_EVENT_NAME: string = 'refreshConns';
@@ -214,7 +222,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
       }
       vscode.window.forceCode.config = readConfigFile(orgInf.username);
 
-      const sfdxPath = path.join(operatingSystem.getHomeDir(), '.sfdx', orgInf.username + '.json');
+      const sfdxPath = path.join(getHomeDir(), '.sfdx', orgInf.username + '.json');
       const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
       service.currentConnection.connection = new jsforce.Connection({
         oauth2: {

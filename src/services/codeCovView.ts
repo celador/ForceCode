@@ -10,7 +10,7 @@ import {
 import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import constants from './../models/constants';
+import { constants } from '../models';
 import { isEmptyUndOrNull } from '../util';
 import { notifications } from '.';
 

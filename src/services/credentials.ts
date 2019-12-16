@@ -1,10 +1,15 @@
 import * as vscode from 'vscode';
-import { fcConnection, dxService } from '.';
-import { FCOauth } from './fcConnection';
+import {
+  fcConnection,
+  dxService,
+  readConfigFile,
+  saveConfigFile,
+  defaultOptions,
+  FCOauth,
+} from '.';
 import { Config } from '../forceCode';
-import { readConfigFile, saveConfigFile, defaultOptions } from './configuration';
 import * as deepmerge from 'deepmerge';
-import { FCCancellationToken } from '../commands/forcecodeCommand';
+import { FCCancellationToken } from '../commands';
 
 const quickPickOptions: vscode.QuickPickOptions = {
   ignoreFocusOut: true,

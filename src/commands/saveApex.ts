@@ -1,11 +1,9 @@
 import * as vscode from 'vscode';
-import * as parsers from './../parsers';
-import * as forceCode from './../forceCode';
+import * as parsers from '../parsers';
+import * as forceCode from '../forceCode';
 import { saveService, codeCovViewService, notifications } from '../services';
-import diff from './diff';
-import { createPackageXML, deployFiles } from './deploy';
+import { createPackageXML, deployFiles, FCCancellationToken, diff } from '.';
 import * as path from 'path';
-import { FCCancellationToken } from './forcecodeCommand';
 
 export function saveApex(
   document: vscode.TextDocument,

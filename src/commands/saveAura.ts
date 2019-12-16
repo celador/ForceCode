@@ -1,10 +1,8 @@
 import * as vscode from 'vscode';
-import * as parsers from './../parsers';
+import * as parsers from '../parsers';
 import { saveService, notifications } from '../services';
-import diff from './diff';
 import * as path from 'path';
-import { deployFiles, createPackageXML } from './deploy';
-import { FCCancellationToken } from './forcecodeCommand';
+import { deployFiles, createPackageXML, diff, FCCancellationToken } from '.';
 
 // =======================================================================================================================================
 // ================================                Lightning Components               ===========================================

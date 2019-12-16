@@ -4,7 +4,7 @@ import { IMetadataObject } from '../forceCode';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
 import { isEmptyUndOrNull, toArray } from '../util';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand } from '.';
 
 export class PackageBuilder extends ForcecodeCommand {
   constructor() {

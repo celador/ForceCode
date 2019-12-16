@@ -5,26 +5,21 @@ import {
   codeCovViewService,
   configuration,
   fcConnection,
-  operatingSystem,
+  isWindows,
   saveService,
   saveHistoryService,
   notifications,
+  FCFile,
+  trackEvent,
+  FCTimer,
 } from './services';
-import ForceCodeContentProvider from './providers/ContentProvider';
-import ForceCodeLogProvider from './providers/LogProvider';
-import {
-  editorUpdateApexCoverageDecorator,
-  updateDecorations,
-} from './decorators/testCoverageDecorator';
-import * as commands from './models/commands';
+import { ApexTestLinkProvider, ForceCodeContentProvider, ForceCodeLogProvider } from './providers';
+import { editorUpdateApexCoverageDecorator, updateDecorations } from './decorators';
+import { fcCommands, createProject } from './commands';
 import * as path from 'path';
-import { FCFile } from './services/codeCovView';
 import { IMetadataObject } from './forceCode';
-import { ApexTestLinkProvider } from './providers/ApexTestLinkProvider';
-import { trackEvent, FCTimer } from './services/fcAnalytics';
 import * as fs from 'fs-extra';
-import { createProject } from './commands/createProject';
-import { getAnyTTMetadataFromPath, getToolingTypeFromFolder } from './parsers/getToolingType';
+import { getAnyTTMetadataFromPath, getToolingTypeFromFolder } from './parsers';
 
 export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
@@ -46,7 +41,7 @@ export function activate(context: vscode.ExtensionContext): any {
 
   const startupTimer: FCTimer = new FCTimer('extension.activate');
 
-  commands.fcCommands.forEach(cur => {
+  fcCommands.forEach(cur => {
     context.subscriptions.push(
       vscode.commands.registerCommand(cur.commandName, function(
         context: any,
@@ -190,7 +185,7 @@ export function activate(context: vscode.ExtensionContext): any {
   );
 
   // need this because windows won't tell us when a dir is removed like linux/mac does above
-  if (operatingSystem.isWindows()) {
+  if (isWindows()) {
     context.subscriptions.push(
       vscode.workspace
         .createFileSystemWatcher(path.join(vscode.window.forceCode.projectRoot, '*'))

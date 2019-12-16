@@ -4,11 +4,11 @@ import {
   dxService,
   ApexTestQueryResult,
   apexTestResults,
+  FCFile,
   notifications,
-} from './../services';
-import { ForcecodeCommand } from './forcecodeCommand';
-import { updateDecorations } from '../decorators/testCoverageDecorator';
-import { FCFile } from '../services/codeCovView';
+} from '../services';
+import { ForcecodeCommand } from '.';
+import { updateDecorations } from '../decorators';
 
 export class ToggleCoverage extends ForcecodeCommand {
   constructor() {

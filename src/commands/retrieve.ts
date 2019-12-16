@@ -10,17 +10,20 @@ import {
   PXMLMember,
   notifications,
 } from '../services';
-import { getToolingTypeFromExt, getAnyTTMetadataFromPath } from '../parsers/getToolingType';
+import { getToolingTypeFromExt, getAnyTTMetadataFromPath, outputToString } from '../parsers';
 import { IWorkspaceMember, IMetadataObject, ICodeCoverage } from '../forceCode';
 const mime = require('mime-types');
 import * as compress from 'compressing';
 import { parseString } from 'xml2js';
-import { outputToString } from '../parsers/output';
-import { packageBuilder } from '.';
-import { getMembers, getFolderContents } from './packageBuilder';
+import {
+  packageBuilder,
+  FCCancellationToken,
+  ForcecodeCommand,
+  getMembers,
+  getFolderContents,
+} from '.';
 import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
-import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
 
 export class Refresh extends ForcecodeCommand {
   constructor() {

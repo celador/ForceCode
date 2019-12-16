@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
-import * as forceCode from './../forceCode';
-import { editorUpdateApexCoverageDecorator } from '../decorators/testCoverageDecorator';
-import { FCFile } from './codeCovView';
-import { codeCovViewService } from '.';
+import * as forceCode from '../forceCode';
+import { editorUpdateApexCoverageDecorator } from '../decorators';
+import { codeCovViewService, FCFile } from '.';
 import { QueryResult } from 'jsforce';
 
 export default function getApexTestResults(singleClass?: boolean): Promise<QueryResult> {

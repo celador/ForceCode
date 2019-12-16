@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
-import { fcConnection, FCOauth, notifications } from '.';
-import { isWindows } from './operatingSystem';
+import { fcConnection, FCOauth, notifications, isWindows } from '.';
 import { SpawnOptions, spawn } from 'child_process';
-import { FCCancellationToken } from '../commands/forcecodeCommand';
+import { FCCancellationToken } from '../commands';
 const kill = require('tree-kill');
 
 export interface SFDX {

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { getAuraNameFromFileName } from '../parsers';
-import { getAuraDefTypeFromDocument } from '../commands/saveAura';
+import { getAuraDefTypeFromDocument } from '../commands';
 import { QueryResult } from 'jsforce';
 
 /**

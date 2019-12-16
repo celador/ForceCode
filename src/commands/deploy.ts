@@ -1,17 +1,14 @@
 import * as vscode from 'vscode';
-import { PXML, PXMLMember, notifications } from '../services';
-import { getFileListFromPXML, zipFiles } from './../services';
+import { PXML, PXMLMember, notifications, getFileListFromPXML, zipFiles } from '../services';
 import * as path from 'path';
 import klaw = require('klaw');
-import { getAuraNameFromFileName } from '../parsers';
+import { getAuraNameFromFileName, outputToString, getAnyTTMetadataFromPath } from '../parsers';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
-import { outputToString } from '../parsers/output';
 import { isEmptyUndOrNull, toArray } from '../util';
 import { DeployResult } from 'jsforce';
-import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
+import { FCCancellationToken, ForcecodeCommand } from '.';
 import { IMetadataObject } from '../forceCode';
-import { getAnyTTMetadataFromPath } from '../parsers/getToolingType';
 
 export class DeployPackage extends ForcecodeCommand {
   constructor() {

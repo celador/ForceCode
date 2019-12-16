@@ -8,8 +8,8 @@
 import * as vscode from 'vscode';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
 import { FCOauth, fcConnection, notifications } from '../services';
-import { CLIENT_ID } from './';
 
+const CLIENT_ID = 'sfdx-vscode';
 export interface SObject {
   actionOverrides: any[];
   activateable: boolean;

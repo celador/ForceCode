@@ -2,9 +2,14 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as deepmerge from 'deepmerge';
-import { saveConfigFile, readConfigFile } from '../services/configuration';
-import { configuration, fcConnection, notifications } from '../services';
-import { ForcecodeCommand } from './forcecodeCommand';
+import {
+  configuration,
+  fcConnection,
+  notifications,
+  saveConfigFile,
+  readConfigFile,
+} from '../services';
+import { ForcecodeCommand } from '.';
 
 interface PDir {
   default: boolean;

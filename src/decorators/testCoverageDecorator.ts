@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import * as forceCode from './../forceCode';
-import { FCFile } from '../services/codeCovView';
-import { codeCovViewService, notifications } from '../services';
+import * as forceCode from '../forceCode';
+import { codeCovViewService, notifications, FCFile } from '../services';
 
 // create a decorator type that we use to decorate small numbers
 const uncoveredLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(

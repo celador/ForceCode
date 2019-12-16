@@ -1,4 +1,4 @@
-import { ForcecodeCommand } from './forcecodeCommand';
+import { diff, retrieve, ForcecodeCommand } from '.';
 import * as vscode from 'vscode';
 import {
   fcConnection,
@@ -8,14 +8,13 @@ import {
   commandViewService,
   dxService,
   notifications,
+  FCFile,
+  ClassType,
 } from '../services';
-import retrieve from './retrieve';
-import diff from './diff';
 import { getFileName } from '../parsers';
-import { readConfigFile, removeConfigFolder } from '../services/configuration';
+import { readConfigFile, removeConfigFolder } from '../services';
 import { Config } from '../forceCode';
-import { editorUpdateApexCoverageDecorator } from '../decorators/testCoverageDecorator';
-import { FCFile, ClassType } from '../services/codeCovView';
+import { editorUpdateApexCoverageDecorator } from '../decorators';
 
 export class ToolingQuery extends ForcecodeCommand {
   constructor() {

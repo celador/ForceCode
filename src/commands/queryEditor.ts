@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { outputToString, outputToCSV } from '../parsers/output';
+import { outputToString, outputToCSV } from '../parsers';
 import { RecordResult } from 'jsforce';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand } from '.';
 
 export class QueryEditor extends ForcecodeCommand {
   constructor() {

@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { dxService, fcConnection } from '../services';
 import { Config } from '../forceCode';
-import { defaultOptions, saveConfigFile } from '../services/configuration';
-import { ForcecodeCommand, FCCancellationToken } from './forcecodeCommand';
+import { defaultOptions, saveConfigFile } from '../services';
+import { ForcecodeCommand, FCCancellationToken } from '.';
 
 interface ScratchOrgOptions {
   definitionFile?: string;

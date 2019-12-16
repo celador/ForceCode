@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import * as forceCode from './../forceCode';
+import * as forceCode from '../forceCode';
 import * as path from 'path';
 import { apexTestResults } from '.';
 import { saveToFile } from '../util';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand } from '.';
 import { notifications } from '../services';
 
 export class OverallCoverage extends ForcecodeCommand {

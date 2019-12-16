@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { afterEach } from 'mocha';
-import { RetrieveBundle } from '../../../src/commands/retrieve';
+import { RetrieveBundle } from '../../../src/commands';
 
 suite('forcecodeCommand.ts', () => {
   const sandbox = sinon.createSandbox();

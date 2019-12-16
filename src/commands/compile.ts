@@ -1,16 +1,25 @@
 import * as vscode from 'vscode';
-import * as parsers from './../parsers';
-import * as forceCode from './../forceCode';
+import * as forceCode from '../forceCode';
 import { codeCovViewService, saveHistoryService, saveService, notifications } from '../services';
-import { saveAura, getAuraDefTypeFromDocument } from './saveAura';
-import { saveApex } from './saveApex';
+import {
+  saveAura,
+  saveApex,
+  saveLWC,
+  getAuraDefTypeFromDocument,
+  createPackageXML,
+  deployFiles,
+  FCCancellationToken,
+  ForcecodeCommand,
+} from '.';
 import { parseString } from 'xml2js';
 import * as path from 'path';
-import { saveLWC } from './saveLWC';
-import { createPackageXML, deployFiles } from './deploy';
 import { isEmptyUndOrNull } from '../util';
-import { FCCancellationToken, ForcecodeCommand } from './forcecodeCommand';
-import { getAnyTTMetadataFromPath, getToolingTypeFromFolder } from '../parsers/getToolingType';
+import {
+  getAnyTTMetadataFromPath,
+  getToolingTypeFromFolder,
+  getName,
+  getWholeFileName,
+} from '../parsers';
 
 export class CompileMenu extends ForcecodeCommand {
   constructor() {
@@ -86,7 +95,7 @@ export default async function compile(
     document.uri.fsPath
   );
   const folderToolingType: string | undefined = ttMeta?.xmlName;
-  const name: string | undefined = parsers.getName(document, toolingType);
+  const name: string | undefined = getName(document, toolingType);
 
   var DefType: string | undefined;
   var Metadata: {} | undefined;
@@ -322,7 +331,7 @@ export default async function compile(
 
   function updateSaveHistory(): boolean {
     saveHistoryService.addSaveResult({
-      fileName: parsers.getWholeFileName(document) || 'UNKNOWN',
+      fileName: getWholeFileName(document) || 'UNKNOWN',
       path: document.fileName,
       success: errMessages.length === 0,
       messages: errMessages,

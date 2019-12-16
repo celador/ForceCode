@@ -1,14 +1,20 @@
 import * as vscode from 'vscode';
-import * as forceCode from './../forceCode';
-import { codeCovViewService, fcConnection, notifications } from './../services';
+import * as forceCode from '../forceCode';
+import {
+  codeCovViewService,
+  fcConnection,
+  notifications,
+  FCFile,
+  getUUID,
+  FCAnalytics,
+  defaultOptions,
+  readForceJson,
+} from '.';
 import * as path from 'path';
-import { FCFile } from './codeCovView';
-import { getToolingTypeFromExt } from '../parsers/getToolingType';
+import { getToolingTypeFromExt } from '../parsers';
 import { Connection, IMetadataFileProperties } from 'jsforce';
-import { getUUID, FCAnalytics } from './fcAnalytics';
 
 import klaw = require('klaw');
-import { defaultOptions, readForceJson } from './configuration';
 import { isEmptyUndOrNull } from '../util';
 
 export default class ForceService implements forceCode.IForceService {

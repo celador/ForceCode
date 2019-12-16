@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ForcecodeCommand } from './forcecodeCommand';
+import { ForcecodeCommand } from '.';
 import { notifications } from '../services';
 
 export class Find extends ForcecodeCommand {

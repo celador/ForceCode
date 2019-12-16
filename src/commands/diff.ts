@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
-import * as parsers from './../parsers';
-import ForceCodeContentProvider from '../providers/ContentProvider';
-import { ForcecodeCommand } from './forcecodeCommand';
-import { getToolingTypeFromFolder } from '../parsers/getToolingType';
+import { ForceCodeContentProvider } from '../providers';
+import { ForcecodeCommand } from '.';
+import { getToolingTypeFromFolder, getWholeFileName } from '../parsers';
 
 const PROVIDER: string = 'forcecode://salesforce.com';
 
@@ -43,7 +42,7 @@ export default function diff(document: vscode.TextDocument, auraSource?: boolean
     return Promise.reject('No document open to diff with the server.');
   }
   const toolingType: string | undefined = getToolingTypeFromFolder(document.uri);
-  const fileName: string | undefined = parsers.getWholeFileName(document);
+  const fileName: string | undefined = getWholeFileName(document);
   if (auraSource) {
     ForceCodeContentProvider.getInstance().auraSource = document;
   }

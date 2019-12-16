@@ -1,9 +1,7 @@
 import * as vscode from 'vscode';
 import { saveService, notifications } from '../services';
 import * as path from 'path';
-import { createPackageXML, deployFiles } from './deploy';
-import diff from './diff';
-import { FCCancellationToken } from './forcecodeCommand';
+import { createPackageXML, deployFiles, FCCancellationToken, diff } from '.';
 
 // =======================================================================================================================================
 // ================================                Lightning Web Components               ================================================
