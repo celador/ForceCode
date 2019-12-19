@@ -132,7 +132,7 @@ function getUrl(config: Config): Promise<Config> {
       vscode.window
         .showQuickPick(options, quickPickOptions)
         .then((res: vscode.QuickPickItem | undefined) => {
-          if (res && res.description === 'https://example.my.salesforce.com') {
+          if (res?.description === 'https://example.my.salesforce.com') {
             vscode.window
               .showInputBox({
                 ignoreFocusOut: true,
@@ -170,7 +170,7 @@ function getAutoCompile(config: Config): Promise<Config> {
       vscode.window
         .showQuickPick(options, { ignoreFocusOut: true })
         .then((res: vscode.QuickPickItem | undefined) => {
-          config.autoCompile = res && res.label === 'Yes';
+          config.autoCompile = res?.label === 'Yes';
           resolve(config);
         });
     } else {

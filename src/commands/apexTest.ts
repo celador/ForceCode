@@ -74,7 +74,7 @@ export class ApexTest extends ForcecodeCommand {
 
     // =======================================================================================================================================
     function showResult(dxRes: ApexTestQueryResult) {
-      if (dxRes.summary.failing && dxRes.summary.failing > 0) {
+      if (dxRes.summary.failing > 0) {
         let errorMessage: string = 'FAILED: ';
         dxRes.tests.forEach(curTest => {
           //if (/*curTest.StackTrace && */curTest.Message) {

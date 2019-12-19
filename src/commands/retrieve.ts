@@ -35,7 +35,7 @@ export class Refresh extends ForcecodeCommand {
   }
 
   public command(context: any, selectedResource?: any) {
-    if (selectedResource && selectedResource instanceof Array) {
+    if (selectedResource instanceof Array) {
       return new Promise((resolve, reject) => {
         var files: PXMLMember[] = [];
         var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => {

@@ -76,7 +76,7 @@ export class Settings extends ForcecodeCommand {
           fs.existsSync(sfdxProjJsonPath)
         ) {
           var sfdxProjJson: SFDXProjectJson = fs.readJsonSync(sfdxProjJsonPath);
-          if (sfdxProjJson.packageDirectories && sfdxProjJson.packageDirectories.length > 0) {
+          if (sfdxProjJson.packageDirectories?.length > 0) {
             const forceProjIndex: number = sfdxProjJson.packageDirectories.findIndex(
               dir => dir.path === currentSettings.src
             );

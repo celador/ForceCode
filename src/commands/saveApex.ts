@@ -101,7 +101,7 @@ export function saveApex(
         //  UPDATE it
         var record = records[0];
         // Get the modified date of the local file...
-        if (Metadata && Metadata.packageVersions) {
+        if (Metadata?.packageVersions) {
           // this is an ApexPage...so we might need to edit packageVersions
           if (!Array.isArray(Metadata.packageVersions)) {
             Metadata.packageVersions = [Metadata.packageVersions];
@@ -277,7 +277,7 @@ export function saveApex(
     }
     function isFinished(res: any) {
       // Here, we're checking whether the Container Async Request, is Queued, or in some other state
-      if (res.records && res.records[0]) {
+      if (res?.records?.length > 0) {
         if (res.records.some((record: any) => record.State === 'Queued')) {
           return false;
         } else {

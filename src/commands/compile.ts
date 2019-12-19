@@ -207,7 +207,7 @@ export async function compile(
     if (res instanceof Error) {
       onError(res);
       failures++;
-    } else if (res.records && res.records.length > 0) {
+    } else if (res.records?.length > 0) {
       res.records
         .filter((r: any) => r.State !== 'Error')
         .forEach((containerAsyncRequest: any) => {
@@ -236,7 +236,7 @@ export async function compile(
             }
           });
         });
-    } else if (res.errors && res.errors.length > 0) {
+    } else if (res.errors?.length > 0) {
       // We got an error with the container
       res.errors.forEach((err: any) => {
         onError(err);

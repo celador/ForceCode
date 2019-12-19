@@ -74,10 +74,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
   public isLoggedIn(): boolean {
     const loggedIn: boolean =
-      this.currentConnection !== undefined &&
-      this.currentConnection.connection !== undefined &&
-      vscode.window.forceCode.conn &&
-      this.currentConnection.isLoggedIn;
+      vscode.window.forceCode.conn && this.currentConnection?.isLoggedIn === true;
     if (loggedIn) {
       vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
     } else {
@@ -313,7 +310,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     orgInfo: FCOauth | SFDX | undefined,
     saveToken?: boolean
   ): FCConnection | undefined {
-    if (orgInfo && orgInfo.username) {
+    if (orgInfo?.username) {
       var connIndex: number = this.getConnIndex(orgInfo.username);
       if (connIndex === -1) {
         connIndex = this.connections.push(new FCConnection(this, orgInfo)) - 1;
