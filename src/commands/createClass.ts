@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
 import { ForcecodeCommand } from '.';
+import { getVSCodeSetting } from '../services';
 
 export class CreateClass extends ForcecodeCommand {
   constructor() {
@@ -154,7 +155,7 @@ export class CreateClass extends ForcecodeCommand {
       var metaFile: string = `<?xml version="1.0" encoding="UTF-8"?>
 <${type} xmlns="urn:metadata.tooling.soap.sforce.com" fqn="${name}">
     <apiVersion>${vscode.window.forceCode.config.apiVersion ||
-      vscode.workspace.getConfiguration('force')['defaultApiVersion']}</apiVersion>
+      getVSCodeSetting('defaultApiVersion')}</apiVersion>
     ${extra}
 </${type}>`;
       var metaFileName: string = path.join(filePath, name + '.' + ext + '-meta.xml');

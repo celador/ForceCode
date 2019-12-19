@@ -4,6 +4,7 @@ import * as path from 'path';
 import { outputToString, outputToCSV } from '../parsers';
 import { RecordResult } from 'jsforce';
 import { ForcecodeCommand } from '.';
+import { getVSCodeSetting } from '../services';
 
 export class QueryEditor extends ForcecodeCommand {
   constructor() {
@@ -61,7 +62,7 @@ export class QueryEditor extends ForcecodeCommand {
       }
       if (message.save && curResults) {
         // save the results
-        const csv: boolean = vscode.workspace.getConfiguration('force')['outputQueriesAsCSV'];
+        const csv: boolean = getVSCodeSetting('outputQueriesAsCSV');
         var data: string = csv ? outputToCSV(curResults) : outputToString(curResults);
         const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
         vscode.window
@@ -141,7 +142,7 @@ export class QueryEditor extends ForcecodeCommand {
         queryHistory.splice(queryIndex, 1);
       }
       queryHistory.unshift(curQuery);
-      const maxQueryHistory = vscode.workspace.getConfiguration('force')['maxQueryHistory'];
+      const maxQueryHistory = getVSCodeSetting('maxQueryHistory');
       if (queryHistory.length > maxQueryHistory) {
         const toDrop = queryHistory.length - maxQueryHistory;
         queryHistory.splice(maxQueryHistory, toDrop);
@@ -153,7 +154,7 @@ export class QueryEditor extends ForcecodeCommand {
         resToSend = {
           success: true,
           results: outputToCSV(curResults),
-          limit: vscode.workspace.getConfiguration('force')['maxQueryResultsPerPage'],
+          limit: getVSCodeSetting('maxQueryResultsPerPage'),
         };
       } else {
         resToSend = {

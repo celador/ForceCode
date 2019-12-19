@@ -3,6 +3,7 @@ import { getIcon, getExtension, getFolder } from '../parsers';
 import * as path from 'path';
 import { isEmptyUndOrNull } from '../util';
 import { ForcecodeCommand, FCCancellationToken, ToolingType, retrieve } from '.';
+import { getVSCodeSetting } from '../services';
 const TYPEATTRIBUTE: string = 'type';
 
 export class ShowFileOptions extends ForcecodeCommand {
@@ -139,13 +140,13 @@ export function showFileOptions(promises: any[], cancellationToken: FCCancellati
       });
 
       return retrieve({ types: files }, cancellationToken).then((res: any) => {
-        if (vscode.workspace.getConfiguration('force')['showFilesOnOpen']) {
+        if (getVSCodeSetting('showFilesOnOpen')) {
           // open the files in the editor
           var filesOpened: number = 0;
           return opts.forEach((curFile: any) => {
             if (
               !cancellationToken.isCanceled() &&
-              filesOpened < vscode.workspace.getConfiguration('force')['showFilesOnOpenMax']
+              filesOpened < getVSCodeSetting('showFilesOnOpenMax')
             ) {
               var tType: string = curFile.detail.split(' ')[0];
               if (

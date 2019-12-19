@@ -6,7 +6,7 @@
  */
 
 import * as vscode from 'vscode';
-import { fcConnection, notifications, trackEvent, FCTimer } from '.';
+import { fcConnection, notifications, trackEvent, FCTimer, getVSCodeSetting } from '.';
 import { EventEmitter } from 'events';
 import { ForcecodeCommand } from '../commands';
 import * as path from 'path';
@@ -69,10 +69,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
 
     if (execution.commandName === 'ForceCode.fileModified') {
       this.fileModCommands++;
-      if (
-        this.fileModCommands >
-        vscode.workspace.getConfiguration('force')['maxFileChangeNotifications']
-      ) {
+      if (this.fileModCommands > getVSCodeSetting('maxFileChangeNotifications')) {
         return Promise.resolve();
       }
     }

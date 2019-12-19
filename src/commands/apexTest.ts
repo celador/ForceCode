@@ -6,6 +6,7 @@ import {
   getApexTestResults,
   FCFile,
   notifications,
+  getVSCodeSetting,
 } from '../services';
 import { ForcecodeCommand } from '.';
 import { updateDecorations } from '../decorators';
@@ -90,7 +91,7 @@ export class ApexTest extends ForcecodeCommand {
       return dxRes;
     }
     function showLog(): Promise<vscode.TextEditor | void> {
-      if (vscode.workspace.getConfiguration('force')['showTestLog']) {
+      if (getVSCodeSetting('showTestLog')) {
         if (!fcConnection.currentConnection) {
           return Promise.reject('No current org info found');
         }

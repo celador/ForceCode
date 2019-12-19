@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { getVSCodeSetting } from '.';
 
 interface ISaveResult {
   fileName: string;
@@ -31,7 +32,7 @@ export class SaveHistoryService implements vscode.TreeDataProvider<SaveResult> {
 
   public addSaveResult(result: ISaveResult) {
     this.saveResults.unshift(new SaveResult(result));
-    if (this.saveResults.length > vscode.workspace.getConfiguration('force')['maxSaveHistory']) {
+    if (this.saveResults.length > getVSCodeSetting('maxSaveHistory')) {
       this.saveResults.pop();
     }
     this._onDidChangeTreeData.fire();

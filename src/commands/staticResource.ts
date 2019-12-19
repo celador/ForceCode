@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
 import globule = require('globule');
-import { zipFiles, notifications } from '../services';
+import { zipFiles, notifications, getVSCodeSetting } from '../services';
 import { ForcecodeCommand } from '.';
 const mime = require('mime-types');
 
@@ -209,7 +209,7 @@ function getFileList(root: string) {
   return (function innerGetFileList(localPath) {
     var fileslist: any[] = []; // List of files
     var files: any = fs.readdirSync(localPath); // Files in current 'sfdc' directory
-    var ignoreFilesSettings: any = vscode.workspace.getConfiguration('force')['filesExclude'] || {
+    var ignoreFilesSettings: any = getVSCodeSetting('filesExclude') || {
       '.gitignore': true,
       '.DS_Store': true,
       '.org_metadata': true,
@@ -285,14 +285,11 @@ function makeResourceMetadata(bundleName: string, cont: any, contType: string) {
 
 function deployComplete(results: any) {
   notifications.showStatus(`ForceCode: Deployed ${results.fullName} $(check)`);
-  if (
-    vscode.workspace.getConfiguration('force')['autoRefresh'] &&
-    vscode.workspace.getConfiguration('force')['browser']
-  ) {
+  if (getVSCodeSetting('autoRefresh') && getVSCodeSetting('browser')) {
     require('child_process').exec(
-      `osascript -e 'tell application "${
-        vscode.workspace.getConfiguration('force')['browser']
-      }" to reload active tab of window 1'`
+      `osascript -e 'tell application "${getVSCodeSetting(
+        'browser'
+      )}" to reload active tab of window 1'`
     );
   }
   return results;
@@ -300,14 +297,11 @@ function deployComplete(results: any) {
 
 function deployAllComplete(results: any) {
   notifications.showStatus(`ForceCode: Deployed ${results.length} Resources $(check)`);
-  if (
-    vscode.workspace.getConfiguration('force')['autoRefresh'] &&
-    vscode.workspace.getConfiguration('force')['browser']
-  ) {
+  if (getVSCodeSetting('autoRefresh') && getVSCodeSetting('browser')) {
     require('child_process').exec(
-      `osascript -e 'tell application "${
-        vscode.workspace.getConfiguration('force')['browser']
-      }" to reload active tab of window 1'`
+      `osascript -e 'tell application "${getVSCodeSetting(
+        'browser'
+      )}" to reload active tab of window 1'`
     );
   }
   var talliedResults: {} = results.reduce(function(prev: any, curr: any) {
