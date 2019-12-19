@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.20.2
+    * Fix issue with saving VisualForce pages and being shown a file change notification every time.
 * 3.20.1
     * Turn on line decorations when a class in the Code Coverage view is clicked.
 * 3.20.0
