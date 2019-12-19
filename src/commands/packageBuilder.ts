@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { dxService, PXML, PXMLMember, SObjectCategory } from '../services';
+import { dxService, PXML, PXMLMember, SObjectCategory, getVSCodeSetting } from '../services';
 import { IMetadataObject } from '../forceCode';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
@@ -187,7 +187,7 @@ export function packageBuilder(buildPackage?: boolean): Promise<any> {
                 types: mappedTypes,
                 version:
                   vscode.window.forceCode.config.apiVersion ||
-                  vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+                  getVSCodeSetting('defaultApiVersion'),
               },
             };
             var xml: string = builder

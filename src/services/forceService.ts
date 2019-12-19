@@ -9,6 +9,7 @@ import {
   FCAnalytics,
   defaultOptions,
   readForceJson,
+  getVSCodeSetting,
 } from '.';
 import * as path from 'path';
 import { getToolingTypeFromExt } from '../parsers';
@@ -179,7 +180,7 @@ export class ForceService implements forceCode.IForceService {
               curMem.id = key.id;
               if (
                 curFCFile.compareDates(key.lastModifiedDate) ||
-                !vscode.workspace.getConfiguration('force')['checkForFileChanges']
+                !getVSCodeSetting('checkForFileChanges')
               ) {
                 curFCFile.updateWsMember(curMem);
               } else {

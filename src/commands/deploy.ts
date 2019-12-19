@@ -1,5 +1,12 @@
 import * as vscode from 'vscode';
-import { PXML, PXMLMember, notifications, getFileListFromPXML, zipFiles } from '../services';
+import {
+  PXML,
+  PXMLMember,
+  notifications,
+  getFileListFromPXML,
+  zipFiles,
+  getVSCodeSetting,
+} from '../services';
 import * as path from 'path';
 import klaw = require('klaw');
 import { getAuraNameFromFileName, outputToString, getAnyTTMetadataFromPath } from '../parsers';
@@ -170,9 +177,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
     var packObj: PXML = {
       Package: {
         types: [],
-        version:
-          vscode.window.forceCode.config.apiVersion ||
-          vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+        version: vscode.window.forceCode.config.apiVersion || getVSCodeSetting('defaultApiVersion'),
       },
     };
     files.forEach(file => {

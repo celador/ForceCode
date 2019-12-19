@@ -11,7 +11,7 @@ interface SFDXConfig {
 
 export const defaultOptions: Config = {
   alias: '',
-  apiVersion: vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+  apiVersion: getVSCodeSetting('defaultApiVersion'),
   deployOptions: {
     allowMissingFiles: true,
     checkOnly: false,
@@ -118,7 +118,7 @@ export function getSetConfig(service?: ForceService): Promise<Config> {
   fs.copyFileSync(forceSFDXProjJson, sfdxProjectJson);
 
   // update the defaultusername in the sfdx config file...
-  if (vscode.workspace.getConfiguration('force')['setDefaultUsernameOnLogin']) {
+  if (getVSCodeSetting('setDefaultUsernameOnLogin')) {
     const sfdxConfigPath = path.join(sfdxPath, 'sfdx-config.json');
     var sfdxConfig: SFDXConfig = {};
     if (fs.existsSync(sfdxConfigPath)) {
@@ -190,4 +190,8 @@ export function removeConfigFolder(userName: string): boolean {
     }
   }
   return false;
+}
+
+export function getVSCodeSetting(name: string) {
+  return vscode.workspace.getConfiguration('force')[name];
 }

@@ -9,6 +9,7 @@ import {
   SObjectCategory,
   PXMLMember,
   notifications,
+  getVSCodeSetting,
 } from '../services';
 import { getToolingTypeFromExt, getAnyTTMetadataFromPath, outputToString } from '../parsers';
 import { IWorkspaceMember, IMetadataObject, ICodeCoverage } from '../forceCode';
@@ -35,7 +36,7 @@ export class Refresh extends ForcecodeCommand {
   }
 
   public command(context: any, selectedResource?: any) {
-    if (selectedResource && selectedResource instanceof Array) {
+    if (selectedResource instanceof Array) {
       return new Promise((resolve, reject) => {
         var files: PXMLMember[] = [];
         var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => {
@@ -276,8 +277,7 @@ export function retrieve(
       var theStream = vscode.window.forceCode.conn.metadata.retrieve({
         unpackaged: retrieveTypes,
         apiVersion:
-          vscode.window.forceCode.config.apiVersion ||
-          vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+          vscode.window.forceCode.config.apiVersion || getVSCodeSetting('defaultApiVersion'),
       });
       theStream.on('error', error => {
         reject(
@@ -324,8 +324,7 @@ export function retrieve(
         var theStream = vscode.window.forceCode.conn.metadata.retrieve({
           packageNames: [option.description],
           apiVersion:
-            vscode.window.forceCode.config.apiVersion ||
-            vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+            vscode.window.forceCode.config.apiVersion || getVSCodeSetting('defaultApiVersion'),
         });
         theStream.on('error', error => {
           reject(

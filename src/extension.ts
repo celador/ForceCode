@@ -92,7 +92,7 @@ export function activate(context: vscode.ExtensionContext): any {
   // AutoCompile Feature
   context.subscriptions.push(
     vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
-      if (vscode.window.forceCode.config && vscode.window.forceCode.config.autoCompile === true) {
+      if (vscode.window.forceCode?.config?.autoCompile === true) {
         var isResource: RegExpMatchArray | null = textDocument.fileName.match(
           /resource\-bundles.*\.resource.*$/
         ); // We are in a resource-bundles folder, bundle and deploy the staticResource
@@ -100,7 +100,7 @@ export function activate(context: vscode.ExtensionContext): any {
           textDocument.uri.fsPath
         );
         if (textDocument.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot) !== -1) {
-          if (isResource && isResource.index) {
+          if (isResource?.index) {
             return vscode.commands.executeCommand(
               'ForceCode.staticResourceDeployFromFile',
               textDocument

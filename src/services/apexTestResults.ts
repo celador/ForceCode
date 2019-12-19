@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as forceCode from '../forceCode';
 import { editorUpdateApexCoverageDecorator } from '../decorators';
-import { codeCovViewService, FCFile } from '.';
+import { codeCovViewService, FCFile, getVSCodeSetting } from '.';
 import { QueryResult } from 'jsforce';
 
 export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> {
@@ -42,11 +42,7 @@ export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> 
       // update the current editor
       editorUpdateApexCoverageDecorator(vscode.window.activeTextEditor);
 
-      if (
-        singleClass &&
-        highestClass &&
-        vscode.workspace.getConfiguration('force')['revealTestedClass']
-      ) {
+      if (singleClass && highestClass && getVSCodeSetting('revealTestedClass')) {
         // reveal the tested class
         var treePro = vscode.window.createTreeView('ForceCode.codeCovDataProvider', {
           treeDataProvider: codeCovViewService,

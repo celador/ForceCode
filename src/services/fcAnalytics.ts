@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { GA_TRACKING_ID, getHomeDir, getOS } from '.';
+import { GA_TRACKING_ID, getHomeDir, getOS, getVSCodeSetting } from '.';
 import { Visitor } from 'universal-analytics';
 import * as path from 'path';
 import * as fs from 'fs-extra';
@@ -92,7 +92,5 @@ export function inDebug(): boolean {
 function optIn(): boolean {
   const debug = inDebug();
   // turn off analytics when we are debugging
-  return (
-    vscode.workspace.getConfiguration('force').get('allowAnonymousUsageTracking') == true && !debug
-  );
+  return getVSCodeSetting('allowAnonymousUsageTracking') == true && !debug;
 }

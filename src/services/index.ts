@@ -13,6 +13,7 @@ export {
   readConfigFile,
   removeConfigFolder,
   readForceJson,
+  getVSCodeSetting,
 } from './configuration';
 
 import { DXService } from './dxService';

@@ -18,7 +18,7 @@ export class DiffMenu extends ForcecodeCommand {
   }
 
   public command(_context: any, selectedResource?: any) {
-    if (selectedResource && selectedResource.path) {
+    if (selectedResource?.path) {
       return vscode.workspace.openTextDocument(selectedResource).then(doc => diff(doc));
     }
     if (!vscode.window.activeTextEditor) {

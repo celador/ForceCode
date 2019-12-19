@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { dxService, SObjectCategory } from '../services';
+import { dxService, SObjectCategory, getVSCodeSetting } from '../services';
 import { ForcecodeCommand } from '.';
 
 export class BulkLoader extends ForcecodeCommand {
@@ -67,12 +67,8 @@ export class BulkLoader extends ForcecodeCommand {
           });
       } else {
         var csvFileIn = fs.createReadStream(csvPath);
-        vscode.window.forceCode.conn.bulk.pollInterval = vscode.workspace.getConfiguration('force')[
-          'bulkLoaderPollInterval'
-        ];
-        vscode.window.forceCode.conn.bulk.pollTimeout = vscode.workspace.getConfiguration('force')[
-          'bulkLoaderPollTimeout'
-        ];
+        vscode.window.forceCode.conn.bulk.pollInterval = getVSCodeSetting('bulkLoaderPollInterval');
+        vscode.window.forceCode.conn.bulk.pollTimeout = getVSCodeSetting('bulkLoaderPollTimeout');
         batch = vscode.window.forceCode.conn.bulk.load(
           message.object,
           message.operation,
@@ -144,7 +140,7 @@ export class BulkLoader extends ForcecodeCommand {
             }
           });
         } catch (e) {}
-      }, vscode.workspace.getConfiguration('force')['bulkLoaderPollInterval']);
+      }, getVSCodeSetting('bulkLoaderPollInterval'));
     }
   }
 }

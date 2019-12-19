@@ -12,6 +12,7 @@ import {
   SFDX,
   checkConfig,
   enterCredentials,
+  getVSCodeSetting,
 } from '.';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
@@ -74,10 +75,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
   public isLoggedIn(): boolean {
     const loggedIn: boolean =
-      this.currentConnection !== undefined &&
-      this.currentConnection.connection !== undefined &&
-      vscode.window.forceCode.conn &&
-      this.currentConnection.isLoggedIn;
+      vscode.window.forceCode.conn && this.currentConnection?.isLoggedIn === true;
     if (loggedIn) {
       vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
     } else {
@@ -123,9 +121,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             this.addConnection({ username: uName });
           });
           if (orgs) {
-            const showOnlyProjectOrgs: boolean = vscode.workspace.getConfiguration('force')[
-              'onlyShowProjectUsernames'
-            ];
+            const showOnlyProjectOrgs: boolean = getVSCodeSetting('onlyShowProjectUsernames');
             if (showOnlyProjectOrgs) {
               orgs = orgs.filter(currentOrg => uNames.includes(currentOrg.username || ''));
             }
@@ -232,8 +228,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         accessToken: service.currentConnection.orgInfo.accessToken,
         refreshToken: refreshToken,
         version:
-          vscode.window.forceCode?.config?.apiVersion ||
-          vscode.workspace.getConfiguration('force')['defaultApiVersion'],
+          vscode.window.forceCode?.config?.apiVersion || getVSCodeSetting('defaultApiVersion'),
       });
 
       return Promise.resolve(service.currentConnection.connection);
@@ -313,7 +308,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     orgInfo: FCOauth | SFDX | undefined,
     saveToken?: boolean
   ): FCConnection | undefined {
-    if (orgInfo && orgInfo.username) {
+    if (orgInfo?.username) {
       var connIndex: number = this.getConnIndex(orgInfo.username);
       if (connIndex === -1) {
         connIndex = this.connections.push(new FCConnection(this, orgInfo)) - 1;

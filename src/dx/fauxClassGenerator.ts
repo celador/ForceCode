@@ -213,7 +213,7 @@ export class FauxClassGenerator {
     if (sobject.fields) {
       for (const field of sobject.fields) {
         const decls: string[] = this.generateField(field);
-        if (decls && decls.length > 0) {
+        if (decls?.length > 0) {
           for (const decl of decls) {
             declarations.push(decl);
           }

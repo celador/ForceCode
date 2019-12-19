@@ -52,7 +52,7 @@ export class ForceCodeContentProvider implements vscode.TextDocumentContentProvi
       vscode.commands.executeCommand('ForceCode.toolingQuery', query).then(
         results => {
           const theResults = results as QueryResult;
-          if (theResults && theResults.totalSize === 1) {
+          if (theResults?.totalSize === 1) {
             return resolve(theResults.records[0][field]);
           } else {
             return resolve('The current file could NOT be found in the org');

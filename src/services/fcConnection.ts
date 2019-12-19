@@ -51,10 +51,7 @@ export class FCConnection extends vscode.TreeItem {
   }
 
   public isCurrentConnection(): boolean {
-    return (
-      this.parent.currentConnection !== undefined &&
-      this.parent.currentConnection.orgInfo.username === this.orgInfo.username
-    );
+    return this.parent.currentConnection?.orgInfo.username === this.orgInfo.username;
   }
 
   public showConnection() {
@@ -101,7 +98,7 @@ export class FCConnection extends vscode.TreeItem {
     this.tooltip = this.isCurrentConnection()
       ? 'Current username'
       : 'Click to switch to ' + this.orgInfo.username;
-    if (this.connection && this.connection.limitInfo && this.connection.limitInfo.apiUsage) {
+    if (this.connection?.limitInfo?.apiUsage) {
       this.tooltip +=
         ' - Limits: ' +
         this.connection.limitInfo.apiUsage.used +

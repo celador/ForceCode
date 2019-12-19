@@ -53,11 +53,7 @@ export function updateDecorations() {
       };
       uncoveredLineOptions.push(decorationRange);
     }
-  } else if (
-    vscode.window.forceCode &&
-    vscode.window.forceCode.config &&
-    vscode.window.forceCode.config.showTestCoverage
-  ) {
+  } else if (vscode.window.forceCode?.config?.showTestCoverage) {
     uncoveredLineOptions = getUncoveredLineOptions(activeEditor.document);
   }
   activeEditor.setDecorations(lineOpts, uncoveredLineOptions);

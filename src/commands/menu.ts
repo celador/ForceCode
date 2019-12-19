@@ -26,10 +26,7 @@ export class ForceCodeMenu extends ForcecodeCommand {
         if (!cur.hidden) {
           if (cur.commandName !== 'ForceCode.createScratchOrg') {
             quickpick.push(cur);
-          } else if (
-            fcConnection.currentConnection &&
-            fcConnection.currentConnection.orgInfo.isDevHub
-          ) {
+          } else if (fcConnection.currentConnection?.orgInfo.isDevHub) {
             quickpick.push(cur);
           }
         }
@@ -50,7 +47,7 @@ export class ForceCodeMenu extends ForcecodeCommand {
       return vscode.window.showQuickPick(options, config);
     }
     function processResult(result: any) {
-      if (result !== undefined && result.description !== undefined) {
+      if (result?.description !== undefined) {
         return vscode.commands.executeCommand(
           quickpick.find(cur => {
             return result.description === cur.description;
