@@ -43,11 +43,11 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   public addCommandExecution(execution: ForcecodeCommand, context: any, selectedResource?: any) {
     if (
       ['ForceCode.compile', 'ForceCode.refresh'].find(c => {
-        return execution !== undefined && c === execution.commandName;
+        return c === execution?.commandName;
       })
     ) {
       var splitPath;
-      if (context && context.fsPath) {
+      if (context?.fsPath) {
         splitPath = context.fsPath.split(path.sep);
       } else if (context) {
         splitPath = context.fileName.split(path.sep);
@@ -81,7 +81,8 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     this.tasks.push(theTask);
     const visibleTasks = this.getChildren().length;
     if (visibleTasks > 0) {
-      this.runningTasksStatus.text = 'ForceCode: Executing ' + visibleTasks + ' Task(s)';
+      this.runningTasksStatus.text =
+        '$(loading~spin) ForceCode: Executing ' + visibleTasks + ' Task(s)';
       this.runningTasksStatus.show();
       this.runningTasksStatus.command = 'ForceCode.showTasks';
     }
@@ -100,7 +101,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
 
       if (this.getChildren().length > 0) {
         this.runningTasksStatus.text =
-          'ForceCode: Executing ' + this.getChildren().length + ' Tasks';
+          '$(loading~spin) ForceCode: Executing ' + this.getChildren().length + ' Tasks';
       } else {
         this.runningTasksStatus.hide();
       }
