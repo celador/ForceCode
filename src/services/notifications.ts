@@ -87,7 +87,7 @@ export class Notifications {
     if (instance.statusTimeout) {
       clearTimeout(instance.statusTimeout);
     }
-    instance.statusTimeout = setTimeout(function() {
+    instance.statusTimeout = setTimeout(() => {
       instance.statusBarItem.text = `ForceCode Menu`;
     }, 5000);
   }

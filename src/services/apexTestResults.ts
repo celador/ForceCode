@@ -22,7 +22,7 @@ export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> 
     if (res.records) {
       var highestCov: number = 0;
       var highestClass: FCFile | undefined;
-      res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
+      res.records.forEach((curRes: forceCode.ICodeCoverage) => {
         const fcfile: FCFile | undefined = codeCovViewService.findById(curRes.ApexClassOrTriggerId);
         if (fcfile && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
           fcfile.setCoverageTestClass('overall');

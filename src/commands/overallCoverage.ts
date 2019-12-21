@@ -29,7 +29,7 @@ export class OverallCoverage extends ForcecodeCommand {
         outputString +=
           spaces.substr(0, spaces.length - outputString.length - 1) +
           'Percent\t\t\tCovered/Total\n\n';
-        res.records.forEach(function(curRes: forceCode.ICodeCoverage) {
+        res.records.forEach((curRes: forceCode.ICodeCoverage) => {
           var total: number = curRes.NumLinesCovered + curRes.NumLinesUncovered;
           var percent = ((curRes.NumLinesCovered / total) * 100).toFixed(2) + '% covered';
           outputString +=

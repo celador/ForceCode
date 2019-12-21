@@ -111,6 +111,7 @@
       headArrIdIndex = undefined;
       queryResHeader = '<tr>';
       resHead.forEach(header => {
+        // file deepcode ignore GlobalReplacementRegex: only need first
         header = header.replace('"', '');
         if (header.toLowerCase() === 'id') {
           headArrIdIndex = headerArray.length;
