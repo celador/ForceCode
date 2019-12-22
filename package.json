@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.20.3-1",
+  "version": "3.21.0",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -355,18 +355,53 @@
         ]
       },
       {
-        "id": "staticResource",
+        "id": "html",
         "extensions": [
-          ".resource"
+          ".htm",
+          ".html",
+          ".cmp",
+          ".app",
+          ".auradoc",
+          ".evt",
+          ".design",
+          ".intf",
+          ".tokens"
+        ],
+        "aliases": [
+          "HTML"
         ]
       },
       {
-        "id": "apex",
-        "aliases": [
-          "Apex"
-        ],
+        "id": "javascript",
         "extensions": [
-          ".apex"
+          ".js"
+        ],
+        "aliases": [
+          "Javascript"
+        ]
+      },
+      {
+        "id": "css",
+        "extensions": [
+          ".css"
+        ],
+        "aliases": [
+          "CSS"
+        ]
+      },
+      {
+        "id": "svg",
+        "extensions": [
+          ".svg"
+        ],
+        "aliases": [
+          "SVG"
+        ]
+      },
+      {
+        "id": "staticResource",
+        "extensions": [
+          ".resource"
         ]
       },
       {
@@ -456,7 +491,27 @@
           "group": "ForceCode"
         },
         {
+          "when": "resourceLangId == html && ForceCodeActive && ForceCodeLoggedIn",
+          "command": "ForceCode.diff",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == javascript && ForceCodeActive && ForceCodeLoggedIn",
+          "command": "ForceCode.diff",
+          "group": "ForceCode"
+        },
+        {
           "when": "resourceLangId == apex && ForceCodeActive && ForceCodeLoggedIn",
+          "command": "ForceCode.diff",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == css && ForceCodeActive && ForceCodeLoggedIn",
+          "command": "ForceCode.diff",
+          "group": "ForceCode"
+        },
+        {
+          "when": "resourceLangId == svg && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.diff",
           "group": "ForceCode"
         }
@@ -552,6 +607,22 @@
         {
           "command": "ForceCode.diff",
           "when": "ForceCodeActive && resourceLangId == visualforce && ForceCodeLoggedIn"
+        },
+        {
+          "command": "ForceCode.diff",
+          "when": "ForceCodeActive && resourceLangId == html && ForceCodeLoggedIn"
+        },
+        {
+          "command": "ForceCode.diff",
+          "when": "ForceCodeActive && resourceLangId == javascript && ForceCodeLoggedIn"
+        },
+        {
+          "command": "ForceCode.diff",
+          "when": "ForceCodeActive && resourceLangId == css && ForceCodeLoggedIn"
+        },
+        {
+          "command": "ForceCode.diff",
+          "when": "ForceCodeActive && resourceLangId == svg && ForceCodeLoggedIn"
         },
         {
           "command": "ForceCode.openOrg",
