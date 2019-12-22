@@ -20,7 +20,7 @@ export function saveApex(
   return Promise.resolve(vscode.window.forceCode)
     .then(addToContainer)
     .then(requestCompile)
-    .then(asyncRequest => getCompileStatus(asyncRequest));
+    .then(getCompileStatus);
 
   // =======================================================================================================================================
   // =================================  Tooling Objects (Class, Page, Component, Trigger)  =================================================
@@ -29,15 +29,14 @@ export function saveApex(
     // We will push the filename on to the members array to make sure that the next time we compile,
     var fc: forceCode.IForceService = vscode.window.forceCode;
     var hasActiveContainer: Boolean = svc.containerId !== undefined;
-    var fileIsOnlyMember: Boolean =
-      fc.containerMembers.length === 1 && fc.containerMembers.every(m => m.name === name);
+    var fileIsOnlyMember: Boolean = fc.containerMember?.name === name;
     if (hasActiveContainer && fileIsOnlyMember) {
       // This is what happens when we had an error on the previous compile.
       // We want to just update the member and try to compile again
-      return updateMember(fc.containerMembers[0]);
+      return updateMember(fc.containerMember);
     } else {
       // Otherwise, we create a new Container
-      return svc.newContainer(true).then(() => {
+      return svc.newContainer().then(() => {
         // Then Get the files info from the type, name, and prefix
         // Then Add the new member, updating the contents.
         return fc.conn.tooling
@@ -48,10 +47,13 @@ export function saveApex(
       });
     }
 
-    function updateMember(records: any) {
+    function updateMember(records: forceCode.IContainerMember | undefined) {
+      if (!records || cancellationToken.isCanceled()) {
+        return Promise.reject();
+      }
       var member: {} = Metadata
         ? {
-            Body: records.body,
+            Body: body,
             Metadata: Metadata,
             Id: records.id,
           }
@@ -59,16 +61,12 @@ export function saveApex(
             Body: body,
             Id: records.id,
           };
-      if (cancellationToken.isCanceled()) {
-        return Promise.reject();
-      } else {
-        return fc.conn.tooling
-          .sobject(upToolType)
-          .update(member)
-          .then(() => {
-            return fc;
-          });
-      }
+      return fc.conn.tooling
+        .sobject(upToolType)
+        .update(member)
+        .then(() => {
+          return fc;
+        });
     }
 
     function shouldCompile(record: any) {
@@ -126,7 +124,7 @@ export function saveApex(
                 if (!res.id) {
                   throw { message: record.Name + ' not saved' };
                 }
-                fc.containerMembers.push({ name, id: res.id });
+                fc.containerMember = { name, id: res.id };
                 return fc;
               });
           } else {
@@ -190,7 +188,7 @@ export function saveApex(
   }
   // =======================================================================================================================================
   function requestCompile(retval: any) {
-    if (vscode.window.forceCode.containerMembers.length === 0 || cancellationToken.isCanceled()) {
+    if (!vscode.window.forceCode.containerMember || cancellationToken.isCanceled()) {
       return {
         async then(callback: any) {
           return callback(retval);
@@ -214,7 +212,7 @@ export function saveApex(
     if (cancellationToken.isCanceled()) {
       return Promise.reject();
     }
-    if (vscode.window.forceCode.containerMembers.length === 0) {
+    if (!vscode.window.forceCode.containerMember) {
       return Promise.resolve(retval); // we don't need new container stuff on new file creation
     }
     return nextStatus();
@@ -262,12 +260,11 @@ export function saveApex(
     }
     function cancelRequest(): Promise<any> {
       // toss the container member...it's in an unknown state
-      const containerId = vscode.window.forceCode.containerAsyncRequestId;
-      return vscode.window.forceCode.newContainer(true).then(_res => {
-        return vscode.window.forceCode.conn.tooling
-          .sobject('ContainerAsyncRequest')
-          .update({ Id: containerId, State: 'Aborted' });
-      });
+      const containerAReqId = vscode.window.forceCode.containerAsyncRequestId;
+      vscode.window.forceCode.containerId = undefined;
+      return vscode.window.forceCode.conn.tooling
+        .sobject('ContainerAsyncRequest')
+        .update({ Id: containerAReqId, State: 'Aborted' });
     }
     function getStatus(): Promise<any> {
       return vscode.window.forceCode.conn.tooling.query(

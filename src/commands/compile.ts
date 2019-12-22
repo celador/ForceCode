@@ -188,9 +188,10 @@ export async function compile(
     return saveApex(document, ttMeta, cancellationToken, Metadata, forceCompile)
       .then(finished)
       .then(res => {
-        return vscode.window.forceCode.newContainer(res).then(() => {
-          return true;
-        });
+        if (res) {
+          vscode.window.forceCode.containerId = undefined;
+        }
+        return true;
       })
       .catch(finished)
       .then(updateSaveHistory);

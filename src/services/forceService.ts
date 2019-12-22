@@ -23,7 +23,7 @@ export class ForceService implements forceCode.IForceService {
   public config: forceCode.Config;
   public conn!: Connection;
   public containerId: string | undefined;
-  public containerMembers: forceCode.IContainerMember[];
+  public containerMember?: forceCode.IContainerMember;
   public describe!: forceCode.IMetadataDescribe;
   public containerAsyncRequestId: string | undefined;
   public projectRoot: string;
@@ -41,7 +41,6 @@ export class ForceService implements forceCode.IForceService {
     this.config = defaultOptions;
     this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
     notifications.setStatusText(`ForceCode Loading...`);
-    this.containerMembers = [];
     this.storageRoot = context.extensionPath;
 
     const vsConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('force');
@@ -86,21 +85,17 @@ export class ForceService implements forceCode.IForceService {
     });
   }
 
-  public newContainer(force: Boolean): Promise<forceCode.IForceService> {
+  public newContainer(): Promise<forceCode.IForceService> {
     var self: forceCode.IForceService = vscode.window.forceCode;
-    if (!force && self.containerId && self.containerMembers.length === 0) {
-      return Promise.resolve(self);
-    } else {
-      self.containerAsyncRequestId = undefined;
-      return self.conn.tooling
-        .sobject('MetadataContainer')
-        .create({ name: 'ForceCode-' + Date.now() })
-        .then(res => {
-          self.containerId = res.id;
-          self.containerMembers = [];
-          return Promise.resolve(self);
-        });
-    }
+    self.containerAsyncRequestId = undefined;
+    return self.conn.tooling
+      .sobject('MetadataContainer')
+      .create({ name: 'ForceCode-' + Date.now() })
+      .then(res => {
+        self.containerId = res.id;
+        self.containerMember = undefined;
+        return Promise.resolve(self);
+      });
   }
 
   public checkForFileChanges() {

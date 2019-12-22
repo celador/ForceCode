@@ -251,9 +251,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     function login(hadToLogIn: boolean): Promise<boolean> {
-      vscode.window.forceCode.containerAsyncRequestId = undefined;
       vscode.window.forceCode.containerId = undefined;
-      vscode.window.forceCode.containerMembers = [];
       return checkConfig(vscode.window.forceCode.config).then(config => {
         saveConfigFile(config.username, config);
         if (!service.currentConnection || !service.currentConnection.connection) {
