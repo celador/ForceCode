@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.21.0
+    * Add ability to save multiple files at a time, no need to wait for your apex class to finish before saving your trigger!
 * 3.20.2
     * Fix issue with saving VisualForce pages and being shown a file change notification every time.
 * 3.20.1

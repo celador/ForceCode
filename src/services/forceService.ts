@@ -22,10 +22,7 @@ export class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
   public config: forceCode.Config;
   public conn!: Connection;
-  public containerId: string | undefined;
-  public containerMember?: forceCode.IContainerMember;
   public describe!: forceCode.IMetadataDescribe;
-  public containerAsyncRequestId: string | undefined;
   public projectRoot: string;
   public workspaceRoot: string;
   public storageRoot: string;
@@ -83,19 +80,6 @@ export class ForceService implements forceCode.IForceService {
           }
         });
     });
-  }
-
-  public newContainer(): Promise<forceCode.IForceService> {
-    var self: forceCode.IForceService = vscode.window.forceCode;
-    self.containerAsyncRequestId = undefined;
-    return self.conn.tooling
-      .sobject('MetadataContainer')
-      .create({ name: 'ForceCode-' + Date.now() })
-      .then(res => {
-        self.containerId = res.id;
-        self.containerMember = undefined;
-        return Promise.resolve(self);
-      });
   }
 
   public checkForFileChanges() {

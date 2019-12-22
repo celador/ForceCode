@@ -13,6 +13,7 @@ import {
   checkConfig,
   enterCredentials,
   getVSCodeSetting,
+  containerService,
 } from '.';
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
@@ -251,7 +252,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     }
 
     function login(hadToLogIn: boolean): Promise<boolean> {
-      vscode.window.forceCode.containerId = undefined;
+      containerService.clear();
       return checkConfig(vscode.window.forceCode.config).then(config => {
         saveConfigFile(config.username, config);
         if (!service.currentConnection || !service.currentConnection.connection) {
