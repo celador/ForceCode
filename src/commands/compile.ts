@@ -187,10 +187,8 @@ export async function compile(
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
     return saveApex(document, ttMeta, cancellationToken, Metadata, forceCompile)
       .then(finished)
-      .then(res => {
-        return vscode.window.forceCode.newContainer(res).then(() => {
-          return true;
-        });
+      .then(_res => {
+        return true;
       })
       .catch(finished)
       .then(updateSaveHistory);

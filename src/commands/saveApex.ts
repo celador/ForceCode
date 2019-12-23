@@ -1,7 +1,13 @@
 import * as vscode from 'vscode';
 import * as parsers from '../parsers';
 import * as forceCode from '../forceCode';
-import { saveService, codeCovViewService, notifications } from '../services';
+import {
+  saveService,
+  codeCovViewService,
+  notifications,
+  containerService,
+  Container,
+} from '../services';
 import { createPackageXML, deployFiles, FCCancellationToken, diff } from '.';
 import * as path from 'path';
 
@@ -17,41 +23,33 @@ export function saveApex(
   const name: string | undefined = parsers.getName(document, toolingType.xmlName);
   const upToolType: string = toolingType.xmlName + 'Member';
   var checkCount: number = 0;
+  const container: Container = containerService.createContainer(
+    document.fileName,
+    fileName,
+    toolingType.xmlName,
+    upToolType
+  );
   return Promise.resolve(vscode.window.forceCode)
     .then(addToContainer)
     .then(requestCompile)
-    .then(asyncRequest => getCompileStatus(asyncRequest));
+    .then(getCompileStatus);
 
   // =======================================================================================================================================
   // =================================  Tooling Objects (Class, Page, Component, Trigger)  =================================================
   // =======================================================================================================================================
   function addToContainer(svc: forceCode.IForceService) {
     // We will push the filename on to the members array to make sure that the next time we compile,
-    var fc: forceCode.IForceService = vscode.window.forceCode;
-    var hasActiveContainer: Boolean = svc.containerId !== undefined;
-    var fileIsOnlyMember: Boolean =
-      fc.containerMembers.length === 1 && fc.containerMembers.every(m => m.name === name);
-    if (hasActiveContainer && fileIsOnlyMember) {
+    var records = container.records;
+    if (container.existing) {
       // This is what happens when we had an error on the previous compile.
       // We want to just update the member and try to compile again
-      return updateMember(fc.containerMembers[0]);
-    } else {
-      // Otherwise, we create a new Container
-      return svc.newContainer(true).then(() => {
-        // Then Get the files info from the type, name, and prefix
-        // Then Add the new member, updating the contents.
-        return fc.conn.tooling
-          .sobject(toolingType.xmlName)
-          .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' })
-          .execute()
-          .then((records: any) => addMember(records));
-      });
-    }
-
-    function updateMember(records: any) {
+      if (!records || cancellationToken.isCanceled()) {
+        return Promise.reject();
+      }
+      records = records && records.length > 0 ? records[0] : records;
       var member: {} = Metadata
         ? {
-            Body: records.body,
+            Body: body,
             Metadata: Metadata,
             Id: records.id,
           }
@@ -59,16 +57,10 @@ export function saveApex(
             Body: body,
             Id: records.id,
           };
-      if (cancellationToken.isCanceled()) {
-        return Promise.reject();
-      } else {
-        return fc.conn.tooling
-          .sobject(upToolType)
-          .update(member)
-          .then(() => {
-            return fc;
-          });
-      }
+      return container.updateContainerMember(member);
+    } else {
+      // Otherwise, we create a new Container
+      return container.createContainer().then(addMember);
     }
 
     function shouldCompile(record: any) {
@@ -96,7 +88,7 @@ export function saveApex(
       }
     }
     function addMember(records: any) {
-      if (records.length > 0) {
+      if (records && records.length > 0) {
         // Tooling Object already exists
         //  UPDATE it
         var record = records[0];
@@ -111,24 +103,15 @@ export function saveApex(
         var member: {} = {
           Body: Metadata ? record.Body || record.Markup : body,
           ContentEntityId: record.Id,
-          Id: fc.containerId,
+          Id: container.containerId,
           Metadata: Metadata ? Object.assign({}, record.Metadata, Metadata) : record.Metadata,
-          MetadataContainerId: fc.containerId,
+          MetadataContainerId: container.containerId,
         };
         return shouldCompile(record).then(should => {
           if (cancellationToken.isCanceled()) {
             return Promise.reject();
           } else if (should && name) {
-            return fc.conn.tooling
-              .sobject(upToolType)
-              .create(member)
-              .then(res => {
-                if (!res.id) {
-                  throw { message: record.Name + ' not saved' };
-                }
-                fc.containerMembers.push({ name, id: res.id });
-                return fc;
-              });
+            return container.createContainerMember(member);
           } else {
             throw { message: record.Name + ' not saved' };
           }
@@ -164,9 +147,9 @@ export function saveApex(
                 if (foo.status === 'Failed') {
                   return foo;
                 }
-                return fc.conn.tooling
+                return svc.conn.tooling
                   .sobject(toolingType.xmlName)
-                  .find({ Name: fileName, NamespacePrefix: fc.config.prefix || '' })
+                  .find({ Name: fileName, NamespacePrefix: svc.config.prefix || '' })
                   .execute()
                   .then((records: any) => {
                     if (records.length > 0) {
@@ -190,45 +173,37 @@ export function saveApex(
   }
   // =======================================================================================================================================
   function requestCompile(retval: any) {
-    if (vscode.window.forceCode.containerMembers.length === 0 || cancellationToken.isCanceled()) {
+    if (!container.containerMember || cancellationToken.isCanceled()) {
       return {
         async then(callback: any) {
           return callback(retval);
         },
       };
     }
-    return vscode.window.forceCode.conn.tooling
-      .sobject('ContainerAsyncRequest')
-      .create({
-        IsCheckOnly: false,
-        IsRunTests: false,
-        MetadataContainerId: vscode.window.forceCode.containerId,
-      })
-      .then(res => {
-        vscode.window.forceCode.containerAsyncRequestId = res.id;
-        return vscode.window.forceCode;
-      });
+    return container.compile();
   }
   // =======================================================================================================================================
   function getCompileStatus(retval: any): Promise<any> {
     if (cancellationToken.isCanceled()) {
       return Promise.reject();
     }
-    if (vscode.window.forceCode.containerMembers.length === 0) {
+    if (!container.containerMember) {
       return Promise.resolve(retval); // we don't need new container stuff on new file creation
     }
     return nextStatus();
     function nextStatus(): any {
       if (cancellationToken.isCanceled()) {
-        return cancelRequest()
+        return container
+          .cancelCompile()
           .catch(_err => Promise.reject())
           .then(_res => Promise.reject());
       }
       checkCount += 1;
       // Set a timeout to auto fail the compile after 60 seconds
-      return getStatus().then(res => {
+      return container.getStatus().then(res => {
         if (isFinished(res)) {
           checkCount = 0;
+          containerService.removeContainer(container);
           return res;
         } else if (checkCount > 30) {
           checkCount = 0;
@@ -247,7 +222,8 @@ export function saveApex(
                 }).then(nextStatus);
               } else {
                 cancellationToken.cancel();
-                return cancelRequest()
+                return container
+                  .cancelCompile()
                   .catch(_err => Promise.reject())
                   .then(_res => Promise.reject());
               }
@@ -259,21 +235,6 @@ export function saveApex(
           }).then(nextStatus);
         }
       });
-    }
-    function cancelRequest(): Promise<any> {
-      // toss the container member...it's in an unknown state
-      const containerId = vscode.window.forceCode.containerAsyncRequestId;
-      return vscode.window.forceCode.newContainer(true).then(_res => {
-        return vscode.window.forceCode.conn.tooling
-          .sobject('ContainerAsyncRequest')
-          .update({ Id: containerId, State: 'Aborted' });
-      });
-    }
-    function getStatus(): Promise<any> {
-      return vscode.window.forceCode.conn.tooling.query(
-        `SELECT Id, MetadataContainerId, MetadataContainerMemberId, State, IsCheckOnly, ` +
-          `DeployDetails, ErrorMsg FROM ContainerAsyncRequest WHERE Id='${vscode.window.forceCode.containerAsyncRequestId}'`
-      );
     }
     function isFinished(res: any) {
       // Here, we're checking whether the Container Async Request, is Queued, or in some other state

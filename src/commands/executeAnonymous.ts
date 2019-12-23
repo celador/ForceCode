@@ -94,7 +94,7 @@ export class ExecuteAnonymous extends ForcecodeCommand {
       }
       return vscode.workspace
         .openTextDocument(newDocURI)
-        .then(function(document: vscode.TextDocument) {
+        .then(document => {
           return vscode.window.showTextDocument(document, 3, true).then(editor => {
             editor.edit(edit => {
               return edit.insert(new vscode.Position(0, 0), filteredLog);

@@ -37,7 +37,7 @@ export class Find extends ForcecodeCommand {
             notifications.showError(err.message);
             return;
           }
-          var resArray: any[] = new Array();
+          var resArray: any[] = [];
           resArray.push({ records: searchResult.searchRecords });
 
           return vscode.commands.executeCommand('ForceCode.showFileOptions', resArray);

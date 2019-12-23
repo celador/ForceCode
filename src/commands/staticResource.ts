@@ -59,12 +59,13 @@ export function staticResourceBundleDeploy(): any {
     if (fs.existsSync(bundlePath)) {
       bundleDirectories = fs
         .readdirSync(bundlePath)
-        .filter(function(file) {
+        .filter(file => {
           return fs.statSync(path.join(bundlePath, file)).isDirectory();
         })
         .map(d => {
           return {
             name: d.split('.resource')[0],
+            // file deepcode ignore GlobalReplacementRegex: only need first
             type: d.split('.resource.')[1].replace('.', '/'),
           };
         });
@@ -74,7 +75,7 @@ export function staticResourceBundleDeploy(): any {
     if (fs.existsSync(spaPath)) {
       spaDirectories = fs
         .readdirSync(spaPath)
-        .filter(function(file) {
+        .filter(file => {
           return fs.statSync(path.join(spaPath, file)).isDirectory();
         })
         .map(s => {
@@ -159,7 +160,7 @@ function bundleAndDeployAll() {
     return Promise.all(
       fs
         .readdirSync(bundlePath)
-        .filter(function(file) {
+        .filter(file => {
           return fs.statSync(path.join(bundlePath, file)).isDirectory();
         })
         .map(d => {
@@ -208,7 +209,7 @@ function getFileList(root: string) {
   // Perform the recursive file search
   return (function innerGetFileList(localPath) {
     var fileslist: any[] = []; // List of files
-    var files: any = fs.readdirSync(localPath); // Files in current 'sfdc' directory
+    var files: string[] = fs.readdirSync(localPath); // Files in current 'sfdc' directory
     var ignoreFilesSettings: any = getVSCodeSetting('filesExclude') || {
       '.gitignore': true,
       '.DS_Store': true,
@@ -224,7 +225,7 @@ function getFileList(root: string) {
       .filter(setting => setting.value === true)
       .map(setting => root + path.sep + setting.key);
 
-    files.forEach(function(file: any) {
+    files.forEach(file => {
       var pathname: string = localPath + path.sep + file;
       var stat: any = fs.lstatSync(pathname);
 
@@ -304,7 +305,7 @@ function deployAllComplete(results: any) {
       )}" to reload active tab of window 1'`
     );
   }
-  var talliedResults: {} = results.reduce(function(prev: any, curr: any) {
+  var talliedResults: {} = results.reduce((prev: any, curr: any) => {
     return Object.assign(prev, curr);
   }, {});
   return talliedResults;

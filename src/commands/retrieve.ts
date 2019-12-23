@@ -56,6 +56,7 @@ export class Refresh extends ForcecodeCommand {
             theNames.forEach(curName => {
               var index: number = getTTIndex(curName.name, files);
               if (index >= 0) {
+                // file deepcode ignore ComparisonArrayLiteral: <please specify a reason of ignoring this>
                 if (curName.members === ['*']) {
                   files[index].members = ['*'];
                 } else {
@@ -157,14 +158,14 @@ export function retrieve(
           return JSON.stringify({ PACKAGES: { packages: [] } });
         }
       })
-      .then(function(json: string) {
+      .then((json: string) => {
         if (json.trim().startsWith('<')) {
           return [];
         } else {
           return JSON.parse(json.replace('while(1);\n', '')).PACKAGES.packages;
         }
       })
-      .catch(function() {
+      .catch(() => {
         return [];
       });
   }

@@ -156,14 +156,10 @@ export interface IForceService {
   workspaceRoot: string;
   storageRoot: string;
   describe?: IMetadataDescribe;
-  containerId?: string;
-  containerMembers: IContainerMember[];
-  containerAsyncRequestId?: string;
   conn: Connection;
   fcDiagnosticCollection: vscode.DiagnosticCollection;
   uuid: string;
   connect(): Promise<IForceService>;
-  newContainer(force: Boolean): Promise<IForceService>;
   checkForFileChanges(): any;
 }
 

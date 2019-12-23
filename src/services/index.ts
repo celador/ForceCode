@@ -33,4 +33,7 @@ import { SaveService } from './saveService';
 export const saveService = SaveService.getInstance();
 import { SaveHistoryService } from './saveHistoryService';
 export const saveHistoryService = SaveHistoryService.getInstance();
+import { ContainerService, Container } from './containerService';
+export const containerService = ContainerService.getInstance();
+export { Container };
 export * from './fcZip';

@@ -17,7 +17,7 @@ import { getToolingTypeMetadata } from '../parsers';
 export function zipFiles(fileList: string[], root: string, lwcPackageXML?: string) {
   var zip: any = new compress.zip.Stream();
   // Add folders and files to zip object for each file in the list
-  fileList.forEach(function(file) {
+  fileList.forEach(file => {
     const filePath: string = path.join(
       lwcPackageXML && file === 'package.xml' ? lwcPackageXML : root,
       file

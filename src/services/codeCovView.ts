@@ -143,15 +143,15 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     if (!element) {
       var fcFiles: FCFile[] = [];
       // This is the root node
-      Object.keys(ClassType).forEach(val => {
-        if (val !== ClassType.NoShow && val !== ClassType.Subclass) {
+      Object.entries(ClassType).forEach(val => {
+        if (val[1] !== ClassType.NoShow && val[1] !== ClassType.Subclass) {
           var newFCFile: FCFile = new FCFile(
-            ClassType[val],
+            val[1],
             TreeItemCollapsibleState.Collapsed,
             this,
             folderWSMember
           );
-          newFCFile.setType(ClassType[val]);
+          newFCFile.setType(val[1]);
           fcFiles.push(newFCFile);
         }
       });

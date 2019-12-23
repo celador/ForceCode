@@ -23,7 +23,7 @@ export function filterLog(body: string) {
     if (getVSCodeSetting('debugFilter')) {
       debugLevel = getVSCodeSetting('debugFilter').split('|');
     }
-    body.split('\n').forEach(function(l) {
+    body.split('\n').forEach(l => {
       var theSplitLine: string[] = l.split(')|');
       if (
         theSplitLine.length > 1 &&
@@ -31,7 +31,7 @@ export function filterLog(body: string) {
         theSplitLine[0].split('(').length === 2
       ) {
         includeIt = false;
-        debugLevel.forEach(function(i) {
+        debugLevel.forEach(i => {
           if (theSplitLine[1].split('|')[0] === i) {
             includeIt = true;
           }

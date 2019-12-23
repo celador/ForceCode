@@ -7,6 +7,8 @@ import { notifications } from '.';
 interface PreSaveFile {
   path: string;
   fileContents: string;
+  saving: boolean;
+  queue: boolean;
 }
 
 export class SaveService {
@@ -40,16 +42,22 @@ export class SaveService {
         .readFileSync(documentPath)
         .toString()
         .trim();
-      this.preSaveFiles.push({ path: documentPath, fileContents: fileContents });
+      this.preSaveFiles.push({
+        path: documentPath,
+        fileContents: fileContents,
+        saving: false,
+        queue: false,
+      });
       return true;
     }
   }
 
   public addFilesInFolder(folder: string): Promise<boolean> {
+    const self: SaveService = this;
     return new Promise<boolean>((resolve, reject) => {
       klaw(folder)
         .on('data', file => {
-          if (file.stats.isFile()) this.addFile(file.path);
+          if (file.stats.isFile()) self.addFile(file.path);
         })
         .on('end', () => {
           resolve(true);
@@ -91,15 +99,31 @@ export class SaveService {
     cancellationToken: FCCancellationToken
   ): Promise<boolean> {
     // take the path and get the TextDocument, then hand it off to the compile() function
+    const fileIndex: number = this.getFileIndex(document.fileName);
+    if (fileIndex === -1) {
+      return Promise.resolve(true);
+    }
+    if (this.preSaveFiles[fileIndex].saving) {
+      this.preSaveFiles[fileIndex].queue = true;
+      return Promise.resolve(true);
+    }
+    this.preSaveFiles[fileIndex].saving = true;
+    const self: SaveService = this;
     return new Promise((resolve, reject) => {
       compile(document, forceCompile, cancellationToken)
         .then(success => {
+          self.preSaveFiles[fileIndex].saving = false;
           if (success) {
             // update the file time for start up file change checks
             var mTime: Date = new Date();
             fs.utimesSync(document.fileName, mTime, mTime);
             // remove the pre-save file version if successful
-            return resolve(this.removeFile(document.fileName));
+            if (self.preSaveFiles[fileIndex].queue) {
+              self.preSaveFiles[fileIndex].queue = false;
+              return resolve(self.saveFile(document, true, cancellationToken));
+            } else {
+              return resolve(self.removeFile(document.fileName));
+            }
           } else {
             return resolve(false);
           }
