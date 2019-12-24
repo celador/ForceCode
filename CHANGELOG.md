@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.21.2
+    * Fix issue deploying static resources
 * 3.21.1
     * Fix `Deploy only working after a save command` #345
     * Fix `Save/Deploy/Compile Check for Diffs` #334

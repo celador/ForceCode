@@ -2,22 +2,10 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
 import globule = require('globule');
-import { zipFiles, notifications, getVSCodeSetting } from '../services';
+import { zipFiles, notifications, getVSCodeSetting, saveHistoryService } from '../services';
 import { ForcecodeCommand } from '.';
+import { getWholeFileName } from '../parsers';
 const mime = require('mime-types');
-
-export class StaticResourceDeployFile extends ForcecodeCommand {
-  constructor() {
-    super();
-    this.commandName = 'ForceCode.staticResourceDeployFromFile';
-    this.name = 'Saving static resource';
-    this.hidden = true;
-  }
-
-  public command(context: vscode.TextDocument) {
-    return staticResourceDeployFromFile(context);
-  }
-}
 
 export class StaticResourceBundle extends ForcecodeCommand {
   constructor() {
@@ -108,7 +96,10 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument):
     .then(getPackageName)
     .then(bundleAndDeploy)
     .then(deployComplete)
-    .catch(onError);
+    .catch(onError)
+    .then(finalRes => {
+      return updateSaveHistory(textDocument, finalRes);
+    });
   // =======================================================================================================================================
   function getPackageName(): vscode.QuickPickItem {
     let bundlePath: string =
@@ -309,4 +300,15 @@ function deployAllComplete(results: any) {
     return Object.assign(prev, curr);
   }, {});
   return talliedResults;
+}
+
+function updateSaveHistory(document: vscode.TextDocument, res?: any): boolean {
+  const success = res?.success ? res?.success : false;
+  saveHistoryService.addSaveResult({
+    fileName: getWholeFileName(document) || 'UNKNOWN',
+    path: document.fileName,
+    success: success,
+    messages: [''],
+  });
+  return success;
 }

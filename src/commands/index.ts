@@ -12,7 +12,6 @@ import { saveLWC } from './saveLWC';
 import {
   staticResourceBundleDeploy,
   StaticResourceBundle,
-  StaticResourceDeployFile,
   staticResourceDeployFromFile,
 } from './staticResource';
 import { CreateScratchOrg } from './createScratchOrg';
@@ -103,7 +102,6 @@ export const fcCommands: ForcecodeCommand[] = [
   new ShowFileOptions(),
   new ApexTest(),
   new FileModified(),
-  new StaticResourceDeployFile(),
   new CheckForFileChanges(),
   new ShowTasks(),
   new OpenOnClick(),

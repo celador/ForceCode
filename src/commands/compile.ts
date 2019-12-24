@@ -35,24 +35,19 @@ export class CompileMenu extends ForcecodeCommand {
     this.label = 'Compile/Deploy';
   }
 
-  public command(context: any, selectedResource?: any) {
+  public async command(context: any, selectedResource?: any) {
     selectedResource = selectedResource ? true : false;
+    var document: vscode.TextDocument | undefined = vscode.window.activeTextEditor?.document;
     if (context) {
       if (context.uri) {
         context = context.uri;
       }
-      return vscode.workspace.openTextDocument(context).then(doc => {
-        return saveService.saveFile(doc, selectedResource, this.cancellationToken);
-      });
+      document = await vscode.workspace.openTextDocument(context);
     }
-    if (!vscode.window.activeTextEditor) {
+    if (!document) {
       return;
     }
-    return saveService.saveFile(
-      vscode.window.activeTextEditor.document,
-      selectedResource,
-      this.cancellationToken
-    );
+    return saveService.saveFile(document, selectedResource, this.cancellationToken);
   }
 }
 

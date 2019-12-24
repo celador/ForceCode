@@ -8,7 +8,6 @@ import {
   isWindows,
   saveService,
   saveHistoryService,
-  notifications,
   FCFile,
   trackEvent,
   FCTimer,
@@ -17,9 +16,8 @@ import { ApexTestLinkProvider, ForceCodeContentProvider, ForceCodeLogProvider } 
 import { editorUpdateApexCoverageDecorator, updateDecorations } from './decorators';
 import { fcCommands, createProject } from './commands';
 import * as path from 'path';
-import { IMetadataObject } from './forceCode';
 import * as fs from 'fs-extra';
-import { getAnyTTMetadataFromPath, getToolingTypeFromFolder } from './parsers';
+import { getToolingTypeFromFolder } from './parsers';
 
 export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
@@ -93,28 +91,7 @@ export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
     vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
       if (vscode.window.forceCode?.config?.autoCompile === true) {
-        var isResource: RegExpMatchArray | null = textDocument.fileName.match(
-          /resource\-bundles.*\.resource.*$/
-        ); // We are in a resource-bundles folder, bundle and deploy the staticResource
-        const toolingType: IMetadataObject | undefined = getAnyTTMetadataFromPath(
-          textDocument.uri.fsPath
-        );
-        if (textDocument.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot) !== -1) {
-          if (isResource?.index) {
-            return vscode.commands.executeCommand(
-              'ForceCode.staticResourceDeployFromFile',
-              textDocument
-            );
-          } else if (toolingType) {
-            return vscode.commands.executeCommand('ForceCode.compile', textDocument);
-          }
-        } else if (isResource || toolingType) {
-          return notifications.showError(
-            "The file you are trying to save to the server isn't in the current org's source folder (" +
-              vscode.window.forceCode.projectRoot +
-              ')'
-          );
-        }
+        return vscode.commands.executeCommand('ForceCode.compile', textDocument);
       }
       return undefined;
     })
