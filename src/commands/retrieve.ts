@@ -617,6 +617,16 @@ function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
     const isAura: boolean = ffNameParts[0] === 'aura' || ffNameParts[0] === 'lwc';
     const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
     const tType: IMetadataObject | undefined = getAnyTTMetadataFromPath(uri.fsPath);
+    const isResource: RegExpMatchArray | null = uri.fsPath.match(
+      /resource\-bundles.*\.resource.*$/
+    );
+    if (isResource) {
+      if (ffNameParts.length >= 3) {
+        return resolve({ name: 'StaticResource', members: [ffNameParts[2]] });
+      } else {
+        return resolve({ name: 'StaticResource', members: ['*'] });
+      }
+    }
     if (!tType) {
       return reject(
         "Either the file/metadata type doesn't exist in the current org or you're trying to save/retrieve outside of " +
@@ -628,24 +638,24 @@ function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
       // we have foldered metadata
       ffNameParts.shift();
       folderedName = ffNameParts.join('/').split('.')[0];
-      resolve({ name: tType.xmlName, members: [folderedName] });
+      return resolve({ name: tType.xmlName, members: [folderedName] });
     } else if (isDir) {
       if (isAura) {
         if (baseDirectoryName === 'aura' || baseDirectoryName === 'lwc') {
           baseDirectoryName = '*';
         }
-        resolve({ name: tType.xmlName, members: [baseDirectoryName] });
+        return resolve({ name: tType.xmlName, members: [baseDirectoryName] });
       } else if (tType.inFolder && ffNameParts.length > 1) {
-        getFolderContents(tType.xmlName, ffNameParts[1]).then(contents => {
-          resolve({ name: tType.xmlName, members: contents });
+        return getFolderContents(tType.xmlName, ffNameParts[1]).then(contents => {
+          return resolve({ name: tType.xmlName, members: contents });
         });
       } else {
-        getMembers([tType.xmlName], true).then(members => {
-          resolve(members[0]);
+        return getMembers([tType.xmlName], true).then(members => {
+          return resolve(members[0]);
         });
       }
     } else {
-      resolve({ name: tType.xmlName, members: [baseDirectoryName] });
+      return resolve({ name: tType.xmlName, members: [baseDirectoryName] });
     }
   });
 }
