@@ -36,6 +36,7 @@ export class CompileMenu extends ForcecodeCommand {
   }
 
   public command(context: any, selectedResource?: any) {
+    selectedResource = selectedResource ? true : false;
     if (context) {
       if (context.uri) {
         context = context.uri;
