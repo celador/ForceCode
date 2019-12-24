@@ -98,19 +98,15 @@ export function removeErrorOnDoc(dontRemove?: boolean, autoCompile?: boolean) {
       },
     };
   }
-  if (!dontRemove) {
-    const position = editor.document.positionAt(0);
-    const position2 = editor.document.positionAt(1);
-    const range: vscode.Range = new vscode.Range(position, position2);
-    editor.edit(edit => {
-      edit.delete(range); // remove syntax error
-    });
-  } else {
-    const position = editor.document.positionAt(0);
-    editor.edit(edit => {
-      edit.insert(position, ' ');
-    });
-  }
+  const position = editor.document.positionAt(0);
+  const position2 = editor.document.positionAt(1);
+  const range: vscode.Range = new vscode.Range(position, position2);
+  editor.edit(edit => {
+    if (dontRemove) {
+      edit.insert(position, '<');
+    }
+    edit.delete(range); // remove syntax error
+  });
   vscode.window.forceCode.lastSaveResult = undefined;
   return editor.document.save().then(async _res => {
     if (!autoCompile) {
@@ -121,7 +117,7 @@ export function removeErrorOnDoc(dontRemove?: boolean, autoCompile?: boolean) {
 }
 
 function getSaveResult(expected: boolean): Promise<any> {
-  const MAX_TIME = 30;
+  const MAX_TIME = 60;
   var seconds = 0;
   return new Promise<SaveResult | undefined>((resolve, _reject) => checkResult(resolve)).then(
     res => {
