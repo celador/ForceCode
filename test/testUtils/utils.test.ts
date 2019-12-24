@@ -1,9 +1,8 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as vscode from 'vscode';
-import { defaultOptions } from '../../src/services';
+import { defaultOptions, SaveResult } from '../../src/services';
 import * as assert from 'assert';
-import { SaveResult } from '../../src/services/saveHistoryService';
 
 export function createProjectDir(): vscode.Uri[] | undefined {
   var folder = '.';
