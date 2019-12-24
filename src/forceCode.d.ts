@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { Connection } from 'jsforce';
 import { ForceService } from './services';
+import { SaveResult } from './services/saveHistoryService';
 
 declare module 'vscode' {
   export namespace window {
@@ -155,10 +156,11 @@ export interface IForceService {
   projectRoot: string;
   workspaceRoot: string;
   storageRoot: string;
-  describe?: IMetadataDescribe;
+  describe: IMetadataDescribe;
   conn: Connection;
   fcDiagnosticCollection: vscode.DiagnosticCollection;
   uuid: string;
+  lastSaveResult: SaveResult | undefined;
   connect(): Promise<IForceService>;
   checkForFileChanges(): any;
 }

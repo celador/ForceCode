@@ -3,6 +3,7 @@ import * as fs from 'fs-extra';
 import * as vscode from 'vscode';
 import { defaultOptions } from '../../src/services';
 import * as assert from 'assert';
+import { SaveResult } from '../../src/services/saveHistoryService';
 
 export function createProjectDir(): vscode.Uri[] | undefined {
   var folder = '.';
@@ -67,7 +68,7 @@ function removeDirOrFile(thePath: string) {
   }
 }
 
-export function addErrorToDoc(sandbox: sinon.SinonSandbox) {
+export function addErrorToDoc() {
   var editor = vscode.window.activeTextEditor;
   if (!editor) {
     return {
@@ -80,19 +81,15 @@ export function addErrorToDoc(sandbox: sinon.SinonSandbox) {
   editor.edit(edit => {
     edit.insert(position, '<'); // add a syntax error
   });
-  const spy = sandbox.spy(vscode.window, 'showErrorMessage');
+  vscode.window.forceCode.lastSaveResult = undefined;
   return editor.document.save().then(_res => {
-    return vscode.commands.executeCommand('ForceCode.compile').then(_res2 => {
-      return assert.strictEqual(spy.called, true);
+    return vscode.commands.executeCommand('ForceCode.compile').then(async _res2 => {
+      return await getSaveResult(false);
     });
   });
 }
 
-export function removeErrorOnDoc(
-  sandbox: sinon.SinonSandbox,
-  dontRemove?: boolean,
-  autoCompile?: boolean
-) {
+export function removeErrorOnDoc(dontRemove?: boolean, autoCompile?: boolean) {
   var editor = vscode.window.activeTextEditor;
   if (!editor) {
     return {
@@ -114,14 +111,46 @@ export function removeErrorOnDoc(
       edit.insert(position, ' ');
     });
   }
-  const spy = sandbox.spy(vscode.window, 'showErrorMessage');
+  vscode.window.forceCode.lastSaveResult = undefined;
   return editor.document.save().then(async _res => {
     if (!autoCompile) {
       await vscode.commands.executeCommand('ForceCode.compile');
-      return assert.strictEqual(spy.called, false);
-    } else {
-      // TODO: Find a way to wait for the save to be done
-      return assert.strictEqual(spy.called, false);
     }
+    return await getSaveResult(true);
   });
+}
+
+function getSaveResult(expected: boolean): Promise<any> {
+  const MAX_TIME = 30;
+  var seconds = 0;
+  return new Promise<SaveResult | undefined>((resolve, _reject) => checkResult(resolve)).then(
+    res => {
+      if (res) {
+        return assert.strictEqual(expected, res.result.success, res.result.messages.join('\n'));
+      } else {
+        return assert.strictEqual(expected, !expected, 'Timeout on save');
+      }
+    }
+  );
+
+  async function checkResult(resolveFunc: {
+    (value?: SaveResult | PromiseLike<SaveResult | undefined> | undefined): void;
+    (arg0: SaveResult | undefined): any;
+  }): Promise<any> {
+    if (seconds > MAX_TIME) {
+      return resolveFunc();
+    }
+
+    if (!vscode.window.forceCode.lastSaveResult) {
+      seconds++;
+      await timeout(1000);
+      return checkResult(resolveFunc);
+    } else {
+      return resolveFunc(vscode.window.forceCode.lastSaveResult);
+    }
+  }
+}
+
+function timeout(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

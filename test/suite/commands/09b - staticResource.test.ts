@@ -22,7 +22,7 @@ suite('staticResource.ts', () => {
     return await vscode.workspace.openTextDocument(output).then(doc => {
       return vscode.window.showTextDocument(doc).then(() => {
         // open the SiteStyles.css file, edit, then save
-        return removeErrorOnDoc(sandbox, true, true);
+        return removeErrorOnDoc(true, true);
       });
     });
   });

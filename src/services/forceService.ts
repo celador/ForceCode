@@ -17,6 +17,7 @@ import { Connection, IMetadataFileProperties } from 'jsforce';
 
 import klaw = require('klaw');
 import { isEmptyUndOrNull } from '../util';
+import { SaveResult } from './saveHistoryService';
 
 export class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
@@ -27,6 +28,7 @@ export class ForceService implements forceCode.IForceService {
   public workspaceRoot: string;
   public storageRoot: string;
   public uuid: string;
+  public lastSaveResult: SaveResult | undefined;
 
   constructor(context: vscode.ExtensionContext) {
     notifications.writeLog('Initializing ForceCode service');

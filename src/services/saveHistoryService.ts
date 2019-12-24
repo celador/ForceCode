@@ -35,6 +35,7 @@ export class SaveHistoryService implements vscode.TreeDataProvider<SaveResult> {
     if (this.saveResults.length > getVSCodeSetting('maxSaveHistory')) {
       this.saveResults.pop();
     }
+    vscode.window.forceCode.lastSaveResult = this.saveResults[0];
     this._onDidChangeTreeData.fire();
   }
 
@@ -57,7 +58,7 @@ export class SaveHistoryService implements vscode.TreeDataProvider<SaveResult> {
 }
 
 export class SaveResult extends vscode.TreeItem {
-  private readonly result: ISaveResult;
+  public readonly result: ISaveResult;
 
   constructor(result: ISaveResult) {
     super(

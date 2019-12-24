@@ -43,11 +43,11 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save class fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Save class pass', async () => {
-    await removeErrorOnDoc(sandbox);
+    await removeErrorOnDoc();
   });
 
   test('Refresh class', async () => {
@@ -80,14 +80,14 @@ suite('createClass.ts and compile.ts', () => {
     await vscode.workspace.openTextDocument(output).then(doc => {
       return vscode.window.showTextDocument(doc).then(() => {
         // edit the doc to fail
-        return addErrorToDoc(sandbox);
+        return addErrorToDoc();
       });
     });
   });
 
   test('Saves class metadata pass', async () => {
     // doc will already be active from the above test
-    await removeErrorOnDoc(sandbox);
+    await removeErrorOnDoc();
   });
 
   test('Creates Visualforce Page', async () => {
@@ -112,11 +112,11 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save VF page fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Save VF page pass', async () => {
-    await removeErrorOnDoc(sandbox);
+    await removeErrorOnDoc();
   });
 
   test('Opens org', async () => {
@@ -160,11 +160,11 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save VF component fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Save VF component pass', async () => {
-    await removeErrorOnDoc(sandbox);
+    await removeErrorOnDoc();
   });
 
   test('Creates Aura App', async () => {
@@ -189,11 +189,11 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save Aura app fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Save Aura app pass', async () => {
-    await removeErrorOnDoc(sandbox);
+    await removeErrorOnDoc();
   });
 
   test('Preview Aura app', async () => {
@@ -242,11 +242,11 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save Trigger fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Save Trigger pass', async () => {
-    await removeErrorOnDoc(sandbox);
+    await removeErrorOnDoc();
   });
 
   test('Creates LWC Component', async () => {
@@ -271,7 +271,7 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save LWC fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Creates LWC Component 2', async () => {
@@ -298,7 +298,7 @@ suite('createClass.ts and compile.ts', () => {
 
   test('Save LWC pass', async () => {
     // indicate we shouldn't try and remove an error, and that autoCompile is on
-    await removeErrorOnDoc(sandbox, true, true);
+    await removeErrorOnDoc(true, true);
   });
 
   test('Creates Lightning Message Channel', async () => {
@@ -327,7 +327,7 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save Lightning Message Channel fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Creates Lightning Message Channel 2', async () => {
@@ -358,7 +358,7 @@ suite('createClass.ts and compile.ts', () => {
 
   test('Save Lightning Message Channel pass', async () => {
     // indicate we shouldn't try and remove an error, and that autoCompile is on
-    await removeErrorOnDoc(sandbox, true, true);
+    await removeErrorOnDoc(true, true);
   });
 
   test('Verify Code Coverage view now has contents', async () => {
