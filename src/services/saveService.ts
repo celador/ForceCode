@@ -98,11 +98,9 @@ export class SaveService {
     forceCompile: boolean,
     cancellationToken: FCCancellationToken
   ): Promise<boolean> {
-    // take the path and get the TextDocument, then hand it off to the compile() function
+    // if the preSaveFile doesn't exist, make it. this means someone is saving via ctr+shift+s or right click and hasn't changed the file+saved it
+    this.addFile(document.fileName);
     const fileIndex: number = this.getFileIndex(document.fileName);
-    if (fileIndex === -1) {
-      return Promise.resolve(true);
-    }
     if (this.preSaveFiles[fileIndex].saving) {
       this.preSaveFiles[fileIndex].queue = true;
       return Promise.resolve(true);

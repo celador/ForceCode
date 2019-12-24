@@ -1,5 +1,8 @@
 ## Change Log
 
+* 3.21.1
+    * Fix `Deploy only working after a save command` #345
+    * Fix `Save/Deploy/Compile Check for Diffs` #334
 * 3.21.0
     * Add ability to save multiple files at a time, no need to wait for your apex class to finish before saving your trigger!
     * Add diff in context menu for aura and lwc
