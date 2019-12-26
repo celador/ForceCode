@@ -17,6 +17,19 @@ suite('codeCompletionRefresh.ts', () => {
         },
       };
     });
+    sandbox
+      .stub(vscode.window, 'showInformationMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('No'); // Pick No so we don't reload the window
+          },
+        };
+      });
     await vscode.commands.executeCommand('ForceCode.codeCompletionRefresh').then(_res => {
       assert.strictEqual(true, true);
     });
