@@ -5,7 +5,12 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { afterEach, beforeEach } from 'mocha';
 import { codeCovViewService } from '../../../src/services';
-import { addErrorToDoc, removeErrorOnDoc, createForceJson } from '../../testUtils/utils.test';
+import {
+  addErrorToDoc,
+  removeErrorOnDoc,
+  createForceJson,
+  timeout,
+} from '../../testUtils/utils.test';
 
 suite('createClass.ts and compile.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -358,6 +363,13 @@ suite('createClass.ts and compile.ts', () => {
 
   test('Save Lightning Message Channel pass', async () => {
     // indicate we shouldn't try and remove an error, and that autoCompile is on
+    await removeErrorOnDoc(true, true);
+  });
+
+  test('Test multi-save', async () => {
+    // indicate we shouldn't try and remove an error, and that autoCompile is on
+    removeErrorOnDoc(true, true);
+    await timeout(1000);
     await removeErrorOnDoc(true, true);
   });
 
