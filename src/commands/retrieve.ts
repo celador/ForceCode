@@ -617,14 +617,15 @@ function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
     const isAura: boolean = ffNameParts[0] === 'aura' || ffNameParts[0] === 'lwc';
     const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
     const tType: IMetadataObject | undefined = getAnyTTMetadataFromPath(uri.fsPath);
-    const isResource: RegExpMatchArray | null = uri.fsPath.match(
-      /resource\-bundles.*\.resource.*$/
-    );
+    const isResource: boolean = ffNameParts[0] === 'resource-bundles';
     if (isResource) {
-      if (ffNameParts.length >= 3) {
-        return resolve({ name: 'StaticResource', members: [ffNameParts[2]] });
-      } else {
+      if (ffNameParts.length === 1) {
+        // refresh all bundles
         return resolve({ name: 'StaticResource', members: ['*'] });
+      } else {
+        // refresh specific bundle
+        const members: string = ffNameParts[1].split('.resource').shift() || '*';
+        return resolve({ name: 'StaticResource', members: [members] });
       }
     }
     if (!tType) {

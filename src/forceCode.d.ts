@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { Connection } from 'jsforce';
-import { ForceService } from './services';
-import { SaveResult } from './services/saveHistoryService';
+import { ForceService, SaveResult } from './services';
 
 declare module 'vscode' {
   export namespace window {
