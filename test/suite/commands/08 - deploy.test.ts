@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { afterEach } from 'mocha';
+import { toArray } from '../../../src/util';
 
 suite('deploy.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -12,7 +13,7 @@ suite('deploy.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[1]); // deploy second file in list
+          return callback(toArray(items)[1]); // deploy second file in list
         },
       };
     });

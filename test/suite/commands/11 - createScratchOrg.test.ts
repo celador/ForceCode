@@ -3,6 +3,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { dxService } from '../../../src/services';
 import { afterEach, beforeEach } from 'mocha';
+import { toArray } from '../../../src/util';
 
 suite('createScratchOrg.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -16,7 +17,7 @@ suite('createScratchOrg.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[0]);
+          return callback(toArray(items)[0]);
         },
       };
     });

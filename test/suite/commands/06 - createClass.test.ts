@@ -11,6 +11,7 @@ import {
   createForceJson,
   timeout,
 } from '../../testUtils/utils.test';
+import { toArray } from '../../../src/util';
 
 suite('createClass.ts and compile.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -29,7 +30,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[1]); // apex class
+          return callback(toArray(items)[1]); // apex class
         },
       };
     });
@@ -99,7 +100,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[5]); // VF page
+          return callback(toArray(items)[5]); // VF page
         },
       };
     });
@@ -143,7 +144,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[6]); // VF component
+          return callback(toArray(items)[6]); // VF component
         },
       };
     });
@@ -176,7 +177,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[0]); // Aura, app
+          return callback(toArray(items)[0]); // Aura, app
         },
       };
     });
@@ -219,7 +220,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[4]); // Trigger
+          return callback(toArray(items)[4]); // Trigger
         },
       };
     });
@@ -258,7 +259,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[3]); // LWC component
+          return callback(toArray(items)[3]); // LWC component
         },
       };
     });
@@ -283,7 +284,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[3]); // LWC component
+          return callback(toArray(items)[3]); // LWC component
         },
       };
     });
@@ -310,7 +311,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[2]); // Lightning Message Channel
+          return callback(toArray(items)[2]); // Lightning Message Channel
         },
       };
     });
@@ -339,7 +340,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[2]); // Lightning Message Channel
+          return callback(toArray(items)[2]); // Lightning Message Channel
         },
       };
     });
