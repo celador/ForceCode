@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as path from 'path';
 import { afterEach } from 'mocha';
-import { removeErrorOnDoc } from '../../testUtils/utils.test';
+import { removeErrorOnDoc, timeout } from '../../testUtils/utils.test';
 import { toArray } from '../../../src/util';
 
 suite('staticResource.ts', () => {
@@ -37,7 +37,8 @@ suite('staticResource.ts', () => {
     return await vscode.workspace.openTextDocument(output).then(doc => {
       return vscode.commands
         .executeCommand('ForceCode.refresh', undefined, [doc.uri])
-        .then(_res => {
+        .then(async _res => {
+          await timeout(3000);
           return assert.strictEqual(true, true);
         });
     });
