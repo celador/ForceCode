@@ -59,7 +59,7 @@ export function updateDecorations() {
   activeEditor.setDecorations(lineOpts, uncoveredLineOptions);
 }
 
-export function getUncoveredLineOptions(document: vscode.TextDocument) {
+function getUncoveredLineOptions(document: vscode.TextDocument) {
   var uncoveredLineDec: vscode.DecorationOptions[] = [];
   const fcfile: FCFile | undefined = codeCovViewService.findByPath(document.fileName);
   if (fcfile) {

@@ -70,8 +70,15 @@ export class CodeCompletionRefresh extends ForcecodeCommand {
           notifications.writeLog(
             'Refresh took ' + Math.round((endTime - startTime) / (1000 * 60)) + ' minutes.'
           );
-          notifications.showInfo('ForceCode: Retrieval of objects complete!!!');
-          return Promise.resolve();
+          return notifications
+            .showInfo('ForceCode: Retrieval of objects complete! Reload window now?', 'Yes', 'No')
+            .then(choice => {
+              if (choice === 'Yes') {
+                return vscode.commands.executeCommand('workbench.action.reloadWindow');
+              } else {
+                return Promise.resolve();
+              }
+            });
         } catch (e) {
           return Promise.reject();
         }

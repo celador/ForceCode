@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
-import { compile, FCCancellationToken } from '../commands';
+import { compile, FCCancellationToken, staticResourceDeployFromFile } from '../commands';
 import klaw = require('klaw');
 import { notifications } from '.';
+import { IMetadataObject } from '../forceCode';
+import { getAnyTTMetadataFromPath } from '../parsers';
 
 interface PreSaveFile {
   path: string;
@@ -107,9 +109,10 @@ export class SaveService {
     }
     this.preSaveFiles[fileIndex].saving = true;
     const self: SaveService = this;
-    return new Promise((resolve, reject) => {
-      compile(document, forceCompile, cancellationToken)
-        .then(success => {
+
+    return new Promise<boolean>((resolve, reject) => {
+      return startSave()
+        .then((success: any) => {
           self.preSaveFiles[fileIndex].saving = false;
           if (success) {
             // update the file time for start up file change checks
@@ -128,6 +131,29 @@ export class SaveService {
         })
         .catch(reject);
     });
+
+    function startSave() {
+      var isResource: RegExpMatchArray | null = document.fileName.match(
+        /resource\-bundles.*\.resource.*$/
+      ); // We are in a resource-bundles folder, bundle and deploy the staticResource
+      const toolingType: IMetadataObject | undefined = getAnyTTMetadataFromPath(
+        document.uri.fsPath
+      );
+      if (document.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot) !== -1) {
+        if (isResource?.index) {
+          return staticResourceDeployFromFile(document);
+        } else if (toolingType) {
+          return compile(document, forceCompile, cancellationToken);
+        }
+      } else if (isResource || toolingType) {
+        notifications.showError(
+          "The file you are trying to save to the server isn't in the current org's source folder (" +
+            vscode.window.forceCode.projectRoot +
+            ')'
+        );
+      }
+      return Promise.resolve(false);
+    }
   }
 
   private removeFile(thePath: string): boolean {

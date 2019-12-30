@@ -1,4 +1,4 @@
-export { isLinux, isMac, isWindows, getHomeDir, getOS } from './operatingSystem';
+export { /*isLinux, isMac,*/ isWindows, getHomeDir, getOS } from './operatingSystem';
 export { OUTPUT_CHANNEL_NAME, MAX_TIME_BETWEEN_FILE_CHANGES, GA_TRACKING_ID } from './constants';
 export { getApexTestResults } from './apexTestResults';
 import { Notifications } from './notifications';
@@ -31,9 +31,9 @@ export const codeCovViewService = CodeCovViewService.getInstance();
 export { FCFile, ClassType };
 import { SaveService } from './saveService';
 export const saveService = SaveService.getInstance();
-import { SaveHistoryService } from './saveHistoryService';
+import { SaveHistoryService, SaveResult } from './saveHistoryService';
 export const saveHistoryService = SaveHistoryService.getInstance();
 import { ContainerService, Container } from './containerService';
 export const containerService = ContainerService.getInstance();
-export { Container };
+export { Container, SaveResult };
 export * from './fcZip';

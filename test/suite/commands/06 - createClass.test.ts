@@ -5,7 +5,13 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { afterEach, beforeEach } from 'mocha';
 import { codeCovViewService } from '../../../src/services';
-import { addErrorToDoc, removeErrorOnDoc, createForceJson } from '../../testUtils/utils.test';
+import {
+  addErrorToDoc,
+  removeErrorOnDoc,
+  createForceJson,
+  timeout,
+} from '../../testUtils/utils.test';
+import { toArray } from '../../../src/util';
 
 suite('createClass.ts and compile.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -24,7 +30,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[1]); // apex class
+          return callback(toArray(items)[1]); // apex class
         },
       };
     });
@@ -43,11 +49,11 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save class fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Save class pass', async () => {
-    await removeErrorOnDoc(sandbox);
+    await removeErrorOnDoc();
   });
 
   test('Refresh class', async () => {
@@ -80,21 +86,21 @@ suite('createClass.ts and compile.ts', () => {
     await vscode.workspace.openTextDocument(output).then(doc => {
       return vscode.window.showTextDocument(doc).then(() => {
         // edit the doc to fail
-        return addErrorToDoc(sandbox);
+        return addErrorToDoc();
       });
     });
   });
 
   test('Saves class metadata pass', async () => {
     // doc will already be active from the above test
-    await removeErrorOnDoc(sandbox);
+    await removeErrorOnDoc();
   });
 
   test('Creates Visualforce Page', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[5]); // VF page
+          return callback(toArray(items)[5]); // VF page
         },
       };
     });
@@ -112,15 +118,22 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save VF page fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Save VF page pass', async () => {
-    await removeErrorOnDoc(sandbox);
+    await removeErrorOnDoc();
   });
 
-  test('Opens org', async () => {
-    return await vscode.commands.executeCommand('ForceCode.openOrg').then(_res => {
+  test('Opens org via ForceCode menu', async () => {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+      return {
+        async then(callback: any) {
+          return callback(toArray(items)[0]); // Open org option
+        },
+      };
+    });
+    return await vscode.commands.executeCommand('ForceCode.showMenu').then(_res => {
       return assert.strictEqual(true, true);
     });
   });
@@ -138,7 +151,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[6]); // VF component
+          return callback(toArray(items)[6]); // VF component
         },
       };
     });
@@ -160,18 +173,18 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save VF component fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Save VF component pass', async () => {
-    await removeErrorOnDoc(sandbox);
+    await removeErrorOnDoc();
   });
 
   test('Creates Aura App', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[0]); // Aura, app
+          return callback(toArray(items)[0]); // Aura, app
         },
       };
     });
@@ -189,11 +202,11 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save Aura app fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Save Aura app pass', async () => {
-    await removeErrorOnDoc(sandbox);
+    await removeErrorOnDoc();
   });
 
   test('Preview Aura app', async () => {
@@ -214,7 +227,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[4]); // Trigger
+          return callback(toArray(items)[4]); // Trigger
         },
       };
     });
@@ -242,18 +255,18 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save Trigger fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Save Trigger pass', async () => {
-    await removeErrorOnDoc(sandbox);
+    await removeErrorOnDoc();
   });
 
   test('Creates LWC Component', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[3]); // LWC component
+          return callback(toArray(items)[3]); // LWC component
         },
       };
     });
@@ -271,14 +284,14 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save LWC fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Creates LWC Component 2', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[3]); // LWC component
+          return callback(toArray(items)[3]); // LWC component
         },
       };
     });
@@ -298,14 +311,14 @@ suite('createClass.ts and compile.ts', () => {
 
   test('Save LWC pass', async () => {
     // indicate we shouldn't try and remove an error, and that autoCompile is on
-    await removeErrorOnDoc(sandbox, true, true);
+    await removeErrorOnDoc(true, true);
   });
 
   test('Creates Lightning Message Channel', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[2]); // Lightning Message Channel
+          return callback(toArray(items)[2]); // Lightning Message Channel
         },
       };
     });
@@ -327,14 +340,14 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Save Lightning Message Channel fail', async () => {
-    await addErrorToDoc(sandbox);
+    await addErrorToDoc();
   });
 
   test('Creates Lightning Message Channel 2', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[2]); // Lightning Message Channel
+          return callback(toArray(items)[2]); // Lightning Message Channel
         },
       };
     });
@@ -358,10 +371,23 @@ suite('createClass.ts and compile.ts', () => {
 
   test('Save Lightning Message Channel pass', async () => {
     // indicate we shouldn't try and remove an error, and that autoCompile is on
-    await removeErrorOnDoc(sandbox, true, true);
+    await removeErrorOnDoc(true, true);
+  });
+
+  test('Test multi-save', async () => {
+    // indicate we shouldn't try and remove an error, and that autoCompile is on
+    removeErrorOnDoc(true, true);
+    await timeout(1000);
+    await removeErrorOnDoc(true, true);
   });
 
   test('Verify Code Coverage view now has contents', async () => {
     return assert.strictEqual(codeCovViewService.getChildren().length > 0, true);
+  });
+
+  test('Check for file changes', async () => {
+    return await vscode.commands.executeCommand('ForceCode.checkForFileChanges').then(_res => {
+      return assert.strictEqual(true, true);
+    });
   });
 });

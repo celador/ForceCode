@@ -1,5 +1,9 @@
 ## Change Log
 
+* 3.21.2
+    * Fix issue deploying static resources
+    * Fix retrieval of static resource when working in the resource-bundles folder
+    * Add option to reload the window after retrieving sObjects during a code completion refresh in order to reload the Apex extension
 * 3.21.1
     * Fix `Deploy only working after a save command` #345
     * Fix `Save/Deploy/Compile Check for Diffs` #334

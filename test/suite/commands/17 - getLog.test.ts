@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { afterEach } from 'mocha';
+import { toArray } from '../../../src/util';
 
 suite('getLog.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -12,7 +13,7 @@ suite('getLog.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[0]);
+          return callback(toArray(items)[0]);
         },
       };
     });

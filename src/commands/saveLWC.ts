@@ -55,6 +55,7 @@ export function saveLWC(
       (def: any) =>
         !saveService.compareContents(path.join(filePath, def.FilePath.split('/').pop()), def.Source)
     );
+    saveService.removeFilesInFolder(filePath);
 
     if (!forceCompile && changedFiles.length === 1) {
       return notifications

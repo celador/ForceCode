@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as path from 'path';
 import { afterEach } from 'mocha';
-import { removeErrorOnDoc } from '../../testUtils/utils.test';
+import { removeErrorOnDoc, timeout } from '../../testUtils/utils.test';
 import { toArray } from '../../../src/util';
 
 suite('staticResource.ts', () => {
@@ -22,8 +22,25 @@ suite('staticResource.ts', () => {
     return await vscode.workspace.openTextDocument(output).then(doc => {
       return vscode.window.showTextDocument(doc).then(() => {
         // open the SiteStyles.css file, edit, then save
-        return removeErrorOnDoc(sandbox, true, true);
+        return removeErrorOnDoc(true, true);
       });
+    });
+  });
+
+  test('Refresh static resource', async () => {
+    var output = path.join(
+      vscode.window.forceCode.projectRoot,
+      'resource-bundles',
+      'SiteSamples.resource.application.zip',
+      'SiteStyles.css'
+    );
+    return await vscode.workspace.openTextDocument(output).then(doc => {
+      return vscode.commands
+        .executeCommand('ForceCode.refresh', undefined, [doc.uri])
+        .then(async _res => {
+          await timeout(3000);
+          return assert.strictEqual(true, true);
+        });
     });
   });
 
@@ -32,7 +49,7 @@ suite('staticResource.ts', () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[toArray(items).length - 1]);
+          return callback(toArray(items)[toArray(items).length - 1]);
         },
       };
     });
@@ -42,11 +59,11 @@ suite('staticResource.ts', () => {
   });
 
   test('Static resource deploy first', async () => {
-    // call 'ForceCode.staticResource', stub choice to be the last (all)
+    // call 'ForceCode.staticResource', stub choice to be the first
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
         async then(callback: any) {
-          return callback(items[0]);
+          return callback(toArray(items)[0]);
         },
       };
     });
