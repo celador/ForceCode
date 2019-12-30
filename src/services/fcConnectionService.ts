@@ -74,7 +74,9 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
   public isLoggedIn(): boolean {
     const loggedIn: boolean =
-      vscode.window.forceCode.conn && this.currentConnection?.isLoggedIn === true;
+      vscode.window.forceCode.conn !== undefined &&
+      this.currentConnection?.connection !== undefined &&
+      this.currentConnection?.isLoggedIn === true;
     if (loggedIn) {
       vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
     } else {
@@ -213,7 +215,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     function setOrgInfo(orgInf: FCOauth | SFDX): Promise<Connection | undefined> {
       service.currentConnection = service.addConnection(orgInf, true);
       if (!service.currentConnection) {
-        return Promise.reject('Error setting up connection');
+        return Promise.reject('Error setting up connection: setOrgInfo');
       }
       vscode.window.forceCode.config = readConfigFile(orgInf.username);
 
@@ -237,7 +239,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
       if (connection) {
         return connection.identity().then((res: any) => {
           if (!service.currentConnection) {
-            return Promise.reject('Error setting up connection');
+            return Promise.reject('Error setting up connection: getUserId1');
           }
           service.currentConnection.orgInfo.userId = res.user_id;
           service.currentConnection.isLoggedIn = true;
@@ -245,7 +247,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
           return Promise.resolve(false);
         });
       } else {
-        return Promise.reject('Error setting up connection');
+        return Promise.reject('Error setting up connection: getUserId2');
       }
     }
 
@@ -254,7 +256,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
       return checkConfig(vscode.window.forceCode.config).then(config => {
         saveConfigFile(config.username, config);
         if (!service.currentConnection || !service.currentConnection.connection) {
-          return Promise.reject('Error setting up connection');
+          return Promise.reject('Error setting up connection: login');
         }
         vscode.window.forceCode.conn = service.currentConnection.connection;
 

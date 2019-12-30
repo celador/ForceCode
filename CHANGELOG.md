@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.21.3
+    * Fix issues switching usernames in the Saved Usernames view
 * 3.21.2
     * Fix issue deploying static resources
     * Fix retrieval of static resource when working in the resource-bundles folder
