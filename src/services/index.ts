@@ -1,4 +1,4 @@
-export { isLinux, isMac, isWindows, getHomeDir, getOS } from './operatingSystem';
+export { /*isLinux, isMac,*/ isWindows, getHomeDir, getOS } from './operatingSystem';
 export { OUTPUT_CHANNEL_NAME, MAX_TIME_BETWEEN_FILE_CHANGES, GA_TRACKING_ID } from './constants';
 export { getApexTestResults } from './apexTestResults';
 import { Notifications } from './notifications';

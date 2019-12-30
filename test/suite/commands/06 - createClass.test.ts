@@ -125,8 +125,15 @@ suite('createClass.ts and compile.ts', () => {
     await removeErrorOnDoc();
   });
 
-  test('Opens org', async () => {
-    return await vscode.commands.executeCommand('ForceCode.openOrg').then(_res => {
+  test('Opens org via ForceCode menu', async () => {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+      return {
+        async then(callback: any) {
+          return callback(toArray(items)[0]); // Open org option
+        },
+      };
+    });
+    return await vscode.commands.executeCommand('ForceCode.showMenu').then(_res => {
       return assert.strictEqual(true, true);
     });
   });
@@ -376,5 +383,11 @@ suite('createClass.ts and compile.ts', () => {
 
   test('Verify Code Coverage view now has contents', async () => {
     return assert.strictEqual(codeCovViewService.getChildren().length > 0, true);
+  });
+
+  test('Check for file changes', async () => {
+    return await vscode.commands.executeCommand('ForceCode.checkForFileChanges').then(_res => {
+      return assert.strictEqual(true, true);
+    });
   });
 });

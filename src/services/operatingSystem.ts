@@ -2,12 +2,14 @@ import os = require('os');
 export function isWindows() {
   return os.platform().startsWith('win');
 }
+/* Currently unused
 export function isLinux() {
   return os.platform().startsWith('linux');
 }
 export function isMac() {
   return os.platform().startsWith('darwin');
 }
+*/
 export function getOS() {
   return os.platform();
 }
