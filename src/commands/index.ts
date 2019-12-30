@@ -1,19 +1,15 @@
 import { ForcecodeCommand, CancelCommand, FCCancellationToken } from './forcecodeCommand';
 export { getApexTestResults } from '../services';
 import { compile, CompileMenu, ForceCompile } from './compile';
-import { deploy, DeployPackage, createPackageXML, deployFiles } from './deploy';
+import { DeployPackage, createPackageXML, deployFiles } from './deploy';
 import { diff, DiffMenu } from './diff';
-import { showFileOptions, Open, ShowFileOptions } from './open';
+import { Open, ShowFileOptions } from './open';
 import { packageBuilder, PackageBuilder, getMembers, getFolderContents } from './packageBuilder';
 import { retrieve, RetrieveBundle, Refresh, ToolingType } from './retrieve';
 import { getAuraDefTypeFromDocument, saveAura } from './saveAura';
 import { saveApex } from './saveApex';
 import { saveLWC } from './saveLWC';
-import {
-  staticResourceBundleDeploy,
-  StaticResourceBundle,
-  staticResourceDeployFromFile,
-} from './staticResource';
+import { StaticResourceBundle, staticResourceDeployFromFile } from './staticResource';
 import { CreateScratchOrg } from './createScratchOrg';
 
 import { Find } from './find';
@@ -45,15 +41,12 @@ import {
 
 export {
   compile,
-  deploy,
   diff,
   packageBuilder,
   retrieve,
   saveApex,
   saveAura,
   saveLWC,
-  showFileOptions,
-  staticResourceBundleDeploy,
   staticResourceDeployFromFile,
   ForcecodeCommand,
   createProject,

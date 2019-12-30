@@ -117,11 +117,11 @@ export interface Field {
   writeRequiresMasterRead: boolean;
 }
 
-export interface Urls {
+interface Urls {
   layout: string;
 }
 
-export interface RecordTypeInfo {
+interface RecordTypeInfo {
   active: boolean;
   available: boolean;
   defaultRecordTypeMapping: boolean;
@@ -131,12 +131,12 @@ export interface RecordTypeInfo {
   urls: Urls;
 }
 
-export interface SupportedScope {
+interface SupportedScope {
   label: string;
   name: string;
 }
 
-export interface Urls2 {
+interface Urls2 {
   compactLayouts: string;
   rowTemplate: string;
   approvalLayouts: string;
@@ -148,10 +148,6 @@ export interface Urls2 {
   quickActions: string;
   layouts: string;
   sobject: string;
-}
-
-export interface DescribeSObjectResult {
-  result: SObject;
 }
 
 type SubRequest = { method: string; url: string };

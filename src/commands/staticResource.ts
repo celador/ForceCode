@@ -25,7 +25,7 @@ export class StaticResourceBundle extends ForcecodeCommand {
   }
 }
 
-export function staticResourceBundleDeploy(): any {
+function staticResourceBundleDeploy(): any {
   // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
   return Promise.resolve(vscode.window.forceCode)
     .then(getPackageName)

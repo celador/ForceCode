@@ -111,7 +111,7 @@ export interface ToolingType {
   members: string[];
 }
 
-export interface ToolingTypes {
+interface ToolingTypes {
   types: ToolingType[];
 }
 

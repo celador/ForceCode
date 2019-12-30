@@ -91,7 +91,7 @@ export class Open extends ForcecodeCommand {
   }
 }
 
-export function showFileOptions(promises: any[], cancellationToken: FCCancellationToken) {
+function showFileOptions(promises: any[], cancellationToken: FCCancellationToken) {
   return Promise.all(promises)
     .then(results => {
       let options: vscode.QuickPickItem[] = results
