@@ -19,6 +19,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   private static instance: CommandViewService;
   private readonly tasks: Task[];
   private fileModCommands: number = 0;
+  private getCodeCoverage: boolean = false;
   private _onDidChangeTreeData: vscode.EventEmitter<Task | undefined> = new vscode.EventEmitter<
     Task | undefined
   >();
@@ -38,6 +39,11 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
       CommandViewService.instance = new CommandViewService();
     }
     return CommandViewService.instance;
+  }
+
+  public enqueueCodeCoverage() {
+    this.getCodeCoverage = true;
+    return Promise.resolve(false);
   }
 
   public addCommandExecution(execution: ForcecodeCommand, context: any, selectedResource?: any) {
@@ -68,10 +74,10 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     }
 
     if (execution.commandName === 'ForceCode.fileModified') {
-      this.fileModCommands++;
-      if (this.fileModCommands > getVSCodeSetting('maxFileChangeNotifications')) {
+      if (this.fileModCommands >= getVSCodeSetting('maxFileChangeNotifications')) {
         return Promise.resolve();
       }
+      this.fileModCommands++;
     }
 
     var theTask: Task = new Task(this, execution, context, selectedResource);
@@ -91,7 +97,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   public removeTask(task: Task): boolean {
     const index = this.tasks.indexOf(task);
     if (index !== -1) {
-      if (this.tasks[index].execution.commandName === 'ForceCode.fileModified') {
+      if (task.execution.commandName === 'ForceCode.fileModified') {
         this.fileModCommands--;
       }
       this.tasks.splice(index, 1);
@@ -101,6 +107,15 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
           '$(loading~spin) ForceCode: Executing ' + this.getChildren().length + ' Tasks';
       } else {
         this.runningTasksStatus.hide();
+        // when code coverage is enqueued, it will only be retrieved when no other visible tasks are running
+        if (this.getCodeCoverage) {
+          this.getCodeCoverage = false;
+          vscode.commands
+            .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
+            .then(() => {
+              notifications.writeLog('Done retrieving code coverage');
+            });
+        }
       }
 
       this._onDidChangeTreeData.fire();

@@ -14,7 +14,7 @@ import {
 import { getFileName } from '../parsers';
 import { readConfigFile, removeConfigFolder } from '../services';
 import { Config } from '../forceCode';
-import { editorUpdateApexCoverageDecorator } from '../decorators';
+import { updateDecorations } from '../decorators';
 
 export class ToolingQuery extends ForcecodeCommand {
   constructor() {
@@ -190,7 +190,7 @@ export class ChangeCoverageDecoration extends ForcecodeCommand {
         .then(doc => vscode.window.showTextDocument(doc, { preview: false }))
         .then(_res => {
           parent.setCoverageTestClass(newCoverage);
-          return editorUpdateApexCoverageDecorator(vscode.window.activeTextEditor);
+          return updateDecorations();
         });
     }
   }

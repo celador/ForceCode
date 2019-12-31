@@ -2,6 +2,7 @@
 
 * 3.21.3
     * Fix issues switching usernames in the Saved Usernames view
+    * Queue code coverage retrieval so it isn't called multiple times when refreshing modified files
 * 3.21.2
     * Fix issue deploying static resources
     * Fix retrieval of static resource when working in the resource-bundles folder
