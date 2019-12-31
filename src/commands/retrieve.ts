@@ -10,6 +10,7 @@ import {
   PXMLMember,
   notifications,
   getVSCodeSetting,
+  commandViewService,
 } from '../services';
 import { getToolingTypeFromExt, getAnyTTMetadataFromPath, outputToString } from '../parsers';
 import { IWorkspaceMember, IMetadataObject, ICodeCoverage } from '../forceCode';
@@ -527,7 +528,6 @@ export function retrieve(
   // =======================================================================================================================================
   function finished(res: any): Promise<any> {
     if (res.success) {
-      var getCodeCov: boolean = false;
       notifications.writeLog('Done retrieving files');
       // check the metadata and add the new members
       return updateWSMems().then(() => {
@@ -554,7 +554,7 @@ export function retrieve(
               return cur.type === 'ApexClass' || cur.type === 'ApexTrigger';
             });
             if (shouldGetCoverage) {
-              getCodeCov = true;
+              commandViewService.enqueueCodeCoverage();
             }
             return vscode.window.forceCode.conn.metadata.list(theTypes[curTypes]);
           });
@@ -585,16 +585,7 @@ export function retrieve(
           });
         });
         notifications.writeLog('Done updating/adding metadata');
-        if (getCodeCov) {
-          return vscode.commands
-            .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
-            .then(() => {
-              notifications.writeLog('Done retrieving code coverage');
-              return Promise.resolve();
-            });
-        } else {
-          return Promise.resolve();
-        }
+        return Promise.resolve();
       }
     } else {
       notifications.showError('Retrieve Errors');

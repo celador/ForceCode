@@ -13,7 +13,7 @@ import {
   FCTimer,
 } from './services';
 import { ApexTestLinkProvider, ForceCodeContentProvider, ForceCodeLogProvider } from './providers';
-import { editorUpdateApexCoverageDecorator, updateDecorations } from './decorators';
+import { updateDecorations } from './decorators';
 import { fcCommands, createProject } from './commands';
 import * as path from 'path';
 import * as fs from 'fs-extra';
@@ -112,9 +112,7 @@ export function activate(context: vscode.ExtensionContext): any {
   );
 
   // Text Coverage Decorators
-  context.subscriptions.push(
-    vscode.window.onDidChangeActiveTextEditor(editorUpdateApexCoverageDecorator)
-  );
+  context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(updateDecorations));
 
   // watch for config file changes
   context.subscriptions.push(

@@ -26,40 +26,30 @@ const acovLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextE
   { backgroundColor: 'rgba(72,54,36,1)', isWholeLine: true }
 );
 
-// When this subscription is created (when the extension/Code boots), try to decorate the document
-let activeEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-if (activeEditor) {
-  updateDecorations();
-}
-// Export Function used when the Editor changes
-export function editorUpdateApexCoverageDecorator(editor: vscode.TextEditor | undefined) {
-  activeEditor = editor;
-  if (editor) {
-    updateDecorations();
-  }
-}
-
 export function updateDecorations() {
-  if (!activeEditor) {
-    return;
-  }
-  var uncoveredLineOptions: vscode.DecorationOptions[] = [];
-  var lineOpts: vscode.TextEditorDecorationType = uncoveredLineStyle;
-  if (activeEditor.document.languageId === 'apexCodeCoverage') {
-    lineOpts = acovLineStyle;
-    for (var i: number = 2; i < activeEditor.document.lineCount; i += 2) {
-      let decorationRange: vscode.DecorationOptions = {
-        range: activeEditor.document.lineAt(i).range,
-      };
-      uncoveredLineOptions.push(decorationRange);
+  vscode.window.visibleTextEditors.forEach(editor => {
+    var uncoveredLineOptions: vscode.DecorationOptions[] = [];
+    var lineOpts: vscode.TextEditorDecorationType = uncoveredLineStyle;
+    if (editor.document.languageId === 'apexCodeCoverage') {
+      lineOpts = acovLineStyle;
+      for (var i: number = 2; i < editor.document.lineCount; i += 2) {
+        let decorationRange: vscode.DecorationOptions = {
+          range: editor.document.lineAt(i).range,
+        };
+        uncoveredLineOptions.push(decorationRange);
+      }
+    } else if (vscode.window.forceCode?.config?.showTestCoverage) {
+      uncoveredLineOptions = getUncoveredLineOptions(editor);
     }
-  } else if (vscode.window.forceCode?.config?.showTestCoverage) {
-    uncoveredLineOptions = getUncoveredLineOptions(activeEditor.document);
+    editor.setDecorations(lineOpts, uncoveredLineOptions);
+  });
+
+  if (vscode.window.activeTextEditor) {
   }
-  activeEditor.setDecorations(lineOpts, uncoveredLineOptions);
 }
 
-function getUncoveredLineOptions(document: vscode.TextDocument) {
+function getUncoveredLineOptions(editor: vscode.TextEditor) {
+  const document = editor.document;
   var uncoveredLineDec: vscode.DecorationOptions[] = [];
   const fcfile: FCFile | undefined = codeCovViewService.findByPath(document.fileName);
   if (fcfile) {
@@ -86,9 +76,12 @@ function getUncoveredLineOptions(document: vscode.TextDocument) {
         uncoveredLineDecorations.push(decorationRange);
         // Add output to output channel
       });
-      var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
-      var percent = ((fileCoverage.NumLinesCovered / total) * 100).toFixed(2) + '% covered';
-      notifications.showStatus(fileCoverage.ApexClassOrTrigger.Name + ' ' + percent);
+
+      if (editor === vscode.window.activeTextEditor) {
+        var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
+        var percent = ((fileCoverage.NumLinesCovered / total) * 100).toFixed(2) + '% covered';
+        notifications.showStatus(fileCoverage.ApexClassOrTrigger.Name + ' ' + percent);
+      }
     }
     return uncoveredLineDecorations;
   }

@@ -10,6 +10,7 @@ import {
   defaultOptions,
   readForceJson,
   getVSCodeSetting,
+  commandViewService,
 } from '.';
 import * as path from 'path';
 import { getToolingTypeFromExt } from '../parsers';
@@ -177,12 +178,7 @@ export class ForceService implements forceCode.IForceService {
         }
       });
       notifications.writeLog('Done getting workspace info');
-      return vscode.commands
-        .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
-        .then(() => {
-          notifications.writeLog('Done retrieving code coverage');
-          return Promise.resolve();
-        });
+      return commandViewService.enqueueCodeCoverage();
     }
   }
 

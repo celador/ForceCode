@@ -7,6 +7,7 @@ import {
   FCFile,
   notifications,
   getVSCodeSetting,
+  commandViewService,
 } from '../services';
 import { ForcecodeCommand } from '.';
 import { updateDecorations } from '../decorators';
@@ -34,7 +35,11 @@ export class GetCodeCoverage extends ForcecodeCommand {
   }
 
   public command() {
-    return getApexTestResults().then(_res => getApexTestResults(true));
+    return getApexTestResults()
+      .then(_res => getApexTestResults(true))
+      .then((
+        _res2 // update the current editor
+      ) => updateDecorations());
   }
 }
 
@@ -67,8 +72,8 @@ export class ApexTest extends ForcecodeCommand {
     return dxService
       .runTest(context, selectedResource, this.cancellationToken)
       .then((dxRes: ApexTestQueryResult) => {
-        return vscode.commands
-          .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
+        return commandViewService
+          .enqueueCodeCoverage()
           .then(() => showResult(dxRes))
           .then(showLog);
       });
