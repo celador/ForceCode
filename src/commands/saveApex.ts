@@ -40,7 +40,7 @@ export function saveApex(
   function addToContainer(svc: forceCode.IForceService) {
     // We will push the filename on to the members array to make sure that the next time we compile,
     var records = container.records;
-    if (container.existing) {
+    if (container.existing && records?.length > 0) {
       // This is what happens when we had an error on the previous compile.
       // We want to just update the member and try to compile again
       if (!records || cancellationToken.isCanceled()) {
