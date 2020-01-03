@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.21.4
+   * Fix "Record id is not found in record" after create a new class #349
 * 3.21.3
     * Fix issues switching usernames in the Saved Usernames view
     * Queue code coverage retrieval so it isn't called multiple times when refreshing modified files
