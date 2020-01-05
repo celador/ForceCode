@@ -57,23 +57,11 @@ export function zipFiles(
  * @return {String[]} - Array of paths relative to given root
  */
 function getFileList(root: string) {
-  // get ignore settings from Forcecode workspace settings and .forceignore
-  const ignoreFilesSettings: { [key: string]: boolean } = Object.assign(
-    {},
-    getVSCodeSetting('filesExclude'),
-    readForceIgnore()
-  );
-
-  const ignoreFiles: string[] = Object.keys(ignoreFilesSettings)
-    .map(key => {
-      return { key: key, value: ignoreFilesSettings[key] };
-    })
-    .filter(setting => setting.value === true && !setting.key.endsWith('*-meta.xml'))
-    .map(setting => setting.key);
+  return getFilteredFileList(innerGetFileList(root));
 
   // We trap the relative root in a closure then
   // Perform the recursive file search
-  return (function innerGetFileList(localPath) {
+  function innerGetFileList(localPath: string) {
     var fileslist: any[] = []; // List of files
     var files: string[];
     if (!fs.statSync(localPath).isDirectory()) {
@@ -89,12 +77,12 @@ function getFileList(root: string) {
       // If file is a directory, recursively add it's children
       if (stat.isDirectory()) {
         fileslist = fileslist.concat(innerGetFileList(pathname));
-      } else if (!globule.isMatch(ignoreFiles, pathname, { matchBase: true, dot: true })) {
+      } else {
         fileslist.push(pathname.replace(root + path.sep, ''));
       }
     });
     return fileslist;
-  })(root);
+  }
 }
 
 // read the .forceignore file, if it exists
@@ -115,6 +103,32 @@ function readForceIgnore(): { [key: string]: boolean } {
   }
 
   return ignoreObject;
+}
+
+export function getFilteredFileList(files: string[]): string[] {
+  // get ignore settings from Forcecode workspace settings and .forceignore
+  const ignoreFilesSettings: { [key: string]: boolean } = Object.assign(
+    {},
+    getVSCodeSetting('filesExclude'),
+    readForceIgnore()
+  );
+
+  const ignoreFiles: string[] = Object.keys(ignoreFilesSettings)
+    .map(key => {
+      return { key: key, value: ignoreFilesSettings[key] };
+    })
+    .filter(setting => setting.value === true && !setting.key.endsWith('*-meta.xml'))
+    .map(setting => setting.key);
+
+  var fileslist: string[] = [];
+
+  files.forEach(file => {
+    if (!globule.isMatch(ignoreFiles, file, { matchBase: true, dot: true })) {
+      fileslist.push(file);
+    }
+  });
+
+  return fileslist;
 }
 
 export interface PXMLMember {

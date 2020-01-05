@@ -6,6 +6,7 @@ import {
   getFileListFromPXML,
   zipFiles,
   getVSCodeSetting,
+  getFilteredFileList,
 } from '../services';
 import * as path from 'path';
 import klaw = require('klaw');
@@ -129,7 +130,7 @@ function deploy(cancellationToken: FCCancellationToken) {
           }
         })
         .on('end', () => {
-          resolve(fileList.sort());
+          resolve(getFilteredFileList(fileList.sort()));
         })
         .on('error', (err: Error, item: klaw.Item) => {
           notifications.writeLog(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
