@@ -1,7 +1,7 @@
 ## Change Log
 
 * 3.22.0
-    * Add ignore functionality via the Forcecode `force.filesExclude` workspace setting. This can be used when deploying files to ignore files/folders.
+    * Add ignore functionality via the Forcecode `force.filesExclude` workspace setting. This can be used when deploying files to ignore files/folders. Forcecode now also respects `.forceignore` files in your workspace root as well. A `.forceignore` file will always supersede the `force.filesExclude` workspace setting.
 * 3.21.4
     * Fix "Record id is not found in record" after create a new class #349
 * 3.21.3

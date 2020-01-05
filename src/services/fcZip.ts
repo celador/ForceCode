@@ -46,22 +46,24 @@ export function zipFiles(
 }
 
 /**
- * @private zipFiles
  * Takes directory and recursively adds all child files to the list
  * with all paths being relative to the original path.
- * @param {String} relativeRoot - path (relative or absolute) of folder to recurse
+ * @param {String} root - path (absolute) of folder to recurse
  * @return {String[]} - Array of paths relative to given root
  */
 export function getFileList(root: string) {
-  // Throw if not a directory
   if (!fs.statSync(root).isDirectory()) {
     return [root];
   }
 
-  const ignoreFilesSettings: any = getVSCodeSetting('filesExclude');
+  // get ignore settings from Forcecode workspace settings and .forceignore
+  const ignoreFilesSettings: { [key: string]: boolean } = Object.assign(
+    {},
+    getVSCodeSetting('filesExclude'),
+    readForceIgnore()
+  );
 
-  // TODO add .forceignore
-  const ignoreFiles: any[] = Object.keys(ignoreFilesSettings)
+  const ignoreFiles: string[] = Object.keys(ignoreFilesSettings)
     .map(key => {
       return { key: key, value: ignoreFilesSettings[key] };
     })
@@ -87,6 +89,26 @@ export function getFileList(root: string) {
     });
     return fileslist;
   })(root);
+}
+
+// read the .forceignore file, if it exists
+function readForceIgnore(): { [key: string]: boolean } {
+  const forceIgnorePath: string = vscode.window.forceCode.workspaceRoot + path.sep + '.forceignore';
+  var ignoreObject: { [key: string]: boolean } = {};
+
+  if (fs.existsSync(forceIgnorePath)) {
+    const forceIgnoreContents: string = fs.readFileSync(forceIgnorePath).toString();
+
+    // parse the ignore file and put into key: value format
+    forceIgnoreContents.split(/\r?\n/).forEach(line => {
+      line = line.trim();
+      if (line !== '' && !line.startsWith('#')) {
+        ignoreObject[line] = true;
+      }
+    });
+  }
+
+  return ignoreObject;
 }
 
 export interface PXMLMember {
