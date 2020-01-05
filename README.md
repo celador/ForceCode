@@ -303,7 +303,7 @@ The configuration file will look like the following. You can either edit this fi
 
 There's also workspace configuration options that are not included in the settings.json, but rather in your vscode settings.json file. The reasoning for separating the files is for portability reasons; to make it easier to share this configuration with others and yourself across projects.  
 If you open up your settings.json file, or go to Code &gt; Preferences &gt; Workspace Settings and create a new preference, starting with `force` you should see the defaultApiVersion and filesExclude preferences. The defaultApiVersion will be what ForceCode uses as the API version when creating new projects or logging into new orgs. 
-The filesExclude property allows you to have certain files ignored \(excluded\) from Static Resources when bundled/deployed.  This allows you to create a modern SPA project in a "spa" folder instead of keeping it in your "resource-bundles" directory.  
+The filesExclude property allows you to have certain files ignored \(excluded\) when deploying. This can be used with static resources, LWC, Aura, etc. For static resources, this allows you to create a modern SPA project in a "spa" folder instead of keeping it in your "resource-bundles" directory.  
 However, when we build these SPAs we generally have a ton of preference and source files that we don't want to deploy to Salesforce, both for security and size reasons.  
 So, you can create Node glob patterns to ignore. The default configuration is shown below.  
 Glob patterns can be tricky... so a little research and trial and error may be required to get your bundle just right.

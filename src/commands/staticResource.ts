@@ -1,8 +1,13 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
-import globule = require('globule');
-import { zipFiles, notifications, getVSCodeSetting, saveHistoryService } from '../services';
+import {
+  zipFiles,
+  notifications,
+  getVSCodeSetting,
+  saveHistoryService,
+  getFileList,
+} from '../services';
 import { ForcecodeCommand } from '.';
 import { getWholeFileName } from '../parsers';
 const mime = require('mime-types');
@@ -181,54 +186,6 @@ function getPackagePath(option: vscode.QuickPickItem) {
     }
   }
   return bundlePath;
-}
-
-/**
- * @private zipFiles
- * Takes directory and recursively adds all child files to the list
- * with all paths being relative to the original path.
- * @param {String} relativeRoot - path (relative or absolute) of folder to recurse
- * @return {String[]} - Array of paths relative to given root
- */
-function getFileList(root: string) {
-  // Throw if not a directory
-  if (!fs.statSync(root).isDirectory()) {
-    return [root];
-  }
-
-  // We trap the relative root in a closure then
-  // Perform the recursive file search
-  return (function innerGetFileList(localPath) {
-    var fileslist: any[] = []; // List of files
-    var files: string[] = fs.readdirSync(localPath); // Files in current 'sfdc' directory
-    var ignoreFilesSettings: any = getVSCodeSetting('filesExclude') || {
-      '.gitignore': true,
-      '.DS_Store': true,
-      '.org_metadata': true,
-      '.log': true,
-      'node_modules/**': true,
-      'bower_modules/**': true,
-    };
-    var ignoreFiles: any[] = Object.keys(ignoreFilesSettings)
-      .map(key => {
-        return { key: key, value: ignoreFilesSettings[key] };
-      })
-      .filter(setting => setting.value === true)
-      .map(setting => root + path.sep + setting.key);
-
-    files.forEach(file => {
-      var pathname: string = localPath + path.sep + file;
-      var stat: any = fs.lstatSync(pathname);
-
-      // If file is a directory, recursively add it's children
-      if (stat.isDirectory()) {
-        fileslist = fileslist.concat(innerGetFileList(pathname));
-      } else if (!globule.isMatch(ignoreFiles, pathname, { matchBase: true, dot: true })) {
-        fileslist.push(pathname.replace(root + path.sep, ''));
-      }
-    });
-    return fileslist;
-  })(root);
 }
 
 /**

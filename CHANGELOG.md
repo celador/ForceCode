@@ -1,7 +1,9 @@
 ## Change Log
 
+* 3.22.0
+    * Add ignore functionality via the Forcecode `force.filesExclude` workspace setting. This can be used when deploying files to ignore files/folders.
 * 3.21.4
-   * Fix "Record id is not found in record" after create a new class #349
+    * Fix "Record id is not found in record" after create a new class #349
 * 3.21.3
     * Fix issues switching usernames in the Saved Usernames view
     * Queue code coverage retrieval so it isn't called multiple times when refreshing modified files

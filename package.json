@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.21.4",
+  "version": "3.22.0",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -257,7 +257,7 @@
         "force.debugOnly": {
           "type": "boolean",
           "default": true,
-          "description": "When executing anonymous, we can either show all the output or only the debug lines.  This makes it easier to debug your code.  Turn if on for the important stuff, and turn it off to get all the detail."
+          "description": "When executing anonymous or running Apex tests, we can either show all the output or only the debug lines. This makes it easier to debug your code. Turn if on for the important stuff, and turn it off to get all the detail."
         },
         "force.filesExclude": {
           "type": "object",
@@ -269,7 +269,6 @@
             "node_modules/**": true,
             "bower_modules/**": true,
             "**.tmp": true,
-            "**/*-meta.xml": true,
             ".log": true
           },
           "description": "An object describing the files to exclude from the Static Resource build. The key is a Nodejs \"Glob\" pattern, the value is true or false"
@@ -677,7 +676,7 @@
     "jsforce": "1.9.3",
     "klaw": "3.0.0",
     "mime-types": "2.1.25",
-    "mocha": "^6.2.2",
+    "mocha": "^7.0.0",
     "os": "0.1.1",
     "remap-istanbul": "^0.13.0",
     "request-light": "0.2.5",

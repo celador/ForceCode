@@ -6,6 +6,8 @@ import { parseString } from 'xml2js';
 import { toArray } from '../util';
 import { IMetadataObject } from '../forceCode';
 import { getToolingTypeMetadata } from '../parsers';
+import { getVSCodeSetting } from './configuration';
+import globule = require('globule');
 
 /**
  * @private zipFiles
@@ -14,20 +16,77 @@ import { getToolingTypeMetadata } from '../parsers';
  * @param {String[]} fileList - Array of file paths
  * @return {Zip} - zip stream
  */
-export function zipFiles(fileList: string[], root: string, lwcPackageXML?: string) {
-  var zip: any = new compress.zip.Stream();
+export function zipFiles(
+  fileList: string[],
+  root: string,
+  lwcPackageXML?: string
+): compress.zip.Stream {
+  var zip: compress.zip.Stream = new compress.zip.Stream();
   // Add folders and files to zip object for each file in the list
   fileList.forEach(file => {
     const filePath: string = path.join(
       lwcPackageXML && file === 'package.xml' ? lwcPackageXML : root,
       file
     );
-    zip.addEntry(filePath, {
-      relativePath: file.indexOf('.') !== -1 ? file : file.split(path.sep)[0],
-    });
+    // this allows a filter on the files/folders
+    if (fs.lstatSync(filePath).isDirectory()) {
+      getFileList(filePath).forEach(theFile => {
+        zip.addEntry(filePath + path.sep + theFile, {
+          relativePath: file + path.sep + theFile,
+        });
+      });
+    } else {
+      zip.addEntry(filePath, {
+        relativePath: file.indexOf('.') !== -1 ? file : file.split(path.sep)[0],
+      });
+    }
   });
 
   return zip;
+}
+
+/**
+ * @private zipFiles
+ * Takes directory and recursively adds all child files to the list
+ * with all paths being relative to the original path.
+ * @param {String} relativeRoot - path (relative or absolute) of folder to recurse
+ * @return {String[]} - Array of paths relative to given root
+ */
+export function getFileList(root: string) {
+  // Throw if not a directory
+  if (!fs.statSync(root).isDirectory()) {
+    return [root];
+  }
+
+  const ignoreFilesSettings: any = getVSCodeSetting('filesExclude');
+
+  // TODO add .forceignore
+  const ignoreFiles: any[] = Object.keys(ignoreFilesSettings)
+    .map(key => {
+      return { key: key, value: ignoreFilesSettings[key] };
+    })
+    .filter(setting => setting.value === true && !setting.key.endsWith('*-meta.xml'))
+    .map(setting => root + path.sep + setting.key);
+
+  // We trap the relative root in a closure then
+  // Perform the recursive file search
+  return (function innerGetFileList(localPath) {
+    var fileslist: any[] = []; // List of files
+    var files: string[] = fs.readdirSync(localPath); // Files in current 'sfdc' directory
+
+    files.forEach(file => {
+      var pathname: string = localPath + path.sep + file;
+      var stat: any = fs.lstatSync(pathname);
+
+      // If file is a directory, recursively add it's children
+      if (stat.isDirectory()) {
+        fileslist = fileslist.concat(innerGetFileList(pathname));
+      } else if (!globule.isMatch(ignoreFiles, pathname, { matchBase: true, dot: true })) {
+        fileslist.push(pathname.replace(root + path.sep, ''));
+      }
+    });
+    return fileslist;
+  })(root);
 }
 
 export interface PXMLMember {
