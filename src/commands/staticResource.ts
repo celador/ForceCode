@@ -1,13 +1,7 @@
 import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import path = require('path');
-import {
-  zipFiles,
-  notifications,
-  getVSCodeSetting,
-  saveHistoryService,
-  getFileList,
-} from '../services';
+import { zipFiles, notifications, getVSCodeSetting, saveHistoryService } from '../services';
 import { ForcecodeCommand } from '.';
 import { getWholeFileName } from '../parsers';
 const mime = require('mime-types');
@@ -138,7 +132,7 @@ function bundleAndDeploy(option: vscode.QuickPickItem) {
   let root: string = getPackagePath(option);
   var detail = option.detail || '';
   if (detail.includes('zip') || detail === 'SPA') {
-    let zip: any = zipFiles(getFileList(root), root);
+    let zip: any = zipFiles([''], root);
     return deploy(zip, option.label, detail);
   } else {
     var ext = '.' + mime.extension(option.detail);

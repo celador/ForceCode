@@ -29,17 +29,22 @@ export function zipFiles(
       file
     );
     // this allows a filter on the files/folders
-    if (fs.lstatSync(filePath).isDirectory()) {
-      getFileList(filePath).forEach(theFile => {
-        zip.addEntry(filePath + path.sep + theFile, {
-          relativePath: file + path.sep + theFile,
-        });
+    getFileList(filePath).forEach(theFile => {
+      var theFilePath;
+      var relativePath;
+      if (filePath === theFile) {
+        // file
+        theFilePath = filePath;
+        relativePath = file.indexOf('.') !== -1 ? file : file.split(path.sep)[0];
+      } else {
+        // directory
+        theFilePath = filePath + path.sep + theFile;
+        relativePath = file === '' ? theFile : file + path.sep + theFile;
+      }
+      zip.addEntry(theFilePath, {
+        relativePath,
       });
-    } else {
-      zip.addEntry(filePath, {
-        relativePath: file.indexOf('.') !== -1 ? file : file.split(path.sep)[0],
-      });
-    }
+    });
   });
 
   return zip;
@@ -51,11 +56,7 @@ export function zipFiles(
  * @param {String} root - path (absolute) of folder to recurse
  * @return {String[]} - Array of paths relative to given root
  */
-export function getFileList(root: string) {
-  if (!fs.statSync(root).isDirectory()) {
-    return [root];
-  }
-
+function getFileList(root: string) {
   // get ignore settings from Forcecode workspace settings and .forceignore
   const ignoreFilesSettings: { [key: string]: boolean } = Object.assign(
     {},
@@ -68,16 +69,21 @@ export function getFileList(root: string) {
       return { key: key, value: ignoreFilesSettings[key] };
     })
     .filter(setting => setting.value === true && !setting.key.endsWith('*-meta.xml'))
-    .map(setting => root + path.sep + setting.key);
+    .map(setting => setting.key);
 
   // We trap the relative root in a closure then
   // Perform the recursive file search
   return (function innerGetFileList(localPath) {
     var fileslist: any[] = []; // List of files
-    var files: string[] = fs.readdirSync(localPath); // Files in current 'sfdc' directory
+    var files: string[];
+    if (!fs.statSync(localPath).isDirectory()) {
+      files = [localPath];
+    } else {
+      files = fs.readdirSync(localPath); // Files in current 'sfdc' directory
+    }
 
     files.forEach(file => {
-      var pathname: string = localPath + path.sep + file;
+      var pathname: string = file === localPath ? file : localPath + path.sep + file;
       var stat: any = fs.lstatSync(pathname);
 
       // If file is a directory, recursively add it's children
