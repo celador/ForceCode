@@ -171,6 +171,10 @@
           "light": "./images/runTest.svg",
           "dark": "./images/runTest.svg"
         }
+      },
+      {
+        "command": "ForceCode.deleteFile",
+        "title": "ForceCode: Delete file from org"
       }
     ],
     "keybindings": [
@@ -513,6 +517,11 @@
           "when": "resourceLangId == svg && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.diff",
           "group": "ForceCode"
+        },
+        {
+          "when": "ForceCodeActive && ForceCodeLoggedIn",
+          "command": "ForceCode.deleteFile",
+          "group": "ForceCode"
         }
       ],
       "explorer/context": [
@@ -524,6 +533,11 @@
         {
           "when": "ForceCodeActive && !explorerResourceIsFolder && ForceCodeLoggedIn",
           "command": "ForceCode.compile",
+          "group": "ForceCode"
+        },
+        {
+          "when": "ForceCodeActive && ForceCodeLoggedIn",
+          "command": "ForceCode.deleteFile",
           "group": "ForceCode"
         }
       ],
@@ -637,6 +651,10 @@
         },
         {
           "command": "ForceCode.previewApp",
+          "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
+        },
+        {
+          "command": "ForceCode.deleteFile",
           "when": "ForceCodeActive && editorIsOpen && ForceCodeLoggedIn"
         }
       ]

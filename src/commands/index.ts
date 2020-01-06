@@ -5,7 +5,7 @@ import { DeployPackage, createPackageXML, deployFiles } from './deploy';
 import { diff, DiffMenu } from './diff';
 import { Open, ShowFileOptions } from './open';
 import { packageBuilder, PackageBuilder, getMembers, getFolderContents } from './packageBuilder';
-import { retrieve, RetrieveBundle, Refresh, ToolingType } from './retrieve';
+import { retrieve, RetrieveBundle, Refresh, ToolingType, getAnyNameFromUri } from './retrieve';
 import { getAuraDefTypeFromDocument, saveAura } from './saveAura';
 import { saveApex } from './saveApex';
 import { saveLWC } from './saveLWC';
@@ -37,6 +37,7 @@ import {
   Login,
   RemoveConfig,
   ChangeCoverageDecoration,
+  DeleteFile,
 } from './fcCommands';
 
 export {
@@ -58,6 +59,7 @@ export {
   createPackageXML,
   deployFiles,
   ToolingType,
+  getAnyNameFromUri,
 };
 
 export const fcCommands: ForcecodeCommand[] = [
@@ -104,4 +106,5 @@ export const fcCommands: ForcecodeCommand[] = [
   new Login(),
   new RemoveConfig(),
   new CancelCommand(),
+  new DeleteFile(),
 ];

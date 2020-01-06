@@ -600,9 +600,18 @@ export function retrieve(
   // =======================================================================================================================================
 }
 
-function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
+// TODO account for AuraDefinition and Lightning web component individual peices
+export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
   return new Promise((resolve, reject) => {
     const projRoot: string = vscode.window.forceCode.projectRoot + path.sep;
+    if (uri.fsPath.indexOf(projRoot) === -1) {
+      return reject(
+        'The file you are attempting to save/retrieve/delete (' +
+          uri.fsPath +
+          ') is outside of ' +
+          vscode.window.forceCode.projectRoot
+      );
+    }
     const ffNameParts: string[] = uri.fsPath.split(projRoot)[1].split(path.sep);
     var baseDirectoryName: string = path.parse(uri.fsPath).name;
     const isAura: boolean = ffNameParts[0] === 'aura' || ffNameParts[0] === 'lwc';
@@ -621,7 +630,7 @@ function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
     }
     if (!tType) {
       return reject(
-        "Either the file/metadata type doesn't exist in the current org or you're trying to save/retrieve outside of " +
+        "Either the file/metadata type doesn't exist in the current org or you're trying to save/retrieve/delete outside of " +
           vscode.window.forceCode.projectRoot
       );
     }
