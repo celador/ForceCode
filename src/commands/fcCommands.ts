@@ -313,7 +313,7 @@ export class DeleteFile extends ForcecodeCommand {
     var toDeleteNames: string = 'Are you sure you want to delete the following?\n';
     toDelete.forEach(cur => {
       cur.members.forEach(mem => {
-        toDeleteNames += mem + (cur.defType ? cur.defType : '') + ': ' + cur.name + '\n';
+        toDeleteNames += mem + (cur.defType ? ' ' + cur.defType : '') + ': ' + cur.name + '\n';
       });
     });
 
@@ -336,7 +336,10 @@ export class DeleteFile extends ForcecodeCommand {
           .sobject(cur.name)
           .find({
             DefType: cur.defType,
-            'AuraDefinitionBundle.Name': cur.defType ? cur.name : undefined,
+            'AuraDefinitionBundle.DeveloperName': cur.defType ? cur.members[0] : undefined,
+            'AuraDefinitionBundle.NamespacePrefix': cur.defType
+              ? vscode.window.forceCode.config.prefix || ''
+              : undefined,
             DeveloperName: cur.defType
               ? undefined
               : !cur.name.startsWith('Apex')
@@ -347,7 +350,7 @@ export class DeleteFile extends ForcecodeCommand {
               : cur.name.startsWith('Apex')
               ? cur.members[0]
               : undefined,
-            NamespacePrefix: vscode.window.forceCode.config.prefix || '',
+            NamespacePrefix: cur.defType ? undefined : vscode.window.forceCode.config.prefix || '',
           })
           .execute(function(_err: any, records: any) {
             var toDeleteString: string[] = new Array<string>();
@@ -376,17 +379,19 @@ export class DeleteFile extends ForcecodeCommand {
 
     // delete file(s) from workspace
     filesToDelete.forEach(uri => {
-      var thePath = uri.fsPath;
-      const projPath = vscode.window.forceCode.projectRoot + path.sep;
-      if (
-        thePath.indexOf(projPath + 'lwc' + path.sep) !== -1 ||
-        thePath.indexOf(projPath + 'aura' + path.sep) !== -1
-      ) {
+      var thePath: string = uri.fsPath;
+      const projPath: string = vscode.window.forceCode.projectRoot + path.sep;
+      const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
+      const isMetaData: boolean = thePath.endsWith('-meta.xml');
+      const metaExists: boolean = fs.existsSync(thePath + '-meta.xml');
+      const isLWC: boolean = thePath.indexOf(projPath + 'lwc' + path.sep) !== -1;
+      const isAura = thePath.indexOf(projPath + 'aura' + path.sep) !== -1;
+      if (!isDir && (isLWC || (isAura && (metaExists || isMetaData)))) {
         thePath = thePath.substring(0, thePath.lastIndexOf(path.sep) + 1);
       }
       // delete the file/folder
       fs.removeSync(thePath);
-      if (fs.existsSync(thePath + '-meta.xml')) {
+      if (!isDir && !isLWC && !isAura && metaExists) {
         // delete the meta.xml file
         fs.removeSync(thePath + '-meta.xml');
       }

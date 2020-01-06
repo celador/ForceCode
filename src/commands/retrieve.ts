@@ -660,10 +660,14 @@ export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promis
       var defType: string | undefined;
       if (isAura && getDefType) {
         defType = getAuraDefTypeFromDocument(await vscode.workspace.openTextDocument(uri.fsPath));
-        if (defType === 'CONTROLLER') {
+        if (defType === 'COMPONENT' || defType === 'Metadata') {
+          // used for deleting. we can't delete just the component or the metadata
+          defType = undefined;
+        }
+        if (defType === 'CONTROLLER' || defType === 'HELPER' || defType === 'RENDERER') {
           baseDirectoryName = baseDirectoryName.substring(
             0,
-            baseDirectoryName.toLowerCase().lastIndexOf('component')
+            baseDirectoryName.toUpperCase().lastIndexOf(defType)
           );
         }
       }
