@@ -23,6 +23,7 @@ import {
   ForcecodeCommand,
   getMembers,
   getFolderContents,
+  getAuraDefTypeFromDocument,
 } from '.';
 import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
@@ -600,9 +601,8 @@ export function retrieve(
   // =======================================================================================================================================
 }
 
-// TODO account for AuraDefinition and Lightning web component individual peices
-export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
-  return new Promise((resolve, reject) => {
+export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promise<PXMLMember> {
+  return new Promise(async (resolve, reject) => {
     const projRoot: string = vscode.window.forceCode.projectRoot + path.sep;
     if (uri.fsPath.indexOf(projRoot) === -1) {
       return reject(
@@ -614,7 +614,8 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
     }
     const ffNameParts: string[] = uri.fsPath.split(projRoot)[1].split(path.sep);
     var baseDirectoryName: string = path.parse(uri.fsPath).name;
-    const isAura: boolean = ffNameParts[0] === 'aura' || ffNameParts[0] === 'lwc';
+    const isAura: boolean = ffNameParts[0] === 'aura';
+    const isLWC: boolean = ffNameParts[0] === 'lwc';
     const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
     const tType: IMetadataObject | undefined = getAnyTTMetadataFromPath(uri.fsPath);
     const isResource: boolean = ffNameParts[0] === 'resource-bundles';
@@ -641,7 +642,7 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
       folderedName = ffNameParts.join('/').split('.')[0];
       return resolve({ name: tType.xmlName, members: [folderedName] });
     } else if (isDir) {
-      if (isAura) {
+      if (isAura || isLWC) {
         if (baseDirectoryName === 'aura' || baseDirectoryName === 'lwc') {
           baseDirectoryName = '*';
         }
@@ -656,7 +657,18 @@ export function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
         });
       }
     } else {
-      return resolve({ name: tType.xmlName, members: [baseDirectoryName] });
+      var defType: string | undefined;
+      if (isAura && getDefType) {
+        defType = getAuraDefTypeFromDocument(await vscode.workspace.openTextDocument(uri.fsPath));
+        if (defType === 'CONTROLLER') {
+          baseDirectoryName = baseDirectoryName.substring(
+            0,
+            baseDirectoryName.toLowerCase().lastIndexOf('component')
+          );
+        }
+      }
+      baseDirectoryName = baseDirectoryName.split('.')[0];
+      return resolve({ name: tType.xmlName, members: [baseDirectoryName], defType });
     }
   });
 }

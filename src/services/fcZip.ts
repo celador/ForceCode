@@ -134,6 +134,7 @@ export function getFilteredFileList(files: string[]): string[] {
 export interface PXMLMember {
   members: string[];
   name: string;
+  defType?: string;
 }
 
 export interface PXML {

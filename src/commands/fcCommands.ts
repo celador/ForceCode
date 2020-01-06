@@ -294,8 +294,11 @@ export class DeleteFile extends ForcecodeCommand {
     await new Promise((resolve, reject) => {
       var count = 0;
       filesToDelete.forEach(async resource => {
-        const toAdd = await getAnyNameFromUri(resource).catch(reject);
+        const toAdd = await getAnyNameFromUri(resource, true).catch(reject);
         if (toAdd) {
+          if (toAdd.defType) {
+            toAdd.name = 'AuraDefinition';
+          }
           toDelete.add(toAdd);
         }
         count++;
@@ -310,7 +313,7 @@ export class DeleteFile extends ForcecodeCommand {
     var toDeleteNames: string = 'Are you sure you want to delete the following?\n';
     toDelete.forEach(cur => {
       cur.members.forEach(mem => {
-        toDeleteNames += mem + ': ' + cur.name + '\n';
+        toDeleteNames += mem + (cur.defType ? cur.defType : '') + ': ' + cur.name + '\n';
       });
     });
 
@@ -332,8 +335,18 @@ export class DeleteFile extends ForcecodeCommand {
         await vscode.window.forceCode.conn.tooling
           .sobject(cur.name)
           .find({
-            DeveloperName: !cur.name.startsWith('Apex') ? cur.members[0] : undefined,
-            Name: cur.name.startsWith('Apex') ? cur.members[0] : undefined,
+            DefType: cur.defType,
+            'AuraDefinitionBundle.Name': cur.defType ? cur.name : undefined,
+            DeveloperName: cur.defType
+              ? undefined
+              : !cur.name.startsWith('Apex')
+              ? cur.members[0]
+              : undefined,
+            Name: cur.defType
+              ? undefined
+              : cur.name.startsWith('Apex')
+              ? cur.members[0]
+              : undefined,
             NamespacePrefix: vscode.window.forceCode.config.prefix || '',
           })
           .execute(function(_err: any, records: any) {
