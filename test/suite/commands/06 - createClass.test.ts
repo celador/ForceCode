@@ -248,6 +248,20 @@ suite('createClass.ts and compile.ts', () => {
     await removeErrorOnDoc();
   });
 
+  test('Preview Aura app', async () => {
+    var output = path.join(
+      vscode.window.forceCode.projectRoot,
+      'aura',
+      'testersonAura',
+      'testersonAura.app'
+    );
+    return await vscode.workspace.openTextDocument(output).then(doc => {
+      return vscode.commands.executeCommand('ForceCode.previewApp', doc.uri).then(_res => {
+        return assert.strictEqual(true, true);
+      });
+    });
+  });
+
   test('Delete Aura app DOCUMENTATION', async () => {
     sandbox.restore();
     sandbox
@@ -289,7 +303,34 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Preview Aura app', async () => {
+  test('Delete Aura app', async () => {
+    sandbox.restore();
+    sandbox
+      .stub(vscode.window, 'showWarningMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('Yes'); // Delete the file from the org
+          },
+        };
+      });
+    sandbox
+      .stub(vscode.window, 'showInformationMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('Yes'); // Delete the file from the workspace
+          },
+        };
+      });
     var output = path.join(
       vscode.window.forceCode.projectRoot,
       'aura',
@@ -297,8 +338,8 @@ suite('createClass.ts and compile.ts', () => {
       'testersonAura.app'
     );
     return await vscode.workspace.openTextDocument(output).then(doc => {
-      return vscode.commands.executeCommand('ForceCode.previewApp', doc.uri).then(_res => {
-        return assert.strictEqual(true, true);
+      return vscode.commands.executeCommand('ForceCode.deleteFile', doc.uri).then(_res => {
+        return assert.strictEqual(fs.existsSync(output), false);
       });
     });
   });
