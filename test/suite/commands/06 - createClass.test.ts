@@ -180,6 +180,44 @@ suite('createClass.ts and compile.ts', () => {
     await removeErrorOnDoc();
   });
 
+  test('Delete VF component', async () => {
+    sandbox
+      .stub(vscode.window, 'showWarningMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('Yes'); // Delete the file from the org
+          },
+        };
+      });
+    sandbox
+      .stub(vscode.window, 'showInformationMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('Yes'); // Delete the file from the workspace
+          },
+        };
+      });
+    // doc is already open from the save pass above
+    return await vscode.commands.executeCommand('ForceCode.deleteFile').then(_res => {
+      var output = path.join(
+        vscode.window.forceCode.projectRoot,
+        'components',
+        'testerson.component'
+      );
+      return assert.strictEqual(fs.existsSync(output), false);
+    });
+  });
+
   test('Creates Aura App', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
@@ -207,6 +245,46 @@ suite('createClass.ts and compile.ts', () => {
 
   test('Save Aura app pass', async () => {
     await removeErrorOnDoc();
+  });
+
+  test('Delete Aura app DOCUMENTATION', async () => {
+    sandbox
+      .stub(vscode.window, 'showWarningMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('Yes'); // Delete the file from the org
+          },
+        };
+      });
+    sandbox
+      .stub(vscode.window, 'showInformationMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('Yes'); // Delete the file from the workspace
+          },
+        };
+      });
+    var output = path.join(
+      vscode.window.forceCode.projectRoot,
+      'aura',
+      'testersonAura',
+      'testersonAura.auradoc'
+    );
+    return await vscode.workspace.openTextDocument(output).then(doc => {
+      return vscode.commands.executeCommand('ForceCode.deleteFile', doc.uri).then(_res => {
+        return assert.strictEqual(fs.existsSync(output), false);
+      });
+    });
   });
 
   test('Preview Aura app', async () => {
