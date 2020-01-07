@@ -2,7 +2,7 @@ import { ForcecodeCommand, CancelCommand, FCCancellationToken } from './forcecod
 export { getApexTestResults } from '../services';
 import { compile, CompileMenu, ForceCompile } from './compile';
 import { DeployPackage, createPackageXML, deployFiles } from './deploy';
-import { diff, DiffMenu } from './diff';
+import { DiffMenu } from './diff';
 import { Open, ShowFileOptions } from './open';
 import { packageBuilder, PackageBuilder, getMembers, getFolderContents } from './packageBuilder';
 import { retrieve, RetrieveBundle, Refresh, ToolingType, getAnyNameFromUri } from './retrieve';
@@ -42,7 +42,6 @@ import {
 
 export {
   compile,
-  diff,
   packageBuilder,
   retrieve,
   saveApex,

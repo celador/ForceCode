@@ -17,43 +17,25 @@ export class DiffMenu extends ForcecodeCommand {
     this.label = 'Diff';
   }
 
-  public command(_context: any, selectedResource?: any) {
-    if (selectedResource?.path) {
-      return vscode.workspace.openTextDocument(selectedResource).then(doc => diff(doc));
+  public async command(context?: vscode.Uri) {
+    const document: vscode.TextDocument | undefined = context
+      ? await vscode.workspace.openTextDocument(context.fsPath)
+      : vscode.window.activeTextEditor?.document;
+    if (!document) {
+      return Promise.reject('No document open to diff with the server.');
     }
-    if (!vscode.window.activeTextEditor) {
-      return;
+    const toolingType: string | undefined = getToolingTypeFromFolder(document.uri);
+    if (!toolingType) {
+      return Promise.reject('Metadata type not supported for diffing');
     }
-    const ttype: string | undefined = getToolingTypeFromFolder(
-      vscode.window.activeTextEditor.document.uri
-    );
-    if (!ttype) {
-      throw { message: 'Metadata type not supported for diffing' };
+    const fileName: string | undefined = getWholeFileName(document);
+    if (toolingType === 'AuraDefinition' || toolingType === 'LightningComponentResource') {
+      ForceCodeContentProvider.getInstance().auraSource = document;
     }
-    return diff(
-      vscode.window.activeTextEditor.document,
-      ttype === 'AuraDefinition' || ttype === 'LightningComponentResource'
-    );
-  }
-}
-
-export function diff(document: vscode.TextDocument, auraSource?: boolean) {
-  if (!document) {
-    return Promise.reject('No document open to diff with the server.');
-  }
-  const toolingType: string | undefined = getToolingTypeFromFolder(document.uri);
-  const fileName: string | undefined = getWholeFileName(document);
-  if (auraSource) {
-    ForceCodeContentProvider.getInstance().auraSource = document;
-  }
-  return diffFile();
-  // =======================================================================================================================================
-  // =======================================================================================================================================
-  function diffFile() {
     try {
       return vscode.commands.executeCommand(
         'vscode.diff',
-        buildSalesforceUriFromLocalUri(),
+        vscode.Uri.parse(`${PROVIDER}/${toolingType}/${fileName}?${Date.now()}`),
         document.uri,
         `${fileName} (REMOTE) <~> ${fileName} (LOCAL)`,
         { preview: false }
@@ -62,14 +44,4 @@ export function diff(document: vscode.TextDocument, auraSource?: boolean) {
       return Promise.reject(e);
     }
   }
-
-  function buildSalesforceUriFromLocalUri(): vscode.Uri {
-    var sfuri: vscode.Uri = vscode.Uri.parse(
-      `${PROVIDER}/${toolingType}/${fileName}?${Date.now()}`
-    );
-    return sfuri;
-  }
-  // =======================================================================================================================================
-
-  // =======================================================================================================================================
 }

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { saveService, notifications } from '../services';
 import * as path from 'path';
-import { createPackageXML, deployFiles, FCCancellationToken, diff } from '.';
+import { createPackageXML, deployFiles, FCCancellationToken } from '.';
 
 // =======================================================================================================================================
 // ================================                Lightning Web Components               ================================================
@@ -62,7 +62,7 @@ export function saveLWC(
         .showWarning('Someone has changed this file!', 'Diff', 'Overwrite')
         .then(s => {
           if (s === 'Diff') {
-            diff(document, true);
+            vscode.commands.executeCommand('ForceCode.diff', document);
             return {};
           }
           if (s === 'Overwrite') {

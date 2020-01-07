@@ -8,7 +8,7 @@ import {
   containerService,
   Container,
 } from '../services';
-import { createPackageXML, deployFiles, FCCancellationToken, diff } from '.';
+import { createPackageXML, deployFiles, FCCancellationToken } from '.';
 import * as path from 'path';
 
 export function saveApex(
@@ -75,7 +75,7 @@ export function saveApex(
           .showWarning('Someone else has changed this file!', 'Diff', 'Overwrite')
           .then(s => {
             if (s === 'Diff') {
-              diff(document);
+              vscode.commands.executeCommand('ForceCode.diff', document);
               return false;
             }
             if (s === 'Overwrite') {

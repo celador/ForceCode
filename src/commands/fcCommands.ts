@@ -1,4 +1,4 @@
-import { diff, retrieve, ForcecodeCommand, getAnyNameFromUri } from '.';
+import { retrieve, ForcecodeCommand, getAnyNameFromUri } from '.';
 import * as vscode from 'vscode';
 import {
   fcConnection,
@@ -113,7 +113,7 @@ export class FileModified extends ForcecodeCommand {
           if (s === 'Refresh') {
             return retrieve(theDoc.uri, this.cancellationToken);
           } else if (s === 'Diff') {
-            return diff(theDoc);
+            return vscode.commands.executeCommand('ForceCode.diff', theDoc);
           }
         });
     });
