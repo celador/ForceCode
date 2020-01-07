@@ -36,7 +36,10 @@ declare module 'jsforce/index' {
       update(records: Array<any>, options?: {}, callback?: () => {}): Array<RecordResult>;
       update(record: any): Promise<RecordResult>;
       update(record: any, options?: {}, callback?: () => {}): RecordResult;
-      del(ids: Array<string>, callback?: () => {}): Array<RecordResult>;
+      del(
+        ids: Array<string>,
+        callback?: (err: any, result: any) => any
+      ): Promise<RecordResult | Array<RecordResult>>;
       del(id: string, callback?: () => {}): Array<RecordResult>;
     }
     interface Tooling {

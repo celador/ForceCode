@@ -352,7 +352,7 @@ export class DeleteFile extends ForcecodeCommand {
               : undefined,
             NamespacePrefix: cur.defType ? undefined : vscode.window.forceCode.config.prefix || '',
           })
-          .execute(function(_err: any, records: any) {
+          .execute(async function(_err: any, records: any) {
             var toDeleteString: string[] = new Array<string>();
             if (!records || records.length === 0) {
               return reject(cur.members[0] + ' ' + cur.name + ' not found in the org');
@@ -360,7 +360,20 @@ export class DeleteFile extends ForcecodeCommand {
             records.forEach((rec: any) => {
               toDeleteString.push(rec.Id);
             });
-            vscode.window.forceCode.conn.tooling.sobject(cur.name).del(toDeleteString);
+            await vscode.window.forceCode.conn.tooling
+              .sobject(cur.name)
+              .del(toDeleteString)
+              .then(
+                _res => {},
+                _err =>
+                  reject(
+                    'There was an issue deleting ' +
+                      cur.members[0] +
+                      ', meaning it is most likely a dependency for other metadata. Try removing ' +
+                      cur.members[0] +
+                      ' in the org UI instead.'
+                  )
+              );
           });
         count++;
         if (count === toDelete.size) resolve();
