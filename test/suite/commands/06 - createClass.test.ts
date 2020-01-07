@@ -181,6 +181,7 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Delete VF component', async () => {
+    sandbox.restore();
     sandbox
       .stub(vscode.window, 'showWarningMessage')
       .callsFake(function(
@@ -248,6 +249,7 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Delete Aura app DOCUMENTATION', async () => {
+    sandbox.restore();
     sandbox
       .stub(vscode.window, 'showWarningMessage')
       .callsFake(function(
