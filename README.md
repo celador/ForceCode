@@ -59,9 +59,12 @@ Please note that the following permissions are required to develop on the Force.
 * NO MORE PASSWORDS SAVED IN THE CONFIG FILE!!!
     * Login through the browser and you will be auto logged in through ForceCode every time until you log out.
 * Save / Compile / Deploy a file
-  * Works with Classes, Triggers, Components, Pages, Permission Sets, Objects, Custom Labels, and Lightning Components
-  * Provides line errors in the editor
-  * Works great with autosave
+    * Works with Classes, Triggers, Components, Pages, Permission Sets, Objects, Custom Labels, and Lightning Components
+    * Provides line errors in the editor
+    * Works great with autosave
+* Delete metadata from the org
+    * Currently, delete functionality is limited only to certain metadata (All metadata that can be created via the `New` menu option is supported and a few others). If you receive an error stating that the metadata wasn't found in the org and you are sure it is indeed there, then the type is not currently supported for deletion by Forcecode
+    * Aura component pieces can be removed individually or as a whole. If you delete the Aura component's `cmp`, `app`, etc file or the `-meta.xml` file then the whole bundle will be removed from the org. When deleting an LWC, the whole bundle will ALWAYS be removed!
 * Run Unit Tests
     * Hover over @isTest or testMethod to get a link to run the test class or method
     * Code coverage highlighting in the editor

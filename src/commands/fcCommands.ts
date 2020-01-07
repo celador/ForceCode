@@ -366,6 +366,7 @@ export class DeleteFile extends ForcecodeCommand {
               .then(
                 _res => {},
                 _err =>
+                  // TODO jsforce has an issue and won't give a proper error message
                   reject(
                     'There was an issue deleting ' +
                       cur.members[0] +
