@@ -660,7 +660,13 @@ export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promis
       var defType: string | undefined;
       if (isAura && getDefType) {
         defType = getAuraDefTypeFromDocument(await vscode.workspace.openTextDocument(uri.fsPath));
-        if (defType === 'COMPONENT' || defType === 'Metadata') {
+        if (
+          defType === 'COMPONENT' ||
+          defType === 'APPLICATION' ||
+          defType === 'EVENT' ||
+          defType === 'INTERFACE' ||
+          defType === 'Metadata'
+        ) {
           // used for deleting. we can't delete just the component or the metadata
           defType = undefined;
         }
