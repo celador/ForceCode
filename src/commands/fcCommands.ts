@@ -113,7 +113,7 @@ export class FileModified extends ForcecodeCommand {
           if (s === 'Refresh') {
             return retrieve(theDoc.uri, this.cancellationToken);
           } else if (s === 'Diff') {
-            return vscode.commands.executeCommand('ForceCode.diff', theDoc);
+            return vscode.commands.executeCommand('ForceCode.diff', theDoc.uri);
           }
         });
     });

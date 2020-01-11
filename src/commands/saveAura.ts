@@ -93,7 +93,7 @@ export function saveAura(
           .showWarning('Someone has changed this file!', 'Diff', 'Overwrite')
           .then(s => {
             if (s === 'Diff') {
-              vscode.commands.executeCommand('ForceCode.diff', document);
+              vscode.commands.executeCommand('ForceCode.diff', document.uri);
               return {};
             }
             if (s === 'Overwrite') {

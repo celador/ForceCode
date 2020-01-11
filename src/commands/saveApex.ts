@@ -75,7 +75,8 @@ export function saveApex(
           .showWarning('Someone else has changed this file!', 'Diff', 'Overwrite')
           .then(s => {
             if (s === 'Diff') {
-              vscode.commands.executeCommand('ForceCode.diff', document);
+              vscode.commands.executeCommand('ForceCode.diff', document.uri);
+              containerService.removeContainer(container);
               return false;
             }
             if (s === 'Overwrite') {
