@@ -658,6 +658,7 @@ export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promis
       }
     } else {
       var defType: string | undefined;
+      const retObj: PXMLMember = { name: tType.xmlName, members: [] };
       if (isAura && getDefType) {
         defType = getAuraDefTypeFromDocument(await vscode.workspace.openTextDocument(uri.fsPath));
         if (
@@ -676,9 +677,11 @@ export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promis
             baseDirectoryName.toUpperCase().lastIndexOf(defType)
           );
         }
+        retObj.defType = defType;
       }
       baseDirectoryName = baseDirectoryName.split('.')[0];
-      return resolve({ name: tType.xmlName, members: [baseDirectoryName], defType });
+      retObj.members = [baseDirectoryName];
+      return resolve(retObj);
     }
   });
 }
