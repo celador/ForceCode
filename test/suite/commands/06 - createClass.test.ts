@@ -58,11 +58,14 @@ suite('createClass.ts and compile.ts', () => {
 
   test('Refresh class', async () => {
     var output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
+    // get the mTime for the file
+    const mTime = fs.statSync(output).mtimeMs;
     return await vscode.workspace.openTextDocument(output).then(doc => {
       return vscode.commands
         .executeCommand('ForceCode.refresh', undefined, [doc.uri])
         .then(_res => {
-          return assert.strictEqual(true, true);
+          // make sure the file actually refreshed
+          return assert.notStrictEqual(mTime, fs.statSync(output).mtimeMs);
         });
     });
   });
