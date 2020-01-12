@@ -5,6 +5,7 @@ import * as path from 'path';
 import { afterEach } from 'mocha';
 import { removeErrorOnDoc, timeout } from '../../testUtils/utils.test';
 import { toArray } from '../../../src/util';
+import * as fs from 'fs';
 
 suite('staticResource.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -34,12 +35,14 @@ suite('staticResource.ts', () => {
       'SiteSamples.resource.application.zip',
       'SiteStyles.css'
     );
+    // get the mTime for the file
+    const mTime = fs.statSync(output).mtimeMs;
     return await vscode.workspace.openTextDocument(output).then(doc => {
       return vscode.commands
         .executeCommand('ForceCode.refresh', undefined, [doc.uri])
         .then(async _res => {
           await timeout(3000);
-          return assert.strictEqual(true, true);
+          return assert.notStrictEqual(mTime, fs.statSync(output).mtimeMs);
         });
     });
   });

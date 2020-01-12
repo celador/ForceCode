@@ -23,6 +23,7 @@ import {
   ForcecodeCommand,
   getMembers,
   getFolderContents,
+  getAuraDefTypeFromDocument,
 } from '.';
 import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
@@ -600,12 +601,21 @@ export function retrieve(
   // =======================================================================================================================================
 }
 
-function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
-  return new Promise((resolve, reject) => {
+export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promise<PXMLMember> {
+  return new Promise(async (resolve, reject) => {
     const projRoot: string = vscode.window.forceCode.projectRoot + path.sep;
+    if (uri.fsPath.indexOf(projRoot) === -1) {
+      return reject(
+        'The file you are attempting to save/retrieve/delete (' +
+          uri.fsPath +
+          ') is outside of ' +
+          vscode.window.forceCode.projectRoot
+      );
+    }
     const ffNameParts: string[] = uri.fsPath.split(projRoot)[1].split(path.sep);
     var baseDirectoryName: string = path.parse(uri.fsPath).name;
-    const isAura: boolean = ffNameParts[0] === 'aura' || ffNameParts[0] === 'lwc';
+    const isAura: boolean = ffNameParts[0] === 'aura';
+    const isLWC: boolean = ffNameParts[0] === 'lwc';
     const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
     const tType: IMetadataObject | undefined = getAnyTTMetadataFromPath(uri.fsPath);
     const isResource: boolean = ffNameParts[0] === 'resource-bundles';
@@ -621,7 +631,7 @@ function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
     }
     if (!tType) {
       return reject(
-        "Either the file/metadata type doesn't exist in the current org or you're trying to save/retrieve outside of " +
+        "Either the file/metadata type doesn't exist in the current org or you're trying to save/retrieve/delete outside of " +
           vscode.window.forceCode.projectRoot
       );
     }
@@ -632,7 +642,7 @@ function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
       folderedName = ffNameParts.join('/').split('.')[0];
       return resolve({ name: tType.xmlName, members: [folderedName] });
     } else if (isDir) {
-      if (isAura) {
+      if (isAura || isLWC) {
         if (baseDirectoryName === 'aura' || baseDirectoryName === 'lwc') {
           baseDirectoryName = '*';
         }
@@ -647,7 +657,31 @@ function getAnyNameFromUri(uri: vscode.Uri): Promise<PXMLMember> {
         });
       }
     } else {
-      return resolve({ name: tType.xmlName, members: [baseDirectoryName] });
+      var defType: string | undefined;
+      const retObj: PXMLMember = { name: tType.xmlName, members: [] };
+      if (isAura && getDefType) {
+        defType = getAuraDefTypeFromDocument(await vscode.workspace.openTextDocument(uri.fsPath));
+        if (
+          defType === 'COMPONENT' ||
+          defType === 'APPLICATION' ||
+          defType === 'EVENT' ||
+          defType === 'INTERFACE' ||
+          defType === 'Metadata'
+        ) {
+          // used for deleting. we can't delete just the component or the metadata
+          defType = undefined;
+        }
+        if (defType === 'CONTROLLER' || defType === 'HELPER' || defType === 'RENDERER') {
+          baseDirectoryName = baseDirectoryName.substring(
+            0,
+            baseDirectoryName.toUpperCase().lastIndexOf(defType)
+          );
+        }
+        retObj.defType = defType;
+      }
+      baseDirectoryName = baseDirectoryName.split('.')[0];
+      retObj.members = [baseDirectoryName];
+      return resolve(retObj);
     }
   });
 }

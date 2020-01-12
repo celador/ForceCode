@@ -59,9 +59,12 @@ Please note that the following permissions are required to develop on the Force.
 * NO MORE PASSWORDS SAVED IN THE CONFIG FILE!!!
     * Login through the browser and you will be auto logged in through ForceCode every time until you log out.
 * Save / Compile / Deploy a file
-  * Works with Classes, Triggers, Components, Pages, Permission Sets, Objects, Custom Labels, and Lightning Components
-  * Provides line errors in the editor
-  * Works great with autosave
+    * Works with Classes, Triggers, Components, Pages, Permission Sets, Objects, Custom Labels, and Lightning Components
+    * Provides line errors in the editor
+    * Works great with autosave
+* Delete metadata from the org
+    * Currently, delete functionality is limited only to certain metadata (All metadata that can be created via the `New` menu option is supported and a few others). If you receive an error stating that the metadata wasn't found in the org and you are sure it is indeed there, then the type is not currently supported for deletion by Forcecode
+    * Aura component pieces can be removed individually or as a whole. If you delete the Aura component's `cmp`, `app`, etc file or the `-meta.xml` file then the whole bundle will be removed from the org. When deleting an LWC, the whole bundle will ALWAYS be removed!
 * Run Unit Tests
     * Hover over @isTest or testMethod to get a link to run the test class or method
     * Code coverage highlighting in the editor
@@ -303,7 +306,7 @@ The configuration file will look like the following. You can either edit this fi
 
 There's also workspace configuration options that are not included in the settings.json, but rather in your vscode settings.json file. The reasoning for separating the files is for portability reasons; to make it easier to share this configuration with others and yourself across projects.  
 If you open up your settings.json file, or go to Code &gt; Preferences &gt; Workspace Settings and create a new preference, starting with `force` you should see the defaultApiVersion and filesExclude preferences. The defaultApiVersion will be what ForceCode uses as the API version when creating new projects or logging into new orgs. 
-The filesExclude property allows you to have certain files ignored \(excluded\) from Static Resources when bundled/deployed.  This allows you to create a modern SPA project in a "spa" folder instead of keeping it in your "resource-bundles" directory.  
+The filesExclude property allows you to have certain files ignored \(excluded\) when deploying. Forcecode will also respect `.forceignore` files in your workspace root. A `.forceignore` file will always supersede the `force.filesExclude` workspace setting. This can be used with static resources, LWC, Aura, etc. For static resources, this allows you to create a modern SPA project in a "spa" folder instead of keeping it in your "resource-bundles" directory.  
 However, when we build these SPAs we generally have a ton of preference and source files that we don't want to deploy to Salesforce, both for security and size reasons.  
 So, you can create Node glob patterns to ignore. The default configuration is shown below.  
 Glob patterns can be tricky... so a little research and trial and error may be required to get your bundle just right.

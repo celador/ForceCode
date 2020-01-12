@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as parsers from '../parsers';
 import { saveService, notifications } from '../services';
 import * as path from 'path';
-import { deployFiles, createPackageXML, diff, FCCancellationToken } from '.';
+import { deployFiles, createPackageXML, FCCancellationToken } from '.';
 
 // =======================================================================================================================================
 // ================================                Lightning Components               ===========================================
@@ -93,7 +93,7 @@ export function saveAura(
           .showWarning('Someone has changed this file!', 'Diff', 'Overwrite')
           .then(s => {
             if (s === 'Diff') {
-              diff(document, true);
+              vscode.commands.executeCommand('ForceCode.diff', document.uri);
               return {};
             }
             if (s === 'Overwrite') {

@@ -1,7 +1,12 @@
 ## Change Log
 
+* 3.22.0
+    * Add ignore functionality via the Forcecode `force.filesExclude` workspace setting. This can be used when deploying files to ignore files/folders. Forcecode now also respects `.forceignore` files in your workspace root as well. A `.forceignore` file will always supersede the `force.filesExclude` workspace setting. When choosing files to deploy, the ignore settings will be respected as well (Ignored files won't show in the list of files to choose from).
+    * Add ability to remove source from org. Aura component pieces can be removed individually or as a whole. If you delete the Aura component's `cmp`, `app`, etc file or the `-meta.xml` file then the whole bundle will be removed from the org. When deleting an LWC, the whole bundle will ALWAYS be removed!
+        * Currently, delete functionality is limited only to certain metadata (All metadata that can be created via the `New` menu option is supported and a few others). If you receive an error stating that the metadata wasn't found in the org and you are sure it is indeed there, then the type is not currently supported for deletion by Forcecode 
+    * Fix "Cannot Deploy After Comparing" #354
 * 3.21.4
-   * Fix "Record id is not found in record" after create a new class #349
+    * Fix "Record id is not found in record" after create a new class #349
 * 3.21.3
     * Fix issues switching usernames in the Saved Usernames view
     * Queue code coverage retrieval so it isn't called multiple times when refreshing modified files

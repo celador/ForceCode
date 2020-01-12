@@ -1,4 +1,4 @@
-import { diff, retrieve, ForcecodeCommand } from '.';
+import { retrieve, ForcecodeCommand, getAnyNameFromUri } from '.';
 import * as vscode from 'vscode';
 import {
   fcConnection,
@@ -10,11 +10,14 @@ import {
   notifications,
   FCFile,
   ClassType,
+  PXMLMember,
 } from '../services';
 import { getFileName } from '../parsers';
 import { readConfigFile, removeConfigFolder } from '../services';
 import { Config } from '../forceCode';
 import { updateDecorations } from '../decorators';
+import * as path from 'path';
+import * as fs from 'fs-extra';
 
 export class ToolingQuery extends ForcecodeCommand {
   constructor() {
@@ -110,7 +113,7 @@ export class FileModified extends ForcecodeCommand {
           if (s === 'Refresh') {
             return retrieve(theDoc.uri, this.cancellationToken);
           } else if (s === 'Diff') {
-            return diff(theDoc);
+            return vscode.commands.executeCommand('ForceCode.diff', theDoc.uri);
           }
         });
     });
@@ -253,5 +256,159 @@ export class RemoveConfig extends ForcecodeCommand {
         const conn: FCConnection | undefined = fcConnection.getConnByUsername(username);
         return fcConnection.disconnect(conn);
       });
+  }
+}
+
+export class DeleteFile extends ForcecodeCommand {
+  constructor() {
+    super();
+    this.commandName = 'ForceCode.deleteFile';
+    this.name = 'Deleting ';
+    this.hidden = true;
+  }
+
+  // selectedResource = Array (multiple files) right click via explorer
+  // context = right click in file or explorer
+  // command pallette => both undefined, so check current open file
+  public async command(context?: vscode.Uri, selectedResource?: vscode.Uri[]) {
+    var toDelete: Set<PXMLMember> = new Set<PXMLMember>();
+    var filesToDelete: Set<vscode.Uri> = new Set<vscode.Uri>();
+    // check that file is in the project and get tooling type
+    if (selectedResource) {
+      selectedResource.forEach(resource => {
+        filesToDelete.add(resource);
+      });
+    } else if (context) {
+      filesToDelete.add(context);
+    } else {
+      if (!vscode.window.activeTextEditor) {
+        return undefined;
+      }
+      filesToDelete.add(vscode.window.activeTextEditor.document.uri);
+    }
+
+    if (filesToDelete.size === 0) {
+      return undefined;
+    }
+
+    await new Promise((resolve, reject) => {
+      var count = 0;
+      filesToDelete.forEach(async resource => {
+        const toAdd = await getAnyNameFromUri(resource, true).catch(reject);
+        if (toAdd) {
+          if (toAdd.defType) {
+            toAdd.name = 'AuraDefinition';
+          }
+          toDelete.add(toAdd);
+        }
+        count++;
+        if (count === filesToDelete.size) resolve();
+      });
+    });
+
+    if (toDelete.size === 0) {
+      return undefined;
+    }
+
+    var toDeleteNames: string = 'Are you sure you want to delete the following?\n';
+    toDelete.forEach(cur => {
+      cur.members.forEach(mem => {
+        toDeleteNames += mem + (cur.defType ? ' ' + cur.defType : '') + ': ' + cur.name + '\n';
+      });
+    });
+
+    // ask user if they're sure
+    const choice: string | undefined = await vscode.window.showWarningMessage(
+      toDeleteNames,
+      { modal: true },
+      'Yes'
+    );
+
+    if (choice !== 'Yes') {
+      return undefined;
+    }
+
+    // delete file(s) from org
+    await new Promise((resolve, reject) => {
+      var count = 0;
+      toDelete.forEach(async cur => {
+        await vscode.window.forceCode.conn.tooling
+          .sobject(cur.name)
+          .find({
+            DefType: cur.defType,
+            'AuraDefinitionBundle.DeveloperName': cur.defType ? cur.members[0] : undefined,
+            'AuraDefinitionBundle.NamespacePrefix': cur.defType
+              ? vscode.window.forceCode.config.prefix || ''
+              : undefined,
+            DeveloperName: cur.defType
+              ? undefined
+              : !cur.name.startsWith('Apex')
+              ? cur.members[0]
+              : undefined,
+            Name: cur.defType
+              ? undefined
+              : cur.name.startsWith('Apex')
+              ? cur.members[0]
+              : undefined,
+            NamespacePrefix: cur.defType ? undefined : vscode.window.forceCode.config.prefix || '',
+          })
+          .execute(async function(_err: any, records: any) {
+            var toDeleteString: string[] = new Array<string>();
+            if (!records || records.length === 0) {
+              return reject(cur.members[0] + ' ' + cur.name + ' not found in the org');
+            }
+            records.forEach((rec: any) => {
+              toDeleteString.push(rec.Id);
+            });
+            await vscode.window.forceCode.conn.tooling
+              .sobject(cur.name)
+              .del(toDeleteString)
+              .then(
+                _res => {},
+                _err =>
+                  // TODO jsforce has an issue and won't give a proper error message
+                  reject(
+                    'There was an issue deleting ' +
+                      cur.members[0] +
+                      ', meaning it is most likely a dependency for other metadata. Try removing ' +
+                      cur.members[0] +
+                      ' in the org UI instead.'
+                  )
+              );
+          });
+        count++;
+        if (count === toDelete.size) resolve();
+      });
+    });
+
+    // ask user if they want to delete from workspace
+    const delWSChoice = await notifications.showInfo(
+      'Metadata deleted from org. Delete from workspace?',
+      'Yes',
+      'No'
+    );
+    if (delWSChoice !== 'Yes') {
+      return undefined;
+    }
+
+    // delete file(s) from workspace
+    filesToDelete.forEach(uri => {
+      var thePath: string = uri.fsPath;
+      const projPath: string = vscode.window.forceCode.projectRoot + path.sep;
+      const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
+      const isMetaData: boolean = thePath.endsWith('-meta.xml');
+      const metaExists: boolean = fs.existsSync(thePath + '-meta.xml');
+      const isLWC: boolean = thePath.indexOf(projPath + 'lwc' + path.sep) !== -1;
+      const isAura = thePath.indexOf(projPath + 'aura' + path.sep) !== -1;
+      if (!isDir && (isLWC || (isAura && (metaExists || isMetaData)))) {
+        thePath = thePath.substring(0, thePath.lastIndexOf(path.sep) + 1);
+      }
+      // delete the file/folder
+      fs.removeSync(thePath);
+      if (!isDir && !isLWC && !isAura && metaExists) {
+        // delete the meta.xml file
+        fs.removeSync(thePath + '-meta.xml');
+      }
+    });
   }
 }

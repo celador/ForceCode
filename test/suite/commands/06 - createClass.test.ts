@@ -58,11 +58,14 @@ suite('createClass.ts and compile.ts', () => {
 
   test('Refresh class', async () => {
     var output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
+    // get the mTime for the file
+    const mTime = fs.statSync(output).mtimeMs;
     return await vscode.workspace.openTextDocument(output).then(doc => {
       return vscode.commands
         .executeCommand('ForceCode.refresh', undefined, [doc.uri])
         .then(_res => {
-          return assert.strictEqual(true, true);
+          // make sure the file actually refreshed
+          return assert.notStrictEqual(mTime, fs.statSync(output).mtimeMs);
         });
     });
   });
@@ -180,6 +183,45 @@ suite('createClass.ts and compile.ts', () => {
     await removeErrorOnDoc();
   });
 
+  test('Delete VF component', async () => {
+    sandbox.restore();
+    sandbox
+      .stub(vscode.window, 'showWarningMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('Yes'); // Delete the file from the org
+          },
+        };
+      });
+    sandbox
+      .stub(vscode.window, 'showInformationMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('Yes'); // Delete the file from the workspace
+          },
+        };
+      });
+    // doc is already open from the save pass above
+    return await vscode.commands.executeCommand('ForceCode.deleteFile').then(_res => {
+      var output = path.join(
+        vscode.window.forceCode.projectRoot,
+        'components',
+        'testerson.component'
+      );
+      return assert.strictEqual(fs.existsSync(output), false);
+    });
+  });
+
   test('Creates Aura App', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
       return {
@@ -219,6 +261,88 @@ suite('createClass.ts and compile.ts', () => {
     return await vscode.workspace.openTextDocument(output).then(doc => {
       return vscode.commands.executeCommand('ForceCode.previewApp', doc.uri).then(_res => {
         return assert.strictEqual(true, true);
+      });
+    });
+  });
+
+  test('Delete Aura app DOCUMENTATION', async () => {
+    sandbox.restore();
+    sandbox
+      .stub(vscode.window, 'showWarningMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('Yes'); // Delete the file from the org
+          },
+        };
+      });
+    sandbox
+      .stub(vscode.window, 'showInformationMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('Yes'); // Delete the file from the workspace
+          },
+        };
+      });
+    var output = path.join(
+      vscode.window.forceCode.projectRoot,
+      'aura',
+      'testersonAura',
+      'testersonAura.auradoc'
+    );
+    return await vscode.workspace.openTextDocument(output).then(doc => {
+      return vscode.commands.executeCommand('ForceCode.deleteFile', doc.uri).then(_res => {
+        return assert.strictEqual(fs.existsSync(output), false);
+      });
+    });
+  });
+
+  test('Delete Aura app', async () => {
+    sandbox.restore();
+    sandbox
+      .stub(vscode.window, 'showWarningMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('Yes'); // Delete the file from the org
+          },
+        };
+      });
+    sandbox
+      .stub(vscode.window, 'showInformationMessage')
+      .callsFake(function(
+        _message: string,
+        _options: vscode.MessageOptions,
+        ..._items: vscode.MessageItem[]
+      ) {
+        return {
+          async then(callback: any) {
+            return callback('Yes'); // Delete the file from the workspace
+          },
+        };
+      });
+    var output = path.join(
+      vscode.window.forceCode.projectRoot,
+      'aura',
+      'testersonAura',
+      'testersonAura.app'
+    );
+    return await vscode.workspace.openTextDocument(output).then(doc => {
+      return vscode.commands.executeCommand('ForceCode.deleteFile', doc.uri).then(_res => {
+        return assert.strictEqual(fs.existsSync(output), false);
       });
     });
   });
