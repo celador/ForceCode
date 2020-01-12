@@ -17,7 +17,7 @@ suite('apexTest.ts', () => {
       });
   });
   test('Test toggling coverage', async () => {
-    var before = vscode.window.forceCode.config.showTestCoverage;
+    const before = vscode.window.forceCode.config.showTestCoverage;
     await vscode.commands.executeCommand('ForceCode.toggleCoverage').then(_res => {
       assert.notStrictEqual(before, vscode.window.forceCode.config.showTestCoverage);
     });

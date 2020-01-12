@@ -2,6 +2,9 @@ import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { afterEach } from 'mocha';
+import * as fs from 'fs-extra';
+import * as path from 'path';
+import { timeout } from '../../testUtils/utils.test';
 
 suite('retrieve.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -30,8 +33,13 @@ suite('retrieve.ts', () => {
         },
       };
     });
-    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(_res => {
-      assert.strictEqual(true, true);
+    const apexPath = path.join(vscode.window.forceCode.projectRoot, 'classes');
+    if (fs.existsSync(apexPath)) {
+      fs.removeSync(apexPath);
+    }
+    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(async _res => {
+      await timeout(3000); // give the system time to catch up
+      assert.strictEqual(fs.existsSync(apexPath), true);
     });
   });
 
@@ -43,8 +51,13 @@ suite('retrieve.ts', () => {
         },
       };
     });
-    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(_res => {
-      assert.strictEqual(true, true);
+    const objectPath = path.join(vscode.window.forceCode.projectRoot, 'objects');
+    if (fs.existsSync(objectPath)) {
+      fs.removeSync(objectPath);
+    }
+    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(async _res => {
+      await timeout(3000); // give the system time to catch up
+      assert.strictEqual(fs.existsSync(objectPath), true);
     });
   });
 
@@ -56,8 +69,13 @@ suite('retrieve.ts', () => {
         },
       };
     });
-    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(_res => {
-      assert.strictEqual(true, true);
+    const pSetPath = path.join(vscode.window.forceCode.projectRoot, 'permissionsets');
+    if (fs.existsSync(pSetPath)) {
+      fs.removeSync(pSetPath);
+    }
+    await vscode.commands.executeCommand('ForceCode.retrievePackage').then(async _res => {
+      await timeout(3000); // give the system time to catch up
+      assert.strictEqual(fs.existsSync(pSetPath), true);
     });
   });
 });
