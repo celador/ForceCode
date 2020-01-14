@@ -11,6 +11,7 @@ import {
   FCFile,
   ClassType,
   PXMLMember,
+  getHomeDir,
 } from '../services';
 import { getFileName } from '../parsers';
 import { readConfigFile, removeConfigFolder } from '../services';
@@ -282,65 +283,61 @@ export class DeleteFile extends ForcecodeCommand {
       filesToDelete.add(context);
     } else {
       if (!vscode.window.activeTextEditor) {
-        return undefined;
+        return Promise.resolve();
       }
       filesToDelete.add(vscode.window.activeTextEditor.document.uri);
     }
 
     if (filesToDelete.size === 0) {
-      return undefined;
+      return Promise.resolve();
     }
 
     var toDeleteNames: string = 'Are you sure you want to delete the following?\n';
     var toDelString: string = '';
-    const backupPath: string = path.join(vscode.window.forceCode.storageRoot, 'backup');
+    const backupPathBase: string = path.join(getHomeDir(), '.forceCode', 'backup');
+    if (fs.existsSync(backupPathBase)) {
+      fs.removeSync(backupPathBase);
+    }
     await new Promise((resolve, reject) => {
       var count = 0;
       filesToDelete.forEach(async resource => {
         const toAdd = await getAnyNameFromUri(resource, true).catch(reject);
         if (toAdd) {
           const thePath = resource.fsPath;
+          const theMetaPath: string = thePath + '-meta.xml';
           const isDir: boolean = fs.lstatSync(thePath).isDirectory();
           const isMetaData: boolean = thePath.endsWith('-meta.xml');
-          const metaExists: boolean = fs.existsSync(thePath + '-meta.xml');
+          const metaExists: boolean = fs.existsSync(theMetaPath);
           const isAura: boolean =
             toAdd.name === 'AuraDefinitionBundle' || toAdd.name === 'LightningComponentBundle';
-          // TODO: sort files in a way the can easily be copied back
+          const ttFoldername: string | undefined = thePath
+            .replace(vscode.window.forceCode.projectRoot + path.sep, '')
+            .split(path.sep)
+            .shift();
+          var backupPath: string = path.join(backupPathBase, ttFoldername ? ttFoldername : '');
+          backupPath =
+            thePath ===
+            path.join(vscode.window.forceCode.projectRoot, ttFoldername ? ttFoldername : '')
+              ? backupPathBase
+              : backupPath;
           const basePathArray = thePath.split(path.sep);
           basePathArray.pop();
-          const basePath = basePathArray.join(path.sep);
-          if (isDir) {
-            // backup folder
-            fs.copySync(thePath, path.join(backupPath, path.basename(thePath)), {
-              overwrite: true,
-            });
-          } else if (isAura) {
-            // backup aura folder
-            fs.copySync(basePath, path.join(backupPath, path.basename(basePath)), {
-              overwrite: true,
-            });
-          } else if (isMetaData) {
-            // backup source file, if exists
-            const theSourcePath: string = thePath.replace('-meta.xml', '');
+          const basePath = isDir || !isAura ? thePath : basePathArray.join(path.sep);
+          fs.mkdirpSync(backupPath);
+          fs.copySync(basePath, path.join(backupPath, path.basename(basePath)), {
+            overwrite: true,
+            preserveTimestamps: true,
+          });
+          if (isMetaData || metaExists) {
+            const theSourcePath: string = isMetaData
+              ? thePath.replace('-meta.xml', '')
+              : theMetaPath;
             if (fs.existsSync(theSourcePath)) {
-              fs.copySync(backupPath, theSourcePath, {
+              fs.copySync(theSourcePath, path.join(backupPath, path.basename(theSourcePath)), {
                 overwrite: true,
+                preserveTimestamps: true,
               });
             }
-            fs.copySync(backupPath, thePath, {
-              overwrite: true,
-            });
-          } else if (metaExists) {
-            // backup meta file
-            const theMetaPath: string = thePath + '-meta.xml';
-            if (fs.existsSync(theMetaPath)) {
-              fs.copySync(backupPath, theMetaPath, {
-                overwrite: true,
-              });
-            }
-            fs.copySync(backupPath, thePath, {
-              overwrite: true,
-            });
           }
           if (toAdd.defType) {
             toAdd.name = 'AuraDefinition';
@@ -361,7 +358,7 @@ export class DeleteFile extends ForcecodeCommand {
     });
 
     if (toDelete.size === 0) {
-      return undefined;
+      return Promise.resolve();
     }
 
     // ask user if they're sure
@@ -372,8 +369,7 @@ export class DeleteFile extends ForcecodeCommand {
     );
 
     if (choice !== 'Yes') {
-      // TODO: restore file backup
-      return undefined;
+      return Promise.resolve();
     }
 
     toDelString = toDelString.substr(0, toDelString.length - 1);
@@ -388,30 +384,38 @@ export class DeleteFile extends ForcecodeCommand {
     );
 
     if (delWSChoice !== 'Yes') {
-      return undefined;
+      fs.copySync(backupPathBase, vscode.window.forceCode.projectRoot, {
+        overwrite: true,
+        preserveTimestamps: true,
+      });
+      fs.removeSync(backupPathBase);
+      return Promise.resolve();
     }
+
+    fs.removeSync(backupPathBase);
 
     // delete file(s) from workspace
     filesToDelete.forEach(uri => {
       var thePath: string = uri.fsPath;
-      const projPath: string = vscode.window.forceCode.projectRoot + path.sep;
-      const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
-      const isMetaData: boolean = thePath.endsWith('-meta.xml');
-      const metaExists: boolean = fs.existsSync(thePath + '-meta.xml');
-      const fileExists: boolean = fs.existsSync(thePath);
-      const isLWC: boolean = thePath.indexOf(projPath + 'lwc' + path.sep) !== -1;
-      const isAura: boolean = thePath.indexOf(projPath + 'aura' + path.sep) !== -1;
-      if (!isDir && (isLWC || (isAura && (metaExists || isMetaData)))) {
-        thePath = thePath.substring(0, thePath.lastIndexOf(path.sep) + 1);
-      }
-      // delete the file/folder
-      if (fileExists) {
+      if (fs.existsSync(thePath)) {
+        const theMetaPath: string = thePath + '-meta.xml';
+        const projPath: string = vscode.window.forceCode.projectRoot + path.sep;
+        const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
+        const isMetaData: boolean = thePath.endsWith('-meta.xml');
+        const metaExists: boolean = fs.existsSync(theMetaPath);
+        const isLWC: boolean = thePath.indexOf(projPath + 'lwc' + path.sep) !== -1;
+        const isAura: boolean = thePath.indexOf(projPath + 'aura' + path.sep) !== -1;
+        if (!isDir && (isLWC || (isAura && (metaExists || isMetaData)))) {
+          thePath = thePath.substring(0, thePath.lastIndexOf(path.sep) + 1);
+        }
+        // delete the file/folder
         fs.removeSync(thePath);
-      }
-      if (!isDir && !isLWC && !isAura && metaExists) {
-        // delete the meta.xml file
-        fs.removeSync(thePath + '-meta.xml');
+        if (!isDir && !isLWC && !isAura && metaExists) {
+          // delete the meta.xml file
+          fs.removeSync(theMetaPath);
+        }
       }
     });
+    return Promise.resolve();
   }
 }
