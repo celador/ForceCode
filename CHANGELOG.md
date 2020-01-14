@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.22.1
+    * Transitioned delete functionality to SFDX. Now more types are supported for deleting from an org.
 * 3.22.0
     * Add ignore functionality via the Forcecode `force.filesExclude` workspace setting. This can be used when deploying files to ignore files/folders. Forcecode now also respects `.forceignore` files in your workspace root as well. A `.forceignore` file will always supersede the `force.filesExclude` workspace setting. When choosing files to deploy, the ignore settings will be respected as well (Ignored files won't show in the list of files to choose from).
     * Add ability to remove source from org. Aura component pieces can be removed individually or as a whole. If you delete the Aura component's `cmp`, `app`, etc file or the `-meta.xml` file then the whole bundle will be removed from the org. When deleting an LWC, the whole bundle will ALWAYS be removed!

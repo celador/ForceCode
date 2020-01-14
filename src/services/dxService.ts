@@ -95,6 +95,7 @@ export class DXService {
     const spawnOpt: SpawnOptions = {
       // Always use json in stdout
       env: Object.assign({ SFDX_JSON_TO_STDOUT: 'true' }, process.env),
+      cwd: vscode.window.forceCode.workspaceRoot,
     };
 
     var pid: number;
@@ -143,11 +144,18 @@ export class DXService {
             );
           }
           // We want to resolve if there's an error with parsable results
-          if ((code > 0 && !json) || (json?.status > 0 && !json.result)) {
+          if ((code > 0 && !json) || (json?.status > 0 && !json.result) || json?.exitCode > 0) {
             // Get non-promise stack for extra help
             notifications.writeLog(error);
             notifications.writeLog(json);
-            return reject(json?.message || error?.message || error);
+            var errMess: string | undefined;
+            if (json?.result?.length > 0) {
+              errMess = '';
+              json.result.forEach((res: any) => {
+                errMess += res.error + ' ';
+              });
+            }
+            return reject(errMess || json?.message || error?.message || error);
           } else {
             return resolve(json?.result);
           }
@@ -265,5 +273,9 @@ export class DXService {
 
   public describeGlobal(type: SObjectCategory): Promise<string[]> {
     return this.runCommand('schema:sobject:list --sobjecttypecategory ' + type.toString(), true);
+  }
+
+  public deleteSource(thePath: string, cancellationToken: FCCancellationToken) {
+    return this.runCommand(`source:delete -p ${thePath} -r`, true, cancellationToken);
   }
 }

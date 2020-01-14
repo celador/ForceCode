@@ -11,6 +11,7 @@ import {
   FCFile,
   ClassType,
   PXMLMember,
+  getHomeDir,
 } from '../services';
 import { getFileName } from '../parsers';
 import { readConfigFile, removeConfigFolder } from '../services';
@@ -282,24 +283,74 @@ export class DeleteFile extends ForcecodeCommand {
       filesToDelete.add(context);
     } else {
       if (!vscode.window.activeTextEditor) {
-        return undefined;
+        return Promise.resolve();
       }
       filesToDelete.add(vscode.window.activeTextEditor.document.uri);
     }
 
     if (filesToDelete.size === 0) {
-      return undefined;
+      return Promise.resolve();
     }
 
+    var toDeleteNames: string = 'Are you sure you want to delete the following?\n';
+    var toDelString: string = '';
+    const backupPathBase: string = path.join(getHomeDir(), '.forceCode', 'backup');
+    if (fs.existsSync(backupPathBase)) {
+      fs.removeSync(backupPathBase);
+    }
     await new Promise((resolve, reject) => {
       var count = 0;
       filesToDelete.forEach(async resource => {
         const toAdd = await getAnyNameFromUri(resource, true).catch(reject);
         if (toAdd) {
+          const thePath = resource.fsPath;
+          const theMetaPath: string = thePath + '-meta.xml';
+          const isDir: boolean = fs.lstatSync(thePath).isDirectory();
+          const isMetaData: boolean = thePath.endsWith('-meta.xml');
+          const metaExists: boolean = fs.existsSync(theMetaPath);
+          const isAura: boolean =
+            toAdd.name === 'AuraDefinitionBundle' || toAdd.name === 'LightningComponentBundle';
+          const ttFoldername: string | undefined = thePath
+            .replace(vscode.window.forceCode.projectRoot + path.sep, '')
+            .split(path.sep)
+            .shift();
+          var backupPath: string = path.join(backupPathBase, ttFoldername ? ttFoldername : '');
+          backupPath =
+            thePath ===
+            path.join(vscode.window.forceCode.projectRoot, ttFoldername ? ttFoldername : '')
+              ? backupPathBase
+              : backupPath;
+          const basePathArray = thePath.split(path.sep);
+          basePathArray.pop();
+          const basePath = isDir || !isAura ? thePath : basePathArray.join(path.sep);
+          fs.mkdirpSync(backupPath);
+          fs.copySync(basePath, path.join(backupPath, path.basename(basePath)), {
+            overwrite: true,
+            preserveTimestamps: true,
+          });
+          if (isMetaData || metaExists) {
+            const theSourcePath: string = isMetaData
+              ? thePath.replace('-meta.xml', '')
+              : theMetaPath;
+            if (fs.existsSync(theSourcePath)) {
+              fs.copySync(theSourcePath, path.join(backupPath, path.basename(theSourcePath)), {
+                overwrite: true,
+                preserveTimestamps: true,
+              });
+            }
+          }
           if (toAdd.defType) {
             toAdd.name = 'AuraDefinition';
           }
+          toAdd.members.forEach(mem => {
+            toDeleteNames +=
+              mem + (toAdd.defType ? ' ' + toAdd.defType : '') + ': ' + toAdd.name + '\n';
+          });
           toDelete.add(toAdd);
+          toDelString +=
+            resource.fsPath
+              .replace(vscode.window.forceCode.workspaceRoot + path.sep, '')
+              .replace('-meta.xml', '') + ',';
         }
         count++;
         if (count === filesToDelete.size) resolve();
@@ -307,15 +358,8 @@ export class DeleteFile extends ForcecodeCommand {
     });
 
     if (toDelete.size === 0) {
-      return undefined;
+      return Promise.resolve();
     }
-
-    var toDeleteNames: string = 'Are you sure you want to delete the following?\n';
-    toDelete.forEach(cur => {
-      cur.members.forEach(mem => {
-        toDeleteNames += mem + (cur.defType ? ' ' + cur.defType : '') + ': ' + cur.name + '\n';
-      });
-    });
 
     // ask user if they're sure
     const choice: string | undefined = await vscode.window.showWarningMessage(
@@ -325,61 +369,12 @@ export class DeleteFile extends ForcecodeCommand {
     );
 
     if (choice !== 'Yes') {
-      return undefined;
+      return Promise.resolve();
     }
 
-    // delete file(s) from org
-    await new Promise((resolve, reject) => {
-      var count = 0;
-      toDelete.forEach(async cur => {
-        await vscode.window.forceCode.conn.tooling
-          .sobject(cur.name)
-          .find({
-            DefType: cur.defType,
-            'AuraDefinitionBundle.DeveloperName': cur.defType ? cur.members[0] : undefined,
-            'AuraDefinitionBundle.NamespacePrefix': cur.defType
-              ? vscode.window.forceCode.config.prefix || ''
-              : undefined,
-            DeveloperName: cur.defType
-              ? undefined
-              : !cur.name.startsWith('Apex')
-              ? cur.members[0]
-              : undefined,
-            Name: cur.defType
-              ? undefined
-              : cur.name.startsWith('Apex')
-              ? cur.members[0]
-              : undefined,
-            NamespacePrefix: cur.defType ? undefined : vscode.window.forceCode.config.prefix || '',
-          })
-          .execute(async function(_err: any, records: any) {
-            var toDeleteString: string[] = new Array<string>();
-            if (!records || records.length === 0) {
-              return reject(cur.members[0] + ' ' + cur.name + ' not found in the org');
-            }
-            records.forEach((rec: any) => {
-              toDeleteString.push(rec.Id);
-            });
-            await vscode.window.forceCode.conn.tooling
-              .sobject(cur.name)
-              .del(toDeleteString)
-              .then(
-                _res => {},
-                _err =>
-                  // TODO jsforce has an issue and won't give a proper error message
-                  reject(
-                    'There was an issue deleting ' +
-                      cur.members[0] +
-                      ', meaning it is most likely a dependency for other metadata. Try removing ' +
-                      cur.members[0] +
-                      ' in the org UI instead.'
-                  )
-              );
-          });
-        count++;
-        if (count === toDelete.size) resolve();
-      });
-    });
+    toDelString = toDelString.substr(0, toDelString.length - 1);
+
+    await dxService.deleteSource(toDelString, this.cancellationToken);
 
     // ask user if they want to delete from workspace
     const delWSChoice = await notifications.showInfo(
@@ -387,28 +382,40 @@ export class DeleteFile extends ForcecodeCommand {
       'Yes',
       'No'
     );
+
     if (delWSChoice !== 'Yes') {
-      return undefined;
+      fs.copySync(backupPathBase, vscode.window.forceCode.projectRoot, {
+        overwrite: true,
+        preserveTimestamps: true,
+      });
+      fs.removeSync(backupPathBase);
+      return Promise.resolve();
     }
+
+    fs.removeSync(backupPathBase);
 
     // delete file(s) from workspace
     filesToDelete.forEach(uri => {
       var thePath: string = uri.fsPath;
-      const projPath: string = vscode.window.forceCode.projectRoot + path.sep;
-      const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
-      const isMetaData: boolean = thePath.endsWith('-meta.xml');
-      const metaExists: boolean = fs.existsSync(thePath + '-meta.xml');
-      const isLWC: boolean = thePath.indexOf(projPath + 'lwc' + path.sep) !== -1;
-      const isAura = thePath.indexOf(projPath + 'aura' + path.sep) !== -1;
-      if (!isDir && (isLWC || (isAura && (metaExists || isMetaData)))) {
-        thePath = thePath.substring(0, thePath.lastIndexOf(path.sep) + 1);
-      }
-      // delete the file/folder
-      fs.removeSync(thePath);
-      if (!isDir && !isLWC && !isAura && metaExists) {
-        // delete the meta.xml file
-        fs.removeSync(thePath + '-meta.xml');
+      if (fs.existsSync(thePath)) {
+        const theMetaPath: string = thePath + '-meta.xml';
+        const projPath: string = vscode.window.forceCode.projectRoot + path.sep;
+        const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
+        const isMetaData: boolean = thePath.endsWith('-meta.xml');
+        const metaExists: boolean = fs.existsSync(theMetaPath);
+        const isLWC: boolean = thePath.indexOf(projPath + 'lwc' + path.sep) !== -1;
+        const isAura: boolean = thePath.indexOf(projPath + 'aura' + path.sep) !== -1;
+        if (!isDir && (isLWC || (isAura && (metaExists || isMetaData)))) {
+          thePath = thePath.substring(0, thePath.lastIndexOf(path.sep) + 1);
+        }
+        // delete the file/folder
+        fs.removeSync(thePath);
+        if (!isDir && !isLWC && !isAura && metaExists) {
+          // delete the meta.xml file
+          fs.removeSync(theMetaPath);
+        }
       }
     });
+    return Promise.resolve();
   }
 }
