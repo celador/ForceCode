@@ -6,6 +6,21 @@ import { ForcecodeCommand } from '.';
 import { getWholeFileName } from '../parsers';
 const mime = require('mime-types');
 
+interface IResourceBundle {
+  fullName: string;
+  description?: string;
+  contentType: string;
+  cacheControl: string;
+}
+
+interface ResourceBundle {
+  fullName: string;
+  description?: string;
+  content: any;
+  contentType: string;
+  cacheControl: string;
+}
+
 export class StaticResourceBundle extends ForcecodeCommand {
   constructor() {
     super();
@@ -128,7 +143,7 @@ function onError(err: any) {
   throw mess + '\n$#FC_LOG_ONLY_#*' + (err.message || err);
 }
 
-function bundleAndDeploy(option: vscode.QuickPickItem) {
+async function bundleAndDeploy(option: vscode.QuickPickItem) {
   let root: string = getPackagePath(option);
   var detail = option.detail || '';
   if (detail.includes('zip') || detail === 'SPA') {
@@ -139,7 +154,7 @@ function bundleAndDeploy(option: vscode.QuickPickItem) {
     var data = fs.readFileSync(root + path.sep + option.label + ext).toString('base64');
     return vscode.window.forceCode.conn.metadata.upsert(
       'StaticResource',
-      makeResourceMetadata(option.label, data, detail)
+      await makeResourceMetadata(option.label, data, detail)
     );
   }
 }
@@ -193,12 +208,12 @@ function deploy(zip: any, packageName: string, conType: string) {
     var finalPath: string = `${vscode.window.forceCode.projectRoot}${path.sep}staticresources${path.sep}${packageName}.resource`;
     zip
       .pipe(fs.createWriteStream(finalPath))
-      .on('finish', () => {
+      .on('finish', async () => {
         const content = fs.readFileSync(finalPath).toString('base64');
         resolve(
           vscode.window.forceCode.conn.metadata.upsert(
             'StaticResource',
-            makeResourceMetadata(packageName, content, conType)
+            await makeResourceMetadata(packageName, content, conType)
           )
         );
       })
@@ -213,17 +228,74 @@ function deploy(zip: any, packageName: string, conType: string) {
  * makes a valid static resource bundle object
  * @param {String} bundleName - Name of the bundle (WITHOUT the .resource at the end)
  * @param {ZipBlob} - generated zip blob
+ * @param {String} contType - Content type of the resource
  * @return {Metadata[]} - Array with one metadata object
  */
-function makeResourceMetadata(bundleName: string, cont: any, contType: string) {
-  return [
-    {
-      fullName: bundleName,
-      content: cont,
-      contentType: contType,
-      cacheControl: vscode.window.forceCode.config.staticResourceCacheControl,
-    },
-  ];
+async function makeResourceMetadata(bundleName: string, cont: any, contType: string) {
+  const allSettings = getResourceSettings();
+  var curSetting: IResourceBundle | undefined = findResourceSetting(bundleName, allSettings);
+  let settings: ResourceBundle[] = [];
+  if (!curSetting) {
+    const records = await vscode.window.forceCode.conn.tooling
+      .sobject('StaticResource')
+      .find({ Name: bundleName })
+      .execute();
+    if (records.length > 0) {
+      curSetting = {
+        fullName: bundleName,
+        description: records[0].Description,
+        contentType: records[0].ContentType,
+        cacheControl: records[0].CacheControl,
+      };
+    } else {
+      curSetting = {
+        fullName: bundleName,
+        contentType: contType,
+        cacheControl: vscode.window.forceCode.config.staticResourceCacheControl,
+      };
+    }
+    addResourceSetting(curSetting);
+  }
+  const bundle: ResourceBundle = Object.assign({ content: cont }, curSetting);
+  settings.push(bundle);
+  return settings;
+}
+
+function getResourceSettings(): IResourceBundle[] {
+  let settingsFile: string =
+    vscode.window.forceCode.projectRoot +
+    path.sep +
+    'resource-bundles' +
+    path.sep +
+    'forceBundleSettings.json';
+  let settings: IResourceBundle[] = [];
+  if (fs.existsSync(settingsFile)) {
+    settings = fs.readJSONSync(settingsFile);
+  }
+  return settings;
+}
+
+function findResourceSetting(
+  bundleName: string,
+  settings: IResourceBundle[]
+): IResourceBundle | undefined {
+  return settings.find(cur => cur.fullName === bundleName);
+}
+
+// add a setting if it doesn't exist
+function addResourceSetting(setting: IResourceBundle) {
+  let settingsFile: string =
+    vscode.window.forceCode.projectRoot +
+    path.sep +
+    'resource-bundles' +
+    path.sep +
+    'forceBundleSettings.json';
+  let settings: IResourceBundle[] = getResourceSettings();
+  const curSetting: IResourceBundle | undefined = findResourceSetting(setting.fullName, settings);
+  if (!curSetting) {
+    settings.push(setting);
+    fs.outputFileSync(settingsFile, JSON.stringify(settings, undefined, 4));
+  }
 }
 
 function deployComplete(results: any) {
