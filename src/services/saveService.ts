@@ -96,13 +96,16 @@ export class SaveService {
   }
 
   public saveFile(
-    document: vscode.TextDocument,
+    document: string,
     forceCompile: boolean,
     cancellationToken: FCCancellationToken
   ): Promise<boolean> {
     // if the preSaveFile doesn't exist, make it. this means someone is saving via ctr+shift+s or right click and hasn't changed the file+saved it
-    this.addFile(document.fileName);
-    const fileIndex: number = this.getFileIndex(document.fileName);
+    if (!fs.existsSync(document)) {
+      throw 'This type of document can\'t be saved via the ForceCode menu. Please right-click the file in the explorer and click ForceCode: Save/Deploy/Compile';
+    }
+    this.addFile(document);
+    const fileIndex: number = this.getFileIndex(document);
     if (this.preSaveFiles[fileIndex].saving) {
       this.preSaveFiles[fileIndex].queue = true;
       return Promise.resolve(true);
@@ -117,13 +120,13 @@ export class SaveService {
           if (success) {
             // update the file time for start up file change checks
             var mTime: Date = new Date();
-            fs.utimesSync(document.fileName, mTime, mTime);
+            fs.utimesSync(document, mTime, mTime);
             // remove the pre-save file version if successful
             if (self.preSaveFiles[fileIndex].queue) {
               self.preSaveFiles[fileIndex].queue = false;
               return resolve(self.saveFile(document, true, cancellationToken));
             } else {
-              return resolve(self.removeFile(document.fileName));
+              return resolve(self.removeFile(document));
             }
           } else {
             return resolve(false);
@@ -133,13 +136,9 @@ export class SaveService {
     });
 
     function startSave() {
-      var isResource: RegExpMatchArray | null = document.fileName.match(
-        /resource\-bundles.*\.resource.*$/
-      ); // We are in a resource-bundles folder, bundle and deploy the staticResource
-      const toolingType: IMetadataObject | undefined = getAnyTTMetadataFromPath(
-        document.uri.fsPath
-      );
-      if (document.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot) !== -1) {
+      var isResource: RegExpMatchArray | null = document.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
+      const toolingType: IMetadataObject | undefined = getAnyTTMetadataFromPath(document);
+      if (document.indexOf(vscode.window.forceCode.projectRoot) !== -1) {
         if (isResource?.index) {
           return staticResourceDeployFromFile(document);
         } else if (toolingType) {

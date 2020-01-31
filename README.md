@@ -20,7 +20,7 @@ As of version 3.17.0, you will be required to install the SFDX-CLI on your syste
 
 ## Slack
 
-ForceCode now has a Slack channel! Click [here](https://join.slack.com/t/forcecodeworkspace/shared_invite/enQtNDczMDg3Nzg2ODcxLWRhYWM2NmI3MGNmMmE1MmRkOTFkMGQzZmQ1YjlhMDhjY2YzNmU0NDEyNDU4OGM1NzdlZjU2NTg3Y2FkNTdhMjA) to join us! 
+ForceCode now has a Slack channel! Click [here](https://join.slack.com/t/forcecodeworkspace/shared_invite/enQtOTMwMjkwODQwNzA0LThhNWJlNDA0OTg3OWFmN2YyNzEwNTdlNzA3ZGJhODc5YWI2MTBjODY2YTFmMzE0YjZjOWUyMGMyZTY5YzVmMDU) to join us! 
 Use this to ask question and receive updates on upcoming features!
 
 ### Permissions
