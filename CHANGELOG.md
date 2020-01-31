@@ -3,6 +3,7 @@
 * 3.22.2
     * Add ability to change settings for static resources (Per resource) via using a `forceBundleSettings.json` file in the `resource-bundle` folder. This file will be auto-generated upon save of a static resource. If the resource exists in the org, the current settings of the resource will be used in the file.
     * Update Slack invite link #357
+    * Fix issue saving binary static resource files (JPG, PNG, etc)
 * 3.22.1
     * Transitioned delete functionality to SFDX. Now more types are supported for deleting from an org.
 * 3.22.0

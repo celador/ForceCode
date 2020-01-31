@@ -37,12 +37,12 @@ export class CompileMenu extends ForcecodeCommand {
 
   public async command(context: any, selectedResource?: any) {
     selectedResource = selectedResource ? true : false;
-    var document: vscode.TextDocument | undefined = vscode.window.activeTextEditor?.document;
+    var document: string | undefined = vscode.window.activeTextEditor?.document.fileName;
     if (context) {
       if (context.uri) {
         context = context.uri;
       }
-      document = await vscode.workspace.openTextDocument(context);
+      document = context.fsPath;
     }
     if (!document) {
       return;
@@ -64,14 +64,15 @@ export class ForceCompile extends ForcecodeCommand {
 }
 
 export async function compile(
-  document: vscode.TextDocument,
+  thePath: string,
   forceCompile: boolean,
   cancellationToken: FCCancellationToken
 ): Promise<boolean> {
-  if (!document) {
+  if (!thePath) {
     return Promise.resolve(false);
   }
-  if (document.uri.fsPath.indexOf(vscode.window.forceCode.projectRoot + path.sep) === -1) {
+  const document: vscode.TextDocument = await vscode.workspace.openTextDocument(thePath);
+  if (document.fileName.indexOf(vscode.window.forceCode.projectRoot + path.sep) === -1) {
     notifications.showError(
       "The file you are trying to save to the server isn't in the current org's source folder (" +
         vscode.window.forceCode.projectRoot +
@@ -87,9 +88,7 @@ export async function compile(
   var exDiagnostics: vscode.Diagnostic[] = vscode.languages.getDiagnostics(document.uri);
 
   const toolingType: string | undefined = getToolingTypeFromFolder(document.uri);
-  const ttMeta: forceCode.IMetadataObject | undefined = getAnyTTMetadataFromPath(
-    document.uri.fsPath
-  );
+  const ttMeta: forceCode.IMetadataObject | undefined = getAnyTTMetadataFromPath(document.fileName);
   const folderToolingType: string | undefined = ttMeta?.xmlName;
   const name: string | undefined = getName(document, toolingType);
 

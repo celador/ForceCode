@@ -3,7 +3,6 @@ import fs = require('fs-extra');
 import path = require('path');
 import { zipFiles, notifications, getVSCodeSetting, saveHistoryService } from '../services';
 import { ForcecodeCommand } from '.';
-import { getWholeFileName } from '../parsers';
 const mime = require('mime-types');
 
 interface IResourceBundle {
@@ -104,7 +103,7 @@ function staticResourceBundleDeploy(): any {
   }
 }
 
-export function staticResourceDeployFromFile(textDocument: vscode.TextDocument): any {
+export function staticResourceDeployFromFile(textDocument: string): any {
   // This command is run when working in a file, and it's saved... It will auto bundle/deploy that static resource
   return Promise.resolve(vscode.window.forceCode)
     .then(getPackageName)
@@ -121,8 +120,8 @@ export function staticResourceDeployFromFile(textDocument: vscode.TextDocument):
     var resType;
     var resourceName = '';
     try {
-      resourceName = textDocument.fileName.split(bundlePath)[1].split('.resource.')[0];
-      resType = textDocument.fileName
+      resourceName = textDocument.split(bundlePath)[1].split('.resource.')[0];
+      resType = textDocument
         .split(bundlePath)[1]
         .split('.resource.')[1]
         .split(path.sep)[0]
@@ -325,11 +324,11 @@ function deployAllComplete(results: any) {
   return talliedResults;
 }
 
-function updateSaveHistory(document: vscode.TextDocument, res?: any): boolean {
+function updateSaveHistory(document: string, res?: any): boolean {
   const success = res?.success ? res?.success : false;
   saveHistoryService.addSaveResult({
-    fileName: getWholeFileName(document) || 'UNKNOWN',
-    path: document.fileName,
+    fileName: document.split(path.sep).pop() || 'UNKNOWN',
+    path: document,
     success: success,
     messages: [''],
   });
