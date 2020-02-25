@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.22.2",
+  "version": "3.22.3",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "engines": {
-    "vscode": "^1.41.0"
+    "vscode": "^1.42.0"
   },
   "icon": "images/new-logo.png",
   "categories": [
@@ -250,7 +250,7 @@
         },
         "force.defaultApiVersion": {
           "type": "string",
-          "default": "47.0",
+          "default": "48.0",
           "description": "The Salesforce API version to use when logging into new orgs. Must be in the format of XX.X. Example: 45.0"
         },
         "force.debugFilter": {
@@ -676,21 +676,21 @@
   },
   "devDependencies": {
     "@types/deepmerge": "2.2.0",
-    "@types/fs-extra": "8.0.1",
+    "@types/fs-extra": "8.1.0",
     "@types/globule": "1.1.3",
     "@types/klaw": "3.0.0",
     "@types/mocha": "^7.0.1",
-    "@types/node": "^10.17.14",
+    "@types/node": "^10.17.16",
     "@types/sinon": "^7.5.1",
     "@types/universal-analytics": "0.4.3",
-    "@types/vscode": "1.41.0",
+    "@types/vscode": "1.42.0",
     "@types/xml2js": "0.4.5",
     "compressing": "1.5.0",
     "decache": "^4.5.1",
     "deepmerge": "4.2.2",
     "fs-extra": "8.1.0",
-    "globule": "1.3.0",
-    "handlebars": "4.7.2",
+    "globule": "1.3.1",
+    "handlebars": "4.7.3",
     "istanbul": "^0.4.5",
     "jsforce": "1.9.3",
     "klaw": "3.0.0",
@@ -699,18 +699,18 @@
     "os": "0.1.1",
     "remap-istanbul": "^0.13.0",
     "request-light": "0.2.5",
-    "rimraf": "^3.0.1",
-    "sinon": "^8.1.1",
+    "rimraf": "^3.0.2",
+    "sinon": "^9.0.0",
     "tree-kill": "1.2.2",
     "ts-loader": "^6.2.1",
     "tslint": "^6.0.0",
-    "typescript": "^3.7.5",
+    "typescript": "^3.8.2",
     "universal-analytics": "0.4.20",
-    "uuid": "3.4.0",
-    "vsce": "^1.71.0",
+    "uuid": "7.0.0",
+    "vsce": "^1.73.0",
     "vscode-test": "^1.3.0",
-    "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
     "xml2js": "0.4.23"
   }
 }
