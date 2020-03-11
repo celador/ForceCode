@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.22.4
+    * Update dependencies
 * 3.22.3
     * Fix `Record id is not found in record after timeout on class save to org occurred` #361
     * Update for API 48.0
