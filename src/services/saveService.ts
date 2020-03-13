@@ -33,24 +33,25 @@ export class SaveService {
     This needs to be in place for those who don't use autoCompile and for
     unsuccessful saves to the server...mainly for file comparison
   */
-  public addFile(documentPath: string): boolean {
+  public addFile(documentPath: string): PreSaveFile {
     const existingFile: PreSaveFile | undefined = this.getFile(documentPath);
 
     if (existingFile) {
-      return false;
+      return existingFile;
     } else {
       // we need to read the file since the document has unsaved content
       const fileContents: string = fs
         .readFileSync(documentPath)
         .toString()
         .trim();
-      this.preSaveFiles.push({
+      const newPSFile: PreSaveFile = {
         path: documentPath,
         fileContents: fileContents,
         saving: false,
         queue: false,
-      });
-      return true;
+      };
+      this.preSaveFiles.push(newPSFile);
+      return newPSFile;
     }
   }
 
@@ -104,26 +105,30 @@ export class SaveService {
     if (!fs.existsSync(document)) {
       throw 'This type of document can\'t be saved via the ForceCode menu. Please right-click the file in the explorer and click ForceCode: Save/Deploy/Compile';
     }
-    this.addFile(document);
-    const fileIndex: number = this.getFileIndex(document);
-    if (this.preSaveFiles[fileIndex].saving) {
-      this.preSaveFiles[fileIndex].queue = true;
+
+    const psFile: PreSaveFile = this.addFile(document);
+    if (psFile.saving) {
+      psFile.queue = true;
+      this.updateFile(psFile);
       return Promise.resolve(true);
     }
-    this.preSaveFiles[fileIndex].saving = true;
+    psFile.saving = true;
+    this.updateFile(psFile);
     const self: SaveService = this;
 
     return new Promise<boolean>((resolve, reject) => {
       return startSave()
         .then((success: any) => {
-          self.preSaveFiles[fileIndex].saving = false;
+          psFile.saving = false;
+          self.updateFile(psFile);
           if (success) {
             // update the file time for start up file change checks
             var mTime: Date = new Date();
             fs.utimesSync(document, mTime, mTime);
             // remove the pre-save file version if successful
-            if (self.preSaveFiles[fileIndex].queue) {
-              self.preSaveFiles[fileIndex].queue = false;
+            if (psFile.queue) {
+              psFile.queue = false;
+              self.updateFile(psFile);
               return resolve(self.saveFile(document, true, cancellationToken));
             } else {
               return resolve(self.removeFile(document));
@@ -152,6 +157,13 @@ export class SaveService {
         );
       }
       return Promise.resolve(false);
+    }
+  }
+
+  private updateFile(psFile: PreSaveFile) {
+    const fileIndex: number = this.getFileIndex(psFile.path);
+    if (fileIndex > -1) {
+      this.preSaveFiles[fileIndex] = psFile;
     }
   }
 
