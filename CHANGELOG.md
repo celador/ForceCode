@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.22.5
+    * Fix `Forcecode won't deploy file on save after a while` #364
 * 3.22.4
     * Update dependencies
 * 3.22.3
