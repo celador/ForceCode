@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.22.6
+    * Fix retrieving from package with only one type. This resolves `Retrieve from package.xml feature doesn't retrieve settings metadata` #368
 * 3.22.5
     * Fix `Forcecode won't deploy file on save after a while` #364
 * 3.22.4

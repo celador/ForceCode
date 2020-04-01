@@ -262,7 +262,12 @@ export function retrieve(
     }
     throw new Error();
 
-    function retrieveComponents(resolve: any, reject: any, retrieveTypes: ToolingTypes) {
+    function retrieveComponents(
+      resolve: any,
+      reject: any,
+      retrieveTypes: ToolingTypes,
+      version?: string
+    ) {
       // count the number of types. if it's more than 10,000 the retrieve will fail
       var totalTypes: number = 0;
       retrieveTypes.types.forEach(type => {
@@ -280,7 +285,9 @@ export function retrieve(
       var theStream = vscode.window.forceCode.conn.metadata.retrieve({
         unpackaged: retrieveTypes,
         apiVersion:
-          vscode.window.forceCode.config.apiVersion || getVSCodeSetting('defaultApiVersion'),
+          version ||
+          vscode.window.forceCode.config.apiVersion ||
+          getVSCodeSetting('defaultApiVersion'),
       });
       theStream.on('error', error => {
         reject(
@@ -402,17 +409,10 @@ export function retrieve(
             if (cancellationToken.isCanceled()) {
               reject();
             }
-            try {
-              resolve(
-                vscode.window.forceCode.conn.metadata
-                  .retrieve({
-                    unpackaged: dom.Package,
-                  })
-                  .stream()
-              );
-            } catch (e) {
-              reject(e);
-            }
+            dom.Package.types = toArray(dom.Package.types);
+            const ver = dom.Package.version;
+            delete dom.Package.version;
+            retrieveComponents(resolve, reject, dom.Package, ver);
           }
         });
       }
