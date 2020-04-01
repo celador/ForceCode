@@ -25,3 +25,4 @@ wallaby.js
 book.json
 prettier.config.js
 assets/**
+.nyc_output/**
