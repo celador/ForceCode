@@ -3,7 +3,7 @@ import { GA_TRACKING_ID, getHomeDir, getOS, getVSCodeSetting } from '.';
 import { Visitor } from 'universal-analytics';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-const uuidv4 = require('uuid/v4');
+import { v4 as uuidv4 } from 'uuid';
 
 const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
 const fcVersion = myExt?.packageJSON?.version;
@@ -44,7 +44,7 @@ export class FCTimer {
  * This will be used to track errors and how much the extension is used.
  */
 export function trackEvent(category: string, message: string): Promise<any> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     // check if the user has opted in to tracking
     if (optIn()) {
       const params = {
@@ -54,7 +54,7 @@ export function trackEvent(category: string, message: string): Promise<any> {
       };
       const analytics: Visitor = new Visitor(GA_TRACKING_ID, vscode.window.forceCode.uuid);
       analytics
-        .event(params, response => {
+        .event(params, (response) => {
           if (!response) {
             // according to universal-analytics, no response from the callback is a success
             resolve(true);
