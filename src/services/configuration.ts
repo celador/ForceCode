@@ -20,7 +20,7 @@ export const defaultOptions: Config = {
     rollbackOnError: true,
     runTests: [],
     singlePackage: true,
-    testLevel: 'NoTestRun',
+    testLevel: 'Default',
   },
   isDeveloperEdition: false,
   overwritePackageXML: false,

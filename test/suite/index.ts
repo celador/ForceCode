@@ -18,9 +18,9 @@ export async function run(): Promise<void> {
   // Create the mocha test
   const mocha = new Mocha({
     ui: 'tdd',
+    color: true,
     timeout: 180000, // 3 minutes...code completion can take a while
   });
-  mocha.useColors(true);
 
   const testsRoot = path.resolve(__dirname, '..');
 

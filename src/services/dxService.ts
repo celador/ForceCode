@@ -88,7 +88,7 @@ export class DXService {
 
     const parts = fullCommand.split(' ');
     const commandName = parts[0];
-    const args = parts.slice(1).map(arg => {
+    const args = parts.slice(1).map((arg) => {
       return arg.split('#FC*SPACE*#').join(' ');
     });
 
@@ -111,11 +111,11 @@ export class DXService {
           cancellationToken.cancellationEmitter.on('cancelled', killPromise);
         }
         let stdout = '';
-        cmd.stdout.on('data', data => {
+        cmd.stdout.on('data', (data) => {
           stdout += data;
         });
 
-        cmd.stderr.on('data', data => {
+        cmd.stderr.on('data', (data) => {
           var theErr: string = data.toString();
           notifications.writeLog(theErr);
           if (theErr) {
@@ -125,12 +125,12 @@ export class DXService {
           }
         });
 
-        cmd.on('error', data => {
+        cmd.on('error', (data) => {
           notifications.writeLog(data);
           sfdxNotFound = data.message.indexOf('ENOENT') > -1;
         });
 
-        cmd.on('close', code => {
+        cmd.on('close', (code) => {
           let json;
           try {
             json = JSON.parse(stdout);
@@ -191,12 +191,12 @@ export class DXService {
 
   public orgList(): Promise<FCOauth[]> {
     return this.runCommand('org:list --clean --noprompt', false)
-      .then(res => {
+      .then((res) => {
         return res.nonScratchOrgs.concat(res.scratchOrgs);
       })
       .catch(() => {
         // we got an error because there are no connections
-        fcConnection.getChildren().forEach(curConn => {
+        fcConnection.getChildren().forEach((curConn) => {
           curConn.isLoggedIn = false;
         });
         return undefined;
@@ -208,7 +208,7 @@ export class DXService {
     if (logid) {
       theLogId += ' --logid ' + logid;
     }
-    return this.runCommand('apex:log:get' + theLogId, true).then(log => {
+    return this.runCommand('apex:log:get' + theLogId, true).then((log) => {
       log = log[0] || log;
       return Promise.resolve(log.log);
     });
@@ -222,7 +222,7 @@ export class DXService {
       .openTextDocument(
         vscode.Uri.parse(`sflog://salesforce.com/${new Date().toISOString()}.log?q=${id}`)
       )
-      .then(function(document: vscode.TextDocument) {
+      .then(function (document: vscode.TextDocument) {
         if (document.getText() !== '') {
           return vscode.window.showTextDocument(document, 3, true);
         } else {

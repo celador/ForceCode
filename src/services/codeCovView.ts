@@ -50,17 +50,17 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public constructor() {
-    window.onDidChangeActiveTextEditor(_event => {
+    window.onDidChangeActiveTextEditor((_event) => {
       this.refresh();
     });
   }
 
   public refresh() {
-    this._onDidChangeTreeData.fire();
+    this._onDidChangeTreeData.fire(undefined);
   }
 
   public addClass(wsMember: IWorkspaceMember) {
-    const index: number = this.classes.findIndex(curClass => {
+    const index: number = this.classes.findIndex((curClass) => {
       return curClass.getWsMember().path === wsMember.path;
     });
     if (index !== -1) {
@@ -81,7 +81,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     if (isEmptyUndOrNull(this.classes)) {
       return undefined;
     }
-    return this.classes.find(cur => {
+    return this.classes.find((cur) => {
       return cur.getWsMember().name === name && cur.getWsMember().type === type;
     });
   }
@@ -90,7 +90,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     if (isEmptyUndOrNull(this.classes)) {
       return undefined;
     }
-    return this.classes.filter(cur => {
+    return this.classes.filter((cur) => {
       return cur.getWsMember().type === type;
     });
   }
@@ -99,7 +99,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     if (isEmptyUndOrNull(this.classes)) {
       return undefined;
     }
-    return this.classes.find(cur => {
+    return this.classes.find((cur) => {
       return cur.getWsMember().path === pa;
     });
   }
@@ -108,13 +108,13 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     if (isEmptyUndOrNull(this.classes)) {
       return undefined;
     }
-    return this.classes.find(cur => {
+    return this.classes.find((cur) => {
       return cur.getWsMember().id === id;
     });
   }
 
   public removeClasses(fcfiles: FCFile[]) {
-    fcfiles.forEach(cur => {
+    fcfiles.forEach((cur) => {
       this.removeClass(cur);
     });
   }
@@ -143,7 +143,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     if (!element) {
       var fcFiles: FCFile[] = [];
       // This is the root node
-      Object.entries(ClassType).forEach(val => {
+      Object.entries(ClassType).forEach((val) => {
         if (val[1] !== ClassType.NoShow && val[1] !== ClassType.Subclass) {
           var newFCFile: FCFile = new FCFile(
             val[1],
@@ -162,7 +162,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       if (element.label === ClassType.NotInSrc) {
         var fcFiles: FCFile[] = [];
         if (workspace.textDocuments) {
-          workspace.textDocuments.forEach(curEd => {
+          workspace.textDocuments.forEach((curEd) => {
             if (
               !curEd.fileName.startsWith(window.forceCode.projectRoot) &&
               curEd.uri.scheme === 'file'
@@ -190,7 +190,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
         return fcFiles;
       } else {
         this.classes.sort(this.sortFunc);
-        return this.classes.filter(res => {
+        return this.classes.filter((res) => {
           return res.getType() === element.getType();
         });
       }
@@ -238,16 +238,8 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   private sortFunc(a: FCFile, b: FCFile): number {
-    var aStr =
-      a?.label
-        ?.split('% ')
-        .pop()
-        ?.toUpperCase() || '';
-    var bStr =
-      b?.label
-        ?.split('% ')
-        .pop()
-        ?.toUpperCase() || '';
+    var aStr = a?.label?.split('% ').pop()?.toUpperCase() || '';
+    var bStr = b?.label?.split('% ').pop()?.toUpperCase() || '';
     return aStr.localeCompare(bStr);
   }
 }
@@ -329,11 +321,7 @@ export class FCFile extends TreeItem {
     } else {
       var testFile: boolean = false;
       try {
-        testFile = fs
-          .readFileSync(this.wsMember.path)
-          .toString()
-          .toLowerCase()
-          .includes('@istest');
+        testFile = fs.readFileSync(this.wsMember.path).toString().toLowerCase().includes('@istest');
       } catch (e) {}
       if (testFile) {
         this.type = ClassType.TestClass;

@@ -90,6 +90,9 @@
         if (key === 'testLevel') {
           theHtml +=
             '<div>testLevel <select id="deployOptions_fcSep_testLevel" onchange="changeSetting(\'deployOptions_fcSep_testLevel\')">' +
+            '<option value="Default" ' +
+            (message[key] === 'Default' ? 'selected="selected"' : '') +
+            '>Default</option>' +
             '<option value="NoTestRun" ' +
             (message[key] === 'NoTestRun' ? 'selected="selected"' : '') +
             '>NoTestRun</option>' +
