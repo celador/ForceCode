@@ -36,7 +36,7 @@ export class SaveHistoryService implements vscode.TreeDataProvider<SaveResult> {
       this.saveResults.pop();
     }
     vscode.window.forceCode.lastSaveResult = this.saveResults[0];
-    this._onDidChangeTreeData.fire();
+    this._onDidChangeTreeData.fire(undefined);
   }
 
   public getTreeItem(element: SaveResult): vscode.TreeItem {

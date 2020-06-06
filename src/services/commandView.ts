@@ -31,7 +31,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   public constructor() {
     this.tasks = [];
     this.runningTasksStatus = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
-    this.removeEmitter.on('removeTask', theTask => this.removeTask(theTask));
+    this.removeEmitter.on('removeTask', (theTask) => this.removeTask(theTask));
   }
 
   public static getInstance() {
@@ -48,7 +48,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
 
   public addCommandExecution(execution: ForcecodeCommand, context: any, selectedResource?: any) {
     if (
-      ['ForceCode.compile', 'ForceCode.refresh'].find(c => {
+      ['ForceCode.compile', 'ForceCode.refresh'].find((c) => {
         return c === execution?.commandName;
       })
     ) {
@@ -90,7 +90,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
       this.runningTasksStatus.command = 'ForceCode.showTasks';
     }
 
-    this._onDidChangeTreeData.fire();
+    this._onDidChangeTreeData.fire(undefined);
     return theTask.run(FIRST_TRY);
   }
 
@@ -118,7 +118,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
         }
       }
 
-      this._onDidChangeTreeData.fire();
+      this._onDidChangeTreeData.fire(undefined);
       fcConnection.refreshConnsStatus();
       return true;
     }
@@ -132,7 +132,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
   public getChildren(element?: Task): Task[] {
     if (!element) {
       // This is the root node
-      return this.tasks.filter(cur => {
+      return this.tasks.filter((cur) => {
         return cur.label !== '' && cur.label !== undefined;
       });
     }
@@ -176,16 +176,16 @@ export class Task extends vscode.TreeItem {
   }
 
   public run(attempt: number): Promise<any> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       resolve(this.execution.run(this.context, this.selectedResource));
     })
-      .catch(reason => {
+      .catch((reason) => {
         if (this.execution.cancellationToken.isCanceled()) {
           return Promise.resolve();
         }
         return fcConnection
           .checkLoginStatus(reason, this.execution.cancellationToken)
-          .then(loggedIn => {
+          .then((loggedIn) => {
             if (loggedIn || attempt === SECOND_TRY) {
               if (reason) {
                 notifications.showError(reason.message || reason, 'OK');
@@ -198,7 +198,7 @@ export class Task extends vscode.TreeItem {
             }
           });
       })
-      .then(finalRes => {
+      .then((finalRes) => {
         if (finalRes === 'FC:AGAIN') {
           // try again, possibly had to refresh the access token
           return this.run(SECOND_TRY);

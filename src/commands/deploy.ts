@@ -62,7 +62,7 @@ function deploy(cancellationToken: FCCancellationToken) {
     matchOnDetail: true,
     placeHolder: 'Choose files to deploy',
   };
-  return vscode.window.showQuickPick(options, config).then(choice => {
+  return vscode.window.showQuickPick(options, config).then((choice) => {
     if (!choice) {
       return Promise.resolve();
     }
@@ -71,21 +71,21 @@ function deploy(cancellationToken: FCCancellationToken) {
         .then(showFileList)
         .then(createPackageXML)
         .then(getFileListFromPXML)
-        .then(files => {
+        .then((files) => {
           return deployFiles(files, cancellationToken);
         });
     } else {
-      return getFileListFromPXML().then(files => {
+      return getFileListFromPXML().then((files) => {
         return deployFiles(files, cancellationToken);
       });
     }
   });
 
   function getFileList(): Promise<string[]> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       var fileList: string[] = [];
       klaw(vscode.window.forceCode.projectRoot)
-        .on('data', file => {
+        .on('data', (file) => {
           if (
             file.stats.isFile() &&
             !file.path.match(/resource\-bundles.*\.resource.*$/) &&
@@ -141,14 +141,14 @@ function deploy(cancellationToken: FCCancellationToken) {
   function showFileList(files: string[]): Promise<string[]> {
     return new Promise((resolve, reject) => {
       let options: vscode.QuickPickItem[] = files
-        .map(file => {
+        .map((file) => {
           const fname = file.split(path.sep).pop();
           return {
             label: fname || '',
             detail: file,
           };
         })
-        .filter(file => file.label !== '');
+        .filter((file) => file.label !== '');
       let config: {} = {
         matchOnDescription: true,
         matchOnDetail: true,
@@ -156,12 +156,12 @@ function deploy(cancellationToken: FCCancellationToken) {
           files.length === 0 ? 'No files in the current project' : 'Choose files to deploy',
         canPickMany: true,
       };
-      vscode.window.showQuickPick(options, config).then(files => {
+      vscode.window.showQuickPick(options, config).then((files) => {
         if (isEmptyUndOrNull(files)) {
           reject(cancellationToken.cancel());
         }
         var theFiles: string[] = [];
-        toArray(files).forEach(file => {
+        toArray(files).forEach((file) => {
           if (file) {
             theFiles.push(file.detail);
           }
@@ -181,7 +181,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
         version: vscode.window.forceCode.config.apiVersion || getVSCodeSetting('defaultApiVersion'),
       },
     };
-    files.forEach(file => {
+    files.forEach((file) => {
       var fileTT: IMetadataObject | undefined = getAnyTTMetadataFromPath(file);
       if (!fileTT) {
         reject();
@@ -235,13 +235,13 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
   });
 
   function findMDTIndex(pxmlObj: PXML, type: string) {
-    return pxmlObj.Package.types.findIndex(curType => {
+    return pxmlObj.Package.types.findIndex((curType) => {
       return curType.name === type;
     });
   }
 
   function findMemberIndex(pxmlObj: PXML, index: number, member: string) {
-    return pxmlObj.Package.types[index].members.findIndex(curType => {
+    return pxmlObj.Package.types[index].members.findIndex((curType) => {
       return curType === member;
     });
   }
@@ -258,6 +258,9 @@ export function deployFiles(
   }
   var zip = zipFiles(files, deployPath, lwcPackageXML);
   Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
+  if (deployOptions.testLevel === 'Default') {
+    delete deployOptions.testLevel;
+  }
   notifications.showLog();
   return new Promise((resolve, reject) => {
     return checkDeployStatus(
@@ -279,12 +282,12 @@ export function deployFiles(
       // TODO: Find a way to cancel the deployment here. Currently, the deployment still occurs in the background
       return rejectFunction();
     } else {
-      return deployResult.check(function(err, res) {
+      return deployResult.check(function (err, res) {
         if (err) {
           return rejectFunction(err);
         }
         if (res.done) {
-          return deployResult.complete(function(err, res) {
+          return deployResult.complete(function (err, res) {
             if (err) {
               return rejectFunction(err);
             } else {
@@ -309,7 +312,7 @@ export function deployFiles(
     } else if (res.status === 'Failed') {
       notifications
         .showError('ForceCode: Deploy Errors. View Details?', 'Yes', 'No')
-        .then(choice => {
+        .then((choice) => {
           if (choice === 'Yes') {
             vscode.commands.executeCommand(
               'ForceCode.openFileInOrg',
@@ -332,7 +335,7 @@ export function deployFiles(
 
       notifications
         .showError('ForceCode: Deployment timed out. View details status in the org?', 'Yes', 'No')
-        .then(choice => {
+        .then((choice) => {
           if (choice === 'Yes') {
             vscode.commands.executeCommand(
               'ForceCode.openFileInOrg',
@@ -341,11 +344,7 @@ export function deployFiles(
           }
         });
     }
-    notifications.writeLog(
-      outputToString(res)
-        .replace(/{/g, '')
-        .replace(/}/g, '')
-    );
+    notifications.writeLog(outputToString(res).replace(/{/g, '').replace(/}/g, ''));
     return res;
   }
 }
