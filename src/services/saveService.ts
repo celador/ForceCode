@@ -40,10 +40,7 @@ export class SaveService {
       return existingFile;
     } else {
       // we need to read the file since the document has unsaved content
-      const fileContents: string = fs
-        .readFileSync(documentPath)
-        .toString()
-        .trim();
+      const fileContents: string = fs.readFileSync(documentPath).toString().trim();
       const newPSFile: PreSaveFile = {
         path: documentPath,
         fileContents: fileContents,
@@ -59,7 +56,7 @@ export class SaveService {
     const self: SaveService = this;
     return new Promise<boolean>((resolve, reject) => {
       klaw(folder)
-        .on('data', file => {
+        .on('data', (file) => {
           if (file.stats.isFile()) self.addFile(file.path);
         })
         .on('end', () => {
@@ -75,7 +72,7 @@ export class SaveService {
   public removeFilesInFolder(folder: string): boolean {
     const psFilesToRemove: PreSaveFile[] = this.getFilesInFolder(folder);
     if (psFilesToRemove.length > 0) {
-      psFilesToRemove.forEach(f => this.removeFile(f.path));
+      psFilesToRemove.forEach((f) => this.removeFile(f.path));
       return true;
     } else {
       return false;
@@ -137,7 +134,11 @@ export class SaveService {
             return resolve(false);
           }
         })
-        .catch(reject);
+        .catch((reason: any) => {
+          psFile.saving = false;
+          self.updateFile(psFile);
+          return reject(reason);
+        });
     });
 
     function startSave() {
@@ -188,10 +189,10 @@ export class SaveService {
   }
 
   private getFilesInFolder(folder: string): PreSaveFile[] {
-    return this.preSaveFiles.filter(psFile => psFile.path.indexOf(folder) !== -1);
+    return this.preSaveFiles.filter((psFile) => psFile.path.indexOf(folder) !== -1);
   }
 
   private getFileIndex(thePath: string): number {
-    return this.preSaveFiles.findIndex(curFile => curFile.path === thePath);
+    return this.preSaveFiles.findIndex((curFile) => curFile.path === thePath);
   }
 }

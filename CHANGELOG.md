@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.22.8
+    * Fix `Error when trying to save: getaddrinfo ENOTFOUND` #121
 * 3.22.7
     * Updated dependencies
     * Allow for selecting a Default test level when deploying #373

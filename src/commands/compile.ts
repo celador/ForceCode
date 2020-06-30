@@ -104,7 +104,7 @@ export async function compile(
 
   if (document.fileName.endsWith('-meta.xml')) {
     var tmpMeta = await new Promise((resolve, reject) => {
-      parseString(document.getText(), { explicitArray: false }, function(err, dom) {
+      parseString(document.getText(), { explicitArray: false }, function (err, dom) {
         if (err) {
           return reject(err);
         } else {
@@ -115,17 +115,15 @@ export async function compile(
         }
       });
     }).then(
-      res => {
+      (res) => {
         return res;
       },
-      reason => {
+      (reason) => {
         return reason;
       }
     );
     if (tmpMeta instanceof Error) {
-      return Promise.resolve(tmpMeta)
-        .then(finished)
-        .then(updateSaveHistory);
+      return Promise.resolve(tmpMeta).then(finished).then(updateSaveHistory);
     }
   }
 
@@ -182,7 +180,7 @@ export async function compile(
     // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
     return saveApex(document, ttMeta, cancellationToken, Metadata, forceCompile)
       .then(finished)
-      .then(_res => {
+      .then((_res) => {
         return true;
       })
       .catch(finished)
@@ -217,7 +215,7 @@ export async function compile(
                 );
               }
               if (
-                !exDiagnostics.find(exDia => {
+                !exDiagnostics.find((exDia) => {
                   return exDia.message === failure.problem;
                 })
               ) {
@@ -291,7 +289,7 @@ export async function compile(
       theerr = errSplit || theerr;
       var match = errMsg.match(matchRegex);
       if (match) {
-        match = match.filter(mat => mat); // eliminate all undefined elements
+        match = match.filter((mat) => mat); // eliminate all undefined elements
         errSplit = theerr.split(match[0]).pop();
         theerr = (errSplit || theerr).trim(); // remove the line information from the error message if 'Message:' wasn't part of the string
         const row = match[1];
@@ -311,7 +309,7 @@ export async function compile(
       );
     }
     if (
-      !exDiagnostics.find(exDia => {
+      !exDiagnostics.find((exDia) => {
         return exDia.message === theerr;
       })
     ) {

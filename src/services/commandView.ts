@@ -186,6 +186,8 @@ export class Task extends vscode.TreeItem {
         return fcConnection
           .checkLoginStatus(reason, this.execution.cancellationToken)
           .then((loggedIn) => {
+            notifications.writeLog('Logged in: ' + loggedIn);
+            notifications.writeLog('Error reason: ' + reason?.message || reason);
             if (loggedIn || attempt === SECOND_TRY) {
               if (reason) {
                 notifications.showError(reason.message || reason, 'OK');
