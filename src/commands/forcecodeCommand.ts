@@ -37,6 +37,7 @@ export abstract class ForcecodeCommand {
   public abstract command(context: any, selectedResource: any): any;
 
   public run(context: any, selectedResource: any): any {
+    notifications.writeLog('about to run ' + this.commandName);
     // reset the variables
     this.cancellationToken = new FCCancellationToken();
     try {

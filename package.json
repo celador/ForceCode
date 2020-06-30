@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.22.7",
+  "version": "3.22.8",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "engines": {
-    "vscode": "^1.45.1"
+    "vscode": "^1.46.0"
   },
   "icon": "images/new-logo.png",
   "categories": [
@@ -680,23 +680,23 @@
     "@types/globule": "1.1.3",
     "@types/klaw": "3.0.1",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^10.17.24",
+    "@types/node": "^10.17.26",
     "@types/sinon": "^9.0.4",
     "@types/universal-analytics": "0.4.4",
     "@types/uuid": "8.0.0",
-    "@types/vscode": "1.45.1",
+    "@types/vscode": "1.46.0",
     "@types/xml2js": "0.4.5",
     "compressing": "1.5.1",
     "deepmerge": "4.2.2",
     "fs-extra": "9.0.1",
-    "globule": "1.3.1",
+    "globule": "1.3.2",
     "jsforce": "1.9.3",
     "klaw": "3.0.0",
     "mime-types": "2.1.27",
-    "mocha": "^7.2.0",
+    "mocha": "^8.0.1",
     "nyc": "^15.1.0",
     "os": "0.1.1",
-    "request-light": "0.3.0",
+    "request-light": "0.4.0",
     "rimraf": "^3.0.2",
     "sinon": "^9.0.2",
     "source-map-support": "^0.5.19",
@@ -705,11 +705,11 @@
     "tslint": "^6.1.2",
     "typescript": "^3.9.5",
     "universal-analytics": "0.4.20",
-    "uuid": "8.1.0",
-    "vsce": "^1.76.0",
+    "uuid": "8.2.0",
+    "vsce": "^1.77.0",
     "vscode-test": "^1.4.0",
     "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11",
+    "webpack-cli": "^3.3.12",
     "xml2js": "0.4.23"
   }
 }
