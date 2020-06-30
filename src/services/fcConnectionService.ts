@@ -145,10 +145,13 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
   // this is a check that will refresh the orgs and check if logged in. if not, it asks to log in
   public checkLoginStatus(reason: any, cancellationToken: FCCancellationToken): Promise<boolean> {
     const message = reason?.message || reason;
+    notifications.writeLog('Checking login status: ' + message);
     return this.refreshConnections().then(() => {
       if (
         !this.isLoggedIn() ||
-        (message && message.indexOf('expired access/refresh token') !== -1)
+        (message &&
+          (message.indexOf('expired access/refresh token') !== -1 ||
+            message.indexOf('ECONNRESET') !== -1))
       ) {
         if (this.currentConnection) {
           this.currentConnection.isLoggedIn = false;
