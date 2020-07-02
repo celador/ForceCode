@@ -19,6 +19,7 @@ import { Connection, IMetadataFileProperties } from 'jsforce';
 import klaw = require('klaw');
 import { isEmptyUndOrNull } from '../util';
 import { SaveResult } from './saveHistoryService';
+import { CoverageRetrieveType } from './commandView';
 
 export class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
@@ -48,7 +49,7 @@ export class ForceService implements forceCode.IForceService {
     this.uuid = uuidRes.uuid;
 
     notifications.writeLog('Starting ForceCode service');
-    new Promise(resolve => {
+    new Promise((resolve) => {
       if (uuidRes.firstTime) {
         // ask the user to opt-in
         return notifications
@@ -57,7 +58,7 @@ export class ForceService implements forceCode.IForceService {
             'Yes',
             'No'
           )
-          .then(choice => {
+          .then((choice) => {
             var option: boolean = false;
             if (choice === 'Yes') {
               option = true;
@@ -77,7 +78,7 @@ export class ForceService implements forceCode.IForceService {
       const username = readForceJson();
       vscode.commands
         .executeCommand('ForceCode.switchUser', username ? { username: username } : undefined)
-        .then(res => {
+        .then((res) => {
           if (res === false && !fcConnection.isLoggedIn()) {
             notifications.hideStatus();
           }
@@ -92,13 +93,13 @@ export class ForceService implements forceCode.IForceService {
   // Get files in src folder..
   // Match them up with ContainerMembers
   private getWorkspaceMembers(): Promise<Array<Promise<IMetadataFileProperties[]>>> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       var types: Array<Array<{}>> = [[]];
       var typeNames: Array<string> = [];
       var proms: Array<Promise<IMetadataFileProperties[]>> = [];
       const index = 0;
       klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
-        .on('data', function(item) {
+        .on('data', function (item) {
           var type: string | undefined = getToolingTypeFromExt(item.path);
 
           if (type) {
@@ -126,7 +127,7 @@ export class ForceService implements forceCode.IForceService {
             }
           }
         })
-        .on('end', function() {
+        .on('end', function () {
           if (types[index].length > 0) {
             proms.push(vscode.window.forceCode.conn.metadata.list(types.splice(0, 1)));
           }
@@ -142,7 +143,7 @@ export class ForceService implements forceCode.IForceService {
     if (isEmptyUndOrNull(mems) || isEmptyUndOrNull(mems[0])) {
       return Promise.resolve({});
     }
-    return Promise.all(mems).then(rets => {
+    return Promise.all(mems).then((rets) => {
       return parseRecords(rets);
     });
 
@@ -150,9 +151,9 @@ export class ForceService implements forceCode.IForceService {
       if (!Array.isArray(recs)) {
         Promise.resolve();
       }
-      recs.forEach(curSet => {
+      recs.forEach((curSet) => {
         if (Array.isArray(curSet)) {
-          curSet.forEach(key => {
+          curSet.forEach((key) => {
             var curFCFile: FCFile | undefined = codeCovViewService.findByNameAndType(
               key.fullName,
               key.type
@@ -178,7 +179,7 @@ export class ForceService implements forceCode.IForceService {
         }
       });
       notifications.writeLog('Done getting workspace info');
-      return commandViewService.enqueueCodeCoverage();
+      return commandViewService.enqueueCodeCoverage(CoverageRetrieveType.StartUp);
     }
   }
 
@@ -198,17 +199,15 @@ export class ForceService implements forceCode.IForceService {
     notifications.showStatus('ForceCode Ready!');
 
     // get the current org info
-    return checkForChanges()
-      .then(cleanupContainers)
-      .catch(connectionError);
+    return checkForChanges().then(cleanupContainers).catch(connectionError);
 
     // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
     function cleanupContainers(): Promise<any> {
-      return new Promise(function(resolve) {
+      return new Promise(function (resolve) {
         vscode.window.forceCode.conn.tooling
           .sobject('MetadataContainer')
           .find({ Name: { $like: 'ForceCode-%' } })
-          .execute(function(_err: any, records: any) {
+          .execute(function (_err: any, records: any) {
             var toDelete: string[] = new Array<string>();
             if (!records || records.length === 0) {
               resolve();

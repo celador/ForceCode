@@ -27,6 +27,7 @@ import {
 } from '.';
 import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
+import { CoverageRetrieveType } from '../services/commandView';
 
 export class Refresh extends ForcecodeCommand {
   constructor() {
@@ -41,7 +42,7 @@ export class Refresh extends ForcecodeCommand {
     if (selectedResource instanceof Array) {
       return new Promise((resolve, reject) => {
         var files: PXMLMember[] = [];
-        var proms: Promise<PXMLMember>[] = selectedResource.map(curRes => {
+        var proms: Promise<PXMLMember>[] = selectedResource.map((curRes) => {
           if (curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
             return getAnyNameFromUri(curRes);
           } else {
@@ -54,8 +55,8 @@ export class Refresh extends ForcecodeCommand {
           }
         });
         Promise.all(proms)
-          .then(theNames => {
-            theNames.forEach(curName => {
+          .then((theNames) => {
+            theNames.forEach((curName) => {
               var index: number = getTTIndex(curName.name, files);
               if (index >= 0) {
                 // file deepcode ignore ComparisonArrayLiteral: <please specify a reason of ignoring this>
@@ -82,7 +83,7 @@ export class Refresh extends ForcecodeCommand {
     return retrieve(vscode.window.activeTextEditor.document.uri, this.cancellationToken);
 
     function getTTIndex(toolType: string, arr: ToolingType[]): number {
-      return arr.findIndex(cur => {
+      return arr.findIndex((cur) => {
         return cur.name === toolType && cur.members !== ['*'];
       });
     }
@@ -153,7 +154,7 @@ export function retrieve(
     };
 
     return xhr(foptions)
-      .then(response => {
+      .then((response) => {
         if (response.status === 200) {
           return response.responseText;
         } else {
@@ -176,7 +177,7 @@ export function retrieve(
     if (resource !== undefined) {
       return Promise.resolve();
     }
-    return getPackages().then(packages => {
+    return getPackages().then((packages) => {
       let options: vscode.QuickPickItem[] = packages.map((pkg: any) => {
         return {
           label: `$(briefcase) ${pkg.Name}`,
@@ -229,7 +230,7 @@ export function retrieve(
         matchOnDetail: true,
         placeHolder: 'Retrieve Package',
       };
-      return vscode.window.showQuickPick(options, config).then(res => {
+      return vscode.window.showQuickPick(options, config).then((res) => {
         if (!res) {
           return Promise.reject(cancellationToken.cancel());
         }
@@ -247,11 +248,11 @@ export function retrieve(
     if (opt) {
       return new Promise(pack);
     } else if (resource) {
-      return new Promise(function(resolve, reject) {
+      return new Promise(function (resolve, reject) {
         // Get the Metadata Object type
         if (resource instanceof vscode.Uri) {
           getAnyNameFromUri(resource)
-            .then(names => {
+            .then((names) => {
               retrieveComponents(resolve, reject, { types: [names] });
             })
             .catch(reject);
@@ -270,7 +271,7 @@ export function retrieve(
     ) {
       // count the number of types. if it's more than 10,000 the retrieve will fail
       var totalTypes: number = 0;
-      retrieveTypes.types.forEach(type => {
+      retrieveTypes.types.forEach((type) => {
         totalTypes += type.members.length;
       });
       if (totalTypes > 10000) {
@@ -289,7 +290,7 @@ export function retrieve(
           vscode.window.forceCode.config.apiVersion ||
           getVSCodeSetting('defaultApiVersion'),
       });
-      theStream.on('error', error => {
+      theStream.on('error', (error) => {
         reject(
           error || {
             message:
@@ -336,7 +337,7 @@ export function retrieve(
           apiVersion:
             vscode.window.forceCode.config.apiVersion || getVSCodeSetting('defaultApiVersion'),
         });
-        theStream.on('error', error => {
+        theStream.on('error', (error) => {
           reject(
             error || {
               message: 'There was an error retrieving ' + option.description,
@@ -348,7 +349,7 @@ export function retrieve(
 
       function builder() {
         packageBuilder()
-          .then(mappedTypes => {
+          .then((mappedTypes) => {
             retrieveComponents(resolve, reject, { types: mappedTypes });
           })
           .catch(reject);
@@ -356,7 +357,7 @@ export function retrieve(
 
       function all() {
         getMembers(['*'], true)
-          .then(mappedTypes => {
+          .then((mappedTypes) => {
             retrieveComponents(resolve, reject, { types: mappedTypes });
           })
           .catch(reject);
@@ -369,8 +370,8 @@ export function retrieve(
           );
         }
         var types: any[] = vscode.window.forceCode.describe.metadataObjects
-          .filter(o => o.xmlName === metadataType)
-          .map(r => {
+          .filter((o) => o.xmlName === metadataType)
+          .map((r) => {
             return { name: r.xmlName, members: '*' };
           });
         retrieveComponents(resolve, reject, { types: types });
@@ -379,7 +380,7 @@ export function retrieve(
       function unpackaged() {
         var xmlFilePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}package.xml`;
         var data: any = fs.readFileSync(xmlFilePath);
-        parseString(data, { explicitArray: false }, function(err, dom) {
+        parseString(data, { explicitArray: false }, function (err, dom) {
           if (err) {
             reject(err);
           } else {
@@ -390,7 +391,7 @@ export function retrieve(
             if (!dom.Package.version) {
               reject({ message: 'No version element found in package.xml file.' });
             }
-            const typeWithoutMembersOrName = toArray(dom.Package.types).find(curType => {
+            const typeWithoutMembersOrName = toArray(dom.Package.types).find((curType) => {
               return !curType.members || !curType.name;
             });
             if (typeWithoutMembersOrName) {
@@ -418,7 +419,7 @@ export function retrieve(
       }
 
       function getObjects(type: SObjectCategory) {
-        dxService.describeGlobal(type).then(objs => {
+        dxService.describeGlobal(type).then((objs) => {
           retrieveComponents(resolve, reject, { types: [{ name: 'CustomObject', members: objs }] });
         });
       }
@@ -426,18 +427,18 @@ export function retrieve(
   }
 
   function processResult(stream: fs.ReadStream): Promise<any> {
-    return new Promise(function(resolve, reject) {
-      cancellationToken.cancellationEmitter.on('cancelled', function() {
+    return new Promise(function (resolve, reject) {
+      cancellationToken.cancellationEmitter.on('cancelled', function () {
         stream.pause();
         reject(stream.emit('end'));
       });
       var resBundleNames: string[] = [];
       const destDir: string = vscode.window.forceCode.projectRoot;
       new compress.zip.UncompressStream({ source: stream })
-        .on('error', function(err: any) {
+        .on('error', function (err: any) {
           reject(err || { message: 'package not found' });
         })
-        .on('entry', function(header: any, stream: any, next: any) {
+        .on('entry', function (header: any, stream: any, next: any) {
           stream.on('end', next);
           var name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
           name = packageName ? name.replace(packageName + path.sep, '') : name;
@@ -480,10 +481,10 @@ export function retrieve(
           }
         })
         .on('finish', () => {
-          resBundleNames.forEach(metaName => {
+          resBundleNames.forEach((metaName) => {
             const data: string = fs.readFileSync(path.join(destDir, metaName)).toString();
             // unzip the resource
-            parseString(data, { explicitArray: false }, function(err, dom) {
+            parseString(data, { explicitArray: false }, function (err, dom) {
               if (!err) {
                 var actualResData = fs.readFileSync(
                   path.join(destDir, metaName).split('-meta.xml')[0]
@@ -550,16 +551,16 @@ export function retrieve(
               theTypes['type' + i] = theTypes['type0'].splice(0, 3);
             }
           }
-          let proms = Object.keys(theTypes).map(curTypes => {
-            const shouldGetCoverage = theTypes[curTypes].find(cur => {
+          let proms = Object.keys(theTypes).map((curTypes) => {
+            const shouldGetCoverage = theTypes[curTypes].find((cur) => {
               return cur.type === 'ApexClass' || cur.type === 'ApexTrigger';
             });
             if (shouldGetCoverage) {
-              commandViewService.enqueueCodeCoverage();
+              commandViewService.enqueueCodeCoverage(CoverageRetrieveType.OpenFile);
             }
             return vscode.window.forceCode.conn.metadata.list(theTypes[curTypes]);
           });
-          return Promise.all(proms).then(rets => {
+          return Promise.all(proms).then((rets) => {
             return parseRecords(rets);
           });
         } else {
@@ -569,10 +570,10 @@ export function retrieve(
 
       function parseRecords(recs: any[]): Thenable<any> {
         notifications.writeLog('Done retrieving metadata records');
-        recs.some(curSet => {
-          return toArray(curSet).some(key => {
+        recs.some((curSet) => {
+          return toArray(curSet).some((key) => {
             if (key && newWSMembers.length > 0) {
-              var index: number = newWSMembers.findIndex(curMem => {
+              var index: number = newWSMembers.findIndex((curMem) => {
                 return curMem.name === key.fullName && curMem.type === key.type;
               });
               if (index >= 0) {
@@ -591,11 +592,7 @@ export function retrieve(
     } else {
       notifications.showError('Retrieve Errors');
     }
-    notifications.writeLog(
-      outputToString(res)
-        .replace(/{/g, '')
-        .replace(/}/g, '')
-    );
+    notifications.writeLog(outputToString(res).replace(/{/g, '').replace(/}/g, ''));
     return Promise.resolve(res);
   }
   // =======================================================================================================================================
@@ -648,11 +645,11 @@ export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promis
         }
         return resolve({ name: tType.xmlName, members: [baseDirectoryName] });
       } else if (tType.inFolder && ffNameParts.length > 1) {
-        return getFolderContents(tType.xmlName, ffNameParts[1]).then(contents => {
+        return getFolderContents(tType.xmlName, ffNameParts[1]).then((contents) => {
           return resolve({ name: tType.xmlName, members: contents });
         });
       } else {
-        return getMembers([tType.xmlName], true).then(members => {
+        return getMembers([tType.xmlName], true).then((members) => {
           return resolve(members[0]);
         });
       }

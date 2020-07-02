@@ -1,5 +1,9 @@
 ## Change Log
 
+* 3.22.9
+    * Added options to `Allow to retrieve code coverage on demand` #377
+        * Enable/disable retrieval of code coverage on start up and when retrieving/opening a file from the server. Options are located in the ForceCode extension's options.
+        * Button on the code coverage view allows manual retrieval of code coverage.
 * 3.22.8
     * Fix `Error when trying to save: getaddrinfo ENOTFOUND` #121
 * 3.22.7
