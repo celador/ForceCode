@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.22.8",
+  "version": "3.22.9",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -247,6 +247,16 @@
           "type": "boolean",
           "default": false,
           "description": "This option, when checked, will allow ForceCode to check for file changes against the server on startup of ForceCode."
+        },
+        "force.retrieveCodeCoverageOnStart": {
+          "type": "boolean",
+          "default": true,
+          "description": "This option, when checked, will allow ForceCode to retrieve code coverage information on startup of ForceCode."
+        },
+        "force.retrieveCoverageOnFileRetrieval": {
+          "type": "boolean",
+          "default": true,
+          "description": "This option, when checked, will allow ForceCode to retrieve code coverage information when retrieving an apex file from the server."
         },
         "force.defaultApiVersion": {
           "type": "string",
