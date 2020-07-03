@@ -97,6 +97,14 @@
         }
       },
       {
+        "command": "ForceCode.getCodeCoverage",
+        "title": "Retrieve Code Coverage Information",
+        "icon": {
+          "light": "./images/refreshCoverage.svg",
+          "dark": "./images/refreshCoverage.svg"
+        }
+      },
+      {
         "command": "ForceCode.executeAnonymous",
         "title": "ForceCode: Execute Anonymous"
       },
@@ -550,6 +558,13 @@
           "when": "ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.deleteFile",
           "group": "ForceCode"
+        }
+      ],
+      "view/title": [
+        {
+          "when": "view == ForceCode.codeCovDataProvider",
+          "command": "ForceCode.getCodeCoverage",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
