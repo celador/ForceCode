@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.22.8",
+  "version": "3.22.9",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -9,7 +9,7 @@
   },
   "license": "MIT",
   "engines": {
-    "vscode": "^1.46.0"
+    "vscode": "^1.47.0"
   },
   "icon": "images/new-logo.png",
   "categories": [
@@ -94,6 +94,14 @@
         "icon": {
           "light": "./images/refresh.svg",
           "dark": "./images/refresh.svg"
+        }
+      },
+      {
+        "command": "ForceCode.getCodeCoverage",
+        "title": "Retrieve Code Coverage Information",
+        "icon": {
+          "light": "./images/refreshCoverage.svg",
+          "dark": "./images/refreshCoverage.svg"
         }
       },
       {
@@ -247,6 +255,16 @@
           "type": "boolean",
           "default": false,
           "description": "This option, when checked, will allow ForceCode to check for file changes against the server on startup of ForceCode."
+        },
+        "force.retrieveCodeCoverageOnStart": {
+          "type": "boolean",
+          "default": true,
+          "description": "This option, when checked, will allow ForceCode to retrieve code coverage information on startup of ForceCode."
+        },
+        "force.retrieveCoverageOnFileRetrieval": {
+          "type": "boolean",
+          "default": true,
+          "description": "This option, when checked, will allow ForceCode to retrieve code coverage information when retrieving an apex file from the server."
         },
         "force.defaultApiVersion": {
           "type": "string",
@@ -542,6 +560,13 @@
           "group": "ForceCode"
         }
       ],
+      "view/title": [
+        {
+          "when": "view == ForceCode.codeCovDataProvider",
+          "command": "ForceCode.getCodeCoverage",
+          "group": "navigation"
+        }
+      ],
       "view/item/context": [
         {
           "when": "viewItem == currentConn && ForceCodeActive",
@@ -679,12 +704,12 @@
     "@types/fs-extra": "9.0.1",
     "@types/globule": "1.1.3",
     "@types/klaw": "3.0.1",
-    "@types/mocha": "^7.0.2",
-    "@types/node": "^10.17.26",
+    "@types/mocha": "^8.0.2",
+    "@types/node": "^10.17.28",
     "@types/sinon": "^9.0.4",
     "@types/universal-analytics": "0.4.4",
-    "@types/uuid": "8.0.0",
-    "@types/vscode": "1.46.0",
+    "@types/uuid": "8.0.1",
+    "@types/vscode": "1.47.0",
     "@types/xml2js": "0.4.5",
     "compressing": "1.5.1",
     "deepmerge": "4.2.2",
@@ -693,22 +718,22 @@
     "jsforce": "1.9.3",
     "klaw": "3.0.0",
     "mime-types": "2.1.27",
-    "mocha": "^8.0.1",
+    "mocha": "^8.1.1",
     "nyc": "^15.1.0",
     "os": "0.1.1",
     "request-light": "0.4.0",
     "rimraf": "^3.0.2",
-    "sinon": "^9.0.2",
+    "sinon": "^9.0.3",
     "source-map-support": "^0.5.19",
     "tree-kill": "1.2.2",
-    "ts-loader": "^7.0.5",
-    "tslint": "^6.1.2",
-    "typescript": "^3.9.5",
-    "universal-analytics": "0.4.20",
-    "uuid": "8.2.0",
-    "vsce": "^1.77.0",
+    "ts-loader": "^8.0.2",
+    "tslint": "^6.1.3",
+    "typescript": "^3.9.7",
+    "universal-analytics": "0.4.23",
+    "uuid": "8.3.0",
+    "vsce": "^1.78.0",
     "vscode-test": "^1.4.0",
-    "webpack": "^4.43.0",
+    "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12",
     "xml2js": "0.4.23"
   }

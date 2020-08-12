@@ -11,6 +11,7 @@ import {
 } from '../services';
 import { ForcecodeCommand } from '.';
 import { updateDecorations } from '../decorators';
+import { CoverageRetrieveType } from '../services/commandView';
 
 export class ToggleCoverage extends ForcecodeCommand {
   constructor() {
@@ -36,7 +37,7 @@ export class GetCodeCoverage extends ForcecodeCommand {
 
   public command() {
     return getApexTestResults()
-      .then(_res => getApexTestResults(true))
+      .then((_res) => getApexTestResults(true))
       .then((
         _res2 // update the current editor
       ) => updateDecorations());
@@ -73,7 +74,7 @@ export class ApexTest extends ForcecodeCommand {
       .runTest(context, selectedResource, this.cancellationToken)
       .then((dxRes: ApexTestQueryResult) => {
         return commandViewService
-          .enqueueCodeCoverage()
+          .enqueueCodeCoverage(CoverageRetrieveType.RunTest)
           .then(() => showResult(dxRes))
           .then(showLog);
       });
@@ -82,7 +83,7 @@ export class ApexTest extends ForcecodeCommand {
     function showResult(dxRes: ApexTestQueryResult) {
       if (dxRes.summary.failing > 0) {
         let errorMessage: string = 'FAILED: ';
-        dxRes.tests.forEach(curTest => {
+        dxRes.tests.forEach((curTest) => {
           //if (/*curTest.StackTrace && */curTest.Message) {
           errorMessage +=
             (curTest.StackTrace ? curTest.StackTrace + '\n' : '') +

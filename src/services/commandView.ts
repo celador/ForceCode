@@ -14,6 +14,12 @@ import * as path from 'path';
 const FIRST_TRY = 1;
 const SECOND_TRY = 2;
 
+export enum CoverageRetrieveType {
+  StartUp,
+  OpenFile,
+  RunTest,
+}
+
 export class CommandViewService implements vscode.TreeDataProvider<Task> {
   private runningTasksStatus: vscode.StatusBarItem;
   private static instance: CommandViewService;
@@ -41,8 +47,21 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     return CommandViewService.instance;
   }
 
-  public enqueueCodeCoverage() {
-    this.getCodeCoverage = true;
+  public enqueueCodeCoverage(type: CoverageRetrieveType) {
+    // mandatory since it only makes sense
+    if (type === CoverageRetrieveType.RunTest) {
+      this.getCodeCoverage = true;
+    } else if (
+      type === CoverageRetrieveType.OpenFile &&
+      getVSCodeSetting('retrieveCoverageOnFileRetrieval')
+    ) {
+      this.getCodeCoverage = true;
+    } else if (
+      type === CoverageRetrieveType.StartUp &&
+      getVSCodeSetting('retrieveCodeCoverageOnStart')
+    ) {
+      this.getCodeCoverage = true;
+    }
     return Promise.resolve(false);
   }
 
