@@ -130,7 +130,6 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public clear() {
-    delete this.classes;
     this.classes = [];
     this.refresh();
   }
