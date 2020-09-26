@@ -1,5 +1,7 @@
 ## Change Log
 
+* 3.22.10
+    * Update to jsforce 1.10.0
 * 3.22.9
     * Added options to `Allow to retrieve code coverage on demand` #377
         * Enable/disable retrieval of code coverage on start up and when retrieving/opening a file from the server. Options are located in the ForceCode extension's options.
