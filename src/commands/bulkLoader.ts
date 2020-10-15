@@ -34,10 +34,10 @@ export class BulkLoader extends ForcecodeCommand {
 
     // And set its HTML content
     panel.webview.html = getSettingsPage();
-    var csvPath: string;
-    var batch: any;
-    var timeOut: NodeJS.Timeout;
-    var totalRecords: number;
+    let csvPath: string;
+    let batch: any;
+    let timeOut: NodeJS.Timeout;
+    let totalRecords: number;
     const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
 
     // handle settings changes
@@ -66,7 +66,7 @@ export class BulkLoader extends ForcecodeCommand {
             }
           });
       } else {
-        var csvFileIn = fs.createReadStream(csvPath);
+        let csvFileIn = fs.createReadStream(csvPath);
         vscode.window.forceCode.conn.bulk.pollInterval = getVSCodeSetting('bulkLoaderPollInterval');
         vscode.window.forceCode.conn.bulk.pollTimeout = getVSCodeSetting('bulkLoaderPollTimeout');
         batch = vscode.window.forceCode.conn.bulk.load(
@@ -81,9 +81,9 @@ export class BulkLoader extends ForcecodeCommand {
               panel.webview.postMessage({ error: err.message || err });
               return;
             }
-            var totalErrors: number = 0;
-            var errorFile: string = '"Line Number In CSV File","ERROR"\n';
-            for (var i = 0; i < rets.length; i++) {
+            let totalErrors: number = 0;
+            let errorFile: string = '"Line Number In CSV File","ERROR"\n';
+            for (let i = 0; i < rets.length; i++) {
               if (!rets[i].success) {
                 totalErrors++;
                 errorFile += '"' + (i + 2) + '","' + rets[i].errors[0] + '"\n';

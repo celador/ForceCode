@@ -79,7 +79,7 @@ export class Container {
   }
 
   public createContainer() {
-    var self: Container = this;
+    let self: Container = this;
     return vscode.window.forceCode.conn.tooling
       .sobject('MetadataContainer')
       .create({ name: 'ForceCode-' + Date.now() })

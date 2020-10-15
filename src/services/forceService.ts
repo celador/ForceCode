@@ -59,7 +59,7 @@ export class ForceService implements forceCode.IForceService {
             'No'
           )
           .then((choice) => {
-            var option: boolean = false;
+            let option: boolean = false;
             if (choice === 'Yes') {
               option = true;
             }
@@ -94,13 +94,13 @@ export class ForceService implements forceCode.IForceService {
   // Match them up with ContainerMembers
   private getWorkspaceMembers(): Promise<Array<Promise<IMetadataFileProperties[]>>> {
     return new Promise((resolve) => {
-      var types: Array<Array<{}>> = [[]];
-      var typeNames: Array<string> = [];
-      var proms: Array<Promise<IMetadataFileProperties[]>> = [];
+      let types: Array<Array<{}>> = [[]];
+      let typeNames: Array<string> = [];
+      let proms: Array<Promise<IMetadataFileProperties[]>> = [];
       const index = 0;
       klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
         .on('data', function (item) {
-          var type: string | undefined = getToolingTypeFromExt(item.path);
+          let type: string | undefined = getToolingTypeFromExt(item.path);
 
           if (type) {
             if (!codeCovViewService.findByPath(item.path)) {
@@ -114,9 +114,9 @@ export class ForceService implements forceCode.IForceService {
                 types[index].push({ type: type });
               }
 
-              var thePath: string | undefined = item.path.split(path.sep).pop();
-              var filename: string = thePath?.split('.')[0] || '';
-              var workspaceMember: forceCode.IWorkspaceMember = {
+              let thePath: string | undefined = item.path.split(path.sep).pop();
+              let filename: string = thePath?.split('.')[0] || '';
+              let workspaceMember: forceCode.IWorkspaceMember = {
                 name: filename,
                 path: item.path,
                 id: '', //metadataFileProperties.id,
@@ -154,12 +154,12 @@ export class ForceService implements forceCode.IForceService {
       recs.forEach((curSet) => {
         if (Array.isArray(curSet)) {
           curSet.forEach((key) => {
-            var curFCFile: FCFile | undefined = codeCovViewService.findByNameAndType(
+            let curFCFile: FCFile | undefined = codeCovViewService.findByNameAndType(
               key.fullName,
               key.type
             );
             if (curFCFile) {
-              var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
+              let curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
               curMem.id = key.id;
               if (
                 curFCFile.compareDates(key.lastModifiedDate) ||
@@ -184,8 +184,8 @@ export class ForceService implements forceCode.IForceService {
   }
 
   public connect(): Promise<forceCode.IForceService> {
-    var self: forceCode.IForceService = vscode.window.forceCode;
-    var config = self.config;
+    let self: forceCode.IForceService = vscode.window.forceCode;
+    let config = self.config;
     if (!config.username) {
       notifications.showError(
         `ForceCode: No username found. Please try to login to the org again.`
@@ -208,7 +208,7 @@ export class ForceService implements forceCode.IForceService {
           .sobject('MetadataContainer')
           .find({ Name: { $like: 'ForceCode-%' } })
           .execute(function (_err: any, records: any) {
-            var toDelete: string[] = new Array<string>();
+            let toDelete: string[] = new Array<string>();
             if (!records || records.length === 0) {
               resolve();
             }

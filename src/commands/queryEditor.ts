@@ -41,9 +41,9 @@ export class QueryEditor extends ForcecodeCommand {
       'queryHistory.json'
     );
 
-    var curResults: any;
-    var queryHistory: string[] = [];
-    var curQuery: string;
+    let curResults: any;
+    let queryHistory: string[] = [];
+    let curQuery: string;
 
     // try and get the query history
     if (fs.existsSync(qHistPath)) {
@@ -63,7 +63,7 @@ export class QueryEditor extends ForcecodeCommand {
       if (message.save && curResults) {
         // save the results
         const csv: boolean = getVSCodeSetting('outputQueriesAsCSV');
-        var data: string = csv ? outputToCSV(curResults) : outputToString(curResults);
+        let data: string = csv ? outputToCSV(curResults) : outputToString(curResults);
         const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
         vscode.window
           .showSaveDialog({
@@ -85,7 +85,7 @@ export class QueryEditor extends ForcecodeCommand {
       } else if (message.update) {
         // push the update to the server here
         // get the type from the query
-        var toUpdateArray: [] = message.rows.map((row: any) => {
+        let toUpdateArray: [] = message.rows.map((row: any) => {
           return row.value;
         });
         const lowerCaseQuery: string = curQuery.toLowerCase();
@@ -94,7 +94,7 @@ export class QueryEditor extends ForcecodeCommand {
         const type: string = typeStart.split(' ')[0];
         // save the records using the bulk api
         //vscode.window.forceCode.conn.bulk.load(type, 'update', message.rows).then(res => {
-        var prom: Promise<Array<RecordResult>>;
+        let prom: Promise<Array<RecordResult>>;
         if (message.updateToql) {
           prom = vscode.window.forceCode.conn.tooling.sobject(type).update(toUpdateArray);
         } else {
@@ -104,7 +104,7 @@ export class QueryEditor extends ForcecodeCommand {
           .then(res => {
             // take the res and show message based off of it
             // clear out the bg color
-            var resToSend = {
+            let resToSend = {
               saveResult: true,
               saveSuccess: res[0].success,
               errors: res[0].errors,
@@ -116,7 +116,7 @@ export class QueryEditor extends ForcecodeCommand {
             });
           })
           .catch(err => {
-            var resToSend = {
+            let resToSend = {
               saveResult: true,
               saveSuccess: false,
               errors: [err.message || err],
@@ -149,7 +149,7 @@ export class QueryEditor extends ForcecodeCommand {
       }
       // save the query history
       fs.outputFileSync(qHistPath, JSON.stringify({ queries: queryHistory }, undefined, 4));
-      var resToSend: {};
+      let resToSend: {};
       if (results.length > 0 || results.totalSize > 0) {
         resToSend = {
           success: true,
@@ -167,7 +167,7 @@ export class QueryEditor extends ForcecodeCommand {
     }
 
     function onError(err: any) {
-      var errToSend: {} = {
+      let errToSend: {} = {
         success: false,
         results: err?.message || err,
       };

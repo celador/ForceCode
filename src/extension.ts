@@ -100,7 +100,7 @@ export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument(function(event) {
       // clear the code coverage
-      var fileName = event.document.fileName;
+      let fileName = event.document.fileName;
       // get the id
       const fcfile: FCFile | undefined = codeCovViewService.findByPath(fileName);
 

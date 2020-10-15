@@ -19,7 +19,7 @@ suite('forcecodeCommand.ts', () => {
     });
 
     return await new Promise((resolve, _reject) => {
-      var ccr = new RetrieveBundle();
+      let ccr = new RetrieveBundle();
       setTimeout(cancelTask, 3000);
       return ccr.run(undefined, undefined).then(
         (_res: any) => {

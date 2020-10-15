@@ -66,7 +66,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     if (index !== -1) {
       this.classes[index].setWsMember(wsMember);
     } else {
-      var newClass: FCFile = new FCFile(
+      let newClass: FCFile = new FCFile(
         wsMember.name,
         TreeItemCollapsibleState.None,
         this,
@@ -140,11 +140,11 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
   public getChildren(element?: FCFile): FCFile[] {
     if (!element) {
-      var fcFiles: FCFile[] = [];
+      let fcFiles: FCFile[] = [];
       // This is the root node
       Object.entries(ClassType).forEach((val) => {
         if (val[1] !== ClassType.NoShow && val[1] !== ClassType.Subclass) {
-          var newFCFile: FCFile = new FCFile(
+          let newFCFile: FCFile = new FCFile(
             val[1],
             TreeItemCollapsibleState.Collapsed,
             this,
@@ -159,7 +159,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       return fcFiles;
     } else if (element.getWsMember().type === ClassType.NoShow) {
       if (element.label === ClassType.NotInSrc) {
-        var fcFiles: FCFile[] = [];
+        let fcFiles: FCFile[] = [];
         if (workspace.textDocuments) {
           workspace.textDocuments.forEach((curEd) => {
             if (
@@ -168,7 +168,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
             ) {
               const fName = curEd.fileName.split(path.sep).pop();
               if (fName) {
-                var newFCFile: FCFile = new FCFile(
+                let newFCFile: FCFile = new FCFile(
                   fName,
                   TreeItemCollapsibleState.None,
                   this,
@@ -197,12 +197,12 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       element.getType() === ClassType.CoveredClass ||
       element.getType() === ClassType.UncoveredClass
     ) {
-      var fcFiles: FCFile[] = [];
+      let fcFiles: FCFile[] = [];
       for (let [key, value] of element.getWsMember().coverage) {
-        var total: number = value.NumLinesCovered + value.NumLinesUncovered;
-        var percent = Math.floor((value.NumLinesCovered / total) * 100);
+        let total: number = value.NumLinesCovered + value.NumLinesUncovered;
+        let percent = Math.floor((value.NumLinesCovered / total) * 100);
         if (key !== 'overall' && value.ApexTestClass && percent !== 0) {
-          var newFCFile: FCFile = new FCFile(
+          let newFCFile: FCFile = new FCFile(
             `${percent}% ${key}`,
             TreeItemCollapsibleState.None,
             this,
@@ -224,7 +224,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
   public getParent(element: FCFile): any {
     if (element.getWsMember().id !== '') {
-      var newFCFile: FCFile = new FCFile(
+      let newFCFile: FCFile = new FCFile(
         element.getType(),
         TreeItemCollapsibleState.Expanded,
         this,
@@ -237,8 +237,8 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   private sortFunc(a: FCFile, b: FCFile): number {
-    var aStr = a?.label?.split('% ').pop()?.toUpperCase() || '';
-    var bStr = b?.label?.split('% ').pop()?.toUpperCase() || '';
+    let aStr = a?.label?.split('% ').pop()?.toUpperCase() || '';
+    let bStr = b?.label?.split('% ').pop()?.toUpperCase() || '';
     return aStr.localeCompare(bStr);
   }
 }
@@ -294,10 +294,10 @@ export class FCFile extends TreeItem {
 
     this.type = ClassType.UncoveredClass;
     this.tooltip = this.label;
-    var fileCoverage: ICodeCoverage | undefined = this.wsMember.coverage.get('overall');
+    let fileCoverage: ICodeCoverage | undefined = this.wsMember.coverage.get('overall');
     if (fileCoverage) {
-      var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
-      var percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
+      let total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
+      let percent = Math.floor((fileCoverage.NumLinesCovered / total) * 100);
       this.label = percent + '% ' + this.label;
       this.tooltip =
         this.label + ' - ' + fileCoverage.NumLinesCovered + '/' + total + ' lines covered';
@@ -318,7 +318,7 @@ export class FCFile extends TreeItem {
       this.setCoverageTestClass('overall');
       // this next check needs changed to something different, as there are problems reading the file
     } else {
-      var testFile: boolean = false;
+      let testFile: boolean = false;
       try {
         testFile = fs.readFileSync(this.wsMember.path).toString().toLowerCase().includes('@istest');
       } catch (e) {}
@@ -372,8 +372,8 @@ export class FCFile extends TreeItem {
       return true;
     }
     const stat: fs.Stats = fs.statSync(this.wsMember.path);
-    var localMS: number = stat.mtime.getTime();
-    var serverMS: number = new Date(serverDate).getTime();
+    let localMS: number = stat.mtime.getTime();
+    let serverMS: number = new Date(serverDate).getTime();
 
     if (localMS > serverMS || serverMS - localMS <= MAX_TIME_BETWEEN_FILE_CHANGES) {
       return true;

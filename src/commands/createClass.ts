@@ -21,7 +21,7 @@ export class CreateClass extends ForcecodeCommand {
     // ask what the user wants to create
 
     return new Promise((resolve, reject) => {
-      var fileOptions: vscode.QuickPickItem[] = [
+      let fileOptions: vscode.QuickPickItem[] = [
         {
           label: 'Aura Component',
           description: 'Create an Aura Component AKA a Lightning Component',
@@ -130,7 +130,7 @@ export class CreateClass extends ForcecodeCommand {
     }
 
     function createFolder(typeFolder: string, name?: string): string {
-      var metaPath: string = path.join(vscode.window.forceCode.projectRoot, typeFolder);
+      let metaPath: string = path.join(vscode.window.forceCode.projectRoot, typeFolder);
       if (name) {
         metaPath = path.join(metaPath, name);
       }
@@ -142,7 +142,7 @@ export class CreateClass extends ForcecodeCommand {
     }
 
     function createMetaFile(name: string, type: string, filePath: string, ext: string) {
-      var extra: string = '';
+      let extra: string = '';
       if (type === 'ApexClass' || type === 'ApexTrigger') {
         extra = '<status>Active</status>';
       } else if (type === 'LightningComponentBundle') {
@@ -152,13 +152,13 @@ export class CreateClass extends ForcecodeCommand {
       } else {
         extra = `<label>${name}</label>`;
       }
-      var metaFile: string = `<?xml version="1.0" encoding="UTF-8"?>
+      let metaFile: string = `<?xml version="1.0" encoding="UTF-8"?>
 <${type} xmlns="urn:metadata.tooling.soap.sforce.com" fqn="${name}">
     <apiVersion>${vscode.window.forceCode.config.apiVersion ||
       getVSCodeSetting('defaultApiVersion')}</apiVersion>
     ${extra}
 </${type}>`;
-      var metaFileName: string = path.join(filePath, name + '.' + ext + '-meta.xml');
+      let metaFileName: string = path.join(filePath, name + '.' + ext + '-meta.xml');
       fs.outputFileSync(metaFileName, metaFile);
     }
 
@@ -173,7 +173,7 @@ export class CreateClass extends ForcecodeCommand {
 
     function createAura(name: string, resolve: any, reject: any) {
       // ask if the user wants an App, Event, or Component
-      var auraOptions: vscode.QuickPickItem[] = [
+      let auraOptions: vscode.QuickPickItem[] = [
         {
           label: 'App',
           description: 'Create an Aura App',
@@ -285,7 +285,7 @@ export class CreateClass extends ForcecodeCommand {
 </svg>`;
       const svgPath: string = path.join(folderPath, name + '.svg');
       fs.outputFileSync(svgPath, svgSrc);
-      var fileContents;
+      let fileContents;
       if (ext === 'cmp') {
         fileContents = `<aura:component>
 
@@ -375,7 +375,7 @@ export default class ${jsClassName} extends LightningElement {}`;
       const ext = 'cls';
       const folderPath = createFolder('classes');
       createMetaFile(name, 'ApexClass', folderPath, ext);
-      var fileContents: string = `public with sharing class ${name} {
+      let fileContents: string = `public with sharing class ${name} {
 
 }`;
       createSrcFile(name, folderPath, fileContents, ext, resolve);

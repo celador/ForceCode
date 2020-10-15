@@ -37,7 +37,7 @@ export class CompileMenu extends ForcecodeCommand {
 
   public async command(context: any, selectedResource?: any) {
     selectedResource = selectedResource ? true : false;
-    var document: string | undefined = vscode.window.activeTextEditor?.document.fileName;
+    let document: string | undefined = vscode.window.activeTextEditor?.document.fileName;
     if (context) {
       if (context.uri) {
         context = context.uri;
@@ -81,20 +81,20 @@ export async function compile(
     return Promise.resolve(false);
   }
 
-  var diagnosticCollection: vscode.DiagnosticCollection =
+  let diagnosticCollection: vscode.DiagnosticCollection =
     vscode.window.forceCode.fcDiagnosticCollection;
   diagnosticCollection.delete(document.uri);
-  var diagnostics: vscode.Diagnostic[] = [];
-  var exDiagnostics: vscode.Diagnostic[] = vscode.languages.getDiagnostics(document.uri);
+  let diagnostics: vscode.Diagnostic[] = [];
+  let exDiagnostics: vscode.Diagnostic[] = vscode.languages.getDiagnostics(document.uri);
 
   const toolingType: string | undefined = getToolingTypeFromFolder(document.uri);
   const ttMeta: forceCode.IMetadataObject | undefined = getAnyTTMetadataFromPath(document.fileName);
   const folderToolingType: string | undefined = ttMeta?.xmlName;
   const name: string | undefined = getName(document, toolingType);
 
-  var DefType: string | undefined;
-  var Metadata: {} | undefined;
-  var errMessages: string[] = [];
+  let DefType: string | undefined;
+  let Metadata: {} | undefined;
+  let errMessages: string[] = [];
 
   if (folderToolingType === 'StaticResource') {
     return Promise.reject(
@@ -103,7 +103,7 @@ export async function compile(
   }
 
   if (document.fileName.endsWith('-meta.xml')) {
-    var tmpMeta = await new Promise((resolve, reject) => {
+    let tmpMeta = await new Promise((resolve, reject) => {
       parseString(document.getText(), { explicitArray: false }, function (err, dom) {
         if (err) {
           return reject(err);
@@ -132,11 +132,11 @@ export async function compile(
     return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot)
       .then(() => {
         const files: string[] = [];
-        var pathSplit = 'documents';
+        let pathSplit = 'documents';
         if (folderToolingType === 'EmailTemplate') {
           pathSplit = 'email';
         }
-        var foldName: string | undefined = document.fileName
+        let foldName: string | undefined = document.fileName
           .split(path.sep + pathSplit + path.sep)
           .pop();
         if (foldName) {
@@ -156,7 +156,7 @@ export async function compile(
     return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot)
       .then(() => {
         const files: string[] = [];
-        var pathSplit: string[] = document.fileName.split(path.sep);
+        let pathSplit: string[] = document.fileName.split(path.sep);
         //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
         files.push(path.join(pathSplit[pathSplit.length - 2], pathSplit[pathSplit.length - 1]));
         files.push('package.xml');
@@ -194,7 +194,7 @@ export async function compile(
       notifications.showStatus(`${name} ${DefType || ''} $(check)`);
       return true;
     }
-    var failures: number = 0;
+    let failures: number = 0;
     if (res instanceof Error) {
       onError(res);
       failures++;
@@ -208,7 +208,7 @@ export async function compile(
                 failure.lineNumber == null || failure.lineNumber < 1 ? 1 : failure.lineNumber;
               failure.columnNumber = failure.columnNumber == null ? 0 : failure.columnNumber;
 
-              var failureRange: vscode.Range = document.lineAt(failure.lineNumber - 1).range;
+              let failureRange: vscode.Range = document.lineAt(failure.lineNumber - 1).range;
               if (failure.columnNumber - 1 >= 0) {
                 failureRange = failureRange.with(
                   new vscode.Position(failure.lineNumber - 1, failure.columnNumber - 1)
@@ -278,16 +278,16 @@ export async function compile(
     if (errMsg.indexOf('expired access/refresh token') !== -1) {
       throw err;
     }
-    var theerr: string;
-    var failureLineNumber: number = 1;
-    var failureColumnNumber: number = 0;
+    let theerr: string;
+    let failureLineNumber: number = 1;
+    let failureColumnNumber: number = 0;
     try {
       const matchRegex = /:(\d+),(\d+):|:(\d+),(\d+) :|\[(\d+),(\d+)\]/; // this will match :12,3432: :12,3432 : and [12,3432]
-      var errSplit = errMsg.split('Message:').pop();
+      let errSplit = errMsg.split('Message:').pop();
       theerr = errSplit || errMsg;
       errSplit = theerr.split(': Source').shift();
       theerr = errSplit || theerr;
-      var match = errMsg.match(matchRegex);
+      let match = errMsg.match(matchRegex);
       if (match) {
         match = match.filter((mat) => mat); // eliminate all undefined elements
         errSplit = theerr.split(match[0]).pop();
@@ -302,7 +302,7 @@ export async function compile(
     } catch (e) {
       theerr = errMsg;
     }
-    var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
+    let failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
     if (failureColumnNumber - 1 >= 0) {
       failureRange = failureRange.with(
         new vscode.Position(failureLineNumber - 1, failureColumnNumber)

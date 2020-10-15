@@ -2,12 +2,12 @@ export function outputToString(toConvert: any, depth?: number): string {
   if (toConvert === undefined || toConvert === null) {
     return '';
   }
-  var retval: string;
+  let retval: string;
   if (typeof toConvert === 'object') {
-    var level: number = depth || 1;
-    var tabs: string = '';
-    var brTabs: string = '';
-    for (var theTabs = 0; theTabs < level; theTabs++) {
+    let level: number = depth || 1;
+    let tabs: string = '';
+    let brTabs: string = '';
+    for (let theTabs = 0; theTabs < level; theTabs++) {
       tabs += '\t';
       if (theTabs + 1 < level) {
         brTabs += '\t';
@@ -32,10 +32,10 @@ interface ObjArr {
 
 export function outputToCSV(arr: ObjArr[]): string {
   delete arr[0].attributes;
-  var csvContent = '"' + getKeys(arr[0]).join('","') + '"\n';
-  for (var i = 0; i < arr.length; i++) {
+  let csvContent = '"' + getKeys(arr[0]).join('","') + '"\n';
+  for (let i = 0; i < arr.length; i++) {
     const curItem = arr[i];
-    var curItemArr: string[] = [];
+    let curItemArr: string[] = [];
     getKeys(curItem).forEach(key => {
       curItemArr.push(curItem[key] === null ? '""' : getValue(curItem, key));
     });
@@ -48,7 +48,7 @@ export function outputToCSV(arr: ObjArr[]): string {
 }
 
 function getKeys(value: string | any, theArr?: string[], prevName?: string): string[] {
-  var curArr: string[] = theArr || [];
+  let curArr: string[] = theArr || [];
   if (value === null) {
     if (prevName) {
       curArr.push(prevName);
@@ -57,7 +57,7 @@ function getKeys(value: string | any, theArr?: string[], prevName?: string): str
     Object.keys(value)
       .filter(value => value !== 'attributes')
       .forEach(val => {
-        var curName = prevName ? prevName + '.' + val : val;
+        let curName = prevName ? prevName + '.' + val : val;
         if (typeof value[val] === 'object') {
           getKeys(value[val], curArr, curName);
         } else {
@@ -71,9 +71,9 @@ function getKeys(value: string | any, theArr?: string[], prevName?: string): str
 }
 
 function getValue(obj: ObjArr, val: string): string {
-  var curObj: any = obj;
-  var valSplit = val.split('.');
-  for (var i = 0; i < valSplit.length; i++) {
+  let curObj: any = obj;
+  let valSplit = val.split('.');
+  for (let i = 0; i < valSplit.length; i++) {
     curObj = curObj[valSplit[i]];
   }
   return `"${curObj || ''}"`;

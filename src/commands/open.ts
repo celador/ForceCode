@@ -43,18 +43,18 @@ export class Open extends ForcecodeCommand {
     // =======================================================================================================================================
     // =======================================================================================================================================
     function getFileList() {
-      var metadataTypes: string[] = [
+      let metadataTypes: string[] = [
         'ApexClass',
         'ApexTrigger',
         'ApexPage',
         'ApexComponent',
         'StaticResource',
       ];
-      var predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ||
+      let predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ||
         ''}'`;
-      var promises: any[] = metadataTypes.map(t => {
-        var sResource = t === 'StaticResource' ? ', ContentType' : '';
-        var q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;
+      let promises: any[] = metadataTypes.map(t => {
+        let sResource = t === 'StaticResource' ? ', ContentType' : '';
+        let q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;
         return vscode.window.forceCode.conn.tooling.query(q);
       });
       promises.push(
@@ -120,18 +120,18 @@ function showFileOptions(promises: any[], cancellationToken: FCCancellationToken
       return vscode.window.showQuickPick(options, config);
     })
     .then(opt => {
-      var opts: any = opt;
+      let opts: any = opt;
       if (isEmptyUndOrNull(opts)) {
         return Promise.resolve();
       }
-      var files: ToolingType[] = [];
+      let files: ToolingType[] = [];
       if (!(opts instanceof Array)) {
         opts = [opts];
       }
       opts.forEach((curOpt: any) => {
-        var tType: string = curOpt.detail.split(' ')[0];
-        var fName: string = curOpt.label.slice(curOpt.label.lastIndexOf(' ') + 1).split('.')[0];
-        var index: number = getTTIndex(tType, files);
+        let tType: string = curOpt.detail.split(' ')[0];
+        let fName: string = curOpt.label.slice(curOpt.label.lastIndexOf(' ') + 1).split('.')[0];
+        let index: number = getTTIndex(tType, files);
         if (index >= 0) {
           files[index].members.push(fName);
         } else {
@@ -142,13 +142,13 @@ function showFileOptions(promises: any[], cancellationToken: FCCancellationToken
       return retrieve({ types: files }, cancellationToken).then((res: any) => {
         if (getVSCodeSetting('showFilesOnOpen')) {
           // open the files in the editor
-          var filesOpened: number = 0;
+          let filesOpened: number = 0;
           return opts.forEach((curFile: any) => {
             if (
               !cancellationToken.isCanceled() &&
               filesOpened < getVSCodeSetting('showFilesOnOpenMax')
             ) {
-              var tType: string = curFile.detail.split(' ')[0];
+              let tType: string = curFile.detail.split(' ')[0];
               if (
                 tType !== 'AuraDefinitionBundle' &&
                 tType !== 'StaticResource' &&
@@ -156,10 +156,10 @@ function showFileOptions(promises: any[], cancellationToken: FCCancellationToken
                 tType != 'LightningMessageChannel'
               ) {
                 filesOpened++;
-                var fName: string = curFile.label
+                let fName: string = curFile.label
                   .slice(curFile.label.lastIndexOf(' ') + 1)
                   .split('.')[0];
-                var filePath: string = `${vscode.window.forceCode.projectRoot}${
+                let filePath: string = `${vscode.window.forceCode.projectRoot}${
                   path.sep
                 }${getFolder(tType)}${path.sep}${fName}.${getExtension(tType)}`;
                 vscode.workspace.openTextDocument(filePath).then(document => {

@@ -5,15 +5,15 @@ import { defaultOptions, SaveResult } from '../../src/services';
 import * as assert from 'assert';
 
 export function createProjectDir(): vscode.Uri[] | undefined {
-  var folder = '.';
-  var folderUri: vscode.Uri[] | undefined;
+  let folder = '.';
+  let folderUri: vscode.Uri[] | undefined;
   if (vscode.workspace.workspaceFolders) {
     const wsUri = vscode.workspace.workspaceFolders[0].uri;
     folder = wsUri.fsPath;
     folder = path.join(folder, 'test');
     removeDirOrFile(folder);
     fs.mkdirpSync(folder);
-    var folderUriPre = vscode.Uri.file(folder);
+    let folderUriPre = vscode.Uri.file(folder);
     folderUri = [
       Object.assign({}, wsUri, {
         fsPath: folder,
@@ -30,8 +30,8 @@ export function createForceJson(username: string, autoCompile?: boolean) {
     if (!autoCompile) {
       removeProjectFiles();
     }
-    var thePathOrg = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    var thePath = path.join(thePathOrg, 'force.json');
+    let thePathOrg = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    let thePath = path.join(thePathOrg, 'force.json');
     const forceData = {
       lastUsername: username,
     };
@@ -39,7 +39,7 @@ export function createForceJson(username: string, autoCompile?: boolean) {
     if (username) {
       const fcPath = path.join(thePathOrg, '.forceCode', username);
       fs.mkdirpSync(fcPath);
-      var settings = Object.assign(defaultOptions, {
+      let settings = Object.assign(defaultOptions, {
         url: 'https://login.salesforce.com',
         autoCompile: autoCompile ? autoCompile : false,
         username: username,
@@ -51,7 +51,7 @@ export function createForceJson(username: string, autoCompile?: boolean) {
 
 export function removeProjectFiles() {
   if (vscode.workspace.workspaceFolders) {
-    var thePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    let thePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     removeDirOrFile(path.join(thePath, 'force.json'));
     removeDirOrFile(path.join(thePath, 'sfdx-project.json'));
     removeDirOrFile(path.join(thePath, '.forceCode'));
@@ -68,7 +68,7 @@ function removeDirOrFile(thePath: string) {
 }
 
 export function addErrorToDoc() {
-  var editor = vscode.window.activeTextEditor;
+  let editor = vscode.window.activeTextEditor;
   if (!editor) {
     return {
       async then(callback: any) {
@@ -89,7 +89,7 @@ export function addErrorToDoc() {
 }
 
 export function removeErrorOnDoc(dontRemove?: boolean, autoCompile?: boolean) {
-  var editor = vscode.window.activeTextEditor;
+  let editor = vscode.window.activeTextEditor;
   if (!editor) {
     return {
       async then(callback: any) {
@@ -117,7 +117,7 @@ export function removeErrorOnDoc(dontRemove?: boolean, autoCompile?: boolean) {
 
 function getSaveResult(expected: boolean): Promise<any> {
   const MAX_TIME = 60;
-  var seconds = 0;
+  let seconds = 0;
   return new Promise<SaveResult | undefined>((resolve, _reject) => checkResult(resolve)).then(
     res => {
       if (res) {

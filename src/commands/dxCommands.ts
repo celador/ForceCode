@@ -29,8 +29,8 @@ export class PreviewVisualforce extends ForcecodeCommand {
   }
 
   public command(context: Uri) {
-    var vfFileNameSplit = context.fsPath.split(path.sep);
-    var vfFileName = vfFileNameSplit[vfFileNameSplit.length - 1].split('.')[0];
+    let vfFileNameSplit = context.fsPath.split(path.sep);
+    let vfFileName = vfFileNameSplit[vfFileNameSplit.length - 1].split('.')[0];
     return dxService.openOrgPage('/apex/' + vfFileName);
   }
 }
@@ -43,8 +43,8 @@ export class PreviewApp extends ForcecodeCommand {
   }
 
   public command(context: Uri) {
-    var appFileNameSplit = context.fsPath.split(path.sep);
-    var appFileName = appFileNameSplit[appFileNameSplit.length - 1];
+    let appFileNameSplit = context.fsPath.split(path.sep);
+    let appFileName = appFileNameSplit[appFileNameSplit.length - 1];
     return dxService.openOrgPage('/c/' + appFileName);
   }
 }
@@ -57,14 +57,14 @@ export class OpenFileInOrg extends ForcecodeCommand {
   }
 
   public command(context: any) {
-    var id: string | undefined;
+    let id: string | undefined;
     if (context) {
       if (context.fsPath) {
-        var filePath = context.fsPath;
+        let filePath = context.fsPath;
         const fcfile: FCFile | undefined = codeCovViewService.findByPath(filePath);
         const member: IWorkspaceMember | undefined = fcfile?.getWsMember();
         if (member) {
-          var type = member.type;
+          let type = member.type;
           if (type === 'ApexClass') {
             type += 'e';
           }

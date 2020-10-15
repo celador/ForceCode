@@ -41,8 +41,8 @@ export class Refresh extends ForcecodeCommand {
   public command(context: any, selectedResource?: any) {
     if (selectedResource instanceof Array) {
       return new Promise((resolve, reject) => {
-        var files: PXMLMember[] = [];
-        var proms: Promise<PXMLMember>[] = selectedResource.map((curRes) => {
+        let files: PXMLMember[] = [];
+        let proms: Promise<PXMLMember>[] = selectedResource.map((curRes) => {
           if (curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
             return getAnyNameFromUri(curRes);
           } else {
@@ -57,7 +57,7 @@ export class Refresh extends ForcecodeCommand {
         Promise.all(proms)
           .then((theNames) => {
             theNames.forEach((curName) => {
-              var index: number = getTTIndex(curName.name, files);
+              let index: number = getTTIndex(curName.name, files);
               if (index >= 0) {
                 // file deepcode ignore ComparisonArrayLiteral: <please specify a reason of ignoring this>
                 if (curName.members === ['*']) {
@@ -123,10 +123,10 @@ export function retrieve(
   cancellationToken: FCCancellationToken
 ) {
   let option: any;
-  var newWSMembers: IWorkspaceMember[] = [];
-  var toolTypes: Array<{}> = [];
-  var typeNames: Array<string> = [];
-  var packageName: string | undefined;
+  let newWSMembers: IWorkspaceMember[] = [];
+  let toolTypes: Array<{}> = [];
+  let typeNames: Array<string> = [];
+  let packageName: string | undefined;
 
   return Promise.resolve(vscode.window.forceCode)
     .then(showPackageOptions)
@@ -141,8 +141,8 @@ export function retrieve(
     if (!fcConnection.currentConnection) {
       return Promise.reject('No current connection');
     }
-    var orgInfo: FCOauth = fcConnection.currentConnection.orgInfo;
-    var requestUrl: string = orgInfo.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
+    let orgInfo: FCOauth = fcConnection.currentConnection.orgInfo;
+    let requestUrl: string = orgInfo.instanceUrl + '/_ui/common/apex/debug/ApexCSIAPI';
     const foptions: XHROptions = {
       type: 'POST',
       url: requestUrl,
@@ -270,7 +270,7 @@ export function retrieve(
       version?: string
     ) {
       // count the number of types. if it's more than 10,000 the retrieve will fail
-      var totalTypes: number = 0;
+      let totalTypes: number = 0;
       retrieveTypes.types.forEach((type) => {
         totalTypes += type.members.length;
       });
@@ -283,7 +283,7 @@ export function retrieve(
       if (cancellationToken.isCanceled()) {
         reject();
       }
-      var theStream = vscode.window.forceCode.conn.metadata.retrieve({
+      let theStream = vscode.window.forceCode.conn.metadata.retrieve({
         unpackaged: retrieveTypes,
         apiVersion:
           version ||
@@ -332,7 +332,7 @@ export function retrieve(
         if (cancellationToken.isCanceled()) {
           reject();
         }
-        var theStream = vscode.window.forceCode.conn.metadata.retrieve({
+        let theStream = vscode.window.forceCode.conn.metadata.retrieve({
           packageNames: [option.description],
           apiVersion:
             vscode.window.forceCode.config.apiVersion || getVSCodeSetting('defaultApiVersion'),
@@ -369,7 +369,7 @@ export function retrieve(
             'Metadata describe error. Please try logging out of and back into the org.'
           );
         }
-        var types: any[] = vscode.window.forceCode.describe.metadataObjects
+        let types: any[] = vscode.window.forceCode.describe.metadataObjects
           .filter((o) => o.xmlName === metadataType)
           .map((r) => {
             return { name: r.xmlName, members: '*' };
@@ -378,8 +378,8 @@ export function retrieve(
       }
 
       function unpackaged() {
-        var xmlFilePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}package.xml`;
-        var data: any = fs.readFileSync(xmlFilePath);
+        let xmlFilePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}package.xml`;
+        let data: any = fs.readFileSync(xmlFilePath);
         parseString(data, { explicitArray: false }, function (err, dom) {
           if (err) {
             reject(err);
@@ -432,7 +432,7 @@ export function retrieve(
         stream.pause();
         reject(stream.emit('end'));
       });
-      var resBundleNames: string[] = [];
+      let resBundleNames: string[] = [];
       const destDir: string = vscode.window.forceCode.projectRoot;
       new compress.zip.UncompressStream({ source: stream })
         .on('error', function (err: any) {
@@ -440,7 +440,7 @@ export function retrieve(
         })
         .on('entry', function (header: any, stream: any, next: any) {
           stream.on('end', next);
-          var name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
+          let name = path.normalize(header.name).replace('unpackaged' + path.sep, '');
           name = packageName ? name.replace(packageName + path.sep, '') : name;
           if (header.type === 'file') {
             const tType: string | undefined = getToolingTypeFromExt(name);
@@ -448,7 +448,7 @@ export function retrieve(
             if (tType && fullName) {
               // add to ws members
 
-              var wsMem: IWorkspaceMember = {
+              let wsMem: IWorkspaceMember = {
                 name: fullName.split('.')[0],
                 path: `${vscode.window.forceCode.projectRoot}${path.sep}${name}`,
                 id: '', //metadataFileProperties.id,
@@ -486,13 +486,13 @@ export function retrieve(
             // unzip the resource
             parseString(data, { explicitArray: false }, function (err, dom) {
               if (!err) {
-                var actualResData = fs.readFileSync(
+                let actualResData = fs.readFileSync(
                   path.join(destDir, metaName).split('-meta.xml')[0]
                 );
-                var ContentType: string = dom.StaticResource.contentType;
-                var ctFolderName = ContentType.split('/').join('.');
+                let ContentType: string = dom.StaticResource.contentType;
+                let ctFolderName = ContentType.split('/').join('.');
                 const resFN: string = metaName.slice(metaName.indexOf(path.sep) + 1).split('.')[0];
-                var zipFilePath: string = path.join(
+                let zipFilePath: string = path.join(
                   destDir,
                   'resource-bundles',
                   resFN + '.resource.' + ctFolderName
@@ -503,14 +503,14 @@ export function retrieve(
                   compress.zip.uncompress(actualResData, zipFilePath);
                 } else {
                   // this will work for most other things...
-                  var theData: any;
+                  let theData: any;
                   if (ContentType.includes('image') || ContentType.includes('shockwave-flash')) {
                     theData = Buffer.from(actualResData.toString('base64'), 'base64');
                   } else {
                     theData = actualResData.toString(mime.charset(ContentType) || 'UTF-8');
                   }
-                  var ext = mime.extension(ContentType);
-                  var filePath: string = path.join(
+                  let ext = mime.extension(ContentType);
+                  let filePath: string = path.join(
                     destDir,
                     'resource-bundles',
                     resFN + '.resource.' + ctFolderName,
@@ -543,11 +543,11 @@ export function retrieve(
 
       function updateWSMems(): Promise<any> {
         if (toolTypes.length > 0) {
-          var theTypes: { [key: string]: Array<any> } = {};
+          let theTypes: { [key: string]: Array<any> } = {};
 
           theTypes['type0'] = toolTypes;
           if (theTypes['type0'].length > 3) {
-            for (var i = 1; theTypes['type0'].length > 3; i++) {
+            for (let i = 1; theTypes['type0'].length > 3; i++) {
               theTypes['type' + i] = theTypes['type0'].splice(0, 3);
             }
           }
@@ -573,7 +573,7 @@ export function retrieve(
         recs.some((curSet) => {
           return toArray(curSet).some((key) => {
             if (key && newWSMembers.length > 0) {
-              var index: number = newWSMembers.findIndex((curMem) => {
+              let index: number = newWSMembers.findIndex((curMem) => {
                 return curMem.name === key.fullName && curMem.type === key.type;
               });
               if (index >= 0) {
@@ -610,7 +610,7 @@ export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promis
       );
     }
     const ffNameParts: string[] = uri.fsPath.split(projRoot)[1].split(path.sep);
-    var baseDirectoryName: string = path.parse(uri.fsPath).name;
+    let baseDirectoryName: string = path.parse(uri.fsPath).name;
     const isAura: boolean = ffNameParts[0] === 'aura';
     const isLWC: boolean = ffNameParts[0] === 'lwc';
     const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
@@ -632,7 +632,7 @@ export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promis
           vscode.window.forceCode.projectRoot
       );
     }
-    var folderedName: string;
+    let folderedName: string;
     if (tType.inFolder && ffNameParts.length > 2) {
       // we have foldered metadata
       ffNameParts.shift();
@@ -654,7 +654,7 @@ export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promis
         });
       }
     } else {
-      var defType: string | undefined;
+      let defType: string | undefined;
       const retObj: PXMLMember = { name: tType.xmlName, members: [] };
       if (isAura && getDefType) {
         defType = getAuraDefTypeFromDocument(await vscode.workspace.openTextDocument(uri.fsPath));

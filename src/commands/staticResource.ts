@@ -117,8 +117,8 @@ export function staticResourceDeployFromFile(textDocument: string): any {
   function getPackageName(): vscode.QuickPickItem {
     let bundlePath: string =
       vscode.window.forceCode.projectRoot + path.sep + 'resource-bundles' + path.sep;
-    var resType;
-    var resourceName = '';
+    let resType;
+    let resourceName = '';
     try {
       resourceName = textDocument.split(bundlePath)[1].split('.resource.')[0];
       resType = textDocument
@@ -135,7 +135,7 @@ export function staticResourceDeployFromFile(textDocument: string): any {
 }
 
 function onError(err: any) {
-  var mess =
+  let mess =
     'Invalid static resource folder or file name. Name must be in the form of ResourceName.resource.type.subtype\nEXAMPLE: ' +
     'MyResource.resource.application.javascript\nThis folder would then contain one file, named MyResource.js.\nSee the ' +
     'ForceCode output panel for more detail.';
@@ -144,13 +144,13 @@ function onError(err: any) {
 
 async function bundleAndDeploy(option: vscode.QuickPickItem) {
   let root: string = getPackagePath(option);
-  var detail = option.detail || '';
+  let detail = option.detail || '';
   if (detail.includes('zip') || detail === 'SPA') {
     let zip: any = zipFiles([''], root);
     return deploy(zip, option.label, detail);
   } else {
-    var ext = '.' + mime.extension(option.detail);
-    var data = fs.readFileSync(root + path.sep + option.label + ext).toString('base64');
+    let ext = '.' + mime.extension(option.detail);
+    let data = fs.readFileSync(root + path.sep + option.label + ext).toString('base64');
     return vscode.window.forceCode.conn.metadata.upsert(
       'StaticResource',
       await makeResourceMetadata(option.label, data, detail)
@@ -180,7 +180,7 @@ function bundleAndDeployAll() {
 }
 
 function getPackagePath(option: vscode.QuickPickItem) {
-  var bundlePath: string = vscode.window.forceCode.projectRoot + path.sep;
+  let bundlePath: string = vscode.window.forceCode.projectRoot + path.sep;
   // Get package data
   if (option.detail && option.detail !== 'SPA') {
     bundlePath +=
@@ -204,7 +204,7 @@ function getPackagePath(option: vscode.QuickPickItem) {
  */
 function deploy(zip: any, packageName: string, conType: string) {
   return new Promise((resolve, reject) => {
-    var finalPath: string = `${vscode.window.forceCode.projectRoot}${path.sep}staticresources${path.sep}${packageName}.resource`;
+    let finalPath: string = `${vscode.window.forceCode.projectRoot}${path.sep}staticresources${path.sep}${packageName}.resource`;
     zip
       .pipe(fs.createWriteStream(finalPath))
       .on('finish', async () => {
@@ -232,7 +232,7 @@ function deploy(zip: any, packageName: string, conType: string) {
  */
 async function makeResourceMetadata(bundleName: string, cont: any, contType: string) {
   const allSettings = getResourceSettings();
-  var curSetting: IResourceBundle | undefined = findResourceSetting(bundleName, allSettings);
+  let curSetting: IResourceBundle | undefined = findResourceSetting(bundleName, allSettings);
   let settings: ResourceBundle[] = [];
   if (!curSetting) {
     const records = await vscode.window.forceCode.conn.tooling
@@ -318,7 +318,7 @@ function deployAllComplete(results: any) {
       )}" to reload active tab of window 1'`
     );
   }
-  var talliedResults: {} = results.reduce((prev: any, curr: any) => {
+  let talliedResults: {} = results.reduce((prev: any, curr: any) => {
     return Object.assign(prev, curr);
   }, {});
   return talliedResults;

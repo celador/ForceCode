@@ -34,9 +34,9 @@ export const defaultOptions: Config = {
 };
 
 export function getSetConfig(service?: ForceService): Promise<Config> {
-  var self: IForceService = service || vscode.window.forceCode;
+  let self: IForceService = service || vscode.window.forceCode;
   const projPath = self.workspaceRoot;
-  var lastUsername: string | undefined = readForceJson();
+  let lastUsername: string | undefined = readForceJson();
   self.config = readConfigFile(lastUsername, service);
 
   self.projectRoot = path.join(projPath, self.config.src || 'src');
@@ -55,8 +55,8 @@ export function getSetConfig(service?: ForceService): Promise<Config> {
   const sfdxPath = path.join(projPath, '.sfdx');
   const sfdxProjectJson = path.join(projPath, 'sfdx-project.json');
   const forceSFDXProjJson = path.join(forceConfigPath, 'sfdx-project.json');
-  var sfdxStat;
-  var requiresRestart = false;
+  let sfdxStat;
+  let requiresRestart = false;
 
   try {
     sfdxStat = fs.lstatSync(sfdxPath);
@@ -120,7 +120,7 @@ export function getSetConfig(service?: ForceService): Promise<Config> {
   // update the defaultusername in the sfdx config file...
   if (getVSCodeSetting('setDefaultUsernameOnLogin')) {
     const sfdxConfigPath = path.join(sfdxPath, 'sfdx-config.json');
-    var sfdxConfig: SFDXConfig = {};
+    let sfdxConfig: SFDXConfig = {};
     if (fs.existsSync(sfdxConfigPath)) {
       sfdxConfig = fs.readJsonSync(sfdxConfigPath);
     }
@@ -141,9 +141,9 @@ export function getSetConfig(service?: ForceService): Promise<Config> {
 
 export function readForceJson() {
   const projPath = vscode.window.forceCode.workspaceRoot;
-  var lastUsername: string | undefined;
+  let lastUsername: string | undefined;
   if (fs.existsSync(path.join(projPath, 'force.json'))) {
-    var forceFile = fs.readJsonSync(path.join(projPath, 'force.json'));
+    let forceFile = fs.readJsonSync(path.join(projPath, 'force.json'));
     lastUsername = forceFile.lastUsername;
   }
   return lastUsername;
@@ -159,8 +159,8 @@ export function saveConfigFile(userName: string | undefined, config: Config) {
 }
 
 export function readConfigFile(userName: string | undefined, service?: ForceService): Config {
-  var self: IForceService = service || vscode.window.forceCode;
-  var config: Config = defaultOptions;
+  let self: IForceService = service || vscode.window.forceCode;
+  let config: Config = defaultOptions;
   if (userName) {
     const configPath: string = path.join(
       self.workspaceRoot,

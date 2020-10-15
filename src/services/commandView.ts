@@ -71,7 +71,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
         return c === execution?.commandName;
       })
     ) {
-      var splitPath;
+      let splitPath;
       if (context?.fsPath) {
         splitPath = context.fsPath.split(path.sep);
       } else if (context) {
@@ -99,7 +99,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
       this.fileModCommands++;
     }
 
-    var theTask: Task = new Task(this, execution, context, selectedResource);
+    let theTask: Task = new Task(this, execution, context, selectedResource);
     this.tasks.push(theTask);
     const visibleTasks = this.getChildren().length;
     if (visibleTasks > 0) {

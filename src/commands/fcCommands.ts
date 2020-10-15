@@ -62,7 +62,7 @@ export class Logout extends ForcecodeCommand {
   }
 
   public command(context: FCConnection | undefined) {
-    var conn = context || fcConnection.currentConnection;
+    let conn = context || fcConnection.currentConnection;
     return fcConnection.disconnect(conn);
   }
 }
@@ -82,7 +82,7 @@ export class SwitchUser extends ForcecodeCommand {
 
   public command(context: FCOauth | FCConnection) {
     codeCovViewService.clear();
-    var orgInfo: FCOauth;
+    let orgInfo: FCOauth;
     if (context instanceof FCConnection) {
       orgInfo = context.orgInfo;
     } else {
@@ -144,7 +144,7 @@ export class ShowTasks extends ForcecodeCommand {
 
   public command() {
     if (fcConnection.isLoggedIn()) {
-      var treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {
+      let treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {
         treeDataProvider: commandViewService,
       });
       return treePro.reveal(commandViewService.getChildren()[0]);
@@ -176,9 +176,9 @@ export class ChangeCoverageDecoration extends ForcecodeCommand {
   }
 
   public command(context: FCFile) {
-    var parent = context.getParentFCFile() || context;
+    let parent = context.getParentFCFile() || context;
     if (context.label) {
-      var newCoverage = context.label.split(' ').pop();
+      let newCoverage = context.label.split(' ').pop();
       if (parent === context) {
         newCoverage = 'overall';
       }
@@ -208,7 +208,7 @@ export class Login extends ForcecodeCommand {
   }
 
   public command(context: FCOauth | FCConnection) {
-    var orgInfo: FCOauth;
+    let orgInfo: FCOauth;
     if (context instanceof FCConnection) {
       orgInfo = context.orgInfo;
     } else {
@@ -229,7 +229,7 @@ export class RemoveConfig extends ForcecodeCommand {
   }
 
   public command(context: string | FCConnection) {
-    var username: string;
+    let username: string;
     if (context instanceof FCConnection) {
       username = context.orgInfo.username;
     } else {
@@ -272,8 +272,8 @@ export class DeleteFile extends ForcecodeCommand {
   // context = right click in file or explorer
   // command pallette => both undefined, so check current open file
   public async command(context?: vscode.Uri, selectedResource?: vscode.Uri[]) {
-    var toDelete: Set<PXMLMember> = new Set<PXMLMember>();
-    var filesToDelete: Set<vscode.Uri> = new Set<vscode.Uri>();
+    let toDelete: Set<PXMLMember> = new Set<PXMLMember>();
+    let filesToDelete: Set<vscode.Uri> = new Set<vscode.Uri>();
     // check that file is in the project and get tooling type
     if (selectedResource) {
       selectedResource.forEach(resource => {
@@ -292,14 +292,14 @@ export class DeleteFile extends ForcecodeCommand {
       return Promise.resolve();
     }
 
-    var toDeleteNames: string = 'Are you sure you want to delete the following?\n';
-    var toDelString: string = '';
+    let toDeleteNames: string = 'Are you sure you want to delete the following?\n';
+    let toDelString: string = '';
     const backupPathBase: string = path.join(getHomeDir(), '.forceCode', 'backup');
     if (fs.existsSync(backupPathBase)) {
       fs.removeSync(backupPathBase);
     }
     await new Promise((resolve, reject) => {
-      var count = 0;
+      let count = 0;
       filesToDelete.forEach(async resource => {
         const toAdd = await getAnyNameFromUri(resource, true).catch(reject);
         if (toAdd) {
@@ -314,7 +314,7 @@ export class DeleteFile extends ForcecodeCommand {
             .replace(vscode.window.forceCode.projectRoot + path.sep, '')
             .split(path.sep)
             .shift();
-          var backupPath: string = path.join(backupPathBase, ttFoldername ? ttFoldername : '');
+          let backupPath: string = path.join(backupPathBase, ttFoldername ? ttFoldername : '');
           backupPath =
             thePath ===
             path.join(vscode.window.forceCode.projectRoot, ttFoldername ? ttFoldername : '')
@@ -396,7 +396,7 @@ export class DeleteFile extends ForcecodeCommand {
 
     // delete file(s) from workspace
     filesToDelete.forEach(uri => {
-      var thePath: string = uri.fsPath;
+      let thePath: string = uri.fsPath;
       if (fs.existsSync(thePath)) {
         const theMetaPath: string = thePath + '-meta.xml';
         const projPath: string = vscode.window.forceCode.projectRoot + path.sep;

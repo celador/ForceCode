@@ -96,7 +96,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
 
     function selectDays(): Thenable<string | undefined> {
       let durOpts: vscode.QuickPickItem[] = [];
-      for (var i = 1; i < 31; i++) {
+      for (let i = 1; i < 31; i++) {
         durOpts.push({ label: String(i) });
       }
 
@@ -127,7 +127,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
     }
 
     function createOrg(cancellationToken: FCCancellationToken) {
-      var theOptions: string;
+      let theOptions: string;
       if (!soOptions.definitionFile) {
         theOptions =
           '--durationdays ' +
@@ -137,7 +137,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
         theOptions = '--definitionfile ' + soOptions.definitionFile;
       }
       return dxService.createScratchOrg(theOptions, cancellationToken).then(res => {
-        var scratchConfig: Config = defaultOptions;
+        let scratchConfig: Config = defaultOptions;
         scratchConfig.username = res.username;
         saveConfigFile(res.username, scratchConfig);
         fcConnection.refreshConnections();

@@ -28,11 +28,11 @@ const acovLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextE
 
 export function updateDecorations() {
   vscode.window.visibleTextEditors.forEach(editor => {
-    var uncoveredLineOptions: vscode.DecorationOptions[] = [];
-    var lineOpts: vscode.TextEditorDecorationType = uncoveredLineStyle;
+    let uncoveredLineOptions: vscode.DecorationOptions[] = [];
+    let lineOpts: vscode.TextEditorDecorationType = uncoveredLineStyle;
     if (editor.document.languageId === 'apexCodeCoverage') {
       lineOpts = acovLineStyle;
-      for (var i: number = 2; i < editor.document.lineCount; i += 2) {
+      for (let i: number = 2; i < editor.document.lineCount; i += 2) {
         let decorationRange: vscode.DecorationOptions = {
           range: editor.document.lineAt(i).range,
         };
@@ -50,7 +50,7 @@ export function updateDecorations() {
 
 function getUncoveredLineOptions(editor: vscode.TextEditor) {
   const document = editor.document;
-  var uncoveredLineDec: vscode.DecorationOptions[] = [];
+  let uncoveredLineDec: vscode.DecorationOptions[] = [];
   const fcfile: FCFile | undefined = codeCovViewService.findByPath(document.fileName);
   if (fcfile) {
     const wsMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
@@ -62,7 +62,7 @@ function getUncoveredLineOptions(editor: vscode.TextEditor) {
   return uncoveredLineDec;
 
   function getUncoveredLineOptionsFor(workspaceMember: forceCode.IWorkspaceMember) {
-    var uncoveredLineDecorations: vscode.DecorationOptions[] = [];
+    let uncoveredLineDecorations: vscode.DecorationOptions[] = [];
     const wsMemCoverage = workspaceMember.selectedCoverage || 'overall';
     let fileCoverage: forceCode.ICodeCoverage | undefined = workspaceMember.coverage.get(
       wsMemCoverage
@@ -78,8 +78,8 @@ function getUncoveredLineOptions(editor: vscode.TextEditor) {
       });
 
       if (editor === vscode.window.activeTextEditor) {
-        var total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
-        var percent = ((fileCoverage.NumLinesCovered / total) * 100).toFixed(2) + '% covered';
+        let total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;
+        let percent = ((fileCoverage.NumLinesCovered / total) * 100).toFixed(2) + '% covered';
         notifications.showStatus(fileCoverage.ApexClassOrTrigger.Name + ' ' + percent);
       }
     }

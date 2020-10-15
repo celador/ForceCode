@@ -70,7 +70,7 @@ export class DXService {
     targetusername: boolean,
     cancellationToken?: FCCancellationToken
   ): Promise<any> {
-    var fullCommand =
+    let fullCommand =
       'sfdx force:' +
       cmdString +
       (targetusername && fcConnection.currentConnection
@@ -98,8 +98,8 @@ export class DXService {
       cwd: vscode.window.forceCode.workspaceRoot,
     };
 
-    var pid: number;
-    var sfdxNotFound = false;
+    let pid: number;
+    let sfdxNotFound = false;
 
     return new Promise((resolve, reject) => {
       const cmd = spawn(commandName, args, spawnOpt);
@@ -116,7 +116,7 @@ export class DXService {
         });
 
         cmd.stderr.on('data', (data) => {
-          var theErr: string = data.toString();
+          let theErr: string = data.toString();
           notifications.writeLog(theErr);
           if (theErr) {
             theErr = theErr.toLowerCase();
@@ -148,7 +148,7 @@ export class DXService {
             // Get non-promise stack for extra help
             notifications.writeLog(error);
             notifications.writeLog(json);
-            var errMess: string | undefined;
+            let errMess: string | undefined;
             if (json?.result?.length > 0) {
               errMess = '';
               json.result.forEach((res: any) => {
@@ -204,7 +204,7 @@ export class DXService {
   }
 
   public getDebugLog(logid: string | undefined): Promise<string> {
-    var theLogId: string = '';
+    let theLogId: string = '';
     if (logid) {
       theLogId += ' --logid ' + logid;
     }
@@ -261,7 +261,7 @@ export class DXService {
     classOrMethod: string,
     cancellationToken: FCCancellationToken
   ): Promise<any> {
-    var toRun: string;
+    let toRun: string;
     if (classOrMethod === 'class') {
       toRun = '-n ' + classOrMethodName;
     } else {

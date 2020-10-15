@@ -16,10 +16,10 @@ export function saveAura(
   forceCompile?: boolean
 ): Promise<any> {
   const ext: string | undefined = parsers.getFileExtension(document);
-  var DefType: string | undefined = getAuraDefTypeFromDocument(document);
-  var Format: string = getAuraFormatFromDocument();
-  var Source: string = document.getText();
-  var currentObjectDefinition: any = undefined;
+  let DefType: string | undefined = getAuraDefTypeFromDocument(document);
+  let Format: string = getAuraFormatFromDocument();
+  let Source: string = document.getText();
+  let currentObjectDefinition: any = undefined;
   // Aura Bundles are a special case, since they can be upserted with the Tooling API
   // Instead of needing to be compiled, like Classes and Pages..
   return Promise.resolve(vscode.window.forceCode)
@@ -84,7 +84,7 @@ export function saveAura(
   }
   function upsertAuraDefinition(definitions: any, bundle: any) {
     // If the Definition doesn't exist, create it
-    var def: any[] = definitions.filter((result: any) => result.DefType === DefType);
+    let def: any[] = definitions.filter((result: any) => result.DefType === DefType);
     currentObjectDefinition = def.length > 0 ? def[0] : undefined;
     if (currentObjectDefinition !== undefined) {
       const serverContents: string = currentObjectDefinition.Source;
@@ -176,7 +176,7 @@ export function getAuraDefTypeFromDocument(document: vscode.TextDocument) {
       if (!fileName || !fname) {
         return undefined;
       }
-      var fileNameEndsWith: string = fileName.replace(fname, '').toLowerCase();
+      let fileNameEndsWith: string = fileName.replace(fname, '').toLowerCase();
       if (fileNameEndsWith === 'controller') {
         // CONTROLLER — client-side controller
         return 'CONTROLLER';

@@ -14,7 +14,7 @@ suite('staticResource.ts', () => {
   });
 
   test('Save static resource zip (auto-compile)', async () => {
-    var output = path.join(
+    let output = path.join(
       vscode.window.forceCode.projectRoot,
       'resource-bundles',
       'SiteSamples.resource.application.zip',
@@ -29,7 +29,7 @@ suite('staticResource.ts', () => {
   });
 
   test('Refresh static resource', async () => {
-    var output = path.join(
+    let output = path.join(
       vscode.window.forceCode.projectRoot,
       'resource-bundles',
       'SiteSamples.resource.application.zip',

@@ -48,9 +48,9 @@ export class Settings extends ForcecodeCommand {
       }
     );
 
-    var tempSettings: any;
-    var currentSettings = vscode.window.forceCode.config;
-    var userNames: string[];
+    let tempSettings: any;
+    let currentSettings = vscode.window.forceCode.config;
+    let userNames: string[];
 
     // And set its HTML content
     panel.webview.html = getSettingsPage();
@@ -75,7 +75,7 @@ export class Settings extends ForcecodeCommand {
           tempSettings['src'] !== currentSettings.src &&
           fs.existsSync(sfdxProjJsonPath)
         ) {
-          var sfdxProjJson: SFDXProjectJson = fs.readJsonSync(sfdxProjJsonPath);
+          let sfdxProjJson: SFDXProjectJson = fs.readJsonSync(sfdxProjJsonPath);
           if (sfdxProjJson.packageDirectories?.length > 0) {
             const forceProjIndex: number = sfdxProjJson.packageDirectories.findIndex(
               dir => dir.path === currentSettings.src

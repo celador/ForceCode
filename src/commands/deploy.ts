@@ -36,7 +36,7 @@ export class DeployPackage extends ForcecodeCommand {
   }
 }
 
-var deployOptions: any = {
+let deployOptions: any = {
   checkOnly: true,
   ignoreWarnings: false,
   rollbackOnError: true,
@@ -83,7 +83,7 @@ function deploy(cancellationToken: FCCancellationToken) {
 
   function getFileList(): Promise<string[]> {
     return new Promise((resolve) => {
-      var fileList: string[] = [];
+      let fileList: string[] = [];
       klaw(vscode.window.forceCode.projectRoot)
         .on('data', (file) => {
           if (
@@ -160,7 +160,7 @@ function deploy(cancellationToken: FCCancellationToken) {
         if (isEmptyUndOrNull(files)) {
           reject(cancellationToken.cancel());
         }
-        var theFiles: string[] = [];
+        let theFiles: string[] = [];
         toArray(files).forEach((file) => {
           if (file) {
             theFiles.push(file.detail);
@@ -175,19 +175,19 @@ function deploy(cancellationToken: FCCancellationToken) {
 export function createPackageXML(files: string[], lwcPackageXML?: string): Promise<any> {
   return new Promise((resolve, reject) => {
     const builder = new xml2js.Builder();
-    var packObj: PXML = {
+    let packObj: PXML = {
       Package: {
         types: [],
         version: vscode.window.forceCode.config.apiVersion || getVSCodeSetting('defaultApiVersion'),
       },
     };
     files.forEach((file) => {
-      var fileTT: IMetadataObject | undefined = getAnyTTMetadataFromPath(file);
+      let fileTT: IMetadataObject | undefined = getAnyTTMetadataFromPath(file);
       if (!fileTT) {
         reject();
         return;
       }
-      var member: string | undefined;
+      let member: string | undefined;
       if (fileTT.xmlName === 'AuraDefinitionBundle') {
         member = getAuraNameFromFileName(file, 'aura');
       } else if (fileTT.xmlName === 'LightningComponentBundle') {
@@ -211,7 +211,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
             packObj.Package.types[index].members.push(folderMeta);
           }
         } else {
-          var newMem: PXMLMember = {
+          let newMem: PXMLMember = {
             members: [member],
             name: fileTT.xmlName,
           };
@@ -222,7 +222,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
         }
       }
     });
-    var xml: string = builder
+    let xml: string = builder
       .buildObject(packObj)
       .replace('<Package>', '<Package xmlns="http://soap.sforce.com/2006/04/metadata">')
       .replace(' standalone="yes"', '');
@@ -256,7 +256,7 @@ export function deployFiles(
   if (isEmptyUndOrNull(files)) {
     return Promise.resolve();
   }
-  var zip = zipFiles(files, deployPath, lwcPackageXML);
+  let zip = zipFiles(files, deployPath, lwcPackageXML);
   Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
   if (deployOptions.testLevel === 'Default') {
     delete deployOptions.testLevel;
@@ -321,7 +321,7 @@ export function deployFiles(
           }
         });
     } else {
-      var depId: string;
+      let depId: string;
       const message: string = res.message || res;
       if (res.id) {
         depId = res.id;

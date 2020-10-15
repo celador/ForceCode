@@ -52,7 +52,7 @@ export class RunTests extends ForcecodeCommand {
   }
 
   public command(context: any) {
-    var ctv = context;
+    let ctv = context;
     if (context instanceof FCFile) {
       ctv = { name: context.getWsMember().name, type: 'class' };
     }

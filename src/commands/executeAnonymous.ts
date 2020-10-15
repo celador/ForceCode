@@ -26,9 +26,9 @@ export class ExecuteAnonymous extends ForcecodeCommand {
       );
       return;
     }
-    var document: vscode.TextDocument = editor.document;
-    var selection = editor.selection;
-    var text = document.getText(selection);
+    let document: vscode.TextDocument = editor.document;
+    let selection = editor.selection;
+    let text = document.getText(selection);
     if (text === '') {
       notifications.showError('No text selected to execute, please select code to run...');
       return;
@@ -53,18 +53,18 @@ export class ExecuteAnonymous extends ForcecodeCommand {
 
     function runDiagnostics(res: ExecuteAnonymousResult) {
       // Create a diagnostic Collection for the current file.  Overwriting the last...
-      var diagnosticCollection: vscode.DiagnosticCollection =
+      let diagnosticCollection: vscode.DiagnosticCollection =
         vscode.window.forceCode.fcDiagnosticCollection;
       diagnosticCollection.delete(document.uri);
-      var diagnostics: vscode.Diagnostic[] = [];
+      let diagnostics: vscode.Diagnostic[] = [];
       if (res.compiled === false) {
         const lineNumber: number = Number(res.line) - 1 + selection.start.line;
-        var col = 0;
+        let col = 0;
         if (lineNumber === selection.start.line) {
           col = selection.start.character;
         }
         const columnNumber: number = Number(res.column) - 1 + col;
-        var failureRange: vscode.Range = document.lineAt(lineNumber < 0 ? 0 : lineNumber).range;
+        let failureRange: vscode.Range = document.lineAt(lineNumber < 0 ? 0 : lineNumber).range;
         if (columnNumber >= 0) {
           failureRange = failureRange.with(new vscode.Position(lineNumber, columnNumber));
         }

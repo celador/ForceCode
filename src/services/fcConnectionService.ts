@@ -87,13 +87,13 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
   public getSavedUsernames(): Promise<string[]> {
     return new Promise((resolve) => {
-      var usernames: string[] = [];
-      var fcPath: string = path.join(vscode.window.forceCode.workspaceRoot, '.forceCode');
+      let usernames: string[] = [];
+      let fcPath: string = path.join(vscode.window.forceCode.workspaceRoot, '.forceCode');
       if (fs.existsSync(fcPath)) {
         klaw(fcPath, { depthLimit: 0 })
           .on('data', function (file) {
             if (file.stats.isDirectory()) {
-              var fileName: string | undefined = file.path.split(path.sep).pop();
+              let fileName: string | undefined = file.path.split(path.sep).pop();
               if (fileName && fileName.indexOf('@') > 0) {
                 usernames.push(fileName);
               }
@@ -168,9 +168,9 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     cancellationToken: FCCancellationToken
   ): Promise<boolean> {
     const service = this;
+    let username: string | undefined;
     if (!this.loggingIn) {
       this.loggingIn = true;
-      var username: string | undefined;
       if (orgInfo) {
         username = orgInfo.username;
       }
@@ -307,7 +307,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     saveToken?: boolean
   ): FCConnection | undefined {
     if (orgInfo?.username) {
-      var connIndex: number = this.getConnIndex(orgInfo.username);
+      let connIndex: number = this.getConnIndex(orgInfo.username);
       if (connIndex === -1) {
         connIndex = this.connections.push(new FCConnection(this, orgInfo)) - 1;
       } else {
@@ -334,8 +334,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
   }
 
   private sortFunc(a: FCConnection, b: FCConnection): number {
-    var aStr = a.label?.toUpperCase() || '';
-    var bStr = b.label?.toUpperCase() || '';
+    let aStr = a.label?.toUpperCase() || '';
+    let bStr = b.label?.toUpperCase() || '';
     return aStr.localeCompare(bStr);
   }
 }

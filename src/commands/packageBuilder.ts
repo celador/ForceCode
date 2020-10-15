@@ -25,8 +25,8 @@ export class PackageBuilder extends ForcecodeCommand {
 }
 
 function sortFunc(a: any, b: any): number {
-  var aStr = a.label.toUpperCase();
-  var bStr = b.label.toUpperCase();
+  let aStr = a.label.toUpperCase();
+  let bStr = b.label.toUpperCase();
   return aStr.localeCompare(bStr);
 }
 
@@ -39,11 +39,11 @@ export function getMembers(
       'Metadata describe error. Please try logging out of and back into the org.'
     );
   }
-  var metadataObjects: IMetadataObject[] = vscode.window.forceCode.describe.metadataObjects;
+  let metadataObjects: IMetadataObject[] = vscode.window.forceCode.describe.metadataObjects;
   if (!(metadataTypes.length === 1 && metadataTypes[0] === '*')) {
     metadataObjects = metadataObjects.filter(type => metadataTypes.includes(type.xmlName));
   }
-  var proms: Promise<PXMLMember>[] = metadataObjects.map(r => {
+  let proms: Promise<PXMLMember>[] = metadataObjects.map(r => {
     return new Promise<PXMLMember>((resolve, reject) => {
       if (r.xmlName === 'CustomObject') {
         dxService
@@ -67,7 +67,7 @@ export function getMembers(
             Promise.all(proms)
               .then(folderList => {
                 folderList = toArray(folderList);
-                var members = folders.filter(f => f !== undefined).map(f => f.fullName);
+                let members = folders.filter(f => f !== undefined).map(f => f.fullName);
                 members = members.concat(...folderList);
                 resolve({ name: r.xmlName, members: members });
               })
@@ -156,7 +156,7 @@ export function packageBuilder(buildPackage?: boolean): Promise<any> {
     if (!vscode.window.forceCode.describe) {
       return reject('Metadata describe error. Please try logging out of and back into the org.');
     }
-    var options: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
+    let options: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
       return {
         label: r.xmlName,
         detail: r.directoryName,
@@ -182,7 +182,7 @@ export function packageBuilder(buildPackage?: boolean): Promise<any> {
           } else {
             // generate the file, then ask the user where to save it
             const builder = new xml2js.Builder();
-            var packObj: PXML = {
+            let packObj: PXML = {
               Package: {
                 types: mappedTypes,
                 version:
@@ -190,7 +190,7 @@ export function packageBuilder(buildPackage?: boolean): Promise<any> {
                   getVSCodeSetting('defaultApiVersion'),
               },
             };
-            var xml: string = builder
+            let xml: string = builder
               .buildObject(packObj)
               .replace('<Package>', '<Package xmlns="http://soap.sforce.com/2006/04/metadata">')
               .replace(' standalone="yes"', '');

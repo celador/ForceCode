@@ -22,7 +22,7 @@ export function saveApex(
   const body: string = document.getText();
   const name: string | undefined = parsers.getName(document, toolingType.xmlName);
   const upToolType: string = toolingType.xmlName + 'Member';
-  var checkCount: number = 0;
+  let checkCount: number = 0;
   const container: Container = containerService.createContainer(
     document.fileName,
     fileName,
@@ -47,7 +47,7 @@ export function saveApex(
     if (container.existing && records && records.id) {
       // This is what happens when we had an error on the previous compile.
       // We want to just update the member and try to compile again
-      var member: {} = Metadata
+      let member: {} = Metadata
         ? {
             Body: body,
             Metadata: Metadata,
@@ -92,7 +92,7 @@ export function saveApex(
       if (records && records.length > 0) {
         // Tooling Object already exists
         //  UPDATE it
-        var record = records[0];
+        let record = records[0];
         // Get the modified date of the local file...
         if (Metadata?.packageVersions) {
           // this is an ApexPage...so we might need to edit packageVersions
@@ -101,7 +101,7 @@ export function saveApex(
           }
         }
 
-        var member: {} = {
+        let member: {} = {
           Body: Metadata ? record.Body || record.Markup : body,
           ContentEntityId: record.Id,
           Id: container.containerId,
@@ -154,7 +154,7 @@ export function saveApex(
                   .execute()
                   .then((records: any) => {
                     if (records.length > 0) {
-                      var workspaceMember: forceCode.IWorkspaceMember = {
+                      let workspaceMember: forceCode.IWorkspaceMember = {
                         name: fileName,
                         path: document.fileName,
                         id: records[0].Id,

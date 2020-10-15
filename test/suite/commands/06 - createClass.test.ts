@@ -43,7 +43,7 @@ suite('createClass.ts and compile.ts', () => {
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
       // verify the file was created
-      var output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
+      let output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -57,7 +57,7 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Refresh class', async () => {
-    var output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
+    let output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
     // get the mTime for the file
     const mTime = fs.statSync(output).mtimeMs;
     return await vscode.workspace.openTextDocument(output).then(doc => {
@@ -71,7 +71,7 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Open file (class) in the org', async () => {
-    var output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
+    let output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
     return await vscode.workspace.openTextDocument(output).then(doc => {
       return vscode.commands.executeCommand('ForceCode.openFileInOrg', doc.uri).then(_res => {
         return assert.strictEqual(true, true);
@@ -81,7 +81,7 @@ suite('createClass.ts and compile.ts', () => {
 
   test('Saves class metadata fail', async () => {
     // open the testerson class metadata
-    var output = path.join(
+    let output = path.join(
       vscode.window.forceCode.projectRoot,
       'classes',
       'testerson.cls-meta.xml'
@@ -115,7 +115,7 @@ suite('createClass.ts and compile.ts', () => {
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      var output = path.join(vscode.window.forceCode.projectRoot, 'pages', 'testerson.page');
+      let output = path.join(vscode.window.forceCode.projectRoot, 'pages', 'testerson.page');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -142,7 +142,7 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Preview VF', async () => {
-    var output = path.join(vscode.window.forceCode.projectRoot, 'pages', 'testerson.page');
+    let output = path.join(vscode.window.forceCode.projectRoot, 'pages', 'testerson.page');
     return await vscode.workspace.openTextDocument(output).then(doc => {
       return vscode.commands.executeCommand('ForceCode.previewVF', doc.uri).then(_res => {
         return assert.strictEqual(true, true);
@@ -166,7 +166,7 @@ suite('createClass.ts and compile.ts', () => {
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      var output = path.join(
+      let output = path.join(
         vscode.window.forceCode.projectRoot,
         'components',
         'testerson.component'
@@ -213,7 +213,7 @@ suite('createClass.ts and compile.ts', () => {
       });
     // doc is already open from the save pass above
     return await vscode.commands.executeCommand('ForceCode.deleteFile').then(_res => {
-      var output = path.join(
+      let output = path.join(
         vscode.window.forceCode.projectRoot,
         'components',
         'testerson.component'
@@ -238,7 +238,7 @@ suite('createClass.ts and compile.ts', () => {
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      var output = path.join(vscode.window.forceCode.projectRoot, 'aura', 'testersonAura');
+      let output = path.join(vscode.window.forceCode.projectRoot, 'aura', 'testersonAura');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -252,7 +252,7 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Preview Aura app', async () => {
-    var output = path.join(
+    let output = path.join(
       vscode.window.forceCode.projectRoot,
       'aura',
       'testersonAura',
@@ -293,7 +293,7 @@ suite('createClass.ts and compile.ts', () => {
           },
         };
       });
-    var output = path.join(
+    let output = path.join(
       vscode.window.forceCode.projectRoot,
       'aura',
       'testersonAura',
@@ -334,7 +334,7 @@ suite('createClass.ts and compile.ts', () => {
           },
         };
       });
-    var output = path.join(
+    let output = path.join(
       vscode.window.forceCode.projectRoot,
       'aura',
       'testersonAura',
@@ -355,7 +355,7 @@ suite('createClass.ts and compile.ts', () => {
         },
       };
     });
-    var inputStub = sandbox
+    let inputStub = sandbox
       .stub(vscode.window, 'showInputBox')
       .onFirstCall()
       .callsFake(function(_options) {
@@ -373,7 +373,7 @@ suite('createClass.ts and compile.ts', () => {
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      var output = path.join(vscode.window.forceCode.projectRoot, 'triggers', 'testerson.trigger');
+      let output = path.join(vscode.window.forceCode.projectRoot, 'triggers', 'testerson.trigger');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -402,7 +402,7 @@ suite('createClass.ts and compile.ts', () => {
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      var output = path.join(vscode.window.forceCode.projectRoot, 'lwc', 'theLWCTest');
+      let output = path.join(vscode.window.forceCode.projectRoot, 'lwc', 'theLWCTest');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -428,7 +428,7 @@ suite('createClass.ts and compile.ts', () => {
     });
     createForceJson(process.env.SF_USERNAME || '', true); // turn on autoCompile
     return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      var output = path.join(vscode.window.forceCode.projectRoot, 'lwc', 'theLWCTest2');
+      let output = path.join(vscode.window.forceCode.projectRoot, 'lwc', 'theLWCTest2');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -454,7 +454,7 @@ suite('createClass.ts and compile.ts', () => {
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      var output = path.join(
+      let output = path.join(
         vscode.window.forceCode.projectRoot,
         'messageChannels',
         'MyMessageChannel.messageChannel'
@@ -484,7 +484,7 @@ suite('createClass.ts and compile.ts', () => {
     });
     createForceJson(process.env.SF_USERNAME || '', true); // turn on autoCompile
     return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      var output = path.join(
+      let output = path.join(
         vscode.window.forceCode.projectRoot,
         'messageChannels',
         'MyMessageChannel2.messageChannel'

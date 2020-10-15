@@ -21,17 +21,17 @@ export class OverallCoverage extends ForcecodeCommand {
   public command(): any {
     return getApexTestResults().then(res => {
       if (res.records) {
-        var outputString: string = 'Class/Trigger Name';
+        let outputString: string = 'Class/Trigger Name';
         // use this for formatting
-        var spaces: string = '                                                       ';
-        var orgTotalLines: number = 0;
-        var orgTotalCoveredLines: number = 0;
+        let spaces: string = '                                                       ';
+        let orgTotalLines: number = 0;
+        let orgTotalCoveredLines: number = 0;
         outputString +=
           spaces.substr(0, spaces.length - outputString.length - 1) +
           'Percent\t\t\tCovered/Total\n\n';
         res.records.forEach((curRes: forceCode.ICodeCoverage) => {
-          var total: number = curRes.NumLinesCovered + curRes.NumLinesUncovered;
-          var percent = ((curRes.NumLinesCovered / total) * 100).toFixed(2) + '% covered';
+          let total: number = curRes.NumLinesCovered + curRes.NumLinesUncovered;
+          let percent = ((curRes.NumLinesCovered / total) * 100).toFixed(2) + '% covered';
           outputString +=
             curRes.ApexClassOrTrigger.Name +
             spaces.substr(0, spaces.length - curRes.ApexClassOrTrigger.Name.length - 1) +
@@ -44,7 +44,7 @@ export class OverallCoverage extends ForcecodeCommand {
           orgTotalCoveredLines += curRes.NumLinesCovered;
           orgTotalLines += total;
         });
-        var orgPercent = ((orgTotalCoveredLines / orgTotalLines) * 100).toFixed(2) + '% covered';
+        let orgPercent = ((orgTotalCoveredLines / orgTotalLines) * 100).toFixed(2) + '% covered';
         outputString +=
           '\nOverall coverage: ' +
           spaces.substr(0, spaces.length - 'Overall coverage: '.length - 1) +
