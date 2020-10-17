@@ -54,7 +54,7 @@ export class QueryEditor extends ForcecodeCommand {
     panel.webview.html = getQueryEditorPage();
 
     // handle a query
-    panel.webview.onDidReceiveMessage(message => {
+    panel.webview.onDidReceiveMessage((message) => {
       // the structure of message is { toql: string, query: string }
       // or { save: boolean }
       if (message.query) {
@@ -70,16 +70,13 @@ export class QueryEditor extends ForcecodeCommand {
             filters: csv ? { CSV: ['csv'] } : { JSON: ['json'] },
             defaultUri: defaultURI,
           })
-          .then(uri => {
+          .then((uri) => {
             if (uri) {
               fs.outputFileSync(uri.fsPath, data);
             }
           });
       } else if (message.toql) {
-        vscode.window.forceCode.conn.tooling
-          .query(curQuery)
-          .then(sendResults)
-          .catch(onError);
+        vscode.window.forceCode.conn.tooling.query(curQuery).then(sendResults).catch(onError);
       } else if (message.getResults) {
         sendResults(curResults, true);
       } else if (message.update) {
@@ -101,7 +98,7 @@ export class QueryEditor extends ForcecodeCommand {
           prom = vscode.window.forceCode.conn.sobject(type).update(toUpdateArray);
         }
         prom
-          .then(res => {
+          .then((res) => {
             // take the res and show message based off of it
             // clear out the bg color
             let resToSend = {
@@ -115,7 +112,7 @@ export class QueryEditor extends ForcecodeCommand {
               Object.assign(curResults[curRow.key - 1], curRow.value);
             });
           })
-          .catch(err => {
+          .catch((err) => {
             let resToSend = {
               saveResult: true,
               saveSuccess: false,
@@ -124,10 +121,7 @@ export class QueryEditor extends ForcecodeCommand {
             sendData(resToSend);
           });
       } else {
-        vscode.window.forceCode.conn
-          .query(curQuery)
-          .then(sendResults)
-          .catch(onError);
+        vscode.window.forceCode.conn.query(curQuery).then(sendResults).catch(onError);
       }
     }, undefined);
 

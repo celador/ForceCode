@@ -93,7 +93,7 @@ export class ForceService implements forceCode.IForceService {
   // Get files in src folder..
   // Match them up with ContainerMembers
   private getWorkspaceMembers(): Promise<Array<Promise<IMetadataFileProperties[]>>> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       let types: Array<Array<{}>> = [[]];
       let typeNames: Array<string> = [];
       let proms: Array<Promise<IMetadataFileProperties[]>> = [];
@@ -135,6 +135,7 @@ export class ForceService implements forceCode.IForceService {
         })
         .on('error', (err: Error, item: klaw.Item) => {
           notifications.writeLog(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
+          reject();
         });
     });
   }
@@ -208,7 +209,7 @@ export class ForceService implements forceCode.IForceService {
           .sobject('MetadataContainer')
           .find({ Name: { $like: 'ForceCode-%' } })
           .execute(function (_err: any, records: any) {
-            let toDelete: string[] = new Array<string>();
+            let toDelete: string[] = [];
             if (!records || records.length === 0) {
               resolve();
             }

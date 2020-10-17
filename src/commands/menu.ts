@@ -16,23 +16,24 @@ export class ForceCodeMenu extends ForcecodeCommand {
     }
     return Promise.resolve(vscode.window.forceCode)
       .then(displayMenu)
-      .then(res => processResult(res));
+      .then((res) => processResult(res));
     // =======================================================================================================================================
     // =======================================================================================================================================
     // =======================================================================================================================================
 
     function displayMenu() {
-      fcCommands.forEach(cur => {
+      fcCommands.forEach((cur) => {
         if (!cur.hidden) {
-          if (cur.commandName !== 'ForceCode.createScratchOrg') {
-            quickpick.push(cur);
-          } else if (fcConnection.currentConnection?.orgInfo.isDevHub) {
+          if (
+            cur.commandName !== 'ForceCode.createScratchOrg' ||
+            fcConnection.currentConnection?.orgInfo.isDevHub
+          ) {
             quickpick.push(cur);
           }
         }
       });
 
-      let options: vscode.QuickPickItem[] = quickpick.map(record => {
+      let options: vscode.QuickPickItem[] = quickpick.map((record) => {
         return {
           description: `${record.description}`,
           detail: `${record.detail}`,
@@ -49,7 +50,7 @@ export class ForceCodeMenu extends ForcecodeCommand {
     function processResult(result: any) {
       if (result?.description !== undefined) {
         return vscode.commands.executeCommand(
-          quickpick.find(cur => {
+          quickpick.find((cur) => {
             return result.description === cur.description;
           }).commandName,
           context

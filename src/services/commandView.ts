@@ -49,16 +49,11 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
 
   public enqueueCodeCoverage(type: CoverageRetrieveType) {
     // mandatory since it only makes sense
-    if (type === CoverageRetrieveType.RunTest) {
-      this.getCodeCoverage = true;
-    } else if (
-      type === CoverageRetrieveType.OpenFile &&
-      getVSCodeSetting('retrieveCoverageOnFileRetrieval')
-    ) {
-      this.getCodeCoverage = true;
-    } else if (
-      type === CoverageRetrieveType.StartUp &&
-      getVSCodeSetting('retrieveCodeCoverageOnStart')
+    if (
+      type === CoverageRetrieveType.RunTest ||
+      (type === CoverageRetrieveType.OpenFile &&
+        getVSCodeSetting('retrieveCoverageOnFileRetrieval')) ||
+      (type === CoverageRetrieveType.StartUp && getVSCodeSetting('retrieveCodeCoverageOnStart'))
     ) {
       this.getCodeCoverage = true;
     }

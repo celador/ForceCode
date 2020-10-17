@@ -34,7 +34,7 @@ const folderWSMember: IWorkspaceMember = {
 
 export class CodeCovViewService implements TreeDataProvider<FCFile> {
   private static instance: CodeCovViewService;
-  private classes: Array<FCFile> = new Array<FCFile>();
+  private classes: Array<FCFile> = [];
   private _onDidChangeTreeData: EventEmitter<FCFile | undefined> = new EventEmitter<
     FCFile | undefined
   >();

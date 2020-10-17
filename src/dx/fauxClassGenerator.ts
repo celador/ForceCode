@@ -247,7 +247,9 @@ export class FauxClassGenerator {
     // sort, but filter out duplicates
     // which can happen due to childRelationships w/o a relationshipName
     declarations.sort((first: string, second: string): number => {
-      return FauxClassGenerator.fieldName(first) > FauxClassGenerator.fieldName(second) ? 1 : -1;
+      const fName = FauxClassGenerator.fieldName(first);
+      const sName = FauxClassGenerator.fieldName(second);
+      return fName === sName ? 0 : fName > sName ? 1 : -1;
     });
 
     declarations = declarations.filter((value: string, index: number, array: string[]): boolean => {

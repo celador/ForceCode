@@ -41,7 +41,7 @@ export class BulkLoader extends ForcecodeCommand {
     const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
 
     // handle settings changes
-    panel.webview.onDidReceiveMessage(message => {
+    panel.webview.onDidReceiveMessage((message) => {
       if (message.uploadCSV) {
         vscode.window
           .showOpenDialog({
@@ -50,15 +50,11 @@ export class BulkLoader extends ForcecodeCommand {
             canSelectFolders: false,
             canSelectMany: false,
           })
-          .then(uri => {
+          .then((uri) => {
             if (uri) {
               csvPath = uri[0].fsPath;
               try {
-                totalRecords =
-                  fs
-                    .readFileSync(csvPath)
-                    .toString()
-                    .split('\n').length - 1;
+                totalRecords = fs.readFileSync(csvPath).toString().split('\n').length - 1;
                 panel.webview.postMessage({ fileSelected: true, totalRecords: totalRecords });
               } catch (e) {
                 throw 'Invalid file format, please select a CSV file';
@@ -96,7 +92,7 @@ export class BulkLoader extends ForcecodeCommand {
                   defaultUri: defaultURI,
                   saveLabel: 'Save Error File',
                 })
-                .then(uri => {
+                .then((uri) => {
                   if (uri) {
                     fs.outputFileSync(uri.fsPath, errorFile);
                   }
@@ -115,7 +111,7 @@ export class BulkLoader extends ForcecodeCommand {
       }
     }, undefined);
 
-    return dxService.describeGlobal(SObjectCategory.ALL).then(sObjects => {
+    return dxService.describeGlobal(SObjectCategory.ALL).then((sObjects) => {
       return panel.webview.postMessage({ sObjects: sObjects });
     });
 
@@ -127,18 +123,17 @@ export class BulkLoader extends ForcecodeCommand {
       if (timeOut) {
         clearTimeout(timeOut);
       }
-      timeOut = setTimeout(() => {
+      timeOut = setTimeout(async () => {
         try {
-          batch.check().then((res: any) => {
-            panel.webview.postMessage({
-              state: res.state,
-              processed: res.numberRecordsProcessed,
-              failures: res.numberRecordsFailed,
-            });
-            if (res.status !== 'Completed') {
-              checkStatus();
-            }
+          const res = await batch.check();
+          panel.webview.postMessage({
+            state: res.state,
+            processed: res.numberRecordsProcessed,
+            failures: res.numberRecordsFailed,
           });
+          if (res.status !== 'Completed') {
+            checkStatus();
+          }
         } catch (e) {}
       }, getVSCodeSetting('bulkLoaderPollInterval'));
     }

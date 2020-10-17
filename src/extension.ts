@@ -39,9 +39,9 @@ export function activate(context: vscode.ExtensionContext): any {
 
   const startupTimer: FCTimer = new FCTimer('extension.activate');
 
-  fcCommands.forEach(cur => {
+  fcCommands.forEach((cur) => {
     context.subscriptions.push(
-      vscode.commands.registerCommand(cur.commandName, function(
+      vscode.commands.registerCommand(cur.commandName, function (
         context: any,
         selectedResource: any
       ): any {
@@ -98,7 +98,7 @@ export function activate(context: vscode.ExtensionContext): any {
   );
 
   context.subscriptions.push(
-    vscode.workspace.onDidChangeTextDocument(function(event) {
+    vscode.workspace.onDidChangeTextDocument(function (event) {
       // clear the code coverage
       let fileName = event.document.fileName;
       // get the id
@@ -118,7 +118,7 @@ export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
     vscode.workspace
       .createFileSystemWatcher(path.join(vscode.window.forceCode.workspaceRoot, 'force.json'))
-      .onDidChange(_uri => {
+      .onDidChange((_uri) => {
         getSetConfig();
       })
   );
@@ -129,7 +129,7 @@ export function activate(context: vscode.ExtensionContext): any {
       .createFileSystemWatcher(
         path.join(vscode.window.forceCode.workspaceRoot, 'sfdx-project.json')
       )
-      .onDidChange(_uri => {
+      .onDidChange((_uri) => {
         if (vscode.window.forceCode.config.username) {
           fs.copyFileSync(
             path.join(vscode.window.forceCode.workspaceRoot, 'sfdx-project.json'),
@@ -150,7 +150,7 @@ export function activate(context: vscode.ExtensionContext): any {
       .createFileSystemWatcher(
         path.join(vscode.window.forceCode.projectRoot, '**', '*.{cls,trigger,page,component}')
       )
-      .onDidDelete(uri => {
+      .onDidDelete((uri) => {
         const fcfile: FCFile | undefined = codeCovViewService.findByPath(uri.fsPath);
 
         if (fcfile) {
@@ -164,7 +164,7 @@ export function activate(context: vscode.ExtensionContext): any {
     context.subscriptions.push(
       vscode.workspace
         .createFileSystemWatcher(path.join(vscode.window.forceCode.projectRoot, '*'))
-        .onDidDelete(uri => {
+        .onDidDelete((uri) => {
           const tType: string | undefined = getToolingTypeFromFolder(uri);
           if (tType) {
             const fcfiles: FCFile[] | undefined = codeCovViewService.findByType(tType);

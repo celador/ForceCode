@@ -65,7 +65,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
     function selectDefinitionFile(): Thenable<string | undefined> {
       return vscode.window
         .showOpenDialog({ filters: { JSON: ['json'] }, canSelectMany: false })
-        .then(fileArr => {
+        .then((fileArr) => {
           return fileArr && fileArr.length > 0 ? fileArr[0].fsPath : undefined;
         });
     }
@@ -89,7 +89,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
       let config: vscode.QuickPickOptions = {
         placeHolder: 'Choose an org edition to create...',
       };
-      return vscode.window.showQuickPick(options, config).then(choice => {
+      return vscode.window.showQuickPick(options, config).then((choice) => {
         return choice?.label;
       });
     }
@@ -103,7 +103,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
       let config: vscode.QuickPickOptions = {
         placeHolder: 'Days until org expires...',
       };
-      return vscode.window.showQuickPick(durOpts, config).then(choice => {
+      return vscode.window.showQuickPick(durOpts, config).then((choice) => {
         return choice?.label;
       });
     }
@@ -121,7 +121,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
       let config: vscode.QuickPickOptions = {
         placeHolder: prompt,
       };
-      return vscode.window.showQuickPick(sDataOptions, config).then(choice => {
+      return vscode.window.showQuickPick(sDataOptions, config).then((choice) => {
         return choice?.label === 'Yes';
       });
     }
@@ -136,7 +136,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
       } else {
         theOptions = '--definitionfile ' + soOptions.definitionFile;
       }
-      return dxService.createScratchOrg(theOptions, cancellationToken).then(res => {
+      return dxService.createScratchOrg(theOptions, cancellationToken).then((res) => {
         let scratchConfig: Config = defaultOptions;
         scratchConfig.username = res.username;
         saveConfigFile(res.username, scratchConfig);
