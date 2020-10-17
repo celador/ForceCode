@@ -128,65 +128,51 @@ export async function compile(
   }
 
   // Start doing stuff
-  if (folderToolingType === 'EmailTemplate' || folderToolingType === 'Document') {
-    return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot)
-      .then(() => {
-        const files: string[] = [];
-        let pathSplit = 'documents';
-        if (folderToolingType === 'EmailTemplate') {
-          pathSplit = 'email';
-        }
-        let foldName: string | undefined = document.fileName
-          .split(path.sep + pathSplit + path.sep)
-          .pop();
-        if (foldName) {
-          //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
-          files.push(path.join(pathSplit, foldName));
-          files.push(path.join(pathSplit, foldName + '-meta.xml'));
-          files.push('package.xml');
-          return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
-        } else {
-          return Promise.reject(false);
-        }
-      })
-      .then(finished)
-      .catch(finished)
-      .then(updateSaveHistory);
-  } else if (folderToolingType && toolingType === undefined) {
-    return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot)
-      .then(() => {
-        const files: string[] = [];
-        let pathSplit: string[] = document.fileName.split(path.sep);
+  let result;
+  try {
+    if (folderToolingType === 'EmailTemplate' || folderToolingType === 'Document') {
+      await createPackageXML([document.fileName], vscode.window.forceCode.storageRoot);
+      const files: string[] = [];
+      let pathSplit = 'documents';
+      if (folderToolingType === 'EmailTemplate') {
+        pathSplit = 'email';
+      }
+      let foldName: string | undefined = document.fileName
+        .split(path.sep + pathSplit + path.sep)
+        .pop();
+      if (foldName) {
         //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
-        files.push(path.join(pathSplit[pathSplit.length - 2], pathSplit[pathSplit.length - 1]));
+        files.push(path.join(pathSplit, foldName));
+        files.push(path.join(pathSplit, foldName + '-meta.xml'));
         files.push('package.xml');
-        return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
-      })
-      .then(finished)
-      .catch(finished)
-      .then(updateSaveHistory);
-  } else if (toolingType === 'AuraDefinition') {
-    DefType = getAuraDefTypeFromDocument(document);
-    return saveAura(document, name, cancellationToken, Metadata, forceCompile)
-      .then(finished)
-      .catch(finished)
-      .then(updateSaveHistory);
-  } else if (toolingType === 'LightningComponentResource') {
-    return saveLWC(document, name, cancellationToken, forceCompile)
-      .then(finished)
-      .catch(finished)
-      .then(updateSaveHistory);
-  } else if (ttMeta && toolingType) {
-    // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-    return saveApex(document, ttMeta, cancellationToken, Metadata, forceCompile)
-      .then(finished)
-      .then((_res) => {
-        return true;
-      })
-      .catch(finished)
-      .then(updateSaveHistory);
-  } else {
-    return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
+        result = await deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
+      } else {
+        return Promise.reject(false);
+      }
+    } else if (folderToolingType && toolingType === undefined) {
+      await createPackageXML([document.fileName], vscode.window.forceCode.storageRoot);
+      const files: string[] = [];
+      let pathSplit: string[] = document.fileName.split(path.sep);
+      //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
+      files.push(path.join(pathSplit[pathSplit.length - 2], pathSplit[pathSplit.length - 1]));
+      files.push('package.xml');
+      result = await deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
+    } else if (toolingType === 'AuraDefinition') {
+      DefType = getAuraDefTypeFromDocument(document);
+      result = await saveAura(document, name, cancellationToken, Metadata, forceCompile);
+    } else if (toolingType === 'LightningComponentResource') {
+      result = await saveLWC(document, name, cancellationToken, forceCompile);
+    } else if (ttMeta && toolingType) {
+      // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
+      result = await saveApex(document, ttMeta, cancellationToken, Metadata, forceCompile);
+    } else {
+      return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
+    }
+    finished(result);
+  } catch (error) {
+    finished(error);
+  } finally {
+    return Promise.resolve(updateSaveHistory());
   }
 
   function finished(res: any): boolean {

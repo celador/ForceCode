@@ -18,7 +18,7 @@ import {
 const jsforce: any = require('jsforce');
 import klaw = require('klaw');
 import { FCCancellationToken } from '../commands';
-import { jsforce, Connection } from 'jsforce';
+import { jsforce } from 'jsforce';
 
 export class FCConnectionService implements vscode.TreeDataProvider<FCConnection> {
   private static instance: FCConnectionService;
@@ -113,114 +113,108 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     });
   }
 
-  public refreshConnections(): Promise<boolean> {
+  public async refreshConnections(): Promise<boolean> {
     if (!this.refreshingConns) {
       this.refreshingConns = true;
-      return dxService.orgList().then((orgs) => {
-        return this.getSavedUsernames().then((uNames) => {
-          uNames.forEach((uName) => {
-            this.addConnection({ username: uName });
-          });
-          if (orgs) {
-            const showOnlyProjectOrgs: boolean = getVSCodeSetting('onlyShowProjectUsernames');
-            if (showOnlyProjectOrgs) {
-              orgs = orgs.filter((currentOrg) => uNames.includes(currentOrg.username || ''));
-            }
-            orgs.forEach((curOrg) => {
-              this.addConnection(curOrg);
-            });
-          }
-          // tell the connections to refresh their text/icons
-          this.refreshConnsStatus();
-          notifications.writeLog('Orgs refreshed');
-          this.refreshingConns = false;
-          return true;
-        });
+      let orgs = await dxService.orgList();
+      const uNames = await this.getSavedUsernames();
+      uNames.forEach((uName) => {
+        this.addConnection({ username: uName });
       });
+      if (orgs) {
+        if (getVSCodeSetting('onlyShowProjectUsernames')) {
+          orgs = orgs.filter((currentOrg) => uNames.includes(currentOrg.username || ''));
+        }
+        orgs.forEach((curOrg) => {
+          this.addConnection(curOrg);
+        });
+      }
+      // tell the connections to refresh their text/icons
+      this.refreshConnsStatus();
+      notifications.writeLog('Orgs refreshed');
+      this.refreshingConns = false;
+    }
+    return Promise.resolve(true);
+  }
+
+  // this is a check that will refresh the orgs and check if logged in. if not, it asks to log in
+  public async checkLoginStatus(
+    reason: any,
+    cancellationToken: FCCancellationToken
+  ): Promise<boolean> {
+    const message = reason?.message || reason;
+    notifications.writeLog('Checking login status: ' + message);
+    await this.refreshConnections();
+    if (
+      !this.isLoggedIn() ||
+      (message &&
+        (message.indexOf('expired access/refresh token') !== -1 ||
+          message.indexOf('ECONNRESET') !== -1))
+    ) {
+      if (this.currentConnection) {
+        this.currentConnection.isLoggedIn = false;
+      }
+      return this.connect(this.currentConnection?.orgInfo, cancellationToken);
     } else {
       return Promise.resolve(true);
     }
   }
 
-  // this is a check that will refresh the orgs and check if logged in. if not, it asks to log in
-  public checkLoginStatus(reason: any, cancellationToken: FCCancellationToken): Promise<boolean> {
-    const message = reason?.message || reason;
-    notifications.writeLog('Checking login status: ' + message);
-    return this.refreshConnections().then(() => {
-      if (
-        !this.isLoggedIn() ||
-        (message &&
-          (message.indexOf('expired access/refresh token') !== -1 ||
-            message.indexOf('ECONNRESET') !== -1))
-      ) {
-        if (this.currentConnection) {
-          this.currentConnection.isLoggedIn = false;
-        }
-        return this.connect(this.currentConnection?.orgInfo, cancellationToken);
-      } else {
-        return true;
-      }
-    });
-  }
-
-  public connect(
+  public async connect(
     orgInfo: FCOauth | SFDX | undefined,
     cancellationToken: FCCancellationToken
   ): Promise<boolean> {
     const service = this;
     let username: string | undefined;
-    if (!this.loggingIn) {
-      this.loggingIn = true;
-      if (orgInfo) {
-        username = orgInfo.username;
-      }
-      return setupConn()
-        .then(login)
-        .then((loginRes) => {
-          return vscode.window.forceCode.connect().then(() => {
-            return loginRes;
-          });
-        })
-        .catch((err) => {
-          notifications.writeLog(err);
-          return false;
-        })
-        .then((finalRes) => {
-          this.loggingIn = false;
-          return finalRes;
-        });
-    } else {
+
+    if (this.loggingIn) {
       return Promise.resolve(false);
     }
 
-    function setupConn(): Promise<boolean> {
+    this.loggingIn = true;
+    if (orgInfo) {
+      username = orgInfo.username;
+    }
+    let finalRes: any;
+    try {
       service.currentConnection = service.getConnByUsername(username);
+      finalRes = service.isLoggedIn();
+      const connection = await setupConn(finalRes);
+      await login(connection);
+      await vscode.window.forceCode.connect();
+    } catch (err) {
+      notifications.writeLog(err);
+      finalRes = false;
+    }
+    this.loggingIn = false;
+    return Promise.resolve(finalRes);
 
-      if (service.isLoggedIn()) {
+    // pretty much this whole function is skipped if a user is logged in already
+    async function setupConn(isLoggedIn: boolean): Promise<FCConnection> {
+      if (isLoggedIn && service.currentConnection) {
         vscode.window.forceCode.config = readConfigFile(username);
-        return Promise.resolve(true);
+        return Promise.resolve(service.currentConnection);
       }
 
-      return dxService.getOrgInfo(username).catch(getCredentials).then(setOrgInfo).then(getUserId);
-    }
-
-    function getCredentials() {
-      if (service.currentConnection) {
-        service.currentConnection.connection = undefined;
+      let orgInf: FCOauth;
+      try {
+        orgInf = await dxService.getOrgInfo(username);
+      } catch (_error) {
+        if (service.currentConnection) {
+          service.currentConnection.connection = undefined;
+        }
+        orgInf = await enterCredentials(cancellationToken);
       }
-      return enterCredentials(cancellationToken);
-    }
 
-    function setOrgInfo(orgInf: FCOauth | SFDX): Promise<Connection | undefined> {
       service.currentConnection = service.addConnection(orgInf, true);
       if (!service.currentConnection) {
-        return Promise.reject('Error setting up connection: setOrgInfo');
+        return Promise.reject('Error setting up connection: setupConn');
       }
       vscode.window.forceCode.config = readConfigFile(orgInf.username);
 
       const sfdxPath = path.join(getHomeDir(), '.sfdx', orgInf.username + '.json');
       const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
-      service.currentConnection.connection = new jsforce.Connection({
+      let connection = new jsforce.Connection({
         oauth2: {
           clientId: service.currentConnection.orgInfo.clientId || 'SalesforceDevelopmentExperience',
         },
@@ -231,51 +225,40 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
           vscode.window.forceCode?.config?.apiVersion || getVSCodeSetting('defaultApiVersion'),
       });
 
-      return Promise.resolve(service.currentConnection.connection);
+      service.currentConnection.connection = connection;
+
+      // get the user id
+      const identity = await connection.identity();
+      service.currentConnection.orgInfo.userId = identity.user_id;
+      service.currentConnection.isLoggedIn = true;
+      vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
+
+      return Promise.resolve(service.currentConnection);
     }
 
-    function getUserId(connection: Connection | undefined): Promise<boolean> {
-      if (connection) {
-        return connection.identity().then((res: any) => {
-          if (!service.currentConnection) {
-            return Promise.reject('Error setting up connection: getUserId1');
-          }
-          service.currentConnection.orgInfo.userId = res.user_id;
-          service.currentConnection.isLoggedIn = true;
-          vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
-          return Promise.resolve(false);
-        });
-      } else {
-        return Promise.reject('Error setting up connection: getUserId2');
-      }
-    }
-
-    function login(hadToLogIn: boolean): Promise<boolean> {
+    async function login(fcConnection: FCConnection): Promise<void> {
       containerService.clear();
-      return checkConfig(vscode.window.forceCode.config).then((config) => {
-        saveConfigFile(config.username, config);
-        if (!service.currentConnection || !service.currentConnection.connection) {
-          return Promise.reject('Error setting up connection: login');
-        }
-        vscode.window.forceCode.conn = service.currentConnection.connection;
-
-        // writing to force.json will trigger the file watcher. this, in turn, will call configuration()
-        // which will finish setting up the login process
-        fs.outputFileSync(
-          path.join(vscode.window.forceCode.workspaceRoot, 'force.json'),
-          JSON.stringify({ lastUsername: config.username }, undefined, 4)
-        );
-        vscode.window.forceCode.projectRoot = path.join(
-          vscode.window.forceCode.workspaceRoot,
-          vscode.window.forceCode.config.src || 'src'
-        );
-        return vscode.window.forceCode.conn.metadata.describe().then((res) => {
-          vscode.window.forceCode.describe = res;
-          vscode.window.forceCode.config.prefix = res.organizationNamespace;
-          notifications.writeLog('Done retrieving metadata records');
-          return Promise.resolve(hadToLogIn);
-        });
-      });
+      const config = await checkConfig(vscode.window.forceCode.config);
+      saveConfigFile(config.username, config);
+      if (!fcConnection.connection) {
+        return Promise.reject('Error setting up connection: login');
+      }
+      vscode.window.forceCode.conn = fcConnection.connection;
+      // writing to force.json will trigger the file watcher. this, in turn, will call configuration()
+      // which will finish setting up the login process
+      fs.outputFileSync(
+        path.join(vscode.window.forceCode.workspaceRoot, 'force.json'),
+        JSON.stringify({ lastUsername: config.username }, undefined, 4)
+      );
+      vscode.window.forceCode.projectRoot = path.join(
+        vscode.window.forceCode.workspaceRoot,
+        vscode.window.forceCode.config.src || 'src'
+      );
+      const describe = await vscode.window.forceCode.conn.metadata.describe();
+      vscode.window.forceCode.describe = describe;
+      vscode.window.forceCode.config.prefix = describe.organizationNamespace;
+      notifications.writeLog('Done retrieving metadata records');
+      return Promise.resolve();
     }
   }
 

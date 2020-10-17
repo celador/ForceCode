@@ -25,7 +25,6 @@ import { ForceCodeMenu } from './menu';
 import { ApexTest, RunTests, GetCodeCoverage, ToggleCoverage } from './apexTest';
 import { OpenOrg, PreviewVisualforce, PreviewApp, OpenFileInOrg } from './dxCommands';
 import { createProject } from './createProject';
-import { MigrateData } from './migrateData';
 import {
   ToolingQuery,
   CreateProject,
@@ -81,7 +80,6 @@ export const fcCommands: ForcecodeCommand[] = [
   new DeployPackage(),
   new CodeCompletionRefresh(),
   new BulkLoader(),
-  new MigrateData(),
   new Settings(),
   new CreateProject(),
   new Logout(),

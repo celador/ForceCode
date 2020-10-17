@@ -33,7 +33,7 @@ export const defaultOptions: Config = {
   staticResourceCacheControl: 'Private',
 };
 
-export function getSetConfig(service?: ForceService): Promise<Config> {
+export async function getSetConfig(service?: ForceService): Promise<Config> {
   let self: IForceService = service || vscode.window.forceCode;
   const projPath = self.workspaceRoot;
   let lastUsername: string | undefined = readForceJson();
@@ -45,9 +45,8 @@ export function getSetConfig(service?: ForceService): Promise<Config> {
   }
 
   if (!self.config.username) {
-    return fcConnection.refreshConnections().then(() => {
-      return Promise.resolve(self.config);
-    });
+    await fcConnection.refreshConnections();
+    return Promise.resolve(self.config);
   }
 
   const forceConfigPath = path.join(projPath, '.forceCode', self.config.username);
@@ -134,12 +133,11 @@ export function getSetConfig(service?: ForceService): Promise<Config> {
     );
   }
 
-  return fcConnection.refreshConnections().then(() => {
-    return Promise.resolve(self.config);
-  });
+  await fcConnection.refreshConnections();
+  return Promise.resolve(self.config);
 }
 
-export function readForceJson() {
+export function readForceJson(): string | undefined {
   const projPath = vscode.window.forceCode.workspaceRoot;
   let lastUsername: string | undefined;
   if (fs.existsSync(path.join(projPath, 'force.json'))) {
