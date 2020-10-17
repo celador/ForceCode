@@ -160,8 +160,8 @@ export async function saveApex(
             };
             codeCovViewService.addClass(workspaceMember);
           }
-          return foo;
         }
+        return foo;
       }
     }
   }
