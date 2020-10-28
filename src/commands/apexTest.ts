@@ -12,6 +12,7 @@ import {
 import { ForcecodeCommand } from '.';
 import { updateDecorations } from '../decorators';
 import { CoverageRetrieveType } from '../services/commandView';
+import { VSCODE_SETTINGS } from '../services/configuration';
 
 export class ToggleCoverage extends ForcecodeCommand {
   constructor() {
@@ -97,7 +98,7 @@ export class ApexTest extends ForcecodeCommand {
       return dxRes;
     }
     function showLog(): Promise<vscode.TextEditor | void> {
-      if (getVSCodeSetting('showTestLog')) {
+      if (getVSCodeSetting(VSCODE_SETTINGS.showTestLog)) {
         if (!fcConnection.currentConnection) {
           return Promise.reject('No current org info found');
         }

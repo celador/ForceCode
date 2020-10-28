@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as forceCode from '../forceCode';
 import { codeCovViewService, FCFile, getVSCodeSetting } from '.';
 import { QueryResult } from 'jsforce';
+import { VSCODE_SETTINGS } from './configuration';
 
 export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> {
   let fromWhere: string = singleClass ? ' ApexCodeCoverage ' : ' ApexCodeCoverageAggregate ';
@@ -39,7 +40,7 @@ export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> 
         }
       });
 
-      if (singleClass && highestClass && getVSCodeSetting('revealTestedClass')) {
+      if (singleClass && highestClass && getVSCodeSetting(VSCODE_SETTINGS.revealTestedClass)) {
         // reveal the tested class
         let treePro = vscode.window.createTreeView('ForceCode.codeCovDataProvider', {
           treeDataProvider: codeCovViewService,

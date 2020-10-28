@@ -10,6 +10,7 @@ import { fcConnection, notifications, trackEvent, FCTimer, getVSCodeSetting } fr
 import { EventEmitter } from 'events';
 import { ForcecodeCommand } from '../commands';
 import * as path from 'path';
+import { VSCODE_SETTINGS } from './configuration';
 
 const FIRST_TRY = 1;
 const SECOND_TRY = 2;
@@ -52,8 +53,8 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     if (
       type === CoverageRetrieveType.RunTest ||
       (type === CoverageRetrieveType.OpenFile &&
-        getVSCodeSetting('retrieveCoverageOnFileRetrieval')) ||
-      (type === CoverageRetrieveType.StartUp && getVSCodeSetting('retrieveCodeCoverageOnStart'))
+        getVSCodeSetting(VSCODE_SETTINGS.retrieveCoverageOnFileRetrieval)) ||
+      (type === CoverageRetrieveType.StartUp && getVSCodeSetting(VSCODE_SETTINGS.retrieveCodeCoverageOnStart))
     ) {
       this.getCodeCoverage = true;
     }
@@ -88,7 +89,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     }
 
     if (execution.commandName === 'ForceCode.fileModified') {
-      if (this.fileModCommands >= getVSCodeSetting('maxFileChangeNotifications')) {
+      if (this.fileModCommands >= getVSCodeSetting(VSCODE_SETTINGS.maxFileChangeNotifications)) {
         return Promise.resolve();
       }
       this.fileModCommands++;

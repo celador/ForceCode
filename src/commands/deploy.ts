@@ -17,6 +17,7 @@ import { isEmptyUndOrNull, toArray } from '../util';
 import { DeployResult } from 'jsforce';
 import { FCCancellationToken, ForcecodeCommand } from '.';
 import { IMetadataObject } from '../forceCode';
+import { VSCODE_SETTINGS } from '../services/configuration';
 
 export class DeployPackage extends ForcecodeCommand {
   constructor() {
@@ -178,7 +179,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
     let packObj: PXML = {
       Package: {
         types: [],
-        version: vscode.window.forceCode.config.apiVersion || getVSCodeSetting('defaultApiVersion'),
+        version: vscode.window.forceCode.config.apiVersion || getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
       },
     };
     files.forEach((file) => {

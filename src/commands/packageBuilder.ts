@@ -5,6 +5,7 @@ import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
 import { isEmptyUndOrNull, toArray } from '../util';
 import { ForcecodeCommand } from '.';
+import { VSCODE_SETTINGS } from '../services/configuration';
 
 export class PackageBuilder extends ForcecodeCommand {
   constructor() {
@@ -187,7 +188,7 @@ export function packageBuilder(buildPackage?: boolean): Promise<any> {
                 types: mappedTypes,
                 version:
                   vscode.window.forceCode.config.apiVersion ||
-                  getVSCodeSetting('defaultApiVersion'),
+                  getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
               },
             };
             let xml: string = builder

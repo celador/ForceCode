@@ -4,6 +4,7 @@ import * as path from 'path';
 import { isEmptyUndOrNull } from '../util';
 import { ForcecodeCommand, FCCancellationToken, ToolingType, retrieve } from '.';
 import { getVSCodeSetting } from '../services';
+import { VSCODE_SETTINGS } from '../services/configuration';
 const TYPEATTRIBUTE: string = 'type';
 
 export class ShowFileOptions extends ForcecodeCommand {
@@ -140,13 +141,13 @@ function showFileOptions(promises: any[], cancellationToken: FCCancellationToken
       });
 
       return retrieve({ types: files }, cancellationToken).then((res: any) => {
-        if (getVSCodeSetting('showFilesOnOpen')) {
+        if (getVSCodeSetting(VSCODE_SETTINGS.showFilesOnOpen)) {
           // open the files in the editor
           let filesOpened: number = 0;
           return opts.forEach((curFile: any) => {
             if (
               !cancellationToken.isCanceled() &&
-              filesOpened < getVSCodeSetting('showFilesOnOpenMax')
+              filesOpened < getVSCodeSetting(VSCODE_SETTINGS.showFilesOnOpenMax)
             ) {
               let tType: string = curFile.detail.split(' ')[0];
               if (

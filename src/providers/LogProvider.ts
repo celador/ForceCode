@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { dxService, getVSCodeSetting } from '../services';
+import { VSCODE_SETTINGS } from '../services/configuration';
 
 export class ForceCodeLogProvider implements vscode.TextDocumentContentProvider {
   provideTextDocumentContent(uri: vscode.Uri): Thenable<string> {
@@ -14,14 +15,14 @@ export class ForceCodeLogProvider implements vscode.TextDocumentContentProvider 
 }
 
 export function filterLog(body: string) {
-  if (!getVSCodeSetting('debugOnly')) {
+  if (!getVSCodeSetting(VSCODE_SETTINGS.debugOnly)) {
     return body;
   } else {
     let theLog = '';
     let includeIt = false;
     let debugLevel = ['USER_DEBUG'];
-    if (getVSCodeSetting('debugFilter')) {
-      debugLevel = getVSCodeSetting('debugFilter').split('|');
+    if (getVSCodeSetting(VSCODE_SETTINGS.debugFilter)) {
+      debugLevel = getVSCodeSetting(VSCODE_SETTINGS.debugFilter).split('|');
     }
     body.split('\n').forEach(l => {
       let theSplitLine: string[] = l.split(')|');

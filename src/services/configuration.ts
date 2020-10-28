@@ -9,9 +9,35 @@ interface SFDXConfig {
   defaultusername?: string;
 }
 
+export enum VSCODE_SETTINGS {
+  allowAnonymousUsageTracking = 'allowAnonymousUsageTracking',
+  autoRefresh = 'autoRefresh',
+  browser = 'browser',
+  bulkLoaderPollInterval = 'bulkLoaderPollInterval',
+  bulkLoaderPollTimeout = 'bulkLoaderPollTimeout',
+  checkForFileChanges = 'checkForFileChanges',
+  retrieveCodeCoverageOnStart = 'retrieveCodeCoverageOnStart',
+  retrieveCoverageOnFileRetrieval = 'retrieveCoverageOnFileRetrieval',
+  defaultApiVersion = 'defaultApiVersion',
+  debugFilter = 'debugFilter',
+  debugOnly = 'debugOnly',
+  filesExclude = 'filesExclude',
+  maxFileChangeNotifications = 'maxFileChangeNotifications',
+  maxQueryHistory = 'maxQueryHistory',
+  maxQueryResultsPerPage = 'maxQueryResultsPerPage',
+  maxSaveHistory = 'maxSaveHistory',
+  onlyShowProjectUsernames = 'onlyShowProjectUsernames',
+  outputQueriesAsCSV = 'outputQueriesAsCSV',
+  revealTestedClass = 'revealTestedClass',
+  setDefaultUsernameOnLogin = 'setDefaultUsernameOnLogin',
+  showFilesOnOpen = 'showFilesOnOpen',
+  showFilesOnOpenMax = 'showFilesOnOpenMax',
+  showTestLog = 'showTestLog',
+}
+
 export const defaultOptions: Config = {
   alias: '',
-  apiVersion: getVSCodeSetting('defaultApiVersion'),
+  apiVersion: getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
   deployOptions: {
     allowMissingFiles: true,
     checkOnly: false,
@@ -117,7 +143,7 @@ export async function getSetConfig(service?: ForceService): Promise<Config> {
   fs.copyFileSync(forceSFDXProjJson, sfdxProjectJson);
 
   // update the defaultusername in the sfdx config file...
-  if (getVSCodeSetting('setDefaultUsernameOnLogin')) {
+  if (getVSCodeSetting(VSCODE_SETTINGS.setDefaultUsernameOnLogin)) {
     const sfdxConfigPath = path.join(sfdxPath, 'sfdx-config.json');
     let sfdxConfig: SFDXConfig = {};
     if (fs.existsSync(sfdxConfigPath)) {
@@ -190,6 +216,6 @@ export function removeConfigFolder(userName: string): boolean {
   return false;
 }
 
-export function getVSCodeSetting(name: string) {
+export function getVSCodeSetting(name: VSCODE_SETTINGS) {
   return vscode.workspace.getConfiguration('force')[name];
 }

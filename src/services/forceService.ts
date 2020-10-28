@@ -20,6 +20,7 @@ import klaw = require('klaw');
 import { isEmptyUndOrNull } from '../util';
 import { SaveResult } from './saveHistoryService';
 import { CoverageRetrieveType } from './commandView';
+import { VSCODE_SETTINGS } from './configuration';
 
 export class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
@@ -94,42 +95,39 @@ export class ForceService implements forceCode.IForceService {
   // Match them up with ContainerMembers
   private getWorkspaceMembers(): Promise<Array<Promise<IMetadataFileProperties[]>>> {
     return new Promise((resolve, reject) => {
-      let types: Array<Array<{}>> = [[]];
+      let types: Array<{}> = [];
       let typeNames: Array<string> = [];
       let proms: Array<Promise<IMetadataFileProperties[]>> = [];
-      const index = 0;
       klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
         .on('data', function (item) {
           let type: string | undefined = getToolingTypeFromExt(item.path);
 
-          if (type) {
-            if (!codeCovViewService.findByPath(item.path)) {
-              if (!typeNames.includes(type)) {
-                typeNames.push(type);
-                if (types[index].length > 2) {
-                  //index++;
-                  proms.push(vscode.window.forceCode.conn.metadata.list(types.splice(0, 1)));
-                  types.push([]);
-                }
-                types[index].push({ type: type });
+          if (type && !codeCovViewService.findByPath(item.path)) {
+            if (!typeNames.includes(type)) {
+              typeNames.push(type);
+              if (types.length > 2) {
+                //index++;
+                proms.push(vscode.window.forceCode.conn.metadata.list(types));
+                types = [];
               }
-
-              let thePath: string | undefined = item.path.split(path.sep).pop();
-              let filename: string = thePath?.split('.')[0] || '';
-              let workspaceMember: forceCode.IWorkspaceMember = {
-                name: filename,
-                path: item.path,
-                id: '', //metadataFileProperties.id,
-                type: type,
-                coverage: new Map<string, forceCode.ICodeCoverage>(),
-              };
-              codeCovViewService.addClass(workspaceMember);
+              types.push({ type: type });
             }
+
+            let thePath: string | undefined = item.path.split(path.sep).pop();
+            let filename: string = thePath?.split('.')[0] || '';
+            let workspaceMember: forceCode.IWorkspaceMember = {
+              name: filename,
+              path: item.path,
+              id: '', //metadataFileProperties.id,
+              type: type,
+              coverage: new Map<string, forceCode.ICodeCoverage>(),
+            };
+            codeCovViewService.addClass(workspaceMember);
           }
         })
         .on('end', function () {
-          if (types[index].length > 0) {
-            proms.push(vscode.window.forceCode.conn.metadata.list(types.splice(0, 1)));
+          if (types.length > 0) {
+            proms.push(vscode.window.forceCode.conn.metadata.list(types));
           }
           resolve(proms);
         })
@@ -164,7 +162,7 @@ export class ForceService implements forceCode.IForceService {
               curMem.id = key.id;
               if (
                 curFCFile.compareDates(key.lastModifiedDate) ||
-                !getVSCodeSetting('checkForFileChanges')
+                !getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges)
               ) {
                 curFCFile.updateWsMember(curMem);
               } else {

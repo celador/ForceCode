@@ -3,6 +3,7 @@ import fs = require('fs-extra');
 import path = require('path');
 import { zipFiles, notifications, getVSCodeSetting, saveHistoryService } from '../services';
 import { ForcecodeCommand } from '.';
+import { VSCODE_SETTINGS } from '../services/configuration';
 const mime = require('mime-types');
 
 interface IResourceBundle {
@@ -299,11 +300,9 @@ function addResourceSetting(setting: IResourceBundle) {
 
 function deployComplete(results: any) {
   notifications.showStatus(`ForceCode: Deployed ${results.fullName} $(check)`);
-  if (getVSCodeSetting('autoRefresh') && getVSCodeSetting('browser')) {
+  if (getVSCodeSetting(VSCODE_SETTINGS.autoRefresh) && getVSCodeSetting(VSCODE_SETTINGS.browser)) {
     require('child_process').exec(
-      `osascript -e 'tell application "${getVSCodeSetting(
-        'browser'
-      )}" to reload active tab of window 1'`
+      `osascript -e 'tell application "${getVSCodeSetting(VSCODE_SETTINGS.browser)}" to reload active tab of window 1'`
     );
   }
   return results;
@@ -311,11 +310,9 @@ function deployComplete(results: any) {
 
 function deployAllComplete(results: any) {
   notifications.showStatus(`ForceCode: Deployed ${results.length} Resources $(check)`);
-  if (getVSCodeSetting('autoRefresh') && getVSCodeSetting('browser')) {
+  if (getVSCodeSetting(VSCODE_SETTINGS.autoRefresh) && getVSCodeSetting(VSCODE_SETTINGS.browser)) {
     require('child_process').exec(
-      `osascript -e 'tell application "${getVSCodeSetting(
-        'browser'
-      )}" to reload active tab of window 1'`
+      `osascript -e 'tell application "${getVSCodeSetting(VSCODE_SETTINGS.browser)}" to reload active tab of window 1'`
     );
   }
   let talliedResults: {} = results.reduce((prev: any, curr: any) => {

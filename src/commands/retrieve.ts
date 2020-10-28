@@ -28,6 +28,7 @@ import {
 import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
 import { CoverageRetrieveType } from '../services/commandView';
+import { VSCODE_SETTINGS } from '../services/configuration';
 
 export class Refresh extends ForcecodeCommand {
   constructor() {
@@ -288,7 +289,7 @@ export function retrieve(
         apiVersion:
           version ||
           vscode.window.forceCode.config.apiVersion ||
-          getVSCodeSetting('defaultApiVersion'),
+          getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
       });
       theStream.on('error', (error) => {
         reject(
@@ -335,7 +336,7 @@ export function retrieve(
         let theStream = vscode.window.forceCode.conn.metadata.retrieve({
           packageNames: [option.description],
           apiVersion:
-            vscode.window.forceCode.config.apiVersion || getVSCodeSetting('defaultApiVersion'),
+            vscode.window.forceCode.config.apiVersion || getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
         });
         theStream.on('error', (error) => {
           reject(

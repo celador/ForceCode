@@ -6,7 +6,7 @@ import { parseString } from 'xml2js';
 import { toArray } from '../util';
 import { IMetadataObject } from '../forceCode';
 import { getToolingTypeMetadata } from '../parsers';
-import { getVSCodeSetting } from './configuration';
+import { getVSCodeSetting, VSCODE_SETTINGS } from './configuration';
 import globule = require('globule');
 
 /**
@@ -109,7 +109,7 @@ export function getFilteredFileList(files: string[]): string[] {
   // get ignore settings from Forcecode workspace settings and .forceignore
   const ignoreFilesSettings: { [key: string]: boolean } = Object.assign(
     {},
-    getVSCodeSetting('filesExclude'),
+    getVSCodeSetting(VSCODE_SETTINGS.filesExclude),
     readForceIgnore()
   );
 

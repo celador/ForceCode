@@ -15,10 +15,10 @@ import {
   getVSCodeSetting,
   containerService,
 } from '.';
-const jsforce: any = require('jsforce');
+const jsforce = require('jsforce');
 import klaw = require('klaw');
 import { FCCancellationToken } from '../commands';
-import { jsforce } from 'jsforce';
+import { VSCODE_SETTINGS } from './configuration';
 
 export class FCConnectionService implements vscode.TreeDataProvider<FCConnection> {
   private static instance: FCConnectionService;
@@ -122,7 +122,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         this.addConnection({ username: uName });
       });
       if (orgs) {
-        if (getVSCodeSetting('onlyShowProjectUsernames')) {
+        if (getVSCodeSetting(VSCODE_SETTINGS.onlyShowProjectUsernames)) {
           orgs = orgs.filter((currentOrg) => uNames.includes(currentOrg.username || ''));
         }
         orgs.forEach((curOrg) => {
@@ -222,7 +222,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         accessToken: service.currentConnection.orgInfo.accessToken,
         refreshToken: refreshToken,
         version:
-          vscode.window.forceCode?.config?.apiVersion || getVSCodeSetting('defaultApiVersion'),
+          vscode.window.forceCode?.config?.apiVersion || getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
       });
 
       service.currentConnection.connection = connection;

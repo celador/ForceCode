@@ -4,6 +4,7 @@ import { Visitor } from 'universal-analytics';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { v4 as uuidv4 } from 'uuid';
+import { VSCODE_SETTINGS } from './configuration';
 
 const myExt = vscode.extensions.getExtension('JohnAaronNelson.forcecode');
 const fcVersion = myExt?.packageJSON?.version;
@@ -92,5 +93,5 @@ export function inDebug(): boolean {
 function optIn(): boolean {
   const debug = inDebug();
   // turn off analytics when we are debugging
-  return getVSCodeSetting('allowAnonymousUsageTracking') == true && !debug;
+  return getVSCodeSetting(VSCODE_SETTINGS.allowAnonymousUsageTracking) == true && !debug;
 }
