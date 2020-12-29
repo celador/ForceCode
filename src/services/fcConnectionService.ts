@@ -222,7 +222,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         accessToken: service.currentConnection.orgInfo.accessToken,
         refreshToken: refreshToken,
         version:
-          vscode.window.forceCode?.config?.apiVersion || getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
+          vscode.window.forceCode?.config?.apiVersion ||
+          getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
       });
 
       service.currentConnection.connection = connection;
@@ -317,8 +318,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
   }
 
   private sortFunc(a: FCConnection, b: FCConnection): number {
-    let aStr = a.label?.toUpperCase() || '';
-    let bStr = b.label?.toUpperCase() || '';
+    let aStr = a.getLabel().toUpperCase() || '';
+    let bStr = b.getLabel().toUpperCase() || '';
     return aStr.localeCompare(bStr);
   }
 }

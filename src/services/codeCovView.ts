@@ -237,8 +237,8 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   private sortFunc(a: FCFile, b: FCFile): number {
-    let aStr = a?.label?.split('% ').pop()?.toUpperCase() || '';
-    let bStr = b?.label?.split('% ').pop()?.toUpperCase() || '';
+    let aStr = a?.getLabel().split('% ').pop()?.toUpperCase() || '';
+    let bStr = b?.getLabel().split('% ').pop()?.toUpperCase() || '';
     return aStr.localeCompare(bStr);
   }
 }
@@ -264,6 +264,10 @@ export class FCFile extends TreeItem {
     this.parent = parent;
     this.parentFCFile = parentFCFile;
     this.setWsMember(wsMember);
+  }
+
+  public getLabel(): string {
+    return typeof this.label === 'string' ? this.label : this.label?.label || '';
   }
 
   public setWsMember(newMem: IWorkspaceMember) {
@@ -293,7 +297,7 @@ export class FCFile extends TreeItem {
     }
 
     this.type = ClassType.UncoveredClass;
-    this.tooltip = this.label;
+    this.tooltip = this.getLabel();
     let fileCoverage: ICodeCoverage | undefined = this.wsMember.coverage.get('overall');
     if (fileCoverage) {
       let total: number = fileCoverage.NumLinesCovered + fileCoverage.NumLinesUncovered;

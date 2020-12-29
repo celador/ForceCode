@@ -42,14 +42,14 @@ export function getMembers(
   }
   let metadataObjects: IMetadataObject[] = vscode.window.forceCode.describe.metadataObjects;
   if (!(metadataTypes.length === 1 && metadataTypes[0] === '*')) {
-    metadataObjects = metadataObjects.filter(type => metadataTypes.includes(type.xmlName));
+    metadataObjects = metadataObjects.filter((type) => metadataTypes.includes(type.xmlName));
   }
-  let proms: Promise<PXMLMember>[] = metadataObjects.map(r => {
+  let proms: Promise<PXMLMember>[] = metadataObjects.map((r) => {
     return new Promise<PXMLMember>((resolve, reject) => {
       if (r.xmlName === 'CustomObject') {
         dxService
           .describeGlobal(SObjectCategory.ALL)
-          .then(objs => {
+          .then((objs) => {
             resolve({ name: r.xmlName, members: objs });
           })
           .catch(reject);
@@ -57,18 +57,18 @@ export function getMembers(
         const folderType = r.xmlName === 'EmailTemplate' ? 'EmailFolder' : `${r.xmlName}Folder`;
         vscode.window.forceCode.conn.metadata
           .list([{ type: folderType }])
-          .then(folders => {
+          .then((folders) => {
             let proms: Promise<any>[] = [];
             folders = toArray(folders);
-            folders.forEach(f => {
+            folders.forEach((f) => {
               if (f && (f.manageableState === 'unmanaged' || retrieveManaged)) {
                 proms.push(getFolderContents(r.xmlName, f.fullName));
               }
             });
             Promise.all(proms)
-              .then(folderList => {
+              .then((folderList) => {
                 folderList = toArray(folderList);
-                let members = folders.filter(f => f !== undefined).map(f => f.fullName);
+                let members = folders.filter((f) => f !== undefined).map((f) => f.fullName);
                 members = members.concat(...folderList);
                 resolve({ name: r.xmlName, members: members });
               })
@@ -146,9 +146,9 @@ export function getMembers(
 }
 
 export function getFolderContents(type: string, folder: string): Promise<string[]> {
-  return vscode.window.forceCode.conn.metadata.list([{ type, folder }]).then(contents => {
+  return vscode.window.forceCode.conn.metadata.list([{ type, folder }]).then((contents) => {
     contents = toArray(contents);
-    return contents.filter(f => f !== undefined).map(m => m.fullName);
+    return contents.filter((f) => f !== undefined).map((m) => m.fullName);
   });
 }
 
@@ -157,7 +157,7 @@ export function packageBuilder(buildPackage?: boolean): Promise<any> {
     if (!vscode.window.forceCode.describe) {
       return reject('Metadata describe error. Please try logging out of and back into the org.');
     }
-    let options: any[] = vscode.window.forceCode.describe.metadataObjects.map(r => {
+    let options: any[] = vscode.window.forceCode.describe.metadataObjects.map((r) => {
       return {
         label: r.xmlName,
         detail: r.directoryName,
@@ -170,14 +170,14 @@ export function packageBuilder(buildPackage?: boolean): Promise<any> {
       placeHolder: 'Select types',
       canPickMany: true,
     };
-    vscode.window.showQuickPick(options, config).then(types => {
+    vscode.window.showQuickPick(options, config).then((types) => {
       if (isEmptyUndOrNull(types)) {
         return reject();
       }
-      const typesArray: string[] = toArray(types).map(r => r.label);
+      const typesArray: string[] = toArray(types).map((r) => r.label);
 
       getMembers(typesArray, true)
-        .then(mappedTypes => {
+        .then((mappedTypes) => {
           if (!buildPackage) {
             resolve(mappedTypes);
           } else {
@@ -198,9 +198,9 @@ export function packageBuilder(buildPackage?: boolean): Promise<any> {
             const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
             vscode.window
               .showSaveDialog({ filters: { XML: ['xml'] }, defaultUri: defaultURI })
-              .then(uri => {
+              .then((uri) => {
                 if (!uri) {
-                  resolve();
+                  resolve(undefined);
                 } else {
                   resolve(fs.outputFileSync(uri.fsPath, xml));
                 }

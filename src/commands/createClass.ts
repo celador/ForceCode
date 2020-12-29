@@ -58,14 +58,14 @@ export class CreateClass extends ForcecodeCommand {
         placeHolder: 'Choose a file type...',
         ignoreFocusOut: true,
       };
-      vscode.window.showQuickPick(fileOptions, config).then(selection => {
+      vscode.window.showQuickPick(fileOptions, config).then((selection) => {
         if (!selection) {
           reject(this.cancellationToken.cancel());
           return;
         }
-        getFileName(selection.label).then(name => {
+        getFileName(selection.label).then((name) => {
           if (!name) {
-            resolve();
+            resolve(undefined);
             return;
           }
           switch (selection.label) {
@@ -106,16 +106,16 @@ export class CreateClass extends ForcecodeCommand {
       });
     });
 
-    function getFileName(type: string): Promise<string> {
+    function getFileName(type: string): Promise<string | undefined> {
       let options: vscode.InputBoxOptions = {
         placeHolder: 'File name',
         prompt: `Enter ${type} name`,
         ignoreFocusOut: true,
       };
       return new Promise((resolve, reject) => {
-        vscode.window.showInputBox(options).then(filename => {
+        vscode.window.showInputBox(options).then((filename) => {
           if (!filename) {
-            resolve();
+            resolve(undefined);
             return;
           } else {
             const fnameShift = filename.split('.').shift();
@@ -155,8 +155,10 @@ export class CreateClass extends ForcecodeCommand {
       }
       let metaFile: string = `<?xml version="1.0" encoding="UTF-8"?>
 <${type} xmlns="urn:metadata.tooling.soap.sforce.com" fqn="${name}">
-    <apiVersion>${vscode.window.forceCode.config.apiVersion ||
-      getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion)}</apiVersion>
+    <apiVersion>${
+      vscode.window.forceCode.config.apiVersion ||
+      getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion)
+    }</apiVersion>
     ${extra}
 </${type}>`;
       let metaFileName: string = path.join(filePath, name + '.' + ext + '-meta.xml');
@@ -166,7 +168,7 @@ export class CreateClass extends ForcecodeCommand {
     function createSrcFile(name: string, thePath: string, src: string, ext: string, resolve: any) {
       const ofPath: string = path.join(thePath, name + '.' + ext);
       fs.outputFileSync(ofPath, src);
-      return vscode.workspace.openTextDocument(ofPath).then(document => {
+      return vscode.workspace.openTextDocument(ofPath).then((document) => {
         resolve(vscode.window.showTextDocument(document, vscode.ViewColumn.One));
         return;
       });
@@ -196,7 +198,7 @@ export class CreateClass extends ForcecodeCommand {
         placeHolder: 'Choose a type...',
         ignoreFocusOut: true,
       };
-      vscode.window.showQuickPick(auraOptions, config).then(type => {
+      vscode.window.showQuickPick(auraOptions, config).then((type) => {
         if (!type) {
           reject();
           return;
@@ -338,7 +340,7 @@ export default class ${jsClassName} extends LightningElement {}`;
         prompt: `Enter the name of the object the trigger will fire on.`,
         ignoreFocusOut: true,
       };
-      vscode.window.showInputBox(options).then(objname => {
+      vscode.window.showInputBox(options).then((objname) => {
         if (!objname) {
           return resolve();
         }

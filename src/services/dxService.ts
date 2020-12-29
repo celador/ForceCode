@@ -167,7 +167,7 @@ export class DXService {
       notifications.writeLog('Cancelling task...');
       return new Promise((resolve, reject) => {
         kill(pid, 'SIGKILL', (err: {}) => {
-          err ? reject(err) : resolve();
+          err ? reject(err) : resolve(undefined);
         });
       });
     }

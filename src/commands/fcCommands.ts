@@ -102,7 +102,7 @@ export class FileModified extends ForcecodeCommand {
   }
 
   public command(context: vscode.Uri, selectedResource: string) {
-    return vscode.workspace.openTextDocument(context).then(theDoc => {
+    return vscode.workspace.openTextDocument(context).then((theDoc) => {
       return notifications
         .showWarning(
           selectedResource + ' has changed ' + getFileName(theDoc),
@@ -110,7 +110,7 @@ export class FileModified extends ForcecodeCommand {
           'Diff',
           'Dismiss'
         )
-        .then(s => {
+        .then((s) => {
           if (s === 'Refresh') {
             return retrieve(theDoc.uri, this.cancellationToken);
           } else if (s === 'Diff') {
@@ -163,7 +163,7 @@ export class OpenOnClick extends ForcecodeCommand {
   public command(context: string) {
     return vscode.workspace
       .openTextDocument(context)
-      .then(doc => vscode.window.showTextDocument(doc, { preview: false }));
+      .then((doc) => vscode.window.showTextDocument(doc, { preview: false }));
   }
 }
 
@@ -177,7 +177,7 @@ export class ChangeCoverageDecoration extends ForcecodeCommand {
 
   public command(context: FCFile) {
     let parent = context.getParentFCFile() || context;
-    if (context.label) {
+    if (context.label && typeof context.label === 'string') {
       let newCoverage = context.label.split(' ').pop();
       if (parent === context) {
         newCoverage = 'overall';
@@ -191,8 +191,8 @@ export class ChangeCoverageDecoration extends ForcecodeCommand {
       }
       return vscode.workspace
         .openTextDocument(parent.getWsMember().path)
-        .then(doc => vscode.window.showTextDocument(doc, { preview: false }))
-        .then(_res => {
+        .then((doc) => vscode.window.showTextDocument(doc, { preview: false }))
+        .then((_res) => {
           parent.setCoverageTestClass(newCoverage);
           return updateDecorations();
         });
@@ -215,7 +215,7 @@ export class Login extends ForcecodeCommand {
       orgInfo = context;
     }
     const cfg: Config = readConfigFile(orgInfo.username);
-    return dxService.login(cfg.url, this.cancellationToken).then(res => {
+    return dxService.login(cfg.url, this.cancellationToken).then((res) => {
       return vscode.commands.executeCommand('ForceCode.switchUser', res);
     });
   }
@@ -241,7 +241,7 @@ export class RemoveConfig extends ForcecodeCommand {
         'Yes',
         'No'
       )
-      .then(s => {
+      .then((s) => {
         if (s === 'Yes') {
           if (removeConfigFolder(username)) {
             return notifications.showInfo(
@@ -276,7 +276,7 @@ export class DeleteFile extends ForcecodeCommand {
     let filesToDelete: Set<vscode.Uri> = new Set<vscode.Uri>();
     // check that file is in the project and get tooling type
     if (selectedResource) {
-      selectedResource.forEach(resource => {
+      selectedResource.forEach((resource) => {
         filesToDelete.add(resource);
       });
     } else if (context) {
@@ -300,7 +300,7 @@ export class DeleteFile extends ForcecodeCommand {
     }
     await new Promise((resolve, reject) => {
       let count = 0;
-      filesToDelete.forEach(async resource => {
+      filesToDelete.forEach(async (resource) => {
         const toAdd = await getAnyNameFromUri(resource, true).catch(reject);
         if (toAdd) {
           const thePath = resource.fsPath;
@@ -342,7 +342,7 @@ export class DeleteFile extends ForcecodeCommand {
           if (toAdd.defType) {
             toAdd.name = 'AuraDefinition';
           }
-          toAdd.members.forEach(mem => {
+          toAdd.members.forEach((mem) => {
             toDeleteNames +=
               mem + (toAdd.defType ? ' ' + toAdd.defType : '') + ': ' + toAdd.name + '\n';
           });
@@ -353,7 +353,7 @@ export class DeleteFile extends ForcecodeCommand {
               .replace('-meta.xml', '') + ',';
         }
         count++;
-        if (count === filesToDelete.size) resolve();
+        if (count === filesToDelete.size) resolve(undefined);
       });
     });
 
@@ -395,7 +395,7 @@ export class DeleteFile extends ForcecodeCommand {
     fs.removeSync(backupPathBase);
 
     // delete file(s) from workspace
-    filesToDelete.forEach(uri => {
+    filesToDelete.forEach((uri) => {
       let thePath: string = uri.fsPath;
       if (fs.existsSync(thePath)) {
         const theMetaPath: string = thePath + '-meta.xml';

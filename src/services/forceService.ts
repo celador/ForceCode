@@ -73,7 +73,7 @@ export class ForceService implements forceCode.IForceService {
             );
           });
       } else {
-        resolve();
+        resolve(undefined);
       }
     }).then(() => {
       const username = readForceJson();
@@ -209,7 +209,7 @@ export class ForceService implements forceCode.IForceService {
           .execute(function (_err: any, records: any) {
             let toDelete: string[] = [];
             if (!records || records.length === 0) {
-              resolve();
+              resolve(undefined);
             }
             records.forEach((rec: any) => {
               toDelete.push(rec.Id);

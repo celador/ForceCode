@@ -11,14 +11,11 @@ export class ApexTestLinkProvider implements vscode.HoverProvider {
   ): vscode.ProviderResult<vscode.Hover> {
     let wordPosition = document.getWordRangeAtPosition(position);
     if (!wordPosition || wordPosition.start.character === 0)
-      return new Promise(resolve => resolve());
+      return new Promise((resolve) => resolve(undefined));
     wordPosition = wordPosition.with(
       wordPosition.start.with(wordPosition.start.line, wordPosition.start.character - 1)
     );
-    const word = document
-      .getText(wordPosition)
-      .trim()
-      .toLowerCase();
+    const word = document.getText(wordPosition).trim().toLowerCase();
     if (word === '@istest' || word === 'testmethod') {
       let fileContents = document.getText();
       let fileName = getFileName(document);
@@ -48,6 +45,6 @@ export class ApexTestLinkProvider implements vscode.HoverProvider {
         return new vscode.Hover(['ForceCode: Run test', md]);
       }
     }
-    return new Promise(resolve => resolve());
+    return new Promise((resolve) => resolve(undefined));
   }
 }

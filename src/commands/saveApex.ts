@@ -216,7 +216,7 @@ export async function saveApex(
 
       // Throttle the ReCheck of the compile status, to use fewer http requests (reduce effects on SFDC limits)
       return new Promise(function (resolve) {
-        setTimeout(() => resolve(), vscode.window.forceCode.config.poll || 2000);
+        setTimeout(() => resolve(undefined), vscode.window.forceCode.config.poll || 2000);
       }).then(nextStatus);
     }
 
