@@ -199,7 +199,11 @@ export class ForceService implements forceCode.IForceService {
     notifications.showStatus('ForceCode Ready!');
 
     // get the current org info
-    return checkForChanges().then(cleanupContainers).catch(connectionError);
+    if (getVSCodeSetting('checkForFileChanges')) {
+      return checkForChanges().then(cleanupContainers).catch(connectionError);
+    } else {
+      return cleanupContainers().catch(connectionError);
+    }
 
     // we get a nice chunk of forcecode containers after using for some time, so let's clean them on startup
     function cleanupContainers(): Promise<any> {
