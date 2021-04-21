@@ -77,12 +77,12 @@ export function addErrorToDoc() {
     };
   }
   const position = editor.document.positionAt(0);
-  editor.edit(edit => {
+  editor.edit((edit) => {
     edit.insert(position, '<'); // add a syntax error
   });
   vscode.window.forceCode.lastSaveResult = undefined;
-  return editor.document.save().then(_res => {
-    return vscode.commands.executeCommand('ForceCode.compile').then(async _res2 => {
+  return editor.document.save().then((_res) => {
+    return vscode.commands.executeCommand('ForceCode.compile').then(async (_res2) => {
       return await getSaveResult(false);
     });
   });
@@ -100,14 +100,14 @@ export function removeErrorOnDoc(dontRemove?: boolean, autoCompile?: boolean) {
   const position = editor.document.positionAt(0);
   const position2 = editor.document.positionAt(1);
   const range: vscode.Range = new vscode.Range(position, position2);
-  editor.edit(edit => {
+  editor.edit((edit) => {
     if (dontRemove) {
       edit.insert(position, '<');
     }
     edit.delete(range); // remove syntax error
   });
   vscode.window.forceCode.lastSaveResult = undefined;
-  return editor.document.save().then(async _res => {
+  return editor.document.save().then(async (_res) => {
     if (!autoCompile) {
       await vscode.commands.executeCommand('ForceCode.compile');
     }
@@ -116,10 +116,10 @@ export function removeErrorOnDoc(dontRemove?: boolean, autoCompile?: boolean) {
 }
 
 function getSaveResult(expected: boolean): Promise<any> {
-  const MAX_TIME = 60;
+  const MAX_TIME = 120;
   let seconds = 0;
   return new Promise<SaveResult | undefined>((resolve, _reject) => checkResult(resolve)).then(
-    res => {
+    (res) => {
       if (res) {
         return assert.strictEqual(expected, res.result.success, res.result.messages.join('\n'));
       } else {
@@ -147,5 +147,5 @@ function getSaveResult(expected: boolean): Promise<any> {
 }
 
 export function timeout(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
