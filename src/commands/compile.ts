@@ -172,7 +172,11 @@ export async function compile(
   } catch (error) {
     finished(error);
   } finally {
-    return Promise.resolve(updateSaveHistory());
+    let retVal = updateSaveHistory();
+    if (errMessages.length == 1 && errMessages[0].indexOf('expired access/refresh token') !== -1) {
+      return Promise.reject(errMessages[0]);
+    }
+    return Promise.resolve(retVal);
   }
 
   function finished(res: any): boolean {
@@ -249,6 +253,9 @@ export async function compile(
     } else if (diagnostics.length === 0 && errMessages.length === 0) {
       notifications.showError(res.message || res);
     }
+    if (errMessages.length == 1 && errMessages[0].indexOf('expired access/refresh token') !== -1) {
+      return false;
+    }
     notifications.showError(
       'File not saved due to build errors. Please open the Problems panel for more details.'
     );
@@ -262,7 +269,8 @@ export async function compile(
     }
     // make sure we refresh an expired token
     if (errMsg.indexOf('expired access/refresh token') !== -1) {
-      throw err;
+      errMessages.push(errMsg);
+      return false;
     }
     let theerr: string;
     let failureLineNumber: number = 1;
