@@ -144,7 +144,7 @@ export class DXService {
             );
           }
           // We want to resolve if there's an error with parsable results
-          if ((code > 0 && !json) || (json?.status > 0 && !json.result) || json?.exitCode > 0) {
+          if ((code && code > 0 && !json) || (json?.status > 0 && !json.result) || json?.exitCode > 0) {
             // Get non-promise stack for extra help
             notifications.writeLog(error);
             notifications.writeLog(json);
