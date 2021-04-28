@@ -13,14 +13,15 @@ import {
   commandViewService,
 } from '.';
 import * as path from 'path';
-import { getToolingTypeFromExt } from '../parsers';
+//import { getToolingTypeFromExt } from '../parsers';
 import { Connection, IMetadataFileProperties } from 'jsforce';
 
-import klaw = require('klaw');
+//import klaw = require('klaw');
 import { isEmptyUndOrNull } from '../util';
 import { SaveResult } from './saveHistoryService';
 import { CoverageRetrieveType } from './commandView';
 import { VSCODE_SETTINGS } from './configuration';
+import * as fs from 'fs-extra';
 
 export class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
@@ -94,10 +95,37 @@ export class ForceService implements forceCode.IForceService {
   // Get files in src folder..
   // Match them up with ContainerMembers
   private getWorkspaceMembers(): Promise<Array<Promise<IMetadataFileProperties[]>>> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       let types: Array<{}> = [];
-      let typeNames: Array<string> = [];
+      //let typeNames: Array<string> = [];
       let proms: Array<Promise<IMetadataFileProperties[]>> = [];
+      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'classes'))) {
+        types.push({ type: 'ApexClass' });
+      }
+      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'components'))) {
+        types.push({ type: 'ApexComponent' });
+      }
+      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'triggers'))) {
+        if (types.length > 2) {
+          //index++;
+          proms.push(vscode.window.forceCode.conn.metadata.list(types));
+          types = [];
+        }
+        types.push({ type: 'ApexTrigger' });
+      }
+      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'pages'))) {
+        if (types.length > 2) {
+          //index++;
+          proms.push(vscode.window.forceCode.conn.metadata.list(types));
+          types = [];
+        }
+        types.push({ type: 'ApexPage' });
+      }
+      if (types.length > 0) {
+        proms.push(vscode.window.forceCode.conn.metadata.list(types));
+      }
+      resolve(proms);
+      /*
       klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
         .on('data', function (item) {
           let type: string | undefined = getToolingTypeFromExt(item.path);
@@ -135,6 +163,7 @@ export class ForceService implements forceCode.IForceService {
           notifications.writeLog(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
           reject();
         });
+        */
     });
   }
 
@@ -153,27 +182,55 @@ export class ForceService implements forceCode.IForceService {
       recs.forEach((curSet) => {
         if (Array.isArray(curSet)) {
           curSet.forEach((key) => {
+            let thePath: string = path.join(vscode.window.forceCode.projectRoot, key.fileName);
+            if (fs.existsSync(thePath)) {
+              let workspaceMember: forceCode.IWorkspaceMember = {
+                name: key.fullName,
+                path: thePath,
+                id: key.id,
+                type: key.type,
+                coverage: new Map<string, forceCode.ICodeCoverage>(),
+              };
+
+              let curFCFile: FCFile = codeCovViewService.addClass(workspaceMember);
+
+              if (
+                !(
+                  curFCFile.compareDates(key.lastModifiedDate) ||
+                  !getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges)
+                )
+              ) {
+                //curFCFile.updateWsMember(curMem);
+                vscode.commands.executeCommand(
+                  'ForceCode.fileModified',
+                  thePath,
+                  key.lastModifiedByName
+                );
+              }
+            }
+
+            /*
             let curFCFile: FCFile | undefined = codeCovViewService.findByNameAndType(
               key.fullName,
               key.type
             );
             if (curFCFile) {
-              let curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
-              curMem.id = key.id;
+              //let curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
+              //curMem.id = key.id;
               if (
-                curFCFile.compareDates(key.lastModifiedDate) ||
-                !getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges)
+                !(
+                  curFCFile.compareDates(key.lastModifiedDate) ||
+                  !getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges)
+                )
               ) {
-                curFCFile.updateWsMember(curMem);
-              } else {
-                curFCFile.updateWsMember(curMem);
+                //curFCFile.updateWsMember(curMem);
                 vscode.commands.executeCommand(
                   'ForceCode.fileModified',
-                  curMem.path,
+                  thePath,
                   key.lastModifiedByName
                 );
               }
-            }
+            }*/
           });
         }
       });

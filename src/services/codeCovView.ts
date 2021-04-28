@@ -18,8 +18,8 @@ export enum ClassType {
   UncoveredClass = 'Insufficient Coverage',
   NoCoverageData = 'No Coverage Data',
   TestClass = 'Test Classes',
-  NotInOrg = 'Not In Current Org',
-  NotInSrc = 'Open Files Not In Src',
+  NotInOrg = 'Not In Current Org', // TODO remove
+  NotInSrc = 'Open Files Not In Src', // TODO remove
   NoShow = 'NoShow',
   Subclass = 'Subclass',
 }
@@ -59,12 +59,14 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     this._onDidChangeTreeData.fire(undefined);
   }
 
-  public addClass(wsMember: IWorkspaceMember) {
+  public addClass(wsMember: IWorkspaceMember): FCFile {
     const index: number = this.classes.findIndex((curClass) => {
       return curClass.getWsMember().path === wsMember.path;
     });
+    let retval: FCFile;
     if (index !== -1) {
       this.classes[index].setWsMember(wsMember);
+      retval = this.classes[index];
     } else {
       let newClass: FCFile = new FCFile(
         wsMember.name,
@@ -73,8 +75,10 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
         wsMember
       );
       this.classes.push(newClass);
+      retval = newClass;
     }
     this.refresh();
+    return retval;
   }
 
   public findByNameAndType(name: string, type: string): FCFile | undefined {
