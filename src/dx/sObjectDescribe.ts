@@ -8,6 +8,7 @@
 import * as vscode from 'vscode';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
 import { FCOauth, fcConnection, notifications, getVSCodeSetting } from '../services';
+import { VSCODE_SETTINGS } from '../services/configuration';
 
 const CLIENT_ID = 'sfdx-vscode';
 export interface SObject {
@@ -166,7 +167,7 @@ export class SObjectDescribe {
 
   private getVersion(): string {
     return `${this.versionPrefix}${vscode.window.forceCode.config.apiVersion ||
-      getVSCodeSetting('defaultApiVersion')}`;
+      getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion)}`;
   }
 
   public async describeSObjectBatch(types: string[], nextToProcess: number): Promise<SObject[]> {

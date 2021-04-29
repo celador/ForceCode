@@ -8,7 +8,7 @@ import { deployFiles, createPackageXML, FCCancellationToken } from '.';
 // ================================                Lightning Components               ===========================================
 // =======================================================================================================================================
 // TODO: Add cancellation token to updates. Updates with LCs are quick, so is this possible??
-export function saveAura(
+export async function saveAura(
   document: vscode.TextDocument,
   name: string | undefined,
   cancellationToken: FCCancellationToken,
@@ -16,28 +16,24 @@ export function saveAura(
   forceCompile?: boolean
 ): Promise<any> {
   const ext: string | undefined = parsers.getFileExtension(document);
-  var DefType: string | undefined = getAuraDefTypeFromDocument(document);
-  var Format: string = getAuraFormatFromDocument();
-  var Source: string = document.getText();
-  var currentObjectDefinition: any = undefined;
+  let DefType: string | undefined = getAuraDefTypeFromDocument(document);
+  let Format: string = getAuraFormatFromDocument();
+  let Source: string = document.getText();
+  let currentObjectDefinition: any = undefined;
   // Aura Bundles are a special case, since they can be upserted with the Tooling API
   // Instead of needing to be compiled, like Classes and Pages..
-  return Promise.resolve(vscode.window.forceCode)
-    .then(getAuraBundle)
-    .then(ensureAuraBundle)
-    .then(bundle => {
-      if (Array.isArray(bundle)) {
-        if (Metadata) {
-          return updateMetaData(bundle);
-        } else {
-          return getAuraDefinition(bundle).then((definitions: any) =>
-            upsertAuraDefinition(definitions, bundle)
-          );
-        }
-      } else {
-        return Promise.resolve(bundle);
-      }
-    });
+  const results = await getAuraBundle();
+  const bundle = await ensureAuraBundle(results);
+  if (Array.isArray(bundle)) {
+    if (Metadata) {
+      return updateMetaData(bundle);
+    } else {
+      const definitions = await getAuraDefinition(bundle);
+      return upsertAuraDefinition(definitions, bundle);
+    }
+  } else {
+    return Promise.resolve(bundle);
+  }
 
   function getAuraBundle() {
     return vscode.window.forceCode.conn.tooling.sobject('AuraDefinitionBundle').find({
@@ -45,18 +41,18 @@ export function saveAura(
       NamespacePrefix: vscode.window.forceCode.config.prefix || '',
     });
   }
-  function ensureAuraBundle(results: any) {
+
+  async function ensureAuraBundle(results: any) {
     // If the Bundle doesn't exist, create it, else Do nothing
     if (name && (results.length === 0 || !results[0])) {
       // Create Aura Definition Bundle
-      return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot).then(() => {
-        const files: string[] = [];
-        files.push(path.join('aura', name));
-        files.push('package.xml');
-        return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
-      });
+      await createPackageXML([document.fileName], vscode.window.forceCode.storageRoot);
+      const files: string[] = [];
+      files.push(path.join('aura', name));
+      files.push('package.xml');
+      return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
     } else {
-      return results;
+      return Promise.resolve(results);
     }
   }
 
@@ -68,10 +64,10 @@ export function saveAura(
         Id: bundle[0].Id,
       })
       .then(
-        res => {
+        (res) => {
           return res;
         },
-        err => {
+        (err) => {
           return err;
         }
       );
@@ -84,14 +80,14 @@ export function saveAura(
   }
   function upsertAuraDefinition(definitions: any, bundle: any) {
     // If the Definition doesn't exist, create it
-    var def: any[] = definitions.filter((result: any) => result.DefType === DefType);
+    let def: any[] = definitions.filter((result: any) => result.DefType === DefType);
     currentObjectDefinition = def.length > 0 ? def[0] : undefined;
     if (currentObjectDefinition !== undefined) {
       const serverContents: string = currentObjectDefinition.Source;
       if (!forceCompile && !saveService.compareContents(document.fileName, serverContents)) {
         return notifications
           .showWarning('Someone has changed this file!', 'Diff', 'Overwrite')
-          .then(s => {
+          .then((s) => {
             if (s === 'Diff') {
               vscode.commands.executeCommand('ForceCode.diff', document.uri);
               return {};
@@ -113,7 +109,7 @@ export function saveAura(
           Format,
           Source,
         })
-        .catch(_err => {
+        .catch((_err) => {
           return {
             State: 'Error',
             message:
@@ -128,7 +124,7 @@ export function saveAura(
     return vscode.window.forceCode.conn.tooling
       .sobject('AuraDefinition')
       .update({ Id: currentObjectDefinition.Id, Source })
-      .catch(err => {
+      .catch((err) => {
         return { State: 'Error', message: err.message || err };
       });
   }
@@ -176,7 +172,7 @@ export function getAuraDefTypeFromDocument(document: vscode.TextDocument) {
       if (!fileName || !fname) {
         return undefined;
       }
-      var fileNameEndsWith: string = fileName.replace(fname, '').toLowerCase();
+      let fileNameEndsWith: string = fileName.replace(fname, '').toLowerCase();
       if (fileNameEndsWith === 'controller') {
         // CONTROLLER — client-side controller
         return 'CONTROLLER';

@@ -5,6 +5,7 @@ import { outputToString, outputToCSV } from '../parsers';
 import { RecordResult } from 'jsforce';
 import { ForcecodeCommand } from '.';
 import { getVSCodeSetting } from '../services';
+import { VSCODE_SETTINGS } from '../services/configuration';
 
 export class QueryEditor extends ForcecodeCommand {
   constructor() {
@@ -41,9 +42,9 @@ export class QueryEditor extends ForcecodeCommand {
       'queryHistory.json'
     );
 
-    var curResults: any;
-    var queryHistory: string[] = [];
-    var curQuery: string;
+    let curResults: any;
+    let queryHistory: string[] = [];
+    let curQuery: string;
 
     // try and get the query history
     if (fs.existsSync(qHistPath)) {
@@ -54,7 +55,7 @@ export class QueryEditor extends ForcecodeCommand {
     panel.webview.html = getQueryEditorPage();
 
     // handle a query
-    panel.webview.onDidReceiveMessage(message => {
+    panel.webview.onDidReceiveMessage((message) => {
       // the structure of message is { toql: string, query: string }
       // or { save: boolean }
       if (message.query) {
@@ -62,30 +63,27 @@ export class QueryEditor extends ForcecodeCommand {
       }
       if (message.save && curResults) {
         // save the results
-        const csv: boolean = getVSCodeSetting('outputQueriesAsCSV');
-        var data: string = csv ? outputToCSV(curResults) : outputToString(curResults);
+        const csv: boolean = getVSCodeSetting(VSCODE_SETTINGS.outputQueriesAsCSV);
+        let data: string = csv ? outputToCSV(curResults) : outputToString(curResults);
         const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
         vscode.window
           .showSaveDialog({
             filters: csv ? { CSV: ['csv'] } : { JSON: ['json'] },
             defaultUri: defaultURI,
           })
-          .then(uri => {
+          .then((uri) => {
             if (uri) {
               fs.outputFileSync(uri.fsPath, data);
             }
           });
       } else if (message.toql) {
-        vscode.window.forceCode.conn.tooling
-          .query(curQuery)
-          .then(sendResults)
-          .catch(onError);
+        vscode.window.forceCode.conn.tooling.query(curQuery).then(sendResults).catch(onError);
       } else if (message.getResults) {
         sendResults(curResults, true);
       } else if (message.update) {
         // push the update to the server here
         // get the type from the query
-        var toUpdateArray: [] = message.rows.map((row: any) => {
+        let toUpdateArray: [] = message.rows.map((row: any) => {
           return row.value;
         });
         const lowerCaseQuery: string = curQuery.toLowerCase();
@@ -94,17 +92,17 @@ export class QueryEditor extends ForcecodeCommand {
         const type: string = typeStart.split(' ')[0];
         // save the records using the bulk api
         //vscode.window.forceCode.conn.bulk.load(type, 'update', message.rows).then(res => {
-        var prom: Promise<Array<RecordResult>>;
+        let prom: Promise<Array<RecordResult>>;
         if (message.updateToql) {
           prom = vscode.window.forceCode.conn.tooling.sobject(type).update(toUpdateArray);
         } else {
           prom = vscode.window.forceCode.conn.sobject(type).update(toUpdateArray);
         }
         prom
-          .then(res => {
+          .then((res) => {
             // take the res and show message based off of it
             // clear out the bg color
-            var resToSend = {
+            let resToSend = {
               saveResult: true,
               saveSuccess: res[0].success,
               errors: res[0].errors,
@@ -115,8 +113,8 @@ export class QueryEditor extends ForcecodeCommand {
               Object.assign(curResults[curRow.key - 1], curRow.value);
             });
           })
-          .catch(err => {
-            var resToSend = {
+          .catch((err) => {
+            let resToSend = {
               saveResult: true,
               saveSuccess: false,
               errors: [err.message || err],
@@ -124,10 +122,7 @@ export class QueryEditor extends ForcecodeCommand {
             sendData(resToSend);
           });
       } else {
-        vscode.window.forceCode.conn
-          .query(curQuery)
-          .then(sendResults)
-          .catch(onError);
+        vscode.window.forceCode.conn.query(curQuery).then(sendResults).catch(onError);
       }
     }, undefined);
 
@@ -142,19 +137,19 @@ export class QueryEditor extends ForcecodeCommand {
         queryHistory.splice(queryIndex, 1);
       }
       queryHistory.unshift(curQuery);
-      const maxQueryHistory = getVSCodeSetting('maxQueryHistory');
+      const maxQueryHistory = getVSCodeSetting(VSCODE_SETTINGS.maxQueryHistory);
       if (queryHistory.length > maxQueryHistory) {
         const toDrop = queryHistory.length - maxQueryHistory;
         queryHistory.splice(maxQueryHistory, toDrop);
       }
       // save the query history
       fs.outputFileSync(qHistPath, JSON.stringify({ queries: queryHistory }, undefined, 4));
-      var resToSend: {};
+      let resToSend: {};
       if (results.length > 0 || results.totalSize > 0) {
         resToSend = {
           success: true,
           results: outputToCSV(curResults),
-          limit: getVSCodeSetting('maxQueryResultsPerPage'),
+          limit: getVSCodeSetting(VSCODE_SETTINGS.maxQueryResultsPerPage),
         };
       } else {
         resToSend = {
@@ -167,7 +162,7 @@ export class QueryEditor extends ForcecodeCommand {
     }
 
     function onError(err: any) {
-      var errToSend: {} = {
+      let errToSend: {} = {
         success: false,
         results: err?.message || err,
       };

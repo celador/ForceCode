@@ -58,9 +58,9 @@ export class Notifications {
 
   public showError(message: any, ...items: string[]) {
     message = outputToString(message);
-    var mParts = message.split('$#FC_LOG_ONLY_#*');
-    var logMess = message;
-    var theMess = message;
+    let mParts = message.split('$#FC_LOG_ONLY_#*');
+    let logMess = message;
+    let theMess = message;
     if (mParts.length === 2) {
       // omit the split string
       logMess = mParts.join('');

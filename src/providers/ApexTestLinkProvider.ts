@@ -9,30 +9,27 @@ export class ApexTestLinkProvider implements vscode.HoverProvider {
     position: vscode.Position,
     _token: vscode.CancellationToken
   ): vscode.ProviderResult<vscode.Hover> {
-    var wordPosition = document.getWordRangeAtPosition(position);
+    let wordPosition = document.getWordRangeAtPosition(position);
     if (!wordPosition || wordPosition.start.character === 0)
-      return new Promise(resolve => resolve());
+      return new Promise((resolve) => resolve(undefined));
     wordPosition = wordPosition.with(
       wordPosition.start.with(wordPosition.start.line, wordPosition.start.character - 1)
     );
-    const word = document
-      .getText(wordPosition)
-      .trim()
-      .toLowerCase();
+    const word = document.getText(wordPosition).trim().toLowerCase();
     if (word === '@istest' || word === 'testmethod') {
-      var fileContents = document.getText();
-      var fileName = getFileName(document);
-      var runText: string = 'all tests in ' + fileName + '.' + getFileExtension(document);
-      var wordIndex: number = document.offsetAt(position);
+      let fileContents = document.getText();
+      let fileName = getFileName(document);
+      let runText: string = 'all tests in ' + fileName + '.' + getFileExtension(document);
+      let wordIndex: number = document.offsetAt(position);
       // get the index of the first '{' after the position
-      var bracketIndex: number = fileContents.indexOf('{', wordIndex);
+      let bracketIndex: number = fileContents.indexOf('{', wordIndex);
       if (bracketIndex > wordIndex) {
-        var args = { name: fileName, type: 'class' };
+        let args = { name: fileName, type: 'class' };
         // get the text up till the bracket so we can see if it's a class
-        var lineText: string = fileContents.slice(wordIndex, bracketIndex);
+        let lineText: string = fileContents.slice(wordIndex, bracketIndex);
         if (!lineText.toLowerCase().includes('class')) {
           // this means it's a method
-          var methodName: string | undefined = lineText
+          let methodName: string | undefined = lineText
             .slice(0, lineText.lastIndexOf('('))
             .trimRight()
             .split(' ')
@@ -41,13 +38,13 @@ export class ApexTestLinkProvider implements vscode.HoverProvider {
           args.type = 'method';
           runText = methodName + ' test method';
         }
-        var md: vscode.MarkdownString = new vscode.MarkdownString(
+        let md: vscode.MarkdownString = new vscode.MarkdownString(
           'Click [here](' + encodeURI(`${COMMAND}?` + JSON.stringify(args)) + ')  to run ' + runText
         );
         md.isTrusted = true;
         return new vscode.Hover(['ForceCode: Run test', md]);
       }
     }
-    return new Promise(resolve => resolve());
+    return new Promise((resolve) => resolve(undefined));
   }
 }

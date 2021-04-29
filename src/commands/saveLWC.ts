@@ -7,22 +7,19 @@ import { createPackageXML, deployFiles, FCCancellationToken } from '.';
 // ================================                Lightning Web Components               ================================================
 // =======================================================================================================================================
 // TODO: Add cancellation token to updates. Updates with LCs are quick, so is this possible??
-export function saveLWC(
+export async function saveLWC(
   document: vscode.TextDocument,
   name: string | undefined,
   cancellationToken: FCCancellationToken,
   forceCompile?: boolean
 ): Promise<any> {
-  return Promise.resolve(vscode.window.forceCode)
-    .then(getLWCBundle)
-    .then(ensureLWCBundle)
-    .then(bundle => {
-      if (Array.isArray(bundle)) {
-        return getLWCDefinition(bundle).then(upsertLWCDefinition);
-      } else {
-        return Promise.resolve(bundle);
-      }
-    });
+  const results = await getLWCBundle();
+  const bundle = await ensureLWCBundle(results);
+  if (Array.isArray(bundle)) {
+    return upsertLWCDefinition(await getLWCDefinition(bundle));
+  } else {
+    return Promise.resolve(bundle);
+  }
 
   function getLWCBundle() {
     return vscode.window.forceCode.conn.tooling.sobject('LightningComponentBundle').find({
@@ -30,13 +27,14 @@ export function saveLWC(
       NamespacePrefix: vscode.window.forceCode.config.prefix || '',
     });
   }
+
   function ensureLWCBundle(results: any) {
     // If the Bundle doesn't exist, create it, else Do nothing
     if (name && (results.length === 0 || !results[0])) {
       // Create LWC Bundle
       return saveLWCPackage();
     } else {
-      return results;
+      return Promise.resolve(results);
     }
   }
 
@@ -45,13 +43,14 @@ export function saveLWC(
       LightningComponentBundleId: bundle[0].Id,
     });
   }
+
   function upsertLWCDefinition(definitions: any) {
     const docPath = document.fileName;
     const filePath: string = docPath.substring(0, docPath.lastIndexOf(path.sep));
 
     // add files in the folder to PreSaveFiles so we can compare content
     saveService.addFilesInFolder(filePath);
-    var changedFiles: any[] = definitions.filter(
+    let changedFiles: any[] = definitions.filter(
       (def: any) =>
         !saveService.compareContents(path.join(filePath, def.FilePath.split('/').pop()), def.Source)
     );
@@ -60,7 +59,7 @@ export function saveLWC(
     if (!forceCompile && changedFiles.length === 1) {
       return notifications
         .showWarning('Someone has changed this file!', 'Diff', 'Overwrite')
-        .then(s => {
+        .then((s) => {
           if (s === 'Diff') {
             vscode.commands.executeCommand('ForceCode.diff', document.uri);
             return {};
@@ -71,8 +70,8 @@ export function saveLWC(
           return {};
         });
     } else if (!forceCompile && changedFiles.length > 1) {
-      var changedFileNames: string = changedFiles
-        .map(file => file.FilePath.split('/').pop())
+      let changedFileNames: string = changedFiles
+        .map((file) => file.FilePath.split('/').pop())
         .join(',');
       return notifications
         .showWarning(
@@ -80,7 +79,7 @@ export function saveLWC(
           'Yes',
           'No'
         )
-        .then(s => {
+        .then((s) => {
           if (s === 'Yes') {
             return saveLWCPackage();
           }
@@ -91,15 +90,14 @@ export function saveLWC(
     }
   }
 
-  function saveLWCPackage() {
+  async function saveLWCPackage() {
     if (!name) {
       return undefined;
     }
-    return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot).then(() => {
-      const files: string[] = [];
-      files.push(path.join('lwc', name));
-      files.push('package.xml');
-      return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
-    });
+    await createPackageXML([document.fileName], vscode.window.forceCode.storageRoot);
+    const files: string[] = [];
+    files.push(path.join('lwc', name));
+    files.push('package.xml');
+    return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
   }
 }

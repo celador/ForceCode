@@ -10,6 +10,7 @@ import { fcConnection, notifications, trackEvent, FCTimer, getVSCodeSetting } fr
 import { EventEmitter } from 'events';
 import { ForcecodeCommand } from '../commands';
 import * as path from 'path';
+import { VSCODE_SETTINGS } from './configuration';
 
 const FIRST_TRY = 1;
 const SECOND_TRY = 2;
@@ -49,16 +50,11 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
 
   public enqueueCodeCoverage(type: CoverageRetrieveType) {
     // mandatory since it only makes sense
-    if (type === CoverageRetrieveType.RunTest) {
-      this.getCodeCoverage = true;
-    } else if (
-      type === CoverageRetrieveType.OpenFile &&
-      getVSCodeSetting('retrieveCoverageOnFileRetrieval')
-    ) {
-      this.getCodeCoverage = true;
-    } else if (
-      type === CoverageRetrieveType.StartUp &&
-      getVSCodeSetting('retrieveCodeCoverageOnStart')
+    if (
+      type === CoverageRetrieveType.RunTest ||
+      (type === CoverageRetrieveType.OpenFile &&
+        getVSCodeSetting(VSCODE_SETTINGS.retrieveCoverageOnFileRetrieval)) ||
+      (type === CoverageRetrieveType.StartUp && getVSCodeSetting(VSCODE_SETTINGS.retrieveCodeCoverageOnStart))
     ) {
       this.getCodeCoverage = true;
     }
@@ -71,7 +67,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
         return c === execution?.commandName;
       })
     ) {
-      var splitPath;
+      let splitPath;
       if (context?.fsPath) {
         splitPath = context.fsPath.split(path.sep);
       } else if (context) {
@@ -93,13 +89,13 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     }
 
     if (execution.commandName === 'ForceCode.fileModified') {
-      if (this.fileModCommands >= getVSCodeSetting('maxFileChangeNotifications')) {
+      if (this.fileModCommands >= getVSCodeSetting(VSCODE_SETTINGS.maxFileChangeNotifications)) {
         return Promise.resolve();
       }
       this.fileModCommands++;
     }
 
-    var theTask: Task = new Task(this, execution, context, selectedResource);
+    let theTask: Task = new Task(this, execution, context, selectedResource);
     this.tasks.push(theTask);
     const visibleTasks = this.getChildren().length;
     if (visibleTasks > 0) {
@@ -194,40 +190,39 @@ export class Task extends vscode.TreeItem {
     }
   }
 
-  public run(attempt: number): Promise<any> {
-    return new Promise((resolve) => {
-      resolve(this.execution.run(this.context, this.selectedResource));
-    })
-      .catch((reason) => {
-        if (this.execution.cancellationToken.isCanceled()) {
-          return Promise.resolve();
-        }
-        return fcConnection
-          .checkLoginStatus(reason, this.execution.cancellationToken)
-          .then((loggedIn) => {
-            notifications.writeLog('Logged in: ' + loggedIn);
-            notifications.writeLog('Error reason: ' + reason?.message || reason);
-            if (loggedIn || attempt === SECOND_TRY) {
-              if (reason) {
-                notifications.showError(reason.message || reason, 'OK');
-                return trackEvent('Error Thrown', reason.message || reason).then(() => {
-                  return reason;
-                });
-              }
-            } else {
-              return 'FC:AGAIN';
-            }
-          });
-      })
-      .then((finalRes) => {
-        if (finalRes === 'FC:AGAIN') {
-          // try again, possibly had to refresh the access token
-          return this.run(SECOND_TRY);
-        } else {
-          this.taskViewProvider.removeEmitter.emit('removeTask', this);
-          this.commandTimer.stopTimer();
-          return finalRes;
-        }
+  public async run(attempt: number): Promise<any> {
+    let finalRes: any;
+    try {
+      finalRes = await new Promise((resolve) => {
+        resolve(this.execution.run(this.context, this.selectedResource));
       });
+    } catch (reason) {
+      if (this.execution.cancellationToken.isCanceled()) {
+        return Promise.resolve();
+      }
+      const loggedIn = await fcConnection.checkLoginStatus(
+        reason,
+        this.execution.cancellationToken
+      );
+      notifications.writeLog('Logged in: ' + loggedIn);
+      notifications.writeLog('Error reason: ' + reason?.message || reason);
+      if (loggedIn || attempt === SECOND_TRY) {
+        if (reason) {
+          notifications.showError(reason.message || reason, 'OK');
+          await trackEvent('Error Thrown', reason.message || reason);
+          finalRes = reason;
+        }
+      } else {
+        finalRes = 'FC:AGAIN';
+      }
+    }
+    if (finalRes === 'FC:AGAIN') {
+      // try again, possibly had to refresh the access token
+      return this.run(SECOND_TRY);
+    } else {
+      this.taskViewProvider.removeEmitter.emit('removeTask', this);
+      this.commandTimer.stopTimer();
+      return Promise.resolve(finalRes);
+    }
   }
 }

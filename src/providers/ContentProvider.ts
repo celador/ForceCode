@@ -24,12 +24,12 @@ export class ForceCodeContentProvider implements vscode.TextDocumentContentProvi
    * @return {Thenable<string>} TODO: give a description
    */
   provideTextDocumentContent(uri: vscode.Uri): Thenable<string> {
-    var uriParts: string[] = uri.path.split('/');
+    let uriParts: string[] = uri.path.split('/');
     let toolingType: string = uriParts[1];
-    var name: string | undefined = uriParts[2];
-    var toolingName: string = name.split('.')[0];
-    var field: string = 'Body';
-    var nsPrefix = `NamespacePrefix = '${vscode.window.forceCode.config.prefix ||
+    let name: string | undefined = uriParts[2];
+    let toolingName: string = name.split('.')[0];
+    let field: string = 'Body';
+    let nsPrefix = `NamespacePrefix = '${vscode.window.forceCode.config.prefix ||
       ''}' and Name='${toolingName}'`;
     if (toolingType === 'ApexComponent' || toolingType === 'ApexPage') {
       field = 'Markup';
@@ -41,14 +41,14 @@ export class ForceCodeContentProvider implements vscode.TextDocumentContentProvi
     } else if (this.auraSource && toolingType === 'LightningComponentResource') {
       field = 'Source';
       name = getAuraNameFromFileName(this.auraSource.fileName, 'lwc');
-      var FilePath: string | undefined = this.auraSource.fileName
+      let FilePath: string | undefined = this.auraSource.fileName
         .split(vscode.window.forceCode.projectRoot + path.sep)
         .pop();
       FilePath = FilePath?.split(path.sep).join('/') || '';
       nsPrefix = `FilePath='${FilePath}' AND LightningComponentBundleId IN (SELECT Id FROM LightningComponentBundle WHERE DeveloperName='${name}')`;
     }
     return new Promise<string>((resolve, reject) => {
-      var query: string = `SELECT ${field} FROM ${toolingType} WHERE ${nsPrefix}`;
+      let query: string = `SELECT ${field} FROM ${toolingType} WHERE ${nsPrefix}`;
       vscode.commands.executeCommand('ForceCode.toolingQuery', query).then(
         results => {
           const theResults = results as QueryResult;

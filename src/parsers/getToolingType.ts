@@ -28,7 +28,7 @@ export function getToolingTypeFromExt(thePath: string) {
 }
 
 export function getToolingTypeFromFolder(uri: vscode.Uri): string | undefined {
-  var dir: string | undefined = uri.fsPath
+  let dir: string | undefined = uri.fsPath
     .split(vscode.window.forceCode.projectRoot + path.sep)
     .pop();
   dir = dir?.split(path.sep).shift();
@@ -57,14 +57,14 @@ export function getAnyTTMetadataFromPath(thepath: string): IMetadataObject | und
   if (!vscode.window.forceCode.describe) {
     return undefined;
   }
-  var fileName: string | undefined = thepath
+  let fileName: string | undefined = thepath
     .split(vscode.window.forceCode.projectRoot + path.sep)
     .pop();
   if (!fileName) {
     return undefined;
   }
-  var baseDirectoryName: string = fileName.split(path.sep)[0];
-  var ext: string | undefined = fileName
+  let baseDirectoryName: string = fileName.split(path.sep)[0];
+  let ext: string | undefined = fileName
     .split('-meta.xml')[0]
     .split('.')
     .pop();
@@ -81,7 +81,7 @@ export function getToolingTypeMetadata(tType: string): IMetadataObject | undefin
   return vscode.window.forceCode.describe.metadataObjects.find(o => {
     const isType = o.xmlName === tType;
     const childTypes = o.childXmlNames;
-    var childType;
+    let childType;
     if (!isType && childTypes) {
       childType = childTypes.find(t => t === tType);
     }

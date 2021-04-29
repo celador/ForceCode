@@ -62,7 +62,7 @@ export class Logout extends ForcecodeCommand {
   }
 
   public command(context: FCConnection | undefined) {
-    var conn = context || fcConnection.currentConnection;
+    let conn = context || fcConnection.currentConnection;
     return fcConnection.disconnect(conn);
   }
 }
@@ -82,7 +82,7 @@ export class SwitchUser extends ForcecodeCommand {
 
   public command(context: FCOauth | FCConnection) {
     codeCovViewService.clear();
-    var orgInfo: FCOauth;
+    let orgInfo: FCOauth;
     if (context instanceof FCConnection) {
       orgInfo = context.orgInfo;
     } else {
@@ -102,7 +102,7 @@ export class FileModified extends ForcecodeCommand {
   }
 
   public command(context: vscode.Uri, selectedResource: string) {
-    return vscode.workspace.openTextDocument(context).then(theDoc => {
+    return vscode.workspace.openTextDocument(context).then((theDoc) => {
       return notifications
         .showWarning(
           selectedResource + ' has changed ' + getFileName(theDoc),
@@ -110,7 +110,7 @@ export class FileModified extends ForcecodeCommand {
           'Diff',
           'Dismiss'
         )
-        .then(s => {
+        .then((s) => {
           if (s === 'Refresh') {
             return retrieve(theDoc.uri, this.cancellationToken);
           } else if (s === 'Diff') {
@@ -144,7 +144,7 @@ export class ShowTasks extends ForcecodeCommand {
 
   public command() {
     if (fcConnection.isLoggedIn()) {
-      var treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {
+      let treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {
         treeDataProvider: commandViewService,
       });
       return treePro.reveal(commandViewService.getChildren()[0]);
@@ -163,7 +163,7 @@ export class OpenOnClick extends ForcecodeCommand {
   public command(context: string) {
     return vscode.workspace
       .openTextDocument(context)
-      .then(doc => vscode.window.showTextDocument(doc, { preview: false }));
+      .then((doc) => vscode.window.showTextDocument(doc, { preview: false }));
   }
 }
 
@@ -176,9 +176,9 @@ export class ChangeCoverageDecoration extends ForcecodeCommand {
   }
 
   public command(context: FCFile) {
-    var parent = context.getParentFCFile() || context;
-    if (context.label) {
-      var newCoverage = context.label.split(' ').pop();
+    let parent = context.getParentFCFile() || context;
+    if (context.label && typeof context.label === 'string') {
+      let newCoverage = context.label.split(' ').pop();
       if (parent === context) {
         newCoverage = 'overall';
       }
@@ -191,8 +191,8 @@ export class ChangeCoverageDecoration extends ForcecodeCommand {
       }
       return vscode.workspace
         .openTextDocument(parent.getWsMember().path)
-        .then(doc => vscode.window.showTextDocument(doc, { preview: false }))
-        .then(_res => {
+        .then((doc) => vscode.window.showTextDocument(doc, { preview: false }))
+        .then((_res) => {
           parent.setCoverageTestClass(newCoverage);
           return updateDecorations();
         });
@@ -208,14 +208,14 @@ export class Login extends ForcecodeCommand {
   }
 
   public command(context: FCOauth | FCConnection) {
-    var orgInfo: FCOauth;
+    let orgInfo: FCOauth;
     if (context instanceof FCConnection) {
       orgInfo = context.orgInfo;
     } else {
       orgInfo = context;
     }
     const cfg: Config = readConfigFile(orgInfo.username);
-    return dxService.login(cfg.url, this.cancellationToken).then(res => {
+    return dxService.login(cfg.url, this.cancellationToken).then((res) => {
       return vscode.commands.executeCommand('ForceCode.switchUser', res);
     });
   }
@@ -229,7 +229,7 @@ export class RemoveConfig extends ForcecodeCommand {
   }
 
   public command(context: string | FCConnection) {
-    var username: string;
+    let username: string;
     if (context instanceof FCConnection) {
       username = context.orgInfo.username;
     } else {
@@ -241,7 +241,7 @@ export class RemoveConfig extends ForcecodeCommand {
         'Yes',
         'No'
       )
-      .then(s => {
+      .then((s) => {
         if (s === 'Yes') {
           if (removeConfigFolder(username)) {
             return notifications.showInfo(
@@ -272,11 +272,11 @@ export class DeleteFile extends ForcecodeCommand {
   // context = right click in file or explorer
   // command pallette => both undefined, so check current open file
   public async command(context?: vscode.Uri, selectedResource?: vscode.Uri[]) {
-    var toDelete: Set<PXMLMember> = new Set<PXMLMember>();
-    var filesToDelete: Set<vscode.Uri> = new Set<vscode.Uri>();
+    let toDelete: Set<PXMLMember> = new Set<PXMLMember>();
+    let filesToDelete: Set<vscode.Uri> = new Set<vscode.Uri>();
     // check that file is in the project and get tooling type
     if (selectedResource) {
-      selectedResource.forEach(resource => {
+      selectedResource.forEach((resource) => {
         filesToDelete.add(resource);
       });
     } else if (context) {
@@ -292,15 +292,15 @@ export class DeleteFile extends ForcecodeCommand {
       return Promise.resolve();
     }
 
-    var toDeleteNames: string = 'Are you sure you want to delete the following?\n';
-    var toDelString: string = '';
+    let toDeleteNames: string = 'Are you sure you want to delete the following?\n';
+    let toDelString: string = '';
     const backupPathBase: string = path.join(getHomeDir(), '.forceCode', 'backup');
     if (fs.existsSync(backupPathBase)) {
       fs.removeSync(backupPathBase);
     }
     await new Promise((resolve, reject) => {
-      var count = 0;
-      filesToDelete.forEach(async resource => {
+      let count = 0;
+      filesToDelete.forEach(async (resource) => {
         const toAdd = await getAnyNameFromUri(resource, true).catch(reject);
         if (toAdd) {
           const thePath = resource.fsPath;
@@ -314,7 +314,7 @@ export class DeleteFile extends ForcecodeCommand {
             .replace(vscode.window.forceCode.projectRoot + path.sep, '')
             .split(path.sep)
             .shift();
-          var backupPath: string = path.join(backupPathBase, ttFoldername ? ttFoldername : '');
+          let backupPath: string = path.join(backupPathBase, ttFoldername ? ttFoldername : '');
           backupPath =
             thePath ===
             path.join(vscode.window.forceCode.projectRoot, ttFoldername ? ttFoldername : '')
@@ -342,7 +342,7 @@ export class DeleteFile extends ForcecodeCommand {
           if (toAdd.defType) {
             toAdd.name = 'AuraDefinition';
           }
-          toAdd.members.forEach(mem => {
+          toAdd.members.forEach((mem) => {
             toDeleteNames +=
               mem + (toAdd.defType ? ' ' + toAdd.defType : '') + ': ' + toAdd.name + '\n';
           });
@@ -353,7 +353,7 @@ export class DeleteFile extends ForcecodeCommand {
               .replace('-meta.xml', '') + ',';
         }
         count++;
-        if (count === filesToDelete.size) resolve();
+        if (count === filesToDelete.size) resolve(undefined);
       });
     });
 
@@ -395,8 +395,8 @@ export class DeleteFile extends ForcecodeCommand {
     fs.removeSync(backupPathBase);
 
     // delete file(s) from workspace
-    filesToDelete.forEach(uri => {
-      var thePath: string = uri.fsPath;
+    filesToDelete.forEach((uri) => {
+      let thePath: string = uri.fsPath;
       if (fs.existsSync(thePath)) {
         const theMetaPath: string = thePath + '-meta.xml';
         const projPath: string = vscode.window.forceCode.projectRoot + path.sep;

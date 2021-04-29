@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import { dxService, getVSCodeSetting } from '../services';
+import { VSCODE_SETTINGS } from '../services/configuration';
 
 export class ForceCodeLogProvider implements vscode.TextDocumentContentProvider {
   provideTextDocumentContent(uri: vscode.Uri): Thenable<string> {
-    var logId: string | undefined = uri.query.substring(2, 20);
+    let logId: string | undefined = uri.query.substring(2, 20);
 
     const debugString = logId.substr(0, 'debugLog'.length);
     if (debugString === 'debugLog') {
@@ -14,17 +15,17 @@ export class ForceCodeLogProvider implements vscode.TextDocumentContentProvider 
 }
 
 export function filterLog(body: string) {
-  if (!getVSCodeSetting('debugOnly')) {
+  if (!getVSCodeSetting(VSCODE_SETTINGS.debugOnly)) {
     return body;
   } else {
-    var theLog = '';
-    var includeIt = false;
-    var debugLevel = ['USER_DEBUG'];
-    if (getVSCodeSetting('debugFilter')) {
-      debugLevel = getVSCodeSetting('debugFilter').split('|');
+    let theLog = '';
+    let includeIt = false;
+    let debugLevel = ['USER_DEBUG'];
+    if (getVSCodeSetting(VSCODE_SETTINGS.debugFilter)) {
+      debugLevel = getVSCodeSetting(VSCODE_SETTINGS.debugFilter).split('|');
     }
     body.split('\n').forEach(l => {
-      var theSplitLine: string[] = l.split(')|');
+      let theSplitLine: string[] = l.split(')|');
       if (
         theSplitLine.length > 1 &&
         theSplitLine[0].split(':').length === 3 &&

@@ -9,9 +9,35 @@ interface SFDXConfig {
   defaultusername?: string;
 }
 
+export enum VSCODE_SETTINGS {
+  allowAnonymousUsageTracking = 'allowAnonymousUsageTracking',
+  autoRefresh = 'autoRefresh',
+  browser = 'browser',
+  bulkLoaderPollInterval = 'bulkLoaderPollInterval',
+  bulkLoaderPollTimeout = 'bulkLoaderPollTimeout',
+  checkForFileChanges = 'checkForFileChanges',
+  retrieveCodeCoverageOnStart = 'retrieveCodeCoverageOnStart',
+  retrieveCoverageOnFileRetrieval = 'retrieveCoverageOnFileRetrieval',
+  defaultApiVersion = 'defaultApiVersion',
+  debugFilter = 'debugFilter',
+  debugOnly = 'debugOnly',
+  filesExclude = 'filesExclude',
+  maxFileChangeNotifications = 'maxFileChangeNotifications',
+  maxQueryHistory = 'maxQueryHistory',
+  maxQueryResultsPerPage = 'maxQueryResultsPerPage',
+  maxSaveHistory = 'maxSaveHistory',
+  onlyShowProjectUsernames = 'onlyShowProjectUsernames',
+  outputQueriesAsCSV = 'outputQueriesAsCSV',
+  revealTestedClass = 'revealTestedClass',
+  setDefaultUsernameOnLogin = 'setDefaultUsernameOnLogin',
+  showFilesOnOpen = 'showFilesOnOpen',
+  showFilesOnOpenMax = 'showFilesOnOpenMax',
+  showTestLog = 'showTestLog',
+}
+
 export const defaultOptions: Config = {
   alias: '',
-  apiVersion: getVSCodeSetting('defaultApiVersion'),
+  apiVersion: getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
   deployOptions: {
     allowMissingFiles: true,
     checkOnly: false,
@@ -33,10 +59,10 @@ export const defaultOptions: Config = {
   staticResourceCacheControl: 'Private',
 };
 
-export function getSetConfig(service?: ForceService): Promise<Config> {
-  var self: IForceService = service || vscode.window.forceCode;
+export async function getSetConfig(service?: ForceService): Promise<Config> {
+  let self: IForceService = service || vscode.window.forceCode;
   const projPath = self.workspaceRoot;
-  var lastUsername: string | undefined = readForceJson();
+  let lastUsername: string | undefined = readForceJson();
   self.config = readConfigFile(lastUsername, service);
 
   self.projectRoot = path.join(projPath, self.config.src || 'src');
@@ -45,9 +71,8 @@ export function getSetConfig(service?: ForceService): Promise<Config> {
   }
 
   if (!self.config.username) {
-    return fcConnection.refreshConnections().then(() => {
-      return Promise.resolve(self.config);
-    });
+    await fcConnection.refreshConnections();
+    return Promise.resolve(self.config);
   }
 
   const forceConfigPath = path.join(projPath, '.forceCode', self.config.username);
@@ -55,8 +80,8 @@ export function getSetConfig(service?: ForceService): Promise<Config> {
   const sfdxPath = path.join(projPath, '.sfdx');
   const sfdxProjectJson = path.join(projPath, 'sfdx-project.json');
   const forceSFDXProjJson = path.join(forceConfigPath, 'sfdx-project.json');
-  var sfdxStat;
-  var requiresRestart = false;
+  let sfdxStat;
+  let requiresRestart = false;
 
   try {
     sfdxStat = fs.lstatSync(sfdxPath);
@@ -118,9 +143,9 @@ export function getSetConfig(service?: ForceService): Promise<Config> {
   fs.copyFileSync(forceSFDXProjJson, sfdxProjectJson);
 
   // update the defaultusername in the sfdx config file...
-  if (getVSCodeSetting('setDefaultUsernameOnLogin')) {
+  if (getVSCodeSetting(VSCODE_SETTINGS.setDefaultUsernameOnLogin)) {
     const sfdxConfigPath = path.join(sfdxPath, 'sfdx-config.json');
-    var sfdxConfig: SFDXConfig = {};
+    let sfdxConfig: SFDXConfig = {};
     if (fs.existsSync(sfdxConfigPath)) {
       sfdxConfig = fs.readJsonSync(sfdxConfigPath);
     }
@@ -134,16 +159,15 @@ export function getSetConfig(service?: ForceService): Promise<Config> {
     );
   }
 
-  return fcConnection.refreshConnections().then(() => {
-    return Promise.resolve(self.config);
-  });
+  await fcConnection.refreshConnections();
+  return Promise.resolve(self.config);
 }
 
-export function readForceJson() {
+export function readForceJson(): string | undefined {
   const projPath = vscode.window.forceCode.workspaceRoot;
-  var lastUsername: string | undefined;
+  let lastUsername: string | undefined;
   if (fs.existsSync(path.join(projPath, 'force.json'))) {
-    var forceFile = fs.readJsonSync(path.join(projPath, 'force.json'));
+    let forceFile = fs.readJsonSync(path.join(projPath, 'force.json'));
     lastUsername = forceFile.lastUsername;
   }
   return lastUsername;
@@ -159,8 +183,8 @@ export function saveConfigFile(userName: string | undefined, config: Config) {
 }
 
 export function readConfigFile(userName: string | undefined, service?: ForceService): Config {
-  var self: IForceService = service || vscode.window.forceCode;
-  var config: Config = defaultOptions;
+  let self: IForceService = service || vscode.window.forceCode;
+  let config: Config = defaultOptions;
   if (userName) {
     const configPath: string = path.join(
       self.workspaceRoot,
@@ -192,6 +216,6 @@ export function removeConfigFolder(userName: string): boolean {
   return false;
 }
 
-export function getVSCodeSetting(name: string) {
+export function getVSCodeSetting(name: VSCODE_SETTINGS) {
   return vscode.workspace.getConfiguration('force')[name];
 }

@@ -13,13 +13,15 @@ import {
   commandViewService,
 } from '.';
 import * as path from 'path';
-import { getToolingTypeFromExt } from '../parsers';
+//import { getToolingTypeFromExt } from '../parsers';
 import { Connection, IMetadataFileProperties } from 'jsforce';
 
-import klaw = require('klaw');
+//import klaw = require('klaw');
 import { isEmptyUndOrNull } from '../util';
 import { SaveResult } from './saveHistoryService';
 import { CoverageRetrieveType } from './commandView';
+import { VSCODE_SETTINGS } from './configuration';
+import * as fs from 'fs-extra';
 
 export class ForceService implements forceCode.IForceService {
   public fcDiagnosticCollection: vscode.DiagnosticCollection;
@@ -59,7 +61,7 @@ export class ForceService implements forceCode.IForceService {
             'No'
           )
           .then((choice) => {
-            var option: boolean = false;
+            let option: boolean = false;
             if (choice === 'Yes') {
               option = true;
             }
@@ -72,7 +74,7 @@ export class ForceService implements forceCode.IForceService {
             );
           });
       } else {
-        resolve();
+        resolve(undefined);
       }
     }).then(() => {
       const username = readForceJson();
@@ -93,49 +95,75 @@ export class ForceService implements forceCode.IForceService {
   // Get files in src folder..
   // Match them up with ContainerMembers
   private getWorkspaceMembers(): Promise<Array<Promise<IMetadataFileProperties[]>>> {
-    return new Promise((resolve) => {
-      var types: Array<Array<{}>> = [[]];
-      var typeNames: Array<string> = [];
-      var proms: Array<Promise<IMetadataFileProperties[]>> = [];
-      const index = 0;
+    return new Promise((resolve, _reject) => {
+      let types: Array<{}> = [];
+      //let typeNames: Array<string> = [];
+      let proms: Array<Promise<IMetadataFileProperties[]>> = [];
+      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'classes'))) {
+        types.push({ type: 'ApexClass' });
+      }
+      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'components'))) {
+        types.push({ type: 'ApexComponent' });
+      }
+      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'triggers'))) {
+        if (types.length > 2) {
+          //index++;
+          proms.push(vscode.window.forceCode.conn.metadata.list(types));
+          types = [];
+        }
+        types.push({ type: 'ApexTrigger' });
+      }
+      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'pages'))) {
+        if (types.length > 2) {
+          //index++;
+          proms.push(vscode.window.forceCode.conn.metadata.list(types));
+          types = [];
+        }
+        types.push({ type: 'ApexPage' });
+      }
+      if (types.length > 0) {
+        proms.push(vscode.window.forceCode.conn.metadata.list(types));
+      }
+      resolve(proms);
+      /*
       klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
         .on('data', function (item) {
-          var type: string | undefined = getToolingTypeFromExt(item.path);
+          let type: string | undefined = getToolingTypeFromExt(item.path);
 
-          if (type) {
-            if (!codeCovViewService.findByPath(item.path)) {
-              if (!typeNames.includes(type)) {
-                typeNames.push(type);
-                if (types[index].length > 2) {
-                  //index++;
-                  proms.push(vscode.window.forceCode.conn.metadata.list(types.splice(0, 1)));
-                  types.push([]);
-                }
-                types[index].push({ type: type });
+          if (type && !codeCovViewService.findByPath(item.path)) {
+            if (!typeNames.includes(type)) {
+              typeNames.push(type);
+              if (types.length > 2) {
+                //index++;
+                proms.push(vscode.window.forceCode.conn.metadata.list(types));
+                types = [];
               }
-
-              var thePath: string | undefined = item.path.split(path.sep).pop();
-              var filename: string = thePath?.split('.')[0] || '';
-              var workspaceMember: forceCode.IWorkspaceMember = {
-                name: filename,
-                path: item.path,
-                id: '', //metadataFileProperties.id,
-                type: type,
-                coverage: new Map<string, forceCode.ICodeCoverage>(),
-              };
-              codeCovViewService.addClass(workspaceMember);
+              types.push({ type: type });
             }
+
+            let thePath: string | undefined = item.path.split(path.sep).pop();
+            let filename: string = thePath?.split('.')[0] || '';
+            let workspaceMember: forceCode.IWorkspaceMember = {
+              name: filename,
+              path: item.path,
+              id: '', //metadataFileProperties.id,
+              type: type,
+              coverage: new Map<string, forceCode.ICodeCoverage>(),
+            };
+            codeCovViewService.addClass(workspaceMember);
           }
         })
         .on('end', function () {
-          if (types[index].length > 0) {
-            proms.push(vscode.window.forceCode.conn.metadata.list(types.splice(0, 1)));
+          if (types.length > 0) {
+            proms.push(vscode.window.forceCode.conn.metadata.list(types));
           }
           resolve(proms);
         })
         .on('error', (err: Error, item: klaw.Item) => {
           notifications.writeLog(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
+          reject();
         });
+        */
     });
   }
 
@@ -154,27 +182,55 @@ export class ForceService implements forceCode.IForceService {
       recs.forEach((curSet) => {
         if (Array.isArray(curSet)) {
           curSet.forEach((key) => {
-            var curFCFile: FCFile | undefined = codeCovViewService.findByNameAndType(
-              key.fullName,
-              key.type
-            );
-            if (curFCFile) {
-              var curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
-              curMem.id = key.id;
+            let thePath: string = path.join(vscode.window.forceCode.projectRoot, key.fileName);
+            if (fs.existsSync(thePath)) {
+              let workspaceMember: forceCode.IWorkspaceMember = {
+                name: key.fullName,
+                path: thePath,
+                id: key.id,
+                type: key.type,
+                coverage: new Map<string, forceCode.ICodeCoverage>(),
+              };
+
+              let curFCFile: FCFile = codeCovViewService.addClass(workspaceMember);
+
               if (
-                curFCFile.compareDates(key.lastModifiedDate) ||
-                !getVSCodeSetting('checkForFileChanges')
+                (
+                  getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges) &&
+                  !curFCFile.compareDates(key.lastModifiedDate)
+                )
               ) {
-                curFCFile.updateWsMember(curMem);
-              } else {
-                curFCFile.updateWsMember(curMem);
+                //curFCFile.updateWsMember(curMem);
                 vscode.commands.executeCommand(
                   'ForceCode.fileModified',
-                  curMem.path,
+                  thePath,
                   key.lastModifiedByName
                 );
               }
             }
+
+            /*
+            let curFCFile: FCFile | undefined = codeCovViewService.findByNameAndType(
+              key.fullName,
+              key.type
+            );
+            if (curFCFile) {
+              //let curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
+              //curMem.id = key.id;
+              if (
+                !(
+                  curFCFile.compareDates(key.lastModifiedDate) ||
+                  !getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges)
+                )
+              ) {
+                //curFCFile.updateWsMember(curMem);
+                vscode.commands.executeCommand(
+                  'ForceCode.fileModified',
+                  thePath,
+                  key.lastModifiedByName
+                );
+              }
+            }*/
           });
         }
       });
@@ -184,8 +240,8 @@ export class ForceService implements forceCode.IForceService {
   }
 
   public connect(): Promise<forceCode.IForceService> {
-    var self: forceCode.IForceService = vscode.window.forceCode;
-    var config = self.config;
+    let self: forceCode.IForceService = vscode.window.forceCode;
+    let config = self.config;
     if (!config.username) {
       notifications.showError(
         `ForceCode: No username found. Please try to login to the org again.`
@@ -208,9 +264,9 @@ export class ForceService implements forceCode.IForceService {
           .sobject('MetadataContainer')
           .find({ Name: { $like: 'ForceCode-%' } })
           .execute(function (_err: any, records: any) {
-            var toDelete: string[] = new Array<string>();
+            let toDelete: string[] = [];
             if (!records || records.length === 0) {
-              resolve();
+              resolve(undefined);
             }
             records.forEach((rec: any) => {
               toDelete.push(rec.Id);

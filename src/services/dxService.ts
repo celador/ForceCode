@@ -68,9 +68,10 @@ export class DXService {
   public runCommand(
     cmdString: string,
     targetusername: boolean,
-    cancellationToken?: FCCancellationToken
+    cancellationToken?: FCCancellationToken,
+    bypassReject?: boolean
   ): Promise<any> {
-    var fullCommand =
+    let fullCommand =
       'sfdx force:' +
       cmdString +
       (targetusername && fcConnection.currentConnection
@@ -98,8 +99,8 @@ export class DXService {
       cwd: vscode.window.forceCode.workspaceRoot,
     };
 
-    var pid: number;
-    var sfdxNotFound = false;
+    let pid: number;
+    let sfdxNotFound = false;
 
     return new Promise((resolve, reject) => {
       const cmd = spawn(commandName, args, spawnOpt);
@@ -116,7 +117,7 @@ export class DXService {
         });
 
         cmd.stderr.on('data', (data) => {
-          var theErr: string = data.toString();
+          let theErr: string = data.toString();
           notifications.writeLog(theErr);
           if (theErr) {
             theErr = theErr.toLowerCase();
@@ -144,11 +145,11 @@ export class DXService {
             );
           }
           // We want to resolve if there's an error with parsable results
-          if ((code > 0 && !json) || (json?.status > 0 && !json.result) || json?.exitCode > 0) {
+          if (!bypassReject && ((code && code > 0 && !json) || (json?.status > 0 && !json.result) || json?.exitCode > 0)) {
             // Get non-promise stack for extra help
             notifications.writeLog(error);
             notifications.writeLog(json);
-            var errMess: string | undefined;
+            let errMess: string | undefined;
             if (json?.result?.length > 0) {
               errMess = '';
               json.result.forEach((res: any) => {
@@ -167,7 +168,7 @@ export class DXService {
       notifications.writeLog('Cancelling task...');
       return new Promise((resolve, reject) => {
         kill(pid, 'SIGKILL', (err: {}) => {
-          err ? reject(err) : resolve();
+          err ? reject(err) : resolve(undefined);
         });
       });
     }
@@ -204,7 +205,7 @@ export class DXService {
   }
 
   public getDebugLog(logid: string | undefined): Promise<string> {
-    var theLogId: string = '';
+    let theLogId: string = '';
     if (logid) {
       theLogId += ' --logid ' + logid;
     }
@@ -261,7 +262,7 @@ export class DXService {
     classOrMethod: string,
     cancellationToken: FCCancellationToken
   ): Promise<any> {
-    var toRun: string;
+    let toRun: string;
     if (classOrMethod === 'class') {
       toRun = '-n ' + classOrMethodName;
     } else {
@@ -277,5 +278,9 @@ export class DXService {
 
   public deleteSource(thePath: string, cancellationToken: FCCancellationToken) {
     return this.runCommand(`source:delete -p ${thePath} -r`, true, cancellationToken);
+  }
+
+  public getDeployErrors(deploymentId: string, cancellationToken: FCCancellationToken) {
+    return this.runCommand('source:deploy:report -i ' + deploymentId, true, cancellationToken, true);
   }
 }

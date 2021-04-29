@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as forceCode from '../forceCode';
-import { codeCovViewService, saveHistoryService, saveService, notifications } from '../services';
+import { codeCovViewService, saveHistoryService, saveService, notifications, dxService } from '../services';
 import {
   saveAura,
   saveApex,
@@ -13,7 +13,7 @@ import {
 } from '.';
 import { parseString } from 'xml2js';
 import * as path from 'path';
-import { isEmptyUndOrNull } from '../util';
+import { isEmptyUndOrNull, toArray } from '../util';
 import {
   getAnyTTMetadataFromPath,
   getToolingTypeFromFolder,
@@ -37,7 +37,7 @@ export class CompileMenu extends ForcecodeCommand {
 
   public async command(context: any, selectedResource?: any) {
     selectedResource = selectedResource ? true : false;
-    var document: string | undefined = vscode.window.activeTextEditor?.document.fileName;
+    let document: string | undefined = vscode.window.activeTextEditor?.document.fileName;
     if (context) {
       if (context.uri) {
         context = context.uri;
@@ -81,20 +81,20 @@ export async function compile(
     return Promise.resolve(false);
   }
 
-  var diagnosticCollection: vscode.DiagnosticCollection =
+  let diagnosticCollection: vscode.DiagnosticCollection =
     vscode.window.forceCode.fcDiagnosticCollection;
   diagnosticCollection.delete(document.uri);
-  var diagnostics: vscode.Diagnostic[] = [];
-  var exDiagnostics: vscode.Diagnostic[] = vscode.languages.getDiagnostics(document.uri);
+  let diagnostics: vscode.Diagnostic[] = [];
+  let exDiagnostics: vscode.Diagnostic[] = vscode.languages.getDiagnostics(document.uri);
 
   const toolingType: string | undefined = getToolingTypeFromFolder(document.uri);
   const ttMeta: forceCode.IMetadataObject | undefined = getAnyTTMetadataFromPath(document.fileName);
   const folderToolingType: string | undefined = ttMeta?.xmlName;
   const name: string | undefined = getName(document, toolingType);
 
-  var DefType: string | undefined;
-  var Metadata: {} | undefined;
-  var errMessages: string[] = [];
+  let DefType: string | undefined;
+  let Metadata: {} | undefined;
+  let errMessages: string[] = [];
 
   if (folderToolingType === 'StaticResource') {
     return Promise.reject(
@@ -103,7 +103,7 @@ export async function compile(
   }
 
   if (document.fileName.endsWith('-meta.xml')) {
-    var tmpMeta = await new Promise((resolve, reject) => {
+    let tmpMeta = await new Promise((resolve, reject) => {
       parseString(document.getText(), { explicitArray: false }, function (err, dom) {
         if (err) {
           return reject(err);
@@ -128,73 +128,63 @@ export async function compile(
   }
 
   // Start doing stuff
-  if (folderToolingType === 'EmailTemplate' || folderToolingType === 'Document') {
-    return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot)
-      .then(() => {
-        const files: string[] = [];
-        var pathSplit = 'documents';
-        if (folderToolingType === 'EmailTemplate') {
-          pathSplit = 'email';
-        }
-        var foldName: string | undefined = document.fileName
-          .split(path.sep + pathSplit + path.sep)
-          .pop();
-        if (foldName) {
-          //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
-          files.push(path.join(pathSplit, foldName));
-          files.push(path.join(pathSplit, foldName + '-meta.xml'));
-          files.push('package.xml');
-          return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
-        } else {
-          return Promise.reject(false);
-        }
-      })
-      .then(finished)
-      .catch(finished)
-      .then(updateSaveHistory);
-  } else if (folderToolingType && toolingType === undefined) {
-    return createPackageXML([document.fileName], vscode.window.forceCode.storageRoot)
-      .then(() => {
-        const files: string[] = [];
-        var pathSplit: string[] = document.fileName.split(path.sep);
+  let result;
+  try {
+    if (folderToolingType === 'EmailTemplate' || folderToolingType === 'Document') {
+      await createPackageXML([document.fileName], vscode.window.forceCode.storageRoot);
+      const files: string[] = [];
+      let pathSplit = 'documents';
+      if (folderToolingType === 'EmailTemplate') {
+        pathSplit = 'email';
+      }
+      let foldName: string | undefined = document.fileName
+        .split(path.sep + pathSplit + path.sep)
+        .pop();
+      if (foldName) {
         //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
-        files.push(path.join(pathSplit[pathSplit.length - 2], pathSplit[pathSplit.length - 1]));
+        files.push(path.join(pathSplit, foldName));
+        files.push(path.join(pathSplit, foldName + '-meta.xml'));
         files.push('package.xml');
-        return deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
-      })
-      .then(finished)
-      .catch(finished)
-      .then(updateSaveHistory);
-  } else if (toolingType === 'AuraDefinition') {
-    DefType = getAuraDefTypeFromDocument(document);
-    return saveAura(document, name, cancellationToken, Metadata, forceCompile)
-      .then(finished)
-      .catch(finished)
-      .then(updateSaveHistory);
-  } else if (toolingType === 'LightningComponentResource') {
-    return saveLWC(document, name, cancellationToken, forceCompile)
-      .then(finished)
-      .catch(finished)
-      .then(updateSaveHistory);
-  } else if (ttMeta && toolingType) {
-    // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-    return saveApex(document, ttMeta, cancellationToken, Metadata, forceCompile)
-      .then(finished)
-      .then((_res) => {
-        return true;
-      })
-      .catch(finished)
-      .then(updateSaveHistory);
-  } else {
-    return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
+        result = await deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
+      } else {
+        return Promise.reject(false);
+      }
+    } else if (folderToolingType && toolingType === undefined) {
+      await createPackageXML([document.fileName], vscode.window.forceCode.storageRoot);
+      const files: string[] = [];
+      let pathSplit: string[] = document.fileName.split(path.sep);
+      //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
+      files.push(path.join(pathSplit[pathSplit.length - 2], pathSplit[pathSplit.length - 1]));
+      files.push('package.xml');
+      result = await deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
+    } else if (toolingType === 'AuraDefinition') {
+      DefType = getAuraDefTypeFromDocument(document);
+      result = await saveAura(document, name, cancellationToken, Metadata, forceCompile);
+    } else if (toolingType === 'LightningComponentResource') {
+      result = await saveLWC(document, name, cancellationToken, forceCompile);
+    } else if (ttMeta && toolingType) {
+      // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
+      result = await saveApex(document, ttMeta, cancellationToken, Metadata, forceCompile);
+    } else {
+      return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
+    }
+    await finished(result);
+  } catch (error) {
+    await finished(error);
+  } finally {
+    let retVal = updateSaveHistory();
+    if (errMessages.length == 1 && errMessages[0].indexOf('expired access/refresh token') !== -1) {
+      return Promise.reject(errMessages[0]);
+    }
+    return Promise.resolve(retVal);
   }
 
-  function finished(res: any): boolean {
+  async function finished(res: any): Promise<boolean> {
     if (isEmptyUndOrNull(res)) {
       notifications.showStatus(`${name} ${DefType || ''} $(check)`);
       return true;
     }
-    var failures: number = 0;
+    let failures: number = 0;
     if (res instanceof Error) {
       onError(res);
       failures++;
@@ -203,28 +193,8 @@ export async function compile(
         .filter((r: any) => r.State !== 'Error')
         .forEach((containerAsyncRequest: any) => {
           containerAsyncRequest.DeployDetails.componentFailures.forEach((failure: any) => {
-            if (failure.problemType === 'Error') {
-              failure.lineNumber =
-                failure.lineNumber == null || failure.lineNumber < 1 ? 1 : failure.lineNumber;
-              failure.columnNumber = failure.columnNumber == null ? 0 : failure.columnNumber;
-
-              var failureRange: vscode.Range = document.lineAt(failure.lineNumber - 1).range;
-              if (failure.columnNumber - 1 >= 0) {
-                failureRange = failureRange.with(
-                  new vscode.Position(failure.lineNumber - 1, failure.columnNumber - 1)
-                );
-              }
-              if (
-                !exDiagnostics.find((exDia) => {
-                  return exDia.message === failure.problem;
-                })
-              ) {
-                diagnostics.push(new vscode.Diagnostic(failureRange, failure.problem, 0));
-                diagnosticCollection.set(document.uri, diagnostics);
-              }
-              errMessages.push(failure.problem);
-              failures++;
-            }
+            onComponentError(failure);
+            failures++;
           });
         });
     } else if (res.errors?.length > 0) {
@@ -238,14 +208,23 @@ export async function compile(
       failures++;
     } else if (res.status === 'Failed') {
       if (res.message) {
-        errMessages.push(res.message);
+        //errMessages.push(res.message);  // TODO remove as this is handled further down in the code
+        //return false; // don't show the failed build error
+      } else if(res.id) {
+        // grab the error via sfdx command
+        let deployDetails = await dxService.getDeployErrors(res.id, cancellationToken);
+        toArray(deployDetails.details.componentFailures).forEach((failure: any) => {
+          onComponentError(failure);
+          failures++;
+        });
       } else {
         // capture a failed deployment there is no message returned, so guide user to view in Salesforce
         errMessages.push(
           'Deployment failed. Please view the details in the deployment status section in Salesforce.'
         );
+        return false; // don't show the failed build error
       }
-      return false; // don't show the failed build error
+      
     }
 
     if (failures === 0) {
@@ -263,10 +242,37 @@ export async function compile(
     } else if (diagnostics.length === 0 && errMessages.length === 0) {
       notifications.showError(res.message || res);
     }
+    if (errMessages.length == 1 && errMessages[0].indexOf('expired access/refresh token') !== -1) {
+      return false;
+    }
     notifications.showError(
       'File not saved due to build errors. Please open the Problems panel for more details.'
     );
     return false;
+  }
+
+  function onComponentError(failure: any) {
+    if (failure.problemType === 'Error') {
+      failure.lineNumber =
+        failure.lineNumber == null || failure.lineNumber < 1 ? 1 : failure.lineNumber;
+      failure.columnNumber = failure.columnNumber == null ? 0 : failure.columnNumber;
+
+      let failureRange: vscode.Range = document.lineAt(failure.lineNumber - 1).range;
+      if (failure.columnNumber - 1 >= 0) {
+        failureRange = failureRange.with(
+          new vscode.Position(failure.lineNumber - 1, failure.columnNumber - 1)
+        );
+      }
+      if (
+        !exDiagnostics.find((exDia) => {
+          return exDia.message === failure.problem;
+        })
+      ) {
+        diagnostics.push(new vscode.Diagnostic(failureRange, failure.problem, 0));
+        diagnosticCollection.set(document.uri, diagnostics);
+      }
+      errMessages.push(failure.problem);
+    }
   }
 
   function onError(err: any): boolean {
@@ -276,18 +282,19 @@ export async function compile(
     }
     // make sure we refresh an expired token
     if (errMsg.indexOf('expired access/refresh token') !== -1) {
-      throw err;
+      errMessages.push(errMsg);
+      return false;
     }
-    var theerr: string;
-    var failureLineNumber: number = 1;
-    var failureColumnNumber: number = 0;
+    let theerr: string;
+    let failureLineNumber: number = 1;
+    let failureColumnNumber: number = 0;
     try {
       const matchRegex = /:(\d+),(\d+):|:(\d+),(\d+) :|\[(\d+),(\d+)\]/; // this will match :12,3432: :12,3432 : and [12,3432]
-      var errSplit = errMsg.split('Message:').pop();
+      let errSplit = errMsg.split('Message:').pop();
       theerr = errSplit || errMsg;
       errSplit = theerr.split(': Source').shift();
       theerr = errSplit || theerr;
-      var match = errMsg.match(matchRegex);
+      let match = errMsg.match(matchRegex);
       if (match) {
         match = match.filter((mat) => mat); // eliminate all undefined elements
         errSplit = theerr.split(match[0]).pop();
@@ -302,7 +309,7 @@ export async function compile(
     } catch (e) {
       theerr = errMsg;
     }
-    var failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
+    let failureRange: vscode.Range = document.lineAt(failureLineNumber - 1).range;
     if (failureColumnNumber - 1 >= 0) {
       failureRange = failureRange.with(
         new vscode.Position(failureLineNumber - 1, failureColumnNumber)

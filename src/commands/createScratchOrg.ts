@@ -65,7 +65,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
     function selectDefinitionFile(): Thenable<string | undefined> {
       return vscode.window
         .showOpenDialog({ filters: { JSON: ['json'] }, canSelectMany: false })
-        .then(fileArr => {
+        .then((fileArr) => {
           return fileArr && fileArr.length > 0 ? fileArr[0].fsPath : undefined;
         });
     }
@@ -89,21 +89,21 @@ export class CreateScratchOrg extends ForcecodeCommand {
       let config: vscode.QuickPickOptions = {
         placeHolder: 'Choose an org edition to create...',
       };
-      return vscode.window.showQuickPick(options, config).then(choice => {
+      return vscode.window.showQuickPick(options, config).then((choice) => {
         return choice?.label;
       });
     }
 
     function selectDays(): Thenable<string | undefined> {
       let durOpts: vscode.QuickPickItem[] = [];
-      for (var i = 1; i < 31; i++) {
+      for (let i = 1; i < 31; i++) {
         durOpts.push({ label: String(i) });
       }
 
       let config: vscode.QuickPickOptions = {
         placeHolder: 'Days until org expires...',
       };
-      return vscode.window.showQuickPick(durOpts, config).then(choice => {
+      return vscode.window.showQuickPick(durOpts, config).then((choice) => {
         return choice?.label;
       });
     }
@@ -121,13 +121,13 @@ export class CreateScratchOrg extends ForcecodeCommand {
       let config: vscode.QuickPickOptions = {
         placeHolder: prompt,
       };
-      return vscode.window.showQuickPick(sDataOptions, config).then(choice => {
+      return vscode.window.showQuickPick(sDataOptions, config).then((choice) => {
         return choice?.label === 'Yes';
       });
     }
 
     function createOrg(cancellationToken: FCCancellationToken) {
-      var theOptions: string;
+      let theOptions: string;
       if (!soOptions.definitionFile) {
         theOptions =
           '--durationdays ' +
@@ -136,8 +136,8 @@ export class CreateScratchOrg extends ForcecodeCommand {
       } else {
         theOptions = '--definitionfile ' + soOptions.definitionFile;
       }
-      return dxService.createScratchOrg(theOptions, cancellationToken).then(res => {
-        var scratchConfig: Config = defaultOptions;
+      return dxService.createScratchOrg(theOptions, cancellationToken).then((res) => {
+        let scratchConfig: Config = defaultOptions;
         scratchConfig.username = res.username;
         saveConfigFile(res.username, scratchConfig);
         fcConnection.refreshConnections();

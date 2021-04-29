@@ -37,7 +37,7 @@ export class GetLog extends ForcecodeCommand {
       if (!fcConnection.currentConnection) {
         return Promise.reject('No org info found');
       }
-      var queryString: string =
+      let queryString: string =
         `SELECT Id, LogLength, Request, Status, DurationMilliseconds, StartTime, Location FROM ApexLog` +
         ` WHERE LogUserId='${fcConnection.currentConnection.orgInfo.userId}'` +
         // ` AND Request = 'API' AND Location = 'SystemLog'` +
@@ -48,7 +48,7 @@ export class GetLog extends ForcecodeCommand {
     }
 
     function displayOptions(results: QueryResult): Thenable<vscode.QuickPickItem | undefined> {
-      var options: vscode.QuickPickItem[] = results.records.map((record: LogRecord) => {
+      let options: vscode.QuickPickItem[] = results.records.map((record: LogRecord) => {
         return {
           label: `Status: ${record.Status}`,
           detail: `Start: ${new Date(record.StartTime).toLocaleString()}, Bytes: ${

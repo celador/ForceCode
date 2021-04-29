@@ -6,7 +6,7 @@ import { parseString } from 'xml2js';
 import { toArray } from '../util';
 import { IMetadataObject } from '../forceCode';
 import { getToolingTypeMetadata } from '../parsers';
-import { getVSCodeSetting } from './configuration';
+import { getVSCodeSetting, VSCODE_SETTINGS } from './configuration';
 import globule = require('globule');
 
 /**
@@ -21,7 +21,7 @@ export function zipFiles(
   root: string,
   lwcPackageXML?: string
 ): compress.zip.Stream {
-  var zip: compress.zip.Stream = new compress.zip.Stream();
+  let zip: compress.zip.Stream = new compress.zip.Stream();
   // Add folders and files to zip object for each file in the list
   fileList.forEach(file => {
     const filePath: string = path.join(
@@ -30,8 +30,8 @@ export function zipFiles(
     );
     // this allows a filter on the files/folders
     getFileList(filePath).forEach(theFile => {
-      var theFilePath;
-      var relativePath;
+      let theFilePath;
+      let relativePath;
       if (filePath === theFile) {
         // file
         theFilePath = filePath;
@@ -62,8 +62,8 @@ function getFileList(root: string) {
   // We trap the relative root in a closure then
   // Perform the recursive file search
   function innerGetFileList(localPath: string) {
-    var fileslist: any[] = []; // List of files
-    var files: string[];
+    let fileslist: any[] = []; // List of files
+    let files: string[];
     if (!fs.statSync(localPath).isDirectory()) {
       files = [localPath];
     } else {
@@ -71,8 +71,8 @@ function getFileList(root: string) {
     }
 
     files.forEach(file => {
-      var pathname: string = file === localPath ? file : localPath + path.sep + file;
-      var stat: any = fs.lstatSync(pathname);
+      let pathname: string = file === localPath ? file : localPath + path.sep + file;
+      let stat: any = fs.lstatSync(pathname);
 
       // If file is a directory, recursively add it's children
       if (stat.isDirectory()) {
@@ -88,7 +88,7 @@ function getFileList(root: string) {
 // read the .forceignore file, if it exists
 function readForceIgnore(): { [key: string]: boolean } {
   const forceIgnorePath: string = vscode.window.forceCode.workspaceRoot + path.sep + '.forceignore';
-  var ignoreObject: { [key: string]: boolean } = {};
+  let ignoreObject: { [key: string]: boolean } = {};
 
   if (fs.existsSync(forceIgnorePath)) {
     const forceIgnoreContents: string = fs.readFileSync(forceIgnorePath).toString();
@@ -109,7 +109,7 @@ export function getFilteredFileList(files: string[]): string[] {
   // get ignore settings from Forcecode workspace settings and .forceignore
   const ignoreFilesSettings: { [key: string]: boolean } = Object.assign(
     {},
-    getVSCodeSetting('filesExclude'),
+    getVSCodeSetting(VSCODE_SETTINGS.filesExclude),
     readForceIgnore()
   );
 
@@ -120,7 +120,7 @@ export function getFilteredFileList(files: string[]): string[] {
     .filter(setting => setting.value === true && !setting.key.endsWith('*-meta.xml'))
     .map(setting => setting.key);
 
-  var fileslist: string[] = [];
+  let fileslist: string[] = [];
 
   files.forEach(file => {
     if (!globule.isMatch(ignoreFiles, file, { matchBase: true, dot: true })) {
@@ -147,9 +147,9 @@ export interface PXML {
 export function getFileListFromPXML(): Promise<string[]> {
   return new Promise((resolve, reject) => {
     const projectRoot: string = vscode.window.forceCode.projectRoot;
-    var xmlFilePath: string = path.join(projectRoot, 'package.xml');
-    var data: any = fs.readFileSync(xmlFilePath);
-    var fileList: string[] = [];
+    let xmlFilePath: string = path.join(projectRoot, 'package.xml');
+    let data: any = fs.readFileSync(xmlFilePath);
+    let fileList: string[] = [];
     fileList.push('package.xml');
     if (fs.existsSync(path.join(projectRoot, 'destructiveChanges.xml'))) {
       fileList.push('destructiveChanges.xml');
@@ -171,8 +171,8 @@ export function getFileListFromPXML(): Promise<string[]> {
           const ttMeta: IMetadataObject | undefined = getToolingTypeMetadata(curType.name);
           if (ttMeta) {
             const folder: string = ttMeta.directoryName;
-            var ext: string = ttMeta.suffix;
-            var theExt: string = '.' + ext;
+            let ext: string = ttMeta.suffix;
+            let theExt: string = '.' + ext;
             if (folder === 'aura' || folder === 'lwc') {
               theExt = '';
             }

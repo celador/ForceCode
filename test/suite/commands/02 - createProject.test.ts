@@ -12,7 +12,7 @@ suite('createProject.ts', () => {
   before(() => {
     sandbox
       .stub(vscode.window, 'showOpenDialog')
-      .callsFake(function(_options: vscode.OpenDialogOptions) {
+      .callsFake(function (_options?: vscode.OpenDialogOptions) {
         return {
           async then(callback: any) {
             const projectDir = createProjectDir();
@@ -22,7 +22,7 @@ suite('createProject.ts', () => {
       });
     sandbox
       .stub(vscode.commands, 'executeCommand')
-      .callsFake(function(command: string, ...rest: any[]) {
+      .callsFake(function (command: string, ...rest: any[]) {
         return {
           async then(callback: any) {
             if (command === 'vscode.openFolder') {

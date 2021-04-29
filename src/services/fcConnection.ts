@@ -33,6 +33,10 @@ export class FCConnection extends vscode.TreeItem {
     this.isLoggedIn = false;
   }
 
+  public getLabel(): string {
+    return typeof this.label === 'string' ? this.label : this.label?.label || '';
+  }
+
   public disconnect(): Promise<any> {
     if (this.isLoggedIn) {
       const sfdxPath = path.join(getHomeDir(), '.sfdx', this.orgInfo.username + '.json');

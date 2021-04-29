@@ -1,5 +1,11 @@
 ## Change Log
 
+* 3.22.10
+    * Report deployment errors in the problems panel instead of asking to open Salesforce #387
+    * Update to jsforce 1.10.1
+    * Update dependencies
+    * Fixed save issue with expired access token.
+    * Performance improvements on startup.
 * 3.22.9
     * Added options to `Allow to retrieve code coverage on demand` #377
         * Enable/disable retrieval of code coverage on start up and when retrieving/opening a file from the server. Options are located in the ForceCode extension's options.

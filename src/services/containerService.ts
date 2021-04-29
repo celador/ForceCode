@@ -22,7 +22,7 @@ export class ContainerService {
     toolingType: string,
     upToolingType: string
   ) {
-    const index = this.containers.findIndex(cur => cur.thePath === thePath);
+    const index = this.containers.findIndex((cur) => cur.thePath === thePath);
     if (index !== -1) {
       const member = this.containers[index];
       member.existing = true;
@@ -36,7 +36,7 @@ export class ContainerService {
   }
 
   public removeContainer(container: Container): boolean {
-    const index = this.containers.findIndex(cur => cur.thePath === container.thePath);
+    const index = this.containers.findIndex((cur) => cur.thePath === container.thePath);
     if (index !== -1) {
       this.containers.splice(index, 1);
       return true;
@@ -78,62 +78,43 @@ export class Container {
     this.upToolingType = upToolingType;
   }
 
-  public createContainer() {
-    var self: Container = this;
-    return vscode.window.forceCode.conn.tooling
+  public async createContainer() {
+    const res = await vscode.window.forceCode.conn.tooling
       .sobject('MetadataContainer')
-      .create({ name: 'ForceCode-' + Date.now() })
-      .then(res => {
-        self.containerId = res.id;
-      })
-      .then(() => {
-        return vscode.window.forceCode.conn.tooling
-          .sobject(self.toolingType)
-          .find({ Name: self.name, NamespacePrefix: vscode.window.forceCode.config.prefix || '' })
-          .execute()
-          .then((records: any) => {
-            self.records = records;
-            return records;
-          });
-      });
+      .create({ name: 'ForceCode-' + Date.now() });
+    this.containerId = res.id;
+    const records = await vscode.window.forceCode.conn.tooling
+      .sobject(this.toolingType)
+      .find({ Name: this.name, NamespacePrefix: vscode.window.forceCode.config.prefix || '' })
+      .execute();
+    this.records = records;
+    return Promise.resolve(records);
   }
 
-  public createContainerMember(member: any): Promise<boolean> {
-    const self: Container = this;
-    return vscode.window.forceCode.conn.tooling
-      .sobject(self.upToolingType)
-      .create(member)
-      .then(res => {
-        if (!res.id) {
-          throw { message: self.records[0].Name + ' not saved' };
-        }
-        self.containerMember = { name: self.name || '', id: res.id };
-        return true;
-      });
-  }
-
-  public updateContainerMember(member: any): Promise<boolean> {
-    return vscode.window.forceCode.conn.tooling
+  public async createContainerMember(member: any): Promise<boolean> {
+    const res = await vscode.window.forceCode.conn.tooling
       .sobject(this.upToolingType)
-      .update(member)
-      .then(() => {
-        return true;
-      });
+      .create(member);
+    if (!res.id) {
+      throw { message: this.records[0].Name + ' not saved' };
+    }
+    this.containerMember = { name: this.name || '', id: res.id };
+    return Promise.resolve(true);
   }
 
-  public compile(): Promise<boolean> {
-    const self: Container = this;
-    return vscode.window.forceCode.conn.tooling
-      .sobject('ContainerAsyncRequest')
-      .create({
-        IsCheckOnly: false,
-        IsRunTests: false,
-        MetadataContainerId: self.containerId,
-      })
-      .then(res => {
-        self.containerAsyncRequestId = res.id;
-        return true;
-      });
+  public async updateContainerMember(member: any): Promise<boolean> {
+    await vscode.window.forceCode.conn.tooling.sobject(this.upToolingType).update(member);
+    return Promise.resolve(true);
+  }
+
+  public async compile(): Promise<boolean> {
+    const res = await vscode.window.forceCode.conn.tooling.sobject('ContainerAsyncRequest').create({
+      IsCheckOnly: false,
+      IsRunTests: false,
+      MetadataContainerId: this.containerId,
+    });
+    this.containerAsyncRequestId = res.id;
+    return Promise.resolve(true);
   }
 
   public cancelCompile(): Promise<any> {

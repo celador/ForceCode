@@ -148,6 +148,7 @@ declare module 'jsforce/index' {
         csvStream: any,
         callback: (err: any, rets: any) => any
       ): any;
+      createJob(type: string, operation: string, options?: any): any;
     }
     // Connection
     interface Connection {

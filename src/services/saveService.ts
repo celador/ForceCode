@@ -120,7 +120,7 @@ export class SaveService {
           self.updateFile(psFile);
           if (success) {
             // update the file time for start up file change checks
-            var mTime: Date = new Date();
+            let mTime: Date = new Date();
             fs.utimesSync(document, mTime, mTime);
             // remove the pre-save file version if successful
             if (psFile.queue) {
@@ -142,7 +142,7 @@ export class SaveService {
     });
 
     function startSave() {
-      var isResource: RegExpMatchArray | null = document.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
+      let isResource: RegExpMatchArray | null = document.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
       const toolingType: IMetadataObject | undefined = getAnyTTMetadataFromPath(document);
       if (document.indexOf(vscode.window.forceCode.projectRoot) !== -1) {
         if (isResource?.index) {

@@ -2,11 +2,12 @@ import * as vscode from 'vscode';
 import * as forceCode from '../forceCode';
 import { codeCovViewService, FCFile, getVSCodeSetting } from '.';
 import { QueryResult } from 'jsforce';
+import { VSCODE_SETTINGS } from './configuration';
 
 export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> {
-  var fromWhere: string = singleClass ? ' ApexCodeCoverage ' : ' ApexCodeCoverageAggregate ';
-  var selectMore = singleClass ? 'TestMethodName, ApexTestClassId, ApexTestClass.Name,' : '';
-  var query =
+  let fromWhere: string = singleClass ? ' ApexCodeCoverage ' : ' ApexCodeCoverageAggregate ';
+  let selectMore = singleClass ? 'TestMethodName, ApexTestClassId, ApexTestClass.Name,' : '';
+  let query =
     `SELECT ${selectMore} Coverage, ApexClassOrTrigger.Name, ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered ` +
     'FROM' +
     fromWhere +
@@ -19,8 +20,8 @@ export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> 
   function updateCoverage(res: QueryResult): QueryResult {
     // Add Line Coverage information
     if (res.records) {
-      var highestCov: number = 0;
-      var highestClass: FCFile | undefined;
+      let highestCov: number = 0;
+      let highestClass: FCFile | undefined;
       res.records.forEach((curRes: forceCode.ICodeCoverage) => {
         const fcfile: FCFile | undefined = codeCovViewService.findById(curRes.ApexClassOrTriggerId);
         if (fcfile && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
@@ -30,8 +31,8 @@ export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> 
           } else {
             fcfile.addCoverage('overall', curRes);
           }
-          var total: number = curRes.NumLinesCovered + curRes.NumLinesUncovered;
-          var percent = Math.floor((curRes.NumLinesCovered / total) * 100);
+          let total: number = curRes.NumLinesCovered + curRes.NumLinesUncovered;
+          let percent = Math.floor((curRes.NumLinesCovered / total) * 100);
           if (percent > highestCov) {
             highestCov = percent;
             highestClass = fcfile;
@@ -39,9 +40,9 @@ export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> 
         }
       });
 
-      if (singleClass && highestClass && getVSCodeSetting('revealTestedClass')) {
+      if (singleClass && highestClass && getVSCodeSetting(VSCODE_SETTINGS.revealTestedClass)) {
         // reveal the tested class
-        var treePro = vscode.window.createTreeView('ForceCode.codeCovDataProvider', {
+        let treePro = vscode.window.createTreeView('ForceCode.codeCovDataProvider', {
           treeDataProvider: codeCovViewService,
         });
         treePro.reveal(highestClass);

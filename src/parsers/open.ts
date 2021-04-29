@@ -4,18 +4,15 @@ export function getIcon(toolingType: string) {
   switch (toolingType) {
     case 'ApexClass':
       return 'file-code';
-    case 'ApexPage':
-      return 'code';
     case 'ApexTrigger':
       return 'zap';
     case 'ApexComponent':
+    case 'StandardObject':
+    case 'CustomObject':
       return 'gist';
     case 'ApexLog':
       return 'bug';
-    case 'StandardObject':
-      return 'gist';
-    case 'CustomObject':
-      return 'gist';
+    case 'ApexPage':
     default:
       return 'code';
   }
@@ -74,14 +71,13 @@ export function getExtension(toolingType: string) {
 
 export function getFolder(toolingType: string) {
   switch (toolingType) {
-    case 'ApexClass':
-      return 'classes';
     case 'ApexPage':
       return 'pages';
     case 'ApexTrigger':
       return 'triggers';
     case 'ApexComponent':
       return 'components';
+    case 'ApexClass':
     default:
       return 'classes';
   }
