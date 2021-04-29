@@ -213,7 +213,6 @@ export async function compile(
       } else if(res.id) {
         // grab the error via sfdx command
         let deployDetails = await dxService.getDeployErrors(res.id, cancellationToken);
-        console.log(deployDetails);
         toArray(deployDetails.details.componentFailures).forEach((failure: any) => {
           onComponentError(failure);
           failures++;
