@@ -311,7 +311,7 @@ export function deployFiles(
     if (res.status && res.status !== 'Failed') {
       notifications.showStatus('ForceCode: Deployed $(thumbsup)');
     } else if (res.status === 'Failed') {
-      notifications
+      /*notifications   // TODO remove
         .showError('ForceCode: Deploy Errors. View Details?', 'Yes', 'No')
         .then((choice) => {
           if (choice === 'Yes') {
@@ -320,7 +320,7 @@ export function deployFiles(
               `lightning/setup/DeployStatus/page?address=%2Fchangemgmt%2FmonitorDeploymentsDetails.apexp%3FasyncId%3D${res.id}%26retURL%3D%252Fchangemgmt%252FmonitorDeployment.apexp`
             );
           }
-        });
+        });*/
     } else {
       let depId: string;
       const message: string = res.message || res;

@@ -1,6 +1,7 @@
 ## Change Log
 
 * 3.22.10
+    * Report deployment errors in the problems panel instead of asking to open Salesforce #387
     * Update to jsforce 1.10.1
     * Update dependencies
     * Fixed save issue with expired access token.

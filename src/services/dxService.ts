@@ -68,7 +68,8 @@ export class DXService {
   public runCommand(
     cmdString: string,
     targetusername: boolean,
-    cancellationToken?: FCCancellationToken
+    cancellationToken?: FCCancellationToken,
+    bypassReject?: boolean
   ): Promise<any> {
     let fullCommand =
       'sfdx force:' +
@@ -144,7 +145,7 @@ export class DXService {
             );
           }
           // We want to resolve if there's an error with parsable results
-          if ((code && code > 0 && !json) || (json?.status > 0 && !json.result) || json?.exitCode > 0) {
+          if (!bypassReject && ((code && code > 0 && !json) || (json?.status > 0 && !json.result) || json?.exitCode > 0)) {
             // Get non-promise stack for extra help
             notifications.writeLog(error);
             notifications.writeLog(json);
@@ -277,5 +278,9 @@ export class DXService {
 
   public deleteSource(thePath: string, cancellationToken: FCCancellationToken) {
     return this.runCommand(`source:delete -p ${thePath} -r`, true, cancellationToken);
+  }
+
+  public getDeployErrors(deploymentId: string, cancellationToken: FCCancellationToken) {
+    return this.runCommand('source:deploy:report -i ' + deploymentId, true, cancellationToken, true);
   }
 }

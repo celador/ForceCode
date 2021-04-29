@@ -195,9 +195,9 @@ export class ForceService implements forceCode.IForceService {
               let curFCFile: FCFile = codeCovViewService.addClass(workspaceMember);
 
               if (
-                !(
-                  curFCFile.compareDates(key.lastModifiedDate) ||
-                  !getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges)
+                (
+                  getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges) &&
+                  !curFCFile.compareDates(key.lastModifiedDate)
                 )
               ) {
                 //curFCFile.updateWsMember(curMem);
