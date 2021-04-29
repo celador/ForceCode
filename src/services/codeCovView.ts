@@ -5,7 +5,7 @@ import {
   TreeItem,
   TreeItemCollapsibleState,
   window,
-  workspace,
+  //workspace,
 } from 'vscode';
 import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
 import * as path from 'path';
@@ -18,8 +18,8 @@ export enum ClassType {
   UncoveredClass = 'Insufficient Coverage',
   NoCoverageData = 'No Coverage Data',
   TestClass = 'Test Classes',
-  NotInOrg = 'Not In Current Org', // TODO remove
-  NotInSrc = 'Open Files Not In Src', // TODO remove
+  //NotInOrg = 'Not In Current Org', // TODO remove
+  //NotInSrc = 'Open Files Not In Src', // TODO remove
   NoShow = 'NoShow',
   Subclass = 'Subclass',
 }
@@ -162,7 +162,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
       return fcFiles;
     } else if (element.getWsMember().type === ClassType.NoShow) {
-      if (element.label === ClassType.NotInSrc) {
+      /*if (element.label === ClassType.NotInSrc) {
         let fcFiles: FCFile[] = [];
         if (workspace.textDocuments) {
           workspace.textDocuments.forEach((curEd) => {
@@ -191,12 +191,12 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
           });
         }
         return fcFiles;
-      } else {
+      } else {*/
         this.classes.sort(this.sortFunc);
         return this.classes.filter((res) => {
           return res.getType() === element.getType();
         });
-      }
+      //}
     } else if (
       element.getType() === ClassType.CoveredClass ||
       element.getType() === ClassType.UncoveredClass
@@ -296,7 +296,7 @@ export class FCFile extends TreeItem {
 
     this.iconPath = undefined;
     if (!this.wsMember.id || this.wsMember.id === '') {
-      this.type = ClassType.NotInOrg;
+      this.type = ClassType.NoShow;
       return undefined;
     }
 
