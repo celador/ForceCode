@@ -18,8 +18,6 @@ export enum ClassType {
   UncoveredClass = 'Insufficient Coverage',
   NoCoverageData = 'No Coverage Data',
   TestClass = 'Test Classes',
-  //NotInOrg = 'Not In Current Org', // TODO remove
-  //NotInSrc = 'Open Files Not In Src', // TODO remove
   NoShow = 'NoShow',
   Subclass = 'Subclass',
 }
@@ -162,41 +160,10 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
       return fcFiles;
     } else if (element.getWsMember().type === ClassType.NoShow) {
-      /*if (element.label === ClassType.NotInSrc) {
-        let fcFiles: FCFile[] = [];
-        if (workspace.textDocuments) {
-          workspace.textDocuments.forEach((curEd) => {
-            if (
-              !curEd.fileName.startsWith(window.forceCode.projectRoot) &&
-              curEd.uri.scheme === 'file'
-            ) {
-              const fName = curEd.fileName.split(path.sep).pop();
-              if (fName) {
-                let newFCFile: FCFile = new FCFile(
-                  fName,
-                  TreeItemCollapsibleState.None,
-                  this,
-                  folderWSMember
-                );
-                newFCFile.setType(ClassType.NotInSrc);
-                newFCFile.command = {
-                  command: 'ForceCode.openOnClick',
-                  title: '',
-                  arguments: [curEd.fileName],
-                };
-                newFCFile.tooltip = `WARNING: This file isn\'t located in the current PROJECT PATH\n(${window.forceCode.projectRoot})`;
-                fcFiles.push(newFCFile);
-              }
-            }
-          });
-        }
-        return fcFiles;
-      } else {*/
         this.classes.sort(this.sortFunc);
         return this.classes.filter((res) => {
           return res.getType() === element.getType();
         });
-      //}
     } else if (
       element.getType() === ClassType.CoveredClass ||
       element.getType() === ClassType.UncoveredClass

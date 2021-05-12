@@ -310,18 +310,7 @@ export function deployFiles(
     }
     if (res.status && res.status !== 'Failed') {
       notifications.showStatus('ForceCode: Deployed $(thumbsup)');
-    } else if (res.status === 'Failed') {
-      /*notifications   // TODO remove
-        .showError('ForceCode: Deploy Errors. View Details?', 'Yes', 'No')
-        .then((choice) => {
-          if (choice === 'Yes') {
-            vscode.commands.executeCommand(
-              'ForceCode.openFileInOrg',
-              `lightning/setup/DeployStatus/page?address=%2Fchangemgmt%2FmonitorDeploymentsDetails.apexp%3FasyncId%3D${res.id}%26retURL%3D%252Fchangemgmt%252FmonitorDeployment.apexp`
-            );
-          }
-        });*/
-    } else {
+    } else if(!res.status) {
       let depId: string;
       const message: string = res.message || res;
       if (res.id) {
