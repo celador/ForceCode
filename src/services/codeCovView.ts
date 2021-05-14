@@ -10,7 +10,6 @@ import {
 import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { isEmptyUndOrNull } from '../util';
 import { MAX_TIME_BETWEEN_FILE_CHANGES, notifications } from '.';
 
 export enum ClassType {
@@ -32,7 +31,7 @@ const folderWSMember: IWorkspaceMember = {
 
 export class CodeCovViewService implements TreeDataProvider<FCFile> {
   private static instance: CodeCovViewService;
-  private classes: Array<FCFile> = [];
+  private classes: Map<string, FCFile> = new Map();
   private _onDidChangeTreeData: EventEmitter<FCFile | undefined> = new EventEmitter<
     FCFile | undefined
   >();
@@ -58,13 +57,10 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public addClass(wsMember: IWorkspaceMember): FCFile {
-    const index: number = this.classes.findIndex((curClass) => {
-      return curClass.getWsMember().path === wsMember.path;
-    });
     let retval: FCFile;
-    if (index !== -1) {
-      this.classes[index].setWsMember(wsMember);
-      retval = this.classes[index];
+    if (this.classes.has(wsMember.path)) {
+      this.classes.get(wsMember.path)!.setWsMember(wsMember);
+      retval = this.classes.get(wsMember.path)!;
     } else {
       let newClass: FCFile = new FCFile(
         wsMember.name,
@@ -72,47 +68,30 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
         this,
         wsMember
       );
-      this.classes.push(newClass);
+      this.classes.set(wsMember.path, newClass);
       retval = newClass;
     }
     this.refresh();
     return retval;
   }
 
-  public findByNameAndType(name: string, type: string): FCFile | undefined {
-    if (isEmptyUndOrNull(this.classes)) {
-      return undefined;
-    }
-    return this.classes.find((cur) => {
-      return cur.getWsMember().name === name && cur.getWsMember().type === type;
-    });
-  }
-
   public findByType(type: string): FCFile[] | undefined {
-    if (isEmptyUndOrNull(this.classes)) {
-      return undefined;
-    }
-    return this.classes.filter((cur) => {
-      return cur.getWsMember().type === type;
-    });
+    // TODO maybe a map of type to FCFile[]??
+    let retVal: FCFile[] = [];
+    //return this.classes.filter((cur) => {
+    //  return cur.getWsMember().type === type;
+    //});
+    this.classes.forEach((cur) => {
+      if(cur.getWsMember().type === type) {
+        retVal.push(cur);
+      }
+    })
+
+    return retVal;
   }
 
   public findByPath(pa: string): FCFile | undefined {
-    if (isEmptyUndOrNull(this.classes)) {
-      return undefined;
-    }
-    return this.classes.find((cur) => {
-      return cur.getWsMember().path === pa;
-    });
-  }
-
-  public findById(id: string): FCFile | undefined {
-    if (isEmptyUndOrNull(this.classes)) {
-      return undefined;
-    }
-    return this.classes.find((cur) => {
-      return cur.getWsMember().id === id;
-    });
+    return this.classes.get(pa);
   }
 
   public removeClasses(fcfiles: FCFile[]) {
@@ -122,17 +101,11 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public removeClass(fcfile: FCFile): boolean {
-    const index = this.classes.indexOf(fcfile);
-    if (index !== -1) {
-      this.classes.splice(index, 1);
-      this.refresh();
-      return true;
-    }
-    return false;
+    return this.classes.delete(fcfile.getWsMember().path);
   }
 
   public clear() {
-    this.classes = [];
+    this.classes.clear();
     this.refresh();
   }
 
@@ -160,10 +133,14 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
       return fcFiles;
     } else if (element.getWsMember().type === ClassType.NoShow) {
-        this.classes.sort(this.sortFunc);
-        return this.classes.filter((res) => {
-          return res.getType() === element.getType();
-        });
+        let retVal: FCFile[] = [];
+        this.classes.forEach((res) => {
+          if(res.getType() === element.getType()) {
+            retVal.push(res);
+          }
+        })
+        retVal.sort(this.sortFunc)
+        return retVal;
     } else if (
       element.getType() === ClassType.CoveredClass ||
       element.getType() === ClassType.UncoveredClass

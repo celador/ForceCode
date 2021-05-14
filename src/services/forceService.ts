@@ -125,45 +125,6 @@ export class ForceService implements forceCode.IForceService {
         proms.push(vscode.window.forceCode.conn.metadata.list(types));
       }
       resolve(proms);
-      /*
-      klaw(vscode.window.forceCode.projectRoot, { depthLimit: 1 })
-        .on('data', function (item) {
-          let type: string | undefined = getToolingTypeFromExt(item.path);
-
-          if (type && !codeCovViewService.findByPath(item.path)) {
-            if (!typeNames.includes(type)) {
-              typeNames.push(type);
-              if (types.length > 2) {
-                //index++;
-                proms.push(vscode.window.forceCode.conn.metadata.list(types));
-                types = [];
-              }
-              types.push({ type: type });
-            }
-
-            let thePath: string | undefined = item.path.split(path.sep).pop();
-            let filename: string = thePath?.split('.')[0] || '';
-            let workspaceMember: forceCode.IWorkspaceMember = {
-              name: filename,
-              path: item.path,
-              id: '', //metadataFileProperties.id,
-              type: type,
-              coverage: new Map<string, forceCode.ICodeCoverage>(),
-            };
-            codeCovViewService.addClass(workspaceMember);
-          }
-        })
-        .on('end', function () {
-          if (types.length > 0) {
-            proms.push(vscode.window.forceCode.conn.metadata.list(types));
-          }
-          resolve(proms);
-        })
-        .on('error', (err: Error, item: klaw.Item) => {
-          notifications.writeLog(`ForceCode: Error reading ${item.path}. Message: ${err.message}`);
-          reject();
-        });
-        */
     });
   }
 
@@ -208,29 +169,6 @@ export class ForceService implements forceCode.IForceService {
                 );
               }
             }
-
-            /*
-            let curFCFile: FCFile | undefined = codeCovViewService.findByNameAndType(
-              key.fullName,
-              key.type
-            );
-            if (curFCFile) {
-              //let curMem: forceCode.IWorkspaceMember = curFCFile.getWsMember();
-              //curMem.id = key.id;
-              if (
-                !(
-                  curFCFile.compareDates(key.lastModifiedDate) ||
-                  !getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges)
-                )
-              ) {
-                //curFCFile.updateWsMember(curMem);
-                vscode.commands.executeCommand(
-                  'ForceCode.fileModified',
-                  thePath,
-                  key.lastModifiedByName
-                );
-              }
-            }*/
           });
         }
       });

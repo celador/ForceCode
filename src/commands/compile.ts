@@ -227,9 +227,7 @@ export async function compile(
     if (failures === 0) {
       // SUCCESS !!!
       if (res.records && res.records[0].DeployDetails.componentSuccesses.length > 0) {
-        const fcfile = codeCovViewService.findById(
-          res.records[0].DeployDetails.componentSuccesses[0].id
-        );
+        const fcfile = codeCovViewService.findByPath(thePath);
         if (fcfile) {
           fcfile.clearCoverage();
         }
