@@ -10,16 +10,13 @@ import {
 import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { isEmptyUndOrNull } from '../util';
-import { MAX_TIME_BETWEEN_FILE_CHANGES, notifications } from '.';
+import { codeCovViewService, MAX_TIME_BETWEEN_FILE_CHANGES, notifications } from '.';
 
 export enum ClassType {
   CoveredClass = 'Sufficient Coverage',
   UncoveredClass = 'Insufficient Coverage',
   NoCoverageData = 'No Coverage Data',
   TestClass = 'Test Classes',
-  //NotInOrg = 'Not In Current Org', // TODO remove
-  //NotInSrc = 'Open Files Not In Src', // TODO remove
   NoShow = 'NoShow',
   Subclass = 'Subclass',
 }
@@ -34,7 +31,7 @@ const folderWSMember: IWorkspaceMember = {
 
 export class CodeCovViewService implements TreeDataProvider<FCFile> {
   private static instance: CodeCovViewService;
-  private classes: Array<FCFile> = [];
+  private classes: Map<string, FCFile> = new Map();
   private _onDidChangeTreeData: EventEmitter<FCFile | undefined> = new EventEmitter<
     FCFile | undefined
   >();
@@ -60,61 +57,40 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public addClass(wsMember: IWorkspaceMember): FCFile {
-    const index: number = this.classes.findIndex((curClass) => {
-      return curClass.getWsMember().path === wsMember.path;
-    });
     let retval: FCFile;
-    if (index !== -1) {
-      this.classes[index].setWsMember(wsMember);
-      retval = this.classes[index];
+    if (this.classes.has(wsMember.path)) {
+      this.classes.get(wsMember.path)!.setWsMember(wsMember);
+      retval = this.classes.get(wsMember.path)!;
     } else {
       let newClass: FCFile = new FCFile(
         wsMember.name,
         TreeItemCollapsibleState.None,
-        this,
         wsMember
       );
-      this.classes.push(newClass);
+      this.classes.set(wsMember.path, newClass);
       retval = newClass;
     }
     this.refresh();
     return retval;
   }
 
-  public findByNameAndType(name: string, type: string): FCFile | undefined {
-    if (isEmptyUndOrNull(this.classes)) {
-      return undefined;
-    }
-    return this.classes.find((cur) => {
-      return cur.getWsMember().name === name && cur.getWsMember().type === type;
-    });
-  }
-
   public findByType(type: string): FCFile[] | undefined {
-    if (isEmptyUndOrNull(this.classes)) {
-      return undefined;
-    }
-    return this.classes.filter((cur) => {
-      return cur.getWsMember().type === type;
-    });
+    // TODO maybe a map of type to FCFile[]??
+    let retVal: FCFile[] = [];
+    //return this.classes.filter((cur) => {
+    //  return cur.getWsMember().type === type;
+    //});
+    this.classes.forEach((cur) => {
+      if(cur.getWsMember().type === type) {
+        retVal.push(cur);
+      }
+    })
+
+    return retVal;
   }
 
   public findByPath(pa: string): FCFile | undefined {
-    if (isEmptyUndOrNull(this.classes)) {
-      return undefined;
-    }
-    return this.classes.find((cur) => {
-      return cur.getWsMember().path === pa;
-    });
-  }
-
-  public findById(id: string): FCFile | undefined {
-    if (isEmptyUndOrNull(this.classes)) {
-      return undefined;
-    }
-    return this.classes.find((cur) => {
-      return cur.getWsMember().id === id;
-    });
+    return this.classes.get(pa);
   }
 
   public removeClasses(fcfiles: FCFile[]) {
@@ -124,17 +100,11 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
   }
 
   public removeClass(fcfile: FCFile): boolean {
-    const index = this.classes.indexOf(fcfile);
-    if (index !== -1) {
-      this.classes.splice(index, 1);
-      this.refresh();
-      return true;
-    }
-    return false;
+    return this.classes.delete(fcfile.getWsMember().path);
   }
 
   public clear() {
-    this.classes = [];
+    this.classes.clear();
     this.refresh();
   }
 
@@ -151,7 +121,6 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
           let newFCFile: FCFile = new FCFile(
             val[1],
             TreeItemCollapsibleState.Collapsed,
-            this,
             folderWSMember
           );
           newFCFile.setType(val[1]);
@@ -162,41 +131,14 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
       return fcFiles;
     } else if (element.getWsMember().type === ClassType.NoShow) {
-      /*if (element.label === ClassType.NotInSrc) {
-        let fcFiles: FCFile[] = [];
-        if (workspace.textDocuments) {
-          workspace.textDocuments.forEach((curEd) => {
-            if (
-              !curEd.fileName.startsWith(window.forceCode.projectRoot) &&
-              curEd.uri.scheme === 'file'
-            ) {
-              const fName = curEd.fileName.split(path.sep).pop();
-              if (fName) {
-                let newFCFile: FCFile = new FCFile(
-                  fName,
-                  TreeItemCollapsibleState.None,
-                  this,
-                  folderWSMember
-                );
-                newFCFile.setType(ClassType.NotInSrc);
-                newFCFile.command = {
-                  command: 'ForceCode.openOnClick',
-                  title: '',
-                  arguments: [curEd.fileName],
-                };
-                newFCFile.tooltip = `WARNING: This file isn\'t located in the current PROJECT PATH\n(${window.forceCode.projectRoot})`;
-                fcFiles.push(newFCFile);
-              }
-            }
-          });
-        }
-        return fcFiles;
-      } else {*/
-        this.classes.sort(this.sortFunc);
-        return this.classes.filter((res) => {
-          return res.getType() === element.getType();
-        });
-      //}
+        let retVal: FCFile[] = [];
+        this.classes.forEach((res) => {
+          if(res.getType() === element.getType()) {
+            retVal.push(res);
+          }
+        })
+        retVal.sort(this.sortFunc)
+        return retVal;
     } else if (
       element.getType() === ClassType.CoveredClass ||
       element.getType() === ClassType.UncoveredClass
@@ -209,7 +151,6 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
           let newFCFile: FCFile = new FCFile(
             `${percent}% ${key}`,
             TreeItemCollapsibleState.None,
-            this,
             folderWSMember,
             element
           );
@@ -231,7 +172,6 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       let newFCFile: FCFile = new FCFile(
         element.getType(),
         TreeItemCollapsibleState.Expanded,
-        this,
         folderWSMember
       );
       newFCFile.setType(element.getType());
@@ -250,7 +190,6 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 export class FCFile extends TreeItem {
   public readonly collapsibleState: TreeItemCollapsibleState;
 
-  private parent: CodeCovViewService;
   private wsMember!: IWorkspaceMember;
   private type!: ClassType;
   private parentFCFile?: FCFile;
@@ -258,14 +197,12 @@ export class FCFile extends TreeItem {
   constructor(
     name: string,
     collapsibleState: TreeItemCollapsibleState,
-    parent: CodeCovViewService,
     wsMember: IWorkspaceMember,
     parentFCFile?: FCFile
   ) {
     super(name, collapsibleState);
 
     this.collapsibleState = collapsibleState;
-    this.parent = parent;
     this.parentFCFile = parentFCFile;
     this.setWsMember(wsMember);
   }
@@ -339,10 +276,6 @@ export class FCFile extends TreeItem {
     }
   }
 
-  public updateWsMember(newMem: IWorkspaceMember) {
-    this.parent.addClass(newMem);
-  }
-
   public getWsMember(): IWorkspaceMember {
     return this.wsMember;
   }
@@ -365,13 +298,13 @@ export class FCFile extends TreeItem {
 
   public addCoverage(testClass: string, coverage: ICodeCoverage) {
     this.wsMember.coverage.set(testClass, coverage);
-    this.updateWsMember(this.wsMember);
+    codeCovViewService.addClass(this.wsMember);
   }
 
   public clearCoverage() {
     this.wsMember.coverage.clear();
     super.collapsibleState = TreeItemCollapsibleState.None;
-    this.updateWsMember(this.wsMember);
+    codeCovViewService.addClass(this.wsMember);
   }
 
   // sometimes the times on the dates are a half second off, so this checks for within 2 seconds

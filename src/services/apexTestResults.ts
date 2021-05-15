@@ -3,6 +3,7 @@ import * as forceCode from '../forceCode';
 import { codeCovViewService, FCFile, getVSCodeSetting } from '.';
 import { QueryResult } from 'jsforce';
 import { VSCODE_SETTINGS } from './configuration';
+import path = require('path');
 
 export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> {
   let fromWhere: string = singleClass ? ' ApexCodeCoverage ' : ' ApexCodeCoverageAggregate ';
@@ -23,7 +24,15 @@ export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> 
       let highestCov: number = 0;
       let highestClass: FCFile | undefined;
       res.records.forEach((curRes: forceCode.ICodeCoverage) => {
-        const fcfile: FCFile | undefined = codeCovViewService.findById(curRes.ApexClassOrTriggerId);
+        let thePath = '';
+        if(curRes.ApexClassOrTrigger.attributes.url.indexOf('ApexClass') != -1) {
+          // we have a class
+          thePath = path.join(vscode.window.forceCode.projectRoot, 'classes', curRes.ApexClassOrTrigger.Name + '.cls');
+        } else {
+          // we have a trigger
+          thePath = path.join(vscode.window.forceCode.projectRoot, 'triggers', curRes.ApexClassOrTrigger.Name + '.trigger');
+        }
+        const fcfile: FCFile | undefined = codeCovViewService.findByPath(thePath);
         if (fcfile && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
           fcfile.setCoverageTestClass('overall');
           if (curRes.ApexTestClass) {

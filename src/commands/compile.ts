@@ -207,17 +207,14 @@ export async function compile(
       onError(res);
       failures++;
     } else if (res.status === 'Failed') {
-      if (res.message) {
-        //errMessages.push(res.message);  // TODO remove as this is handled further down in the code
-        //return false; // don't show the failed build error
-      } else if(res.id) {
+      if(res.id) {
         // grab the error via sfdx command
         let deployDetails = await dxService.getDeployErrors(res.id, cancellationToken);
         toArray(deployDetails.details.componentFailures).forEach((failure: any) => {
           onComponentError(failure);
           failures++;
         });
-      } else {
+      } else if(!res.message) {
         // capture a failed deployment there is no message returned, so guide user to view in Salesforce
         errMessages.push(
           'Deployment failed. Please view the details in the deployment status section in Salesforce.'
@@ -230,9 +227,7 @@ export async function compile(
     if (failures === 0) {
       // SUCCESS !!!
       if (res.records && res.records[0].DeployDetails.componentSuccesses.length > 0) {
-        const fcfile = codeCovViewService.findById(
-          res.records[0].DeployDetails.componentSuccesses[0].id
-        );
+        const fcfile = codeCovViewService.findByPath(thePath);
         if (fcfile) {
           fcfile.clearCoverage();
         }
