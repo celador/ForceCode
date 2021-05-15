@@ -161,7 +161,6 @@ export class ForceService implements forceCode.IForceService {
                   !curFCFile.compareDates(key.lastModifiedDate)
                 )
               ) {
-                //curFCFile.updateWsMember(curMem);
                 vscode.commands.executeCommand(
                   'ForceCode.fileModified',
                   thePath,

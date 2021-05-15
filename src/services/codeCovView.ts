@@ -10,7 +10,7 @@ import {
 import { IWorkspaceMember, ICodeCoverage } from '../forceCode';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { MAX_TIME_BETWEEN_FILE_CHANGES, notifications } from '.';
+import { codeCovViewService, MAX_TIME_BETWEEN_FILE_CHANGES, notifications } from '.';
 
 export enum ClassType {
   CoveredClass = 'Sufficient Coverage',
@@ -65,7 +65,6 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       let newClass: FCFile = new FCFile(
         wsMember.name,
         TreeItemCollapsibleState.None,
-        this,
         wsMember
       );
       this.classes.set(wsMember.path, newClass);
@@ -122,7 +121,6 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
           let newFCFile: FCFile = new FCFile(
             val[1],
             TreeItemCollapsibleState.Collapsed,
-            this,
             folderWSMember
           );
           newFCFile.setType(val[1]);
@@ -153,7 +151,6 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
           let newFCFile: FCFile = new FCFile(
             `${percent}% ${key}`,
             TreeItemCollapsibleState.None,
-            this,
             folderWSMember,
             element
           );
@@ -175,7 +172,6 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       let newFCFile: FCFile = new FCFile(
         element.getType(),
         TreeItemCollapsibleState.Expanded,
-        this,
         folderWSMember
       );
       newFCFile.setType(element.getType());
@@ -194,7 +190,6 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 export class FCFile extends TreeItem {
   public readonly collapsibleState: TreeItemCollapsibleState;
 
-  private parent: CodeCovViewService;
   private wsMember!: IWorkspaceMember;
   private type!: ClassType;
   private parentFCFile?: FCFile;
@@ -202,14 +197,12 @@ export class FCFile extends TreeItem {
   constructor(
     name: string,
     collapsibleState: TreeItemCollapsibleState,
-    parent: CodeCovViewService,
     wsMember: IWorkspaceMember,
     parentFCFile?: FCFile
   ) {
     super(name, collapsibleState);
 
     this.collapsibleState = collapsibleState;
-    this.parent = parent;
     this.parentFCFile = parentFCFile;
     this.setWsMember(wsMember);
   }
@@ -283,10 +276,6 @@ export class FCFile extends TreeItem {
     }
   }
 
-  public updateWsMember(newMem: IWorkspaceMember) {
-    this.parent.addClass(newMem);
-  }
-
   public getWsMember(): IWorkspaceMember {
     return this.wsMember;
   }
@@ -309,13 +298,13 @@ export class FCFile extends TreeItem {
 
   public addCoverage(testClass: string, coverage: ICodeCoverage) {
     this.wsMember.coverage.set(testClass, coverage);
-    this.updateWsMember(this.wsMember);
+    codeCovViewService.addClass(this.wsMember);
   }
 
   public clearCoverage() {
     this.wsMember.coverage.clear();
     super.collapsibleState = TreeItemCollapsibleState.None;
-    this.updateWsMember(this.wsMember);
+    codeCovViewService.addClass(this.wsMember);
   }
 
   // sometimes the times on the dates are a half second off, so this checks for within 2 seconds
