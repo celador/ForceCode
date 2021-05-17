@@ -1,12 +1,13 @@
 import { IContainerMember } from '../forceCode';
 import * as vscode from 'vscode';
+import { containerService } from '.';
 
 export class ContainerService {
   private static instance: ContainerService;
-  private containers: Container[];
+  private containers: Map<string, Container>;
 
   constructor() {
-    this.containers = [];
+    this.containers = new Map<string, Container>();
   }
 
   public static getInstance() {
@@ -22,37 +23,28 @@ export class ContainerService {
     toolingType: string,
     upToolingType: string
   ) {
-    const index = this.containers.findIndex((cur) => cur.thePath === thePath);
-    if (index !== -1) {
-      const member = this.containers[index];
+    if (this.containers.has(thePath)) {
+      const member = this.containers.get(thePath)!;
       member.existing = true;
       return member;
     } else {
       // make a new one
-      const container: Container = new Container(thePath, name, toolingType, upToolingType, this);
-      this.containers.push(container);
+      const container: Container = new Container(thePath, name, toolingType, upToolingType);
+      this.containers.set(thePath, container);
       return container;
     }
   }
 
   public removeContainer(container: Container): boolean {
-    const index = this.containers.findIndex((cur) => cur.thePath === container.thePath);
-    if (index !== -1) {
-      this.containers.splice(index, 1);
-      return true;
-    } else {
-      return false;
-    }
+    return this.containers.delete(container.thePath);
   }
 
   public clear() {
-    this.containers = [];
+    this.containers.clear();
   }
 }
 
 export class Container {
-  private readonly parent: ContainerService;
-
   public readonly thePath: string;
   public readonly upToolingType: string;
   public readonly toolingType: string;
@@ -68,9 +60,7 @@ export class Container {
     name: string | undefined,
     toolingType: string,
     upToolingType: string,
-    parent: ContainerService
   ) {
-    this.parent = parent;
     this.existing = false;
     this.name = name;
     this.thePath = thePath;
@@ -119,7 +109,7 @@ export class Container {
 
   public cancelCompile(): Promise<any> {
     // toss the container member...it's in an unknown state
-    this.parent.removeContainer(this);
+    containerService.removeContainer(this);
     return vscode.window.forceCode.conn.tooling
       .sobject('ContainerAsyncRequest')
       .update({ Id: this.containerAsyncRequestId, State: 'Aborted' });

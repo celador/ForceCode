@@ -80,14 +80,13 @@ export class SaveService {
   }
 
   public compareContents(documentPath: string, serverContents: string): boolean {
-    serverContents = serverContents.trim();
     // workaround for SF always saving VF pages with <apex:page > instead or <apex:page>
     if (serverContents.startsWith('<apex:page >')) {
       serverContents = serverContents.replace('<apex:page >', '<apex:page>');
     }
     const oldFileContents: PreSaveFile | undefined = this.getFile(documentPath);
     if (oldFileContents) {
-      return oldFileContents.fileContents === serverContents;
+      return oldFileContents.fileContents.trim() === serverContents.trim();
     }
     // no data to compare to
     return true;
