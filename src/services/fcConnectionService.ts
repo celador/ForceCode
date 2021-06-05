@@ -22,20 +22,19 @@ import { VSCODE_SETTINGS } from './configuration';
 
 export class FCConnectionService implements vscode.TreeDataProvider<FCConnection> {
   private static instance: FCConnectionService;
-  private _onDidChangeTreeData: vscode.EventEmitter<
-    FCConnection | undefined
-  > = new vscode.EventEmitter<FCConnection | undefined>();
+  private _onDidChangeTreeData: vscode.EventEmitter<FCConnection | undefined> =
+    new vscode.EventEmitter<FCConnection | undefined>();
   private loggingIn: boolean = false;
   private refreshingConns: boolean = false;
 
-  public readonly onDidChangeTreeData: vscode.Event<FCConnection | undefined> = this
-    ._onDidChangeTreeData.event;
+  public readonly onDidChangeTreeData: vscode.Event<FCConnection | undefined> =
+    this._onDidChangeTreeData.event;
   public currentConnection: FCConnection | undefined;
-  public connections: FCConnection[];
+  public connections: Map<string, FCConnection>;
 
   public constructor() {
     notifications.writeLog('Starting connection service...');
-    this.connections = [];
+    this.connections = new Map<string, FCConnection>();
   }
 
   public static getInstance() {
@@ -52,7 +51,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
   public getChildren(element?: FCConnection): FCConnection[] {
     if (!element) {
       // This is the root node
-      return this.connections;
+      return Array.from(this.connections.values()).sort(this.sortFunc);
     }
 
     return [];
@@ -67,7 +66,6 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
       this.connections.forEach((conn) => {
         conn.showConnection();
       });
-      this.connections.sort(this.sortFunc);
       this._onDidChangeTreeData.fire(undefined);
     }
   }
@@ -269,9 +267,9 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     if (!conn) {
       return Promise.resolve();
     }
-    const connIndex: number = this.getConnIndex(conn.orgInfo.username);
-    if (connIndex !== -1) {
-      const conn: FCConnection = this.connections.splice(connIndex, 1)[0];
+
+    if (this.connections.has(conn.orgInfo.username)) {
+      this.connections.delete(conn.orgInfo.username);
       return conn.disconnect();
     } else {
       return Promise.resolve();
@@ -279,11 +277,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
   }
 
   public getConnByUsername(userName: string | undefined): FCConnection | undefined {
-    const index: number = this.getConnIndex(userName);
-    if (index !== -1) {
-      return this.connections[index];
-    }
-    return undefined;
+    return this.connections.get(userName ? userName : '');
   }
 
   public addConnection(
@@ -291,30 +285,26 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     saveToken?: boolean
   ): FCConnection | undefined {
     if (orgInfo?.username) {
-      let connIndex: number = this.getConnIndex(orgInfo.username);
-      if (connIndex === -1) {
-        connIndex = this.connections.push(new FCConnection(this, orgInfo)) - 1;
+      let fcConn: FCConnection;
+      if (!this.connections.has(orgInfo.username)) {
+        fcConn = new FCConnection(this, orgInfo);
       } else {
-        const aToken: string | undefined = this.connections[connIndex].orgInfo.accessToken;
-        Object.assign(this.connections[connIndex].orgInfo, orgInfo);
+        fcConn = this.connections.get(orgInfo.username)!;
+        const aToken: string | undefined = fcConn.orgInfo.accessToken;
+        Object.assign(fcConn.orgInfo, orgInfo);
         // only the getOrgInfo command gives us the right access token, for some reason the others don't work
         if (!saveToken) {
-          this.connections[connIndex].orgInfo.accessToken = aToken;
+          fcConn.orgInfo.accessToken = aToken;
         }
       }
-      this.connections[connIndex].isLoggedIn =
+      fcConn.isLoggedIn =
         !orgInfo.isExpired &&
         (orgInfo.connectedStatus === 'Connected' || orgInfo.connectedStatus === 'Unknown');
-      return this.connections[connIndex];
+      this.connections.set(orgInfo.username, fcConn);
+      return fcConn;
     } else {
       return undefined;
     }
-  }
-
-  public getConnIndex(username: string | undefined): number {
-    return this.connections.findIndex((cur) => {
-      return cur.orgInfo.username === username;
-    });
   }
 
   private sortFunc(a: FCConnection, b: FCConnection): number {
