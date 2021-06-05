@@ -25,12 +25,21 @@ export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> 
       let highestClass: FCFile | undefined;
       res.records.forEach((curRes: forceCode.ICodeCoverage) => {
         let thePath = '';
-        if(curRes.ApexClassOrTrigger.attributes.url.indexOf('ApexClass') != -1) {
+        // 01p is an ApexClass, 01q is a trigger
+        if (curRes.ApexClassOrTriggerId.startsWith('01p')) {
           // we have a class
-          thePath = path.join(vscode.window.forceCode.projectRoot, 'classes', curRes.ApexClassOrTrigger.Name + '.cls');
+          thePath = path.join(
+            vscode.window.forceCode.projectRoot,
+            'classes',
+            curRes.ApexClassOrTrigger.Name + '.cls'
+          );
         } else {
           // we have a trigger
-          thePath = path.join(vscode.window.forceCode.projectRoot, 'triggers', curRes.ApexClassOrTrigger.Name + '.trigger');
+          thePath = path.join(
+            vscode.window.forceCode.projectRoot,
+            'triggers',
+            curRes.ApexClassOrTrigger.Name + '.trigger'
+          );
         }
         const fcfile: FCFile | undefined = codeCovViewService.findByPath(thePath);
         if (fcfile && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {
