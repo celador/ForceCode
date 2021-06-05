@@ -59,7 +59,7 @@ export class Container {
     thePath: string,
     name: string | undefined,
     toolingType: string,
-    upToolingType: string,
+    upToolingType: string
   ) {
     this.existing = false;
     this.name = name;
