@@ -4,6 +4,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { fcConnection, ForceService, notifications } from '.';
 import * as deepmerge from 'deepmerge';
+import { MAX_SFDX_COPY_RETRIES, SFDX_RETRY_DELAY } from './constants';
 
 interface SFDXConfig {
   defaultusername?: string;
@@ -70,12 +71,20 @@ export async function getSetConfig(service?: ForceService): Promise<Config> {
     fs.mkdirpSync(self.projectRoot);
   }
 
-  if (!self.config.username) {
-    await fcConnection.refreshConnections();
-    return Promise.resolve(self.config);
+  if (self.config.username) {
+    await copySFDXData(self, projPath);
   }
 
-  const forceConfigPath = path.join(projPath, '.forceCode', self.config.username);
+  await fcConnection.refreshConnections();
+  return Promise.resolve(self.config);
+}
+
+async function copySFDXData(
+  self: IForceService,
+  projPath: string,
+  retryCount: number = 0
+): Promise<boolean> {
+  const forceConfigPath = path.join(projPath, '.forceCode', self.config.username!);
   const forceSfdxPath = path.join(forceConfigPath, '.sfdx');
   const sfdxPath = path.join(projPath, '.sfdx');
   const sfdxProjectJson = path.join(projPath, 'sfdx-project.json');
@@ -98,7 +107,16 @@ export async function getSetConfig(service?: ForceService): Promise<Config> {
         fs.removeSync(sfdxPath);
       } catch (e) {
         notifications.writeLog(e);
-        requiresRestart = true;
+        retryCount++;
+        if (retryCount > MAX_SFDX_COPY_RETRIES) {
+          requiresRestart = true;
+        } else {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(copySFDXData(self, projPath, retryCount));
+            }, SFDX_RETRY_DELAY);
+          });
+        }
       }
 
       // if the sfdx-project.json file exists, move it into the .forceCode folder
@@ -159,8 +177,7 @@ export async function getSetConfig(service?: ForceService): Promise<Config> {
     );
   }
 
-  await fcConnection.refreshConnections();
-  return Promise.resolve(self.config);
+  return Promise.resolve(!requiresRestart);
 }
 
 export function readForceJson(): string | undefined {
