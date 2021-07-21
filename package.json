@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "3.22.12-5",
+  "version": "3.22.12",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -273,7 +273,7 @@
         },
         "force.defaultApiVersion": {
           "type": "string",
-          "default": "51.0",
+          "default": "52.0",
           "description": "The Salesforce API version to use when logging into new orgs. Must be in the format of XX.X. Example: 45.0"
         },
         "force.debugFilter": {
@@ -736,7 +736,7 @@
     "typescript": "^4.3.5",
     "universal-analytics": "0.4.23",
     "uuid": "8.3.2",
-    "vsce": "^1.95.1",
+    "vsce": "^1.96.1",
     "vscode-test": "^1.6.1",
     "webpack": "^5.45.1",
     "webpack-cli": "^4.7.2",

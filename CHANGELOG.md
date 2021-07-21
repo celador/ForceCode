@@ -3,6 +3,7 @@
 * 3.22.12
     * Fix issue with `Existing SFDX project found...`. ForceCode will now attempt to resolve the issue itself.
     * Fix whitespace issue when checking for changes while deploying LWCs.
+    * Fix issues with code coverage.
     * Performance improvements.
 * 3.22.11
     * Performance improvements
