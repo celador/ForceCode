@@ -82,12 +82,6 @@ export class Refresh extends ForcecodeCommand {
       return undefined;
     }
     return retrieve(vscode.window.activeTextEditor.document.uri, this.cancellationToken);
-
-    function getTTIndex(toolType: string, arr: ToolingType[]): number {
-      return arr.findIndex((cur) => {
-        return cur.name === toolType && cur.members !== ['*'];
-      });
-    }
   }
 }
 
@@ -117,6 +111,12 @@ export interface ToolingType {
 
 interface ToolingTypes {
   types: ToolingType[];
+}
+
+export function getTTIndex(toolType: string, arr: ToolingType[]): number {
+  return arr.findIndex((cur) => {
+    return cur.name === toolType && cur.members !== ['*'];
+  });
 }
 
 export function retrieve(
@@ -336,7 +336,8 @@ export function retrieve(
         let theStream = vscode.window.forceCode.conn.metadata.retrieve({
           packageNames: [option.description],
           apiVersion:
-            vscode.window.forceCode.config.apiVersion || getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
+            vscode.window.forceCode.config.apiVersion ||
+            getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
         });
         theStream.on('error', (error) => {
           reject(

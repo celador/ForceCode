@@ -5,6 +5,7 @@ import { isEmptyUndOrNull } from '../util';
 import { ForcecodeCommand, FCCancellationToken, ToolingType, retrieve } from '.';
 import { getVSCodeSetting } from '../services';
 import { VSCODE_SETTINGS } from '../services/configuration';
+import { getTTIndex } from './retrieve';
 const TYPEATTRIBUTE: string = 'type';
 
 export class ShowFileOptions extends ForcecodeCommand {
@@ -38,7 +39,7 @@ export class Open extends ForcecodeCommand {
   public command(): any {
     return Promise.resolve(vscode.window.forceCode)
       .then(getFileList)
-      .then(proms => showFileOptions(proms, this.cancellationToken));
+      .then((proms) => showFileOptions(proms, this.cancellationToken));
 
     // =======================================================================================================================================
     // =======================================================================================================================================
@@ -51,9 +52,10 @@ export class Open extends ForcecodeCommand {
         'ApexComponent',
         'StaticResource',
       ];
-      let predicate: string = `WHERE NamespacePrefix = '${vscode.window.forceCode.config.prefix ||
-        ''}'`;
-      let promises: any[] = metadataTypes.map(t => {
+      let predicate: string = `WHERE NamespacePrefix = '${
+        vscode.window.forceCode.config.prefix || ''
+      }'`;
+      let promises: any[] = metadataTypes.map((t) => {
         let sResource = t === 'StaticResource' ? ', ContentType' : '';
         let q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;
         return vscode.window.forceCode.conn.tooling.query(q);
@@ -94,9 +96,9 @@ export class Open extends ForcecodeCommand {
 
 function showFileOptions(promises: any[], cancellationToken: FCCancellationToken) {
   return Promise.all(promises)
-    .then(results => {
+    .then((results) => {
       let options: vscode.QuickPickItem[] = results
-        .map(res => res.records)
+        .map((res) => res.records)
         .reduce((prev, curr) => {
           return prev.concat(curr);
         })
@@ -120,7 +122,7 @@ function showFileOptions(promises: any[], cancellationToken: FCCancellationToken
       };
       return vscode.window.showQuickPick(options, config);
     })
-    .then(opt => {
+    .then((opt) => {
       let opts: any = opt;
       if (isEmptyUndOrNull(opts)) {
         return Promise.resolve();
@@ -163,7 +165,7 @@ function showFileOptions(promises: any[], cancellationToken: FCCancellationToken
                 let filePath: string = `${vscode.window.forceCode.projectRoot}${
                   path.sep
                 }${getFolder(tType)}${path.sep}${fName}.${getExtension(tType)}`;
-                vscode.workspace.openTextDocument(filePath).then(document => {
+                vscode.workspace.openTextDocument(filePath).then((document) => {
                   vscode.window.showTextDocument(document, { preview: false });
                 });
               }
@@ -173,10 +175,4 @@ function showFileOptions(promises: any[], cancellationToken: FCCancellationToken
         return res;
       });
     });
-
-  function getTTIndex(toolType: string, arr: ToolingType[]): number {
-    return arr.findIndex(cur => {
-      return cur.name === toolType;
-    });
-  }
 }

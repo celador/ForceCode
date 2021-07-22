@@ -15,10 +15,10 @@ interface PreSaveFile {
 
 export class SaveService {
   private static instance: SaveService;
-  private preSaveFiles: PreSaveFile[];
+  private preSaveFiles: Map<string, PreSaveFile>;
 
   constructor() {
-    this.preSaveFiles = [];
+    this.preSaveFiles = new Map<string, PreSaveFile>();
   }
 
   public static getInstance() {
@@ -47,7 +47,7 @@ export class SaveService {
         saving: false,
         queue: false,
       };
-      this.preSaveFiles.push(newPSFile);
+      this.preSaveFiles.set(newPSFile.path, newPSFile);
       return newPSFile;
     }
   }
@@ -80,14 +80,13 @@ export class SaveService {
   }
 
   public compareContents(documentPath: string, serverContents: string): boolean {
-    serverContents = serverContents.trim();
     // workaround for SF always saving VF pages with <apex:page > instead or <apex:page>
     if (serverContents.startsWith('<apex:page >')) {
       serverContents = serverContents.replace('<apex:page >', '<apex:page>');
     }
     const oldFileContents: PreSaveFile | undefined = this.getFile(documentPath);
     if (oldFileContents) {
-      return oldFileContents.fileContents === serverContents;
+      return oldFileContents.fileContents.trim() === serverContents.trim();
     }
     // no data to compare to
     return true;
@@ -100,7 +99,7 @@ export class SaveService {
   ): Promise<boolean> {
     // if the preSaveFile doesn't exist, make it. this means someone is saving via ctr+shift+s or right click and hasn't changed the file+saved it
     if (!fs.existsSync(document)) {
-      throw 'This type of document can\'t be saved via the ForceCode menu. Please right-click the file in the explorer and click ForceCode: Save/Deploy/Compile';
+      throw "This type of document can't be saved via the ForceCode menu. Please right-click the file in the explorer and click ForceCode: Save/Deploy/Compile";
     }
 
     const psFile: PreSaveFile = this.addFile(document);
@@ -162,37 +161,20 @@ export class SaveService {
   }
 
   private updateFile(psFile: PreSaveFile) {
-    const fileIndex: number = this.getFileIndex(psFile.path);
-    if (fileIndex > -1) {
-      this.preSaveFiles[fileIndex] = psFile;
-    }
+    this.preSaveFiles.set(psFile.path, psFile);
   }
 
   private removeFile(thePath: string): boolean {
-    const fileIndex: number = this.getFileIndex(thePath);
-
-    if (fileIndex > -1) {
-      this.preSaveFiles.splice(fileIndex, 1);
-      return true;
-    } else {
-      return false;
-    }
+    return this.preSaveFiles.delete(thePath);
   }
 
   private getFile(thePath: string): PreSaveFile | undefined {
-    const fileIndex: number = this.getFileIndex(thePath);
-    if (fileIndex > -1) {
-      return this.preSaveFiles[fileIndex];
-    } else {
-      return undefined;
-    }
+    return this.preSaveFiles.get(thePath);
   }
 
   private getFilesInFolder(folder: string): PreSaveFile[] {
-    return this.preSaveFiles.filter((psFile) => psFile.path.indexOf(folder) !== -1);
-  }
-
-  private getFileIndex(thePath: string): number {
-    return this.preSaveFiles.findIndex((curFile) => curFile.path === thePath);
+    return Array.from(this.preSaveFiles.values()).filter(
+      (psFile) => psFile.path.indexOf(folder) !== -1
+    );
   }
 }

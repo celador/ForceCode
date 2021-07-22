@@ -62,11 +62,7 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
       this.classes.get(wsMember.path)!.setWsMember(wsMember);
       retval = this.classes.get(wsMember.path)!;
     } else {
-      let newClass: FCFile = new FCFile(
-        wsMember.name,
-        TreeItemCollapsibleState.None,
-        wsMember
-      );
+      let newClass: FCFile = new FCFile(wsMember.name, TreeItemCollapsibleState.None, wsMember);
       this.classes.set(wsMember.path, newClass);
       retval = newClass;
     }
@@ -81,10 +77,10 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     //  return cur.getWsMember().type === type;
     //});
     this.classes.forEach((cur) => {
-      if(cur.getWsMember().type === type) {
+      if (cur.getWsMember().type === type) {
         retVal.push(cur);
       }
-    })
+    });
 
     return retVal;
   }
@@ -116,14 +112,14 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
     if (!element) {
       let fcFiles: FCFile[] = [];
       // This is the root node
-      Object.entries(ClassType).forEach((val) => {
-        if (val[1] !== ClassType.NoShow && val[1] !== ClassType.Subclass) {
+      Object.values(ClassType).forEach((val) => {
+        if (val !== ClassType.NoShow && val !== ClassType.Subclass) {
           let newFCFile: FCFile = new FCFile(
-            val[1],
+            val,
             TreeItemCollapsibleState.Collapsed,
             folderWSMember
           );
-          newFCFile.setType(val[1]);
+          newFCFile.setType(val);
           fcFiles.push(newFCFile);
         }
       });
@@ -131,14 +127,14 @@ export class CodeCovViewService implements TreeDataProvider<FCFile> {
 
       return fcFiles;
     } else if (element.getWsMember().type === ClassType.NoShow) {
-        let retVal: FCFile[] = [];
-        this.classes.forEach((res) => {
-          if(res.getType() === element.getType()) {
-            retVal.push(res);
-          }
-        })
-        retVal.sort(this.sortFunc)
-        return retVal;
+      let retVal: FCFile[] = [];
+      this.classes.forEach((res) => {
+        if (res.getType() === element.getType()) {
+          retVal.push(res);
+        }
+      });
+      retVal.sort(this.sortFunc);
+      return retVal;
     } else if (
       element.getType() === ClassType.CoveredClass ||
       element.getType() === ClassType.UncoveredClass
