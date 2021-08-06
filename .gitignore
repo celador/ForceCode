@@ -30,3 +30,4 @@ analytics.json
 package.xml
 forcecode-**.vsix
 .nyc_output/**
+.DS_Store
