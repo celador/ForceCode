@@ -13,7 +13,6 @@ import {
   PXMLMember,
   getHomeDir,
 } from '../services';
-import { getFileName } from '../parsers';
 import { readConfigFile, removeConfigFolder } from '../services';
 import { Config } from '../forceCode';
 import { updateDecorations } from '../decorators';
@@ -105,7 +104,7 @@ export class FileModified extends ForcecodeCommand {
     return vscode.workspace.openTextDocument(context).then((theDoc) => {
       return notifications
         .showWarning(
-          selectedResource + ' has changed ' + getFileName(theDoc),
+          selectedResource + ' has changed ' + theDoc.fileName.split(path.sep).pop(),
           'Refresh',
           'Diff',
           'Dismiss'

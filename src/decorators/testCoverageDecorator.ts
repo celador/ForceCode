@@ -3,8 +3,8 @@ import * as forceCode from '../forceCode';
 import { codeCovViewService, notifications, FCFile } from '../services';
 
 // create a decorator type that we use to decorate small numbers
-const uncoveredLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(
-  {
+const uncoveredLineStyle: vscode.TextEditorDecorationType =
+  vscode.window.createTextEditorDecorationType({
     backgroundColor: 'rgba(247,98,34,0.3)',
     // borderWidth: '1px',
     // borderStyle: 'dashed',
@@ -19,15 +19,14 @@ const uncoveredLineStyle: vscode.TextEditorDecorationType = vscode.window.create
       // this color will be used in dark color themes
       borderColor: 'rgba(247,98,34,1)',
     },
-  }
-);
+  });
 
 const acovLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(
   { backgroundColor: 'rgba(72,54,36,1)', isWholeLine: true }
 );
 
 export function updateDecorations() {
-  vscode.window.visibleTextEditors.forEach(editor => {
+  vscode.window.visibleTextEditors.forEach((editor) => {
     let uncoveredLineOptions: vscode.DecorationOptions[] = [];
     let lineOpts: vscode.TextEditorDecorationType = uncoveredLineStyle;
     if (editor.document.languageId === 'apexCodeCoverage') {
@@ -64,16 +63,18 @@ function getUncoveredLineOptions(editor: vscode.TextEditor) {
   function getUncoveredLineOptionsFor(workspaceMember: forceCode.IWorkspaceMember) {
     let uncoveredLineDecorations: vscode.DecorationOptions[] = [];
     const wsMemCoverage = workspaceMember.selectedCoverage || 'overall';
-    let fileCoverage: forceCode.ICodeCoverage | undefined = workspaceMember.coverage.get(
-      wsMemCoverage
-    );
+    let fileCoverage: forceCode.ICodeCoverage | undefined =
+      workspaceMember.coverage.get(wsMemCoverage);
     if (fileCoverage) {
-      fileCoverage.Coverage.uncoveredLines.forEach(notCovered => {
-        let decorationRange: vscode.DecorationOptions = {
-          range: document.lineAt(Number(notCovered - 1)).range,
-          hoverMessage: 'Line ' + notCovered + ' not covered by a test',
-        };
-        uncoveredLineDecorations.push(decorationRange);
+      fileCoverage.Coverage.uncoveredLines.forEach((notCovered) => {
+        // just in case, as I have encountered "illegal value for line" errors
+        if (notCovered > 0 && notCovered < document.lineCount) {
+          let decorationRange: vscode.DecorationOptions = {
+            range: document.lineAt(Number(notCovered - 1)).range,
+            hoverMessage: 'Line ' + notCovered + ' not covered by a test',
+          };
+          uncoveredLineDecorations.push(decorationRange);
+        }
         // Add output to output channel
       });
 
