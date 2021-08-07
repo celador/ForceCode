@@ -94,8 +94,7 @@ export class DXService {
     });
 
     const spawnOpt: SpawnOptions = {
-      // Always use json in stdout
-      env: Object.assign({ SFDX_JSON_TO_STDOUT: 'true' }, process.env),
+      env: process.env, // this should be the default anyways
       cwd: vscode.window.forceCode.workspaceRoot,
     };
 
@@ -145,7 +144,12 @@ export class DXService {
             );
           }
           // We want to resolve if there's an error with parsable results
-          if (!bypassReject && ((code && code > 0 && !json) || (json?.status > 0 && !json.result) || json?.exitCode > 0)) {
+          if (
+            !bypassReject &&
+            ((code && code > 0 && !json) ||
+              (json?.status > 0 && !json.result) ||
+              json?.exitCode > 0)
+          ) {
             // Get non-promise stack for extra help
             notifications.writeLog(error);
             notifications.writeLog(json);
@@ -281,6 +285,11 @@ export class DXService {
   }
 
   public getDeployErrors(deploymentId: string, cancellationToken: FCCancellationToken) {
-    return this.runCommand('source:deploy:report -i ' + deploymentId, true, cancellationToken, true);
+    return this.runCommand(
+      'source:deploy:report -i ' + deploymentId,
+      true,
+      cancellationToken,
+      true
+    );
   }
 }
