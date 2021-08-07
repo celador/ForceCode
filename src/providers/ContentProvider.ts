@@ -3,6 +3,7 @@ import * as path from 'path';
 import { getAuraNameFromFileName } from '../parsers';
 import { getAuraDefTypeFromDocument } from '../commands';
 import { QueryResult } from 'jsforce';
+import { getSrcDir } from '../services/configuration';
 
 /**
  * Salesforce Content Provider class.
@@ -29,8 +30,9 @@ export class ForceCodeContentProvider implements vscode.TextDocumentContentProvi
     let name: string | undefined = uriParts[2];
     let toolingName: string = name.split('.')[0];
     let field: string = 'Body';
-    let nsPrefix = `NamespacePrefix = '${vscode.window.forceCode.config.prefix ||
-      ''}' and Name='${toolingName}'`;
+    let nsPrefix = `NamespacePrefix = '${
+      vscode.window.forceCode.config.prefix || ''
+    }' and Name='${toolingName}'`;
     if (toolingType === 'ApexComponent' || toolingType === 'ApexPage') {
       field = 'Markup';
     } else if (this.auraSource && toolingType === 'AuraDefinition') {
@@ -42,7 +44,7 @@ export class ForceCodeContentProvider implements vscode.TextDocumentContentProvi
       field = 'Source';
       name = getAuraNameFromFileName(this.auraSource.fileName, 'lwc');
       let FilePath: string | undefined = this.auraSource.fileName
-        .split(vscode.window.forceCode.projectRoot + path.sep)
+        .split(getSrcDir() + path.sep)
         .pop();
       FilePath = FilePath?.split(path.sep).join('/') || '';
       nsPrefix = `FilePath='${FilePath}' AND LightningComponentBundleId IN (SELECT Id FROM LightningComponentBundle WHERE DeveloperName='${name}')`;
@@ -50,7 +52,7 @@ export class ForceCodeContentProvider implements vscode.TextDocumentContentProvi
     return new Promise<string>((resolve, reject) => {
       let query: string = `SELECT ${field} FROM ${toolingType} WHERE ${nsPrefix}`;
       vscode.commands.executeCommand('ForceCode.toolingQuery', query).then(
-        results => {
+        (results) => {
           const theResults = results as QueryResult;
           if (theResults?.totalSize === 1) {
             return resolve(theResults.records[0][field]);

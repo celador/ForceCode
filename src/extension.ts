@@ -18,6 +18,7 @@ import { fcCommands, createProject } from './commands';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { getToolingTypeFromFolder } from './parsers';
+import { getSrcDir } from './services/configuration';
 
 export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
@@ -41,12 +42,12 @@ export function activate(context: vscode.ExtensionContext): any {
 
   fcCommands.forEach((cur) => {
     context.subscriptions.push(
-      vscode.commands.registerCommand(cur.commandName, function (
-        context: any,
-        selectedResource: any
-      ): any {
-        return commandViewService.addCommandExecution(cur, context, selectedResource);
-      })
+      vscode.commands.registerCommand(
+        cur.commandName,
+        function (context: any, selectedResource: any): any {
+          return commandViewService.addCommandExecution(cur, context, selectedResource);
+        }
+      )
     );
   });
 
@@ -147,9 +148,7 @@ export function activate(context: vscode.ExtensionContext): any {
   // watch for deleted files and update workspaceMembers
   context.subscriptions.push(
     vscode.workspace
-      .createFileSystemWatcher(
-        path.join(vscode.window.forceCode.projectRoot, '**', '*.{cls,trigger,page,component}')
-      )
+      .createFileSystemWatcher(path.join(getSrcDir(), '**', '*.{cls,trigger,page,component}'))
       .onDidDelete((uri) => {
         const fcfile: FCFile | undefined = codeCovViewService.findByPath(uri.fsPath);
 
@@ -162,17 +161,15 @@ export function activate(context: vscode.ExtensionContext): any {
   // need this because windows won't tell us when a dir is removed like linux/mac does above
   if (isWindows()) {
     context.subscriptions.push(
-      vscode.workspace
-        .createFileSystemWatcher(path.join(vscode.window.forceCode.projectRoot, '*'))
-        .onDidDelete((uri) => {
-          const tType: string | undefined = getToolingTypeFromFolder(uri);
-          if (tType) {
-            const fcfiles: FCFile[] | undefined = codeCovViewService.findByType(tType);
-            if (fcfiles) {
-              codeCovViewService.removeClasses(fcfiles);
-            }
+      vscode.workspace.createFileSystemWatcher(path.join(getSrcDir(), '*')).onDidDelete((uri) => {
+        const tType: string | undefined = getToolingTypeFromFolder(uri);
+        if (tType) {
+          const fcfiles: FCFile[] | undefined = codeCovViewService.findByType(tType);
+          if (fcfiles) {
+            codeCovViewService.removeClasses(fcfiles);
           }
-        })
+        }
+      })
     );
   }
   vscode.commands.executeCommand('setContext', 'ForceCodeShowMenu', true);

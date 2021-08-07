@@ -12,6 +12,7 @@ import {
   timeout,
 } from '../../testUtils/utils.test';
 import { toArray } from '../../../src/util';
+import { getSrcDir } from '../../../src/services/configuration';
 
 suite('createClass.ts and compile.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -27,23 +28,23 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates new class', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
           return callback(toArray(items)[1]); // apex class
         },
       };
     });
-    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(_options) {
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
           return callback('testerson'); // name of class
         },
       };
     });
-    return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
+    return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
       // verify the file was created
-      let output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
+      let output = path.join(getSrcDir(), 'classes', 'testerson.cls');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -57,13 +58,13 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Refresh class', async () => {
-    let output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
+    let output = path.join(getSrcDir(), 'classes', 'testerson.cls');
     // get the mTime for the file
     const mTime = fs.statSync(output).mtimeMs;
-    return await vscode.workspace.openTextDocument(output).then(doc => {
+    return await vscode.workspace.openTextDocument(output).then((doc) => {
       return vscode.commands
         .executeCommand('ForceCode.refresh', undefined, [doc.uri])
-        .then(_res => {
+        .then((_res) => {
           // make sure the file actually refreshed
           return assert.notStrictEqual(mTime, fs.statSync(output).mtimeMs);
         });
@@ -71,9 +72,9 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Open file (class) in the org', async () => {
-    let output = path.join(vscode.window.forceCode.projectRoot, 'classes', 'testerson.cls');
-    return await vscode.workspace.openTextDocument(output).then(doc => {
-      return vscode.commands.executeCommand('ForceCode.openFileInOrg', doc.uri).then(_res => {
+    let output = path.join(getSrcDir(), 'classes', 'testerson.cls');
+    return await vscode.workspace.openTextDocument(output).then((doc) => {
+      return vscode.commands.executeCommand('ForceCode.openFileInOrg', doc.uri).then((_res) => {
         return assert.strictEqual(true, true);
       });
     });
@@ -81,12 +82,8 @@ suite('createClass.ts and compile.ts', () => {
 
   test('Saves class metadata fail', async () => {
     // open the testerson class metadata
-    let output = path.join(
-      vscode.window.forceCode.projectRoot,
-      'classes',
-      'testerson.cls-meta.xml'
-    );
-    await vscode.workspace.openTextDocument(output).then(doc => {
+    let output = path.join(getSrcDir(), 'classes', 'testerson.cls-meta.xml');
+    await vscode.workspace.openTextDocument(output).then((doc) => {
       return vscode.window.showTextDocument(doc).then(() => {
         // edit the doc to fail
         return addErrorToDoc();
@@ -100,22 +97,22 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates Visualforce Page', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
           return callback(toArray(items)[5]); // VF page
         },
       };
     });
-    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(_options) {
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
           return callback('testerson'); // name of VF page
         },
       };
     });
-    return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      let output = path.join(vscode.window.forceCode.projectRoot, 'pages', 'testerson.page');
+    return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
+      let output = path.join(getSrcDir(), 'pages', 'testerson.page');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -129,48 +126,44 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Opens org via ForceCode menu', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
           return callback(toArray(items)[0]); // Open org option
         },
       };
     });
-    return await vscode.commands.executeCommand('ForceCode.showMenu').then(_res => {
+    return await vscode.commands.executeCommand('ForceCode.showMenu').then((_res) => {
       return assert.strictEqual(true, true);
     });
   });
 
   test('Preview VF', async () => {
-    let output = path.join(vscode.window.forceCode.projectRoot, 'pages', 'testerson.page');
-    return await vscode.workspace.openTextDocument(output).then(doc => {
-      return vscode.commands.executeCommand('ForceCode.previewVF', doc.uri).then(_res => {
+    let output = path.join(getSrcDir(), 'pages', 'testerson.page');
+    return await vscode.workspace.openTextDocument(output).then((doc) => {
+      return vscode.commands.executeCommand('ForceCode.previewVF', doc.uri).then((_res) => {
         return assert.strictEqual(true, true);
       });
     });
   });
 
   test('Creates Visualforce Component', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
           return callback(toArray(items)[6]); // VF component
         },
       };
     });
-    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(_options) {
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
           return callback('testerson'); // name of component
         },
       };
     });
-    return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      let output = path.join(
-        vscode.window.forceCode.projectRoot,
-        'components',
-        'testerson.component'
-      );
+    return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
+      let output = path.join(getSrcDir(), 'components', 'testerson.component');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -187,7 +180,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.restore();
     sandbox
       .stub(vscode.window, 'showWarningMessage')
-      .callsFake(function(
+      .callsFake(function (
         _message: string,
         _options: vscode.MessageOptions,
         ..._items: vscode.MessageItem[]
@@ -200,7 +193,7 @@ suite('createClass.ts and compile.ts', () => {
       });
     sandbox
       .stub(vscode.window, 'showInformationMessage')
-      .callsFake(function(
+      .callsFake(function (
         _message: string,
         _options: vscode.MessageOptions,
         ..._items: vscode.MessageItem[]
@@ -212,33 +205,29 @@ suite('createClass.ts and compile.ts', () => {
         };
       });
     // doc is already open from the save pass above
-    return await vscode.commands.executeCommand('ForceCode.deleteFile').then(_res => {
-      let output = path.join(
-        vscode.window.forceCode.projectRoot,
-        'components',
-        'testerson.component'
-      );
+    return await vscode.commands.executeCommand('ForceCode.deleteFile').then((_res) => {
+      let output = path.join(getSrcDir(), 'components', 'testerson.component');
       return assert.strictEqual(fs.existsSync(output), false);
     });
   });
 
   test('Creates Aura App', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
           return callback(toArray(items)[0]); // Aura, app
         },
       };
     });
-    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(_options) {
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
           return callback('testersonAura'); // name of Aura app
         },
       };
     });
-    return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      let output = path.join(vscode.window.forceCode.projectRoot, 'aura', 'testersonAura');
+    return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
+      let output = path.join(getSrcDir(), 'aura', 'testersonAura');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -252,14 +241,9 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Preview Aura app', async () => {
-    let output = path.join(
-      vscode.window.forceCode.projectRoot,
-      'aura',
-      'testersonAura',
-      'testersonAura.app'
-    );
-    return await vscode.workspace.openTextDocument(output).then(doc => {
-      return vscode.commands.executeCommand('ForceCode.previewApp', doc.uri).then(_res => {
+    let output = path.join(getSrcDir(), 'aura', 'testersonAura', 'testersonAura.app');
+    return await vscode.workspace.openTextDocument(output).then((doc) => {
+      return vscode.commands.executeCommand('ForceCode.previewApp', doc.uri).then((_res) => {
         return assert.strictEqual(true, true);
       });
     });
@@ -269,7 +253,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.restore();
     sandbox
       .stub(vscode.window, 'showWarningMessage')
-      .callsFake(function(
+      .callsFake(function (
         _message: string,
         _options: vscode.MessageOptions,
         ..._items: vscode.MessageItem[]
@@ -282,7 +266,7 @@ suite('createClass.ts and compile.ts', () => {
       });
     sandbox
       .stub(vscode.window, 'showInformationMessage')
-      .callsFake(function(
+      .callsFake(function (
         _message: string,
         _options: vscode.MessageOptions,
         ..._items: vscode.MessageItem[]
@@ -293,14 +277,9 @@ suite('createClass.ts and compile.ts', () => {
           },
         };
       });
-    let output = path.join(
-      vscode.window.forceCode.projectRoot,
-      'aura',
-      'testersonAura',
-      'testersonAura.auradoc'
-    );
-    return await vscode.workspace.openTextDocument(output).then(doc => {
-      return vscode.commands.executeCommand('ForceCode.deleteFile', doc.uri).then(_res => {
+    let output = path.join(getSrcDir(), 'aura', 'testersonAura', 'testersonAura.auradoc');
+    return await vscode.workspace.openTextDocument(output).then((doc) => {
+      return vscode.commands.executeCommand('ForceCode.deleteFile', doc.uri).then((_res) => {
         return assert.strictEqual(fs.existsSync(output), false);
       });
     });
@@ -310,7 +289,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.restore();
     sandbox
       .stub(vscode.window, 'showWarningMessage')
-      .callsFake(function(
+      .callsFake(function (
         _message: string,
         _options: vscode.MessageOptions,
         ..._items: vscode.MessageItem[]
@@ -323,7 +302,7 @@ suite('createClass.ts and compile.ts', () => {
       });
     sandbox
       .stub(vscode.window, 'showInformationMessage')
-      .callsFake(function(
+      .callsFake(function (
         _message: string,
         _options: vscode.MessageOptions,
         ..._items: vscode.MessageItem[]
@@ -334,21 +313,16 @@ suite('createClass.ts and compile.ts', () => {
           },
         };
       });
-    let output = path.join(
-      vscode.window.forceCode.projectRoot,
-      'aura',
-      'testersonAura',
-      'testersonAura.app'
-    );
-    return await vscode.workspace.openTextDocument(output).then(doc => {
-      return vscode.commands.executeCommand('ForceCode.deleteFile', doc.uri).then(_res => {
+    let output = path.join(getSrcDir(), 'aura', 'testersonAura', 'testersonAura.app');
+    return await vscode.workspace.openTextDocument(output).then((doc) => {
+      return vscode.commands.executeCommand('ForceCode.deleteFile', doc.uri).then((_res) => {
         return assert.strictEqual(fs.existsSync(output), false);
       });
     });
   });
 
   test('Creates Trigger on Account', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
           return callback(toArray(items)[4]); // Trigger
@@ -358,22 +332,22 @@ suite('createClass.ts and compile.ts', () => {
     let inputStub = sandbox
       .stub(vscode.window, 'showInputBox')
       .onFirstCall()
-      .callsFake(function(_options) {
+      .callsFake(function (_options) {
         return {
           async then(callback: any) {
             return callback('testerson'); // name of Trigger
           },
         };
       });
-    inputStub.onSecondCall().callsFake(function(_options) {
+    inputStub.onSecondCall().callsFake(function (_options) {
       return {
         async then(callback: any) {
           return callback('Account'); // Trigger is on Object Account
         },
       };
     });
-    return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      let output = path.join(vscode.window.forceCode.projectRoot, 'triggers', 'testerson.trigger');
+    return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
+      let output = path.join(getSrcDir(), 'triggers', 'testerson.trigger');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -387,22 +361,22 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates LWC Component', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
           return callback(toArray(items)[3]); // LWC component
         },
       };
     });
-    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(_options) {
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
           return callback('theLWCTest'); // name of component
         },
       };
     });
-    return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      let output = path.join(vscode.window.forceCode.projectRoot, 'lwc', 'theLWCTest');
+    return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
+      let output = path.join(getSrcDir(), 'lwc', 'theLWCTest');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -412,14 +386,14 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates LWC Component 2', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
           return callback(toArray(items)[3]); // LWC component
         },
       };
     });
-    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(_options) {
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
           return callback('theLWCTest2'); // name of component
@@ -427,8 +401,8 @@ suite('createClass.ts and compile.ts', () => {
       };
     });
     createForceJson(process.env.SF_USERNAME || '', true); // turn on autoCompile
-    return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      let output = path.join(vscode.window.forceCode.projectRoot, 'lwc', 'theLWCTest2');
+    return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
+      let output = path.join(getSrcDir(), 'lwc', 'theLWCTest2');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -439,26 +413,22 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates Lightning Message Channel', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
           return callback(toArray(items)[2]); // Lightning Message Channel
         },
       };
     });
-    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(_options) {
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
           return callback('MyMessageChannel'); // name of component
         },
       };
     });
-    return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      let output = path.join(
-        vscode.window.forceCode.projectRoot,
-        'messageChannels',
-        'MyMessageChannel.messageChannel'
-      );
+    return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
+      let output = path.join(getSrcDir(), 'messageChannels', 'MyMessageChannel.messageChannel');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -468,14 +438,14 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Creates Lightning Message Channel 2', async () => {
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
           return callback(toArray(items)[2]); // Lightning Message Channel
         },
       };
     });
-    sandbox.stub(vscode.window, 'showInputBox').callsFake(function(_options) {
+    sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
           return callback('MyMessageChannel2'); // name of component
@@ -483,12 +453,8 @@ suite('createClass.ts and compile.ts', () => {
       };
     });
     createForceJson(process.env.SF_USERNAME || '', true); // turn on autoCompile
-    return await vscode.commands.executeCommand('ForceCode.createClass').then(_res => {
-      let output = path.join(
-        vscode.window.forceCode.projectRoot,
-        'messageChannels',
-        'MyMessageChannel2.messageChannel'
-      );
+    return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
+      let output = path.join(getSrcDir(), 'messageChannels', 'MyMessageChannel2.messageChannel');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
@@ -510,7 +476,7 @@ suite('createClass.ts and compile.ts', () => {
   });
 
   test('Check for file changes', async () => {
-    return await vscode.commands.executeCommand('ForceCode.checkForFileChanges').then(_res => {
+    return await vscode.commands.executeCommand('ForceCode.checkForFileChanges').then((_res) => {
       return assert.strictEqual(true, true);
     });
   });

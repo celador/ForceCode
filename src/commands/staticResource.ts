@@ -3,7 +3,7 @@ import fs = require('fs-extra');
 import path = require('path');
 import { zipFiles, notifications, getVSCodeSetting, saveHistoryService } from '../services';
 import { ForcecodeCommand } from '.';
-import { VSCODE_SETTINGS } from '../services/configuration';
+import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
 const mime = require('mime-types');
 
 interface IResourceBundle {
@@ -43,7 +43,7 @@ function staticResourceBundleDeploy(): any {
   // Login, then get Identity info, then enable logging, then execute the query, then get the debug log, then disable logging
   return Promise.resolve(vscode.window.forceCode)
     .then(getPackageName)
-    .then(option => {
+    .then((option) => {
       if (!option) {
         return;
       }
@@ -57,14 +57,14 @@ function staticResourceBundleDeploy(): any {
   // =======================================================================================================================================
   function getPackageName(): any {
     let bundleDirectories: any[] = [];
-    let bundlePath: string = vscode.window.forceCode.projectRoot + path.sep + 'resource-bundles';
+    let bundlePath: string = path.join(getSrcDir(), 'resource-bundles');
     if (fs.existsSync(bundlePath)) {
       bundleDirectories = fs
         .readdirSync(bundlePath)
-        .filter(file => {
+        .filter((file) => {
           return fs.statSync(path.join(bundlePath, file)).isDirectory();
         })
-        .map(d => {
+        .map((d) => {
           return {
             name: d.split('.resource')[0],
             // file deepcode ignore GlobalReplacementRegex: only need first
@@ -73,14 +73,14 @@ function staticResourceBundleDeploy(): any {
         });
     }
     let spaDirectories: Array<any> = [];
-    let spaPath: string = vscode.window.forceCode.projectRoot + path.sep + 'spa';
+    let spaPath: string = path.join(getSrcDir(), 'spa');
     if (fs.existsSync(spaPath)) {
       spaDirectories = fs
         .readdirSync(spaPath)
-        .filter(file => {
+        .filter((file) => {
           return fs.statSync(path.join(spaPath, file)).isDirectory();
         })
-        .map(s => {
+        .map((s) => {
           return { name: s, type: 'SPA' };
         });
     }
@@ -93,7 +93,7 @@ function staticResourceBundleDeploy(): any {
     let options: any[] = bundleDirectories
       .concat(spaDirectories)
       .concat([{ name: 'All Static Resources', type: 'resource-bundle' }])
-      .map(option => {
+      .map((option) => {
         return {
           description: option.name,
           detail: option.type,
@@ -111,13 +111,12 @@ export function staticResourceDeployFromFile(textDocument: string): any {
     .then(bundleAndDeploy)
     .then(deployComplete)
     .catch(onError)
-    .then(finalRes => {
+    .then((finalRes) => {
       return updateSaveHistory(textDocument, finalRes);
     });
   // =======================================================================================================================================
   function getPackageName(): vscode.QuickPickItem {
-    let bundlePath: string =
-      vscode.window.forceCode.projectRoot + path.sep + 'resource-bundles' + path.sep;
+    let bundlePath: string = getSrcDir() + path.sep + 'resource-bundles' + path.sep;
     let resType;
     let resourceName = '';
     try {
@@ -160,15 +159,15 @@ async function bundleAndDeploy(option: vscode.QuickPickItem) {
 }
 
 function bundleAndDeployAll() {
-  let bundlePath: string = vscode.window.forceCode.projectRoot + path.sep + 'resource-bundles';
+  let bundlePath: string = path.join(getSrcDir(), 'resource-bundles');
   if (fs.existsSync(bundlePath)) {
     return Promise.all(
       fs
         .readdirSync(bundlePath)
-        .filter(file => {
+        .filter((file) => {
           return fs.statSync(path.join(bundlePath, file)).isDirectory();
         })
-        .map(d => {
+        .map((d) => {
           return bundleAndDeploy({
             detail: d.split('.resource.')[1].replace('.', '/'),
             label: d.split('.resource.')[0], //substring(0, d.lastIndexOf('.resource')),
@@ -181,7 +180,7 @@ function bundleAndDeployAll() {
 }
 
 function getPackagePath(option: vscode.QuickPickItem) {
-  let bundlePath: string = vscode.window.forceCode.projectRoot + path.sep;
+  let bundlePath: string = getSrcDir() + path.sep;
   // Get package data
   if (option.detail && option.detail !== 'SPA') {
     bundlePath +=
@@ -205,7 +204,9 @@ function getPackagePath(option: vscode.QuickPickItem) {
  */
 function deploy(zip: any, packageName: string, conType: string) {
   return new Promise((resolve, reject) => {
-    let finalPath: string = `${vscode.window.forceCode.projectRoot}${path.sep}staticresources${path.sep}${packageName}.resource`;
+    let finalPath: string = `${getSrcDir()}${path.sep}staticresources${
+      path.sep
+    }${packageName}.resource`;
     zip
       .pipe(fs.createWriteStream(finalPath))
       .on('finish', async () => {
@@ -262,12 +263,7 @@ async function makeResourceMetadata(bundleName: string, cont: any, contType: str
 }
 
 function getResourceSettings(): IResourceBundle[] {
-  let settingsFile: string =
-    vscode.window.forceCode.projectRoot +
-    path.sep +
-    'resource-bundles' +
-    path.sep +
-    'forceBundleSettings.json';
+  let settingsFile: string = path.join(getSrcDir(), 'resource-bundles', 'forceBundleSettings.json');
   let settings: IResourceBundle[] = [];
   if (fs.existsSync(settingsFile)) {
     settings = fs.readJSONSync(settingsFile);
@@ -279,17 +275,12 @@ function findResourceSetting(
   bundleName: string,
   settings: IResourceBundle[]
 ): IResourceBundle | undefined {
-  return settings.find(cur => cur.fullName === bundleName);
+  return settings.find((cur) => cur.fullName === bundleName);
 }
 
 // add a setting if it doesn't exist
 function addResourceSetting(setting: IResourceBundle) {
-  let settingsFile: string =
-    vscode.window.forceCode.projectRoot +
-    path.sep +
-    'resource-bundles' +
-    path.sep +
-    'forceBundleSettings.json';
+  let settingsFile: string = path.join(getSrcDir(), 'resource-bundles', 'forceBundleSettings.json');
   let settings: IResourceBundle[] = getResourceSettings();
   const curSetting: IResourceBundle | undefined = findResourceSetting(setting.fullName, settings);
   if (!curSetting) {
@@ -302,7 +293,9 @@ function deployComplete(results: any) {
   notifications.showStatus(`ForceCode: Deployed ${results.fullName} $(check)`);
   if (getVSCodeSetting(VSCODE_SETTINGS.autoRefresh) && getVSCodeSetting(VSCODE_SETTINGS.browser)) {
     require('child_process').exec(
-      `osascript -e 'tell application "${getVSCodeSetting(VSCODE_SETTINGS.browser)}" to reload active tab of window 1'`
+      `osascript -e 'tell application "${getVSCodeSetting(
+        VSCODE_SETTINGS.browser
+      )}" to reload active tab of window 1'`
     );
   }
   return results;
@@ -312,7 +305,9 @@ function deployAllComplete(results: any) {
   notifications.showStatus(`ForceCode: Deployed ${results.length} Resources $(check)`);
   if (getVSCodeSetting(VSCODE_SETTINGS.autoRefresh) && getVSCodeSetting(VSCODE_SETTINGS.browser)) {
     require('child_process').exec(
-      `osascript -e 'tell application "${getVSCodeSetting(VSCODE_SETTINGS.browser)}" to reload active tab of window 1'`
+      `osascript -e 'tell application "${getVSCodeSetting(
+        VSCODE_SETTINGS.browser
+      )}" to reload active tab of window 1'`
     );
   }
   let talliedResults: {} = results.reduce((prev: any, curr: any) => {

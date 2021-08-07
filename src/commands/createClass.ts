@@ -3,7 +3,7 @@ import fs = require('fs-extra');
 import path = require('path');
 import { ForcecodeCommand } from '.';
 import { getVSCodeSetting } from '../services';
-import { VSCODE_SETTINGS } from '../services/configuration';
+import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
 
 export class CreateClass extends ForcecodeCommand {
   constructor() {
@@ -131,7 +131,7 @@ export class CreateClass extends ForcecodeCommand {
     }
 
     function createFolder(typeFolder: string, name?: string): string {
-      let metaPath: string = path.join(vscode.window.forceCode.projectRoot, typeFolder);
+      let metaPath: string = path.join(getSrcDir(), typeFolder);
       if (name) {
         metaPath = path.join(metaPath, name);
       }

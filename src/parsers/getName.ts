@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { getSrcDir } from '../services/configuration';
 
 export function getName(
   document: vscode.TextDocument,
@@ -37,8 +38,6 @@ function getNameFromClassBody(document: vscode.TextDocument): string | undefined
   return className;
 }
 export function getAuraNameFromFileName(fileName: string, folderName: string): string | undefined {
-  const fnSplit = fileName
-    .split(`${vscode.window.forceCode.projectRoot}${path.sep}${folderName}${path.sep}`)
-    .pop();
+  const fnSplit = fileName.split(`${getSrcDir()}${path.sep}${folderName}${path.sep}`).pop();
   return fnSplit?.split(path.sep).shift() || '';
 }

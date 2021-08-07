@@ -18,6 +18,7 @@ import { Config } from '../forceCode';
 import { updateDecorations } from '../decorators';
 import * as path from 'path';
 import * as fs from 'fs-extra';
+import { getSrcDir } from '../services/configuration';
 
 export class ToolingQuery extends ForcecodeCommand {
   constructor() {
@@ -310,13 +311,12 @@ export class DeleteFile extends ForcecodeCommand {
           const isAura: boolean =
             toAdd.name === 'AuraDefinitionBundle' || toAdd.name === 'LightningComponentBundle';
           const ttFoldername: string | undefined = thePath
-            .replace(vscode.window.forceCode.projectRoot + path.sep, '')
+            .replace(getSrcDir() + path.sep, '')
             .split(path.sep)
             .shift();
           let backupPath: string = path.join(backupPathBase, ttFoldername ? ttFoldername : '');
           backupPath =
-            thePath ===
-            path.join(vscode.window.forceCode.projectRoot, ttFoldername ? ttFoldername : '')
+            thePath === path.join(getSrcDir(), ttFoldername ? ttFoldername : '')
               ? backupPathBase
               : backupPath;
           const basePathArray = thePath.split(path.sep);
@@ -383,7 +383,7 @@ export class DeleteFile extends ForcecodeCommand {
     );
 
     if (delWSChoice !== 'Yes') {
-      fs.copySync(backupPathBase, vscode.window.forceCode.projectRoot, {
+      fs.copySync(backupPathBase, getSrcDir(), {
         overwrite: true,
         preserveTimestamps: true,
       });
@@ -398,7 +398,7 @@ export class DeleteFile extends ForcecodeCommand {
       let thePath: string = uri.fsPath;
       if (fs.existsSync(thePath)) {
         const theMetaPath: string = thePath + '-meta.xml';
-        const projPath: string = vscode.window.forceCode.projectRoot + path.sep;
+        const projPath: string = getSrcDir() + path.sep;
         const isDir: boolean = fs.lstatSync(uri.fsPath).isDirectory();
         const isMetaData: boolean = thePath.endsWith('-meta.xml');
         const metaExists: boolean = fs.existsSync(theMetaPath);

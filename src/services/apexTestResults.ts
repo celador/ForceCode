@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as forceCode from '../forceCode';
 import { codeCovViewService, FCFile, getVSCodeSetting } from '.';
 import { QueryResult } from 'jsforce';
-import { VSCODE_SETTINGS } from './configuration';
+import { getSrcDir, VSCODE_SETTINGS } from './configuration';
 import * as path from 'path';
 
 export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> {
@@ -33,14 +33,10 @@ export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> 
         // 01p is an ApexClass, 01q is a trigger
         if (curRes.ApexClassOrTriggerId.startsWith('01p')) {
           // we have a class
-          thePath = path.join(vscode.window.forceCode.projectRoot, 'classes', className + '.cls');
+          thePath = path.join(getSrcDir(), 'classes', className + '.cls');
         } else {
           // we have a trigger
-          thePath = path.join(
-            vscode.window.forceCode.projectRoot,
-            'triggers',
-            className + '.trigger'
-          );
+          thePath = path.join(getSrcDir(), 'triggers', className + '.trigger');
         }
         const fcfile: FCFile | undefined = codeCovViewService.findByPath(thePath);
         if (fcfile && curRes.NumLinesUncovered === curRes.Coverage.uncoveredLines.length) {

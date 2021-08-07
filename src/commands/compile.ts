@@ -1,6 +1,12 @@
 import * as vscode from 'vscode';
 import * as forceCode from '../forceCode';
-import { codeCovViewService, saveHistoryService, saveService, notifications, dxService } from '../services';
+import {
+  codeCovViewService,
+  saveHistoryService,
+  saveService,
+  notifications,
+  dxService,
+} from '../services';
 import {
   saveAura,
   saveApex,
@@ -20,6 +26,7 @@ import {
   getName,
   getWholeFileName,
 } from '../parsers';
+import { getSrcDir } from '../services/configuration';
 
 export class CompileMenu extends ForcecodeCommand {
   constructor() {
@@ -72,10 +79,10 @@ export async function compile(
     return Promise.resolve(false);
   }
   const document: vscode.TextDocument = await vscode.workspace.openTextDocument(thePath);
-  if (document.fileName.indexOf(vscode.window.forceCode.projectRoot + path.sep) === -1) {
+  if (document.fileName.indexOf(getSrcDir() + path.sep) === -1) {
     notifications.showError(
       "The file you are trying to save to the server isn't in the current org's source folder (" +
-        vscode.window.forceCode.projectRoot +
+        getSrcDir() +
         ')'
     );
     return Promise.resolve(false);
@@ -207,21 +214,20 @@ export async function compile(
       onError(res);
       failures++;
     } else if (res.status === 'Failed') {
-      if(res.id) {
+      if (res.id) {
         // grab the error via sfdx command
         let deployDetails = await dxService.getDeployErrors(res.id, cancellationToken);
         toArray(deployDetails.details.componentFailures).forEach((failure: any) => {
           onComponentError(failure);
           failures++;
         });
-      } else if(!res.message) {
+      } else if (!res.message) {
         // capture a failed deployment there is no message returned, so guide user to view in Salesforce
         errMessages.push(
           'Deployment failed. Please view the details in the deployment status section in Salesforce.'
         );
         return false; // don't show the failed build error
       }
-      
     }
 
     if (failures === 0) {

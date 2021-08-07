@@ -28,7 +28,7 @@ import {
 import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
 import { CoverageRetrieveType } from '../services/commandView';
-import { VSCODE_SETTINGS } from '../services/configuration';
+import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
 import { buildPackageXMLFile } from './deploy';
 
 export class Refresh extends ForcecodeCommand {
@@ -45,13 +45,13 @@ export class Refresh extends ForcecodeCommand {
       return new Promise((resolve, reject) => {
         let files: PXMLMember[] = [];
         let proms: Promise<PXMLMember>[] = selectedResource.map((curRes) => {
-          if (curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
+          if (curRes.fsPath.startsWith(getSrcDir() + path.sep)) {
             return getAnyNameFromUri(curRes);
           } else {
             throw {
               message:
                 "Only files/folders within the current org's src folder (" +
-                vscode.window.forceCode.projectRoot +
+                getSrcDir() +
                 ') can be retrieved/refreshed.',
             };
           }
@@ -391,7 +391,7 @@ export function retrieve(
       }
 
       function unpackaged() {
-        let xmlFilePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}package.xml`;
+        let xmlFilePath: string = `${getSrcDir()}${path.sep}package.xml`;
         let data: any = fs.readFileSync(xmlFilePath);
         parseString(data, { explicitArray: false }, function (err, dom) {
           if (err) {
@@ -452,7 +452,7 @@ export function retrieve(
         reject(stream.emit('end'));
       });
       let resBundleNames: string[] = [];
-      const destDir: string = vscode.window.forceCode.projectRoot;
+      const destDir: string = getSrcDir();
       new compress.zip.UncompressStream({ source: stream })
         .on('error', function (err: any) {
           reject(err || { message: 'package not found' });
@@ -469,7 +469,7 @@ export function retrieve(
 
               let wsMem: IWorkspaceMember = {
                 name: fullName.split('.')[0],
-                path: `${vscode.window.forceCode.projectRoot}${path.sep}${name}`,
+                path: `${destDir}${path.sep}${name}`,
                 id: '', //metadataFileProperties.id,
                 type: tType,
                 coverage: new Map<string, ICodeCoverage>(),
@@ -619,13 +619,13 @@ export function retrieve(
 
 export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promise<PXMLMember> {
   return new Promise(async (resolve, reject) => {
-    const projRoot: string = vscode.window.forceCode.projectRoot + path.sep;
+    const projRoot: string = getSrcDir() + path.sep;
     if (uri.fsPath.indexOf(projRoot) === -1) {
       return reject(
         'The file you are attempting to save/retrieve/delete (' +
           uri.fsPath +
           ') is outside of ' +
-          vscode.window.forceCode.projectRoot
+          getSrcDir()
       );
     }
     const ffNameParts: string[] = uri.fsPath.split(projRoot)[1].split(path.sep);
@@ -648,7 +648,7 @@ export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promis
     if (!tType) {
       return reject(
         "Either the file/metadata type doesn't exist in the current org or you're trying to save/retrieve/delete outside of " +
-          vscode.window.forceCode.projectRoot
+          getSrcDir()
       );
     }
     let folderedName: string;

@@ -20,7 +20,7 @@ import { Connection, IMetadataFileProperties } from 'jsforce';
 import { isEmptyUndOrNull } from '../util';
 import { SaveResult } from './saveHistoryService';
 import { CoverageRetrieveType } from './commandView';
-import { VSCODE_SETTINGS } from './configuration';
+import { getSrcDir, VSCODE_SETTINGS } from './configuration';
 import * as fs from 'fs-extra';
 
 export class ForceService implements forceCode.IForceService {
@@ -99,13 +99,13 @@ export class ForceService implements forceCode.IForceService {
       let types: Array<{}> = [];
       //let typeNames: Array<string> = [];
       let proms: Array<Promise<IMetadataFileProperties[]>> = [];
-      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'classes'))) {
+      if (fs.existsSync(path.join(getSrcDir(), 'classes'))) {
         types.push({ type: 'ApexClass' });
       }
-      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'components'))) {
+      if (fs.existsSync(path.join(getSrcDir(), 'components'))) {
         types.push({ type: 'ApexComponent' });
       }
-      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'triggers'))) {
+      if (fs.existsSync(path.join(getSrcDir(), 'triggers'))) {
         if (types.length > 2) {
           //index++;
           proms.push(vscode.window.forceCode.conn.metadata.list(types));
@@ -113,7 +113,7 @@ export class ForceService implements forceCode.IForceService {
         }
         types.push({ type: 'ApexTrigger' });
       }
-      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'pages'))) {
+      if (fs.existsSync(path.join(getSrcDir(), 'pages'))) {
         if (types.length > 2) {
           //index++;
           proms.push(vscode.window.forceCode.conn.metadata.list(types));
@@ -143,7 +143,7 @@ export class ForceService implements forceCode.IForceService {
       recs.forEach((curSet) => {
         if (Array.isArray(curSet)) {
           curSet.forEach((key) => {
-            let thePath: string = path.join(vscode.window.forceCode.projectRoot, key.fileName);
+            let thePath: string = path.join(getSrcDir(), key.fileName);
             if (fs.existsSync(thePath)) {
               let workspaceMember: forceCode.IWorkspaceMember = {
                 name: key.fullName,
@@ -156,10 +156,8 @@ export class ForceService implements forceCode.IForceService {
               let curFCFile: FCFile = codeCovViewService.addClass(workspaceMember);
 
               if (
-                (
-                  getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges) &&
-                  !curFCFile.compareDates(key.lastModifiedDate)
-                )
+                getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges) &&
+                !curFCFile.compareDates(key.lastModifiedDate)
               ) {
                 vscode.commands.executeCommand(
                   'ForceCode.fileModified',

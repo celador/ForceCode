@@ -17,7 +17,7 @@ import { isEmptyUndOrNull, toArray } from '../util';
 import { DeployResult } from 'jsforce';
 import { FCCancellationToken, ForcecodeCommand } from '.';
 import { IMetadataObject } from '../forceCode';
-import { VSCODE_SETTINGS } from '../services/configuration';
+import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
 
 export class DeployPackage extends ForcecodeCommand {
   constructor() {
@@ -85,7 +85,7 @@ function deploy(cancellationToken: FCCancellationToken) {
   function getFileList(): Promise<string[]> {
     return new Promise((resolve) => {
       let fileList: string[] = [];
-      klaw(vscode.window.forceCode.projectRoot)
+      klaw(getSrcDir())
         .on('data', (file) => {
           if (
             file.stats.isFile() &&
@@ -95,37 +95,27 @@ function deploy(cancellationToken: FCCancellationToken) {
               file.path.indexOf(vscode.window.forceCode.config.spaDist) !== -1
             ) &&
             !file.path.endsWith('-meta.xml') &&
-            path.dirname(file.path) !== vscode.window.forceCode.projectRoot
+            path.dirname(file.path) !== getSrcDir()
           ) {
-            if (file.path.indexOf(path.join(vscode.window.forceCode.projectRoot, 'aura')) !== -1) {
+            if (file.path.indexOf(path.join(getSrcDir(), 'aura')) !== -1) {
               const auraName = getAuraNameFromFileName(file.path, 'aura');
               if (auraName) {
-                const auraPath: string = path.join(
-                  vscode.window.forceCode.projectRoot,
-                  'aura',
-                  auraName
-                );
+                const auraPath: string = path.join(getSrcDir(), 'aura', auraName);
                 if (fileList.indexOf(auraPath) === -1) {
                   fileList.push(auraPath);
                 }
               }
               // this check will exclude files like package.xml
-            } else if (
-              file.path.indexOf(path.join(vscode.window.forceCode.projectRoot, 'lwc')) !== -1
-            ) {
+            } else if (file.path.indexOf(path.join(getSrcDir(), 'lwc')) !== -1) {
               const lwcName = getAuraNameFromFileName(file.path, 'lwc');
               if (lwcName) {
-                const lwcPath: string = path.join(
-                  vscode.window.forceCode.projectRoot,
-                  'lwc',
-                  lwcName
-                );
+                const lwcPath: string = path.join(getSrcDir(), 'lwc', lwcName);
                 if (fileList.indexOf(lwcPath) === -1) {
                   fileList.push(lwcPath);
                 }
               }
               // this check will exclude files like package.xml
-            } else if (file.path.split(vscode.window.forceCode.projectRoot).length > 1) {
+            } else if (file.path.split(getSrcDir()).length > 1) {
               fileList.push(file.path);
             }
           }
@@ -188,7 +178,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       } else if (fileTT.xmlName === 'LightningComponentBundle') {
         member = getAuraNameFromFileName(file, 'lwc');
       } else if (fileTT.inFolder) {
-        const file2 = file.split(vscode.window.forceCode.projectRoot + path.sep).pop();
+        const file2 = file.split(getSrcDir() + path.sep).pop();
         member = file2?.substring(file2.indexOf(path.sep) + 1);
       } else {
         member = file.split(path.sep).pop();
@@ -247,10 +237,7 @@ export function buildPackageXMLFile(types: PXMLMember[], lwcPackageXML?: string)
     .buildObject(packObj)
     .replace('<Package>', '<Package xmlns="http://soap.sforce.com/2006/04/metadata">')
     .replace(' standalone="yes"', '');
-  fs.outputFileSync(
-    path.join(lwcPackageXML || vscode.window.forceCode.projectRoot, 'package.xml'),
-    xml
-  );
+  fs.outputFileSync(path.join(lwcPackageXML || getSrcDir(), 'package.xml'), xml);
 }
 
 export function deployFiles(
@@ -258,7 +245,7 @@ export function deployFiles(
   cancellationToken: FCCancellationToken,
   lwcPackageXML?: string
 ): Promise<any> {
-  const deployPath: string = vscode.window.forceCode.projectRoot;
+  const deployPath: string = getSrcDir();
   if (isEmptyUndOrNull(files)) {
     return Promise.resolve();
   }

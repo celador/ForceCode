@@ -237,3 +237,15 @@ export function removeConfigFolder(userName: string): boolean {
 export function getVSCodeSetting(name: VSCODE_SETTINGS) {
   return vscode.workspace.getConfiguration('force')[name];
 }
+
+/**
+ *
+ * @returns The directory which the source code is stored. If we're using the "source" format, then it will be a little different
+ */
+export function getSrcDir(): string {
+  let srcPath = vscode.window.forceCode.projectRoot;
+  if (vscode.window.forceCode.config.useSourceFormat) {
+    srcPath = path.join(srcPath, 'main', 'default');
+  }
+  return srcPath;
+}

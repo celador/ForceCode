@@ -5,7 +5,7 @@ import { outputToString, outputToCSV } from '../parsers';
 import { RecordResult } from 'jsforce';
 import { ForcecodeCommand } from '.';
 import { getVSCodeSetting } from '../services';
-import { VSCODE_SETTINGS } from '../services/configuration';
+import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
 
 export class QueryEditor extends ForcecodeCommand {
   constructor() {
@@ -65,7 +65,7 @@ export class QueryEditor extends ForcecodeCommand {
         // save the results
         const csv: boolean = getVSCodeSetting(VSCODE_SETTINGS.outputQueriesAsCSV);
         let data: string = csv ? outputToCSV(curResults) : outputToString(curResults);
-        const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
+        const defaultURI: vscode.Uri = vscode.Uri.file(getSrcDir());
         vscode.window
           .showSaveDialog({
             filters: csv ? { CSV: ['csv'] } : { JSON: ['json'] },
