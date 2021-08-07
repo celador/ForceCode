@@ -58,6 +58,7 @@ export const defaultOptions: Config = {
   spaDist: '',
   src: 'src',
   staticResourceCacheControl: 'Private',
+  useSourceFormat: false,
 };
 
 export async function getSetConfig(service?: ForceService): Promise<Config> {

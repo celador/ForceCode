@@ -292,4 +292,12 @@ export class DXService {
       true
     );
   }
+
+  public deploySourceFormat(thePath: string, cancellationToken: FCCancellationToken) {
+    return this.runCommand(`source:deploy -p ${thePath}`, true, cancellationToken);
+  }
+
+  public async retrieveSourceFormat(pXMLPath: string, cancellationToken: FCCancellationToken) {
+    return this.runCommand(`source:retrieve -x ${pXMLPath}`, true, cancellationToken);
+  }
 }

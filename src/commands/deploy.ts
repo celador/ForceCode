@@ -175,13 +175,7 @@ function deploy(cancellationToken: FCCancellationToken) {
 
 export function createPackageXML(files: string[], lwcPackageXML?: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    const builder = new xml2js.Builder();
-    let packObj: PXML = {
-      Package: {
-        types: [],
-        version: vscode.window.forceCode.config.apiVersion || getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
-      },
-    };
+    let types: PXMLMember[] = [];
     files.forEach((file) => {
       let fileTT: IMetadataObject | undefined = getAnyTTMetadataFromPath(file);
       if (!fileTT) {
@@ -203,13 +197,13 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       member = lIndexOfP > 0 ? member?.substring(0, lIndexOfP) : member;
       if (member) {
         member = member.replace('\\', '/');
-        const index: number = findMDTIndex(packObj, fileTT.xmlName);
+        const index: number = findMDTIndex(types, fileTT.xmlName);
         const folderMeta = member.split('/')[0];
-        const memberIndex: number = index !== -1 ? findMemberIndex(packObj, index, folderMeta) : -1;
+        const memberIndex: number = index !== -1 ? findMemberIndex(types, index, folderMeta) : -1;
         if (index !== -1) {
-          packObj.Package.types[index].members.push(member);
+          types[index].members.push(member);
           if (fileTT.inFolder && memberIndex === -1) {
-            packObj.Package.types[index].members.push(folderMeta);
+            types[index].members.push(folderMeta);
           }
         } else {
           let newMem: PXMLMember = {
@@ -219,33 +213,44 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
           if (fileTT.inFolder) {
             newMem.members.push(folderMeta);
           }
-          packObj.Package.types.push(newMem);
+          types.push(newMem);
         }
       }
     });
-    let xml: string = builder
-      .buildObject(packObj)
-      .replace('<Package>', '<Package xmlns="http://soap.sforce.com/2006/04/metadata">')
-      .replace(' standalone="yes"', '');
-    resolve(
-      fs.outputFileSync(
-        path.join(lwcPackageXML || vscode.window.forceCode.projectRoot, 'package.xml'),
-        xml
-      )
-    );
+    resolve(buildPackageXMLFile(types, lwcPackageXML));
   });
 
-  function findMDTIndex(pxmlObj: PXML, type: string) {
-    return pxmlObj.Package.types.findIndex((curType) => {
+  function findMDTIndex(types: PXMLMember[], type: string) {
+    return types.findIndex((curType) => {
       return curType.name === type;
     });
   }
 
-  function findMemberIndex(pxmlObj: PXML, index: number, member: string) {
-    return pxmlObj.Package.types[index].members.findIndex((curType) => {
+  function findMemberIndex(types: PXMLMember[], index: number, member: string) {
+    return types[index].members.findIndex((curType) => {
       return curType === member;
     });
   }
+}
+
+export function buildPackageXMLFile(types: PXMLMember[], lwcPackageXML?: string) {
+  let packObj: PXML = {
+    Package: {
+      types: types,
+      version:
+        vscode.window.forceCode.config.apiVersion ||
+        getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
+    },
+  };
+  const builder = new xml2js.Builder();
+  let xml: string = builder
+    .buildObject(packObj)
+    .replace('<Package>', '<Package xmlns="http://soap.sforce.com/2006/04/metadata">')
+    .replace(' standalone="yes"', '');
+  fs.outputFileSync(
+    path.join(lwcPackageXML || vscode.window.forceCode.projectRoot, 'package.xml'),
+    xml
+  );
 }
 
 export function deployFiles(
@@ -310,7 +315,7 @@ export function deployFiles(
     }
     if (res.status && res.status !== 'Failed') {
       notifications.showStatus('ForceCode: Deployed $(thumbsup)');
-    } else if(!res.status) {
+    } else if (!res.status) {
       let depId: string;
       const message: string = res.message || res;
       if (res.id) {

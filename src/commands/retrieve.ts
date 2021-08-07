@@ -29,6 +29,7 @@ import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
 import { CoverageRetrieveType } from '../services/commandView';
 import { VSCODE_SETTINGS } from '../services/configuration';
+import { buildPackageXMLFile } from './deploy';
 
 export class Refresh extends ForcecodeCommand {
   constructor() {
@@ -284,6 +285,16 @@ export function retrieve(
       if (cancellationToken.isCanceled()) {
         reject();
       }
+
+      if (vscode.window.forceCode.config.useSourceFormat) {
+        let pXMLPath = vscode.window.forceCode.storageRoot;
+        buildPackageXMLFile(retrieveTypes.types, pXMLPath);
+        return dxService
+          .retrieveSourceFormat(path.join(pXMLPath, 'package.xml'), cancellationToken)
+          .then(resolve)
+          .catch(reject);
+      }
+
       let theStream = vscode.window.forceCode.conn.metadata.retrieve({
         unpackaged: retrieveTypes,
         apiVersion:
@@ -429,6 +440,12 @@ export function retrieve(
   }
 
   function processResult(stream: fs.ReadStream): Promise<any> {
+    if (
+      vscode.window.forceCode.config.useSourceFormat &&
+      (!stream || !(stream instanceof fs.ReadStream))
+    ) {
+      return Promise.resolve({ success: true });
+    }
     return new Promise(function (resolve, reject) {
       cancellationToken.cancellationEmitter.on('cancelled', function () {
         stream.pause();
