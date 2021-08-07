@@ -1,5 +1,9 @@
 ## Change Log
 
+* 3.22.13
+    * Fix Illegal value for line with test coverage
+    * Fix only showing one file changed notification for multiple files with the same name
+    * Remove `SFDX_JSON_TO_STDOUT` as it's no longer used.
 * 3.22.12
     * Fix issue with `Existing SFDX project found...`. ForceCode will now attempt to resolve the issue itself.
     * Fix whitespace issue when checking for changes while deploying LWCs.
