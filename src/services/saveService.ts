@@ -5,6 +5,7 @@ import { notifications } from '.';
 import { IMetadataObject } from '../forceCode';
 import { getAnyTTMetadataFromPath } from '../parsers';
 import { getSrcDir } from './configuration';
+import path = require('path');
 
 interface PreSaveFile {
   path: string;
@@ -147,6 +148,9 @@ export class SaveService {
         if (isResource?.index) {
           return staticResourceDeployFromFile(document);
         } else if (toolingType) {
+          return compile(document, forceCompile, cancellationToken);
+        } else if (document.indexOf(path.sep + 'objects' + path.sep) !== -1) {
+          // this means we have object data in source format
           return compile(document, forceCompile, cancellationToken);
         }
       } else if (isResource || toolingType) {

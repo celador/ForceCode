@@ -109,71 +109,84 @@ export async function compile(
     );
   }
 
-  if (document.fileName.endsWith('-meta.xml')) {
-    let tmpMeta = await new Promise((resolve, reject) => {
-      parseString(document.getText(), { explicitArray: false }, function (err, dom) {
-        if (err) {
-          return reject(err);
-        } else {
-          const metadataType: string = Object.keys(dom)[0];
-          delete dom[metadataType].$;
-          Metadata = dom[metadataType];
-          return resolve(Metadata);
-        }
-      });
-    }).then(
-      (res) => {
-        return res;
-      },
-      (reason) => {
-        return reason;
-      }
-    );
-    if (tmpMeta instanceof Error) {
-      return Promise.resolve(tmpMeta).then(finished).then(updateSaveHistory);
-    }
-  }
-
   // Start doing stuff
   let result;
+  let savedObject = false;
   try {
-    if (folderToolingType === 'EmailTemplate' || folderToolingType === 'Document') {
-      await createPackageXML([document.fileName], vscode.window.forceCode.storageRoot);
-      const files: string[] = [];
-      let pathSplit = 'documents';
-      if (folderToolingType === 'EmailTemplate') {
-        pathSplit = 'email';
+    let parts = thePath
+      .split(path.sep + 'objects' + path.sep)
+      .pop()
+      ?.split(path.sep);
+
+    if (parts && parts.length > 1) {
+      // this means we have object data in source format
+      result = await dxService.deploySourceFormat(thePath, cancellationToken);
+      savedObject = true;
+    } else if (document.fileName.endsWith('-meta.xml')) {
+      let tmpMeta = await new Promise((resolve, reject) => {
+        parseString(document.getText(), { explicitArray: false }, function (err, dom) {
+          if (err) {
+            return reject(err);
+          } else {
+            const metadataType: string = Object.keys(dom)[0];
+            delete dom[metadataType].$;
+            Metadata = dom[metadataType];
+            return resolve(Metadata);
+          }
+        });
+      }).then(
+        (res) => {
+          return res;
+        },
+        (reason) => {
+          return reason;
+        }
+      );
+      if (tmpMeta instanceof Error) {
+        return Promise.resolve(tmpMeta).then(finished).then(updateSaveHistory);
       }
-      let foldName: string | undefined = document.fileName
-        .split(path.sep + pathSplit + path.sep)
-        .pop();
-      if (foldName) {
+    }
+
+    if (!savedObject) {
+      if (folderToolingType === 'EmailTemplate' || folderToolingType === 'Document') {
+        await createPackageXML([document.fileName], vscode.window.forceCode.storageRoot);
+        const files: string[] = [];
+        let pathSplit = 'documents';
+        if (folderToolingType === 'EmailTemplate') {
+          pathSplit = 'email';
+        }
+        let foldName: string | undefined = document.fileName
+          .split(path.sep + pathSplit + path.sep)
+          .pop();
+        if (foldName) {
+          //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
+          files.push(path.join(pathSplit, foldName));
+          files.push(path.join(pathSplit, foldName + '-meta.xml'));
+          files.push('package.xml');
+          result = await deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
+        } else {
+          return Promise.reject(false);
+        }
+      } else if (folderToolingType && toolingType === undefined) {
+        let tFileName = document.fileName.split('-meta.xml').shift() || document.fileName;
+        await createPackageXML([tFileName], vscode.window.forceCode.storageRoot);
+        const files: string[] = [];
+        let pathSplit: string[] = tFileName.split(path.sep);
         //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
-        files.push(path.join(pathSplit, foldName));
-        files.push(path.join(pathSplit, foldName + '-meta.xml'));
+        files.push(path.join(pathSplit[pathSplit.length - 2], pathSplit[pathSplit.length - 1]));
         files.push('package.xml');
         result = await deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
+      } else if (toolingType === 'AuraDefinition') {
+        DefType = getAuraDefTypeFromDocument(document);
+        result = await saveAura(document, name, cancellationToken, Metadata, forceCompile);
+      } else if (toolingType === 'LightningComponentResource') {
+        result = await saveLWC(document, name, cancellationToken, forceCompile);
+      } else if (ttMeta && toolingType) {
+        // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
+        result = await saveApex(document, ttMeta, cancellationToken, Metadata, forceCompile);
       } else {
-        return Promise.reject(false);
+        return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
       }
-    } else if (folderToolingType && toolingType === undefined) {
-      await createPackageXML([document.fileName], vscode.window.forceCode.storageRoot);
-      const files: string[] = [];
-      let pathSplit: string[] = document.fileName.split(path.sep);
-      //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
-      files.push(path.join(pathSplit[pathSplit.length - 2], pathSplit[pathSplit.length - 1]));
-      files.push('package.xml');
-      result = await deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
-    } else if (toolingType === 'AuraDefinition') {
-      DefType = getAuraDefTypeFromDocument(document);
-      result = await saveAura(document, name, cancellationToken, Metadata, forceCompile);
-    } else if (toolingType === 'LightningComponentResource') {
-      result = await saveLWC(document, name, cancellationToken, forceCompile);
-    } else if (ttMeta && toolingType) {
-      // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-      result = await saveApex(document, ttMeta, cancellationToken, Metadata, forceCompile);
-    } else {
-      return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
     }
     await finished(result);
   } catch (error) {

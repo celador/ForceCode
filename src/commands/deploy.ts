@@ -7,6 +7,7 @@ import {
   zipFiles,
   getVSCodeSetting,
   getFilteredFileList,
+  dxService,
 } from '../services';
 import * as path from 'path';
 import klaw = require('klaw');
@@ -249,6 +250,18 @@ export function deployFiles(
   if (isEmptyUndOrNull(files)) {
     return Promise.resolve();
   }
+
+  if (vscode.window.forceCode.config.useSourceFormat) {
+    return dxService
+      .deploySourceFormat(
+        path.join(vscode.window.forceCode.storageRoot, 'package.xml'),
+        cancellationToken,
+        true
+      )
+      .then(finished)
+      .catch(finished);
+  }
+
   let zip = zipFiles(files, deployPath, lwcPackageXML);
   Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
   if (deployOptions.testLevel === 'Default') {

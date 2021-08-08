@@ -151,8 +151,6 @@ export class DXService {
               json?.exitCode > 0)
           ) {
             // Get non-promise stack for extra help
-            notifications.writeLog(error);
-            notifications.writeLog(json);
             let errMess: string | undefined;
             if (json?.result?.length > 0) {
               errMess = '';
@@ -293,11 +291,22 @@ export class DXService {
     );
   }
 
-  public deploySourceFormat(thePath: string, cancellationToken: FCCancellationToken) {
-    return this.runCommand(`source:deploy -p ${thePath}`, true, cancellationToken);
+  public deploySourceFormat(
+    pXMLPath: string,
+    cancellationToken: FCCancellationToken,
+    packageXML?: boolean
+  ) {
+    notifications.writeLog('Deploying in source format');
+    // package.xml or a path
+    return this.runCommand(
+      `source:deploy -${(packageXML ? 'x ' : 'p') + pXMLPath}`,
+      true,
+      cancellationToken
+    );
   }
 
   public async retrieveSourceFormat(pXMLPath: string, cancellationToken: FCCancellationToken) {
+    notifications.writeLog('Retrieving in source format');
     return this.runCommand(`source:retrieve -x ${pXMLPath}`, true, cancellationToken);
   }
 }
