@@ -645,6 +645,26 @@ export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promis
         return resolve({ name: 'StaticResource', members: [members] });
       }
     }
+
+    // check if we have source format for an object. the dir will be in the format /objects/Account/... so length will be over 2
+    if (!tType && ffNameParts[0] === 'objects' && vscode.window.forceCode.config.useSourceFormat) {
+      // set the type to whatever's in the extension...CustomField (field-meta.xml), ListView (listView-meta.xml), etc.
+      // default to the object
+      let componentName = ffNameParts[ffNameParts.length - 1].split('.')[0];
+      let type = ffNameParts[ffNameParts.length - 2];
+      if (type == ffNameParts[1] || ffNameParts.length === 3) {
+        // we could end up with Account and Account for example ffNameParts.length === 3
+        componentName = ffNameParts[1];
+        type = 'CustomObject';
+      }
+      type = type.endsWith('s') && !type.endsWith('ss') ? type.substring(0, type.length - 1) : type;
+
+      type = type.charAt(0).toUpperCase() + type.slice(1);
+      type = type == 'Object' || type == 'Field' ? 'Custom' + type : type;
+      componentName = type != 'CustomObject' ? ffNameParts[1] + '.' + componentName : componentName;
+      return resolve({ name: type, members: [componentName] });
+    }
+
     if (!tType) {
       return reject(
         "Either the file/metadata type doesn't exist in the current org or you're trying to save/retrieve/delete outside of " +
