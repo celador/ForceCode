@@ -14,7 +14,7 @@ import {
 import { toArray } from '../../../src/util';
 import { getSrcDir } from '../../../src/services/configuration';
 
-suite('createClass.ts and compile.ts', () => {
+suite('Source: createClass.ts and compile.ts', () => {
   const sandbox = sinon.createSandbox();
   beforeEach(() => {
     vscode.window.forceCode.config.useSourceFormat = true;
@@ -28,7 +28,7 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.restore();
   });
 
-  test('Creates new class', async () => {
+  test('Source: Creates new class', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
@@ -39,27 +39,27 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
-          return callback('testerson'); // name of class
+          return callback('testersonSource'); // name of class
         },
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
       // verify the file was created
-      let output = path.join(getSrcDir(), 'classes', 'testerson.cls');
+      let output = path.join(getSrcDir(), 'classes', 'testersonSource.cls');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
 
-  test('Save class fail', async () => {
+  test('Source: Save class fail', async () => {
     await addErrorToDoc();
   });
 
-  test('Save class pass', async () => {
+  test('Source: Save class pass', async () => {
     await removeErrorOnDoc();
   });
 
-  test('Refresh class', async () => {
-    let output = path.join(getSrcDir(), 'classes', 'testerson.cls');
+  test('Source: Refresh class', async () => {
+    let output = path.join(getSrcDir(), 'classes', 'testersonSource.cls');
     // get the mTime for the file
     const mTime = fs.statSync(output).mtimeMs;
     return await vscode.workspace.openTextDocument(output).then((doc) => {
@@ -72,8 +72,8 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Open file (class) in the org', async () => {
-    let output = path.join(getSrcDir(), 'classes', 'testerson.cls');
+  test('Source: Open file (class) in the org', async () => {
+    let output = path.join(getSrcDir(), 'classes', 'testersonSource.cls');
     return await vscode.workspace.openTextDocument(output).then((doc) => {
       return vscode.commands.executeCommand('ForceCode.openFileInOrg', doc.uri).then((_res) => {
         return assert.strictEqual(true, true);
@@ -81,9 +81,9 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Saves class metadata fail', async () => {
+  test('Source: Saves class metadata fail', async () => {
     // open the testerson class metadata
-    let output = path.join(getSrcDir(), 'classes', 'testerson.cls-meta.xml');
+    let output = path.join(getSrcDir(), 'classes', 'testersonSource.cls-meta.xml');
     await vscode.workspace.openTextDocument(output).then((doc) => {
       return vscode.window.showTextDocument(doc).then(() => {
         // edit the doc to fail
@@ -92,12 +92,12 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Saves class metadata pass', async () => {
+  test('Source: Saves class metadata pass', async () => {
     // doc will already be active from the above test
     await removeErrorOnDoc();
   });
 
-  test('Creates Visualforce Page', async () => {
+  test('Source: Creates Visualforce Page', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
@@ -108,25 +108,25 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
-          return callback('testerson'); // name of VF page
+          return callback('testersonSource'); // name of VF page
         },
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
-      let output = path.join(getSrcDir(), 'pages', 'testerson.page');
+      let output = path.join(getSrcDir(), 'pages', 'testersonSource.page');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
 
-  test('Save VF page fail', async () => {
+  test('Source: Save VF page fail', async () => {
     await addErrorToDoc();
   });
 
-  test('Save VF page pass', async () => {
+  test('Source: Save VF page pass', async () => {
     await removeErrorOnDoc();
   });
 
-  test('Opens org via ForceCode menu', async () => {
+  test('Source: Opens org via ForceCode menu', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
@@ -139,8 +139,8 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Preview VF', async () => {
-    let output = path.join(getSrcDir(), 'pages', 'testerson.page');
+  test('Source: Preview VF', async () => {
+    let output = path.join(getSrcDir(), 'pages', 'testersonSource.page');
     return await vscode.workspace.openTextDocument(output).then((doc) => {
       return vscode.commands.executeCommand('ForceCode.previewVF', doc.uri).then((_res) => {
         return assert.strictEqual(true, true);
@@ -148,7 +148,7 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Creates Visualforce Component', async () => {
+  test('Source: Creates Visualforce Component', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
@@ -159,25 +159,25 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
-          return callback('testerson'); // name of component
+          return callback('testersonSource'); // name of component
         },
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
-      let output = path.join(getSrcDir(), 'components', 'testerson.component');
+      let output = path.join(getSrcDir(), 'components', 'testersonSource.component');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
 
-  test('Save VF component fail', async () => {
+  test('Source: Save VF component fail', async () => {
     await addErrorToDoc();
   });
 
-  test('Save VF component pass', async () => {
+  test('Source: Save VF component pass', async () => {
     await removeErrorOnDoc();
   });
 
-  test('Delete VF component', async () => {
+  test('Source: Delete VF component', async () => {
     sandbox.restore();
     sandbox
       .stub(vscode.window, 'showWarningMessage')
@@ -207,12 +207,12 @@ suite('createClass.ts and compile.ts', () => {
       });
     // doc is already open from the save pass above
     return await vscode.commands.executeCommand('ForceCode.deleteFile').then((_res) => {
-      let output = path.join(getSrcDir(), 'components', 'testerson.component');
+      let output = path.join(getSrcDir(), 'components', 'testersonSource.component');
       return assert.strictEqual(fs.existsSync(output), false);
     });
   });
 
-  test('Creates Aura App', async () => {
+  test('Source: Creates Aura App', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
@@ -223,26 +223,26 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
-          return callback('testersonAura'); // name of Aura app
+          return callback('testersonAuraSource'); // name of Aura app
         },
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
-      let output = path.join(getSrcDir(), 'aura', 'testersonAura');
+      let output = path.join(getSrcDir(), 'aura', 'testersonAuraSource');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
 
-  test('Save Aura app fail', async () => {
+  test('Source: Save Aura app fail', async () => {
     await addErrorToDoc();
   });
 
-  test('Save Aura app pass', async () => {
+  test('Source: Save Aura app pass', async () => {
     await removeErrorOnDoc();
   });
 
-  test('Preview Aura app', async () => {
-    let output = path.join(getSrcDir(), 'aura', 'testersonAura', 'testersonAura.app');
+  test('Source: Preview Aura app', async () => {
+    let output = path.join(getSrcDir(), 'aura', 'testersonAuraSource', 'testersonAuraSource.app');
     return await vscode.workspace.openTextDocument(output).then((doc) => {
       return vscode.commands.executeCommand('ForceCode.previewApp', doc.uri).then((_res) => {
         return assert.strictEqual(true, true);
@@ -250,7 +250,7 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Delete Aura app DOCUMENTATION', async () => {
+  test('Source: Delete Aura app DOCUMENTATION', async () => {
     sandbox.restore();
     sandbox
       .stub(vscode.window, 'showWarningMessage')
@@ -278,7 +278,12 @@ suite('createClass.ts and compile.ts', () => {
           },
         };
       });
-    let output = path.join(getSrcDir(), 'aura', 'testersonAura', 'testersonAura.auradoc');
+    let output = path.join(
+      getSrcDir(),
+      'aura',
+      'testersonAuraSource',
+      'testersonAuraSource.auradoc'
+    );
     return await vscode.workspace.openTextDocument(output).then((doc) => {
       return vscode.commands.executeCommand('ForceCode.deleteFile', doc.uri).then((_res) => {
         return assert.strictEqual(fs.existsSync(output), false);
@@ -286,7 +291,7 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Delete Aura app', async () => {
+  test('Source: Delete Aura app', async () => {
     sandbox.restore();
     sandbox
       .stub(vscode.window, 'showWarningMessage')
@@ -314,7 +319,7 @@ suite('createClass.ts and compile.ts', () => {
           },
         };
       });
-    let output = path.join(getSrcDir(), 'aura', 'testersonAura', 'testersonAura.app');
+    let output = path.join(getSrcDir(), 'aura', 'testersonAuraSource', 'testersonAuraSource.app');
     return await vscode.workspace.openTextDocument(output).then((doc) => {
       return vscode.commands.executeCommand('ForceCode.deleteFile', doc.uri).then((_res) => {
         return assert.strictEqual(fs.existsSync(output), false);
@@ -322,7 +327,7 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Creates Trigger on Account', async () => {
+  test('Source: Creates Trigger on Account', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
@@ -336,7 +341,7 @@ suite('createClass.ts and compile.ts', () => {
       .callsFake(function (_options) {
         return {
           async then(callback: any) {
-            return callback('testerson'); // name of Trigger
+            return callback('testersonSource'); // name of Trigger
           },
         };
       });
@@ -348,20 +353,20 @@ suite('createClass.ts and compile.ts', () => {
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
-      let output = path.join(getSrcDir(), 'triggers', 'testerson.trigger');
+      let output = path.join(getSrcDir(), 'triggers', 'testersonSource.trigger');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
 
-  test('Save Trigger fail', async () => {
+  test('Source: Save Trigger fail', async () => {
     await addErrorToDoc();
   });
 
-  test('Save Trigger pass', async () => {
+  test('Source: Save Trigger pass', async () => {
     await removeErrorOnDoc();
   });
 
-  test('Creates LWC Component', async () => {
+  test('Source: Creates LWC Component', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
@@ -372,21 +377,21 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
-          return callback('theLWCTest'); // name of component
+          return callback('theLWCTestSource'); // name of component
         },
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
-      let output = path.join(getSrcDir(), 'lwc', 'theLWCTest');
+      let output = path.join(getSrcDir(), 'lwc', 'theLWCTestSource');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
 
-  test('Save LWC fail', async () => {
+  test('Source: Save LWC fail', async () => {
     await addErrorToDoc();
   });
 
-  test('Creates LWC Component 2', async () => {
+  test('Source: Creates LWC Component 2', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
@@ -397,23 +402,23 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
-          return callback('theLWCTest2'); // name of component
+          return callback('theLWCTest2Source'); // name of component
         },
       };
     });
     createForceJson(process.env.SF_USERNAME || '', true); // turn on autoCompile
     return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
-      let output = path.join(getSrcDir(), 'lwc', 'theLWCTest2');
+      let output = path.join(getSrcDir(), 'lwc', 'theLWCTest2Source');
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
 
-  test('Save LWC pass', async () => {
+  test('Source: Save LWC pass', async () => {
     // indicate we shouldn't try and remove an error, and that autoCompile is on
     await removeErrorOnDoc(true, true);
   });
 
-  test('Creates Lightning Message Channel', async () => {
+  test('Source: Creates Lightning Message Channel', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
@@ -424,21 +429,25 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
-          return callback('MyMessageChannel'); // name of component
+          return callback('MyMessageChannelSource'); // name of component
         },
       };
     });
     return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
-      let output = path.join(getSrcDir(), 'messageChannels', 'MyMessageChannel.messageChannel');
+      let output = path.join(
+        getSrcDir(),
+        'messageChannels',
+        'MyMessageChannelSource.messageChannel'
+      );
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
 
-  test('Save Lightning Message Channel fail', async () => {
+  test('Source: Save Lightning Message Channel fail', async () => {
     await addErrorToDoc();
   });
 
-  test('Creates Lightning Message Channel 2', async () => {
+  test('Source: Creates Lightning Message Channel 2', async () => {
     sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
@@ -449,34 +458,38 @@ suite('createClass.ts and compile.ts', () => {
     sandbox.stub(vscode.window, 'showInputBox').callsFake(function (_options) {
       return {
         async then(callback: any) {
-          return callback('MyMessageChannel2'); // name of component
+          return callback('MyMessageChannel2Source'); // name of component
         },
       };
     });
     createForceJson(process.env.SF_USERNAME || '', true); // turn on autoCompile
     return await vscode.commands.executeCommand('ForceCode.createClass').then((_res) => {
-      let output = path.join(getSrcDir(), 'messageChannels', 'MyMessageChannel2.messageChannel');
+      let output = path.join(
+        getSrcDir(),
+        'messageChannels',
+        'MyMessageChannel2Source.messageChannel'
+      );
       return assert.strictEqual(fs.existsSync(output), true);
     });
   });
 
-  test('Save Lightning Message Channel pass', async () => {
+  test('Source: Save Lightning Message Channel pass', async () => {
     // indicate we shouldn't try and remove an error, and that autoCompile is on
     await removeErrorOnDoc(true, true);
   });
 
-  test('Test multi-save', async () => {
+  test('Source: Test multi-save', async () => {
     // indicate we shouldn't try and remove an error, and that autoCompile is on
     removeErrorOnDoc(true, true);
     await timeout(1000);
     await removeErrorOnDoc(true, true);
   });
 
-  test('Verify Code Coverage view now has contents', async () => {
+  test('Source: Verify Code Coverage view now has contents', async () => {
     return assert.strictEqual(codeCovViewService.getChildren().length > 0, true);
   });
 
-  test('Check for file changes', async () => {
+  test('Source: Check for file changes', async () => {
     return await vscode.commands.executeCommand('ForceCode.checkForFileChanges').then((_res) => {
       return assert.strictEqual(true, true);
     });
