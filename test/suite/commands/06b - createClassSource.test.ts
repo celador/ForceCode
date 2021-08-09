@@ -25,6 +25,7 @@ suite('Source: createClass.ts and compile.ts', () => {
     });
   });
   afterEach(() => {
+    vscode.window.forceCode.config.useSourceFormat = false;
     sandbox.restore();
   });
 
