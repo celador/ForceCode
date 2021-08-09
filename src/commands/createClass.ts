@@ -319,7 +319,8 @@ export default class ${jsClassName} extends LightningElement {}`;
 
     function createLMC(name: string, resolve: any) {
       // create the folder and page
-      const ext = 'messageChannel';
+      let ext = 'messageChannel';
+      ext = vscode.window.forceCode.config.useSourceFormat ? ext + '-meta.xml' : ext;
       const folderPath = createFolder('messageChannels');
       const fileContents = `<?xml version="1.0" encoding="UTF-8"?>
 <LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">

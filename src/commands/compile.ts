@@ -113,12 +113,9 @@ export async function compile(
   let result;
   let savedObject = false;
   try {
-    let parts = thePath
-      .split(path.sep + 'objects' + path.sep)
-      .pop()
-      ?.split(path.sep);
+    let parts: string[] = thePath.split(path.sep + 'objects' + path.sep);
 
-    if (parts && parts.length > 1) {
+    if (parts.length > 1 && vscode.window.forceCode.config.useSourceFormat) {
       // this means we have object data in source format
       result = await dxService.deploySourceFormat(thePath, cancellationToken);
       savedObject = true;
