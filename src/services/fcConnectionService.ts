@@ -251,7 +251,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
       );
       vscode.window.forceCode.projectRoot = path.join(
         vscode.window.forceCode.workspaceRoot,
-        vscode.window.forceCode.config.src || 'src'
+        vscode.window.forceCode.config.src || (config.useSourceFormat ? 'force-app' : 'src')
       );
       const describe = await vscode.window.forceCode.conn.metadata.describe();
       vscode.window.forceCode.describe = describe;

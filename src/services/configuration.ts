@@ -66,7 +66,10 @@ export async function getSetConfig(service?: ForceService): Promise<Config> {
   let lastUsername: string | undefined = readForceJson();
   self.config = readConfigFile(lastUsername, service);
 
-  self.projectRoot = path.join(projPath, self.config.src || 'src');
+  self.projectRoot = path.join(
+    projPath,
+    self.config.src || (self.config.useSourceFormat ? 'force-app' : 'src')
+  );
   if (!fs.existsSync(self.projectRoot)) {
     fs.mkdirpSync(self.projectRoot);
   }
