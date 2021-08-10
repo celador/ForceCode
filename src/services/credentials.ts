@@ -83,7 +83,7 @@ export async function enterCredentials(cancellationToken: FCCancellationToken): 
 }
 
 export function checkConfig(cfg: Config): Promise<Config> {
-  return getUrl(cfg).then(getAutoCompile);
+  return getUrl(cfg).then(getAutoCompileAndFormat);
 }
 
 async function getUrl(config: Config): Promise<Config> {
@@ -135,7 +135,7 @@ async function getUrl(config: Config): Promise<Config> {
   return Promise.resolve(config);
 }
 
-async function getAutoCompile(config: Config): Promise<Config> {
+async function getAutoCompileAndFormat(config: Config): Promise<Config> {
   if (Object.keys(config).indexOf('autoCompile') === -1) {
     let options: vscode.QuickPickItem[] = [
       {
@@ -151,6 +151,27 @@ async function getAutoCompile(config: Config): Promise<Config> {
       ignoreFocusOut: true,
     });
     config.autoCompile = choice?.label === 'Yes';
+
+    // only ask for new projects since there's issues switching between formats currently
+    if (Object.keys(config).indexOf('useSourceFormat') === -1) {
+      let sourceOptions: vscode.QuickPickItem[] = [
+        {
+          description: 'This is the "classic" format/project folder setup.',
+          label: 'Metadata',
+        },
+        {
+          description: 'This is the SFDX Source format/project folder setup.',
+          label: 'Source',
+        },
+      ];
+      const sourceChoice: vscode.QuickPickItem | undefined = await vscode.window.showQuickPick(
+        sourceOptions,
+        {
+          ignoreFocusOut: true,
+        }
+      );
+      config.useSourceFormat = sourceChoice?.label === 'Source';
+    }
   }
   return Promise.resolve(config);
 }

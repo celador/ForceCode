@@ -58,7 +58,6 @@ export const defaultOptions: Config = {
   spaDist: '',
   src: 'src',
   staticResourceCacheControl: 'Private',
-  useSourceFormat: false,
 };
 
 export async function getSetConfig(service?: ForceService): Promise<Config> {
@@ -246,6 +245,9 @@ export function getSrcDir(): string {
   let srcPath = vscode.window.forceCode.projectRoot;
   if (vscode.window.forceCode.config.useSourceFormat) {
     srcPath = path.join(srcPath, 'main', 'default');
+  }
+  if (!fs.existsSync(srcPath)) {
+    fs.mkdirpSync(srcPath);
   }
   return srcPath;
 }
