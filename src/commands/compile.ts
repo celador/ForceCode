@@ -103,7 +103,7 @@ export async function compile(
   let Metadata: {} | undefined;
   let errMessages: string[] = [];
 
-  if (folderToolingType === 'StaticResource') {
+  if (folderToolingType === 'StaticResource' && !vscode.window.forceCode.config.useSourceFormat) {
     return Promise.reject(
       'To save a static resource you must edit the files contained in the resource-bundles folder, not the staticresources folder.'
     );
