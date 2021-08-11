@@ -310,7 +310,7 @@ export function retrieve(
           }
         );
       });
-      resolve(theStream.stream());
+      resolve(theStream.stream()).catch(reject);
     }
 
     function pack(resolve: any, reject: any) {
