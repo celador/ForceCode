@@ -56,7 +56,7 @@ export const defaultOptions: Config = {
   prefix: '',
   showTestCoverage: true,
   spaDist: '',
-  src: 'src',
+  src: '',
   staticResourceCacheControl: 'Private',
 };
 
@@ -65,14 +65,7 @@ export async function getSetConfig(service?: ForceService): Promise<Config> {
   const projPath = self.workspaceRoot;
   let lastUsername: string | undefined = readForceJson();
   self.config = readConfigFile(lastUsername, service);
-
-  self.projectRoot = path.join(
-    projPath,
-    self.config.src || (self.config.useSourceFormat ? 'force-app' : 'src')
-  );
-  if (!fs.existsSync(self.projectRoot)) {
-    fs.mkdirpSync(self.projectRoot);
-  }
+  getSrcDir(self); // TODO this is a workaround for not populating the package dir in sfdx-project.json
 
   if (self.config.username) {
     await copySFDXData(self, projPath);
@@ -244,11 +237,17 @@ export function getVSCodeSetting(name: VSCODE_SETTINGS) {
  *
  * @returns The directory which the source code is stored. If we're using the "source" format, then it will be a little different
  */
-export function getSrcDir(): string {
-  let srcPath = vscode.window.forceCode.projectRoot;
-  if (vscode.window.forceCode.config.useSourceFormat) {
-    srcPath = path.join(srcPath, 'main', 'default');
+export function getSrcDir(service?: IForceService): string {
+  let self: IForceService = service || vscode.window.forceCode;
+  let src = self.config.src;
+  const useSrc = self.config.useSourceFormat;
+  src = src && src.trim() !== '' ? src : undefined;
+  if (!src) {
+    src = useSrc ? 'force-app' : 'src';
+    self.config.src = src;
   }
+  let srcPath =
+    self.workspaceRoot + path.sep + src + (useSrc ? path.sep + 'main' + path.sep + 'default' : '');
   if (!fs.existsSync(srcPath)) {
     fs.mkdirpSync(srcPath);
   }

@@ -138,7 +138,6 @@ export interface IMetadataDescribe {
 
 export interface IForceService {
   config: Config;
-  projectRoot: string;
   workspaceRoot: string;
   storageRoot: string;
   describe: IMetadataDescribe;

@@ -28,7 +28,6 @@ export class ForceService implements forceCode.IForceService {
   public config: forceCode.Config;
   public conn!: Connection;
   public describe!: forceCode.IMetadataDescribe;
-  public projectRoot: string;
   public workspaceRoot: string;
   public storageRoot: string;
   public uuid: string;
@@ -40,7 +39,6 @@ export class ForceService implements forceCode.IForceService {
       throw 'A folder needs to be open before Forcecode can be activated';
     }
     this.workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    this.projectRoot = path.join(this.workspaceRoot, 'src');
     this.config = defaultOptions;
     this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
     notifications.setStatusText(`ForceCode Loading...`);

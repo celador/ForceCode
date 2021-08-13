@@ -10,15 +10,12 @@ export function createProject(): Thenable<void> {
       canSelectMany: false,
       openLabel: `Create Project`,
     })
-    .then(folder => {
+    .then((folder) => {
       if (!folder) {
         return;
       }
       // create default src folder so sfdx doesn't complain about a bad dir
       const projFolder: string = folder[0].fsPath;
-      if (!fs.existsSync(path.join(projFolder, 'src'))) {
-        fs.mkdirpSync(path.join(projFolder, 'src'));
-      }
 
       // make a dummy force.json to activate Forcecode
       fs.outputFileSync(
