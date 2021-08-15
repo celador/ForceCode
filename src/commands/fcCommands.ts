@@ -129,8 +129,8 @@ export class CheckForFileChanges extends ForcecodeCommand {
     this.hidden = true;
   }
 
-  public command() {
-    return vscode.window.forceCode.checkForFileChanges();
+  public command(context: any) {
+    return vscode.window.forceCode.checkForFileChanges(context);
   }
 }
 

@@ -32,6 +32,8 @@ export class ForceService implements forceCode.IForceService {
   public storageRoot: string;
   public uuid: string;
   public lastSaveResult: SaveResult | undefined;
+  public creatingFile: boolean = false;
+  private interval: NodeJS.Timeout | undefined;
 
   constructor(context: vscode.ExtensionContext) {
     notifications.writeLog('Initializing ForceCode service');
@@ -86,8 +88,18 @@ export class ForceService implements forceCode.IForceService {
     });
   }
 
-  public checkForFileChanges() {
-    return this.getWorkspaceMembers().then(this.parseMembers);
+  public checkForFileChanges(skipChanges?: boolean) {
+    return this.getWorkspaceMembers().then((mems) => this.parseMembers(mems, skipChanges));
+  }
+
+  public checkForFileChangesQueue() {
+    if (this.interval) {
+      clearTimeout(this.interval);
+    }
+    this.interval = setTimeout(
+      () => vscode.commands.executeCommand('ForceCode.checkForFileChanges', true, undefined),
+      1000
+    );
   }
 
   // Get files in src folder..
@@ -126,7 +138,7 @@ export class ForceService implements forceCode.IForceService {
     });
   }
 
-  private parseMembers(mems: Array<Promise<IMetadataFileProperties[]>>) {
+  private parseMembers(mems: Array<Promise<IMetadataFileProperties[]>>, skipChanges?: boolean) {
     if (isEmptyUndOrNull(mems) || isEmptyUndOrNull(mems[0])) {
       return Promise.resolve({});
     }
@@ -138,6 +150,7 @@ export class ForceService implements forceCode.IForceService {
       if (!Array.isArray(recs)) {
         Promise.resolve();
       }
+      let apexType = false;
       recs.forEach((curSet) => {
         if (Array.isArray(curSet)) {
           curSet.forEach((key) => {
@@ -151,9 +164,12 @@ export class ForceService implements forceCode.IForceService {
                 coverage: new Map<string, forceCode.ICodeCoverage>(),
               };
 
+              apexType = key.type === 'ApexClass' || key.type === 'ApexTrigger';
+
               let curFCFile: FCFile = codeCovViewService.addClass(workspaceMember);
 
               if (
+                !skipChanges &&
                 getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges) &&
                 !curFCFile.compareDates(key.lastModifiedDate)
               ) {
@@ -168,7 +184,11 @@ export class ForceService implements forceCode.IForceService {
         }
       });
       notifications.writeLog('Done getting workspace info');
-      return commandViewService.enqueueCodeCoverage(CoverageRetrieveType.StartUp);
+      if (skipChanges && apexType) {
+        return commandViewService.enqueueCodeCoverage(CoverageRetrieveType.OpenFile);
+      } else {
+        return commandViewService.enqueueCodeCoverage(CoverageRetrieveType.StartUp);
+      }
     }
   }
 

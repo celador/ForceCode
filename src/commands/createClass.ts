@@ -4,6 +4,7 @@ import path = require('path');
 import { ForcecodeCommand } from '.';
 import { getVSCodeSetting } from '../services';
 import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
+import { getToolingTypeFromExt } from '../parsers';
 
 export class CreateClass extends ForcecodeCommand {
   constructor() {
@@ -167,6 +168,9 @@ export class CreateClass extends ForcecodeCommand {
 
     function createSrcFile(name: string, thePath: string, src: string, ext: string, resolve: any) {
       const ofPath: string = path.join(thePath, name + '.' + ext);
+      if (getToolingTypeFromExt(ofPath)) {
+        vscode.window.forceCode.creatingFile = true;
+      }
       fs.outputFileSync(ofPath, src);
       return vscode.workspace.openTextDocument(ofPath).then((document) => {
         resolve(vscode.window.showTextDocument(document, vscode.ViewColumn.One));

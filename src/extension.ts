@@ -17,7 +17,8 @@ import { updateDecorations } from './decorators';
 import { fcCommands, createProject } from './commands';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { getToolingTypeFromFolder } from './parsers';
+import { getToolingTypeFromExt, getToolingTypeFromFolder } from './parsers';
+import { CoverageRetrieveType } from './services/commandView';
 
 export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
@@ -156,6 +157,24 @@ export function activate(context: vscode.ExtensionContext): any {
         if (fcfile) {
           codeCovViewService.removeClass(fcfile);
         }
+      })
+  );
+
+  // watch for new files and create workspaceMembers
+  context.subscriptions.push(
+    vscode.workspace
+      .createFileSystemWatcher(
+        path.join(vscode.window.forceCode.workspaceRoot, '**', '*.{cls,trigger,page,component}')
+      )
+      .onDidCreate((uri) => {
+        let tType = getToolingTypeFromExt(uri.fsPath);
+        if (tType && !vscode.window.forceCode.creatingFile) {
+          if (tType === 'ApexClass' || tType === 'ApexTrigger') {
+            commandViewService.enqueueCodeCoverage(CoverageRetrieveType.OpenFile);
+          }
+          vscode.window.forceCode.checkForFileChangesQueue();
+        }
+        vscode.window.forceCode.creatingFile = false;
       })
   );
 

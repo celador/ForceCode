@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import {
-  codeCovViewService,
   fcConnection,
   FCOauth,
   dxService,
@@ -10,7 +9,6 @@ import {
   PXMLMember,
   notifications,
   getVSCodeSetting,
-  commandViewService,
 } from '../services';
 import { getToolingTypeFromExt, getAnyTTMetadataFromPath, outputToString } from '../parsers';
 import { IWorkspaceMember, IMetadataObject, ICodeCoverage } from '../forceCode';
@@ -27,7 +25,6 @@ import {
 } from '.';
 import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
-import { CoverageRetrieveType } from '../services/commandView';
 import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
 import { buildPackageXMLFile } from './deploy';
 
@@ -550,64 +547,12 @@ export function retrieve(
   function finished(res: any): Promise<any> {
     if (res.success) {
       notifications.writeLog('Done retrieving files');
-      // check the metadata and add the new members
-      return updateWSMems().then(() => {
-        if (option) {
-          notifications.showStatus(`Retrieve ${option.description} $(thumbsup)`);
-        } else {
-          notifications.showStatus(`Retrieve $(thumbsup)`);
-        }
-        return Promise.resolve(res);
-      });
-
-      function updateWSMems(): Promise<any> {
-        if (toolTypes.length > 0) {
-          let theTypes: { [key: string]: Array<any> } = {};
-
-          theTypes['type0'] = toolTypes;
-          if (theTypes['type0'].length > 3) {
-            for (let i = 1; theTypes['type0'].length > 3; i++) {
-              theTypes['type' + i] = theTypes['type0'].splice(0, 3);
-            }
-          }
-          let proms = Object.keys(theTypes).map((curTypes) => {
-            const shouldGetCoverage = theTypes[curTypes].find((cur) => {
-              return cur.type === 'ApexClass' || cur.type === 'ApexTrigger';
-            });
-            if (shouldGetCoverage) {
-              commandViewService.enqueueCodeCoverage(CoverageRetrieveType.OpenFile);
-            }
-            return vscode.window.forceCode.conn.metadata.list(theTypes[curTypes]);
-          });
-          return Promise.all(proms).then((rets) => {
-            return parseRecords(rets);
-          });
-        } else {
-          return Promise.resolve();
-        }
+      if (option) {
+        notifications.showStatus(`Retrieve ${option.description} $(thumbsup)`);
+      } else {
+        notifications.showStatus(`Retrieve $(thumbsup)`);
       }
-
-      function parseRecords(recs: any[]): Thenable<any> {
-        notifications.writeLog('Done retrieving metadata records');
-        recs.some((curSet) => {
-          return toArray(curSet).some((key) => {
-            if (key && newWSMembers.length > 0) {
-              let index: number = newWSMembers.findIndex((curMem) => {
-                return curMem.name === key.fullName && curMem.type === key.type;
-              });
-              if (index >= 0) {
-                newWSMembers[index].id = key.id;
-                codeCovViewService.addClass(newWSMembers.splice(index, 1)[0]);
-              }
-              return false;
-            } else {
-              return true;
-            }
-          });
-        });
-        notifications.writeLog('Done updating/adding metadata');
-        return Promise.resolve();
-      }
+      return Promise.resolve(res);
     } else {
       notifications.showError('Retrieve Errors');
     }
