@@ -234,7 +234,7 @@ export function retrieve(
       };
       return vscode.window.showQuickPick(options, config).then((res) => {
         if (!res) {
-          return Promise.reject(cancellationToken.cancel());
+          return cancellationToken.cancel();
         }
         return res;
       });
@@ -263,7 +263,7 @@ export function retrieve(
         }
       });
     }
-    throw new Error();
+    return Promise.resolve(cancellationToken.cancel());
 
     function retrieveComponents(
       resolve: any,
