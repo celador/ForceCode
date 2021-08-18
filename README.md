@@ -16,7 +16,7 @@ There's no complicated setup process or project configurations, no external apps
 
 ## IMPORTANT
 
-As of version 3.17.0, you will be required to install the SFDX-CLI on your system in order for this extension to function! Please download from [https://developer.salesforce.com/tools/sfdxcli](https://developer.salesforce.com/tools/sfdxcli) and install, then restart Visual Studio Code. The ability to run a DX command via the ForceCode menu has also been removed because of this change. The extension size has been dramatically reduced because of this change (Went from ~50MB unpackaged to under 2MB!).
+You will need to install the SFDX-CLI on your system in order for this extension to function! Please download from [https://developer.salesforce.com/tools/sfdxcli](https://developer.salesforce.com/tools/sfdxcli) and install, then restart Visual Studio Code.
 
 ## Slack
 
@@ -29,6 +29,8 @@ Please note that the following permissions are required to develop on the Force.
 
 ## Features
 
+* Ability to create and work in SFDX projects/source format or in the classic Metadata format.
+    * You will be asked for the format to use when creating a new project. Existing projects will continue to support the Metadata format.
 * For code completion and highlighting I highly recommend downloading the various Salesforce language server extensions.
     * Follow the installation instructions on the Apex Code Editor page (You must install the Salesforce cli for code smartness to work!)
     * For apex code completion, select code completion refresh from the ForceCode menu and it will work with the Salesforce apex language server extension. You will need to refresh for each org. ForceCode handles the rest and switches code completion files when switching orgs/usernames.
