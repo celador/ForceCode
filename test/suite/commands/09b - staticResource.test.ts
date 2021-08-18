@@ -6,6 +6,7 @@ import { afterEach } from 'mocha';
 import { removeErrorOnDoc, timeout } from '../../testUtils/utils.test';
 import { toArray } from '../../../src/util';
 import * as fs from 'fs';
+import { getSrcDir } from '../../../src/services/configuration';
 
 suite('staticResource.ts', () => {
   const sandbox = sinon.createSandbox();
@@ -15,12 +16,12 @@ suite('staticResource.ts', () => {
 
   test('Save static resource zip (auto-compile)', async () => {
     let output = path.join(
-      vscode.window.forceCode.projectRoot,
+      getSrcDir(),
       'resource-bundles',
       'SiteSamples.resource.application.zip',
       'SiteStyles.css'
     );
-    return await vscode.workspace.openTextDocument(output).then(doc => {
+    return await vscode.workspace.openTextDocument(output).then((doc) => {
       return vscode.window.showTextDocument(doc).then(() => {
         // open the SiteStyles.css file, edit, then save
         return removeErrorOnDoc(true, true);
@@ -30,17 +31,17 @@ suite('staticResource.ts', () => {
 
   test('Refresh static resource', async () => {
     let output = path.join(
-      vscode.window.forceCode.projectRoot,
+      getSrcDir(),
       'resource-bundles',
       'SiteSamples.resource.application.zip',
       'SiteStyles.css'
     );
     // get the mTime for the file
     const mTime = fs.statSync(output).mtimeMs;
-    return await vscode.workspace.openTextDocument(output).then(doc => {
+    return await vscode.workspace.openTextDocument(output).then((doc) => {
       return vscode.commands
         .executeCommand('ForceCode.refresh', undefined, [doc.uri])
-        .then(async _res => {
+        .then(async (_res) => {
           await timeout(3000);
           return assert.notStrictEqual(mTime, fs.statSync(output).mtimeMs);
         });
@@ -49,28 +50,28 @@ suite('staticResource.ts', () => {
 
   test('Static resource deploy all', async () => {
     // call 'ForceCode.staticResource', stub choice to be the last (all)
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
           return callback(toArray(items)[toArray(items).length - 1]);
         },
       };
     });
-    return await vscode.commands.executeCommand('ForceCode.staticResource').then(_res => {
+    return await vscode.commands.executeCommand('ForceCode.staticResource').then((_res) => {
       return assert.strictEqual(true, true);
     });
   });
 
   test('Static resource deploy first', async () => {
     // call 'ForceCode.staticResource', stub choice to be the first
-    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function(items: any, _options) {
+    sandbox.stub(vscode.window, 'showQuickPick').callsFake(function (items: any, _options) {
       return {
         async then(callback: any) {
           return callback(toArray(items)[0]);
         },
       };
     });
-    return await vscode.commands.executeCommand('ForceCode.staticResource').then(_res => {
+    return await vscode.commands.executeCommand('ForceCode.staticResource').then((_res) => {
       return assert.strictEqual(true, true);
     });
   });

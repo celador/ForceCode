@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import fs = require('fs-extra');
 import * as path from 'path';
 import {
-  codeCovViewService,
   fcConnection,
   FCOauth,
   dxService,
@@ -10,7 +9,6 @@ import {
   PXMLMember,
   notifications,
   getVSCodeSetting,
-  commandViewService,
 } from '../services';
 import { getToolingTypeFromExt, getAnyTTMetadataFromPath, outputToString } from '../parsers';
 import { IWorkspaceMember, IMetadataObject, ICodeCoverage } from '../forceCode';
@@ -27,8 +25,8 @@ import {
 } from '.';
 import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
-import { CoverageRetrieveType } from '../services/commandView';
-import { VSCODE_SETTINGS } from '../services/configuration';
+import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
+import { buildPackageXMLFile } from './deploy';
 
 export class Refresh extends ForcecodeCommand {
   constructor() {
@@ -44,13 +42,13 @@ export class Refresh extends ForcecodeCommand {
       return new Promise((resolve, reject) => {
         let files: PXMLMember[] = [];
         let proms: Promise<PXMLMember>[] = selectedResource.map((curRes) => {
-          if (curRes.fsPath.startsWith(vscode.window.forceCode.projectRoot + path.sep)) {
+          if (curRes.fsPath.startsWith(getSrcDir() + path.sep)) {
             return getAnyNameFromUri(curRes);
           } else {
             throw {
               message:
                 "Only files/folders within the current org's src folder (" +
-                vscode.window.forceCode.projectRoot +
+                getSrcDir() +
                 ') can be retrieved/refreshed.',
             };
           }
@@ -233,7 +231,7 @@ export function retrieve(
       };
       return vscode.window.showQuickPick(options, config).then((res) => {
         if (!res) {
-          return Promise.reject(cancellationToken.cancel());
+          return cancellationToken.cancel();
         }
         return res;
       });
@@ -262,7 +260,7 @@ export function retrieve(
         }
       });
     }
-    throw new Error();
+    return Promise.resolve(cancellationToken.cancel());
 
     function retrieveComponents(
       resolve: any,
@@ -284,6 +282,16 @@ export function retrieve(
       if (cancellationToken.isCanceled()) {
         reject();
       }
+
+      if (vscode.window.forceCode.config.useSourceFormat) {
+        let pXMLPath = vscode.window.forceCode.storageRoot;
+        buildPackageXMLFile(retrieveTypes.types, pXMLPath);
+        return dxService
+          .retrieveSourceFormat(path.join(pXMLPath, 'package.xml'), cancellationToken)
+          .then(resolve)
+          .catch(reject);
+      }
+
       let theStream = vscode.window.forceCode.conn.metadata.retrieve({
         unpackaged: retrieveTypes,
         apiVersion:
@@ -299,7 +307,7 @@ export function retrieve(
           }
         );
       });
-      resolve(theStream.stream());
+      resolve(theStream.stream()).catch(reject);
     }
 
     function pack(resolve: any, reject: any) {
@@ -380,7 +388,7 @@ export function retrieve(
       }
 
       function unpackaged() {
-        let xmlFilePath: string = `${vscode.window.forceCode.projectRoot}${path.sep}package.xml`;
+        let xmlFilePath: string = `${getSrcDir()}${path.sep}package.xml`;
         let data: any = fs.readFileSync(xmlFilePath);
         parseString(data, { explicitArray: false }, function (err, dom) {
           if (err) {
@@ -429,13 +437,19 @@ export function retrieve(
   }
 
   function processResult(stream: fs.ReadStream): Promise<any> {
+    if (
+      vscode.window.forceCode.config.useSourceFormat &&
+      (!stream || !(stream instanceof fs.ReadStream))
+    ) {
+      return Promise.resolve({ success: true });
+    }
     return new Promise(function (resolve, reject) {
       cancellationToken.cancellationEmitter.on('cancelled', function () {
         stream.pause();
         reject(stream.emit('end'));
       });
       let resBundleNames: string[] = [];
-      const destDir: string = vscode.window.forceCode.projectRoot;
+      const destDir: string = getSrcDir();
       new compress.zip.UncompressStream({ source: stream })
         .on('error', function (err: any) {
           reject(err || { message: 'package not found' });
@@ -452,7 +466,7 @@ export function retrieve(
 
               let wsMem: IWorkspaceMember = {
                 name: fullName.split('.')[0],
-                path: `${vscode.window.forceCode.projectRoot}${path.sep}${name}`,
+                path: `${destDir}${path.sep}${name}`,
                 id: '', //metadataFileProperties.id,
                 type: tType,
                 coverage: new Map<string, ICodeCoverage>(),
@@ -533,64 +547,12 @@ export function retrieve(
   function finished(res: any): Promise<any> {
     if (res.success) {
       notifications.writeLog('Done retrieving files');
-      // check the metadata and add the new members
-      return updateWSMems().then(() => {
-        if (option) {
-          notifications.showStatus(`Retrieve ${option.description} $(thumbsup)`);
-        } else {
-          notifications.showStatus(`Retrieve $(thumbsup)`);
-        }
-        return Promise.resolve(res);
-      });
-
-      function updateWSMems(): Promise<any> {
-        if (toolTypes.length > 0) {
-          let theTypes: { [key: string]: Array<any> } = {};
-
-          theTypes['type0'] = toolTypes;
-          if (theTypes['type0'].length > 3) {
-            for (let i = 1; theTypes['type0'].length > 3; i++) {
-              theTypes['type' + i] = theTypes['type0'].splice(0, 3);
-            }
-          }
-          let proms = Object.keys(theTypes).map((curTypes) => {
-            const shouldGetCoverage = theTypes[curTypes].find((cur) => {
-              return cur.type === 'ApexClass' || cur.type === 'ApexTrigger';
-            });
-            if (shouldGetCoverage) {
-              commandViewService.enqueueCodeCoverage(CoverageRetrieveType.OpenFile);
-            }
-            return vscode.window.forceCode.conn.metadata.list(theTypes[curTypes]);
-          });
-          return Promise.all(proms).then((rets) => {
-            return parseRecords(rets);
-          });
-        } else {
-          return Promise.resolve();
-        }
+      if (option) {
+        notifications.showStatus(`Retrieve ${option.description} $(thumbsup)`);
+      } else {
+        notifications.showStatus(`Retrieve $(thumbsup)`);
       }
-
-      function parseRecords(recs: any[]): Thenable<any> {
-        notifications.writeLog('Done retrieving metadata records');
-        recs.some((curSet) => {
-          return toArray(curSet).some((key) => {
-            if (key && newWSMembers.length > 0) {
-              let index: number = newWSMembers.findIndex((curMem) => {
-                return curMem.name === key.fullName && curMem.type === key.type;
-              });
-              if (index >= 0) {
-                newWSMembers[index].id = key.id;
-                codeCovViewService.addClass(newWSMembers.splice(index, 1)[0]);
-              }
-              return false;
-            } else {
-              return true;
-            }
-          });
-        });
-        notifications.writeLog('Done updating/adding metadata');
-        return Promise.resolve();
-      }
+      return Promise.resolve(res);
     } else {
       notifications.showError('Retrieve Errors');
     }
@@ -602,13 +564,13 @@ export function retrieve(
 
 export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promise<PXMLMember> {
   return new Promise(async (resolve, reject) => {
-    const projRoot: string = vscode.window.forceCode.projectRoot + path.sep;
+    const projRoot: string = getSrcDir() + path.sep;
     if (uri.fsPath.indexOf(projRoot) === -1) {
       return reject(
         'The file you are attempting to save/retrieve/delete (' +
           uri.fsPath +
           ') is outside of ' +
-          vscode.window.forceCode.projectRoot
+          getSrcDir()
       );
     }
     const ffNameParts: string[] = uri.fsPath.split(projRoot)[1].split(path.sep);
@@ -628,10 +590,30 @@ export function getAnyNameFromUri(uri: vscode.Uri, getDefType?: boolean): Promis
         return resolve({ name: 'StaticResource', members: [members] });
       }
     }
+
+    // check if we have source format for an object. the dir will be in the format /objects/Account/... so length will be over 2
+    if (!tType && ffNameParts[0] === 'objects' && vscode.window.forceCode.config.useSourceFormat) {
+      // set the type to whatever's in the extension...CustomField (field-meta.xml), ListView (listView-meta.xml), etc.
+      // default to the object
+      let componentName = ffNameParts[ffNameParts.length - 1].split('.')[0];
+      let type = ffNameParts[ffNameParts.length - 2];
+      if (type == ffNameParts[1] || ffNameParts.length === 3) {
+        // we could end up with Account and Account for example ffNameParts.length === 3
+        componentName = ffNameParts[1];
+        type = 'CustomObject';
+      }
+      type = type.endsWith('s') && !type.endsWith('ss') ? type.substring(0, type.length - 1) : type;
+
+      type = type.charAt(0).toUpperCase() + type.slice(1);
+      type = type == 'Object' || type == 'Field' ? 'Custom' + type : type;
+      componentName = type != 'CustomObject' ? ffNameParts[1] + '.' + componentName : componentName;
+      return resolve({ name: type, members: [componentName] });
+    }
+
     if (!tType) {
       return reject(
         "Either the file/metadata type doesn't exist in the current org or you're trying to save/retrieve/delete outside of " +
-          vscode.window.forceCode.projectRoot
+          getSrcDir()
       );
     }
     let folderedName: string;

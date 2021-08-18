@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { IMetadataObject } from '../forceCode';
+import { getSrcDir } from '../services/configuration';
 
 export function getCoverageType(document: vscode.TextDocument): string | undefined {
   if (document.fileName.endsWith('.cls')) {
@@ -28,9 +29,7 @@ export function getToolingTypeFromExt(thePath: string) {
 }
 
 export function getToolingTypeFromFolder(uri: vscode.Uri): string | undefined {
-  let dir: string | undefined = uri.fsPath
-    .split(vscode.window.forceCode.projectRoot + path.sep)
-    .pop();
+  let dir: string | undefined = uri.fsPath.split(getSrcDir() + path.sep).pop();
   dir = dir?.split(path.sep).shift();
   switch (dir) {
     case 'classes':
@@ -51,26 +50,21 @@ export function getToolingTypeFromFolder(uri: vscode.Uri): string | undefined {
 }
 
 export function getAnyTTMetadataFromPath(thepath: string): IMetadataObject | undefined {
-  if (thepath.indexOf(vscode.window.forceCode.projectRoot) === -1) {
+  if (thepath.indexOf(getSrcDir()) === -1) {
     return undefined;
   }
   if (!vscode.window.forceCode.describe) {
     return undefined;
   }
-  let fileName: string | undefined = thepath
-    .split(vscode.window.forceCode.projectRoot + path.sep)
-    .pop();
+  let fileName: string | undefined = thepath.split(getSrcDir() + path.sep).pop();
   if (!fileName) {
     return undefined;
   }
   let baseDirectoryName: string = fileName.split(path.sep)[0];
-  let ext: string | undefined = fileName
-    .split('-meta.xml')[0]
-    .split('.')
-    .pop();
+  let ext: string | undefined = fileName.split('-meta.xml')[0].split('.').pop();
   ext = ext === baseDirectoryName ? undefined : ext;
   return vscode.window.forceCode.describe.metadataObjects.find(
-    o => o.directoryName === baseDirectoryName && (ext && o.suffix ? ext === o.suffix : true)
+    (o) => o.directoryName === baseDirectoryName && (ext && o.suffix ? ext === o.suffix : true)
   );
 }
 
@@ -78,12 +72,12 @@ export function getToolingTypeMetadata(tType: string): IMetadataObject | undefin
   if (!vscode.window.forceCode.describe) {
     return undefined;
   }
-  return vscode.window.forceCode.describe.metadataObjects.find(o => {
+  return vscode.window.forceCode.describe.metadataObjects.find((o) => {
     const isType = o.xmlName === tType;
     const childTypes = o.childXmlNames;
     let childType;
     if (!isType && childTypes) {
-      childType = childTypes.find(t => t === tType);
+      childType = childTypes.find((t) => t === tType);
     }
     return isType || childType !== undefined;
   });

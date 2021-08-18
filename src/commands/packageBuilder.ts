@@ -5,7 +5,7 @@ import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
 import { isEmptyUndOrNull, toArray } from '../util';
 import { ForcecodeCommand } from '.';
-import { VSCODE_SETTINGS } from '../services/configuration';
+import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
 
 export class PackageBuilder extends ForcecodeCommand {
   constructor() {
@@ -195,7 +195,7 @@ export function packageBuilder(buildPackage?: boolean): Promise<any> {
               .buildObject(packObj)
               .replace('<Package>', '<Package xmlns="http://soap.sforce.com/2006/04/metadata">')
               .replace(' standalone="yes"', '');
-            const defaultURI: vscode.Uri = vscode.Uri.file(vscode.window.forceCode.projectRoot);
+            const defaultURI: vscode.Uri = vscode.Uri.file(getSrcDir());
             vscode.window
               .showSaveDialog({ filters: { XML: ['xml'] }, defaultUri: defaultURI })
               .then((uri) => {

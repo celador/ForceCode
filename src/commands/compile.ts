@@ -1,6 +1,12 @@
 import * as vscode from 'vscode';
 import * as forceCode from '../forceCode';
-import { codeCovViewService, saveHistoryService, saveService, notifications, dxService } from '../services';
+import {
+  codeCovViewService,
+  saveHistoryService,
+  saveService,
+  notifications,
+  dxService,
+} from '../services';
 import {
   saveAura,
   saveApex,
@@ -20,6 +26,7 @@ import {
   getName,
   getWholeFileName,
 } from '../parsers';
+import { getSrcDir } from '../services/configuration';
 
 export class CompileMenu extends ForcecodeCommand {
   constructor() {
@@ -72,10 +79,10 @@ export async function compile(
     return Promise.resolve(false);
   }
   const document: vscode.TextDocument = await vscode.workspace.openTextDocument(thePath);
-  if (document.fileName.indexOf(vscode.window.forceCode.projectRoot + path.sep) === -1) {
+  if (document.fileName.indexOf(getSrcDir() + path.sep) === -1) {
     notifications.showError(
       "The file you are trying to save to the server isn't in the current org's source folder (" +
-        vscode.window.forceCode.projectRoot +
+        getSrcDir() +
         ')'
     );
     return Promise.resolve(false);
@@ -96,77 +103,87 @@ export async function compile(
   let Metadata: {} | undefined;
   let errMessages: string[] = [];
 
-  if (folderToolingType === 'StaticResource') {
+  if (folderToolingType === 'StaticResource' && !vscode.window.forceCode.config.useSourceFormat) {
     return Promise.reject(
       'To save a static resource you must edit the files contained in the resource-bundles folder, not the staticresources folder.'
     );
   }
 
-  if (document.fileName.endsWith('-meta.xml')) {
-    let tmpMeta = await new Promise((resolve, reject) => {
-      parseString(document.getText(), { explicitArray: false }, function (err, dom) {
-        if (err) {
-          return reject(err);
-        } else {
-          const metadataType: string = Object.keys(dom)[0];
-          delete dom[metadataType].$;
-          Metadata = dom[metadataType];
-          return resolve(Metadata);
-        }
-      });
-    }).then(
-      (res) => {
-        return res;
-      },
-      (reason) => {
-        return reason;
-      }
-    );
-    if (tmpMeta instanceof Error) {
-      return Promise.resolve(tmpMeta).then(finished).then(updateSaveHistory);
-    }
-  }
-
   // Start doing stuff
   let result;
+  let savedObject = false;
   try {
-    if (folderToolingType === 'EmailTemplate' || folderToolingType === 'Document') {
-      await createPackageXML([document.fileName], vscode.window.forceCode.storageRoot);
-      const files: string[] = [];
-      let pathSplit = 'documents';
-      if (folderToolingType === 'EmailTemplate') {
-        pathSplit = 'email';
+    let parts: string[] = thePath.split(path.sep + 'objects' + path.sep);
+
+    if (parts.length > 1 && vscode.window.forceCode.config.useSourceFormat) {
+      // this means we have object data in source format
+      result = await dxService.deploySourceFormat(thePath, cancellationToken);
+      savedObject = true;
+    } else if (document.fileName.endsWith('-meta.xml')) {
+      let tmpMeta = await new Promise((resolve, reject) => {
+        parseString(document.getText(), { explicitArray: false }, function (err, dom) {
+          if (err) {
+            return reject(err);
+          } else {
+            const metadataType: string = Object.keys(dom)[0];
+            delete dom[metadataType].$;
+            Metadata = dom[metadataType];
+            return resolve(Metadata);
+          }
+        });
+      }).then(
+        (res) => {
+          return res;
+        },
+        (reason) => {
+          return reason;
+        }
+      );
+      if (tmpMeta instanceof Error) {
+        return Promise.resolve(tmpMeta).then(finished).then(updateSaveHistory);
       }
-      let foldName: string | undefined = document.fileName
-        .split(path.sep + pathSplit + path.sep)
-        .pop();
-      if (foldName) {
+    }
+
+    if (!savedObject) {
+      if (folderToolingType === 'EmailTemplate' || folderToolingType === 'Document') {
+        await createPackageXML([document.fileName], vscode.window.forceCode.storageRoot);
+        const files: string[] = [];
+        let pathSplit = 'documents';
+        if (folderToolingType === 'EmailTemplate') {
+          pathSplit = 'email';
+        }
+        let foldName: string | undefined = document.fileName
+          .split(path.sep + pathSplit + path.sep)
+          .pop();
+        if (foldName) {
+          //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
+          files.push(path.join(pathSplit, foldName));
+          files.push(path.join(pathSplit, foldName + '-meta.xml'));
+          files.push('package.xml');
+          result = await deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
+        } else {
+          return Promise.reject(false);
+        }
+      } else if (folderToolingType && toolingType === undefined) {
+        let tFileName = document.fileName.split('-meta.xml').shift() || document.fileName;
+        await createPackageXML([tFileName], vscode.window.forceCode.storageRoot);
+        const files: string[] = [];
+        let pathSplit: string[] = tFileName.split(path.sep);
         //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
-        files.push(path.join(pathSplit, foldName));
-        files.push(path.join(pathSplit, foldName + '-meta.xml'));
+        files.push(path.join(pathSplit[pathSplit.length - 2], pathSplit[pathSplit.length - 1]));
         files.push('package.xml');
         result = await deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
+      } else if (toolingType === 'AuraDefinition') {
+        DefType = getAuraDefTypeFromDocument(document);
+        result = await saveAura(document, name, cancellationToken, Metadata, forceCompile);
+      } else if (toolingType === 'LightningComponentResource') {
+        result = await saveLWC(document, name, cancellationToken, forceCompile);
+      } else if (ttMeta && toolingType) {
+        // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
+        result = await saveApex(document, ttMeta, cancellationToken, Metadata, forceCompile);
       } else {
-        return Promise.reject(false);
+        return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
       }
-    } else if (folderToolingType && toolingType === undefined) {
-      await createPackageXML([document.fileName], vscode.window.forceCode.storageRoot);
-      const files: string[] = [];
-      let pathSplit: string[] = document.fileName.split(path.sep);
-      //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
-      files.push(path.join(pathSplit[pathSplit.length - 2], pathSplit[pathSplit.length - 1]));
-      files.push('package.xml');
-      result = await deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);
-    } else if (toolingType === 'AuraDefinition') {
-      DefType = getAuraDefTypeFromDocument(document);
-      result = await saveAura(document, name, cancellationToken, Metadata, forceCompile);
-    } else if (toolingType === 'LightningComponentResource') {
-      result = await saveLWC(document, name, cancellationToken, forceCompile);
-    } else if (ttMeta && toolingType) {
-      // This process uses the Tooling API to compile special files like Classes, Triggers, Pages, and Components
-      result = await saveApex(document, ttMeta, cancellationToken, Metadata, forceCompile);
-    } else {
-      return Promise.reject({ message: 'Metadata Describe Error. Please try again.' });
     }
     await finished(result);
   } catch (error) {
@@ -207,21 +224,20 @@ export async function compile(
       onError(res);
       failures++;
     } else if (res.status === 'Failed') {
-      if(res.id) {
+      if (res.id) {
         // grab the error via sfdx command
         let deployDetails = await dxService.getDeployErrors(res.id, cancellationToken);
         toArray(deployDetails.details.componentFailures).forEach((failure: any) => {
           onComponentError(failure);
           failures++;
         });
-      } else if(!res.message) {
+      } else if (!res.message) {
         // capture a failed deployment there is no message returned, so guide user to view in Salesforce
         errMessages.push(
           'Deployment failed. Please view the details in the deployment status section in Salesforce.'
         );
         return false; // don't show the failed build error
       }
-      
     }
 
     if (failures === 0) {

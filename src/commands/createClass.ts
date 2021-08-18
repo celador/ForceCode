@@ -3,7 +3,8 @@ import fs = require('fs-extra');
 import path = require('path');
 import { ForcecodeCommand } from '.';
 import { getVSCodeSetting } from '../services';
-import { VSCODE_SETTINGS } from '../services/configuration';
+import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
+import { getToolingTypeFromExt } from '../parsers';
 
 export class CreateClass extends ForcecodeCommand {
   constructor() {
@@ -131,7 +132,7 @@ export class CreateClass extends ForcecodeCommand {
     }
 
     function createFolder(typeFolder: string, name?: string): string {
-      let metaPath: string = path.join(vscode.window.forceCode.projectRoot, typeFolder);
+      let metaPath: string = path.join(getSrcDir(), typeFolder);
       if (name) {
         metaPath = path.join(metaPath, name);
       }
@@ -167,6 +168,9 @@ export class CreateClass extends ForcecodeCommand {
 
     function createSrcFile(name: string, thePath: string, src: string, ext: string, resolve: any) {
       const ofPath: string = path.join(thePath, name + '.' + ext);
+      if (getToolingTypeFromExt(ofPath)) {
+        vscode.window.forceCode.creatingFile = true;
+      }
       fs.outputFileSync(ofPath, src);
       return vscode.workspace.openTextDocument(ofPath).then((document) => {
         resolve(vscode.window.showTextDocument(document, vscode.ViewColumn.One));
@@ -319,7 +323,8 @@ export default class ${jsClassName} extends LightningElement {}`;
 
     function createLMC(name: string, resolve: any) {
       // create the folder and page
-      const ext = 'messageChannel';
+      let ext = 'messageChannel';
+      ext = vscode.window.forceCode.config.useSourceFormat ? ext + '-meta.xml' : ext;
       const folderPath = createFolder('messageChannels');
       const fileContents = `<?xml version="1.0" encoding="UTF-8"?>
 <LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">

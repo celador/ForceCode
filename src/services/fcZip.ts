@@ -6,7 +6,7 @@ import { parseString } from 'xml2js';
 import { toArray } from '../util';
 import { IMetadataObject } from '../forceCode';
 import { getToolingTypeMetadata } from '../parsers';
-import { getVSCodeSetting, VSCODE_SETTINGS } from './configuration';
+import { getSrcDir, getVSCodeSetting, VSCODE_SETTINGS } from './configuration';
 import globule = require('globule');
 
 /**
@@ -23,13 +23,13 @@ export function zipFiles(
 ): compress.zip.Stream {
   let zip: compress.zip.Stream = new compress.zip.Stream();
   // Add folders and files to zip object for each file in the list
-  fileList.forEach(file => {
+  fileList.forEach((file) => {
     const filePath: string = path.join(
       lwcPackageXML && file === 'package.xml' ? lwcPackageXML : root,
       file
     );
     // this allows a filter on the files/folders
-    getFileList(filePath).forEach(theFile => {
+    getFileList(filePath).forEach((theFile) => {
       let theFilePath;
       let relativePath;
       if (filePath === theFile) {
@@ -70,7 +70,7 @@ function getFileList(root: string) {
       files = fs.readdirSync(localPath); // Files in current 'sfdc' directory
     }
 
-    files.forEach(file => {
+    files.forEach((file) => {
       let pathname: string = file === localPath ? file : localPath + path.sep + file;
       let stat: any = fs.lstatSync(pathname);
 
@@ -94,7 +94,7 @@ function readForceIgnore(): { [key: string]: boolean } {
     const forceIgnoreContents: string = fs.readFileSync(forceIgnorePath).toString();
 
     // parse the ignore file and put into key: value format
-    forceIgnoreContents.split(/\r?\n/).forEach(line => {
+    forceIgnoreContents.split(/\r?\n/).forEach((line) => {
       line = line.trim();
       if (line !== '' && !line.startsWith('#')) {
         ignoreObject[line] = true;
@@ -114,15 +114,15 @@ export function getFilteredFileList(files: string[]): string[] {
   );
 
   const ignoreFiles: string[] = Object.keys(ignoreFilesSettings)
-    .map(key => {
+    .map((key) => {
       return { key: key, value: ignoreFilesSettings[key] };
     })
-    .filter(setting => setting.value === true && !setting.key.endsWith('*-meta.xml'))
-    .map(setting => setting.key);
+    .filter((setting) => setting.value === true && !setting.key.endsWith('*-meta.xml'))
+    .map((setting) => setting.key);
 
   let fileslist: string[] = [];
 
-  files.forEach(file => {
+  files.forEach((file) => {
     if (!globule.isMatch(ignoreFiles, file, { matchBase: true, dot: true })) {
       fileslist.push(file);
     }
@@ -146,7 +146,7 @@ export interface PXML {
 
 export function getFileListFromPXML(): Promise<string[]> {
   return new Promise((resolve, reject) => {
-    const projectRoot: string = vscode.window.forceCode.projectRoot;
+    const projectRoot: string = getSrcDir();
     let xmlFilePath: string = path.join(projectRoot, 'package.xml');
     let data: any = fs.readFileSync(xmlFilePath);
     let fileList: string[] = [];
@@ -160,14 +160,14 @@ export function getFileListFromPXML(): Promise<string[]> {
     if (fs.existsSync(path.join(projectRoot, 'destructiveChangesPost.xml'))) {
       fileList.push('destructiveChangesPost.xml');
     }
-    return parseString(data, { explicitArray: false }, function(err, dom: PXML) {
+    return parseString(data, { explicitArray: false }, function (err, dom: PXML) {
       if (err) {
         reject(err);
       } else {
         if (!dom.Package.types) {
           resolve(fileList);
         }
-        toArray(dom.Package.types).forEach(curType => {
+        toArray(dom.Package.types).forEach((curType) => {
           const ttMeta: IMetadataObject | undefined = getToolingTypeMetadata(curType.name);
           if (ttMeta) {
             const folder: string = ttMeta.directoryName;
@@ -176,7 +176,7 @@ export function getFileListFromPXML(): Promise<string[]> {
             if (folder === 'aura' || folder === 'lwc') {
               theExt = '';
             }
-            toArray(curType.members).forEach(curMem => {
+            toArray(curType.members).forEach((curMem) => {
               curMem = curMem.replace('/', path.sep).split('.')[0];
               if (fs.existsSync(path.join(projectRoot, folder, curMem + theExt))) {
                 fileList.push(path.join(folder, curMem + theExt));

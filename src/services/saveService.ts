@@ -1,10 +1,11 @@
-import * as vscode from 'vscode';
 import * as fs from 'fs-extra';
 import { compile, FCCancellationToken, staticResourceDeployFromFile } from '../commands';
 import klaw = require('klaw');
 import { notifications } from '.';
 import { IMetadataObject } from '../forceCode';
 import { getAnyTTMetadataFromPath } from '../parsers';
+import { getSrcDir } from './configuration';
+import path = require('path');
 
 interface PreSaveFile {
   path: string;
@@ -143,16 +144,19 @@ export class SaveService {
     function startSave() {
       let isResource: RegExpMatchArray | null = document.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
       const toolingType: IMetadataObject | undefined = getAnyTTMetadataFromPath(document);
-      if (document.indexOf(vscode.window.forceCode.projectRoot) !== -1) {
+      if (document.indexOf(getSrcDir()) !== -1) {
         if (isResource?.index) {
           return staticResourceDeployFromFile(document);
         } else if (toolingType) {
+          return compile(document, forceCompile, cancellationToken);
+        } else if (document.indexOf(path.sep + 'objects' + path.sep) !== -1) {
+          // this means we have object data in source format
           return compile(document, forceCompile, cancellationToken);
         }
       } else if (isResource || toolingType) {
         notifications.showError(
           "The file you are trying to save to the server isn't in the current org's source folder (" +
-            vscode.window.forceCode.projectRoot +
+            getSrcDir() +
             ')'
         );
       }

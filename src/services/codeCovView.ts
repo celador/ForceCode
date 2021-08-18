@@ -208,7 +208,13 @@ export class FCFile extends TreeItem {
   }
 
   public setWsMember(newMem: IWorkspaceMember) {
+    // don't overwrite the coverage info. this is set/cleared via addCoverage/clearCoverage
+    let coverage = newMem.coverage;
+    if (this.wsMember && this.wsMember.coverage.size > 0) {
+      coverage = this.wsMember.coverage;
+    }
     this.wsMember = newMem;
+    this.wsMember.coverage = coverage;
 
     this.command = {
       command: 'ForceCode.changeCoverageDecoration',

@@ -7,6 +7,7 @@ import {
   zipFiles,
   getVSCodeSetting,
   getFilteredFileList,
+  dxService,
 } from '../services';
 import * as path from 'path';
 import klaw = require('klaw');
@@ -17,7 +18,7 @@ import { isEmptyUndOrNull, toArray } from '../util';
 import { DeployResult } from 'jsforce';
 import { FCCancellationToken, ForcecodeCommand } from '.';
 import { IMetadataObject } from '../forceCode';
-import { VSCODE_SETTINGS } from '../services/configuration';
+import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
 
 export class DeployPackage extends ForcecodeCommand {
   constructor() {
@@ -85,7 +86,7 @@ function deploy(cancellationToken: FCCancellationToken) {
   function getFileList(): Promise<string[]> {
     return new Promise((resolve) => {
       let fileList: string[] = [];
-      klaw(vscode.window.forceCode.projectRoot)
+      klaw(getSrcDir())
         .on('data', (file) => {
           if (
             file.stats.isFile() &&
@@ -95,37 +96,27 @@ function deploy(cancellationToken: FCCancellationToken) {
               file.path.indexOf(vscode.window.forceCode.config.spaDist) !== -1
             ) &&
             !file.path.endsWith('-meta.xml') &&
-            path.dirname(file.path) !== vscode.window.forceCode.projectRoot
+            path.dirname(file.path) !== getSrcDir()
           ) {
-            if (file.path.indexOf(path.join(vscode.window.forceCode.projectRoot, 'aura')) !== -1) {
+            if (file.path.indexOf(path.join(getSrcDir(), 'aura')) !== -1) {
               const auraName = getAuraNameFromFileName(file.path, 'aura');
               if (auraName) {
-                const auraPath: string = path.join(
-                  vscode.window.forceCode.projectRoot,
-                  'aura',
-                  auraName
-                );
+                const auraPath: string = path.join(getSrcDir(), 'aura', auraName);
                 if (fileList.indexOf(auraPath) === -1) {
                   fileList.push(auraPath);
                 }
               }
               // this check will exclude files like package.xml
-            } else if (
-              file.path.indexOf(path.join(vscode.window.forceCode.projectRoot, 'lwc')) !== -1
-            ) {
+            } else if (file.path.indexOf(path.join(getSrcDir(), 'lwc')) !== -1) {
               const lwcName = getAuraNameFromFileName(file.path, 'lwc');
               if (lwcName) {
-                const lwcPath: string = path.join(
-                  vscode.window.forceCode.projectRoot,
-                  'lwc',
-                  lwcName
-                );
+                const lwcPath: string = path.join(getSrcDir(), 'lwc', lwcName);
                 if (fileList.indexOf(lwcPath) === -1) {
                   fileList.push(lwcPath);
                 }
               }
               // this check will exclude files like package.xml
-            } else if (file.path.split(vscode.window.forceCode.projectRoot).length > 1) {
+            } else if (file.path.split(getSrcDir()).length > 1) {
               fileList.push(file.path);
             }
           }
@@ -175,13 +166,7 @@ function deploy(cancellationToken: FCCancellationToken) {
 
 export function createPackageXML(files: string[], lwcPackageXML?: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    const builder = new xml2js.Builder();
-    let packObj: PXML = {
-      Package: {
-        types: [],
-        version: vscode.window.forceCode.config.apiVersion || getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
-      },
-    };
+    let types: PXMLMember[] = [];
     files.forEach((file) => {
       let fileTT: IMetadataObject | undefined = getAnyTTMetadataFromPath(file);
       if (!fileTT) {
@@ -194,7 +179,7 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       } else if (fileTT.xmlName === 'LightningComponentBundle') {
         member = getAuraNameFromFileName(file, 'lwc');
       } else if (fileTT.inFolder) {
-        const file2 = file.split(vscode.window.forceCode.projectRoot + path.sep).pop();
+        const file2 = file.split(getSrcDir() + path.sep).pop();
         member = file2?.substring(file2.indexOf(path.sep) + 1);
       } else {
         member = file.split(path.sep).pop();
@@ -203,13 +188,13 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
       member = lIndexOfP > 0 ? member?.substring(0, lIndexOfP) : member;
       if (member) {
         member = member.replace('\\', '/');
-        const index: number = findMDTIndex(packObj, fileTT.xmlName);
+        const index: number = findMDTIndex(types, fileTT.xmlName);
         const folderMeta = member.split('/')[0];
-        const memberIndex: number = index !== -1 ? findMemberIndex(packObj, index, folderMeta) : -1;
+        const memberIndex: number = index !== -1 ? findMemberIndex(types, index, folderMeta) : -1;
         if (index !== -1) {
-          packObj.Package.types[index].members.push(member);
+          types[index].members.push(member);
           if (fileTT.inFolder && memberIndex === -1) {
-            packObj.Package.types[index].members.push(folderMeta);
+            types[index].members.push(folderMeta);
           }
         } else {
           let newMem: PXMLMember = {
@@ -219,33 +204,41 @@ export function createPackageXML(files: string[], lwcPackageXML?: string): Promi
           if (fileTT.inFolder) {
             newMem.members.push(folderMeta);
           }
-          packObj.Package.types.push(newMem);
+          types.push(newMem);
         }
       }
     });
-    let xml: string = builder
-      .buildObject(packObj)
-      .replace('<Package>', '<Package xmlns="http://soap.sforce.com/2006/04/metadata">')
-      .replace(' standalone="yes"', '');
-    resolve(
-      fs.outputFileSync(
-        path.join(lwcPackageXML || vscode.window.forceCode.projectRoot, 'package.xml'),
-        xml
-      )
-    );
+    resolve(buildPackageXMLFile(types, lwcPackageXML));
   });
 
-  function findMDTIndex(pxmlObj: PXML, type: string) {
-    return pxmlObj.Package.types.findIndex((curType) => {
+  function findMDTIndex(types: PXMLMember[], type: string) {
+    return types.findIndex((curType) => {
       return curType.name === type;
     });
   }
 
-  function findMemberIndex(pxmlObj: PXML, index: number, member: string) {
-    return pxmlObj.Package.types[index].members.findIndex((curType) => {
+  function findMemberIndex(types: PXMLMember[], index: number, member: string) {
+    return types[index].members.findIndex((curType) => {
       return curType === member;
     });
   }
+}
+
+export function buildPackageXMLFile(types: PXMLMember[], lwcPackageXML?: string) {
+  let packObj: PXML = {
+    Package: {
+      types: types,
+      version:
+        vscode.window.forceCode.config.apiVersion ||
+        getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
+    },
+  };
+  const builder = new xml2js.Builder();
+  let xml: string = builder
+    .buildObject(packObj)
+    .replace('<Package>', '<Package xmlns="http://soap.sforce.com/2006/04/metadata">')
+    .replace(' standalone="yes"', '');
+  fs.outputFileSync(path.join(lwcPackageXML || getSrcDir(), 'package.xml'), xml);
 }
 
 export function deployFiles(
@@ -253,10 +246,22 @@ export function deployFiles(
   cancellationToken: FCCancellationToken,
   lwcPackageXML?: string
 ): Promise<any> {
-  const deployPath: string = vscode.window.forceCode.projectRoot;
+  const deployPath: string = getSrcDir();
   if (isEmptyUndOrNull(files)) {
     return Promise.resolve();
   }
+
+  if (vscode.window.forceCode.config.useSourceFormat) {
+    return dxService
+      .deploySourceFormat(
+        path.join(vscode.window.forceCode.storageRoot, 'package.xml'),
+        cancellationToken,
+        true
+      )
+      .then(finished)
+      .catch(finished);
+  }
+
   let zip = zipFiles(files, deployPath, lwcPackageXML);
   Object.assign(deployOptions, vscode.window.forceCode.config.deployOptions);
   if (deployOptions.testLevel === 'Default') {
@@ -310,7 +315,7 @@ export function deployFiles(
     }
     if (res.status && res.status !== 'Failed') {
       notifications.showStatus('ForceCode: Deployed $(thumbsup)');
-    } else if(!res.status) {
+    } else if (!res.status) {
       let depId: string;
       const message: string = res.message || res;
       if (res.id) {

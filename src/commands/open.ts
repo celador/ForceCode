@@ -4,7 +4,7 @@ import * as path from 'path';
 import { isEmptyUndOrNull } from '../util';
 import { ForcecodeCommand, FCCancellationToken, ToolingType, retrieve } from '.';
 import { getVSCodeSetting } from '../services';
-import { VSCODE_SETTINGS } from '../services/configuration';
+import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
 import { getTTIndex } from './retrieve';
 const TYPEATTRIBUTE: string = 'type';
 
@@ -162,9 +162,9 @@ function showFileOptions(promises: any[], cancellationToken: FCCancellationToken
                 let fName: string = curFile.label
                   .slice(curFile.label.lastIndexOf(' ') + 1)
                   .split('.')[0];
-                let filePath: string = `${vscode.window.forceCode.projectRoot}${
+                let filePath: string = `${getSrcDir()}${path.sep}${getFolder(tType)}${
                   path.sep
-                }${getFolder(tType)}${path.sep}${fName}.${getExtension(tType)}`;
+                }${fName}.${getExtension(tType)}`;
                 vscode.workspace.openTextDocument(filePath).then((document) => {
                   vscode.window.showTextDocument(document, { preview: false });
                 });

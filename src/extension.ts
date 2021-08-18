@@ -17,7 +17,8 @@ import { updateDecorations } from './decorators';
 import { fcCommands, createProject } from './commands';
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { getToolingTypeFromFolder } from './parsers';
+import { getToolingTypeFromExt, getToolingTypeFromFolder } from './parsers';
+import { CoverageRetrieveType } from './services/commandView';
 
 export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
@@ -41,12 +42,12 @@ export function activate(context: vscode.ExtensionContext): any {
 
   fcCommands.forEach((cur) => {
     context.subscriptions.push(
-      vscode.commands.registerCommand(cur.commandName, function (
-        context: any,
-        selectedResource: any
-      ): any {
-        return commandViewService.addCommandExecution(cur, context, selectedResource);
-      })
+      vscode.commands.registerCommand(
+        cur.commandName,
+        function (context: any, selectedResource: any): any {
+          return commandViewService.addCommandExecution(cur, context, selectedResource);
+        }
+      )
     );
   });
 
@@ -148,7 +149,7 @@ export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
     vscode.workspace
       .createFileSystemWatcher(
-        path.join(vscode.window.forceCode.projectRoot, '**', '*.{cls,trigger,page,component}')
+        path.join(vscode.window.forceCode.workspaceRoot, '**', '*.{cls,trigger,page,component}')
       )
       .onDidDelete((uri) => {
         const fcfile: FCFile | undefined = codeCovViewService.findByPath(uri.fsPath);
@@ -159,11 +160,29 @@ export function activate(context: vscode.ExtensionContext): any {
       })
   );
 
+  // watch for new files and create workspaceMembers
+  context.subscriptions.push(
+    vscode.workspace
+      .createFileSystemWatcher(
+        path.join(vscode.window.forceCode.workspaceRoot, '**', '*.{cls,trigger,page,component}')
+      )
+      .onDidCreate((uri) => {
+        let tType = getToolingTypeFromExt(uri.fsPath);
+        if (tType && !vscode.window.forceCode.creatingFile) {
+          if (tType === 'ApexClass' || tType === 'ApexTrigger') {
+            commandViewService.enqueueCodeCoverage(CoverageRetrieveType.OpenFile);
+          }
+          vscode.window.forceCode.checkForFileChangesQueue();
+        }
+        vscode.window.forceCode.creatingFile = false;
+      })
+  );
+
   // need this because windows won't tell us when a dir is removed like linux/mac does above
   if (isWindows()) {
     context.subscriptions.push(
       vscode.workspace
-        .createFileSystemWatcher(path.join(vscode.window.forceCode.projectRoot, '*'))
+        .createFileSystemWatcher(path.join(vscode.window.forceCode.workspaceRoot, '*'))
         .onDidDelete((uri) => {
           const tType: string | undefined = getToolingTypeFromFolder(uri);
           if (tType) {

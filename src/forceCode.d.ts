@@ -34,6 +34,7 @@ export interface Config {
   showTestCoverage: boolean;
   spaDist: string;
   staticResourceCacheControl: string;
+  useSourceFormat?: boolean;
   src?: string;
   url?: string;
   username?: string;
@@ -137,7 +138,6 @@ export interface IMetadataDescribe {
 
 export interface IForceService {
   config: Config;
-  projectRoot: string;
   workspaceRoot: string;
   storageRoot: string;
   describe: IMetadataDescribe;

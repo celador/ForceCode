@@ -20,7 +20,7 @@ import { Connection, IMetadataFileProperties } from 'jsforce';
 import { isEmptyUndOrNull } from '../util';
 import { SaveResult } from './saveHistoryService';
 import { CoverageRetrieveType } from './commandView';
-import { VSCODE_SETTINGS } from './configuration';
+import { getSrcDir, VSCODE_SETTINGS } from './configuration';
 import * as fs from 'fs-extra';
 
 export class ForceService implements forceCode.IForceService {
@@ -28,11 +28,12 @@ export class ForceService implements forceCode.IForceService {
   public config: forceCode.Config;
   public conn!: Connection;
   public describe!: forceCode.IMetadataDescribe;
-  public projectRoot: string;
   public workspaceRoot: string;
   public storageRoot: string;
   public uuid: string;
   public lastSaveResult: SaveResult | undefined;
+  public creatingFile: boolean = false;
+  private interval: NodeJS.Timeout | undefined;
 
   constructor(context: vscode.ExtensionContext) {
     notifications.writeLog('Initializing ForceCode service');
@@ -40,7 +41,6 @@ export class ForceService implements forceCode.IForceService {
       throw 'A folder needs to be open before Forcecode can be activated';
     }
     this.workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    this.projectRoot = path.join(this.workspaceRoot, 'src');
     this.config = defaultOptions;
     this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
     notifications.setStatusText(`ForceCode Loading...`);
@@ -88,8 +88,18 @@ export class ForceService implements forceCode.IForceService {
     });
   }
 
-  public checkForFileChanges() {
-    return this.getWorkspaceMembers().then(this.parseMembers);
+  public checkForFileChanges(skipChanges?: boolean) {
+    return this.getWorkspaceMembers().then((mems) => this.parseMembers(mems, skipChanges));
+  }
+
+  public checkForFileChangesQueue() {
+    if (this.interval) {
+      clearTimeout(this.interval);
+    }
+    this.interval = setTimeout(
+      () => vscode.commands.executeCommand('ForceCode.checkForFileChanges', true, undefined),
+      1000
+    );
   }
 
   // Get files in src folder..
@@ -99,13 +109,13 @@ export class ForceService implements forceCode.IForceService {
       let types: Array<{}> = [];
       //let typeNames: Array<string> = [];
       let proms: Array<Promise<IMetadataFileProperties[]>> = [];
-      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'classes'))) {
+      if (fs.existsSync(path.join(getSrcDir(), 'classes'))) {
         types.push({ type: 'ApexClass' });
       }
-      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'components'))) {
+      if (fs.existsSync(path.join(getSrcDir(), 'components'))) {
         types.push({ type: 'ApexComponent' });
       }
-      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'triggers'))) {
+      if (fs.existsSync(path.join(getSrcDir(), 'triggers'))) {
         if (types.length > 2) {
           //index++;
           proms.push(vscode.window.forceCode.conn.metadata.list(types));
@@ -113,7 +123,7 @@ export class ForceService implements forceCode.IForceService {
         }
         types.push({ type: 'ApexTrigger' });
       }
-      if (fs.existsSync(path.join(vscode.window.forceCode.projectRoot, 'pages'))) {
+      if (fs.existsSync(path.join(getSrcDir(), 'pages'))) {
         if (types.length > 2) {
           //index++;
           proms.push(vscode.window.forceCode.conn.metadata.list(types));
@@ -128,7 +138,7 @@ export class ForceService implements forceCode.IForceService {
     });
   }
 
-  private parseMembers(mems: Array<Promise<IMetadataFileProperties[]>>) {
+  private parseMembers(mems: Array<Promise<IMetadataFileProperties[]>>, skipChanges?: boolean) {
     if (isEmptyUndOrNull(mems) || isEmptyUndOrNull(mems[0])) {
       return Promise.resolve({});
     }
@@ -140,10 +150,11 @@ export class ForceService implements forceCode.IForceService {
       if (!Array.isArray(recs)) {
         Promise.resolve();
       }
+      let apexType = false;
       recs.forEach((curSet) => {
         if (Array.isArray(curSet)) {
           curSet.forEach((key) => {
-            let thePath: string = path.join(vscode.window.forceCode.projectRoot, key.fileName);
+            let thePath: string = path.join(getSrcDir(), key.fileName);
             if (fs.existsSync(thePath)) {
               let workspaceMember: forceCode.IWorkspaceMember = {
                 name: key.fullName,
@@ -153,13 +164,14 @@ export class ForceService implements forceCode.IForceService {
                 coverage: new Map<string, forceCode.ICodeCoverage>(),
               };
 
+              apexType = key.type === 'ApexClass' || key.type === 'ApexTrigger';
+
               let curFCFile: FCFile = codeCovViewService.addClass(workspaceMember);
 
               if (
-                (
-                  getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges) &&
-                  !curFCFile.compareDates(key.lastModifiedDate)
-                )
+                !skipChanges &&
+                getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges) &&
+                !curFCFile.compareDates(key.lastModifiedDate)
               ) {
                 vscode.commands.executeCommand(
                   'ForceCode.fileModified',
@@ -172,7 +184,11 @@ export class ForceService implements forceCode.IForceService {
         }
       });
       notifications.writeLog('Done getting workspace info');
-      return commandViewService.enqueueCodeCoverage(CoverageRetrieveType.StartUp);
+      if (skipChanges && apexType) {
+        return commandViewService.enqueueCodeCoverage(CoverageRetrieveType.OpenFile);
+      } else {
+        return commandViewService.enqueueCodeCoverage(CoverageRetrieveType.StartUp);
+      }
     }
   }
 

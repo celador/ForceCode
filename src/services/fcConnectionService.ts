@@ -249,12 +249,22 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         path.join(vscode.window.forceCode.workspaceRoot, 'force.json'),
         JSON.stringify({ lastUsername: config.username }, undefined, 4)
       );
-      vscode.window.forceCode.projectRoot = path.join(
-        vscode.window.forceCode.workspaceRoot,
-        vscode.window.forceCode.config.src || 'src'
-      );
       const describe = await vscode.window.forceCode.conn.metadata.describe();
       vscode.window.forceCode.describe = describe;
+      if (vscode.window.forceCode.config.useSourceFormat) {
+        // TODO these types currently aren't supported for whatever reason, but can be retrieved via SFDX and non-source
+        // format in ForceCode...so not sure why it doesn't work here as of yet
+        let excludeVals = new Set<String>([
+          'AIApplication',
+          'AIApplicationConfig',
+          'MLDataDefinition',
+          'MLPredictionDefinition',
+        ]);
+        vscode.window.forceCode.describe.metadataObjects =
+          vscode.window.forceCode.describe.metadataObjects.filter(
+            (type) => !excludeVals.has(type.xmlName)
+          );
+      }
       vscode.window.forceCode.config.prefix = describe.organizationNamespace;
       notifications.writeLog('Done retrieving metadata records');
       return Promise.resolve();
