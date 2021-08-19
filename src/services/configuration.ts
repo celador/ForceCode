@@ -244,7 +244,10 @@ export function getSrcDir(service?: IForceService): string {
   src = src && src.trim() !== '' ? src : undefined;
   if (!src) {
     src = useSrc ? 'force-app' : 'src';
-    self.config.src = src;
+    if (src != self.config.src) {
+      self.config.src = src;
+      saveConfigFile(self.config.username, self.config);
+    }
   }
   let srcPath =
     self.workspaceRoot + path.sep + src + (useSrc ? path.sep + 'main' + path.sep + 'default' : '');
