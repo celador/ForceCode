@@ -67,6 +67,7 @@ export class CancelCommand extends ForcecodeCommand {
   }
 
   public command(context: Task) {
-    return context.execution.cancel();
+    // TODO possible fix for `Cannot read property 'execution' of undefined`??
+    return context?.execution.cancel();
   }
 }

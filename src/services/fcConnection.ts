@@ -4,6 +4,7 @@ import { FCConnectionService, getHomeDir, readConfigFile, SFDX } from '.';
 import { Connection } from 'jsforce';
 import * as fs from 'fs-extra';
 import { Config } from '../forceCode';
+import { getSrcDir } from './configuration';
 
 export interface FCOauth {
   username: string;
@@ -111,7 +112,6 @@ export class FCConnection extends vscode.TreeItem {
     }
     const config: Config = readConfigFile(this.orgInfo.username);
     super.label = config.alias.trim() !== '' ? config.alias : config.username;
-    this.tooltip +=
-      '\nPROJECT PATH - ' + path.join(vscode.window.forceCode.workspaceRoot, config?.src || 'src');
+    this.tooltip += '\nPROJECT PATH - ' + getSrcDir();
   }
 }

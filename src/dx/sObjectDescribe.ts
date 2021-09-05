@@ -166,8 +166,10 @@ export class SObjectDescribe {
   private readonly batchPart: string = 'composite/batch';
 
   private getVersion(): string {
-    return `${this.versionPrefix}${vscode.window.forceCode.config.apiVersion ||
-      getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion)}`;
+    return `${this.versionPrefix}${
+      vscode.window.forceCode.config.apiVersion ||
+      getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion)
+    }`;
   }
 
   public async describeSObjectBatch(types: string[], nextToProcess: number): Promise<SObject[]> {
@@ -219,7 +221,7 @@ export class SObjectDescribe {
         fetchedObjects.push(sr.result);
       }
       return Promise.resolve(fetchedObjects);
-    } catch (error) {
+    } catch (error: any) {
       const xhrResponse: XHRResponse = error;
       return Promise.reject(xhrResponse.responseText);
     }
