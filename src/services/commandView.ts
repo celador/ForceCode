@@ -31,8 +31,8 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     Task | undefined
   >();
 
-  public readonly onDidChangeTreeData: vscode.Event<Task | undefined> = this._onDidChangeTreeData
-    .event;
+  public readonly onDidChangeTreeData: vscode.Event<Task | undefined> =
+    this._onDidChangeTreeData.event;
   public removeEmitter = new EventEmitter();
 
   public constructor() {
@@ -54,7 +54,8 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
       type === CoverageRetrieveType.RunTest ||
       (type === CoverageRetrieveType.OpenFile &&
         getVSCodeSetting(VSCODE_SETTINGS.retrieveCoverageOnFileRetrieval)) ||
-      (type === CoverageRetrieveType.StartUp && getVSCodeSetting(VSCODE_SETTINGS.retrieveCodeCoverageOnStart))
+      (type === CoverageRetrieveType.StartUp &&
+        getVSCodeSetting(VSCODE_SETTINGS.retrieveCodeCoverageOnStart))
     ) {
       this.getCodeCoverage = true;
     }
@@ -196,7 +197,7 @@ export class Task extends vscode.TreeItem {
       finalRes = await new Promise((resolve) => {
         resolve(this.execution.run(this.context, this.selectedResource));
       });
-    } catch (reason) {
+    } catch (reason: any) {
       if (this.execution.cancellationToken.isCanceled()) {
         return Promise.resolve();
       }

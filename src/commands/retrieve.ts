@@ -445,7 +445,9 @@ export function retrieve(
     }
     return new Promise(function (resolve, reject) {
       cancellationToken.cancellationEmitter.on('cancelled', function () {
-        stream.pause();
+        if (stream) {
+          stream.pause();
+        }
         reject(stream.emit('end'));
       });
       let resBundleNames: string[] = [];

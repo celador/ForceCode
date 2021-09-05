@@ -1,5 +1,8 @@
 ## Change Log
 
+* 4.0.1
+    * Fix default project folder when switching orgs (was defaulting to src in some cases)
+    * Fix `Cannot read property 'pause' of undefined`
 * 4.0.0
     * Added the ability to create and work in SFDX Source projects
     * Fix retrieve getting stuck when exiting the menu
