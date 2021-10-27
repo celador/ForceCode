@@ -1,5 +1,8 @@
 ## Change Log
 
+* 4.0.2
+    * Fix cancelling of Code Completion Refresh command getting stuck
+    * Fix metadata of undefined issue on load on rare occasions
 * 4.0.1
     * Fix default project folder when switching orgs (was defaulting to src in some cases)
     * Fix `Cannot read property 'pause' of undefined`

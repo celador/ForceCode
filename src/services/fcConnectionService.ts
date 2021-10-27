@@ -178,8 +178,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
       service.currentConnection = service.getConnByUsername(username);
       finalRes = service.isLoggedIn();
       const connection = await setupConn(finalRes);
-      await login(connection);
-      await vscode.window.forceCode.connect();
+      await login(connection).then(() => vscode.window.forceCode.connect());
     } catch (err) {
       notifications.writeLog(err);
       finalRes = false;

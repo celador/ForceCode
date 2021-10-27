@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { getIcon, getExtension, getFolder } from '../parsers';
 import * as path from 'path';
-import { isEmptyUndOrNull } from '../util';
+import { isEmptyUndOrNull, toArray } from '../util';
 import { ForcecodeCommand, FCCancellationToken, ToolingType, retrieve } from '.';
 import { getVSCodeSetting } from '../services';
 import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
@@ -128,9 +128,7 @@ function showFileOptions(promises: any[], cancellationToken: FCCancellationToken
         return Promise.resolve();
       }
       let files: ToolingType[] = [];
-      if (!(opts instanceof Array)) {
-        opts = [opts];
-      }
+      opts = toArray(opts);
       opts.forEach((curOpt: any) => {
         let tType: string = curOpt.detail.split(' ')[0];
         let fName: string = curOpt.label.slice(curOpt.label.lastIndexOf(' ') + 1).split('.')[0];
