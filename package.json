@@ -716,6 +716,7 @@
     "@types/uuid": "8.3.1",
     "@types/vscode": "1.61.0",
     "@types/xml2js": "0.4.9",
+    "@vscode/test-electron": "^1.6.2",
     "compressing": "1.5.1",
     "deepmerge": "4.2.2",
     "fs-extra": "10.0.0",
@@ -735,7 +736,6 @@
     "universal-analytics": "0.4.23",
     "uuid": "8.3.2",
     "vsce": "^1.100.2",
-    "vscode-test": "^1.6.1",
     "webpack": "^5.60.0",
     "webpack-cli": "^4.9.1",
     "xml2js": "0.4.23"
