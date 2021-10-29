@@ -114,6 +114,10 @@
         "title": "ForceCode: Execute Anonymous"
       },
       {
+        "command": "ForceCode.find",
+        "title": "ForceCode: Search Code in Org"
+      },
+      {
         "command": "ForceCode.open",
         "title": "ForceCode: Get Class, Page, or Trigger"
       },
@@ -210,6 +214,13 @@
         "key": "alt+cmd+e",
         "win": "alt+shift+e",
         "linux": "alt+shift+e",
+        "when": "editorFocus && ForceCodeActive && editorHasSelection && ForceCodeLoggedIn"
+      },
+      {
+        "command": "ForceCode.find",
+        "key": "alt+cmd+f",
+        "win": "alt+shift+f",
+        "linux": "alt+shift+f",
         "when": "editorFocus && ForceCodeActive && editorHasSelection && ForceCodeLoggedIn"
       },
       {
@@ -510,6 +521,11 @@
         {
           "when": "resourceLangId == apex && editorHasSelection && ForceCodeActive && ForceCodeLoggedIn",
           "command": "ForceCode.executeAnonymous",
+          "group": "ForceCode"
+        },
+        {
+          "when": "editorHasSelection && ForceCodeActive && ForceCodeLoggedIn",
+          "command": "ForceCode.find",
           "group": "ForceCode"
         },
         {
