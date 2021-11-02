@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
 
-import { runTests } from '@vscode/test-electron';
+import { runTests, downloadAndUnzipVSCode } from '@vscode/test-electron';
 
 async function main() {
   try {
@@ -21,7 +21,14 @@ async function main() {
     fs.mkdirpSync(folderPath);
 
     // Download VS Code, unzip it and run the integration test
-    await runTests({ extensionDevelopmentPath, extensionTestsPath, launchArgs: [folderPath] });
+    // TODO this is temporary until MS fixes the errors with CI/CD and any version of VSCode > 1.60.0
+    const vscodeExecutablePath = await downloadAndUnzipVSCode('1.60.0');
+    await runTests({
+      extensionDevelopmentPath,
+      extensionTestsPath,
+      launchArgs: [folderPath],
+      vscodeExecutablePath,
+    });
   } catch (err) {
     console.error('Failed to run tests');
     process.exit(1);
