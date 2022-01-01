@@ -33,7 +33,7 @@
     "workspaceContains:force.json",
     "onCommand:ForceCode.createProject"
   ],
-  "main": "./dist/src/extension",
+  "main": "./dist/src/extension.js",
   "contributes": {
     "views": {
       "fcView": [
