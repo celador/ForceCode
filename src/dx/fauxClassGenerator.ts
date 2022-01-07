@@ -97,7 +97,7 @@ export class FauxClassGenerator {
     let j = 0;
     while (j < sobjects.length) {
       if (cancellationToken.isCanceled()) {
-        return Promise.reject('Cancelled');
+        return 'Cancelled';
       }
       try {
         fetchedSObjects = fetchedSObjects.concat(await describe.describeSObjectBatch(sobjects, j));

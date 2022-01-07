@@ -13,10 +13,8 @@ import {
   commandViewService,
 } from '.';
 import * as path from 'path';
-//import { getToolingTypeFromExt } from '../parsers';
 import { Connection, IMetadataFileProperties } from 'jsforce';
 
-//import klaw = require('klaw');
 import { isEmptyUndOrNull } from '../util';
 import { SaveResult } from './saveHistoryService';
 import { CoverageRetrieveType } from './commandView';

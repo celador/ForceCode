@@ -1,5 +1,9 @@
 ## Change Log
 
+* 4.0.2
+    * Add `ForceCode: Search Code in Org` command. This can be used from the command pallet, right clicking when text is selected, or by shortcuts.
+    * Fix cancelling of Code Completion Refresh command getting stuck
+    * Fix metadata of undefined issue on load on rare occasions
 * 4.0.1
     * Fix default project folder when switching orgs (was defaulting to src in some cases)
     * Fix `Cannot read property 'pause' of undefined`

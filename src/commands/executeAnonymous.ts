@@ -22,7 +22,7 @@ export class ExecuteAnonymous extends ForcecodeCommand {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       notifications.showError(
-        'A text editor needs to be open with Apex code selected in order to user Execute Anonymous'
+        'A text editor needs to be open with Apex code selected in order to use Execute Anonymous'
       );
       return;
     }
@@ -35,15 +35,15 @@ export class ExecuteAnonymous extends ForcecodeCommand {
     }
 
     // we need to put the selected text in a temp file and then send it off to sfdx to run
-    return saveToFile(text, 'execAnon.tmp').then(path => {
+    return saveToFile(text, 'execAnon.tmp').then((path) => {
       return dxService
         .execAnon(path, this.cancellationToken)
         .then(
-          res => {
+          (res) => {
             removeFile('execAnon.tmp');
             return res;
           },
-          reason => {
+          (reason) => {
             throw reason;
           }
         )
@@ -73,7 +73,7 @@ export class ExecuteAnonymous extends ForcecodeCommand {
       diagnosticCollection.set(document.uri, diagnostics);
       if (diagnostics.length > 0) {
         notifications.showError(`ForceCode: Execute Anonymous Errors`);
-        diagnostics.forEach(d => {
+        diagnostics.forEach((d) => {
           notifications.writeLog(`Line ${Number(res.line)}: ${d.message}`);
         });
       } else {
@@ -94,9 +94,9 @@ export class ExecuteAnonymous extends ForcecodeCommand {
       }
       return vscode.workspace
         .openTextDocument(newDocURI)
-        .then(document => {
-          return vscode.window.showTextDocument(document, 3, true).then(editor => {
-            editor.edit(edit => {
+        .then((document) => {
+          return vscode.window.showTextDocument(document, 3, true).then((editor) => {
+            editor.edit((edit) => {
               return edit.insert(new vscode.Position(0, 0), filteredLog);
             });
           });

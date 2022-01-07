@@ -28,11 +28,7 @@ export abstract class ForcecodeCommand {
   public detail?: string;
   public icon?: string;
   public label?: string;
-  public cancellationToken: FCCancellationToken;
-
-  constructor() {
-    this.cancellationToken = new FCCancellationToken();
-  }
+  public cancellationToken!: FCCancellationToken;
 
   public abstract command(context: any, selectedResource: any): any;
 

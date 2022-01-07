@@ -53,7 +53,7 @@ export class CodeCompletionRefresh extends ForcecodeCommand {
           objectsToGet = SObjectCategory.CUSTOM;
         }
       })
-      .then(async function() {
+      .then(async function () {
         if (!objectsToGet) {
           return Promise.resolve();
         }
@@ -61,18 +61,23 @@ export class CodeCompletionRefresh extends ForcecodeCommand {
         let gen = new FauxClassGenerator();
         try {
           let startTime = new Date().getTime();
-          await gen.generate(
+          let res = await gen.generate(
             vscode.window.forceCode.workspaceRoot,
             objectsToGet,
             cancellationToken
           );
+
+          if (res == 'Cancelled') {
+            return Promise.resolve();
+          }
+
           let endTime = new Date().getTime();
           notifications.writeLog(
             'Refresh took ' + Math.round((endTime - startTime) / (1000 * 60)) + ' minutes.'
           );
           return notifications
             .showInfo('ForceCode: Retrieval of objects complete! Reload window now?', 'Yes', 'No')
-            .then(choice => {
+            .then((choice) => {
               if (choice === 'Yes') {
                 return vscode.commands.executeCommand('workbench.action.reloadWindow');
               } else {
