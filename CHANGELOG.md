@@ -1,5 +1,7 @@
 ## Change Log
 
+* 4.0.3
+    * Dependency updates
 * 4.0.2
     * Add `ForceCode: Search Code in Org` command. This can be used from the command pallet, right clicking when text is selected, or by shortcuts.
     * Fix cancelling of Code Completion Refresh command getting stuck
