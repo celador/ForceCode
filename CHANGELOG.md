@@ -1,5 +1,7 @@
 ## Change Log
 
+* 4.0.4
+    * Fix code coverage not being updated in the org with newer version of SFDX CLI
 * 4.0.3
     * Dependency updates
 * 4.0.2

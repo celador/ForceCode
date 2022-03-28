@@ -22,8 +22,8 @@ export class ToggleCoverage extends ForcecodeCommand {
   }
 
   public command() {
-    vscode.window.forceCode.config.showTestCoverage = !vscode.window.forceCode.config
-      .showTestCoverage;
+    vscode.window.forceCode.config.showTestCoverage =
+      !vscode.window.forceCode.config.showTestCoverage;
     return updateDecorations();
   }
 }
@@ -39,9 +39,11 @@ export class GetCodeCoverage extends ForcecodeCommand {
   public command() {
     return getApexTestResults()
       .then((_res) => getApexTestResults(true))
-      .then((
-        _res2 // update the current editor
-      ) => updateDecorations());
+      .then(
+        (
+          _res2 // update the current editor
+        ) => updateDecorations()
+      );
   }
 }
 
