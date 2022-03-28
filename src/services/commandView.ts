@@ -11,6 +11,7 @@ import { EventEmitter } from 'events';
 import { ForcecodeCommand } from '../commands';
 import * as path from 'path';
 import { VSCODE_SETTINGS } from './configuration';
+import { TASK_TIMEOUT } from './constants';
 
 const FIRST_TRY = 1;
 const SECOND_TRY = 2;
@@ -167,6 +168,7 @@ export class Task extends vscode.TreeItem {
   private readonly context: any;
   private readonly selectedResource: any;
   private readonly commandTimer: FCTimer;
+  private timeoutInterval: NodeJS.Timeout;
 
   constructor(
     taskViewProvider: CommandViewService,
@@ -189,6 +191,10 @@ export class Task extends vscode.TreeItem {
         arguments: [this],
       };
     }
+    // remove any "stuck" tasks after 5 minutes
+    this.timeoutInterval = setTimeout(() => {
+      this.taskViewProvider.removeTask(this);
+    }, TASK_TIMEOUT);
   }
 
   public async run(attempt: number): Promise<any> {
@@ -199,6 +205,7 @@ export class Task extends vscode.TreeItem {
       });
     } catch (reason: any) {
       if (this.execution.cancellationToken.isCanceled()) {
+        clearTimeout(this.timeoutInterval);
         return Promise.resolve();
       }
       const loggedIn = await fcConnection.checkLoginStatus(
@@ -221,6 +228,7 @@ export class Task extends vscode.TreeItem {
       // try again, possibly had to refresh the access token
       return this.run(SECOND_TRY);
     } else {
+      clearTimeout(this.timeoutInterval);
       this.taskViewProvider.removeEmitter.emit('removeTask', this);
       this.commandTimer.stopTimer();
       return Promise.resolve(finalRes);
