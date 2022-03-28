@@ -307,7 +307,11 @@ export function retrieve(
           }
         );
       });
-      resolve(theStream.stream()).catch(reject);
+      try {
+        resolve(theStream.stream());
+      } catch (err) {
+        reject(err);
+      }
     }
 
     function pack(resolve: any, reject: any) {
@@ -354,7 +358,11 @@ export function retrieve(
             }
           );
         });
-        resolve(theStream.stream()).catch(reject);
+        try {
+          resolve(theStream.stream());
+        } catch (err) {
+          reject(err);
+        }
       }
 
       function builder() {

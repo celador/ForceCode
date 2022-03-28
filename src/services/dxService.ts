@@ -271,7 +271,12 @@ export class DXService {
       toRun = '-t ' + classOrMethodName;
     }
 
-    return this.runCommand('apex:test:run ' + toRun + ' -w 3 -y', true, cancellationToken);
+    return this.runCommand(
+      // fix code coverage not being updated in the org with newer version of SFDX CLI: -c -r json
+      'apex:test:run ' + toRun + ' -w 3 -y -c -r json',
+      true,
+      cancellationToken
+    );
   }
 
   public describeGlobal(type: SObjectCategory): Promise<string[]> {
