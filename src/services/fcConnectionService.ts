@@ -18,7 +18,8 @@ import {
 const jsforce = require('jsforce');
 import klaw = require('klaw');
 import { FCCancellationToken } from '../commands';
-import { VSCODE_SETTINGS } from './configuration';
+import { getAPIVersion, VSCODE_SETTINGS } from './configuration';
+import { xhr } from 'request-light';
 
 export class FCConnectionService implements vscode.TreeDataProvider<FCConnection> {
   private static instance: FCConnectionService;
@@ -209,6 +210,23 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
       }
       vscode.window.forceCode.config = readConfigFile(orgInf.username);
 
+      if (
+        getVSCodeSetting(VSCODE_SETTINGS.autoApiVersion) &&
+        service.currentConnection.orgInfo.instanceUrl &&
+        !service.currentConnection.orgInfo.newestAPI
+      ) {
+        try {
+          service.currentConnection.orgInfo.newestAPI = await getLatestVersion(
+            service.currentConnection.orgInfo.instanceUrl
+          );
+          notifications.writeLog(
+            'Newest API version: ' + service.currentConnection.orgInfo.newestAPI
+          );
+        } catch (e: any) {
+          notifications.writeLog(e.message || e);
+        }
+      }
+
       const sfdxPath = path.join(getHomeDir(), '.sfdx', orgInf.username + '.json');
       const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
       let connection = new jsforce.Connection({
@@ -218,9 +236,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         instanceUrl: service.currentConnection.orgInfo.instanceUrl,
         accessToken: service.currentConnection.orgInfo.accessToken,
         refreshToken: refreshToken,
-        version:
-          vscode.window.forceCode?.config?.apiVersion ||
-          getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
+        version: getAPIVersion(),
       });
 
       service.currentConnection.connection = connection;
@@ -232,6 +248,21 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
       vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
 
       return Promise.resolve(service.currentConnection);
+    }
+
+    async function getLatestVersion(instanceUrl: string): Promise<string> {
+      try {
+        let res = await xhr({ url: `${instanceUrl}/services/data` });
+        let jsArr = JSON.parse(res.responseText);
+        if (Array.isArray(jsArr)) {
+          return jsArr[jsArr.length - 1].version;
+        }
+      } catch (err: any) {
+        notifications.writeLog('There was an issue grabbing the latest API version:');
+        notifications.writeLog(err.message || err);
+      }
+
+      return getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion);
     }
 
     async function login(fcConnection: FCConnection): Promise<void> {

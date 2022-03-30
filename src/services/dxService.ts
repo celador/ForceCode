@@ -14,6 +14,7 @@ export interface SFDX {
   isExpired?: boolean;
   userId?: string;
   isDevHub?: boolean;
+  newestAPI?: string;
 }
 
 export interface ExecuteAnonymousResult {

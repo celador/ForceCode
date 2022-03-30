@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import { dxService, PXML, PXMLMember, SObjectCategory, getVSCodeSetting } from '../services';
+import { dxService, PXML, PXMLMember, SObjectCategory } from '../services';
 import { IMetadataObject } from '../forceCode';
 import * as xml2js from 'xml2js';
 import * as fs from 'fs-extra';
 import { isEmptyUndOrNull, toArray } from '../util';
 import { ForcecodeCommand } from '.';
-import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
+import { getAPIVersion, getSrcDir } from '../services/configuration';
 
 export class PackageBuilder extends ForcecodeCommand {
   constructor() {
@@ -186,9 +186,7 @@ export function packageBuilder(buildPackage?: boolean): Promise<any> {
             let packObj: PXML = {
               Package: {
                 types: mappedTypes,
-                version:
-                  vscode.window.forceCode.config.apiVersion ||
-                  getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
+                version: getAPIVersion(),
               },
             };
             let xml: string = builder

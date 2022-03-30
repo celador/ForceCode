@@ -1,6 +1,6 @@
 {
   "name": "forcecode",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "publisher": "JohnAaronNelson",
   "displayName": "ForceCode",
   "description": "Visual Studio Code extension for Salesforce (SFDC) development",
@@ -247,6 +247,11 @@
           "default": false,
           "description": "Allow the Forcecode team to track anonymous usage data so that we can improve your overall experience."
         },
+        "force.autoApiVersion": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically create new source files with the latest Salesforce API version instead of relying on the Default Api Version setting. This will override all other API settings and will update ForceCode org settings to always use the newest API version."
+        },
         "force.autoRefresh": {
           "type": "boolean",
           "default": false,
@@ -285,7 +290,7 @@
         "force.defaultApiVersion": {
           "type": "string",
           "default": "54.0",
-          "description": "The Salesforce API version to use when logging into new orgs. Must be in the format of XX.X. Example: 45.0"
+          "description": "When Auto Api Version is checked this will have no effect. The Salesforce API version to use when logging into new orgs. Must be in the format of XX.X. Example: 45.0"
         },
         "force.debugFilter": {
           "type": "string",

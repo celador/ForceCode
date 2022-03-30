@@ -5,7 +5,6 @@ import {
   notifications,
   getFileListFromPXML,
   zipFiles,
-  getVSCodeSetting,
   getFilteredFileList,
   dxService,
 } from '../services';
@@ -18,7 +17,7 @@ import { isEmptyUndOrNull, toArray } from '../util';
 import { DeployResult } from 'jsforce';
 import { FCCancellationToken, ForcecodeCommand } from '.';
 import { IMetadataObject } from '../forceCode';
-import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
+import { getAPIVersion, getSrcDir } from '../services/configuration';
 
 export class DeployPackage extends ForcecodeCommand {
   constructor() {
@@ -228,9 +227,7 @@ export function buildPackageXMLFile(types: PXMLMember[], lwcPackageXML?: string)
   let packObj: PXML = {
     Package: {
       types: types,
-      version:
-        vscode.window.forceCode.config.apiVersion ||
-        getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
+      version: getAPIVersion(),
     },
   };
   const builder = new xml2js.Builder();

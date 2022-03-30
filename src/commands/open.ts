@@ -4,7 +4,7 @@ import * as path from 'path';
 import { isEmptyUndOrNull, toArray } from '../util';
 import { ForcecodeCommand, FCCancellationToken, ToolingType, retrieve } from '.';
 import { getVSCodeSetting } from '../services';
-import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
+import { getAPIVersion, getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
 import { getTTIndex } from './retrieve';
 const TYPEATTRIBUTE: string = 'type';
 
@@ -66,10 +66,7 @@ export class Open extends ForcecodeCommand {
             predicate
         )
       );
-      if (
-        vscode.window.forceCode.config.apiVersion &&
-        parseInt(vscode.window.forceCode.config.apiVersion) >= 45
-      ) {
+      if (parseInt(getAPIVersion()) >= 45) {
         promises.push(
           vscode.window.forceCode.conn.tooling.query(
             'SELECT Id, DeveloperName, NamespacePrefix, Description FROM LightningComponentBundle ' +
@@ -77,11 +74,7 @@ export class Open extends ForcecodeCommand {
           )
         );
       }
-      if (
-        vscode.window.forceCode.config.isDeveloperEdition &&
-        vscode.window.forceCode.config.apiVersion &&
-        parseInt(vscode.window.forceCode.config.apiVersion) >= 47
-      ) {
+      if (vscode.window.forceCode.config.isDeveloperEdition && parseInt(getAPIVersion()) >= 47) {
         promises.push(
           vscode.window.forceCode.conn.tooling.query(
             'SELECT Id, DeveloperName, NamespacePrefix, Description FROM LightningMessageChannel ' +

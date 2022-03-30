@@ -5,10 +5,9 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import * as vscode from 'vscode';
 import { xhr, XHROptions, XHRResponse } from 'request-light';
-import { FCOauth, fcConnection, notifications, getVSCodeSetting } from '../services';
-import { VSCODE_SETTINGS } from '../services/configuration';
+import { FCOauth, fcConnection, notifications } from '../services';
+import { getAPIVersion } from '../services/configuration';
 
 const CLIENT_ID = 'sfdx-vscode';
 export interface SObject {
@@ -166,10 +165,7 @@ export class SObjectDescribe {
   private readonly batchPart: string = 'composite/batch';
 
   private getVersion(): string {
-    return `${this.versionPrefix}${
-      vscode.window.forceCode.config.apiVersion ||
-      getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion)
-    }`;
+    return `${this.versionPrefix}${getAPIVersion()}`;
   }
 
   public async describeSObjectBatch(types: string[], nextToProcess: number): Promise<SObject[]> {

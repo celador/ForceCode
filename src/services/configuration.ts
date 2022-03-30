@@ -12,6 +12,7 @@ interface SFDXConfig {
 
 export enum VSCODE_SETTINGS {
   allowAnonymousUsageTracking = 'allowAnonymousUsageTracking',
+  autoApiVersion = 'autoApiVersion',
   autoRefresh = 'autoRefresh',
   browser = 'browser',
   bulkLoaderPollInterval = 'bulkLoaderPollInterval',
@@ -38,7 +39,7 @@ export enum VSCODE_SETTINGS {
 
 export const defaultOptions: Config = {
   alias: '',
-  apiVersion: getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
+  apiVersion: getAPIVersion(),
   deployOptions: {
     allowMissingFiles: true,
     checkOnly: false,
@@ -147,7 +148,7 @@ async function copySFDXData(
         },
       ],
       sfdcLoginUrl: self.config.url,
-      sourceApiVersion: self.config.apiVersion,
+      sourceApiVersion: getAPIVersion(),
     };
 
     fs.outputFileSync(forceSFDXProjJson, JSON.stringify(sfdxProj, undefined, 4));
@@ -255,4 +256,12 @@ export function getSrcDir(service?: IForceService): string {
     fs.mkdirpSync(srcPath);
   }
   return srcPath;
+}
+
+export function getAPIVersion() {
+  return (
+    fcConnection?.currentConnection?.orgInfo.newestAPI ||
+    vscode.window.forceCode?.config?.apiVersion ||
+    getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion)
+  );
 }
