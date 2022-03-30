@@ -284,7 +284,7 @@
         },
         "force.defaultApiVersion": {
           "type": "string",
-          "default": "53.0",
+          "default": "54.0",
           "description": "The Salesforce API version to use when logging into new orgs. Must be in the format of XX.X. Example: 45.0"
         },
         "force.debugFilter": {
