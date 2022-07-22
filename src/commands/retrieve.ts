@@ -8,7 +8,6 @@ import {
   SObjectCategory,
   PXMLMember,
   notifications,
-  getVSCodeSetting,
 } from '../services';
 import { getToolingTypeFromExt, getAnyTTMetadataFromPath, outputToString } from '../parsers';
 import { IWorkspaceMember, IMetadataObject, ICodeCoverage } from '../forceCode';
@@ -25,7 +24,7 @@ import {
 } from '.';
 import { XHROptions, xhr } from 'request-light';
 import { toArray } from '../util';
-import { getSrcDir, VSCODE_SETTINGS } from '../services/configuration';
+import { getAPIVersion, getSrcDir } from '../services/configuration';
 import { buildPackageXMLFile } from './deploy';
 
 export class Refresh extends ForcecodeCommand {
@@ -294,10 +293,7 @@ export function retrieve(
 
       let theStream = vscode.window.forceCode.conn.metadata.retrieve({
         unpackaged: retrieveTypes,
-        apiVersion:
-          version ||
-          vscode.window.forceCode.config.apiVersion ||
-          getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
+        apiVersion: version || getAPIVersion(),
       });
       theStream.on('error', (error) => {
         reject(
@@ -347,9 +343,7 @@ export function retrieve(
         }
         let theStream = vscode.window.forceCode.conn.metadata.retrieve({
           packageNames: [option.description],
-          apiVersion:
-            vscode.window.forceCode.config.apiVersion ||
-            getVSCodeSetting(VSCODE_SETTINGS.defaultApiVersion),
+          apiVersion: getAPIVersion(),
         });
         theStream.on('error', (error) => {
           reject(

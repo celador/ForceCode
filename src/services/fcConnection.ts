@@ -17,6 +17,7 @@ export interface FCOauth {
   connectedStatus?: string;
   isExpired?: boolean;
   isDevHub?: boolean;
+  newestAPI?: string;
 }
 
 export class FCConnection extends vscode.TreeItem {
