@@ -289,7 +289,7 @@
         },
         "force.defaultApiVersion": {
           "type": "string",
-          "default": "54.0",
+          "default": "55.0",
           "description": "When Auto Api Version is checked this will have no effect. The Salesforce API version to use when logging into new orgs. Must be in the format of XX.X. Example: 45.0"
         },
         "force.debugFilter": {

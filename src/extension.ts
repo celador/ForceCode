@@ -12,7 +12,7 @@ import {
   trackEvent,
   FCTimer,
 } from './services';
-import { ApexTestLinkProvider, ForceCodeContentProvider, ForceCodeLogProvider } from './providers';
+import { ApexTestLinkProvider, ForceCodeContentProvider } from './providers';
 import { updateDecorations } from './decorators';
 import { fcCommands, createProject } from './commands';
 import * as path from 'path';
@@ -66,9 +66,6 @@ export function activate(context: vscode.ExtensionContext): any {
     vscode.window.registerTreeDataProvider('ForceCode.saveHistoryProvider', saveHistoryService)
   );
 
-  context.subscriptions.push(
-    vscode.workspace.registerTextDocumentContentProvider('sflog', new ForceCodeLogProvider())
-  );
   context.subscriptions.push(
     vscode.workspace.registerTextDocumentContentProvider(
       'forcecode',
