@@ -58,7 +58,7 @@ export class Refresh extends ForcecodeCommand {
               let index: number = getTTIndex(curName.name, files);
               if (index >= 0) {
                 // file deepcode ignore ComparisonArrayLiteral: <please specify a reason of ignoring this>
-                if (curName.members === ['*']) {
+                if (curName.members[0] === '*') {
                   files[index].members = ['*'];
                 } else {
                   files[index].members.push(...curName.members);
@@ -112,7 +112,7 @@ interface ToolingTypes {
 
 export function getTTIndex(toolType: string, arr: ToolingType[]): number {
   return arr.findIndex((cur) => {
-    return cur.name === toolType && cur.members !== ['*'];
+    return cur.name === toolType && cur.members[0] !== '*';
   });
 }
 

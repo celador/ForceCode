@@ -228,7 +228,7 @@ export class DXService {
       )
       .then(function (document: vscode.TextDocument) {
         if (document.getText() !== '') {
-          return vscode.window.showTextDocument(document, 3, true);
+          return vscode.window.showTextDocument(document, vscode.ViewColumn.Two, true);
         } else {
           return {
             async then(callback: any) {
