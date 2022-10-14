@@ -41,7 +41,7 @@ export class ForceService implements forceCode.IForceService {
     this.workspaceRoot = vscode.workspace.workspaceFolders[0].uri.fsPath;
     this.config = defaultOptions;
     this.fcDiagnosticCollection = vscode.languages.createDiagnosticCollection('fcDiagCol');
-    notifications.setStatusText(`ForceCode Loading...`);
+    notifications.setStatusText(`ForceCode Loading...`, true);
     this.storageRoot = context.extensionPath;
 
     const vsConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('force');
@@ -203,6 +203,7 @@ export class ForceService implements forceCode.IForceService {
     vscode.commands.executeCommand('setContext', 'ForceCodeActive', true);
     notifications.setStatusCommand('ForceCode.showMenu');
     notifications.setStatusTooltip('Open the ForceCode Menu');
+    notifications.resetLoading();
     notifications.showStatus('ForceCode Ready!');
 
     // get the current org info

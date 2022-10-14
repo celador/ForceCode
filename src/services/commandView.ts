@@ -23,7 +23,7 @@ export enum CoverageRetrieveType {
 }
 
 export class CommandViewService implements vscode.TreeDataProvider<Task> {
-  private runningTasksStatus: vscode.StatusBarItem;
+  private treeView: vscode.TreeView<Task>;
   private static instance: CommandViewService;
   private readonly tasks: Task[];
   private fileModCommands: number = 0;
@@ -38,8 +38,10 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
 
   public constructor() {
     this.tasks = [];
-    this.runningTasksStatus = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 5);
     this.removeEmitter.on('removeTask', (theTask) => this.removeTask(theTask));
+    this.treeView = vscode.window.createTreeView('ForceCode.treeDataProvider', {
+      treeDataProvider: this,
+    });
   }
 
   public static getInstance() {
@@ -99,15 +101,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
 
     let theTask: Task = new Task(this, execution, context, selectedResource);
     this.tasks.push(theTask);
-    const visibleTasks = this.getChildren().length;
-    if (visibleTasks > 0) {
-      this.runningTasksStatus.text =
-        '$(loading~spin) ForceCode: Executing ' + visibleTasks + ' Task(s)';
-      this.runningTasksStatus.show();
-      this.runningTasksStatus.command = 'ForceCode.showTasks';
-    }
-
-    this._onDidChangeTreeData.fire(undefined);
+    this.updateStatus();
     return theTask.run(FIRST_TRY);
   }
 
@@ -119,23 +113,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
       }
       this.tasks.splice(index, 1);
 
-      if (this.getChildren().length > 0) {
-        this.runningTasksStatus.text =
-          '$(loading~spin) ForceCode: Executing ' + this.getChildren().length + ' Tasks';
-      } else {
-        this.runningTasksStatus.hide();
-        // when code coverage is enqueued, it will only be retrieved when no other visible tasks are running
-        if (this.getCodeCoverage) {
-          this.getCodeCoverage = false;
-          vscode.commands
-            .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
-            .then(() => {
-              notifications.writeLog('Done retrieving code coverage');
-            });
-        }
-      }
-
-      this._onDidChangeTreeData.fire(undefined);
+      this.updateStatus();
       fcConnection.refreshConnsStatus();
       return true;
     }
@@ -159,6 +137,36 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
 
   public getParent(_element: Task): any {
     return null; // this is the parent
+  }
+
+  private updateStatus() {
+    const visibleTasks = this.getChildren().length;
+    const message =
+      visibleTasks == 0
+        ? 'ForceCode'
+        : 'Executing ' + visibleTasks + ' Task' + (visibleTasks > 1 ? 's' : '');
+
+    this.treeView.badge = {
+      value: visibleTasks,
+      tooltip: message,
+    };
+
+    if (visibleTasks > 0) {
+      notifications.setStatusText('ForceCode Menu', true);
+    } else {
+      notifications.resetLoading();
+      // when code coverage is enqueued, it will only be retrieved when no other visible tasks are running
+      if (this.getCodeCoverage) {
+        this.getCodeCoverage = false;
+        vscode.commands
+          .executeCommand('ForceCode.getCodeCoverage', undefined, undefined)
+          .then(() => {
+            notifications.writeLog('Done retrieving code coverage');
+          });
+      }
+    }
+
+    this._onDidChangeTreeData.fire(undefined);
   }
 }
 
