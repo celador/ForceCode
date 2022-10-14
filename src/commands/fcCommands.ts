@@ -5,7 +5,6 @@ import {
   codeCovViewService,
   FCOauth,
   FCConnection,
-  commandViewService,
   dxService,
   notifications,
   FCFile,
@@ -131,24 +130,6 @@ export class CheckForFileChanges extends ForcecodeCommand {
 
   public command(context: any) {
     return vscode.window.forceCode.checkForFileChanges(context);
-  }
-}
-
-export class ShowTasks extends ForcecodeCommand {
-  constructor() {
-    super();
-    this.commandName = 'ForceCode.showTasks';
-    this.name = 'Show tasks';
-    this.hidden = true;
-  }
-
-  public command() {
-    if (fcConnection.isLoggedIn()) {
-      let treePro = vscode.window.createTreeView('ForceCode.treeDataProvider', {
-        treeDataProvider: commandViewService,
-      });
-      return treePro.reveal(commandViewService.getChildren()[0]);
-    }
   }
 }
 

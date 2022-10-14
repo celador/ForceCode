@@ -7,6 +7,7 @@ export class Notifications {
   private outputChannel: vscode.OutputChannel;
   private statusBarItem: vscode.StatusBarItem;
   private statusTimeout: any;
+  private isLoading: Boolean = false;
 
   constructor() {
     this.outputChannel = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
@@ -20,9 +21,20 @@ export class Notifications {
     return Notifications.instance;
   }
 
-  public setStatusText(message: string) {
+  public setStatusText(message: string, loading?: boolean) {
     this.statusBarItem.show();
+    if (loading === false) {
+      this.isLoading = false;
+    } else if (this.isLoading || loading) {
+      this.isLoading = true;
+      message += ` $(loading~spin)`;
+    }
     this.statusBarItem.text = message;
+  }
+
+  public resetLoading() {
+    // just in case we don't want to change the displayed message
+    this.isLoading = false;
   }
 
   public showStatus(message: string) {
@@ -88,7 +100,7 @@ export class Notifications {
       clearTimeout(instance.statusTimeout);
     }
     instance.statusTimeout = setTimeout(() => {
-      instance.statusBarItem.text = `ForceCode Menu`;
+      instance.setStatusText(`ForceCode Menu`);
     }, 5000);
   }
 }

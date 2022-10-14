@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { fcConnection, FCOauth, notifications, isWindows } from '.';
 import { SpawnOptions, spawn } from 'child_process';
 import { FCCancellationToken } from '../commands';
+import { filterLog } from '../providers';
 const kill = require('tree-kill');
 
 export interface SFDX {
@@ -207,28 +208,21 @@ export class DXService {
       });
   }
 
-  public getDebugLog(logid: string | undefined): Promise<string> {
-    let theLogId: string = '';
-    if (logid) {
-      theLogId += ' --logid ' + logid;
-    }
-    return this.runCommand('apex:log:get' + theLogId, true).then((log) => {
-      log = log[0] || log;
-      return Promise.resolve(log.log);
-    });
-  }
-
   public getAndShowLog(id: string | undefined): Thenable<vscode.TextEditor | undefined> {
-    if (!id) {
-      id = 'debugLog';
+    let theLogId: string = '';
+    if (id) {
+      theLogId += ' --logid ' + id;
     }
-    return vscode.workspace
-      .openTextDocument(
-        vscode.Uri.parse(`sflog://salesforce.com/${new Date().toISOString()}.log?q=${id}`)
-      )
+    return this.runCommand('apex:log:get' + theLogId, true)
+      .then((log) => {
+        log = log[0] || log;
+        return Promise.resolve(log.log);
+      })
+      .then(filterLog)
+      .then((log) => vscode.workspace.openTextDocument({ content: log, language: 'log' }))
       .then(function (document: vscode.TextDocument) {
         if (document.getText() !== '') {
-          return vscode.window.showTextDocument(document, 3, true);
+          return vscode.window.showTextDocument(document, vscode.ViewColumn.Two, true);
         } else {
           return {
             async then(callback: any) {

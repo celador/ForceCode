@@ -95,11 +95,13 @@ export class ExecuteAnonymous extends ForcecodeCommand {
       return vscode.workspace
         .openTextDocument(newDocURI)
         .then((document) => {
-          return vscode.window.showTextDocument(document, 3, true).then((editor) => {
-            editor.edit((edit) => {
-              return edit.insert(new vscode.Position(0, 0), filteredLog);
+          return vscode.window
+            .showTextDocument(document, vscode.ViewColumn.Two, true)
+            .then((editor) => {
+              editor.edit((edit) => {
+                return edit.insert(new vscode.Position(0, 0), filteredLog);
+              });
             });
-          });
         })
         .then(() => {
           return res;

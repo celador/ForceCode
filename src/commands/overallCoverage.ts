@@ -19,7 +19,7 @@ export class OverallCoverage extends ForcecodeCommand {
   }
 
   public command(): any {
-    return getApexTestResults().then(res => {
+    return getApexTestResults().then((res) => {
       if (res.records) {
         let outputString: string = 'Class/Trigger Name';
         // use this for formatting
@@ -57,13 +57,13 @@ export class OverallCoverage extends ForcecodeCommand {
           outputString,
           'coverage' + path.sep + 'ApexCoverage-' + Date.now() + '.acov'
         )
-          .then(filename => {
+          .then((filename) => {
             notifications.showStatus('ForceCode: Code coverage retrieval complete!');
             return vscode.workspace
               .openTextDocument(filename)
-              .then(doc => vscode.window.showTextDocument(doc, 3));
+              .then((doc) => vscode.window.showTextDocument(doc, vscode.ViewColumn.Two));
           })
-          .catch(_err => {
+          .catch((_err) => {
             return undefined;
           });
       } else {

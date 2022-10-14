@@ -1,5 +1,9 @@
 ## Change Log
 
+* 4.1.0
+    * Fix logs, overall coverage, etc. showing in 3rd column
+    * Allow log saves
+    * Show running tasks via badge instead of a menu item
 * 4.0.5
     * Auto detect the api version from the org
     * Dependency updates
