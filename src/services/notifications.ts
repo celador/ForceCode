@@ -25,16 +25,25 @@ export class Notifications {
     this.statusBarItem.show();
     if (loading === false) {
       this.isLoading = false;
+      if (message.indexOf(` $(loading~spin)`) > -1) {
+        message = message.substring(0, message.indexOf(` $(loading~spin)`));
+      }
     } else if (this.isLoading || loading) {
       this.isLoading = true;
-      message += ` $(loading~spin)`;
+      if (message.indexOf(` $(loading~spin)`) == -1) {
+        message += ` $(loading~spin)`;
+      }
     }
     this.statusBarItem.text = message;
   }
 
+  public showLoading() {
+    this.setStatusText(this.statusBarItem.text, true);
+  }
+
   public resetLoading() {
     // just in case we don't want to change the displayed message
-    this.isLoading = false;
+    this.setStatusText(this.statusBarItem.text, false);
   }
 
   public showStatus(message: string) {

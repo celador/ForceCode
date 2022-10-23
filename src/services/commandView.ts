@@ -152,7 +152,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     };
 
     if (visibleTasks > 0) {
-      notifications.setStatusText('ForceCode Menu', true);
+      notifications.showLoading();
     } else {
       notifications.resetLoading();
       // when code coverage is enqueued, it will only be retrieved when no other visible tasks are running
