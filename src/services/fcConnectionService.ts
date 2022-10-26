@@ -279,7 +279,27 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         path.join(vscode.window.forceCode.workspaceRoot, 'force.json'),
         JSON.stringify({ lastUsername: config.username }, undefined, 4)
       );
-      const describe = await vscode.window.forceCode.conn.metadata.describe();
+
+      const mdPath = path.join(
+        vscode.window.forceCode.workspaceRoot,
+        '.forceCode',
+        config.username || 'NO_USERNAME',
+        getAPIVersion()
+      );
+
+      const mdFileName = path.join(mdPath, 'mdDescribe.json');
+
+      let describe;
+      if (!fs.existsSync(mdFileName)) {
+        if (!fs.existsSync(mdPath)) {
+          fs.mkdirpSync(mdPath);
+        }
+        describe = await vscode.window.forceCode.conn.metadata.describe();
+        fs.outputFileSync(mdFileName, JSON.stringify(describe, undefined, 4));
+      } else {
+        describe = fs.readJsonSync(mdFileName);
+      }
+
       vscode.window.forceCode.describe = describe;
       if (vscode.window.forceCode.config.useSourceFormat) {
         // TODO these types currently aren't supported for whatever reason, but can be retrieved via SFDX and non-source
