@@ -305,13 +305,13 @@ export async function compile(
       theerr = errSplit || errMsg;
       errSplit = theerr.split(': Source').shift();
       theerr = errSplit || theerr;
-      let match = errMsg.match(matchRegex);
+      let match: RegExpMatchArray | null = errMsg.match(matchRegex);
       if (match) {
-        match = match.filter((mat) => mat); // eliminate all undefined elements
-        errSplit = theerr.split(match[0]).pop();
+        const filteredMatch = match.filter((mat) => mat); // eliminate all undefined elements
+        errSplit = theerr.split(filteredMatch[0]).pop();
         theerr = (errSplit || theerr).trim(); // remove the line information from the error message if 'Message:' wasn't part of the string
-        const row = match[1];
-        const col = match[2];
+        const row = filteredMatch[1];
+        const col = filteredMatch[2];
         failureLineNumber = Number.parseInt(row);
         failureLineNumber =
           failureLineNumber < 1 || failureLineNumber > document.lineCount ? 1 : failureLineNumber;

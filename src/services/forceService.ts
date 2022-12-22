@@ -173,7 +173,7 @@ export class ForceService implements forceCode.IForceService {
               ) {
                 vscode.commands.executeCommand(
                   'ForceCode.fileModified',
-                  thePath,
+                  vscode.Uri.file(thePath),
                   key.lastModifiedByName
                 );
               }

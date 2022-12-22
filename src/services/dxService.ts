@@ -100,7 +100,7 @@ export class DXService {
       cwd: vscode.window.forceCode.workspaceRoot,
     };
 
-    let pid: number;
+    let pid: number | undefined;
     let sfdxNotFound = false;
 
     return new Promise((resolve, reject) => {
