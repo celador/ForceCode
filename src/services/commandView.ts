@@ -6,7 +6,7 @@
  */
 
 import * as vscode from 'vscode';
-import { fcConnection, notifications, trackEvent, FCTimer, getVSCodeSetting } from '.';
+import { fcConnection, notifications, getVSCodeSetting } from '.';
 import { EventEmitter } from 'events';
 import { ForcecodeCommand } from '../commands';
 import * as path from 'path';
@@ -175,7 +175,6 @@ export class Task extends vscode.TreeItem {
   private readonly taskViewProvider: CommandViewService;
   private readonly context: any;
   private readonly selectedResource: any;
-  private readonly commandTimer: FCTimer;
   private timeoutInterval: NodeJS.Timeout;
 
   constructor(
@@ -186,7 +185,6 @@ export class Task extends vscode.TreeItem {
   ) {
     super(execution.name || '', vscode.TreeItemCollapsibleState.None);
 
-    this.commandTimer = new FCTimer(execution.commandName);
     this.taskViewProvider = taskViewProvider;
     this.execution = execution;
     this.context = context;
@@ -225,7 +223,6 @@ export class Task extends vscode.TreeItem {
       if (loggedIn || attempt === SECOND_TRY) {
         if (reason) {
           notifications.showError(reason.message || reason, 'OK');
-          await trackEvent('Error Thrown', reason.message || reason);
           finalRes = reason;
         }
       } else {
@@ -238,7 +235,6 @@ export class Task extends vscode.TreeItem {
     } else {
       clearTimeout(this.timeoutInterval);
       this.taskViewProvider.removeEmitter.emit('removeTask', this);
-      this.commandTimer.stopTimer();
       return Promise.resolve(finalRes);
     }
   }

@@ -92,6 +92,9 @@ export class SwitchUser extends ForcecodeCommand {
 }
 
 export class FileModified extends ForcecodeCommand {
+  private stack: vscode.Uri[] = [];
+  private timeout: NodeJS.Timeout | undefined;
+
   constructor() {
     super();
     this.commandName = 'ForceCode.fileModified';
@@ -101,22 +104,34 @@ export class FileModified extends ForcecodeCommand {
   }
 
   public command(context: vscode.Uri, selectedResource: string) {
-    return vscode.workspace.openTextDocument(context).then((theDoc) => {
-      return notifications
-        .showWarning(
-          selectedResource + ' has changed ' + theDoc.fileName.split(path.sep).pop(),
-          'Refresh',
-          'Diff',
-          'Dismiss'
-        )
-        .then((s) => {
-          if (s === 'Refresh') {
-            return vscode.commands.executeCommand('ForceCode.refresh', context);
-          } else if (s === 'Diff') {
-            return vscode.commands.executeCommand('ForceCode.diff', context);
+    return notifications
+      .showWarning(
+        selectedResource + ' has changed ' + context.fsPath.split(path.sep).pop(),
+        'Refresh',
+        'Diff',
+        'Dismiss'
+      )
+      .then((s) => {
+        if (s === 'Refresh') {
+          if (this.timeout) {
+            clearTimeout(this.timeout);
           }
-        });
-    });
+          const self = this;
+          self.stack.push(context);
+          // if a user clicks refresh constantly then do it all at once. (hopefully) this will fix a bug with not actually refreshing the data
+          return (this.timeout = setTimeout(() => {
+            console.log('ececuting refresh');
+            vscode.commands
+              .executeCommand('ForceCode.refresh', undefined, self.stack)
+              .then((res) => {
+                self.stack = [];
+                return res;
+              });
+          }, 3000));
+        } else if (s === 'Diff') {
+          return vscode.commands.executeCommand('ForceCode.diff', context);
+        }
+      });
   }
 }
 

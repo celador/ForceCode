@@ -3,7 +3,6 @@ export { OUTPUT_CHANNEL_NAME, MAX_TIME_BETWEEN_FILE_CHANGES, GA_TRACKING_ID } fr
 export { getApexTestResults } from './apexTestResults';
 import { Notifications } from './notifications';
 export const notifications = Notifications.getInstance();
-export { inDebug, trackEvent, FCTimer, getUUID, FCAnalytics } from './fcAnalytics';
 export { ForceService } from './forceService';
 export { checkConfig, enterCredentials } from './credentials';
 export {

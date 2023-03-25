@@ -8,8 +8,9 @@ import { EOL } from 'os';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { ChildRelationship, Field, SObject, SObjectDescribe } from '.';
-import { dxService, SObjectCategory, notifications, inDebug } from '../services';
+import { dxService, SObjectCategory, notifications } from '../services';
 import { FCCancellationToken } from '../commands';
+import { inDebug } from '../util/utilities';
 
 const SFDX_DIR = '.sfdx';
 const TOOLS_DIR = 'tools';

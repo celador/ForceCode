@@ -9,8 +9,8 @@ import {
   saveService,
   saveHistoryService,
   FCFile,
-  trackEvent,
-  FCTimer,
+  readForceJson,
+  notifications,
 } from './services';
 import { ApexTestLinkProvider, ForceCodeContentProvider } from './providers';
 import { updateDecorations } from './decorators';
@@ -37,8 +37,6 @@ export function activate(context: vscode.ExtensionContext): any {
       return;
     }
   }
-
-  const startupTimer: FCTimer = new FCTimer('extension.activate');
 
   fcCommands.forEach((cur) => {
     context.subscriptions.push(
@@ -191,7 +189,14 @@ export function activate(context: vscode.ExtensionContext): any {
         })
     );
   }
-  vscode.commands.executeCommand('setContext', 'ForceCodeShowMenu', true);
-  trackEvent('Extension starts', 'Started');
-  startupTimer.stopTimer();
+  const username = readForceJson();
+  vscode.commands
+    .executeCommand('ForceCode.switchUser', username ? { username: username } : undefined)
+    .then((res) => {
+      if (res === false && !fcConnection.isLoggedIn()) {
+        notifications.hideStatus();
+      } else {
+        vscode.commands.executeCommand('setContext', 'ForceCodeShowMenu', true);
+      }
+    });
 }
