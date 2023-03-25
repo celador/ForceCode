@@ -18,11 +18,11 @@ export class SaveService {
   private static instance: SaveService;
   private preSaveFiles: Map<string, PreSaveFile>;
 
-  constructor() {
+  private constructor() {
     this.preSaveFiles = new Map<string, PreSaveFile>();
   }
 
-  public static getInstance() {
+  public static getInstance(): SaveService {
     if (!SaveService.instance) {
       SaveService.instance = new SaveService();
     }
@@ -86,14 +86,10 @@ export class SaveService {
       serverContents = serverContents.replace('<apex:page >', '<apex:page>');
     }
     const oldFileContents: PreSaveFile | undefined = this.getFile(documentPath);
-    if (oldFileContents) {
-      return oldFileContents.fileContents.trim() === serverContents.trim();
-    }
-    // no data to compare to
-    return true;
+    return oldFileContents?.fileContents.trim() === serverContents.trim();
   }
 
-  public saveFile(
+  public async saveFile(
     document: string,
     forceCompile: boolean,
     cancellationToken: FCCancellationToken
@@ -107,49 +103,47 @@ export class SaveService {
     if (psFile.saving) {
       psFile.queue = true;
       this.updateFile(psFile);
-      return Promise.resolve(true);
+      return true;
     }
     psFile.saving = true;
     this.updateFile(psFile);
-    const self: SaveService = this;
 
-    return new Promise<boolean>((resolve, reject) => {
-      return startSave()
-        .then((success: any) => {
-          psFile.saving = false;
-          self.updateFile(psFile);
-          if (success) {
-            // update the file time for start up file change checks
-            let mTime: Date = new Date();
-            fs.utimesSync(document, mTime, mTime);
-            // remove the pre-save file version if successful
-            if (psFile.queue) {
-              psFile.queue = false;
-              self.updateFile(psFile);
-              return resolve(self.saveFile(document, true, cancellationToken));
-            } else {
-              return resolve(self.removeFile(document));
-            }
-          } else {
-            return resolve(false);
-          }
-        })
-        .catch((reason: any) => {
-          psFile.saving = false;
-          self.updateFile(psFile);
-          return reject(reason);
-        });
-    });
+    try {
+      const success = await startSave();
+      psFile.saving = false;
+      this.updateFile(psFile);
+      if (success) {
+        // update the file time for start up file change checks
+        let mTime: Date = new Date();
+        fs.utimesSync(document, mTime, mTime);
+        // remove the pre-save file version if successful
+        if (psFile.queue) {
+          psFile.queue = false;
+          this.updateFile(psFile);
+          return this.saveFile(document, true, cancellationToken);
+        } else {
+          return this.removeFile(document);
+        }
+      } else {
+        return false;
+      }
+    } catch (reason) {
+      psFile.saving = false;
+      this.updateFile(psFile);
+      throw reason;
+    }
 
-    function startSave() {
-      let isResource: RegExpMatchArray | null = document.match(/resource\-bundles.*\.resource.*$/); // We are in a resource-bundles folder, bundle and deploy the staticResource
+    async function startSave() {
+      const isResource: RegExpMatchArray | null = document.match(
+        /resource\-bundles.*\.resource.*$/
+      );
       const toolingType: IMetadataObject | undefined = getAnyTTMetadataFromPath(document);
-      if (document.indexOf(getSrcDir()) !== -1) {
+      if (document.includes(getSrcDir())) {
         if (isResource?.index) {
           return staticResourceDeployFromFile(document);
         } else if (toolingType) {
           return compile(document, forceCompile, cancellationToken);
-        } else if (document.indexOf(path.sep + 'objects' + path.sep) !== -1) {
+        } else if (document.includes(path.sep + 'objects' + path.sep)) {
           // this means we have object data in source format
           return compile(document, forceCompile, cancellationToken);
         }
@@ -160,11 +154,11 @@ export class SaveService {
             ')'
         );
       }
-      return Promise.resolve(false);
+      return false;
     }
   }
 
-  private updateFile(psFile: PreSaveFile) {
+  private updateFile(psFile: PreSaveFile): void {
     this.preSaveFiles.set(psFile.path, psFile);
   }
 

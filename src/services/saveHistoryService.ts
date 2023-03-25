@@ -13,25 +13,24 @@ interface ISaveResult {
 export class SaveHistoryService implements vscode.TreeDataProvider<SaveResult> {
   private static instance: SaveHistoryService;
   private readonly saveResults: SaveResult[];
-  private _onDidChangeTreeData: vscode.EventEmitter<
-    SaveResult | undefined
-  > = new vscode.EventEmitter<SaveResult | undefined>();
+  private _onDidChangeTreeData: vscode.EventEmitter<SaveResult | undefined> =
+    new vscode.EventEmitter<SaveResult | undefined>();
 
-  public readonly onDidChangeTreeData: vscode.Event<SaveResult | undefined> = this
-    ._onDidChangeTreeData.event;
+  public readonly onDidChangeTreeData: vscode.Event<SaveResult | undefined> =
+    this._onDidChangeTreeData.event;
 
-  public constructor() {
+  private constructor() {
     this.saveResults = [];
   }
 
-  public static getInstance() {
+  public static getInstance(): SaveHistoryService {
     if (!SaveHistoryService.instance) {
       SaveHistoryService.instance = new SaveHistoryService();
     }
     return SaveHistoryService.instance;
   }
 
-  public addSaveResult(result: ISaveResult) {
+  public addSaveResult(result: ISaveResult): void {
     this.saveResults.unshift(new SaveResult(result));
     if (this.saveResults.length > getVSCodeSetting(VSCODE_SETTINGS.maxSaveHistory)) {
       this.saveResults.pop();
@@ -53,7 +52,7 @@ export class SaveHistoryService implements vscode.TreeDataProvider<SaveResult> {
     return [];
   }
 
-  public getParent(_element: SaveResult): any {
+  public getParent(_element: SaveResult): null {
     return null; // this is the parent
   }
 }
@@ -69,17 +68,10 @@ export class SaveResult extends vscode.TreeItem {
 
     this.result = result;
     const imagePath: string = path.join(vscode.window.forceCode.storageRoot, 'images');
-    if (this.result.success) {
-      this.iconPath = {
-        dark: path.join(imagePath, 'greenCheck.svg'),
-        light: path.join(imagePath, 'greenCheck.svg'),
-      };
-    } else {
-      this.iconPath = {
-        dark: path.join(imagePath, 'redEx.svg'),
-        light: path.join(imagePath, 'redEx.svg'),
-      };
-    }
+    this.iconPath = {
+      dark: path.join(imagePath, this.result.success ? 'greenCheck.svg' : 'redEx.svg'),
+      light: path.join(imagePath, this.result.success ? 'greenCheck.svg' : 'redEx.svg'),
+    };
     this.tooltip = this.result.success
       ? 'SUCCESS! - ' + new Date().toLocaleTimeString()
       : 'FAILED:\n' + this.result.messages.join('\n');
