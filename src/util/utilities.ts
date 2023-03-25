@@ -32,11 +32,7 @@ export function removeFile(fileName: string): Promise<any> {
 }
 
 export function toArray(toConvert: any): any[] {
-  if (!Array.isArray(toConvert)) {
-    return [toConvert];
-  } else {
-    return toConvert;
-  }
+  return Array.isArray(toConvert) ? toConvert : [toConvert];
 }
 
 export function inDebug(): boolean {

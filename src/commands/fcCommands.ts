@@ -120,7 +120,6 @@ export class FileModified extends ForcecodeCommand {
           self.stack.push(context);
           // if a user clicks refresh constantly then do it all at once. (hopefully) this will fix a bug with not actually refreshing the data
           return (this.timeout = setTimeout(() => {
-            console.log('ececuting refresh');
             vscode.commands
               .executeCommand('ForceCode.refresh', undefined, self.stack)
               .then((res) => {

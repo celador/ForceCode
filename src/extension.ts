@@ -71,7 +71,7 @@ export function activate(context: vscode.ExtensionContext): any {
     )
   );
 
-  let sel: vscode.DocumentSelector = { scheme: 'file', language: 'apex' };
+  const sel: vscode.DocumentSelector = { scheme: 'file', language: 'apex' };
   context.subscriptions.push(
     vscode.languages.registerHoverProvider(sel, new ApexTestLinkProvider())
   );
@@ -96,7 +96,7 @@ export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument(function (event) {
       // clear the code coverage
-      let fileName = event.document.fileName;
+      const fileName = event.document.fileName;
       // get the id
       const fcfile: FCFile | undefined = codeCovViewService.findByPath(fileName);
 
@@ -162,7 +162,7 @@ export function activate(context: vscode.ExtensionContext): any {
         path.join(vscode.window.forceCode.workspaceRoot, '**', '*.{cls,trigger,page,component}')
       )
       .onDidCreate((uri) => {
-        let tType = getToolingTypeFromExt(uri.fsPath);
+        const tType = getToolingTypeFromExt(uri.fsPath);
         if (tType && !vscode.window.forceCode.creatingFile) {
           if (tType === 'ApexClass' || tType === 'ApexTrigger') {
             commandViewService.enqueueCodeCoverage(CoverageRetrieveType.OpenFile);
