@@ -156,7 +156,6 @@ export async function compile(
           .split(path.sep + pathSplit + path.sep)
           .pop();
         if (foldName) {
-          //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
           files.push(path.join(pathSplit, foldName));
           files.push(path.join(pathSplit, foldName + '-meta.xml'));
           files.push('package.xml');
@@ -169,7 +168,6 @@ export async function compile(
         await createPackageXML([tFileName], vscode.window.forceCode.storageRoot);
         const files: string[] = [];
         let pathSplit: string[] = tFileName.split(path.sep);
-        //foldName = foldName.substring(0, foldName.lastIndexOf('.'));
         files.push(path.join(pathSplit[pathSplit.length - 2], pathSplit[pathSplit.length - 1]));
         files.push('package.xml');
         result = await deployFiles(files, cancellationToken, vscode.window.forceCode.storageRoot);

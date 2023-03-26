@@ -26,9 +26,7 @@ export class PackageBuilder extends ForcecodeCommand {
 }
 
 function sortFunc(a: any, b: any): number {
-  let aStr = a.label.toUpperCase();
-  let bStr = b.label.toUpperCase();
-  return aStr.localeCompare(bStr);
+  return a.label.toUpperCase().localeCompare(b.label.toUpperCase());
 }
 
 export function getMembers(

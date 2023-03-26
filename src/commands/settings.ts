@@ -52,74 +52,59 @@ export class Settings extends ForcecodeCommand {
     let currentSettings = vscode.window.forceCode.config;
     let userNames: string[];
 
-    // And set its HTML content
-    panel.webview.html = getSettingsPage();
-
     const overwriteMerge = (_destinationArray: any, sourceArray: any, _options: any) => sourceArray;
 
-    // handle settings changes
-    panel.webview.onDidReceiveMessage(message => {
+    panel.webview.html = getSettingsPage();
+
+    panel.webview.onDidReceiveMessage(handleMessage, undefined);
+
+    return refreshUsernames();
+
+    function handleMessage(message: Partial<any>) {
       if (message.save) {
-        if (!currentSettings.username) {
-          return;
-        }
-        // if the src folder is changed, then update in packageDirectories in sfdx-config.json as well
-        const sfdxProjJsonPath = path.join(
-          vscode.window.forceCode.workspaceRoot,
-          '.forceCode',
-          currentSettings.username,
-          'sfdx-project.json'
-        );
-        if (
-          tempSettings['src'] &&
-          tempSettings['src'] !== currentSettings.src &&
-          fs.existsSync(sfdxProjJsonPath)
-        ) {
-          let sfdxProjJson: SFDXProjectJson = fs.readJsonSync(sfdxProjJsonPath);
-          if (sfdxProjJson.packageDirectories?.length > 0) {
-            const forceProjIndex: number = sfdxProjJson.packageDirectories.findIndex(
-              dir => dir.path === currentSettings.src
-            );
-            if (forceProjIndex > -1) {
-              const currentDirInfo: PDir = sfdxProjJson.packageDirectories[forceProjIndex];
-              sfdxProjJson.packageDirectories.splice(forceProjIndex, 1, {
-                path: tempSettings['src'],
-                default: currentDirInfo.default,
-              });
-              fs.outputFileSync(sfdxProjJsonPath, JSON.stringify(sfdxProjJson, undefined, 4));
-            }
-          }
-        }
-        currentSettings = deepmerge(currentSettings, tempSettings, {
-          arrayMerge: overwriteMerge,
-        });
-        saveConfigFile(currentSettings.username, currentSettings);
-        if (currentSettings.username === vscode.window.forceCode.config.username) {
-          vscode.window.forceCode.config = currentSettings;
-        }
-        getSetConfig();
-        notifications.showInfo('ForceCode settings saved successfully!', 'OK');
+        handleSaveMessage();
       } else if (message.switchUsername && message.username !== currentSettings.username) {
-        // the user wants to change settings for another username
-        tempSettings = {};
-        currentSettings = readConfigFile(message.username);
-        sendSettings();
+        handleSwitchUsernameMessage(message.username);
       } else if (message.removeConfig) {
-        vscode.commands.executeCommand('ForceCode.removeConfig', message.username).then(() => {
-          currentSettings = vscode.window.forceCode.config;
-          refreshUsernames();
-        });
+        handleRemoveConfigMessage(message.username);
       } else {
         tempSettings = deepmerge(tempSettings, message, {
           arrayMerge: overwriteMerge,
         });
       }
-    }, undefined);
+    }
 
-    return refreshUsernames();
+    function handleSaveMessage() {
+      if (!currentSettings.username) {
+        return;
+      }
+      updateSfdxProjectJson();
+      currentSettings = deepmerge(currentSettings, tempSettings, {
+        arrayMerge: overwriteMerge,
+      });
+      saveConfigFile(currentSettings.username, currentSettings);
+      if (currentSettings.username === vscode.window.forceCode.config.username) {
+        vscode.window.forceCode.config = currentSettings;
+      }
+      getSetConfig();
+      notifications.showInfo('ForceCode settings saved successfully!', 'OK');
+    }
+
+    function handleSwitchUsernameMessage(username: string | undefined) {
+      tempSettings = {};
+      currentSettings = readConfigFile(username);
+      sendSettings();
+    }
+
+    function handleRemoveConfigMessage(username: any) {
+      vscode.commands.executeCommand('ForceCode.removeConfig', username).then(() => {
+        currentSettings = vscode.window.forceCode.config;
+        refreshUsernames();
+      });
+    }
 
     function refreshUsernames() {
-      return fcConnection.getSavedUsernames().then(uNames => {
+      return fcConnection.getSavedUsernames().then((uNames) => {
         userNames = uNames;
         sendSettings();
       });
@@ -131,6 +116,38 @@ export class Settings extends ForcecodeCommand {
         currentUserName: vscode.window.forceCode.config.username,
         userNames: userNames,
       });
+    }
+
+    function updateSfdxProjectJson() {
+      if (!currentSettings.username) {
+        return;
+      }
+      const sfdxProjJsonPath = path.join(
+        vscode.window.forceCode.workspaceRoot,
+        '.forceCode',
+        currentSettings.username,
+        'sfdx-project.json'
+      );
+      if (
+        tempSettings['src'] &&
+        tempSettings['src'] !== currentSettings.src &&
+        fs.existsSync(sfdxProjJsonPath)
+      ) {
+        let sfdxProjJson: SFDXProjectJson = fs.readJsonSync(sfdxProjJsonPath);
+        if (sfdxProjJson.packageDirectories?.length > 0) {
+          const forceProjIndex: number = sfdxProjJson.packageDirectories.findIndex(
+            (dir) => dir.path === currentSettings.src
+          );
+          if (forceProjIndex > -1) {
+            const currentDirInfo: PDir = sfdxProjJson.packageDirectories[forceProjIndex];
+            sfdxProjJson.packageDirectories.splice(forceProjIndex, 1, {
+              path: tempSettings['src'],
+              default: currentDirInfo.default,
+            });
+            fs.outputFileSync(sfdxProjJsonPath, JSON.stringify(sfdxProjJson, undefined, 4));
+          }
+        }
+      }
     }
 
     function getSettingsPage(): string {
