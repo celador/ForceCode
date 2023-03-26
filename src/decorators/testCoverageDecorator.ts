@@ -2,23 +2,14 @@ import * as vscode from 'vscode';
 import * as forceCode from '../forceCode';
 import { codeCovViewService, notifications, FCFile } from '../services';
 
-// create a decorator type that we use to decorate small numbers
 const uncoveredLineStyle: vscode.TextEditorDecorationType =
   vscode.window.createTextEditorDecorationType({
     backgroundColor: 'rgba(247,98,34,0.3)',
-    // borderWidth: '1px',
-    // borderStyle: 'dashed',
     overviewRulerColor: 'rgba(247,98,34,1)',
     overviewRulerLane: vscode.OverviewRulerLane.Right,
     isWholeLine: true,
-    light: {
-      // this color will be used in light color themes
-      borderColor: 'rgba(247,98,34,1)',
-    },
-    dark: {
-      // this color will be used in dark color themes
-      borderColor: 'rgba(247,98,34,1)',
-    },
+    light: { borderColor: 'rgba(247,98,34,1)' },
+    dark: { borderColor: 'rgba(247,98,34,1)' },
   });
 
 const acovLineStyle: vscode.TextEditorDecorationType = vscode.window.createTextEditorDecorationType(
@@ -29,6 +20,7 @@ export function updateDecorations() {
   vscode.window.visibleTextEditors.forEach((editor) => {
     let uncoveredLineOptions: vscode.DecorationOptions[] = [];
     let lineOpts: vscode.TextEditorDecorationType = uncoveredLineStyle;
+
     if (editor.document.languageId === 'apexCodeCoverage') {
       lineOpts = acovLineStyle;
       for (let i: number = 2; i < editor.document.lineCount; i += 2) {
@@ -42,15 +34,13 @@ export function updateDecorations() {
     }
     editor.setDecorations(lineOpts, uncoveredLineOptions);
   });
-
-  if (vscode.window.activeTextEditor) {
-  }
 }
 
 function getUncoveredLineOptions(editor: vscode.TextEditor) {
   const document = editor.document;
   let uncoveredLineDec: vscode.DecorationOptions[] = [];
   const fcfile: FCFile | undefined = codeCovViewService.findByPath(document.fileName);
+
   if (fcfile) {
     const wsMem: forceCode.IWorkspaceMember = fcfile.getWsMember();
 
@@ -65,6 +55,7 @@ function getUncoveredLineOptions(editor: vscode.TextEditor) {
     const wsMemCoverage = workspaceMember.selectedCoverage || 'overall';
     let fileCoverage: forceCode.ICodeCoverage | undefined =
       workspaceMember.coverage.get(wsMemCoverage);
+
     if (fileCoverage) {
       fileCoverage.Coverage.uncoveredLines.forEach((notCovered) => {
         // just in case, as I have encountered "illegal value for line" errors

@@ -9,42 +9,51 @@ export class ApexTestLinkProvider implements vscode.HoverProvider {
     position: vscode.Position,
     _token: vscode.CancellationToken
   ): vscode.ProviderResult<vscode.Hover> {
-    let wordPosition = document.getWordRangeAtPosition(position);
-    if (!wordPosition || wordPosition.start.character === 0)
-      return new Promise((resolve) => resolve(undefined));
-    wordPosition = wordPosition.with(
+    const wordPosition = document.getWordRangeAtPosition(position);
+    if (!wordPosition || wordPosition.start.character === 0) {
+      return Promise.resolve(undefined);
+    }
+
+    const adjustedWordPosition = wordPosition.with(
       wordPosition.start.with(wordPosition.start.line, wordPosition.start.character - 1)
     );
-    const word = document.getText(wordPosition).trim().toLowerCase();
+    const word = document.getText(adjustedWordPosition).trim().toLowerCase();
+
     if (word === '@istest' || word === 'testmethod') {
-      let fileContents = document.getText();
-      let fileName = getFileName(document);
-      let runText: string = 'all tests in ' + fileName + '.' + getFileExtension(document);
-      let wordIndex: number = document.offsetAt(position);
+      const fileContents = document.getText();
+      const fileName = getFileName(document);
+      const fileExtension = getFileExtension(document);
+      let runText = `all tests in ${fileName}.${fileExtension}`;
+      const wordIndex = document.offsetAt(position);
       // get the index of the first '{' after the position
-      let bracketIndex: number = fileContents.indexOf('{', wordIndex);
+      const bracketIndex = fileContents.indexOf('{', wordIndex);
+
       if (bracketIndex > wordIndex) {
         let args = { name: fileName, type: 'class' };
         // get the text up till the bracket so we can see if it's a class
-        let lineText: string = fileContents.slice(wordIndex, bracketIndex);
+        const lineText = fileContents.slice(wordIndex, bracketIndex);
+
         if (!lineText.toLowerCase().includes('class')) {
           // this means it's a method
-          let methodName: string | undefined = lineText
+          const methodName = lineText
             .slice(0, lineText.lastIndexOf('('))
-            .trimRight()
+            .trimEnd()
             .split(' ')
             .pop();
-          args.name += '.' + methodName;
+
+          args.name += `.${methodName}`;
           args.type = 'method';
-          runText = methodName + ' test method';
+          runText = `${methodName} test method`;
         }
-        let md: vscode.MarkdownString = new vscode.MarkdownString(
-          'Click [here](' + encodeURI(`${COMMAND}?` + JSON.stringify(args)) + ')  to run ' + runText
+
+        const md = new vscode.MarkdownString(
+          `Click [here](${encodeURI(`${COMMAND}?${JSON.stringify(args)}`)})  to run ${runText}`
         );
         md.isTrusted = true;
         return new vscode.Hover(['ForceCode: Run test', md]);
       }
     }
-    return new Promise((resolve) => resolve(undefined));
+
+    return Promise.resolve(undefined);
   }
 }
