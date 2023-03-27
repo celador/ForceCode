@@ -9,10 +9,10 @@ export function isLinux() {
 export function isMac() {
   return os.platform().startsWith('darwin');
 }
-*/
+
 export function getOS() {
   return os.platform();
-}
+}*/
 
 export function getHomeDir() {
   return os.homedir();
