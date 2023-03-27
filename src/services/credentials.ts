@@ -6,6 +6,7 @@ import {
   saveConfigFile,
   defaultOptions,
   FCOauth,
+  notifications,
 } from '.';
 import { Config } from '../forceCode';
 import * as deepmerge from 'deepmerge';
@@ -32,11 +33,17 @@ export async function enterCredentials(cancellationToken: FCCancellationToken): 
     return Promise.resolve(setupNewUser(defaultOptions));
   } else {
     const cfg = readConfigFile(choice.label);
+    let orgInfo;
     try {
-      const orgInfo = await dxService.getOrgInfo(cfg.username);
-      return Promise.resolve(orgInfo);
-    } catch (_error) {
-      return Promise.resolve(setupNewUser(cfg));
+      orgInfo = await dxService.getOrgInfo(cfg.username);
+    } catch (error) {
+      notifications.writeLog(error);
+    } finally {
+      if (orgInfo) {
+        return Promise.resolve(orgInfo);
+      } else {
+        return Promise.resolve(setupNewUser(cfg));
+      }
     }
   }
 
