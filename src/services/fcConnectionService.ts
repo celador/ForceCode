@@ -188,20 +188,27 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     return Promise.resolve(finalRes);
 
     // pretty much this whole function is skipped if a user is logged in already
-    async function setupConn(isLoggedIn: boolean): Promise<FCConnection> {
+    async function setupConn(
+      isLoggedIn: boolean,
+      tryAgain: boolean = false
+    ): Promise<FCConnection> {
       if (isLoggedIn && service.currentConnection) {
         vscode.window.forceCode.config = readConfigFile(username);
         return Promise.resolve(service.currentConnection);
       }
 
-      let orgInf: FCOauth;
+      let orgInf: FCOauth | undefined;
       try {
         orgInf = await dxService.getOrgInfo(username);
-      } catch (_error) {
-        if (service.currentConnection) {
-          service.currentConnection.connection = undefined;
+      } catch (error) {
+        notifications.writeLog(error);
+      } finally {
+        if (!orgInf) {
+          if (service.currentConnection) {
+            service.currentConnection.connection = undefined;
+          }
+          orgInf = await enterCredentials(cancellationToken);
         }
-        orgInf = await enterCredentials(cancellationToken);
       }
 
       service.currentConnection = service.addConnection(orgInf, true);
@@ -229,7 +236,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
       const sfdxPath = path.join(getHomeDir(), '.sfdx', orgInf.username + '.json');
       const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
-      let connection = new jsforce.Connection({
+      const connection = new jsforce.Connection({
         oauth2: {
           clientId: service.currentConnection.orgInfo.clientId || 'SalesforceDevelopmentExperience',
         },
@@ -241,12 +248,17 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
       service.currentConnection.connection = connection;
 
-      // get the user id
-      const identity = await connection.identity();
-      service.currentConnection.orgInfo.userId = identity.user_id;
-      service.currentConnection.isLoggedIn = true;
-      vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
-
+      try {
+        // get the user id
+        const identity = await connection.identity();
+        service.currentConnection.orgInfo.userId = identity.user_id;
+        service.currentConnection.isLoggedIn = true;
+        vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
+      } catch (err: any) {
+        if (!tryAgain && err?.message?.indexOf('expired access/refresh token') != -1) {
+          service.currentConnection = await setupConn(false, true);
+        }
+      }
       return Promise.resolve(service.currentConnection);
     }
 
@@ -353,8 +365,9 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         const aToken: string | undefined = fcConn.orgInfo.accessToken;
         Object.assign(fcConn.orgInfo, orgInfo);
         // only the getOrgInfo command gives us the right access token, for some reason the others don't work
+        // looks like this is no longer the case!
         if (!saveToken) {
-          fcConn.orgInfo.accessToken = aToken;
+          fcConn.orgInfo.accessToken = aToken ? aToken : fcConn.orgInfo.accessToken;
         }
       }
       fcConn.isLoggedIn =
