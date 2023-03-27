@@ -9,7 +9,7 @@ export function getApexTestResults(singleClass?: boolean): Promise<QueryResult> 
   const fromWhere = singleClass ? ' ApexCodeCoverage ' : ' ApexCodeCoverageAggregate ';
   const selectMore = singleClass ? 'TestMethodName, ApexTestClassId, ApexTestClass.Name,' : '';
   const query =
-    `SELECT ${selectMore} Coverage, ApexClassOrTrigger.Name, ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered` +
+    `SELECT ${selectMore} Coverage, ApexClassOrTrigger.Name, ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered ` +
     `FROM${fromWhere}` +
     'WHERE (NumLinesCovered > 0 OR NumLinesUncovered > 0) ' +
     `ORDER BY ApexClassOrTrigger.Name${singleClass ? ', TestMethodName' : ''} ASC`;
