@@ -6,78 +6,77 @@ export class Notifications {
   private static instance: Notifications;
   private outputChannel: vscode.OutputChannel;
   private statusBarItem: vscode.StatusBarItem;
-  private statusTimeout: any;
-  private isLoading: Boolean = false;
+  private statusTimeout: NodeJS.Timeout | undefined;
+  private isLoading: boolean = false;
 
-  constructor() {
+  private constructor() {
     this.outputChannel = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 6);
   }
 
-  public static getInstance() {
+  public static getInstance(): Notifications {
     if (!Notifications.instance) {
       Notifications.instance = new Notifications();
     }
     return Notifications.instance;
   }
 
-  public setStatusText(message: string, loading?: boolean) {
+  public setStatusText(message: string, loading?: boolean): void {
     this.statusBarItem.show();
     if (loading === false) {
       this.isLoading = false;
-      if (message.indexOf(` $(loading~spin)`) > -1) {
-        message = message.substring(0, message.indexOf(` $(loading~spin)`));
+      if (message.includes(` $(loading~spin)`)) {
+        message = message.replace(` $(loading~spin)`, '');
       }
     } else if (this.isLoading || loading) {
       this.isLoading = true;
-      if (message.indexOf(` $(loading~spin)`) == -1) {
+      if (!message.includes(` $(loading~spin)`)) {
         message += ` $(loading~spin)`;
       }
     }
     this.statusBarItem.text = message;
   }
 
-  public showLoading() {
+  public showLoading(): void {
     this.setStatusText(this.statusBarItem.text, true);
   }
 
-  public resetLoading() {
-    // just in case we don't want to change the displayed message
+  public resetLoading(): void {
     this.setStatusText(this.statusBarItem.text, false);
   }
 
-  public showStatus(message: string) {
+  public showStatus(message: string): void {
     this.writeLog(message);
     this.setStatusText(message);
-    this.resetStatus(this);
+    this.resetStatus();
   }
 
-  public hideStatus() {
+  public hideStatus(): void {
     this.statusBarItem.hide();
   }
 
-  public setStatusCommand(command: string) {
+  public setStatusCommand(command: string): void {
     this.statusBarItem.command = command;
   }
 
-  public setStatusTooltip(tooltip: string) {
+  public setStatusTooltip(tooltip: string): void {
     this.statusBarItem.tooltip = tooltip;
   }
 
-  public clearLog() {
+  public clearLog(): void {
     this.outputChannel.clear();
   }
 
-  public writeLog(data: any) {
+  public writeLog(data: any): void {
     const stringData = outputToString(data);
     this.outputChannel.appendLine(stringData);
   }
 
-  public showLog() {
+  public showLog(): void {
     this.outputChannel.show(true);
   }
 
-  public showError(message: any, ...items: string[]) {
+  public showError(message: any, ...items: string[]): Thenable<string | undefined> {
     message = outputToString(message);
     let mParts = message.split('$#FC_LOG_ONLY_#*');
     let logMess = message;
@@ -91,25 +90,25 @@ export class Notifications {
     return vscode.window.showErrorMessage(theMess, ...items);
   }
 
-  public showWarning(message: string, ...items: string[]) {
+  public showWarning(message: string, ...items: string[]): Thenable<string | undefined> {
     message = outputToString(message);
     this.writeLog(message);
     return vscode.window.showWarningMessage(message, ...items);
   }
 
-  public showInfo(message: string, ...items: string[]) {
+  public showInfo(message: string, ...items: string[]): Thenable<string | undefined> {
     message = outputToString(message);
     this.writeLog(message);
     return vscode.window.showInformationMessage(message, ...items);
   }
 
-  private resetStatus(instance: Notifications) {
+  private resetStatus(): void {
     // for status bar updates. resets after 5 seconds
-    if (instance.statusTimeout) {
-      clearTimeout(instance.statusTimeout);
+    if (this.statusTimeout) {
+      clearTimeout(this.statusTimeout);
     }
-    instance.statusTimeout = setTimeout(() => {
-      instance.setStatusText(`ForceCode Menu`);
+    this.statusTimeout = setTimeout(() => {
+      this.setStatusText('ForceCode Menu');
     }, 5000);
   }
 }
