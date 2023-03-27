@@ -14,7 +14,7 @@ jobs:
     steps:
      - task: NodeTool@0
        inputs:
-         versionSpec: "14.x"
+         versionSpec: "18.x"
        displayName: "Install Node.js"
      - bash: |
          /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
@@ -48,7 +48,7 @@ jobs:
     steps:
       - task: NodeTool@0
         inputs:
-          versionSpec: "14.x"
+          versionSpec: "18.x"
         displayName: "Install Node.js"
       - bash: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
@@ -80,7 +80,7 @@ jobs:
     steps:
       - task: NodeTool@0
         inputs:
-          versionSpec: "14.x"
+          versionSpec: "18.x"
         displayName: "Install Node.js"
       - bash: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
