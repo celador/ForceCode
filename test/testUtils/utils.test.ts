@@ -78,7 +78,7 @@ export function addErrorToDoc() {
   }
   const position = editor.document.positionAt(0);
   editor.edit((edit) => {
-    edit.insert(position, '<'); // add a syntax error
+    edit.insert(position, '~'); // add a syntax error
   });
   vscode.window.forceCode.lastSaveResult = undefined;
   return editor.document.save().then((_res) => {
@@ -102,7 +102,7 @@ export function removeErrorOnDoc(dontRemove?: boolean, autoCompile?: boolean) {
   const range: vscode.Range = new vscode.Range(position, position2);
   editor.edit((edit) => {
     if (dontRemove) {
-      edit.insert(position, '<');
+      edit.insert(position, '~');
     }
     edit.delete(range); // remove syntax error
   });
