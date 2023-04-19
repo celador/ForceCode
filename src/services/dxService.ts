@@ -55,7 +55,6 @@ export enum SObjectCategory {
 
 export class DXService {
   private static instance: DXService;
-  private allOrgInfo: FCOauth[] = [];
 
   public static getInstance() {
     if (!DXService.instance) {
@@ -191,29 +190,22 @@ export class DXService {
     return this.runCommand('auth:web:login --instanceurl ' + url, false, cancellationToken);
   }
 
-  public async getOrgInfo(username: string | undefined): Promise<FCOauth | undefined> {
-    //return this.runCommand('org:display --targetusername ' + username, false);
-    this.allOrgInfo = await this.orgList(true);
-    return this.allOrgInfo.find((org) => org.username == username);
+  public getOrgInfo(username: string | undefined): Promise<SFDX> {
+    return this.runCommand('org:display --targetusername ' + username, false);
   }
 
-  public async orgList(refresh?: boolean): Promise<FCOauth[]> {
-    if (!refresh) {
-      return this.allOrgInfo;
-    }
-
-    let res: FCOauth[] = [];
-    try {
-      const orgInfRes = await this.runCommand('org:list --clean --noprompt', false);
-      res = [...orgInfRes.nonScratchOrgs, ...orgInfRes.scratchOrgs];
-    } catch (_err) {
-      // we got an error because there are no connections
-      fcConnection.getChildren().forEach((curConn) => {
-        curConn.isLoggedIn = false;
+  public orgList(): Promise<FCOauth[]> {
+    return this.runCommand('org:list --clean --noprompt', false)
+      .then((res) => {
+        return res.nonScratchOrgs.concat(res.scratchOrgs);
+      })
+      .catch(() => {
+        // we got an error because there are no connections
+        fcConnection.getChildren().forEach((curConn) => {
+          curConn.isLoggedIn = false;
+        });
+        return undefined;
       });
-    } finally {
-      return res;
-    }
   }
 
   public getAndShowLog(id: string | undefined): Thenable<vscode.TextEditor | undefined> {

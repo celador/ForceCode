@@ -4,11 +4,10 @@
   "configurations": [
     {
       "name": "Launch Extension",
-      "type": "pwa-extensionHost",
+      "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
-      "stopOnEntry": false,
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}", "--disable-extensions"],
       "sourceMaps": true,
       "preLaunchTask": "npm: webpack",
       "outFiles": ["${workspaceFolder}/dist/**/*.js"]
@@ -20,9 +19,9 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "${workspaceFolder}/dist/test",
-        "--disable-extensions=true",
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/dist/test/suite/index"
+        "--extensionTestsPath=${workspaceFolder}/dist/test/suite/index",
+        "--disable-extensions"
       ],
       "preLaunchTask": "npm: compile",
       "outFiles": ["${workspaceFolder}/dist/test/**/*.js"]

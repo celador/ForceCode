@@ -75,6 +75,8 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
         ? context.fsPath.split(path.sep)
         : context
         ? context.fileName.split(path.sep)
+        : selectedResource && Array.isArray(selectedResource) && selectedResource.length > 0
+        ? ['files.cls'] // will just show "Refreshing files"
         : vscode.window.activeTextEditor
         ? vscode.window.activeTextEditor.document.fileName.split(path.sep)
         : undefined;

@@ -188,10 +188,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     return Promise.resolve(finalRes);
 
     // pretty much this whole function is skipped if a user is logged in already
-    async function setupConn(
-      isLoggedIn: boolean,
-      tryAgain: boolean = false
-    ): Promise<FCConnection> {
+    async function setupConn(isLoggedIn: boolean): Promise<FCConnection> {
       if (isLoggedIn && service.currentConnection) {
         vscode.window.forceCode.config = readConfigFile(username);
         return Promise.resolve(service.currentConnection);
@@ -248,17 +245,12 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
       service.currentConnection.connection = connection;
 
-      try {
-        // get the user id
-        const identity = await connection.identity();
-        service.currentConnection.orgInfo.userId = identity.user_id;
-        service.currentConnection.isLoggedIn = true;
-        vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
-      } catch (err: any) {
-        if (!tryAgain && err?.message?.indexOf('expired access/refresh token') != -1) {
-          service.currentConnection = await setupConn(false, true);
-        }
-      }
+      // get the user id
+      const identity = await connection.identity();
+      service.currentConnection.orgInfo.userId = identity.user_id;
+      service.currentConnection.isLoggedIn = true;
+      vscode.commands.executeCommand('setContext', 'ForceCodeLoggedIn', true);
+
       return Promise.resolve(service.currentConnection);
     }
 
@@ -365,9 +357,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         const aToken: string | undefined = fcConn.orgInfo.accessToken;
         Object.assign(fcConn.orgInfo, orgInfo);
         // only the getOrgInfo command gives us the right access token, for some reason the others don't work
-        // looks like this is no longer the case!
         if (!saveToken) {
-          fcConn.orgInfo.accessToken = aToken ? aToken : fcConn.orgInfo.accessToken;
+          fcConn.orgInfo.accessToken = aToken;
         }
       }
       fcConn.isLoggedIn =
