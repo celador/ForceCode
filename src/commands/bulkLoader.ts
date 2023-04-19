@@ -55,7 +55,15 @@ export class BulkLoader extends ForcecodeCommand {
             if (uri) {
               csvPath = uri[0].fsPath;
               try {
-                totalRecords = fs.readFileSync(csvPath).toString().split('\n').length - 1;
+                let splitRecs = fs.readFileSync(csvPath).toString().split('\n');
+                totalRecords = 0;
+                for (let i = 0; i < splitRecs.length; i++) {
+                  if (splitRecs[i].trim() !== '') {
+                    totalRecords++;
+                  }
+                }
+                totalRecords--; // account for the header
+                //totalRecords = fs.readFileSync(csvPath).toString().split('\n').length - 1;
                 panel.webview.postMessage({ fileSelected: true, totalRecords: totalRecords });
               } catch (e) {
                 throw 'Invalid file format, please select a CSV file';
