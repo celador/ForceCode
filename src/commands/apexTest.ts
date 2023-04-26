@@ -97,7 +97,14 @@ export class ApexTest extends ForcecodeCommand {
         if (!fcConnection.currentConnection) {
           return Promise.reject('No current org info found');
         }
-        return Promise.resolve(dxService.getAndShowLog(undefined /*res.records[0].Id*/));
+        const queryString: string =
+          `SELECT Id FROM ApexLog` +
+          ` WHERE LogUserId='${fcConnection.currentConnection.orgInfo.userId}'` +
+          ` ORDER BY StartTime DESC, Id DESC LIMIT 1`;
+
+        return vscode.window.forceCode.conn.tooling.query(queryString).then((recs) => {
+          return Promise.resolve(dxService.getAndShowLog(recs.records[0].Id));
+        });
       } else {
         return Promise.resolve();
       }
