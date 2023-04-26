@@ -74,10 +74,10 @@ export class DXService {
     bypassReject?: boolean
   ): Promise<any> {
     let fullCommand =
-      'sfdx force:' +
+      'sf ' +
       cmdString +
       (targetusername && fcConnection.currentConnection
-        ? ' --targetusername ' + fcConnection.currentConnection.orgInfo.username
+        ? ' --target-org ' + fcConnection.currentConnection.orgInfo.username
         : '');
 
     if (isWindows()) {
@@ -183,19 +183,19 @@ export class DXService {
     cancellationToken: FCCancellationToken
   ): Promise<ExecuteAnonymousResult> {
     file = file.split(' ').join('#FC*SPACE*#');
-    return this.runCommand('apex:execute --apexcodefile ' + file, true, cancellationToken);
+    return this.runCommand('apex run --file ' + file, true, cancellationToken);
   }
 
   public login(url: string | undefined, cancellationToken: FCCancellationToken): Promise<any> {
-    return this.runCommand('auth:web:login --instanceurl ' + url, false, cancellationToken);
+    return this.runCommand('org login web --instance-url ' + url, false, cancellationToken);
   }
 
   public getOrgInfo(username: string | undefined): Promise<SFDX> {
-    return this.runCommand('org:display --targetusername ' + username, false);
+    return this.runCommand('org display --target-org ' + username, false);
   }
 
   public orgList(): Promise<FCOauth[]> {
-    return this.runCommand('org:list --clean --noprompt', false)
+    return this.runCommand('org list --clean --no-prompt', false)
       .then((res) => {
         return res.nonScratchOrgs.concat(res.scratchOrgs);
       })
@@ -211,9 +211,9 @@ export class DXService {
   public getAndShowLog(id: string | undefined): Thenable<vscode.TextEditor | undefined> {
     let theLogId: string = '';
     if (id) {
-      theLogId += ' --logid ' + id;
+      theLogId += ' --log-id ' + id;
     }
-    return this.runCommand('apex:log:get' + theLogId, true)
+    return this.runCommand('apex get log' + theLogId, true)
       .then((log) => {
         log = log[0] || log;
         return Promise.resolve(log.log);
@@ -234,18 +234,18 @@ export class DXService {
   }
 
   public openOrg(): Promise<any> {
-    return this.runCommand('org:open', true);
+    return this.runCommand('org open', true);
   }
 
   public openOrgPage(url: string): Promise<any> {
-    return this.runCommand('org:open -p ' + encodeURIComponent(url), true);
+    return this.runCommand('org open -p ' + encodeURIComponent(url), true);
   }
 
   public createScratchOrg(options: string, cancellationToken: FCCancellationToken): Promise<any> {
     const curConnection = fcConnection.currentConnection;
     if (curConnection) {
       return this.runCommand(
-        'org:create ' + options + ' --targetdevhubusername ' + curConnection.orgInfo.username,
+        'org create scratch ' + options + ' --target-dev-hub ' + curConnection.orgInfo.username,
         false,
         cancellationToken
       );
@@ -268,23 +268,23 @@ export class DXService {
 
     return this.runCommand(
       // fix code coverage not being updated in the org with newer version of SFDX CLI: -c -r json
-      'apex:test:run ' + toRun + ' -w 3 -y -c -r json',
+      'apex run test ' + toRun + ' -w 3 -y -c -r json',
       true,
       cancellationToken
     );
   }
 
   public describeGlobal(type: SObjectCategory): Promise<string[]> {
-    return this.runCommand('schema:sobject:list --sobjecttypecategory ' + type.toString(), true);
+    return this.runCommand('sobject list --sobject ' + type.toString().toLowerCase(), true);
   }
 
   public deleteSource(thePath: string, cancellationToken: FCCancellationToken) {
-    return this.runCommand(`source:delete -p ${thePath} -r`, true, cancellationToken);
+    return this.runCommand(`project delete source -p ${thePath} -r`, true, cancellationToken);
   }
 
   public getDeployErrors(deploymentId: string, cancellationToken: FCCancellationToken) {
     return this.runCommand(
-      'source:deploy:report -i ' + deploymentId,
+      'project deploy report -i ' + deploymentId,
       true,
       cancellationToken,
       true
@@ -299,7 +299,7 @@ export class DXService {
     notifications.writeLog('Deploying in source format');
     // package.xml or a path
     return this.runCommand(
-      `source:deploy -${(packageXML ? 'x ' : 'p') + pXMLPath}`,
+      `project deploy start -${(packageXML ? 'x ' : 'd ') + pXMLPath}`,
       true,
       cancellationToken
     );
@@ -307,6 +307,6 @@ export class DXService {
 
   public async retrieveSourceFormat(pXMLPath: string, cancellationToken: FCCancellationToken) {
     notifications.writeLog('Retrieving in source format');
-    return this.runCommand(`source:retrieve -x ${pXMLPath}`, true, cancellationToken);
+    return this.runCommand(`project retrieve start -x ${pXMLPath}`, true, cancellationToken);
   }
 }

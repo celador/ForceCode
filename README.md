@@ -17,6 +17,7 @@ There's no complicated setup process or project configurations, no external apps
 ## IMPORTANT
 
 You will need to install the SFDX-CLI on your system in order for this extension to function! Please download from [https://developer.salesforce.com/tools/sfdxcli](https://developer.salesforce.com/tools/sfdxcli) and install, then restart Visual Studio Code.
+If you receive messages about the CLI not being installed after you have upgraded to 4.1.1 or higher, please re-download the CLI from the website. I had to manually upgrade this way on my mac in order to receive the newest updates (Switching from sfdx to sf based commands).
 
 ## Slack
 
