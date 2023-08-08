@@ -2,13 +2,9 @@ import * as vscode from 'vscode';
 import * as forceCode from '../forceCode';
 import {
   codeCovViewService,
-  fcConnection,
   notifications,
   FCFile,
-  getUUID,
-  FCAnalytics,
   defaultOptions,
-  readForceJson,
   getVSCodeSetting,
   commandViewService,
 } from '.';
@@ -28,7 +24,6 @@ export class ForceService implements forceCode.IForceService {
   public describe!: forceCode.IMetadataDescribe;
   public workspaceRoot: string;
   public storageRoot: string;
-  public uuid: string;
   public lastSaveResult: SaveResult | undefined;
   public creatingFile: boolean = false;
   private interval: NodeJS.Timeout | undefined;
@@ -44,46 +39,7 @@ export class ForceService implements forceCode.IForceService {
     notifications.setStatusText(`ForceCode Loading...`, true);
     this.storageRoot = context.extensionPath;
 
-    const vsConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('force');
-    const uuidRes: FCAnalytics = getUUID();
-    this.uuid = uuidRes.uuid;
-
     notifications.writeLog('Starting ForceCode service');
-    new Promise((resolve) => {
-      if (uuidRes.firstTime) {
-        // ask the user to opt-in
-        return notifications
-          .showInfo(
-            'The ForceCode Team would like to collect anonymous usage data so we can improve your experience. Is this OK?',
-            'Yes',
-            'No'
-          )
-          .then((choice) => {
-            let option: boolean = false;
-            if (choice === 'Yes') {
-              option = true;
-            }
-            resolve(
-              vsConfig.update(
-                'allowAnonymousUsageTracking',
-                option,
-                vscode.ConfigurationTarget.Global
-              )
-            );
-          });
-      } else {
-        resolve(undefined);
-      }
-    }).then(() => {
-      const username = readForceJson();
-      vscode.commands
-        .executeCommand('ForceCode.switchUser', username ? { username: username } : undefined)
-        .then((res) => {
-          if (res === false && !fcConnection.isLoggedIn()) {
-            notifications.hideStatus();
-          }
-        });
-    });
   }
 
   public checkForFileChanges(skipChanges?: boolean) {
@@ -173,7 +129,7 @@ export class ForceService implements forceCode.IForceService {
               ) {
                 vscode.commands.executeCommand(
                   'ForceCode.fileModified',
-                  thePath,
+                  vscode.Uri.file(thePath),
                   key.lastModifiedByName
                 );
               }

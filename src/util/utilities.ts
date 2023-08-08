@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { getSrcDir } from '../services/configuration';
+import * as vscode from 'vscode';
 
 export function isEmptyUndOrNull(param: any): boolean {
   return (
@@ -31,9 +32,9 @@ export function removeFile(fileName: string): Promise<any> {
 }
 
 export function toArray(toConvert: any): any[] {
-  if (!Array.isArray(toConvert)) {
-    return [toConvert];
-  } else {
-    return toConvert;
-  }
+  return Array.isArray(toConvert) ? toConvert : [toConvert];
+}
+
+export function inDebug(): boolean {
+  return vscode.env.machineId === 'someValue.machineId';
 }

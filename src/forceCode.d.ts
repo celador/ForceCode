@@ -143,7 +143,6 @@ export interface IForceService {
   describe: IMetadataDescribe;
   conn: Connection;
   fcDiagnosticCollection: vscode.DiagnosticCollection;
-  uuid: string;
   lastSaveResult: SaveResult | undefined;
   connect(): Promise<IForceService>;
   checkForFileChanges(): any;

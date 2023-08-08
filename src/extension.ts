@@ -9,8 +9,8 @@ import {
   saveService,
   saveHistoryService,
   FCFile,
-  trackEvent,
-  FCTimer,
+  readForceJson,
+  notifications,
 } from './services';
 import { ApexTestLinkProvider, ForceCodeContentProvider } from './providers';
 import { updateDecorations } from './decorators';
@@ -37,8 +37,6 @@ export function activate(context: vscode.ExtensionContext): any {
       return;
     }
   }
-
-  const startupTimer: FCTimer = new FCTimer('extension.activate');
 
   fcCommands.forEach((cur) => {
     context.subscriptions.push(
@@ -73,7 +71,7 @@ export function activate(context: vscode.ExtensionContext): any {
     )
   );
 
-  let sel: vscode.DocumentSelector = { scheme: 'file', language: 'apex' };
+  const sel: vscode.DocumentSelector = { scheme: 'file', language: 'apex' };
   context.subscriptions.push(
     vscode.languages.registerHoverProvider(sel, new ApexTestLinkProvider())
   );
@@ -98,7 +96,7 @@ export function activate(context: vscode.ExtensionContext): any {
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument(function (event) {
       // clear the code coverage
-      let fileName = event.document.fileName;
+      const fileName = event.document.fileName;
       // get the id
       const fcfile: FCFile | undefined = codeCovViewService.findByPath(fileName);
 
@@ -164,7 +162,7 @@ export function activate(context: vscode.ExtensionContext): any {
         path.join(vscode.window.forceCode.workspaceRoot, '**', '*.{cls,trigger,page,component}')
       )
       .onDidCreate((uri) => {
-        let tType = getToolingTypeFromExt(uri.fsPath);
+        const tType = getToolingTypeFromExt(uri.fsPath);
         if (tType && !vscode.window.forceCode.creatingFile) {
           if (tType === 'ApexClass' || tType === 'ApexTrigger') {
             commandViewService.enqueueCodeCoverage(CoverageRetrieveType.OpenFile);
@@ -191,7 +189,14 @@ export function activate(context: vscode.ExtensionContext): any {
         })
     );
   }
-  vscode.commands.executeCommand('setContext', 'ForceCodeShowMenu', true);
-  trackEvent('Extension starts', 'Started');
-  startupTimer.stopTimer();
+  const username = readForceJson();
+  vscode.commands
+    .executeCommand('ForceCode.switchUser', username ? { username: username } : undefined)
+    .then((res) => {
+      if (res === false && !fcConnection.isLoggedIn()) {
+        notifications.hideStatus();
+      } else {
+        vscode.commands.executeCommand('setContext', 'ForceCodeShowMenu', true);
+      }
+    });
 }

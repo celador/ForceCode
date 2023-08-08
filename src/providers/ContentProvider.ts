@@ -25,10 +25,10 @@ export class ForceCodeContentProvider implements vscode.TextDocumentContentProvi
    * @return {Thenable<string>} TODO: give a description
    */
   provideTextDocumentContent(uri: vscode.Uri): Thenable<string> {
-    let uriParts: string[] = uri.path.split('/');
-    let toolingType: string = uriParts[1];
+    const uriParts: string[] = uri.path.split('/');
+    const toolingType: string = uriParts[1];
     let name: string | undefined = uriParts[2];
-    let toolingName: string = name.split('.')[0];
+    const toolingName: string = name.split('.')[0];
     let field: string = 'Body';
     let nsPrefix = `NamespacePrefix = '${
       vscode.window.forceCode.config.prefix || ''
@@ -49,15 +49,16 @@ export class ForceCodeContentProvider implements vscode.TextDocumentContentProvi
       FilePath = FilePath?.split(path.sep).join('/') || '';
       nsPrefix = `FilePath='${FilePath}' AND LightningComponentBundleId IN (SELECT Id FROM LightningComponentBundle WHERE DeveloperName='${name}')`;
     }
+
     return new Promise<string>((resolve, reject) => {
-      let query: string = `SELECT ${field} FROM ${toolingType} WHERE ${nsPrefix}`;
+      const query: string = `SELECT ${field} FROM ${toolingType} WHERE ${nsPrefix}`;
       vscode.commands.executeCommand('ForceCode.toolingQuery', query).then(
         (results) => {
           const theResults = results as QueryResult;
           if (theResults?.totalSize === 1) {
-            return resolve(theResults.records[0][field]);
+            resolve(theResults.records[0][field]);
           } else {
-            return resolve('The current file could NOT be found in the org');
+            resolve('The current file could NOT be found in the org');
           }
         },
         (err: Error) => reject(err)

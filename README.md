@@ -17,6 +17,7 @@ There's no complicated setup process or project configurations, no external apps
 ## IMPORTANT
 
 You will need to install the SFDX-CLI on your system in order for this extension to function! Please download from [https://developer.salesforce.com/tools/sfdxcli](https://developer.salesforce.com/tools/sfdxcli) and install, then restart Visual Studio Code.
+If you receive messages about the CLI not being installed after you have upgraded to 4.1.1 or higher, please re-download the CLI from the website. I had to manually upgrade this way on my mac in order to receive the newest updates (Switching from sfdx to sf based commands).
 
 ## Slack
 
@@ -328,7 +329,6 @@ Glob patterns can be tricky... so a little research and trial and error may be r
 ```
 
 The following settings have been migrated to the workspace settings as well:
-* allowAnonymousUsageTracking: Checking this will allow the Forcecode team to track anonymous usage data so that we can improve your overall experience.
 * autoRefresh: If autoCompile is on, and you're working in a resource-bundles folder, the staticResource will automatically compile and deploy to your org.  If autoRefresh is on \(and you're working on a Mac\), the currently active tab in Google Chrome Canary \(or your configured browser\) will be refreshed.  This provides a simple browsersync-like experience without the overhead of browsersync
 * browser: Define which browser you want to reload when the static resource refreshes \(this only works with Macs at the moment\)
 * bulkLoaderPollInterval: The amount of time in milliseconds between updates when doing bulk CRUD operations.

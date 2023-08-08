@@ -8,7 +8,7 @@ interface ScratchOrgOptions {
   definitionFile?: string;
   edition: string;
   duration: string;
-  sampleData: boolean;
+  //sampleData: boolean;
 }
 
 export class CreateScratchOrg extends ForcecodeCommand {
@@ -29,7 +29,7 @@ export class CreateScratchOrg extends ForcecodeCommand {
     const soOptions: ScratchOrgOptions = {
       edition: '',
       duration: '',
-      sampleData: false,
+      //sampleData: false,
     };
 
     const fileOrChoice = await askNoYes('Create org based off of a definition file?');
@@ -47,17 +47,20 @@ export class CreateScratchOrg extends ForcecodeCommand {
       if (edition === undefined) {
         return Promise.resolve();
       }
-      soOptions.edition = edition;
+      soOptions.edition = edition.toLowerCase();
       const duration = await selectDays();
       if (duration === undefined) {
         return Promise.resolve();
       }
       soOptions.duration = duration;
+      // looks like there's no longer the option to do this??
+      /*
       const sampleData = await askNoYes('Create org with sample data?');
       if (sampleData === undefined) {
         return Promise.resolve();
       }
       soOptions.sampleData = sampleData;
+      */
     }
 
     return createOrg(this.cancellationToken);
@@ -129,12 +132,9 @@ export class CreateScratchOrg extends ForcecodeCommand {
     function createOrg(cancellationToken: FCCancellationToken) {
       let theOptions: string;
       if (!soOptions.definitionFile) {
-        theOptions =
-          '--durationdays ' +
-          soOptions.duration +
-          ` edition=${soOptions.edition} hasSampleData=${soOptions.sampleData}`;
+        theOptions = '--duration-days ' + soOptions.duration + ` --edition=${soOptions.edition}`;
       } else {
-        theOptions = '--definitionfile ' + soOptions.definitionFile;
+        theOptions = '--definition-file ' + soOptions.definitionFile;
       }
       return dxService.createScratchOrg(theOptions, cancellationToken).then((res) => {
         let scratchConfig: Config = defaultOptions;

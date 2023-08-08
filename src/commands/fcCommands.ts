@@ -1,4 +1,4 @@
-import { retrieve, ForcecodeCommand, getAnyNameFromUri } from '.';
+import { ForcecodeCommand, getAnyNameFromUri } from '.';
 import * as vscode from 'vscode';
 import {
   fcConnection,
@@ -92,6 +92,11 @@ export class SwitchUser extends ForcecodeCommand {
 }
 
 export class FileModified extends ForcecodeCommand {
+  private stack: vscode.Uri[] = [];
+  private execStack: vscode.Uri[] = [];
+  private timeout: NodeJS.Timeout | undefined;
+  private executing = false;
+
   constructor() {
     super();
     this.commandName = 'ForceCode.fileModified';
@@ -101,22 +106,46 @@ export class FileModified extends ForcecodeCommand {
   }
 
   public command(context: vscode.Uri, selectedResource: string) {
-    return vscode.workspace.openTextDocument(context).then((theDoc) => {
-      return notifications
-        .showWarning(
-          selectedResource + ' has changed ' + theDoc.fileName.split(path.sep).pop(),
-          'Refresh',
-          'Diff',
-          'Dismiss'
-        )
-        .then((s) => {
-          if (s === 'Refresh') {
-            return retrieve(theDoc.uri, this.cancellationToken);
-          } else if (s === 'Diff') {
-            return vscode.commands.executeCommand('ForceCode.diff', theDoc.uri);
+    return notifications
+      .showWarning(
+        selectedResource + ' has changed ' + context.fsPath.split(path.sep).pop(),
+        'Refresh',
+        'Diff',
+        'Dismiss'
+      )
+      .then((s) => {
+        if (s === 'Refresh') {
+          if (this.timeout) {
+            clearTimeout(this.timeout);
           }
-        });
-    });
+          const self = this;
+          if (this.executing) {
+            this.execStack.push(context);
+            return;
+          }
+          self.stack.push(context);
+          // if a user clicks refresh constantly then do it all at once. (hopefully) this will fix a bug with not actually refreshing the data
+          return (this.timeout = setTimeout(() => this.refresh(self), 3000));
+        } else if (s === 'Diff') {
+          return vscode.commands.executeCommand('ForceCode.diff', context);
+        }
+      });
+  }
+
+  private refresh(self: FileModified): any {
+    self.executing = true;
+    return vscode.commands
+      .executeCommand('ForceCode.refresh', undefined, self.stack)
+      .then((res) => {
+        if (self.execStack.length > 0) {
+          self.stack = [...self.execStack];
+          self.execStack = [];
+          return self.refresh(self);
+        }
+        self.stack = [];
+        self.executing = false;
+        return res;
+      });
   }
 }
 

@@ -6,7 +6,7 @@
  */
 
 import * as vscode from 'vscode';
-import { fcConnection, notifications, trackEvent, FCTimer, getVSCodeSetting } from '.';
+import { fcConnection, notifications, getVSCodeSetting } from '.';
 import { EventEmitter } from 'events';
 import { ForcecodeCommand } from '../commands';
 import * as path from 'path';
@@ -36,7 +36,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     this._onDidChangeTreeData.event;
   public removeEmitter = new EventEmitter();
 
-  public constructor() {
+  private constructor() {
     this.tasks = [];
     this.removeEmitter.on('removeTask', (theTask) => this.removeTask(theTask));
     this.treeView = vscode.window.createTreeView('ForceCode.treeDataProvider', {
@@ -44,15 +44,14 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     });
   }
 
-  public static getInstance() {
+  public static getInstance(): CommandViewService {
     if (!CommandViewService.instance) {
       CommandViewService.instance = new CommandViewService();
     }
     return CommandViewService.instance;
   }
 
-  public enqueueCodeCoverage(type: CoverageRetrieveType) {
-    // mandatory since it only makes sense
+  public enqueueCodeCoverage(type: CoverageRetrieveType): Promise<boolean> {
     if (
       type === CoverageRetrieveType.RunTest ||
       (type === CoverageRetrieveType.OpenFile &&
@@ -65,41 +64,42 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     return Promise.resolve(false);
   }
 
-  public addCommandExecution(execution: ForcecodeCommand, context: any, selectedResource?: any) {
-    if (
-      ['ForceCode.compile', 'ForceCode.refresh'].find((c) => {
-        return c === execution?.commandName;
-      })
-    ) {
-      let splitPath;
-      if (context?.fsPath) {
-        splitPath = context.fsPath.split(path.sep);
-      } else if (context) {
-        splitPath = context.fileName.split(path.sep);
-      } else if (vscode.window.activeTextEditor) {
-        splitPath = vscode.window.activeTextEditor.document.fileName.split(path.sep);
-      } else {
+  public addCommandExecution(
+    execution: ForcecodeCommand,
+    context: any,
+    selectedResource?: any
+  ): Promise<any> {
+    const commandName = execution?.commandName;
+    if (['ForceCode.compile', 'ForceCode.refresh'].includes(commandName)) {
+      const splitPath = context?.fsPath
+        ? context.fsPath.split(path.sep)
+        : context
+        ? context.fileName.split(path.sep)
+        : selectedResource && Array.isArray(selectedResource) && selectedResource.length > 0
+        ? ['files.cls'] // will just show "Refreshing files"
+        : vscode.window.activeTextEditor
+        ? vscode.window.activeTextEditor.document.fileName.split(path.sep)
+        : undefined;
+
+      if (!splitPath) {
         return Promise.reject({
           message: 'Please open a file before trying to save through the ForceCode menu!',
         });
       }
-      if (execution.commandName === 'ForceCode.compile') {
-        execution.name = 'Saving ';
-      } else {
-        execution.name = 'Refreshing ';
-      }
 
-      execution.name += splitPath[splitPath.length - 1].split('.')[0];
+      execution.name = `${commandName === 'ForceCode.compile' ? 'Saving' : 'Refreshing'} ${
+        splitPath[splitPath.length - 1].split('.')[0]
+      }`;
     }
 
-    if (execution.commandName === 'ForceCode.fileModified') {
+    if (commandName === 'ForceCode.fileModified') {
       if (this.fileModCommands >= getVSCodeSetting(VSCODE_SETTINGS.maxFileChangeNotifications)) {
         return Promise.resolve();
       }
       this.fileModCommands++;
     }
 
-    let theTask: Task = new Task(this, execution, context, selectedResource);
+    const theTask: Task = new Task(this, execution, context, selectedResource);
     this.tasks.push(theTask);
     this.updateStatus();
     return theTask.run(FIRST_TRY);
@@ -139,12 +139,12 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     return null; // this is the parent
   }
 
-  private updateStatus() {
+  private updateStatus(): void {
     const visibleTasks = this.getChildren().length;
     const message =
       visibleTasks == 0
         ? 'ForceCode'
-        : 'Executing ' + visibleTasks + ' Task' + (visibleTasks > 1 ? 's' : '');
+        : `Executing ${visibleTasks} Task${visibleTasks > 1 ? 's' : ''}`;
 
     this.treeView.badge = {
       value: visibleTasks,
@@ -152,7 +152,7 @@ export class CommandViewService implements vscode.TreeDataProvider<Task> {
     };
 
     if (visibleTasks > 0) {
-      notifications.setStatusText('ForceCode Menu', true);
+      notifications.showLoading();
     } else {
       notifications.resetLoading();
       // when code coverage is enqueued, it will only be retrieved when no other visible tasks are running
@@ -175,7 +175,6 @@ export class Task extends vscode.TreeItem {
   private readonly taskViewProvider: CommandViewService;
   private readonly context: any;
   private readonly selectedResource: any;
-  private readonly commandTimer: FCTimer;
   private timeoutInterval: NodeJS.Timeout;
 
   constructor(
@@ -186,7 +185,6 @@ export class Task extends vscode.TreeItem {
   ) {
     super(execution.name || '', vscode.TreeItemCollapsibleState.None);
 
-    this.commandTimer = new FCTimer(execution.commandName);
     this.taskViewProvider = taskViewProvider;
     this.execution = execution;
     this.context = context;
@@ -220,12 +218,11 @@ export class Task extends vscode.TreeItem {
         reason,
         this.execution.cancellationToken
       );
-      notifications.writeLog('Logged in: ' + loggedIn);
-      notifications.writeLog('Error reason: ' + reason?.message || reason);
+      notifications.writeLog(`Logged in: ${loggedIn}`);
+      notifications.writeLog(`Error reason: ${reason?.message || reason}`);
       if (loggedIn || attempt === SECOND_TRY) {
         if (reason) {
           notifications.showError(reason.message || reason, 'OK');
-          await trackEvent('Error Thrown', reason.message || reason);
           finalRes = reason;
         }
       } else {
@@ -238,7 +235,6 @@ export class Task extends vscode.TreeItem {
     } else {
       clearTimeout(this.timeoutInterval);
       this.taskViewProvider.removeEmitter.emit('removeTask', this);
-      this.commandTimer.stopTimer();
       return Promise.resolve(finalRes);
     }
   }

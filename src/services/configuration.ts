@@ -11,7 +11,6 @@ interface SFDXConfig {
 }
 
 export enum VSCODE_SETTINGS {
-  allowAnonymousUsageTracking = 'allowAnonymousUsageTracking',
   autoApiVersion = 'autoApiVersion',
   autoRefresh = 'autoRefresh',
   browser = 'browser',

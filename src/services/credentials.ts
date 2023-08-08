@@ -6,6 +6,7 @@ import {
   saveConfigFile,
   defaultOptions,
   FCOauth,
+  notifications,
 } from '.';
 import { Config } from '../forceCode';
 import * as deepmerge from 'deepmerge';
@@ -14,59 +15,35 @@ import { FCCancellationToken } from '../commands';
 const quickPickOptions: vscode.QuickPickOptions = {
   ignoreFocusOut: true,
 };
+
 export async function enterCredentials(cancellationToken: FCCancellationToken): Promise<FCOauth> {
   const uNames = await fcConnection.getSavedUsernames();
   const orgs = await dxService.orgList();
+  const opts = buildOptions(uNames, orgs);
+
   // ask if the user wants to log into a different account
-  let opts: any[] = [
-    {
-      title: 'New Org',
-      desc: 'You will be asked for your login information for the new org',
-    },
-  ];
-
-  uNames.forEach((uName) => {
-    opts.push({
-      title: uName,
-      desc: '',
-    });
-  });
-
-  // add orgs that are authenticated, but not saved in the project
-  if (orgs) {
-    orgs
-      .filter((currentOrg) => !uNames.includes(currentOrg.username || ''))
-      .forEach((filteredOrg) => {
-        opts.push({
-          title: filteredOrg.username,
-          desc: '',
-        });
-      });
-  }
-
-  let options: vscode.QuickPickItem[] = opts.map((res) => {
-    return {
-      description: `${res.desc}`,
-      // detail: `${'Detail'}`,
-      label: `${res.title}`,
-    };
-  });
   const theseOptions: vscode.QuickPickOptions = {
     ignoreFocusOut: true,
     placeHolder: 'Select a saved org or login to a new one...',
   };
-  const choice = await vscode.window.showQuickPick(options, theseOptions);
+  const choice = await vscode.window.showQuickPick(opts, theseOptions);
   if (!choice || choice.label === undefined) {
     return Promise.reject(undefined);
   } else if (choice.label === 'New Org') {
     return Promise.resolve(setupNewUser(defaultOptions));
   } else {
     const cfg = readConfigFile(choice.label);
+    let orgInfo;
     try {
-      const orgInfo = await dxService.getOrgInfo(cfg.username);
-      return Promise.resolve(orgInfo);
-    } catch (_error) {
-      return Promise.resolve(setupNewUser(cfg));
+      orgInfo = await dxService.getOrgInfo(cfg.username);
+    } catch (error) {
+      notifications.writeLog(error);
+    } finally {
+      if (orgInfo) {
+        return Promise.resolve(orgInfo);
+      } else {
+        return Promise.resolve(setupNewUser(cfg));
+      }
     }
   }
 
@@ -82,47 +59,35 @@ export async function enterCredentials(cancellationToken: FCCancellationToken): 
   }
 }
 
+function buildOptions(uNames: string[], orgs: any[]): vscode.QuickPickItem[] {
+  const newOrgOption = {
+    title: 'New Org',
+    desc: 'You will be asked for your login information for the new org',
+  };
+
+  const savedOrgOptions = uNames.map((uName) => ({ title: uName, desc: '' }));
+
+  const unsavedOrgOptions = orgs
+    .filter((currentOrg) => !uNames.includes(currentOrg.username || ''))
+    .map((filteredOrg) => ({ title: filteredOrg.username, desc: '' }));
+
+  return [newOrgOption, ...savedOrgOptions, ...unsavedOrgOptions].map((res) => ({
+    description: res.desc,
+    label: res.title,
+  }));
+}
+
 export function checkConfig(cfg: Config): Promise<Config> {
   return getUrl(cfg).then(getAutoCompileAndFormat);
 }
 
 async function getUrl(config: Config): Promise<Config> {
   if (Object.keys(config).indexOf('url') === -1) {
-    let opts: any = [
-      {
-        icon: 'file',
-        title: 'Production',
-        url: 'https://login.salesforce.com',
-      },
-      {
-        icon: 'code',
-        title: 'Developer',
-        url: 'https://login.salesforce.com',
-      },
-      {
-        icon: 'beaker',
-        title: 'Sandbox / Test',
-        url: 'https://test.salesforce.com',
-      },
-      {
-        icon: 'tools',
-        title: 'Custom domain',
-        url: 'https://example.my.salesforce.com',
-      },
-    ];
-    let options: vscode.QuickPickItem[] = opts.map((res: any) => {
-      return {
-        description: `${res.url}`,
-        // detail: `${'Detail'}`,
-        label: `$(${res.icon}) ${res.title}`,
-      };
-    });
-    const choice: vscode.QuickPickItem | undefined = await vscode.window.showQuickPick(
-      options,
-      quickPickOptions
-    );
+    const options = buildUrlOptions();
+    const choice = await vscode.window.showQuickPick(options, quickPickOptions);
+
     if (choice?.description === 'https://example.my.salesforce.com') {
-      const cDomain: string | undefined = await vscode.window.showInputBox({
+      const cDomain = await vscode.window.showInputBox({
         ignoreFocusOut: true,
         placeHolder: 'Enter your custom domain then press Enter...',
       });
@@ -135,9 +100,39 @@ async function getUrl(config: Config): Promise<Config> {
   return Promise.resolve(config);
 }
 
+function buildUrlOptions(): vscode.QuickPickItem[] {
+  const opts = [
+    {
+      icon: 'file',
+      title: 'Production',
+      url: 'https://login.salesforce.com',
+    },
+    {
+      icon: 'code',
+      title: 'Developer',
+      url: 'https://login.salesforce.com',
+    },
+    {
+      icon: 'beaker',
+      title: 'Sandbox / Test',
+      url: 'https://test.salesforce.com',
+    },
+    {
+      icon: 'tools',
+      title: 'Custom domain',
+      url: 'https://example.my.salesforce.com',
+    },
+  ];
+
+  return opts.map((res) => ({
+    description: res.url,
+    label: `$(${res.icon}) ${res.title}`,
+  }));
+}
+
 async function getAutoCompileAndFormat(config: Config): Promise<Config> {
   if (Object.keys(config).indexOf('autoCompile') === -1) {
-    let options: vscode.QuickPickItem[] = [
+    const options = [
       {
         description: 'Automatically deploy/compile files on save',
         label: 'Yes',
@@ -147,14 +142,16 @@ async function getAutoCompileAndFormat(config: Config): Promise<Config> {
         label: 'No',
       },
     ];
-    const choice: vscode.QuickPickItem | undefined = await vscode.window.showQuickPick(options, {
+
+    const choice = await vscode.window.showQuickPick(options, {
       ignoreFocusOut: true,
     });
+
     config.autoCompile = choice?.label === 'Yes';
 
     // only ask for new projects since there's issues switching between formats currently
     if (Object.keys(config).indexOf('useSourceFormat') === -1) {
-      let sourceOptions: vscode.QuickPickItem[] = [
+      const sourceOptions = [
         {
           description: 'This is the "classic" format/project folder setup.',
           label: 'Metadata',
@@ -164,14 +161,14 @@ async function getAutoCompileAndFormat(config: Config): Promise<Config> {
           label: 'Source',
         },
       ];
-      const sourceChoice: vscode.QuickPickItem | undefined = await vscode.window.showQuickPick(
-        sourceOptions,
-        {
-          ignoreFocusOut: true,
-        }
-      );
+
+      const sourceChoice = await vscode.window.showQuickPick(sourceOptions, {
+        ignoreFocusOut: true,
+      });
+
       config.useSourceFormat = sourceChoice?.label === 'Source';
     }
   }
+
   return Promise.resolve(config);
 }

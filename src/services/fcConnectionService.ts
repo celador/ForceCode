@@ -194,14 +194,18 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         return Promise.resolve(service.currentConnection);
       }
 
-      let orgInf: FCOauth;
+      let orgInf: FCOauth | undefined;
       try {
         orgInf = await dxService.getOrgInfo(username);
-      } catch (_error) {
-        if (service.currentConnection) {
-          service.currentConnection.connection = undefined;
+      } catch (error) {
+        notifications.writeLog(error);
+      } finally {
+        if (!orgInf) {
+          if (service.currentConnection) {
+            service.currentConnection.connection = undefined;
+          }
+          orgInf = await enterCredentials(cancellationToken);
         }
-        orgInf = await enterCredentials(cancellationToken);
       }
 
       service.currentConnection = service.addConnection(orgInf, true);
@@ -229,7 +233,7 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
       const sfdxPath = path.join(getHomeDir(), '.sfdx', orgInf.username + '.json');
       const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
-      let connection = new jsforce.Connection({
+      const connection = new jsforce.Connection({
         oauth2: {
           clientId: service.currentConnection.orgInfo.clientId || 'SalesforceDevelopmentExperience',
         },
@@ -279,7 +283,27 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         path.join(vscode.window.forceCode.workspaceRoot, 'force.json'),
         JSON.stringify({ lastUsername: config.username }, undefined, 4)
       );
-      const describe = await vscode.window.forceCode.conn.metadata.describe();
+
+      const mdPath = path.join(
+        vscode.window.forceCode.workspaceRoot,
+        '.forceCode',
+        config.username || 'NO_USERNAME',
+        getAPIVersion()
+      );
+
+      const mdFileName = path.join(mdPath, 'mdDescribe.json');
+
+      let describe;
+      if (!fs.existsSync(mdFileName)) {
+        if (!fs.existsSync(mdPath)) {
+          fs.mkdirpSync(mdPath);
+        }
+        describe = await vscode.window.forceCode.conn.metadata.describe();
+        fs.outputFileSync(mdFileName, JSON.stringify(describe, undefined, 4));
+      } else {
+        describe = fs.readJsonSync(mdFileName);
+      }
+
       vscode.window.forceCode.describe = describe;
       if (vscode.window.forceCode.config.useSourceFormat) {
         // TODO these types currently aren't supported for whatever reason, but can be retrieved via SFDX and non-source

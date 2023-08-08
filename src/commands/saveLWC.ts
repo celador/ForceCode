@@ -50,7 +50,7 @@ export async function saveLWC(
 
     // add files in the folder to PreSaveFiles so we can compare content
     saveService.addFilesInFolder(filePath);
-    let changedFiles: any[] = definitions.filter(
+    const changedFiles: any[] = definitions.filter(
       (def: any) =>
         !saveService.compareContents(path.join(filePath, def.FilePath.split('/').pop()), def.Source)
     );
@@ -70,7 +70,7 @@ export async function saveLWC(
           return {};
         });
     } else if (!forceCompile && changedFiles.length > 1) {
-      let changedFileNames: string = changedFiles
+      const changedFileNames: string = changedFiles
         .map((file) => file.FilePath.split('/').pop())
         .join(',');
       return notifications

@@ -38,12 +38,8 @@ export class GetCodeCoverage extends ForcecodeCommand {
 
   public command() {
     return getApexTestResults()
-      .then((_res) => getApexTestResults(true))
-      .then(
-        (
-          _res2 // update the current editor
-        ) => updateDecorations()
-      );
+      .then(() => getApexTestResults(true))
+      .then(() => updateDecorations());
   }
 }
 
@@ -55,10 +51,8 @@ export class RunTests extends ForcecodeCommand {
   }
 
   public command(context: any) {
-    let ctv = context;
-    if (context instanceof FCFile) {
-      ctv = { name: context.getWsMember().name, type: 'class' };
-    }
+    const ctv =
+      context instanceof FCFile ? { name: context.getWsMember().name, type: 'class' } : context;
     return vscode.commands.executeCommand('ForceCode.apexTest', ctv.name, ctv.type);
   }
 }
@@ -87,11 +81,9 @@ export class ApexTest extends ForcecodeCommand {
       if (dxRes.summary.failing > 0) {
         let errorMessage: string = 'FAILED: ';
         dxRes.tests.forEach((curTest) => {
-          //if (/*curTest.StackTrace && */curTest.Message) {
           errorMessage +=
             (curTest.StackTrace ? curTest.StackTrace + '\n' : '') +
             (curTest.Message ? curTest.Message + '\n' : '');
-          //}
         });
         notifications.showError(errorMessage);
       } else {
@@ -99,12 +91,20 @@ export class ApexTest extends ForcecodeCommand {
       }
       return dxRes;
     }
+
     function showLog(): Promise<vscode.TextEditor | void> {
       if (getVSCodeSetting(VSCODE_SETTINGS.showTestLog)) {
         if (!fcConnection.currentConnection) {
           return Promise.reject('No current org info found');
         }
-        return Promise.resolve(dxService.getAndShowLog(undefined /*res.records[0].Id*/));
+        const queryString: string =
+          `SELECT Id FROM ApexLog` +
+          ` WHERE LogUserId='${fcConnection.currentConnection.orgInfo.userId}'` +
+          ` ORDER BY StartTime DESC, Id DESC LIMIT 1`;
+
+        return vscode.window.forceCode.conn.tooling.query(queryString).then((recs) => {
+          return Promise.resolve(dxService.getAndShowLog(recs.records[0].Id));
+        });
       } else {
         return Promise.resolve();
       }

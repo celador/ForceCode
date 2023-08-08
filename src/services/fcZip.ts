@@ -62,21 +62,18 @@ function getFileList(root: string) {
   // We trap the relative root in a closure then
   // Perform the recursive file search
   function innerGetFileList(localPath: string) {
-    let fileslist: any[] = []; // List of files
-    let files: string[];
-    if (!fs.statSync(localPath).isDirectory()) {
-      files = [localPath];
-    } else {
-      files = fs.readdirSync(localPath); // Files in current 'sfdc' directory
-    }
+    const fileslist: any[] = [];
+    const files: string[] = !fs.statSync(localPath).isDirectory()
+      ? [localPath]
+      : fs.readdirSync(localPath);
 
     files.forEach((file) => {
-      let pathname: string = file === localPath ? file : localPath + path.sep + file;
-      let stat: any = fs.lstatSync(pathname);
+      const pathname: string = file === localPath ? file : localPath + path.sep + file;
+      const stat: any = fs.lstatSync(pathname);
 
       // If file is a directory, recursively add it's children
       if (stat.isDirectory()) {
-        fileslist = fileslist.concat(innerGetFileList(pathname));
+        fileslist.push(...innerGetFileList(pathname));
       } else {
         fileslist.push(pathname.replace(root + path.sep, ''));
       }
@@ -88,7 +85,7 @@ function getFileList(root: string) {
 // read the .forceignore file, if it exists
 function readForceIgnore(): { [key: string]: boolean } {
   const forceIgnorePath: string = vscode.window.forceCode.workspaceRoot + path.sep + '.forceignore';
-  let ignoreObject: { [key: string]: boolean } = {};
+  const ignoreObject: { [key: string]: boolean } = {};
 
   if (fs.existsSync(forceIgnorePath)) {
     const forceIgnoreContents: string = fs.readFileSync(forceIgnorePath).toString();
@@ -113,22 +110,13 @@ export function getFilteredFileList(files: string[]): string[] {
     readForceIgnore()
   );
 
-  const ignoreFiles: string[] = Object.keys(ignoreFilesSettings)
-    .map((key) => {
-      return { key: key, value: ignoreFilesSettings[key] };
-    })
-    .filter((setting) => setting.value === true && !setting.key.endsWith('*-meta.xml'))
-    .map((setting) => setting.key);
+  const ignoreFiles: string[] = Object.keys(ignoreFilesSettings).filter(
+    (key) => ignoreFilesSettings[key] === true && !key.endsWith('*-meta.xml')
+  );
 
-  let fileslist: string[] = [];
-
-  files.forEach((file) => {
-    if (!globule.isMatch(ignoreFiles, file, { matchBase: true, dot: true })) {
-      fileslist.push(file);
-    }
-  });
-
-  return fileslist;
+  return files.filter(
+    (file) => !globule.isMatch(ignoreFiles, file, { matchBase: true, dot: true })
+  );
 }
 
 export interface PXMLMember {
@@ -147,20 +135,22 @@ export interface PXML {
 export function getFileListFromPXML(): Promise<string[]> {
   return new Promise((resolve, reject) => {
     const projectRoot: string = getSrcDir();
-    let xmlFilePath: string = path.join(projectRoot, 'package.xml');
-    let data: any = fs.readFileSync(xmlFilePath);
-    let fileList: string[] = [];
-    fileList.push('package.xml');
-    if (fs.existsSync(path.join(projectRoot, 'destructiveChanges.xml'))) {
-      fileList.push('destructiveChanges.xml');
-    }
-    if (fs.existsSync(path.join(projectRoot, 'destructiveChangesPre.xml'))) {
-      fileList.push('destructiveChangesPre.xml');
-    }
-    if (fs.existsSync(path.join(projectRoot, 'destructiveChangesPost.xml'))) {
-      fileList.push('destructiveChangesPost.xml');
-    }
-    return parseString(data, { explicitArray: false }, function (err, dom: PXML) {
+    const xmlFilePath: string = path.join(projectRoot, 'package.xml');
+    const data: any = fs.readFileSync(xmlFilePath);
+    const fileList: string[] = ['package.xml'];
+    const destructiveFiles = [
+      'destructiveChanges.xml',
+      'destructiveChangesPre.xml',
+      'destructiveChangesPost.xml',
+    ];
+
+    destructiveFiles.forEach((file) => {
+      if (fs.existsSync(path.join(projectRoot, file))) {
+        fileList.push(file);
+      }
+    });
+
+    parseString(data, { explicitArray: false }, function (err, dom: PXML) {
       if (err) {
         reject(err);
       } else {
@@ -171,11 +161,8 @@ export function getFileListFromPXML(): Promise<string[]> {
           const ttMeta: IMetadataObject | undefined = getToolingTypeMetadata(curType.name);
           if (ttMeta) {
             const folder: string = ttMeta.directoryName;
-            let ext: string = ttMeta.suffix;
-            let theExt: string = '.' + ext;
-            if (folder === 'aura' || folder === 'lwc') {
-              theExt = '';
-            }
+            const ext: string = ttMeta.suffix;
+            const theExt: string = folder === 'aura' || folder === 'lwc' ? '' : '.' + ext;
             toArray(curType.members).forEach((curMem) => {
               curMem = curMem.replace('/', path.sep).split('.')[0];
               if (fs.existsSync(path.join(projectRoot, folder, curMem + theExt))) {

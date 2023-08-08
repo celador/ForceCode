@@ -8,8 +8,9 @@ import { EOL } from 'os';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import { ChildRelationship, Field, SObject, SObjectDescribe } from '.';
-import { dxService, SObjectCategory, notifications, inDebug } from '../services';
+import { dxService, SObjectCategory, notifications } from '../services';
 import { FCCancellationToken } from '../commands';
+import { inDebug } from '../util/utilities';
 
 const SFDX_DIR = '.sfdx';
 const TOOLS_DIR = 'tools';
@@ -71,13 +72,13 @@ export class FauxClassGenerator {
     if (!fs.existsSync(projectPath) || !fs.existsSync(path.join(projectPath, SFDX_PROJECT_FILE))) {
       throw 'Unable to generate faux classes for sObjects when not in a ForceCode project';
     }
-    if (type === SObjectCategory.ALL) {
-      this.cleanupSObjectFolders(sobjectsFolderPath);
-    } else if (type === SObjectCategory.CUSTOM) {
-      this.cleanupSObjectFolders(customSObjectsFolderPath);
-    } else {
-      this.cleanupSObjectFolders(standardSObjectsFolderPath);
-    }
+    this.cleanupSObjectFolders(
+      type === SObjectCategory.ALL
+        ? sobjectsFolderPath
+        : type === SObjectCategory.CUSTOM
+        ? customSObjectsFolderPath
+        : standardSObjectsFolderPath
+    );
 
     const describe = new SObjectDescribe();
     const standardSObjects: SObject[] = [];
@@ -85,12 +86,7 @@ export class FauxClassGenerator {
     let fetchedSObjects: SObject[] = [];
     let sobjects: string[] = [];
     try {
-      if (inDebug()) {
-        // to save limits during unit testing the extension, as we use a live org to test
-        sobjects = ['Account', 'Contact'];
-      } else {
-        sobjects = await dxService.describeGlobal(type);
-      }
+      sobjects = inDebug() ? ['Account', 'Contact'] : await dxService.describeGlobal(type);
     } catch (e) {
       throw 'Failure fetching list of sObjects from org ' + e;
     }
@@ -107,12 +103,8 @@ export class FauxClassGenerator {
       }
     }
 
-    for (let i = 0; i < fetchedSObjects.length; i++) {
-      if (fetchedSObjects[i].custom) {
-        customSObjects.push(fetchedSObjects[i]);
-      } else {
-        standardSObjects.push(fetchedSObjects[i]);
-      }
+    for (const sobject of fetchedSObjects) {
+      (sobject.custom ? customSObjects : standardSObjects).push(sobject);
     }
 
     this.logFetchedObjects(standardSObjects, customSObjects);
@@ -126,13 +118,10 @@ export class FauxClassGenerator {
     return 'Success!!!';
   }
 
-  // VisibleForTesting
   public generateFauxClassText(sobject: SObject): string {
-    const declarations: string[] = this.generateFauxClassDecls(sobject);
-    return this.generateFauxClassTextFromDecls(sobject.name, declarations);
+    return this.generateFauxClassTextFromDecls(sobject.name, this.generateFauxClassDecls(sobject));
   }
 
-  // VisibleForTesting
   public generateFauxClass(folderPath: string, sobject: SObject): string {
     notifications.writeLog('Generating faux class for ' + sobject.name);
     if (!fs.existsSync(folderPath)) {
@@ -146,11 +135,7 @@ export class FauxClassGenerator {
   }
 
   private stripId(name: string): string {
-    if (name.endsWith('Id')) {
-      return name.slice(0, name.length - 2);
-    } else {
-      return name;
-    }
+    return name.endsWith('Id') ? name.slice(0, name.length - 2) : name;
   }
 
   private capitalize(input: string): string {
@@ -158,8 +143,7 @@ export class FauxClassGenerator {
   }
 
   private getTargetType(describeType: string): string {
-    const gentype = FauxClassGenerator.typeMapping.get(describeType) as string;
-    return gentype || this.capitalize(describeType);
+    return FauxClassGenerator.typeMapping.get(describeType) || this.capitalize(describeType);
   }
 
   private getReferenceName(relationshipName: string, name: string): string {
@@ -167,8 +151,7 @@ export class FauxClassGenerator {
   }
 
   private generateChildRelationship(rel: ChildRelationship): string {
-    const nameToUse = this.getReferenceName(rel.relationshipName, rel.field);
-    return `List<${rel.childSObject}> ${nameToUse}`;
+    return `List<${rel.childSObject}> ${this.getReferenceName(rel.relationshipName, rel.field)}`;
   }
 
   private generateField(field: Field): string[] {
@@ -177,11 +160,8 @@ export class FauxClassGenerator {
     if (field.referenceTo.length === 0) {
       // should be a normal field EXCEPT for external lookup & metadata relationship
       // which is a reference, but no referenceTo targets
-      if (field.extraTypeInfo === 'externallookup') {
-        genType = 'String';
-      } else {
-        genType = this.getTargetType(field.type);
-      }
+      genType =
+        field.extraTypeInfo === 'externallookup' ? 'String' : this.getTargetType(field.type);
       decls.push(`${genType} ${field.name}`);
     } else {
       const nameToUse = this.getReferenceName(field.relationshipName, field.name);
@@ -246,18 +226,18 @@ export class FauxClassGenerator {
   private generateFauxClassTextFromDecls(className: string, declarations: string[]): string {
     // sort, but filter out duplicates
     // which can happen due to childRelationships w/o a relationshipName
-    declarations.sort((first: string, second: string): number => {
-      const fName = FauxClassGenerator.fieldName(first);
-      const sName = FauxClassGenerator.fieldName(second);
-      return fName === sName ? 0 : fName > sName ? 1 : -1;
-    });
-
-    declarations = declarations.filter((value: string, index: number, array: string[]): boolean => {
-      return (
-        !index ||
-        FauxClassGenerator.fieldName(value) !== FauxClassGenerator.fieldName(array[index - 1])
-      );
-    });
+    declarations = declarations
+      .sort((first: string, second: string): number => {
+        const fName = FauxClassGenerator.fieldName(first);
+        const sName = FauxClassGenerator.fieldName(second);
+        return fName === sName ? 0 : fName > sName ? 1 : -1;
+      })
+      .filter((value: string, index: number, array: string[]): boolean => {
+        return (
+          !index ||
+          FauxClassGenerator.fieldName(value) !== FauxClassGenerator.fieldName(array[index - 1])
+        );
+      });
 
     const indentAndModifier = '    global ';
     const classDeclaration = `global class ${className} {${EOL}`;
@@ -270,7 +250,7 @@ export class FauxClassGenerator {
     \/\/     refresh your sObject definitions.
     \/\/ To edit your sObjects and their fields, edit the corresponding
     \/\/     .object-meta.xml and .field-meta.xml files.
-    
+
     `;
     const generatedClass = `${classComment}${classDeclaration}${indentAndModifier}${declarationLines};${EOL}${EOL}${classConstructor}}`;
 

@@ -2,34 +2,26 @@ import { getVSCodeSetting } from '../services';
 import { VSCODE_SETTINGS } from '../services/configuration';
 
 export function filterLog(body: string) {
-  if (!getVSCodeSetting(VSCODE_SETTINGS.debugOnly)) {
+  const debugOnly = getVSCodeSetting(VSCODE_SETTINGS.debugOnly);
+  if (!debugOnly) {
     return body;
-  } else {
-    let theLog = '';
-    let includeIt = false;
-    let debugLevel = ['USER_DEBUG'];
-    if (getVSCodeSetting(VSCODE_SETTINGS.debugFilter)) {
-      debugLevel = getVSCodeSetting(VSCODE_SETTINGS.debugFilter).split('|');
-    }
-    body.split('\n').forEach((l) => {
-      let theSplitLine: string[] = l.split(')|');
-      if (
-        theSplitLine.length > 1 &&
-        theSplitLine[0].split(':').length === 3 &&
-        theSplitLine[0].split('(').length === 2
-      ) {
-        includeIt = false;
-        debugLevel.forEach((i) => {
-          if (theSplitLine[1].split('|')[0] === i) {
-            includeIt = true;
-          }
-        });
-      }
-
-      if (includeIt) {
-        theLog += l + '\n';
-      }
-    });
-    return theLog;
   }
+
+  const debugFilter = getVSCodeSetting(VSCODE_SETTINGS.debugFilter) || 'USER_DEBUG';
+  const debugLevels = debugFilter.split('|');
+
+  return body
+    .split('\n')
+    .filter((line) => {
+      const splitLine = line.split(')|');
+      if (
+        splitLine.length > 1 &&
+        splitLine[0].split(':').length === 3 &&
+        splitLine[0].split('(').length === 2
+      ) {
+        return debugLevels.some((level: string) => splitLine[1].split('|')[0] === level);
+      }
+      return false;
+    })
+    .join('\n');
 }

@@ -10,6 +10,7 @@ import { FCOauth, fcConnection, notifications } from '../services';
 import { getAPIVersion } from '../services/configuration';
 
 const CLIENT_ID = 'sfdx-vscode';
+
 export interface SObject {
   actionOverrides: any[];
   activateable: boolean;
@@ -171,24 +172,26 @@ export class SObjectDescribe {
   public async describeSObjectBatch(types: string[], nextToProcess: number): Promise<SObject[]> {
     const batchSize = 25;
     const batchRequest: BatchRequest = { batchRequests: [] };
-    for (let i = nextToProcess; i < nextToProcess + batchSize && i < types.length; i++) {
-      notifications.writeLog('Processing decription for ' + types[i]);
-      const urlElements = [this.getVersion(), this.sobjectsPart, types[i], 'describe'];
-      const requestUrl = urlElements.join('/');
+
+    for (let i = nextToProcess; i < Math.min(nextToProcess + batchSize, types.length); i++) {
+      notifications.writeLog('Processing description for ' + types[i]);
+      const requestUrl = [this.getVersion(), this.sobjectsPart, types[i], 'describe'].join('/');
 
       batchRequest.batchRequests.push({ method: 'GET', url: requestUrl });
     }
+
     if (!fcConnection.currentConnection) {
       return Promise.reject('No current connection found');
     }
+
     const orgInfo: FCOauth = fcConnection.currentConnection.orgInfo;
-    const batchUrlElements = [
+    const batchRequestUrl = [
       orgInfo.instanceUrl,
       this.servicesPath,
       this.getVersion(),
       this.batchPart,
-    ];
-    const batchRequestUrl = batchUrlElements.join('/');
+    ].join('/');
+
     const options: XHROptions = {
       type: 'POST',
       url: batchRequestUrl,
@@ -206,16 +209,16 @@ export class SObjectDescribe {
       const response: XHRResponse = await xhr(options);
       const batchResponse = JSON.parse(response.responseText) as BatchResponse;
       const fetchedObjects: SObject[] = [];
+
       let i = nextToProcess;
       for (const sr of batchResponse.results) {
-        if (sr.result instanceof Array) {
-          if (sr.result[0].errorCode && sr.result[0].message) {
-            notifications.writeLog(`Error: ${sr.result[0].message} - ${types[i]}`);
-          }
+        if (sr.result instanceof Array && sr.result[0].errorCode && sr.result[0].message) {
+          notifications.writeLog(`Error: ${sr.result[0].message} - ${types[i]}`);
         }
         i++;
         fetchedObjects.push(sr.result);
       }
+
       return Promise.resolve(fetchedObjects);
     } catch (error: any) {
       const xhrResponse: XHRResponse = error;

@@ -1,5 +1,10 @@
 ## Change Log
 
+* 4.1.1
+    * Switched to using sf commands instead of sfdx from the CLI. If you receive errors about the CLI not being found then please reinstall it after downloading from https://developer.salesforce.com/tools/sfdxcli
+    * Bug fixes and performance improvements
+    * Updated UI for settings, soql editor, and bulk loader
+    * Remove analytics, who has time to keep up with checking that stuff anyways??
 * 4.1.0
     * Fix logs, overall coverage, etc. showing in 3rd column
     * Allow log saves
