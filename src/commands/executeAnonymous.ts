@@ -58,15 +58,20 @@ export class ExecuteAnonymous extends ForcecodeCommand {
       diagnosticCollection.delete(document.uri);
       let diagnostics: vscode.Diagnostic[] = [];
       if (res.compiled === false) {
-        const lineNumber: number = Number(res.line) - 1 + selection.start.line;
+        let lineNumber: number = Number(res.line) - 1 + selection.start.line;
         let col = 0;
         if (lineNumber === selection.start.line) {
           col = selection.start.character;
         }
+        if (lineNumber > document.lineCount) {
+          lineNumber = document.lineCount - 1;
+        }
         const columnNumber: number = Number(res.column) - 1 + col;
         let failureRange: vscode.Range = document.lineAt(lineNumber < 0 ? 0 : lineNumber).range;
         if (columnNumber >= 0) {
-          failureRange = failureRange.with(new vscode.Position(lineNumber, columnNumber));
+          failureRange = failureRange.with(
+            document.validatePosition(new vscode.Position(lineNumber, columnNumber))
+          );
         }
         diagnostics.push(new vscode.Diagnostic(failureRange, res.compileProblem));
       }
