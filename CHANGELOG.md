@@ -1,5 +1,13 @@
 ## Change Log
 
+* 4.2.0
+    * Fixed issues with compile errors not being shown in the problems panel
+    * Files shown when clicking the Open Salesforce File option are now in alphabetical order
+    * Support diffing the following meta.xml file types:
+        * Apex (class and trigger)
+        * Aura
+        * LWC
+        * Visualforce
 * 4.1.1
     * Switched to using sf commands instead of sfdx from the CLI. If you receive errors about the CLI not being found then please reinstall it after downloading from https://developer.salesforce.com/tools/sfdxcli
     * Bug fixes and performance improvements

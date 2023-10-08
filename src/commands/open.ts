@@ -57,28 +57,25 @@ export class Open extends ForcecodeCommand {
       }'`;
       let promises: any[] = metadataTypes.map((t) => {
         let sResource = t === 'StaticResource' ? ', ContentType' : '';
-        let q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate}`;
+        let q: string = `SELECT Id, Name, NamespacePrefix${sResource} FROM ${t} ${predicate} ORDER BY Name`;
         return vscode.window.forceCode.conn.tooling.query(q);
       });
       promises.push(
         vscode.window.forceCode.conn.tooling.query(
-          'SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ' +
-            predicate
+          `SELECT Id, DeveloperName, NamespacePrefix, Description FROM AuraDefinitionBundle ${predicate} ORDER BY DeveloperName`
         )
       );
       if (parseInt(getAPIVersion()) >= 45) {
         promises.push(
           vscode.window.forceCode.conn.tooling.query(
-            'SELECT Id, DeveloperName, NamespacePrefix, Description FROM LightningComponentBundle ' +
-              predicate
+            `SELECT Id, DeveloperName, NamespacePrefix, Description FROM LightningComponentBundle ${predicate} ORDER BY DeveloperName`
           )
         );
       }
       if (vscode.window.forceCode.config.isDeveloperEdition && parseInt(getAPIVersion()) >= 47) {
         promises.push(
           vscode.window.forceCode.conn.tooling.query(
-            'SELECT Id, DeveloperName, NamespacePrefix, Description FROM LightningMessageChannel ' +
-              predicate
+            `SELECT Id, DeveloperName, NamespacePrefix, Description FROM LightningMessageChannel ${predicate} ORDER BY DeveloperName`
           )
         );
       }
