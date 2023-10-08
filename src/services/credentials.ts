@@ -68,8 +68,10 @@ function buildOptions(uNames: string[], orgs: any[]): vscode.QuickPickItem[] {
   const savedOrgOptions = uNames.map((uName) => ({ title: uName, desc: '' }));
 
   const unsavedOrgOptions = orgs
-    .filter((currentOrg) => !uNames.includes(currentOrg.username || ''))
-    .map((filteredOrg) => ({ title: filteredOrg.username, desc: '' }));
+    ? orgs
+        .filter((currentOrg) => !uNames.includes(currentOrg.username || ''))
+        .map((filteredOrg) => ({ title: filteredOrg.username, desc: '' }))
+    : [];
 
   return [newOrgOption, ...savedOrgOptions, ...unsavedOrgOptions].map((res) => ({
     description: res.desc,

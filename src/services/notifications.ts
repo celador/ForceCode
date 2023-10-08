@@ -68,6 +68,7 @@ export class Notifications {
   }
 
   public writeLog(data: any): void {
+    console.log('raw log: ', data);
     const stringData = outputToString(data);
     this.outputChannel.appendLine(stringData);
   }

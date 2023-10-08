@@ -263,14 +263,20 @@ export async function compile(
   function onComponentError(failure: any) {
     if (failure.problemType === 'Error') {
       failure.lineNumber =
-        failure.lineNumber == null || failure.lineNumber < 1 ? 1 : failure.lineNumber;
+        failure.lineNumber == null || failure.lineNumber < 1
+          ? 1
+          : failure.lineNumber > document.lineCount
+          ? document.lineCount
+          : failure.lineNumber;
       failure.columnNumber = failure.columnNumber == null ? 0 : failure.columnNumber;
 
       let failureRange: vscode.Range = document.lineAt(failure.lineNumber - 1).range;
+      failureRange = document.validateRange(failureRange);
       if (failure.columnNumber - 1 >= 0) {
-        failureRange = failureRange.with(
+        let failurePosition = document.validatePosition(
           new vscode.Position(failure.lineNumber - 1, failure.columnNumber - 1)
         );
+        failureRange = failureRange.with(failurePosition);
       }
       if (
         !exDiagnostics.find((exDia) => {

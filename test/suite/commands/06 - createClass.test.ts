@@ -49,12 +49,12 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Save class fail', async () => {
-    await addErrorToDoc();
+  test('Save class fail', () => {
+    return addErrorToDoc();
   });
 
-  test('Save class pass', async () => {
-    await removeErrorOnDoc();
+  test('Save class pass', () => {
+    return removeErrorOnDoc();
   });
 
   test('Refresh class', async () => {
@@ -91,9 +91,9 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Saves class metadata pass', async () => {
+  test('Saves class metadata pass', () => {
     // doc will already be active from the above test
-    await removeErrorOnDoc();
+    return removeErrorOnDoc();
   });
 
   test('Creates Visualforce Page', async () => {
@@ -117,12 +117,12 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Save VF page fail', async () => {
-    await addErrorToDoc();
+  test('Save VF page fail', () => {
+    return addErrorToDoc();
   });
 
-  test('Save VF page pass', async () => {
-    await removeErrorOnDoc();
+  test('Save VF page pass', () => {
+    return removeErrorOnDoc();
   });
 
   test('Opens org via ForceCode menu', async () => {
@@ -168,12 +168,12 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Save VF component fail', async () => {
-    await addErrorToDoc();
+  test('Save VF component fail', () => {
+    return addErrorToDoc();
   });
 
-  test('Save VF component pass', async () => {
-    await removeErrorOnDoc();
+  test('Save VF component pass', () => {
+    return removeErrorOnDoc();
   });
 
   test('Delete VF component', async () => {
@@ -232,12 +232,12 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Save Aura app fail', async () => {
-    await addErrorToDoc();
+  test('Save Aura app fail', () => {
+    return addErrorToDoc();
   });
 
-  test('Save Aura app pass', async () => {
-    await removeErrorOnDoc();
+  test('Save Aura app pass', () => {
+    return removeErrorOnDoc();
   });
 
   test('Preview Aura app', async () => {
@@ -352,12 +352,12 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Save Trigger fail', async () => {
-    await addErrorToDoc();
+  test('Save Trigger fail', () => {
+    return addErrorToDoc();
   });
 
-  test('Save Trigger pass', async () => {
-    await removeErrorOnDoc();
+  test('Save Trigger pass', () => {
+    return removeErrorOnDoc();
   });
 
   test('Creates LWC Component', async () => {
@@ -381,8 +381,8 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Save LWC fail', async () => {
-    await addErrorToDoc();
+  test('Save LWC fail', () => {
+    return addErrorToDoc();
   });
 
   test('Creates LWC Component 2', async () => {
@@ -407,9 +407,9 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Save LWC pass', async () => {
+  test('Save LWC pass', () => {
     // indicate we shouldn't try and remove an error, and that autoCompile is on
-    await removeErrorOnDoc(true, true);
+    return removeErrorOnDoc(true, true);
   });
 
   test('Creates Lightning Message Channel', async () => {
@@ -433,8 +433,8 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Save Lightning Message Channel fail', async () => {
-    await addErrorToDoc();
+  test('Save Lightning Message Channel fail', () => {
+    return addErrorToDoc();
   });
 
   test('Creates Lightning Message Channel 2', async () => {
@@ -459,16 +459,17 @@ suite('createClass.ts and compile.ts', () => {
     });
   });
 
-  test('Save Lightning Message Channel pass', async () => {
+  test('Save Lightning Message Channel pass', () => {
     // indicate we shouldn't try and remove an error, and that autoCompile is on
-    await removeErrorOnDoc(true, true);
+    return removeErrorOnDoc(true, true);
   });
 
   test('Test multi-save', async () => {
     // indicate we shouldn't try and remove an error, and that autoCompile is on
     removeErrorOnDoc(true, true);
-    await timeout(1000);
-    await removeErrorOnDoc(true, true);
+    return timeout(1000).then(() => {
+      return removeErrorOnDoc(true, true);
+    });
   });
 
   test('Verify Code Coverage view now has contents', async () => {
