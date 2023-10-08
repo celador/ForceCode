@@ -26,7 +26,7 @@ export class DiffMenu extends ForcecodeCommand {
     }
     const toolingType: string | undefined = getToolingTypeFromFolder(document.uri);
     if (!toolingType) {
-      return Promise.reject('Metadata type not supported for diffing');
+      return Promise.reject('Metadata type not supported for diffing at this time');
     }
     const fileName: string | undefined = getWholeFileName(document);
     if (toolingType === 'AuraDefinition' || toolingType === 'LightningComponentResource') {
