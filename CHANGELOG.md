@@ -1,5 +1,7 @@
 ## Change Log
 
+* 4.2.1
+    * Fixed issues with compile errors not being shown in the problems panel specifically with LWCs
 * 4.2.0
     * Fixed issues with compile errors not being shown in the problems panel
     * Files shown when clicking the Open Salesforce File option are now in alphabetical order

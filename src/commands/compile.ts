@@ -195,6 +195,7 @@ export async function compile(
   }
 
   async function finished(res: any): Promise<boolean> {
+    //console.log('finished res: ', res);
     if (isEmptyUndOrNull(res)) {
       notifications.showStatus(`${name} ${DefType || ''} $(check)`);
       return true;
@@ -222,19 +223,26 @@ export async function compile(
       onError(res);
       failures++;
     } else if (res.status === 'Failed') {
-      if (res.id) {
-        // grab the error via sfdx command
-        let deployDetails = await dxService.getDeployErrors(res.id, cancellationToken);
-        toArray(deployDetails.details.componentFailures).forEach((failure: any) => {
-          onComponentError(failure);
+      if (res.details?.componentFailures) {
+        res.details.componentFailures.forEach((err: any) => {
+          onComponentError(err);
           failures++;
         });
-      } else if (!res.message) {
-        // capture a failed deployment there is no message returned, so guide user to view in Salesforce
-        errMessages.push(
-          'Deployment failed. Please view the details in the deployment status section in Salesforce.'
-        );
-        return false; // don't show the failed build error
+      } else {
+        if (res.id) {
+          // grab the error via sfdx command
+          let deployDetails = await dxService.getDeployErrors(res.id, cancellationToken);
+          toArray(deployDetails.details.componentFailures).forEach((failure: any) => {
+            onComponentError(failure);
+            failures++;
+          });
+        } else if (!res.message) {
+          // capture a failed deployment there is no message returned, so guide user to view in Salesforce
+          errMessages.push(
+            'Deployment failed. Please view the details in the deployment status section in Salesforce.'
+          );
+          return false; // don't show the failed build error
+        }
       }
     }
 
@@ -261,6 +269,7 @@ export async function compile(
   }
 
   function onComponentError(failure: any) {
+    //console.log('failure raw: ', failure);
     if (failure.problemType === 'Error') {
       failure.lineNumber =
         failure.lineNumber == null || failure.lineNumber < 1
@@ -269,6 +278,8 @@ export async function compile(
           ? document.lineCount
           : failure.lineNumber;
       failure.columnNumber = failure.columnNumber == null ? 0 : failure.columnNumber;
+      //console.log('failure.lineNumber: ', failure.lineNumber);
+      //console.log('failure.columnNumber: ', failure.columnNumber);
 
       let failureRange: vscode.Range = document.lineAt(failure.lineNumber - 1).range;
       failureRange = document.validateRange(failureRange);
