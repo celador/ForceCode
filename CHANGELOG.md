@@ -1,5 +1,7 @@
 ## Change Log
 
+* 4.2.2
+    * Fix "undefined" error when an org is locked from a changeset and a user tries to deploy
 * 4.2.1
     * Fixed issues with compile errors not being shown in the problems panel specifically with LWCs
 * 4.2.0
