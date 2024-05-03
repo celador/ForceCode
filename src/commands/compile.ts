@@ -201,6 +201,7 @@ export async function compile(
       return true;
     }
     let failures: number = 0;
+    console.log('RAW Compile Res 1: ', res);
     if (res instanceof Error) {
       onError(res);
       failures++;
@@ -208,10 +209,19 @@ export async function compile(
       res.records
         .filter((r: any) => r.State !== 'Error')
         .forEach((containerAsyncRequest: any) => {
-          containerAsyncRequest.DeployDetails.componentFailures.forEach((failure: any) => {
-            onComponentError(failure);
+          console.log('RAW Compile Res 2: ', containerAsyncRequest);
+          if (containerAsyncRequest.DeployDetails) {
+            // DeployDetails.allComponentMessages has ALL details.
+            // problem, problemType, lineNumber, columnNumber are all null when no errors
+            containerAsyncRequest.DeployDetails.componentFailures.forEach((failure: any) => {
+              onComponentError(failure);
+              failures++;
+            });
+          } else if (containerAsyncRequest.ErrorMsg) {
+            // fix error when a changeset is uploaded and org is locked
+            onComponentError(containerAsyncRequest.ErrorMsg);
             failures++;
-          });
+          }
         });
     } else if (res.errors?.length > 0) {
       // We got an error with the container
@@ -224,6 +234,7 @@ export async function compile(
       failures++;
     } else if (res.status === 'Failed') {
       if (res.details?.componentFailures) {
+        console.log('RAW Compile Res 3: ', res.details.componentFailures);
         res.details.componentFailures.forEach((err: any) => {
           onComponentError(err);
           failures++;
@@ -232,6 +243,7 @@ export async function compile(
         if (res.id) {
           // grab the error via sfdx command
           let deployDetails = await dxService.getDeployErrors(res.id, cancellationToken);
+          console.log('RAW Compile Res 4: ', deployDetails);
           toArray(deployDetails.details.componentFailures).forEach((failure: any) => {
             onComponentError(failure);
             failures++;
@@ -298,6 +310,19 @@ export async function compile(
         diagnosticCollection.set(document.uri, diagnostics);
       }
       errMessages.push(failure.problem);
+    } else if (typeof failure == 'string') {
+      // fix error when a changeset is uploaded and org is locked
+      let failureRange: vscode.Range = document.lineAt(0).range;
+      failureRange = document.validateRange(failureRange);
+      if (
+        !exDiagnostics.find((exDia) => {
+          return exDia.message === failure;
+        })
+      ) {
+        diagnostics.push(new vscode.Diagnostic(failureRange, failure, 0));
+        diagnosticCollection.set(document.uri, diagnostics);
+      }
+      errMessages.push(failure);
     }
   }
 

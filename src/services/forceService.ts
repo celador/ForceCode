@@ -27,6 +27,7 @@ export class ForceService implements forceCode.IForceService {
   public lastSaveResult: SaveResult | undefined;
   public creatingFile: boolean = false;
   private interval: NodeJS.Timeout | undefined;
+  private mdTypes: Array<{}> = [];
 
   constructor(context: vscode.ExtensionContext) {
     notifications.writeLog('Initializing ForceCode service');
@@ -42,8 +43,9 @@ export class ForceService implements forceCode.IForceService {
     notifications.writeLog('Starting ForceCode service');
   }
 
-  public checkForFileChanges(skipChanges?: boolean) {
-    return this.getWorkspaceMembers().then((mems) => this.parseMembers(mems, skipChanges));
+  public async checkForFileChanges(skipChanges?: boolean) {
+    const mems = await this.getWorkspaceMembers();
+    return this.parseMembers(mems, skipChanges);
   }
 
   public checkForFileChangesQueue() {
@@ -60,89 +62,91 @@ export class ForceService implements forceCode.IForceService {
   // Match them up with ContainerMembers
   private getWorkspaceMembers(): Promise<Array<Promise<IMetadataFileProperties[]>>> {
     return new Promise((resolve, _reject) => {
-      let types: Array<{}> = [];
+      this.mdTypes = [];
       //let typeNames: Array<string> = [];
       let proms: Array<Promise<IMetadataFileProperties[]>> = [];
       if (fs.existsSync(path.join(getSrcDir(), 'classes'))) {
-        types.push({ type: 'ApexClass' });
+        proms = this.pushType(proms, { type: 'ApexClass' });
       }
       if (fs.existsSync(path.join(getSrcDir(), 'components'))) {
-        types.push({ type: 'ApexComponent' });
+        proms = this.pushType(proms, { type: 'ApexComponent' });
       }
       if (fs.existsSync(path.join(getSrcDir(), 'triggers'))) {
-        if (types.length > 2) {
-          //index++;
-          proms.push(vscode.window.forceCode.conn.metadata.list(types));
-          types = [];
-        }
-        types.push({ type: 'ApexTrigger' });
+        proms = this.pushType(proms, { type: 'ApexTrigger' });
       }
       if (fs.existsSync(path.join(getSrcDir(), 'pages'))) {
-        if (types.length > 2) {
-          //index++;
-          proms.push(vscode.window.forceCode.conn.metadata.list(types));
-          types = [];
-        }
-        types.push({ type: 'ApexPage' });
+        proms = this.pushType(proms, { type: 'ApexPage' });
       }
-      if (types.length > 0) {
-        proms.push(vscode.window.forceCode.conn.metadata.list(types));
+      if (this.mdTypes.length > 0) {
+        proms.push(vscode.window.forceCode.conn.metadata.list(this.mdTypes));
+        this.mdTypes = [];
       }
       resolve(proms);
     });
   }
 
-  private parseMembers(mems: Array<Promise<IMetadataFileProperties[]>>, skipChanges?: boolean) {
+  private pushType(
+    curProms: Array<Promise<IMetadataFileProperties[]>>,
+    type: {}
+  ): Array<Promise<IMetadataFileProperties[]>> {
+    if (this.mdTypes.length > 2) {
+      //index++;
+      curProms.push(vscode.window.forceCode.conn.metadata.list(this.mdTypes));
+      this.mdTypes = [];
+    }
+    this.mdTypes.push(type);
+    return curProms;
+  }
+
+  private async parseMembers(
+    mems: Array<Promise<IMetadataFileProperties[]>>,
+    skipChanges?: boolean
+  ) {
     if (isEmptyUndOrNull(mems) || isEmptyUndOrNull(mems[0])) {
       return Promise.resolve({});
     }
-    return Promise.all(mems).then((rets) => {
-      return parseRecords(rets);
-    });
+    const recs = await Promise.all(mems);
+    if (!Array.isArray(recs)) {
+      return Promise.resolve();
+    }
+    let apexType = false;
+    recs.forEach((curSet) => {
+      if (Array.isArray(curSet)) {
+        curSet.forEach((key) => {
+          let thePath: string = path.join(getSrcDir(), key.fileName);
+          if (fs.existsSync(thePath)) {
+            let workspaceMember: forceCode.IWorkspaceMember = {
+              name: key.fullName,
+              path: thePath,
+              id: key.id,
+              type: key.type,
+              coverage: new Map<string, forceCode.ICodeCoverage>(),
+            };
 
-    function parseRecords(recs: any[]): Thenable<any> {
-      if (!Array.isArray(recs)) {
-        Promise.resolve();
-      }
-      let apexType = false;
-      recs.forEach((curSet) => {
-        if (Array.isArray(curSet)) {
-          curSet.forEach((key) => {
-            let thePath: string = path.join(getSrcDir(), key.fileName);
-            if (fs.existsSync(thePath)) {
-              let workspaceMember: forceCode.IWorkspaceMember = {
-                name: key.fullName,
-                path: thePath,
-                id: key.id,
-                type: key.type,
-                coverage: new Map<string, forceCode.ICodeCoverage>(),
-              };
+            apexType = key.type === 'ApexClass' || key.type === 'ApexTrigger';
 
-              apexType = key.type === 'ApexClass' || key.type === 'ApexTrigger';
+            let curFCFile: FCFile = codeCovViewService.addClass(workspaceMember);
 
-              let curFCFile: FCFile = codeCovViewService.addClass(workspaceMember);
-
-              if (
-                !skipChanges &&
-                getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges) &&
-                !curFCFile.compareDates(key.lastModifiedDate)
-              ) {
-                vscode.commands.executeCommand(
-                  'ForceCode.fileModified',
-                  vscode.Uri.file(thePath),
-                  key.lastModifiedByName
-                );
-              }
+            if (
+              !skipChanges &&
+              getVSCodeSetting(VSCODE_SETTINGS.checkForFileChanges) &&
+              !curFCFile.compareDates(key.lastModifiedDate)
+            ) {
+              vscode.commands.executeCommand(
+                'ForceCode.fileModified',
+                vscode.Uri.file(thePath),
+                key.lastModifiedByName
+              );
             }
-          });
-        }
-      });
-      notifications.writeLog('Done getting workspace info');
-      if (skipChanges && apexType) {
-        return commandViewService.enqueueCodeCoverage(CoverageRetrieveType.OpenFile);
-      } else {
-        return commandViewService.enqueueCodeCoverage(CoverageRetrieveType.StartUp);
+          }
+        });
       }
+    });
+    notifications.writeLog('Done getting workspace info');
+    if (skipChanges && apexType) {
+      return commandViewService.enqueueCodeCoverage(CoverageRetrieveType.OpenFile);
+    } else {
+      return commandViewService.enqueueCodeCoverage(CoverageRetrieveType.StartUp);
     }
   }
 
