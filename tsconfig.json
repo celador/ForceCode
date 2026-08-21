@@ -5,7 +5,7 @@
     "noResolve": false,
     "removeComments": true,
     "target": "es6",
-    "outDir": "dist",
+    "outDir": "out",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "skipLibCheck": true,

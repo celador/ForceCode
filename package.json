@@ -718,11 +718,15 @@
     "prerelease": "npm version prerelease && git push",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "clean": "rimraf ./dist && rimraf ./node_modules/",
-    "test": "node ./dist/test/runTest.js",
-    "package": "rimraf ./dist && rimraf ./*.vsix && webpack --mode production && vsce package",
+    "test-compile": "webpack --mode development && tsc -p ./",
+    "clean": "rimraf ./dist && rimraf ./out && rimraf ./node_modules/",
+    "test": "node ./out/test/runTest.js",
+    "package": "rimraf ./dist && rimraf ./out && rimraf ./*.vsix && webpack --mode production && vsce package",
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch"
+  },
+  "dependencies": {
+    "@salesforce/core": "^8.32.6"
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",

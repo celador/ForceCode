@@ -208,7 +208,9 @@ export function readConfigFile(userName: string | undefined, service?: ForceServ
     if (fs.existsSync(configPath)) {
       config = fs.readJsonSync(configPath);
     } else {
-      config.username = userName;
+      // don't assign onto defaultOptions itself. it's a shared singleton, so mutating it here
+      // leaked the username into every later readConfigFile call, including readConfigFile(undefined).
+      config = { ...defaultOptions, username: userName };
     }
   }
   return deepmerge(defaultOptions, config);

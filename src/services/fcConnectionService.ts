@@ -21,6 +21,45 @@ import { FCCancellationToken } from '../commands';
 import { getAPIVersion, VSCODE_SETTINGS } from './configuration';
 import { xhr } from 'request-light';
 
+interface AuthFields {
+  accessToken?: string;
+  refreshToken?: string;
+  instanceUrl?: string;
+  clientId?: string;
+}
+
+/**
+ * Read the OAuth credentials for a username the same way the Salesforce CLI does.
+ *
+ * Current CLI versions store the tokens in ~/.sfdx/<username>.json *encrypted*, so reading
+ * refreshToken straight out of that file (which is what ForceCode used to do) hands jsforce
+ * ciphertext. Every request then fails with "invalid_grant: expired access/refresh token",
+ * which killed the whole login and left the extension with no views and no status bar.
+ * AuthInfo decrypts them via the keychain. The raw read stays as a fallback for auth files
+ * written by older CLI versions, which really were plaintext.
+ */
+async function getAuthFields(username: string): Promise<AuthFields> {
+  try {
+    const { AuthInfo } = require('@salesforce/core');
+    const authInfo = await AuthInfo.create({ username });
+    const fields: AuthFields = authInfo.getFields(true);
+    if (fields?.refreshToken || fields?.accessToken) {
+      return fields;
+    }
+    notifications.writeLog(`No usable credentials returned by AuthInfo for ${username}`);
+  } catch (err: any) {
+    notifications.writeLog(
+      `Unable to read credentials via @salesforce/core for ${username}: ${err.message || err}`
+    );
+  }
+
+  const sfdxPath = path.join(getHomeDir(), '.sfdx', username + '.json');
+  if (fs.existsSync(sfdxPath)) {
+    return fs.readJsonSync(sfdxPath);
+  }
+  return {};
+}
+
 export class FCConnectionService implements vscode.TreeDataProvider<FCConnection> {
   private static instance: FCConnectionService;
   private _onDidChangeTreeData: vscode.EventEmitter<FCConnection | undefined> =
@@ -84,10 +123,19 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     return loggedIn;
   }
 
-  public getSavedUsernames(): Promise<string[]> {
+  // projectRoot defaults to the current workspace root, which is only available once
+  // ForceCode has been initialized. Callers that can run before then (ForceCode.createProject)
+  // must pass the folder they're interested in.
+  public getSavedUsernames(projectRoot?: string): Promise<string[]> {
     return new Promise((resolve) => {
       let usernames: string[] = [];
-      let fcPath: string = path.join(vscode.window.forceCode.workspaceRoot, '.forceCode');
+      const root: string | undefined =
+        projectRoot || (vscode.window.forceCode ? vscode.window.forceCode.workspaceRoot : undefined);
+      if (!root) {
+        resolve(usernames);
+        return;
+      }
+      let fcPath: string = path.join(root, '.forceCode');
       if (fs.existsSync(fcPath)) {
         klaw(fcPath, { depthLimit: 0 })
           .on('data', function (file) {
@@ -105,6 +153,8 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
             notifications.writeLog(
               `ForceCode: Error reading ${item.path}. Message: ${err.message}`
             );
+            // never leave this promise pending, callers await it during activation
+            resolve(usernames);
           });
       } else {
         resolve(usernames);
@@ -174,6 +224,10 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
     if (orgInfo) {
       username = orgInfo.username;
     }
+
+    // NOTE: don't default username here. An undefined orgInfo means "log into an org that isn't
+    // in the saved usernames list" (ForceCode.switchUser with no context), so substituting a saved
+    // username would make that command silently reconnect the existing org instead of prompting.
     let finalRes: any;
     try {
       service.currentConnection = service.getConnByUsername(username);
@@ -182,6 +236,12 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
       await login(connection).then(() => vscode.window.forceCode.connect());
     } catch (err) {
       notifications.writeLog(err);
+      // enterCredentials rejects with undefined when the user dismisses the login quick pick,
+      // which isn't worth an error popup. anything else is a real failure that used to fail
+      // completely silently, leaving the user with no views, no status bar and no explanation.
+      if (err !== undefined && err !== null) {
+        notifications.showError(err);
+      }
       finalRes = false;
     }
     this.loggingIn = false;
@@ -196,7 +256,11 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
 
       let orgInf: FCOauth | undefined;
       try {
-        orgInf = await dxService.getOrgInfo(username);
+        // without a username this would shell out to `sf org display --target-org undefined`,
+        // which always fails. go straight to asking the user which org to use.
+        if (username) {
+          orgInf = await dxService.getOrgInfo(username);
+        }
       } catch (error) {
         notifications.writeLog(error);
       } finally {
@@ -231,15 +295,21 @@ export class FCConnectionService implements vscode.TreeDataProvider<FCConnection
         }
       }
 
-      const sfdxPath = path.join(getHomeDir(), '.sfdx', orgInf.username + '.json');
-      const refreshToken: string = fs.readJsonSync(sfdxPath).refreshToken;
+      const authFields = await getAuthFields(orgInf.username);
+      // keep orgInfo in sync so the rest of the extension uses the same token jsforce does
+      if (authFields.accessToken) {
+        service.currentConnection.orgInfo.accessToken = authFields.accessToken;
+      }
       const connection = new jsforce.Connection({
         oauth2: {
-          clientId: service.currentConnection.orgInfo.clientId || 'SalesforceDevelopmentExperience',
+          clientId:
+            authFields.clientId ||
+            service.currentConnection.orgInfo.clientId ||
+            'SalesforceDevelopmentExperience',
         },
-        instanceUrl: service.currentConnection.orgInfo.instanceUrl,
-        accessToken: service.currentConnection.orgInfo.accessToken,
-        refreshToken: refreshToken,
+        instanceUrl: authFields.instanceUrl || service.currentConnection.orgInfo.instanceUrl,
+        accessToken: authFields.accessToken || service.currentConnection.orgInfo.accessToken,
+        refreshToken: authFields.refreshToken,
         version: getAPIVersion(),
       });
 

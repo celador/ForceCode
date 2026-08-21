@@ -189,12 +189,26 @@ export function activate(context: vscode.ExtensionContext): any {
         })
     );
   }
+
   const username = readForceJson();
-  vscode.commands
-    .executeCommand('ForceCode.switchUser', username ? { username: username } : undefined)
+  const resolvedUsername: Promise<string | undefined> = username
+    ? Promise.resolve(username)
+    : fcConnection
+        .getSavedUsernames()
+        .then((usernames) => (usernames.length === 1 ? usernames[0] : undefined));
+
+  resolvedUsername
+    .then((user) =>
+      vscode.commands.executeCommand('ForceCode.switchUser', user ? { username: user } : undefined)
+    )
     .then((res) => {
       if (res === false && !fcConnection.isLoggedIn()) {
-        notifications.hideStatus();
+        // hiding the status bar item here left the user with no visible entry point at all:
+        // the activity bar container is hidden until ForceCodeActive is set and most palette
+        // commands are gated too. keep a clickable item so login can be retried.
+        notifications.setStatusCommand('ForceCode.switchUser');
+        notifications.setStatusTooltip('ForceCode is not connected. Click to log in to Salesforce.');
+        notifications.setStatusText('$(alert) ForceCode: Not Connected', false);
       } else {
         vscode.commands.executeCommand('setContext', 'ForceCodeShowMenu', true);
       }

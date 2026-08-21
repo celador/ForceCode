@@ -23,6 +23,10 @@ const config = {
   devtool: 'source-map',
   externals: [
     { vscode: 'commonjs vscode' }, // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+    // @salesforce/core can't be bundled: its messages loader does `require(filePath)` on a runtime
+    // path, and its undici dependency uses computed class fields that our terser can't parse.
+    // It's a real "dependencies" entry instead, so vsce ships it inside the vsix.
+    { '@salesforce/core': 'commonjs @salesforce/core' },
   ],
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader

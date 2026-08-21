@@ -11,6 +11,7 @@ coverage/**
 coverconfig.json
 azure-pipelines.yml
 dist/test/**
+out/**
 **/*.js.map
 *.vsix
 .vscode-test/**

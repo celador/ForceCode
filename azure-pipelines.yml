@@ -27,7 +27,7 @@ jobs:
          sfdx force:auth:jwt:grant --clientid $(SF_CONSUMER_KEY) --jwtkeyfile assets/server.key --username $(SF_USERNAME)
          npm ci
          echo ">>> Compiling"
-         npm run compile
+         npm run test-compile
          echo ">>> Run integration test"
          export SF_USERNAME=$(SF_USERNAME)
          npm run test

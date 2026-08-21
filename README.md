@@ -1,5 +1,3 @@
-[![Logo](https://raw.githubusercontent.com/celador/ForceCode/master/images/logo-type.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
-
 # ForceCode for Visual Studio Code
 
 [![Version](https://vsmarketplacebadge.apphb.com/version/JohnAaronNelson.ForceCode.png)](https://marketplace.visualstudio.com/items?itemName=JohnAaronNelson.ForceCode)
@@ -16,7 +14,7 @@ There's no complicated setup process or project configurations, no external apps
 
 ## IMPORTANT
 
-You will need to install the SFDX-CLI on your system in order for this extension to function! Please download from [https://developer.salesforce.com/tools/sfdxcli](https://developer.salesforce.com/tools/sfdxcli) and install, then restart Visual Studio Code.
+You will need to install the 'Salesforce CLI' on your system in order for this extension to function! Please download from [https://developer.salesforce.com/tools/salesforcecli](https://developer.salesforce.com/tools/salesforcecli) and install, then restart Visual Studio Code.
 If you receive messages about the CLI not being installed after you have upgraded to 4.1.1 or higher, please re-download the CLI from the website. I had to manually upgrade this way on my mac in order to receive the newest updates (Switching from sfdx to sf based commands).
 
 ## Slack

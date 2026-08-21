@@ -14,7 +14,7 @@ async function main() {
     const extensionTestsPath = path.resolve(__dirname, './suite/index');
 
     // create test folder to open
-    const folderPath = path.join(extensionDevelopmentPath, 'dist', 'test', 'test');
+    const folderPath = path.join(extensionDevelopmentPath, 'out', 'test', 'test');
     if (fs.existsSync(folderPath)) {
       fs.removeSync(folderPath);
     }

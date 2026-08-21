@@ -122,8 +122,12 @@ export class DXService {
           notifications.writeLog(theErr);
           if (theErr) {
             theErr = theErr.toLowerCase();
+            // don't reset this on a later chunk. the sf CLI writes an "update available" warning
+            // to stderr on every invocation, which would otherwise clear a real not-found signal.
             sfdxNotFound =
-              theErr.indexOf('not found') > -1 || theErr.indexOf('not recognized') > -1;
+              sfdxNotFound ||
+              theErr.indexOf('not found') > -1 ||
+              theErr.indexOf('not recognized') > -1;
           }
         });
 
